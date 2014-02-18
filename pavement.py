@@ -3,6 +3,7 @@ from paver.easy import *
 import paver.setuputils
 paver.setuputils.install_distutils_tasks()
 import os, sys
+import datetime
 
 from sphinxcontrib import paverutils
 
@@ -59,3 +60,24 @@ def build(options):
     print 'Building into ', options.build.outdir    
     paverutils.run_sphinx(options,'build')
 
+
+@task
+def setup_github_pages(options):
+    repo = input("paste your repo URL here: ")
+    os.chdir(options.build.builddir)
+    sh("git init")
+    sh("git remote add origin %s " % repo)
+    sh("checkout -b gh-pages")
+    sh("touch .nojekyll")
+    sh("git add .nojekyll")
+    sh("git commit -m 'Create repo and branch'")
+    sh("git push --set-upstream origin gh-pages")
+    sh("git push origin gh-pages")
+
+@task
+def deploy(options):
+    os.chdir(options.build.builddir)
+    sh("git add .")
+    sh("git commit -m 'New Build on: %s'" % datetime.datetime.now())
+    sh("git push")
+    
