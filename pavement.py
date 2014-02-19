@@ -63,14 +63,17 @@ def build(options):
 
 @task
 def setup_github_pages(options):
-    repo = input("paste your repo URL here: ")
+    if sys.version > '3':
+        repo = input("paste your repo URL here: ")
+    else:
+        repo = raw_input("paste your repo URL here: ")
     os.chdir(options.build.builddir)
     sh("git init")
     sh("git remote add origin %s " % repo)
-    sh("checkout -b gh-pages")
+    sh("git checkout -b gh-pages")
     sh("touch .nojekyll")
     sh("git add .nojekyll")
-    sh("git commit -m 'Create repo and branch'")
+    sh("git commit -m 'Create repo and gh-pages branch'")
     sh("git push --set-upstream origin gh-pages")
     sh("git push origin gh-pages")
 

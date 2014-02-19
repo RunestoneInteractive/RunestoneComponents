@@ -33,12 +33,38 @@ Once paver is installed you will also need to install sphinxcontrib-paverutils, 
 
     # pip install sphinxcontrib-paverutils
 
-Publishing your own materials with Runestone
---------------------------------------------
+Quick Start
+-----------
 
-1. Clone the RunestoneTools repository to your development machine
-2. Create a repository (if you don't already have one where you would like to host the finished product)
-3. paver build
+This guide will get you started with creating your own course materials using the Runestone tools.
+
+1. Clone the RunestoneTools repository to your development machine  ``git clone https://github.com/RunestoneInteractive/RunestoneTools.git``
+
+2. Type the command ``paver build``
+
+You will now have a build folder with a file index.html in it, along with some default content.  The contents of the build folder are suitable for hosting anywhere that you can serve static web content from!  For a small class you could even serve the content using the builtin Python webserver.
+
+::
+
+    $ cd build
+    $ python3 -m http.server
+
+Now from your browser you can open up http://localhost:8000/index.html
+
+Running your own web server isn't always the easiest way to go.  So I have provided a couple of commands to make it easy for you to host your materials using githubs Pages feature.
+
+
+2. Create a repository (if you don't already have one where you would like to host the finished product)  Copy the github URL to your clipboard.
+2. Type the command ``paver setup_github_pages``  You will be prompted to paste in the URL to your repository.
+2. Type the command ``paver deploy``
+2. Now you can access your pages from github at http://username.github.io/repo  where username is your github username, and repo is the repository you created to host your deployed pages.  Note that the deployed pages will be on the branch ``gh-pages``
+
+Details
+~~~~~~~
+
+If you want to know the details of what goes on in the paver commands above here is what is happening:
+
+3. paver build  -- creates build directory and html files
 4. cd build
 5. git init
 5. git remote add origin git@github.com:bnmnetp/deploytest.git
