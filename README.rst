@@ -15,8 +15,9 @@ The following three prerequisites are easily installed using pip.  All are eithe
 3. Install paverutils
 
 
+First, get `Sphinx <http://sphinx.pocoo.org>`_, version 1.2.x is current as of this writing:
+
 ::
-First get `Sphinx <http://sphinx.pocoo.org>`_, version 1.1.x is current as of this writing:
 
     # pip install sphinx
 
@@ -54,26 +55,29 @@ Now from your browser you can open up http://localhost:8000/index.html
 Running your own web server isn't always the easiest way to go.  So I have provided a couple of commands to make it easy for you to host your materials using githubs Pages feature.
 
 
-2. Create a repository (if you don't already have one where you would like to host the finished product)  Copy the github URL to your clipboard.
-2. Type the command ``paver setup_github_pages``  You will be prompted to paste in the URL to your repository.
-2. Type the command ``paver deploy``
-2. Now you can access your pages from github at http://username.github.io/repo  where username is your github username, and repo is the repository you created to host your deployed pages.  Note that the deployed pages will be on the branch ``gh-pages``
+#. Create a repository (if you don't already have one where you would like to host the finished product)  Copy the github URL to your clipboard.
+
+#. Type the command ``paver setup_github_pages``  You will be prompted to paste in the URL to your repository.
+
+#. Type the command ``paver deploy``
+
+#. Now you can access your pages from github at http://username.github.io/repo  where username is your github username, and repo is the repository you created to host your deployed pages.  Note that the deployed pages will be on the branch ``gh-pages``
 
 Details
 ~~~~~~~
 
 If you want to know the details of what goes on in the paver commands above here is what is happening:
 
-3. paver build  -- creates build directory and html files
-4. cd build
-5. git init
-5. git remote add origin git@github.com:bnmnetp/deploytest.git
-5. git checkout -b gh-pages
-5. git touch .nojekyll
-5. git add .nojekyll
-5. git add .
-6. git commit -m 'first published version'
-7. git push origin gh-pages
+#. paver build  -- creates build directory and html files
+#. cd build
+#. git init
+#. git remote add origin git@github.com:bnmnetp/deploytest.git
+#. git checkout -b gh-pages
+#. git touch .nojekyll
+#. git add .nojekyll
+#. git add .
+#. git commit -m 'first published version'
+#. git push origin gh-pages
 
 Now wait a few minutes and go to http://username.github.io/yourRepo
 
