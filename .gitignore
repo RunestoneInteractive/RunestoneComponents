@@ -14,8 +14,6 @@ var
 sdist
 develop-eggs
 .installed.cfg
-lib
-lib64
 __pycache__
 _deploy
 
@@ -34,3 +32,4 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+.idea
