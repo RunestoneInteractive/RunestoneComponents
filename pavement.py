@@ -41,7 +41,8 @@ if project_name == "<project_name>":
     ('all','a','rebuild everything'),
     ('outputdir=', 'o', 'output static files here'),
     ('masterurl=', 'u', 'override the default master url'),
-    ('masterapp=', 'p', 'override the default master app')
+    ('masterapp=', 'p', 'override the default master app'),
+    ('slides','s','Use heiroglyph to build slides')
 ])
 def build(options):
     if 'all' in options.build:
@@ -57,6 +58,8 @@ def build(options):
     if 'masterapp' in options.build:
         options.build.template_args['appname'] = options.build.masterapp
 
+    if 'slides' in options.build:
+        options.sphinx.builder = 'slides'
     print 'Building into ', options.build.outdir    
     paverutils.run_sphinx(options,'build')
 
@@ -70,7 +73,8 @@ def setup_github_pages(options):
     os.chdir(options.build.builddir)
     sh("git init")
     sh("git remote add origin %s " % repo)
-    sh("git checkout -b gh-pages")
+    sh("git branch gh-pages")
+    sh("git checkout gh-pages")    # need git 1.8+ to do git checkout -b gh-pages
     sh("touch .nojekyll")
     sh("git add .nojekyll")
     sh("git commit -m 'Create repo and gh-pages branch'")
