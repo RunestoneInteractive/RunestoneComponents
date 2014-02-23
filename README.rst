@@ -41,6 +41,8 @@ This guide will get you started with creating your own course materials using th
 
 1. Clone the RunestoneTools repository to your development machine  ``git clone https://github.com/RunestoneInteractive/RunestoneTools.git``
 
+2. Copy conf.py.prototype to conf.py  You should not need to make any edits to get the basics working.
+
 2. Type the command ``paver build``
 
 You will now have a build folder with a file index.html in it, along with some default content.  The contents of the build folder are suitable for hosting anywhere that you can serve static web content from!  For a small class you could even serve the content using the builtin Python webserver.
@@ -82,4 +84,22 @@ If you want to know the details of what goes on in the paver commands above here
 Now wait a few minutes and go to http://username.github.io/yourRepo
 
 You should see an example page.
+
+Work in Progress
+----------------
+
+Here's what is on the todo list for this project.  If you have the inclination to help out please let me know, I would welcome the help.
+
+Slides
+~~~~~~
+
+I am currently working on getting hieroglyph integrated so that you can make presentation slides with Runestone Interactive features.  At the moment, some of the tools work and some do not.  Activecode works OK, multiple choice questions work fine, reveals work fine, but CodeLens does not work and neither do parsons problems.  Some things make more sense to work in slide mode than others. In particular getting CodeLens to work nicely would be valuable.  I'll keep working on it.  If you want to give it a try yourself.  Install ``pip install hieroglyph``, and uncomment the line in your conf.py file that adds heiroglyph to the extension list.   To build slides you need to run ``paver build --slides``.  There is much that could be done in terms of styling, and working out some problems with javascript.  Standard Sphinx loads all the js files up front, whereas the template for slides moves javscript loading to the bottom of the page.  This appears to be the root of most problems.  In addition the directives themselves for some could be updated to provide a better layout when generating slides instead of html.  
+
+I'm not even sure whether this particular little project should be a high priority, I thought everything might just work, but then it didn't. So, I spent a day hacking at it until I realized it was much more work than I thought.
+
+
+Login/Logout
+~~~~~~~~~~~~
+
+Currently you cannot have your students login to any resources you build and host yourself or on github.  This is a problem that probably will not get fixed until later this semester or even this summer when I have more time to work on the back end.  This has to do with the way that most web frameworks (including web2py) use session cookies to track login/logout. Given the current architecture of the tools it makes sense to go away from cookies anyway.
 
