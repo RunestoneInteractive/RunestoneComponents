@@ -16,6 +16,7 @@ develop-eggs
 .installed.cfg
 __pycache__
 _deploy
+conf.py
 
 # Installer logs
 pip-log.txt
