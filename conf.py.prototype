@@ -22,6 +22,7 @@ extensions = ['sphinx.ext.mathjax',
               'luther.sphinx.assess',
               'luther.sphinx.animation',
               'luther.sphinx.meta',
+#             'hieroglyph',
               'gatech.parsons']
 
 
@@ -123,3 +124,12 @@ html_show_copyright = True
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'PythonCoursewareProjectdoc'
+
+#
+#  slide stuff
+#
+
+slide_theme_path = ['_templates']
+
+slide_theme = 'runestone_slides'
+
