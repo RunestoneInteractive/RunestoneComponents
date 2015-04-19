@@ -10,7 +10,7 @@ Prerequisites
 
 The following three prerequisites are easily installed using pip.  All are either Python2.x or 3.x compatible.
 
-1. Install Spinx
+1. Install Sphinx
 2. Install Paver
 3. Install paverutils
 
