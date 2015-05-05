@@ -18,10 +18,11 @@ setup(
     url = 'https://github.com/RunestoneInteractive/RunestoneTools', 
     download_url = 'https://github.com/RunestoneInteractive/RunestoneTools/tarball/2.0a1', 
     keywords = ['runestone', 'sphinx', 'ebook'], # arbitrary keywords
+    classifiers = [],
     # data_files=[('common',['runestone/common/*']),
     #             ('project/template', ['newproject_copy_me/*'])
     # ],
-    long_description=open('README.txt').read(),
+    long_description=open('README.md').read(),
     entry_points = {
         'console_scripts': [
             'runestone = runestone.__main__:main'
