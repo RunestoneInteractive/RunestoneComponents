@@ -14,7 +14,10 @@ setup(
     zip_safe = False,
     package_dir = {'runestone' : 'runestone'},
     package_data = { '' : ['js/*.js', 'css/*.css', '*.txt']},
-    license='Creative Commons Attribution-Noncommercial-Share Alike license',
+    license='GPL',
+    url = 'https://github.com/RunestoneInteractive/RunestoneTools', 
+    download_url = 'https://github.com/RunestoneInteractive/RunestoneTools/tarball/2.0a1', 
+    keywords = ['runestone', 'sphinx', 'ebook'], # arbitrary keywords
     # data_files=[('common',['runestone/common/*']),
     #             ('project/template', ['newproject_copy_me/*'])
     # ],
