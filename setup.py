@@ -5,7 +5,7 @@ with open('requirements.txt', 'r') as fh:
 
 setup(
     name='runestone',
-    version='0.2.1dev',
+    version='2.0a1',
     author = 'Brad Miller',
     author_email = 'bonelake@mac.com',
     packages= find_packages(),
