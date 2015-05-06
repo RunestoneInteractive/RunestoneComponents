@@ -7,9 +7,9 @@ from pkg_resources import resource_string, resource_filename
 
 
 def init():
-    template_base_dir = resource_filename('runestone', 'common/newproject_copy_me')
-    config_stuff = resource_string('runestone','common/newproject_copy_me/conf.py')
-    paver_stuff = resource_string('runestone','common/newproject_copy_me/pavement.py')    
+    template_base_dir = resource_filename('runestone', 'common/newproject_template')
+    config_stuff = resource_string('runestone','common/newproject_template/conf.py')
+    paver_stuff = resource_string('runestone','common/newproject_template/pavement.py')    
     conf_dict = {}
     print("This will create a new Runestone project in your current directory.")
     proceed = raw_input("Do you want to proceed? Y/n") or "Y"
