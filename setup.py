@@ -5,7 +5,7 @@ with open('requirements.txt', 'r') as fh:
 
 setup(
     name='runestone',
-    description='Sphinx extensions for writing interactive documents.'
+    description='Sphinx extensions for writing interactive documents.',
     version='2.0a1',
     author = 'Brad Miller',
     author_email = 'bonelake@mac.com',
@@ -16,8 +16,8 @@ setup(
     package_dir = {'runestone' : 'runestone'},
     package_data = { '' : ['js/*.js', 'css/*.css', '*.txt']},
     license='GPL',
-    url = 'https://github.com/RunestoneInteractive/RunestoneTools', 
-    download_url = 'https://github.com/RunestoneInteractive/RunestoneTools/tarball/2.0a1', 
+    url = 'https://github.com/RunestoneInteractive/RunestoneTools',
+    download_url = 'https://github.com/RunestoneInteractive/RunestoneTools/tarball/2.0a1',
     keywords = ['runestone', 'sphinx', 'ebook'], # arbitrary keywords
     classifiers = [],
     # data_files=[('common',['runestone/common/*']),
