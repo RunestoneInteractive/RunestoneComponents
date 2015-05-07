@@ -8,7 +8,13 @@ Packaging of the Runestone tools for publishing educational materials using the 
 Quick Start
 -----------
 
-Until I get this tested well enough to push onto ``pypi.python.org`` You can install everything you need with one handy command!
+Until I get this tested well enough to push onto ``pypi.python.org`` You can install everything you need with one simple command! (Although I recommend that you first create a virtual environment for your work.)
+
+```
+pip install runestone
+```
+
+Or, if you prefer to live on the development edge, you can check out the very latest from:
 
 ```
 pip install git+git://github.com/RunestoneInteractive/RunestoneTools.git
@@ -31,13 +37,13 @@ runestone build
 ```
 You will now have a build folder with a file index.html in it, along with some default content.  The contents of the build folder are suitable for hosting anywhere that you can serve static web content from!  For a small class you could even serve the content using the builtin Python webserver.
 
-::
+```
 
     $ runestone serve
+```
 
 Now from your browser you can open up http://localhost:8000/index.html
 
 That is all.  For now.
 
 See https://github.com/bnmnetp/runestone/wiki/DevelopmentRoadmap to get a sense for how this is all going to come together.
-
