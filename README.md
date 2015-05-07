@@ -10,7 +10,7 @@ Check out the [Development Roadmap](https://github.com/bnmnetp/runestone/wiki) t
 Quick Start
 -----------
 
-Until I get this tested well enough to push onto ``pypi.python.org`` You can install everything you need with one simple command! (Although I recommend that you first create a virtual environment for your work.)
+Until I get this tested well enough to push onto ``pypi.python.org`` You can install everything you need with one simple command! (Although I recommend that you first create a virtual environment for your work.)   Python 2.7.x is required, I have not yet made the directives Python3 compatible.  Working on it.
 
 ```
 pip install runestone
