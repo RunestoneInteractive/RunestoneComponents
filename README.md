@@ -1,9 +1,11 @@
-RunestoneTools
-==============
+RunestoneComponents
+===================
 
-Packaging of the Runestone tools for publishing educational materials using the Runestone Interactive components
+Packaging of the Runestone components for publishing educational materials using Sphinx and restructured text.
 
 **NOTE** -- If you have used an older version of this repo, please know this is a total restart.  I think much better, and it WILL stay up to date as this is now the master copy of the components not just a copy.
+
+Check out the [Development Roadmap](https://github.com/bnmnetp/runestone/wiki) to get an understanding of our migration towards webcomponents.
 
 Quick Start
 -----------
