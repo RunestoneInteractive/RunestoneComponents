@@ -18,7 +18,7 @@ __author__ = 'bmiller'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
-from assessbase import *
+from .assessbase import *
 import json
 import random
 
@@ -48,7 +48,7 @@ def depart_mc_node(self,node):
     feedbackStr = "["
     currFeedback = ""
     # Add all of the possible answers
-    okeys = node.mc_options.keys()
+    okeys = list(node.mc_options.keys())
     okeys.sort()
     for k in okeys:
         if 'answer_' in k:
@@ -306,7 +306,7 @@ class MChoiceRandomMF(Assessment):
         feedbackStr = "["
         currFeedback = ""
         # Add all of the possible answers
-        okeys = self.options.keys()
+        okeys = list(self.options.keys())
         okeys.sort()
 
 
@@ -327,7 +327,7 @@ class MChoiceRandomMF(Assessment):
                 answ=answ+self.options[ansArr[i]]+"*separator*"
                 feed=feed+self.options["feedback_"+feedArray[i]]+"*separator*"
                 self.options['opi']=i+1
-                res += OPTION % self.options 
+                res += OPTION % self.options
             i=i+1
 
         # Store the Answer and Feedback arrays getting stuf answ array and feedback array and placing into options
@@ -402,17 +402,17 @@ class timedMChoiceMF(Assessment):
         OPTION = '''
             <input type="radio" name="group1" value="%(alabel)s" id="%(divid)s_opt_%(alabel)s" />
             <label for= "%(divid)s_opt_%(alabel)s">  %(alabel)s) %(atext)s</label><br />
-	        <div id= "%(divid)s_eachFeedback_%(alabel)s"></div>
+            <div id= "%(divid)s_eachFeedback_%(alabel)s"></div>
             '''
 
         TEMPLATE_END = '''
 
             <script>
-		    populateArrays('%(divid)s','%(correct)s',%(feedback)s);
+            populateArrays('%(divid)s','%(correct)s',%(feedback)s);
             $(document).ready(function(){checkTimedRadio('%(divid)s');});
             </script>
-            
- 
+
+
             </form><br />
             <div id="%(divid)s_feedback">
             </div>
@@ -432,5 +432,3 @@ class timedMChoiceMF(Assessment):
 
 
 ######################################################################
-
-

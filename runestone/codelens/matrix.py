@@ -141,7 +141,7 @@ typeSeq = (type([]), type((1,2)))
 
 def dictToLol(dic) :
     "Convert dict to a list of lists"
-    keys = dic.keys(); keys.sort()
+    keys = list(dic.keys()); keys.sort()
     lists = []
     for key in keys :
         val = dic[key]

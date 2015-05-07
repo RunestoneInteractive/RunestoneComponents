@@ -12,16 +12,16 @@ def init():
     paver_stuff = resource_string('runestone','common/newproject_template/pavement.py')    
     conf_dict = {}
     print("This will create a new Runestone project in your current directory.")
-    proceed = raw_input("Do you want to proceed? Y/n") or "Y"
+    proceed = eval(input("Do you want to proceed? Y/n")) or "Y"
     if proceed[0].lower() == "n":
         sys.exit(0)
     print("Next we need to gather a few pieces of information to create your configuration files")
-    conf_dict['project_name'] = raw_input("Project name: (one word, no spaces)")
-    conf_dict['build_dir'] = raw_input("path to build dir [./build] ") or "build"
-    conf_dict['login_req'] = raw_input("require login [false] ") or "false"
-    conf_dict['master_url'] = raw_input("URL for ajax server [http://127.0.0.1:8000] ") or "http://127.0.0.1:8000"
-    conf_dict['author'] = raw_input("your Name ") or getpass.getuser()
-    conf_dict['project_title'] = raw_input("Title for this project [Runestone Default]") or "Runestone Default"
+    conf_dict['project_name'] = eval(input("Project name: (one word, no spaces)"))
+    conf_dict['build_dir'] = eval(input("path to build dir [./build] ")) or "build"
+    conf_dict['login_req'] = eval(input("require login [false] ")) or "false"
+    conf_dict['master_url'] = eval(input("URL for ajax server [http://127.0.0.1:8000] ")) or "http://127.0.0.1:8000"
+    conf_dict['author'] = eval(input("your Name ")) or getpass.getuser()
+    conf_dict['project_title'] = eval(input("Title for this project [Runestone Default]")) or "Runestone Default"
     
     shutil.copytree(os.path.join(template_base_dir,'_sources'),'_sources')
     shutil.copytree(os.path.join(template_base_dir,'_static'),'_static')
@@ -44,8 +44,8 @@ def build():
     paver_main()
     
 def serve():
-    import SimpleHTTPServer
-    import SocketServer
+    import http.server
+    import socketserver
     sys.path.insert(0,os.getcwd())
     try:
         import pavement
@@ -56,9 +56,9 @@ def serve():
     os.chdir(pavement.serving_dir)
 
     PORT = 8000
-    Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
-    httpd = SocketServer.TCPServer(("", PORT), Handler)
-    print "serving at port", PORT
+    Handler = http.server.SimpleHTTPRequestHandler
+    httpd = socketserver.TCPServer(("", PORT), Handler)
+    print(("serving at port", PORT))
 
     httpd.serve_forever()
 

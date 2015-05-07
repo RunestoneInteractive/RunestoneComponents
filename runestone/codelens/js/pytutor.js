@@ -3,7 +3,7 @@
 Online Python Tutor
 https://github.com/pgbovine/OnlinePythonTutor/
 
-Copyright (C) 2010-2014 Philip J. Guo (philip@pgbovine.net)
+Copyright (C) Philip J. Guo (philip@pgbovine.net)
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the
@@ -63,12 +63,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-// include hooks.js after you include pytutor.js, if you want to use hooks
-// see hooks.js for more instructions. (hooking code created by David Pritchard)
-var try_hook = function(hook_name, args) {
-  return [false]; // just a stub
-}
-
 var SVG_ARROW_POLYGON = '0,3 12,3 12,0 18,5 12,10 12,7 0,7';
 var SVG_ARROW_HEIGHT = 10; // must match height of SVG_ARROW_POLYGON
 
@@ -105,6 +99,8 @@ var curVisualizerID = 1; // global to uniquely identify each ExecutionVisualizer
 //   verticalStack - if true, then stack code display ON TOP of visualization
 //                   (else place side-by-side)
 //   visualizerIdOverride - override visualizer ID instead of auto-assigning it
+//                          (BE CAREFUL ABOUT NOT HAVING DUPLICATE IDs ON THE SAME PAGE,
+//                           OR ELSE ARROWS AND OTHER STUFF WILL GO HAYWIRE!)
 //   executeCodeWithRawInputFunc - function to call when you want to re-execute the given program
 //                                 with some new user input (somewhat hacky!)
 //   highlightLines - highlight current and previously executed lines (default: false)
@@ -115,6 +111,11 @@ var curVisualizerID = 1; // global to uniquely identify each ExecutionVisualizer
 //                    granularity instead of line-level granularity (HIGHLY EXPERIMENTAL!)
 //   hideCode - hide the code display and show only the data structure viz
 //   tabularView - render a tabular view of ALL steps at once (EXPERIMENTAL)
+//   lang - to render labels in a style appropriate for other languages,
+//          and to display the proper language in langDisplayDiv
+//          e.g., 'py2' for Python 2, 'py3' for Python 3, 'js' for JavaScript, 'java' for Java
+//          [default is Python-style labels]
+//   debugMode - some extra debugging printouts
 function ExecutionVisualizer(domRootID, dat, params) {
   this.curInputCode = dat.code.rtrim(); // kill trailing spaces
   this.curTrace = dat.trace;
@@ -129,12 +130,12 @@ function ExecutionVisualizer(domRootID, dat, params) {
     var lastEntry = this.curTrace[this.curTrace.length - 1];
     if (lastEntry.event == 'raw_input') {
       this.promptForUserInput = true;
-      this.userInputPromptStr = lastEntry.prompt;
+      this.userInputPromptStr = htmlspecialchars(lastEntry.prompt);
       this.curTrace.pop() // kill last entry so that it doesn't get displayed
     }
     else if (lastEntry.event == 'mouse_input') {
       this.promptForMouseInput = true;
-      this.userInputPromptStr = lastEntry.prompt;
+      this.userInputPromptStr = htmlspecialchars(lastEntry.prompt);
       this.curTrace.pop() // kill last entry so that it doesn't get displayed
     }
   }
@@ -242,13 +243,95 @@ function ExecutionVisualizer(domRootID, dat, params) {
 
   this.classAttrsHidden = {}; // kludgy hack for 'show/hide attributes' for class objects
 
-  try_hook("end_constructor", {myViz:this});
+  // API for adding a hook, created by David Pritchard
+  this.pytutor_hooks = {}; // keys, hook names; values, list of functions
+
+  if (this.params.lang === 'java') {
+    this.activateJavaFrontend(); // ohhhh yeah!
+  }
+
+  this.try_hook("end_constructor", {myViz:this});
 
   this.hasRendered = false;
 
   this.render(); // go for it!
-  
 }
+
+
+/* API for adding a hook, created by David Pritchard
+   https://github.com/daveagp
+
+[this documentation is a bit deprecated since Philip made try_hook a
+method of ExecutionVisualizer, but the general ideas remains]
+
+ An external user should call
+add_pytutor_hook("hook_name_here", function(args) {...})
+ args will be a javascript object with several named properties;
+ this is meant to be similar to Python's keyword arguments.
+
+ The hooked function should return an array whose first element is a boolean:
+ true if it completely handled the situation (no further hooks
+ nor the base function should be called); false otherwise (wasn't handled).
+ If the hook semantically represents a function that returns something,
+ the second value of the returned array is that semantic return value.
+
+ E.g. for the Java visualizer a simplified version of a hook we use is:
+
+add_pytutor_hook(
+  "isPrimitiveType",
+  function(args) {
+    var obj = args.obj; // unpack
+    if (obj instanceof Array && obj[0] == "CHAR-LITERAL")
+      return [true, true]; // yes we handled it, yes it's primitive
+    return [false]; // didn't handle it, let someone else
+  });
+
+ Hook callbacks can return false or undefined (i.e. no return
+ value) in lieu of [false].
+
+ NB: If multiple functions are added to a hook, the oldest goes first.
+*/
+ExecutionVisualizer.prototype.add_pytutor_hook = function(hook_name, func) {
+  if (this.pytutor_hooks[hook_name])
+    this.pytutor_hooks[hook_name].push(func);
+  else
+    this.pytutor_hooks[hook_name] = [func];
+}
+
+/*
+
+[this documentation is a bit deprecated since Philip made try_hook a
+method of ExecutionVisualizer, but the general ideas remains]
+
+try_hook(hook_name, args): how the internal codebase invokes a hook.
+ args will be a javascript object with several named properties;
+ this is meant to be similar to Python's keyword arguments.
+ E.g.,
+
+function isPrimitiveType(obj) {
+  var hook_result = try_hook("isPrimitiveType", {obj:obj});
+  if (hook_result[0]) return hook_result[1];
+  // go on as normal if the hook didn't handle it
+
+ Although add_pytutor_hook allows the hooked function to
+ return false or undefined, try_hook will always return
+ something with the strict format [false], [true] or [true, ...].
+*/
+ExecutionVisualizer.prototype.try_hook = function(hook_name, args) {
+  if (this.pytutor_hooks[hook_name]) {
+    for (var i=0; i<this.pytutor_hooks[hook_name].length; i++) {
+
+      // apply w/o "this", and pack sole arg into array as required by apply
+      var handled_and_result
+        = this.pytutor_hooks[hook_name][i].apply(null, [args]);
+
+      if (handled_and_result && handled_and_result[0])
+        return handled_and_result;
+    }
+  }
+  return [false];
+}
+
 
 // for managing state related to pesky jsPlumb connectors, need to reset
 // before every call to renderDataStructures, or else all hell breaks
@@ -309,6 +392,7 @@ ExecutionVisualizer.prototype.render = function() {
 
   var codeDisplayHTML =
     '<div id="codeDisplayDiv">\
+       <div id="langDisplayDiv"></div>\
        <div id="pyCodeOutputDiv"/>\
        <div id="editCodeLinkDiv"><a id="editBtn">Edit code</a></div>\
        <div id="executionSlider"/>\
@@ -428,8 +512,18 @@ ExecutionVisualizer.prototype.render = function() {
 
 
   if (this.params.editCodeBaseURL) {
+    // kinda kludgy
+    var pyVer = '2'; // default
+    if (this.params.lang === 'js') {
+      pyVer = 'js';
+    } else if (this.params.lang === 'java') {
+      pyVer = 'java';
+    } else if (this.params.lang === 'py3') {
+      pyVer = '3';
+    }
+
     var urlStr = $.param.fragment(this.params.editCodeBaseURL,
-                                  {code: this.curInputCode},
+                                  {code: this.curInputCode, py: pyVer},
                                   2);
     this.domRoot.find('#editBtn').attr('href', urlStr);
   }
@@ -437,6 +531,20 @@ ExecutionVisualizer.prototype.render = function() {
     this.domRoot.find('#editCodeLinkDiv').hide(); // just hide for simplicity!
     this.domRoot.find('#editBtn').attr('href', "#");
     this.domRoot.find('#editBtn').click(function(){return false;}); // DISABLE the link!
+  }
+
+  if (this.params.lang !== undefined) {
+    if (this.params.lang === 'js') {
+      this.domRoot.find('#langDisplayDiv').html('JavaScript');
+    } else if (this.params.lang === 'java') {
+      this.domRoot.find('#langDisplayDiv').html('Java');
+    } else if (this.params.lang === 'py2') {
+      this.domRoot.find('#langDisplayDiv').html('Python 2.7');
+    } else if (this.params.lang === 'py3') {
+      this.domRoot.find('#langDisplayDiv').html('Python 3.3');
+    } else {
+      this.domRoot.find('#langDisplayDiv').hide();
+    }
   }
 
   if (this.params.allowEditAnnotations !== undefined) {
@@ -471,7 +579,7 @@ ExecutionVisualizer.prototype.render = function() {
 
     // add an extra label to link back to the main site, so that viewers
     // on the embedded page know that they're seeing an OPT visualization
-    this.domRoot.find('#codeDisplayDiv').append('<div style="font-size: 8pt; margin-bottom: 20px;">Code visualized with <a href="http://pythontutor.com" target="_blank" style="color: #3D58A2;">Online Python Tutor</a></div>');
+    this.domRoot.find('#codeDisplayDiv').append('<div style="font-size: 8pt; margin-bottom: 20px;">Visualized using <a href="http://pythontutor.com" target="_blank" style="color: #3D58A2;">Online Python Tutor</a> by <a href="http://www.pgbovine.net/" target="_blank" style="color: #3D58A2;">Philip Guo</a></div>');
   }
 
   myViz.editAnnotationMode = false;
@@ -625,7 +733,7 @@ ExecutionVisualizer.prototype.render = function() {
     this.domRoot.find('#vizLayoutTdFirst').hide(); // gigantic hack!
   }
 
-  try_hook("end_render", {myViz:this});
+  this.try_hook("end_render", {myViz:this});
 
   this.precomputeCurTraceLayouts();
 
@@ -1305,7 +1413,7 @@ ExecutionVisualizer.prototype.updateOutput = function(smoothTransition) {
   else {
     this.updateOutputFull(smoothTransition);
   }
-  try_hook("end_updateOutput", {myViz:this});
+  this.try_hook("end_updateOutput", {myViz:this});
 }
 
 ExecutionVisualizer.prototype.updateOutputFull = function(smoothTransition) {
@@ -1319,6 +1427,12 @@ ExecutionVisualizer.prototype.updateOutputFull = function(smoothTransition) {
     return;
   }
 
+  // reset
+  myViz.curLineNumber = undefined;
+  myViz.prevLineNumber = undefined;
+  myViz.curLineIsReturn = undefined;
+  myViz.prevLineIsReturn = undefined;
+  myViz.curLineExceptionMsg = undefined;
 
   // really nitpicky!!! gets the difference in width between the code display
   // and the maximum width of its enclosing div
@@ -1394,6 +1508,10 @@ ExecutionVisualizer.prototype.updateOutputFull = function(smoothTransition) {
       $('#'+curEntry.question.div).modal({position:["25%","50%"]});
   }
 
+  if (myViz.params.debugMode) {
+    console.log('updateOutputFull', curEntry);
+  }
+
   // render VCR controls:
   var totalInstrs = this.curTrace.length;
 
@@ -1453,6 +1571,7 @@ ExecutionVisualizer.prototype.updateOutputFull = function(smoothTransition) {
     myViz.domRoot.find("#errorOutput").show();
 
     hasError = true;
+    myViz.curLineExceptionMsg = curEntry.exception_msg;
   }
   else {
     if (!this.instrLimitReached) { // ugly, I know :/
@@ -1735,6 +1854,12 @@ ExecutionVisualizer.prototype.updateOutputFull = function(smoothTransition) {
       scrollCodeOutputToLine(curEntry.line);
     }
 
+    // add these fields to myViz
+    myViz.curLineNumber = curLineNumber;
+    myViz.prevLineNumber = prevLineNumber;
+    myViz.curLineIsReturn = curIsReturn;
+    myViz.prevLineIsReturn = prevIsReturn;
+
   } // end of highlightCodeLine
 
 
@@ -1902,7 +2027,7 @@ ExecutionVisualizer.prototype.precomputeCurTraceLayouts = function() {
     }
 
     function isLinearObj(heapObj) {
-      var hook_result = try_hook("isLinearObj", {heapObj:heapObj});
+      var hook_result = myViz.try_hook("isLinearObj", {heapObj:heapObj});
       if (hook_result[0]) return hook_result[1];
 
       return heapObj[0] == 'LIST' || heapObj[0] == 'TUPLE' || heapObj[0] == 'SET';
@@ -1918,13 +2043,13 @@ ExecutionVisualizer.prototype.precomputeCurTraceLayouts = function() {
         $.each(heapObj, function(ind, child) {
           if (ind < 1) return; // skip type tag
 
-          if (!isPrimitiveType(child)) {
+          if (!myViz.isPrimitiveType(child)) {
             var childID = getRefID(child);
 
             // comment this out to make "linked lists" that aren't
             // structurally equivalent look good, e.g.,:
             //   x = (1, 2, (3, 4, 5, 6, (7, 8, 9, None)))
-            //if (structurallyEquivalent(heapObj, curEntry.heap[childID])) {
+            //if (myViz.structurallyEquivalent(heapObj, curEntry.heap[childID])) {
             //  updateCurLayout(childID, curRow, newRow);
             //}
             if (myViz.disableHeapNesting) {
@@ -1942,16 +2067,16 @@ ExecutionVisualizer.prototype.precomputeCurTraceLayouts = function() {
 
           if (myViz.disableHeapNesting) {
             var dictKey = child[0];
-            if (!isPrimitiveType(dictKey)) {
+            if (!myViz.isPrimitiveType(dictKey)) {
               var keyChildID = getRefID(dictKey);
               updateCurLayout(keyChildID, [], []);
             }
           }
 
           var dictVal = child[1];
-          if (!isPrimitiveType(dictVal)) {
+          if (!myViz.isPrimitiveType(dictVal)) {
             var childID = getRefID(dictVal);
-            if (structurallyEquivalent(heapObj, curEntry.heap[childID])) {
+            if (myViz.structurallyEquivalent(heapObj, curEntry.heap[childID])) {
               updateCurLayout(childID, curRow, newRow);
             }
             else if (myViz.disableHeapNesting) {
@@ -1967,16 +2092,16 @@ ExecutionVisualizer.prototype.precomputeCurTraceLayouts = function() {
 
           if (myViz.disableHeapNesting) {
             var instKey = child[0];
-            if (!isPrimitiveType(instKey)) {
+            if (!myViz.isPrimitiveType(instKey)) {
               var keyChildID = getRefID(instKey);
               updateCurLayout(keyChildID, [], []);
             }
           }
 
           var instVal = child[1];
-          if (!isPrimitiveType(instVal)) {
+          if (!myViz.isPrimitiveType(instVal)) {
             var childID = getRefID(instVal);
-            if (structurallyEquivalent(heapObj, curEntry.heap[childID])) {
+            if (myViz.structurallyEquivalent(heapObj, curEntry.heap[childID])) {
               updateCurLayout(childID, curRow, newRow);
             }
             else if (myViz.disableHeapNesting) {
@@ -2092,7 +2217,7 @@ ExecutionVisualizer.prototype.precomputeCurTraceLayouts = function() {
     $.each(curEntry.ordered_globals, function(i, varname) {
       var val = curEntry.globals[varname];
       if (val !== undefined) { // might not be defined at this line, which is OKAY!
-        if (!isPrimitiveType(val)) {
+        if (!myViz.isPrimitiveType(val)) {
           var id = getRefID(val);
           updateCurLayout(id, null, []);
         }
@@ -2103,7 +2228,7 @@ ExecutionVisualizer.prototype.precomputeCurTraceLayouts = function() {
       $.each(frame.ordered_varnames, function(xxx, varname) {
         var val = frame.encoded_locals[varname];
 
-        if (!isPrimitiveType(val)) {
+        if (!myViz.isPrimitiveType(val)) {
           var id = getRefID(val);
           updateCurLayout(id, null, []);
         }
@@ -2392,7 +2517,7 @@ ExecutionVisualizer.prototype.renderDataStructures = function(curEntry, curTople
         existingConnectionEndpointIDs.remove(varDivID);
 
         var val = curEntry.globals[varname];
-        if (isPrimitiveType(val)) {
+        if (myViz.isPrimitiveType(val)) {
           myViz.renderPrimitiveObject(val, $(this));
         }
         else {
@@ -2616,7 +2741,7 @@ ExecutionVisualizer.prototype.renderDataStructures = function(curEntry, curTople
         existingConnectionEndpointIDs.remove(varDivID);
 
         var val = frame.encoded_locals[varname];
-        if (isPrimitiveType(val)) {
+        if (myViz.isPrimitiveType(val)) {
           myViz.renderPrimitiveObject(val, $(this));
         }
         else {
@@ -2902,8 +3027,7 @@ ExecutionVisualizer.prototype.renderDataStructures = function(curEntry, curTople
     highlight_frame(myViz.generateID('globals'));
   }
 
-  try_hook("end_renderDataStructures", {myViz:myViz});  
-
+  myViz.try_hook("end_renderDataStructures", {myViz:myViz});
 }
 
 
@@ -3082,7 +3206,7 @@ ExecutionVisualizer.prototype.renderTabularView = function() {
 // rendering functions, which all take a d3 dom element to anchor the
 // new element to render
 ExecutionVisualizer.prototype.renderPrimitiveObject = function(obj, d3DomElement) {
-  if (try_hook("renderPrimitiveObject", {obj:obj, d3DomElement:d3DomElement})[0])
+  if (this.try_hook("renderPrimitiveObject", {obj:obj, d3DomElement:d3DomElement})[0])
     return;
 
   var typ = typeof obj;
@@ -3114,7 +3238,7 @@ ExecutionVisualizer.prototype.renderPrimitiveObject = function(obj, d3DomElement
     d3DomElement.append('<span class="stringObj">' + literalStr + '</span>');
   }
   else if (typ == "object") {
-    assert(obj[0] == 'SPECIAL_FLOAT');
+    assert(obj[0] == 'SPECIAL_FLOAT' || obj[0] == 'JS_SPECIAL_VAL');
     d3DomElement.append('<span class="numberObj">' + obj[1] + '</span>');
   }
   else {
@@ -3124,7 +3248,7 @@ ExecutionVisualizer.prototype.renderPrimitiveObject = function(obj, d3DomElement
 
 
 ExecutionVisualizer.prototype.renderNestedObject = function(obj, stepNum, d3DomElement) {
-  if (isPrimitiveType(obj)) {
+  if (this.isPrimitiveType(obj)) {
     this.renderPrimitiveObject(obj, d3DomElement);
   }
   else {
@@ -3197,7 +3321,7 @@ function(objID, stepNum, d3DomElement, isTopLevel) {
     typeLabelPrefix = 'id' + objID + ':';
   }
 
-  var hook_result = try_hook("renderCompoundObject", 
+  var hook_result = myViz.try_hook("renderCompoundObject",
                              {objID:objID, d3DomElement:d3DomElement, 
                               isTopLevel:isTopLevel, obj:obj, 
                               typeLabelPrefix:typeLabelPrefix,
@@ -3210,10 +3334,10 @@ function(objID, stepNum, d3DomElement, isTopLevel) {
 
     assert(obj.length >= 1);
     if (obj.length == 1) {
-      d3DomElement.append('<div class="typeLabel">' + typeLabelPrefix + 'empty ' + label + '</div>');
+      d3DomElement.append('<div class="typeLabel">' + typeLabelPrefix + ' empty ' + myViz.getRealLabel(label) + '</div>');
     }
     else {
-      d3DomElement.append('<div class="typeLabel">' + typeLabelPrefix + label + '</div>');
+      d3DomElement.append('<div class="typeLabel">' + typeLabelPrefix + myViz.getRealLabel(label) + '</div>');
       d3DomElement.append('<table class="' + label + 'Tbl"></table>');
       var tbl = d3DomElement.children('table');
 
@@ -3287,7 +3411,11 @@ function(objID, stepNum, d3DomElement, isTopLevel) {
     assert(obj.length >= headerLength);
 
     if (isInstance) {
-      d3DomElement.append('<div class="typeLabel">' + typeLabelPrefix + obj[1] + ' instance</div>');
+      if (obj.length === headerLength) {
+        d3DomElement.append('<div class="typeLabel">' + typeLabelPrefix + obj[1] + ' empty ' + myViz.getRealLabel('instance') + '</div>');
+      } else {
+        d3DomElement.append('<div class="typeLabel">' + typeLabelPrefix + obj[1] + ' ' + myViz.getRealLabel('instance') + '</div>');
+      }
     }
     else {
       var superclassStr = '';
@@ -3402,6 +3530,44 @@ function(objID, stepNum, d3DomElement, isTopLevel) {
       d3DomElement.append('<div class="funcObj">' + funcPrefix + ' ' + funcName + '</div>');
     }
   }
+  else if (obj[0] == 'JS_FUNCTION') { /* TODO: refactor me */
+    // JavaScript function
+    assert(obj.length == 5);
+    var funcName = htmlspecialchars(obj[1]);
+    var funcCode = typeLabelPrefix + htmlspecialchars(obj[2]);
+    var funcProperties = obj[3]; // either null or a non-empty list of key-value pairs
+    var parentFrameID = obj[4];
+
+
+    if (funcProperties || parentFrameID || myViz.showAllFrameLabels) {
+      d3DomElement.append('<table class="classTbl"></table>');
+      var tbl = d3DomElement.children('table');
+      tbl.append('<tr><td class="funcCod" colspan="2"><pre class="funcCode">' + funcCode + '</pre>' + '</td></tr>');
+
+      if (funcProperties) {
+        assert(funcProperties.length > 0);
+        $.each(funcProperties, function(ind, kvPair) {
+            tbl.append('<tr class="classEntry"><td class="classKey"></td><td class="classVal"></td></tr>');
+            var newRow = tbl.find('tr:last');
+            var keyTd = newRow.find('td:first');
+            var valTd = newRow.find('td:last');
+            keyTd.append('<span class="keyObj">' + htmlspecialchars(kvPair[0]) + '</span>');
+            myViz.renderNestedObject(kvPair[1], stepNum, valTd);
+        });
+      }
+
+      if (parentFrameID) {
+        tbl.append('<tr class="classEntry"><td class="classKey">parent</td><td class="classVal">' + 'f' + parentFrameID + '</td></tr>');
+      }
+      else if (myViz.showAllFrameLabels) {
+        tbl.append('<tr class="classEntry"><td class="classKey">parent</td><td class="classVal">' + 'global' + '</td></tr>');
+      }
+    }
+    else {
+      // compact form:
+      d3DomElement.append('<pre class="funcCode">' + funcCode + '</pre>');
+    }
+  }
   else if (obj[0] == 'HEAP_PRIMITIVE') {
     assert(obj.length == 3);
 
@@ -3431,6 +3597,19 @@ function(objID, stepNum, d3DomElement, isTopLevel) {
 ExecutionVisualizer.prototype.redrawConnectors = function() {
   this.jsPlumbInstance.repaintEverything();
 }
+
+
+ExecutionVisualizer.prototype.getRealLabel = function(label) {
+  if (this.params.lang === 'js') {
+    if (label === 'list') {
+      return 'array';
+    } else if (label === 'instance') {
+      return 'object';
+    }
+  } else {
+    return label;
+  }
+};
 
 
 // Utilities
@@ -3526,14 +3705,18 @@ var rbRE = new RegExp('\\]|}|\\)|>', 'g');
 function varnameToCssID(varname) {
   // make sure to REPLACE ALL (using the 'g' option)
   // rather than just replacing the first entry
-  return varname.replace(lbRE, 'LeftB_').replace(rbRE, '_RightB').replace(/[.]/g, '_DOT_').replace(/ /g, '_');
+  return varname.replace(lbRE, 'LeftB_')
+                .replace(rbRE, '_RightB')
+                .replace(/[:]/g, '_COLON_')
+                .replace(/[.]/g, '_DOT_')
+                .replace(/ /g, '_');
 }
 
 
 // compare two JSON-encoded compound objects for structural equivalence:
-function structurallyEquivalent(obj1, obj2) {
+ExecutionVisualizer.prototype.structurallyEquivalent = function(obj1, obj2) {
   // punt if either isn't a compound type
-  if (isPrimitiveType(obj1) || isPrimitiveType(obj2)) {
+  if (this.isPrimitiveType(obj1) || this.isPrimitiveType(obj2)) {
     return false;
   }
 
@@ -3582,18 +3765,18 @@ function structurallyEquivalent(obj1, obj2) {
 }
 
 
-function isPrimitiveType(obj) {
-  var hook_result = try_hook("isPrimitiveType", {obj:obj});
+ExecutionVisualizer.prototype.isPrimitiveType = function(obj) {
+  var hook_result = this.try_hook("isPrimitiveType", {obj:obj});
   if (hook_result[0]) return hook_result[1];
 
   // null is a primitive
-  if (obj == null) {
+  if (obj === null) {
     return true;
   }
 
   if (typeof obj == "object") {
     // kludge: only 'SPECIAL_FLOAT' objects count as primitives
-    return (obj[0] == 'SPECIAL_FLOAT');
+    return (obj[0] == 'SPECIAL_FLOAT' || obj[0] == 'JS_SPECIAL_VAL');
   }
   else {
     // non-objects are primitives
@@ -3957,4 +4140,270 @@ function traceQCheckMe(inputId, divId, answer) {
 function closeModal(divId) {
     $.modal.close()
     $("#"+divId).data("vis").stepForward();
+}
+
+
+// All of the Java frontend code in this function was written by David
+// Pritchard and Will Gwozdz, and integrated by Philip Guo
+ExecutionVisualizer.prototype.activateJavaFrontend = function() {
+  // super hack by Philip that reverses the direction of the stack so
+  // that it grows DOWN and renders the same way as the Python and JS
+  // visualizer stacks
+  this.curTrace.forEach(function(e, i) {
+    if (e.stack_to_render !== undefined) {
+      e.stack_to_render.reverse();
+    }
+  });
+
+  this.add_pytutor_hook(
+    "renderPrimitiveObject",
+    function(args) {
+      var obj = args.obj, d3DomElement = args.d3DomElement;
+      var typ = typeof obj;
+      if (obj == null) 
+        d3DomElement.append('<span class="nullObj">null</span>');
+      else if (typ == "number") 
+        d3DomElement.append('<span class="numberObj">' + obj + '</span>');
+      else if (typ == "boolean") {
+        if (obj) 
+          d3DomElement.append('<span class="boolObj">true</span>');
+        else 
+          d3DomElement.append('<span class="boolObj">false</span>');
+      }
+      else if (obj instanceof Array && obj[0] == "VOID") {
+        d3DomElement.append('<span class="voidObj">void</span>');
+      }
+      else if (obj instanceof Array && obj[0] == "NUMBER-LITERAL") {
+        // actually transmitted as a string
+        d3DomElement.append('<span class="numberObj">' + obj[1] + '</span>');
+      }
+      else if (obj instanceof Array && obj[0] == "CHAR-LITERAL") {
+        var asc = obj[1].charCodeAt(0);
+        var ch = obj[1];
+        
+        // default
+        var show = asc.toString(16);
+        while (show.length < 4) show = "0" + show;
+        show = "\\u" + show;
+        
+        if (ch == "\n") show = "\\n";
+        else if (ch == "\r") show = "\\r";
+        else if (ch == "\t") show = "\\t";
+        else if (ch == "\b") show = "\\b";
+        else if (ch == "\f") show = "\\f";
+        else if (ch == "\'") show = "\\\'";
+        else if (ch == "\"") show = "\\\"";
+        else if (ch == "\\") show = "\\\\";
+        else if (asc >= 32) show = ch;
+        
+        // stringObj to make monospace
+        d3DomElement.append('<span class="stringObj">\'' + show + '\'</span>');
+      }
+      else
+        return [false]; // we didn't handle it
+      return [true]; // we handled it
+    });
+
+  this.add_pytutor_hook(
+    "isPrimitiveType", 
+    function(args) {
+      var obj = args.obj;
+      if ((obj instanceof Array && obj[0] == "VOID")
+          || (obj instanceof Array && obj[0] == "NUMBER-LITERAL")
+          || (obj instanceof Array && obj[0] == "CHAR-LITERAL")
+          || (obj instanceof Array && obj[0] == "ELIDE"))
+        return [true, true]; // we handled it, it's primitive
+      return [false]; // didn't handle it
+    });
+
+  this.add_pytutor_hook(
+    "end_updateOutput",
+    function(args) {
+      var myViz = args.myViz;
+      var curEntry = myViz.curTrace[myViz.curInstr];
+      if (myViz.params.stdin && myViz.params.stdin != "") {
+        var stdinPosition = curEntry.stdinPosition || 0;
+        var stdinContent =
+          '<span style="color:lightgray;text-decoration: line-through">'+
+          escapeHtml(myViz.params.stdin.substr(0, stdinPosition))+
+          '</span>'+
+          escapeHtml(myViz.params.stdin.substr(stdinPosition));
+        myViz.domRoot.find('#stdinShow').html(stdinContent);
+      }
+      return [false]; 
+    });
+
+  this.add_pytutor_hook(
+    "end_constructor",
+    function(args) {
+      var myViz = args.myViz;
+      if ((myViz.curTrace.length > 0)
+          && myViz.curTrace[myViz.curTrace.length-1]
+          && myViz.curTrace[myViz.curTrace.length-1].stdout) {
+        myViz.hasStdout = true;
+        myViz.stdoutLines = myViz.curTrace[myViz.curTrace.length-1].stdout.split("\n").length;
+      }
+      // if last frame is a step limit
+      else if ((myViz.curTrace.length > 1)
+               && myViz.curTrace[myViz.curTrace.length-2]
+               && myViz.curTrace[myViz.curTrace.length-2].stdout) {
+        myViz.hasStdout = true;
+        myViz.stdoutLines = myViz.curTrace[myViz.curTrace.length-2].stdout.split("\n").length;
+      }
+      else {
+        myViz.stdoutLines = -1;
+      }
+      if (myViz.hasStdout)
+        for (var i=0; i<myViz.curTrace.length; i++)
+          if (!(myViz.curTrace[i].stdout))
+              myViz.curTrace[i].stdout=" "; // always show it, if it's ever used      
+    });
+
+  this.add_pytutor_hook(
+    "end_render",
+    function(args) {
+      var myViz = args.myViz;
+      //myViz.domRoot.find('#pyStdout').attr('cols', 1); // commented out by pgbovine
+      myViz.domRoot.find('#pyStdout').attr('rows', Math.min(10, myViz.stdoutLines));
+      
+      if (myViz.params.stdin && myViz.params.stdin != "") {
+        var stdinHTML = '<div id="stdinWrap">stdin:<pre id="stdinShow" style="border:1px solid gray"></pre></div>';
+        myViz.domRoot.find('#dataViz').append(stdinHTML);
+      }
+
+      myViz.domRoot.find('#'+myViz.generateID('globals_header')).html("Static fields");
+    });
+
+  this.add_pytutor_hook(
+    "isLinearObject",
+    function(args) {
+      var heapObj = args.heapObj;
+      if (heapObj[0]=='STACK' || heapObj[0]=='QUEUE')
+        return ['true', 'true'];
+      return ['false'];
+    });
+
+  this.add_pytutor_hook(
+    "renderCompoundObject",
+    function(args) {
+      var objID = args.objID;
+      var d3DomElement = args.d3DomElement;
+      var obj = args.obj;
+      var typeLabelPrefix = args.typeLabelPrefix;
+      var myViz = args.myViz;
+      var stepNum = args.stepNum;
+
+      if (!(obj[0] == 'LIST' || obj[0] == 'QUEUE' || obj[0] == 'STACK')) 
+        return [false]; // didn't handle
+
+      var label = obj[0].toLowerCase();
+      var visibleLabel = {list:'array', queue:'queue', stack:'stack'}[label];
+      
+      if (obj.length == 1) {
+        d3DomElement.append('<div class="typeLabel">' + typeLabelPrefix + 'empty ' + visibleLabel + '</div>');
+        return [true]; //handled
+      }
+
+      d3DomElement.append('<div class="typeLabel">' + typeLabelPrefix + visibleLabel + '</div>');
+      d3DomElement.append('<table class="' + label + 'Tbl"></table>');
+      var tbl = d3DomElement.children('table');
+      
+      if (obj[0] == 'LIST') {
+        tbl.append('<tr></tr><tr></tr>');
+        var headerTr = tbl.find('tr:first');
+        var contentTr = tbl.find('tr:last');
+        
+        // i: actual index in json object; ind: apparent index
+        for (var i=1, ind=0; i<obj.length; i++) {
+          val = obj[i];
+          var elide = val instanceof Array && val[0] == 'ELIDE';
+          
+          // add a new column and then pass in that newly-added column
+          // as d3DomElement to the recursive call to child:
+          headerTr.append('<td class="' + label + 'Header"></td>');
+          headerTr.find('td:last').append(elide ? "&hellip;" : ind);
+          
+          contentTr.append('<td class="'+ label + 'Elt"></td>');
+          if (!elide) {
+            myViz.renderNestedObject(val, stepNum, contentTr.find('td:last'));
+            ind++;
+          }
+          else {
+            contentTr.find('td:last').append("&hellip;");
+            ind += val[1]; // val[1] is the number of cells to skip
+          }
+        }
+      } // end of LIST handling
+
+     // Stack and Queue handling code by Will Gwozdz
+      /* The table produced for stacks and queues is formed slightly differently than the others,
+     missing the header row. Two rows made the dashed border not line up properly */
+      if (obj[0] == 'STACK') { 
+        tbl.append('<tr></tr><tr></tr>');
+        var contentTr = tbl.find('tr:last');
+        contentTr.append('<td class="'+ label + 'FElt">'+'<span class="stringObj symbolic">&#8596;</span>'+'</td>');
+        $.each(obj, function(ind, val) {
+          if (ind < 1) return; // skip type tag and ID entry
+          contentTr.append('<td class="'+ label + 'Elt"></td>');
+          myViz.renderNestedObject(val, stepNum, contentTr.find('td:last'));
+        });
+        contentTr.append('<td class="'+ label + 'LElt">'+'</td>');
+      }
+      
+      if (obj[0] == 'QUEUE') { 
+        tbl.append('<tr></tr><tr></tr>');
+        var contentTr = tbl.find('tr:last');    
+        // Add arrows showing in/out direction
+        contentTr.append('<td class="'+ label + 'FElt">'+'<span class="stringObj symbolic">&#8592;</span></td>');    
+        $.each(obj, function(ind, val) {
+          if (ind < 1) return; // skip type tag and ID entry
+          contentTr.append('<td class="'+ label + 'Elt"></td>');
+          myViz.renderNestedObject(val, stepNum, contentTr.find('td:last'));
+        });
+        contentTr.append('<td class="'+ label + 'LElt">'+'<span class="stringObj symbolic">&#8592;</span></td>');    
+      }
+
+      return [true]; // did handle
+    });
+
+  this.add_pytutor_hook(
+    "end_renderDataStructures",
+    function(args) {
+      var myViz = args.myViz;
+      myViz.domRoot.find("td.instKey:contains('___NO_LABEL!___')").hide();
+      myViz.domRoot.find(".typeLabel:contains('dict')").each(
+        function(i) {
+          if ($(this).html()=='dict')
+            $(this).html('symbol table');
+          if ($(this).html()=='empty dict')
+            $(this).html('empty symbol table');
+        });
+    });
+
+  // java synthetics cause things which javascript doesn't like in an id
+  var old_generateID = ExecutionVisualizer.prototype.generateID;
+  this.generateID = function(original_id) {
+    var sanitized = original_id.replace(
+        /[^0-9a-zA-Z_]/g,
+      function(match) {return '-'+match.charCodeAt(0)+'-';}
+    );
+    return old_generateID(sanitized);
+  }
+
+  // utility functions
+  var entityMap = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': '&quot;',
+    "'": '&#39;',
+    "/": '&#x2F;'
+  };
+
+  var escapeHtml = function(string) {
+    return String(string).replace(/[&<>"'\/]/g, function (s) {
+        return entityMap[s];
+      });
+  };
+
 }

@@ -31,8 +31,8 @@ _base_js_escapes = (
     ('=', r'\u003D'),
     ('-', r'\u002D'),
     (';', r'\u003B'),
-    (u'\u2028', r'\u2028'),
-    (u'\u2029', r'\u2029')
+    ('\u2028', r'\u2028'),
+    ('\u2029', r'\u2029')
 )
 
 # Escape every ASCII character with a value less than 32.
@@ -42,7 +42,7 @@ _js_escapes = (_base_js_escapes +
 # escapejs from Django: https://www.djangoproject.com/
 def escapejs(value):
     """Hex encodes characters for use in JavaScript strings."""
-    if not isinstance(value, basestring):
+    if not isinstance(value, str):
         value = str(value)
 
     for bad, good in _js_escapes:

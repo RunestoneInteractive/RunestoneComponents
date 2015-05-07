@@ -1,7 +1,7 @@
 # Online Python Tutor
 # https://github.com/pgbovine/OnlinePythonTutor/
 #
-# Copyright (C) 2010-2013 Philip J. Guo (philip@pgbovine.net)
+# Copyright (C) Philip J. Guo (philip@pgbovine.net)
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -44,8 +44,8 @@ if is_python3:
   import io as StringIO
 else:
   import StringIO
-import pg_encoder
 
+import runestone.codelens.pg_encoder
 
 # TODO: not threadsafe:
 
@@ -121,19 +121,18 @@ ALLOWED_STDLIB_MODULE_IMPORTS = ('math', 'random', 'datetime',
 # logistical problems with doing so that I can't overcome at the moment,
 # especially getting setHTML, setCSS, and setJS to work in the imported
 # modules.)
-CUSTOM_MODULE_IMPORTS = ('callback_module',
-                         'ttt_module',
-                         'html_module',
-                         'htmlexample_module',
+CUSTOM_MODULE_IMPORTS = ('runestone.codelens.callback_module',
+                         'runestone.codelens.ttt_module',
+                         'runestone.codelens.html_module',
+                         'runestone.codelens.htmlexample_module',
 # ignore these troublesome imports for now
 #                         'watch_module',   # 'import sys' might be troublesome
 #                         'bintree_module',
 #                         'GChartWrapper',
-                         'matrix',
-                         'htmlFrame')
+                         'runestone.codelens.matrix',
+                         'runestone.codelens.htmlFrame')
 
-CUSTOM_MODULE_IMPORTS = tuple(['runestone.codelens.'+x for x in
-                               CUSTOM_MODULE_IMPORTS])
+
 # PREEMPTIVELY import all of these modules, so that when the user's
 # script imports them, it won't try to do a file read (since they've
 # already been imported and cached in memory). Remember that when
@@ -200,10 +199,10 @@ def raw_input_wrapper(prompt=''):
 
     # write the prompt and user input to stdout, to emulate what happens
     # at the terminal
-    sys.stdout.write(prompt)
+    sys.stdout.write(str(prompt)) # always convert prompt into a string
     sys.stdout.write(input_str + "\n") # newline to simulate the user hitting Enter
     return input_str
-  raise RawInputException(prompt)
+  raise RawInputException(str(prompt)) # always convert prompt into a string
 
 class MouseInputException(Exception):
   pass
@@ -386,7 +385,7 @@ def visit_function_obj(v, ids_seen_set):
     ids_seen_set.add(v_id)
 
     typ = type(v)
-    
+
     # simple base case
     if typ in (types.FunctionType, types.MethodType):
       yield v
@@ -397,7 +396,7 @@ def visit_function_obj(v, ids_seen_set):
         for child_res in visit_function_obj(child, ids_seen_set):
           yield child_res
 
-    elif typ == dict or pg_encoder.is_class(v) or pg_encoder.is_instance(v):
+    elif typ == dict or runestone.codelens.pg_encoder.is_class(v) or runestone.codelens.pg_encoder.is_instance(v):
       contents_dict = None
 
       if typ == dict:
@@ -491,7 +490,7 @@ class PGLogger(bdb.Bdb):
 
         # very important for this single object to persist throughout
         # execution, or else canonical small IDs won't be consistent.
-        self.encoder = pg_encoder.ObjectEncoder(self.render_heap_primitives)
+        self.encoder = runestone.codelens.pg_encoder.ObjectEncoder(self.render_heap_primitives)
 
         self.executed_script = None # Python script to be executed!
 
@@ -630,10 +629,12 @@ class PGLogger(bdb.Bdb):
         else: exc_type_name = exc_type.__name__
 
         if exc_type_name == 'RawInputException':
-          self.trace.append(dict(event='raw_input', prompt=exc_value.args[0]))
+          raw_input_arg = str(exc_value.args[0]) # make sure it's a string so it's JSON serializable!
+          self.trace.append(dict(event='raw_input', prompt=raw_input_arg))
           self.done = True
         elif exc_type_name == 'MouseInputException':
-          self.trace.append(dict(event='mouse_input', prompt=exc_value.args[0]))
+          mouse_input_arg = str(exc_value.args[0]) # make sure it's a string so it's JSON serializable!
+          self.trace.append(dict(event='mouse_input', prompt=mouse_input_arg))
           self.done = True
         else:
           self.interaction(frame, exc_traceback, 'exception')
@@ -652,11 +653,11 @@ class PGLogger(bdb.Bdb):
 
         # debug ...
         '''
-        print >> sys.stderr, '=== STACK ==='
+        print >> sys.stderr
+        print >> sys.stderr, '=== STACK ===', 'curindex:', self.curindex
         for (e,ln) in self.stack:
           print >> sys.stderr, e.f_code.co_name + ' ' + e.f_code.co_filename + ' ' + str(ln)
         print >> sys.stderr, "top_frame", top_frame.f_code.co_name
-        print >> sys.stderr
         '''
 
 
@@ -744,7 +745,13 @@ class PGLogger(bdb.Bdb):
 
 
         # only render zombie frames that are NO LONGER on the stack
-        cur_stack_frames = [e[0] for e in self.stack]
+        #
+        # subtle: self.stack[:self.curindex+1] is the real stack, since
+        # everything after self.curindex+1 is beyond the top of the
+        # stack. this seems to be relevant only when there's an exception,
+        # since the ENTIRE stack is preserved but self.curindex
+        # starts decrementing as the exception bubbles up the stack.
+        cur_stack_frames = [e[0] for e in self.stack[:self.curindex+1]]
         zombie_frames_to_render = [e for e in self.zombie_frames if e not in cur_stack_frames]
 
 
@@ -775,6 +782,11 @@ class PGLogger(bdb.Bdb):
 
           if cur_name == '':
             cur_name = 'unnamed function'
+
+          # augment lambdas with line number
+          if cur_name == '<lambda>':
+            cur_name += runestone.codelens.pg_encoder.create_lambda_line_number(cur_frame.f_code,
+                                                             self.encoder.line_to_lambda_code)
 
           # encode in a JSON-friendly format now, in order to prevent ill
           # effects of aliasing later down the line ...
@@ -1407,4 +1419,3 @@ def exec_str_with_user_ns(script_str, user_ns, finalizer_func):
     pass
   finally:
     return logger.finalize()
-

@@ -1,7 +1,7 @@
 # Online Python Tutor
 # https://github.com/pgbovine/OnlinePythonTutor/
 #
-# Copyright (C) 2010-2013 Philip J. Guo (philip@pgbovine.net)
+# Copyright (C) Philip J. Guo (philip@pgbovine.net)
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -68,6 +68,7 @@
 FLOAT_PRECISION = 4
 
 
+from collections import defaultdict
 import re, types
 import sys
 import math
@@ -135,6 +136,27 @@ def encode_primitive(dat):
     return dat
 
 
+# grab a line number like ' <line 2>' or ' <line 2b>'
+def create_lambda_line_number(codeobj, line_to_lambda_code):
+  try:
+    lambda_lineno = codeobj.co_firstlineno
+    lst = line_to_lambda_code[lambda_lineno]
+    ind = lst.index(codeobj)
+    # add a suffix for all subsequent lambdas on a line beyond the first
+    # (nix this for now because order isn't guaranteed when you have
+    #  multiple lambdas on the same line)
+    '''
+    if ind > 0:
+      lineno_str = str(lambda_lineno) + chr(ord('a') + ind)
+    else:
+      lineno_str = str(lambda_lineno)
+    '''
+    lineno_str = str(lambda_lineno)
+    return ' <line ' + lineno_str + '>'
+  except:
+    return ''
+
+
 # Note that this might BLOAT MEMORY CONSUMPTION since we're holding on
 # to every reference ever created by the program without ever releasing
 # anything!
@@ -148,6 +170,21 @@ class ObjectEncoder:
 
     self.id_to_small_IDs = {}
     self.cur_small_ID = 1
+
+    # wow, creating unique identifiers for lambdas is quite annoying,
+    # especially if we want to properly differentiate:
+    # 1.) multiple lambdas defined on the same line, and
+    # 2.) the same lambda code defined multiple times on different lines
+    #
+    # However, it gets confused when there are multiple identical
+    # lambdas on the same line, like:
+    # f(lambda x:x*x, lambda y:y*y, lambda x:x*x)
+
+    # (assumes everything is in one file)
+    # Key:   line number
+    # Value: list of the code objects of lambdas defined
+    #        on that line in the order they were defined
+    self.line_to_lambda_code = defaultdict(list)
 
 
   def get_heap(self):
@@ -248,6 +285,16 @@ class ObjectEncoder:
         except TypeError:
           pass
 
+        # put a line number suffix on lambdas to more uniquely identify
+        # them, since they don't have names
+        if func_name == '<lambda>':
+            cod = (dat.__code__ if is_python3 else dat.func_code) # ugh!
+            lst = self.line_to_lambda_code[cod.co_firstlineno]
+            if cod not in lst:
+                lst.append(cod)
+            pretty_name += create_lambda_line_number(cod,
+                                                     self.line_to_lambda_code)
+
         encoded_val = ['FUNCTION', pretty_name, None]
         if get_parent:
           enclosing_frame_id = get_parent(dat)
@@ -271,7 +318,14 @@ class ObjectEncoder:
           m = classRE.match(typeStr)
 
         assert m, typ
-        new_obj.extend([m.group(1), str(dat)])
+
+        if is_python3:
+          encoded_dat = str(dat)
+        else:
+          # ugh, for bytearray() in Python 2, str() returns
+          # non-JSON-serializable characters, so need to decode:
+          encoded_dat = str(dat).decode('utf-8', 'replace')
+        new_obj.extend([m.group(1), encoded_dat])
 
       return ret
 

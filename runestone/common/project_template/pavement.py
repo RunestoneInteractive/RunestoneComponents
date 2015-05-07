@@ -55,6 +55,6 @@ def build(options):
     if 'masterapp' in options.build:
         options.build.template_args['appname'] = options.build.masterapp
 
-    print 'Building into ', options.build.outdir    
+    print('Building into ', options.build.outdir)    
     paverutils.run_sphinx(options,'build')
 

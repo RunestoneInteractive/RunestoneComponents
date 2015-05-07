@@ -19,7 +19,7 @@ __author__ = 'bmiller'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
-from pg_logger import exec_script_str_local
+from .pg_logger import exec_script_str_local
 import json
 
 def setup(app):

@@ -331,7 +331,7 @@ class ActiveCode(Directive):
 
         complete=""
         no_of_buttons=0
-        okeys = self.options.keys()
+        okeys = list(self.options.keys())
         for k in okeys:
             if '_' in k:
                 x,label = k.split('_')

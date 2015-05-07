@@ -15,13 +15,13 @@ if False:
     "Set (or append??) CSS to be text."
     global __CSS__
     __CSS__ = text
-    print('setCSS: ' + text)
+    print(('setCSS: ' + text))
 
   def setHTML(text):
     "Set (or append??) HTML to be text."
     global __HTML__
     __HTML__ = text
-    print('setHTML: ' + text)
+    print(('setHTML: ' + text))
 
 
 def tagger(tagname):
@@ -34,7 +34,7 @@ def tagger(tagname):
     #tagfn.__name__ = tagname # not allowed in OPT sandbox
     return tagfn
 
-A, B, I, P, TABLE, TR, TD, TH = map(tagger, 'A B I P, TABLE TR TD TH'.split())
+A, B, I, P, TABLE, TR, TD, TH = list(map(tagger, 'A B I P, TABLE TR TD TH'.split()))
 
 def join(content):
     "Like ' '.join(content), but recurses into nested lists."
@@ -51,7 +51,7 @@ except NameError:
 def table(matrix, **kwargs):
     """Given [[a, b, c], [d, e, f]], lay it out as a table.
     Each cell gets an id number, starting at 0.  Table can have kwargs."""
-    ints = iter(xrange(1000000))
+    ints = iter(range(1000000))
     return TABLE([TR([TD(c, id=next(ints)) for c in row])
                   for row in matrix],
                  **kwargs)
@@ -112,14 +112,14 @@ class TTTGame(Game):
         self.draw()
 
     def displayWarning(self, msg):
-      print('WARNING! ' + msg)
+      print(('WARNING! ' + msg))
 
     def makemove(self, move):
         player = self.tomove
-        print('making move ' + str(move) + ' for player ' + str(player))
+        print(('making move ' + str(move) + ' for player ' + str(player)))
         if self.over():
             self.displayWarning('game over, no more moves')
-        elif move not in range(9):
+        elif move not in list(range(9)):
             self.displayWarning('not a legal square ' + str(move))
             return None
         elif self.board[move] != ' ':

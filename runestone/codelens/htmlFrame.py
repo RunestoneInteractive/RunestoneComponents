@@ -6,7 +6,7 @@
 # a simple function to apply attributes to template and
 # send it to the <div> for display
 
-from pg_logger import setHTML
+from .pg_logger import setHTML
 
 dft_template = """
 <html><body>

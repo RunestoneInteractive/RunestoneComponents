@@ -18,7 +18,7 @@ __author__ = 'bmiller'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
-from assessbase import *
+from .assessbase import *
 import json
 import random
 
