@@ -21,6 +21,7 @@ from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from .pg_logger import exec_script_str_local
 import json
+import six
 
 def setup(app):
     app.add_directive('codelens',Codelens)
@@ -71,15 +72,20 @@ DATA = '''
 var %(divid)s_vis;
 
 $(document).ready(function() {
-    %(divid)s_vis = new ExecutionVisualizer('%(divid)s',%(divid)s_trace,
-                                {embeddedMode: %(embedded)s,
-                                verticalStack: false,
-                                heightChangeCallback: redrawAllVisualizerArrows,
-                                codeDivWidth: 500,
-                                lang : 'py3'
-                                });
-    attachLoggers(%(divid)s_vis,'%(divid)s');
-    allVisualizers.push(%(divid)s_vis);
+    try {
+        %(divid)s_vis = new ExecutionVisualizer('%(divid)s',%(divid)s_trace,
+                                    {embeddedMode: %(embedded)s,
+                                    verticalStack: false,
+                                    heightChangeCallback: redrawAllVisualizerArrows,
+                                    codeDivWidth: 500,
+                                    lang : '%(python)s'
+                                    });
+        attachLoggers(%(divid)s_vis,'%(divid)s');
+        allVisualizers.push(%(divid)s_vis);
+    } catch (e) {
+        console.log("Failed to Initialize CodeLens component %(divid)s_vis" );
+        console.log(e.toString());
+    }
 
 });
 
@@ -147,7 +153,8 @@ class Codelens(Directive):
         'question':directives.unchanged,
         'correct':directives.unchanged,
         'feedback':directives.unchanged,
-        'breakline':directives.nonnegative_int
+        'breakline':directives.nonnegative_int,
+        'python':directives.unchanged
     }
 
     has_content = True
@@ -181,7 +188,11 @@ class Codelens(Directive):
         else:
             self.options['embedded'] = 'false'
 
-
+        if 'python' not in self.options:
+            if six.PY2:
+                self.options['python'] = 'py2'
+            else:
+                self.options['python'] = 'py3'
 
         if 'question' in self.options:
             curTrace = exec_script_str_local(source, None, CUMULATIVE_MODE, None, raw_dict)
