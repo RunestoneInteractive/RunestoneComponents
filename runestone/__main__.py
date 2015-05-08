@@ -3,6 +3,7 @@ import sys
 import os
 import shutil
 import getpass
+import six
 from pkg_resources import resource_string, resource_filename
 
 
@@ -44,8 +45,6 @@ def build():
     paver_main()
     
 def serve():
-    import http.server
-    import socketserver
     sys.path.insert(0,os.getcwd())
     try:
         import pavement
@@ -55,11 +54,20 @@ def serve():
     
     os.chdir(pavement.serving_dir)
 
-    PORT = 8000
-    Handler = http.server.SimpleHTTPRequestHandler
-    httpd = socketserver.TCPServer(("", PORT), Handler)
-    print(("serving at port", PORT))
 
+    PORT = 8000
+    if six.PY2:
+        import SimpleHTTPServer
+        import SocketServer
+        Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
+        httpd = SocketServer.TCPServer(("", PORT), Handler)
+    else:
+        import http.server
+        import socketserver
+        Handler = http.server.SimpleHTTPRequestHandler
+        httpd = socketserver.TCPServer(("", PORT), Handler)
+
+    print("serving at port", PORT)
     httpd.serve_forever()
 
 def main(args=None):
