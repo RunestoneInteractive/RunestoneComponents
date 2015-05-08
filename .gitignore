@@ -12,6 +12,7 @@ parts
 bin
 var
 sdist
+dist/*
 develop-eggs
 .installed.cfg
 __pycache__
