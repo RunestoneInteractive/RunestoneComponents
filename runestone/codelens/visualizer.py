@@ -75,7 +75,8 @@ $(document).ready(function() {
                                 {embeddedMode: %(embedded)s,
                                 verticalStack: false,
                                 heightChangeCallback: redrawAllVisualizerArrows,
-                                codeDivWidth: 500
+                                codeDivWidth: 500,
+                                lang : 'py3'
                                 });
     attachLoggers(%(divid)s_vis,'%(divid)s');
     allVisualizers.push(%(divid)s_vis);
