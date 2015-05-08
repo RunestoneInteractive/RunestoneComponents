@@ -1,0 +1,29 @@
+Contributing to the Runestone Components
+========================================
+
+We welcome contributions through pull requests to the Runestone Components.
+
+Understand the RoadMap
+----------------------
+
+You should look at the [development road map](https://github.com/bnmnetp/runestone/wiki/DevelopmentRoadmap) 
+and especially RSE-0001 which gives you a clear idea of the current philosophy behind the components.  Any 
+Sphinx directives should create very simple html and let Javascript take care of the rest.
+
+Coding Standards
+----------------
+
+* All components must remain Python 3/2 compatible.   The ``six`` module is already 
+in the requirements.txt file, so feel free to use that.
+* No Tabs
+* Avoid profliferation of jQuery versions.  Make your stuff compatible with the version
+of jQuery in the common folder.
+* Avoid proliferation of additional third party javascript modules.  We are already out of 
+control in this regard and it would be nice to rein it in.
+
+
+Provide an example
+------------------
+
+The folder ``runestone/common/project_template/_sources`` folder is a great place to add a file
+that demonstrates your new feature or component in action.

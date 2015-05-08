@@ -21,10 +21,10 @@ BarList.prototype.size = function()
 
 BarList.prototype.show = function(c)
 {
-	for (var idx=0; idx<this.howmany; idx++)
-	{
-	   this.bars[idx].show(this.c)
-	}
+    for (var idx=0; idx<this.howmany; idx++)
+    {
+       this.bars[idx].show(this.c)
+    }
 }
       
 
@@ -38,10 +38,10 @@ Bar = function(pos, h, col)
 
 Bar.prototype.clone=function()
 {
-	  var newbar = new Bar()   //make a copy
-	  newbar.setHeight(this.getHeight())
-	  newbar.setPosition(this.getPosition())
-	  newbar.setColor(this.getColor())
+      var newbar = new Bar()   //make a copy
+      newbar.setHeight(this.getHeight())
+      newbar.setPosition(this.getPosition())
+      newbar.setColor(this.getColor())
       return newbar
 }
 
@@ -193,10 +193,10 @@ SortingAnimation.prototype.render = function(framenum)
     var currentframe = this.framelist[framenum]
     this.sc.width = this.sc.width
    
-	for (var idx=0; idx<currentframe.length; idx++)
-	{
-	   currentframe[idx].show(this.ctx,idx)
-	}
+    for (var idx=0; idx<currentframe.length; idx++)
+    {
+       currentframe[idx].show(this.ctx,idx)
+    }
    
 }
 
@@ -205,12 +205,12 @@ SortingAnimation.prototype.snapshot = function()
    var newframe = new Array()
    for (var idx=0; idx<this.barlist.bars.length; idx++)
    {
-	  var newbar = new Bar()   //make a copy
-	  newbar.setHeight(this.barlist.bars[idx].getHeight())
-	  newbar.setPosition(this.barlist.bars[idx].getPosition())
-	  newbar.setColor(this.barlist.bars[idx].getColor())
-	  
-	  newframe.push(newbar)
+      var newbar = new Bar()   //make a copy
+      newbar.setHeight(this.barlist.bars[idx].getHeight())
+      newbar.setPosition(this.barlist.bars[idx].getPosition())
+      newbar.setColor(this.barlist.bars[idx].getColor())
+
+      newframe.push(newbar)
    }   
    
    this.framelist.push(newframe)

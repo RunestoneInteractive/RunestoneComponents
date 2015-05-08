@@ -21,8 +21,9 @@ from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from runestone.assess import Assessment
 
+
 def setup(app):
-    app.add_directive('parsonsprob',ParsonsProblem)
+    app.add_directive('parsonsprob', ParsonsProblem)
 
     app.add_stylesheet('parsons.css')
     app.add_stylesheet('lib/prettify.css')
@@ -80,7 +81,7 @@ Example:
         """
 
         template_values = {}
-        template_values['qnumber'] = self.getNumber()        
+        template_values['qnumber'] = self.getNumber()
         template_values['unique_id'] = self.lineno
         template_values['instructions'] = ""
         code = self.content
@@ -105,7 +106,7 @@ Example:
         <div class="sortable-code-container">
         <div id="parsons-sortableTrash-%(unique_id)s" class="sortable-code"></div>
         <div id="parsons-sortableCode-%(unique_id)s" class="sortable-code"></div>
-    	<div style="clear:left;"></div>
+        <div style="clear:left;"></div>
         </div>
         <div class="parsons-controls">
         <input type="button" class='btn btn-success' id="checkMe%(unique_id)s" value="Check Me"/>
@@ -116,25 +117,25 @@ Example:
 
     <script>
         $pjQ(document).ready(function(){
-		
-			$("#parsons-%(unique_id)s").not(".sortable-code").not(".parsons-controls").on("click", function(){
-				 $('html, body').animate({
-					scrollTop: ($("#parsons-%(unique_id)s").offset().top - 50)
-				}, 700);
-			}).find(".sortable-code, .parsons-controls").click(function(e) {
-				return false;
-				});	
+
+            $("#parsons-%(unique_id)s").not(".sortable-code").not(".parsons-controls").on("click", function(){
+                 $('html, body').animate({
+                    scrollTop: ($("#parsons-%(unique_id)s").offset().top - 50)
+                }, 700);
+            }).find(".sortable-code, .parsons-controls").click(function(e) {
+                return false;
+                });
             var msgBox = $("#parsons-message-%(unique_id)s");
             msgBox.hide();
-	    var displayErrors = function (fb) {
-	        if(fb.errors.length > 0) {
+        var displayErrors = function (fb) {
+            if(fb.errors.length > 0) {
                     var hash = pp_%(unique_id)s.getHash("#ul-parsons-sortableCode-%(unique_id)s");
                     msgBox.fadeIn(500);
                     msgBox.attr('class','alert alert-danger');
                     msgBox.html(fb.errors[0]);
                     logBookEvent({'event':'parsons', 'act':hash, 'div_id':'%(divid)s'});
 
-	        } else {
+            } else {
                     logBookEvent({'event':'parsons', 'act':'yes', 'div_id':'%(divid)s'});
                     msgBox.fadeIn(100);
                     msgBox.attr('class','alert alert-success');
@@ -163,13 +164,13 @@ Example:
 
         var pp_%(unique_id)s = new ParsonsWidget({
                 'sortableId': 'parsons-sortableCode-%(unique_id)s',
-		'trashId': 'parsons-sortableTrash-%(unique_id)s',
+        'trashId': 'parsons-sortableTrash-%(unique_id)s',
                 'max_wrong_lines': 1,
                 'solution_label': 'Drop blocks here',
                 'feedback_cb' : displayErrors
         });
         pp_%(unique_id)s.init($pjQ("#parsons-orig-%(unique_id)s").text());
-	pp_%(unique_id)s.shuffleLines();
+    pp_%(unique_id)s.shuffleLines();
             
         if(localStorage.getItem('%(divid)s') && localStorage.getItem('%(divid)s-trash')) {
             try {
@@ -222,16 +223,14 @@ Example:
 
 '''
 
-
         self.assert_has_content()
-        return [nodes.raw('',TEMPLATE % template_values, format='html')]
-
+        return [nodes.raw('', TEMPLATE % template_values, format='html')]
 
     def parse_multiline_parsons(self, lines):
         current_block = []
         results = []
         for line in lines:
-            if(line == '====='):
+            if (line == '====='):
                 results.append(self.convert_leading_whitespace_for_block(current_block))
                 current_block = []
             else:
@@ -244,6 +243,6 @@ Example:
         initialWhitespace = whitespaceMatcher.match(block[0]).end()
         result = block[0]
         for line in block[1:]:
-            result += '\\n' # not a line break...the literal characters \n
+            result += '\\n'  # not a line break...the literal characters \n
             result += line[initialWhitespace:]
         return result

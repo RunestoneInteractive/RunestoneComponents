@@ -7,8 +7,8 @@ DataItem = function(pos, h, col)
 
 DataItem.prototype.clone=function()
 {
-	  var newitem = new DataItem(this.position,this.height,this.color)   //make a copy
-	  return newitem
+      var newitem = new DataItem(this.position,this.height,this.color)   //make a copy
+      return newitem
 }
 
 DataItem.prototype.getHeight=function()
@@ -47,52 +47,52 @@ SortModel = function()  //construct the model
     
 SortModel.prototype.init = function(ctl)
 {
-	this.mycontroller = ctl
+    this.mycontroller = ctl
 
-	this.valuelist = new Array()
-	var howmany = 50
+    this.valuelist = new Array()
+    var howmany = 50
    
-	for (var i=0; i<howmany; i++)
-	{
-	  var min = 5
-	  var max = 300
-	  var y = Math.floor(Math.random() * (max - min + 1)) + min
+    for (var i=0; i<howmany; i++)
+    {
+      var min = 5
+      var max = 300
+      var y = Math.floor(Math.random() * (max - min + 1)) + min
    
-	  var item = new DataItem(i,y,"black")
-	  this.valuelist.push(item)
-	}
-	
-	this.script = new Array()
-	this.script.push(this.makescene())
-	
-	for (var passnum=this.valuelist.length-1; passnum>0; passnum = passnum-1)
-	{
-	  for (var i=0; i<passnum; i=i+1)
-	  {
-		 this.valuelist[i].setColor("red")
-		 this.valuelist[i+1].setColor("red")
-		 
-		 this.script.push(this.makescene())
-		 
-		 if (this.valuelist[i].getHeight() > this.valuelist[i+1].getHeight())
-		 {
-	
-			var temp = this.valuelist[i]
-			this.valuelist[i] = this.valuelist[i+1]
-			this.valuelist[i+1] = temp
-			
-			this.script.push(this.makescene())
-			
-		 }
-		 
-		 this.valuelist[i].setColor("black")
-		 this.valuelist[i+1].setColor("black")
-		 
-		 this.script.push(this.makescene())
-	  }
-	}
-	
-	return this.script
+      var item = new DataItem(i,y,"black")
+      this.valuelist.push(item)
+    }
+
+    this.script = new Array()
+    this.script.push(this.makescene())
+
+    for (var passnum=this.valuelist.length-1; passnum>0; passnum = passnum-1)
+    {
+      for (var i=0; i<passnum; i=i+1)
+      {
+         this.valuelist[i].setColor("red")
+         this.valuelist[i+1].setColor("red")
+
+         this.script.push(this.makescene())
+
+         if (this.valuelist[i].getHeight() > this.valuelist[i+1].getHeight())
+         {
+
+            var temp = this.valuelist[i]
+            this.valuelist[i] = this.valuelist[i+1]
+            this.valuelist[i+1] = temp
+
+            this.script.push(this.makescene())
+
+         }
+
+         this.valuelist[i].setColor("black")
+         this.valuelist[i+1].setColor("black")
+
+         this.script.push(this.makescene())
+      }
+    }
+
+    return this.script
 }
 
 SortModel.prototype.makescene = function()
@@ -100,8 +100,8 @@ SortModel.prototype.makescene = function()
    var newscene = new Array()
    for (var idx=0; idx<this.valuelist.length; idx++)
    {
-	  var item = this.valuelist[idx].clone()   //make a copy
-	  newscene.push(item)
+      var item = this.valuelist[idx].clone()   //make a copy
+      newscene.push(item)
    }   
    
    return newscene
@@ -122,14 +122,14 @@ BarViewer.prototype.init = function(c)
 
 BarViewer.prototype.render = function(ascene)
 {
-	for (var p=0; p<ascene.length; p++)
-	{
+    for (var p=0; p<ascene.length; p++)
+    {
        this.ctx.fillStyle=ascene[p].color
        this.ctx.fillRect(p*7 + 2, 
                              this.ctx.canvas.height-ascene[p].height, 
                              3, 
                              ascene[p].height)
-	}
+    }
 }
 
 ListViewer = function() //contruct a list of numbers view
@@ -143,12 +143,12 @@ ListViewer.prototype.init = function(c)
 
 ListViewer.prototype.render = function(ascene)
 {
-	for (var p=0; p<ascene.length; p++)
-	{
+    for (var p=0; p<ascene.length; p++)
+    {
        this.ctx.fillStyle=ascene[p].color
        this.ctx.fillText(ascene[p].height, p*7 + 2, 
                              this.ctx.canvas.height-ascene[p].height)
-	}
+    }
 }
 
 

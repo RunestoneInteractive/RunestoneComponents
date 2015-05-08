@@ -60,12 +60,12 @@ INLINE = """\
          logBookEvent({'event':'video','act':'play','div_id': '%(divid)s'});
          // Log the run event
       });
-	  $('#%(divid)s video').one("click", function(){
-		this.play();
-	  });
-	  $('#%(divid)s video').one("play", function(){
-		logBookEvent({'event':'video','act':'play','div_id': '%(divid)s'});
-	  });
+      $('#%(divid)s video').one("click", function(){
+        this.play();
+      });
+      $('#%(divid)s video').one("play", function(){
+        logBookEvent({'event':'video','act':'play','div_id': '%(divid)s'});
+      });
    });
 </script>
 """

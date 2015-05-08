@@ -113,44 +113,44 @@ if ('%(hidecode)s' == 'none') {
     $('#%(divid)s_loadb').toggle();
 }
 if ($("#%(divid)s").attr("lang") !== "html" && $("#%(divid)s_code_div").parents(".admonition").length == 0 && $("#%(divid)s_code_div").parents("#exercises").length == 0){
-	if ($(window).width() > 975){
-		$("#%(divid)s_code_div").offset({
-			left: $("#%(divid)s .clearfix").offset().left
-		});
-	}
-	$("#%(divid)s_runb").one("click", function(){
-		$({})
-		.queue(function (next) {
-			if ($(window).width() > 975){
-				$("#%(divid)s_code_div").animate({
-					left: 40
-				}, 500, next);
+    if ($(window).width() > 975){
+        $("#%(divid)s_code_div").offset({
+            left: $("#%(divid)s .clearfix").offset().left
+        });
+    }
+    $("#%(divid)s_runb").one("click", function(){
+        $({})
+        .queue(function (next) {
+            if ($(window).width() > 975){
+                $("#%(divid)s_code_div").animate({
+                    left: 40
+                }, 500, next);
                 if (! Sk.TurtleGraphics ) {
                     Sk.TurtleGraphics = {};
                 }
                 Sk.TurtleGraphics.height = 320;
                 Sk.TurtleGraphics.width = 320;
-			}
-			else{
-				next();
-			}
-		})
-		.queue(function (next) {
-			$("#%(divid)s_runb").parent().siblings(".ac_output").show();
-			runit('%(divid)s',this, %(include)s);
-			$("#%(divid)s_runb").on("click", function(){
-				runit('%(divid)s',this, %(include)s);
-			});
-		})
-		
-	});
+            }
+            else{
+                next();
+            }
+        })
+        .queue(function (next) {
+            $("#%(divid)s_runb").parent().siblings(".ac_output").show();
+            runit('%(divid)s',this, %(include)s);
+            $("#%(divid)s_runb").on("click", function(){
+                runit('%(divid)s',this, %(include)s);
+            });
+        })
+
+    });
 }
 else{
-	$("#%(divid)s_code_div").css({float : "none", marginLeft : "auto", marginRight : "auto"});
-	$("#%(divid)s_runb").parent().siblings(".ac_output").show().css({float : "none", right : "0px"});
-	$("#%(divid)s_runb").on("click", function(){
-		runit('%(divid)s',this, %(include)s);
-	});
+    $("#%(divid)s_code_div").css({float : "none", marginLeft : "auto", marginRight : "auto"});
+    $("#%(divid)s_runb").parent().siblings(".ac_output").show().css({float : "none", right : "0px"});
+    $("#%(divid)s_runb").on("click", function(){
+        runit('%(divid)s',this, %(include)s);
+    });
 }
 </script>
 '''

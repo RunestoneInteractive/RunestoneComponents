@@ -7,8 +7,8 @@ DataItem = function(pos, h, col)
 
 DataItem.prototype.clone=function()
 {
-	  var newitem = new DataItem(this.position,this.value,this.color)   //make a copy
-	  return newitem
+      var newitem = new DataItem(this.position,this.value,this.color)   //make a copy
+      return newitem
 }
 
 DataItem.prototype.getValue=function()
@@ -47,19 +47,19 @@ BinarySearchModel = function()  //construct the model
     
 BinarySearchModel.prototype.init = function(ctl)
 {
-	this.mycontroller = ctl
+    this.mycontroller = ctl
 
-	this.valuelist = new Array()
-	var howmany = 25
+    this.valuelist = new Array()
+    var howmany = 25
     var initvalues=[25,30,46,55,60,78,90,95,101,110,122,134,145,150,166,175,187,200,205,213,240,255,267,299]
-	for (var i=0; i<howmany; i++)
-	{
-	  var item = new DataItem(i,initvalues[i],"black")
-	  this.valuelist.push(item)
-	}
-	
-	this.script = new Array()
-	//this.script.push(this.makescene(this.valuelist))
+    for (var i=0; i<howmany; i++)
+    {
+      var item = new DataItem(i,initvalues[i],"black")
+      this.valuelist.push(item)
+    }
+
+    this.script = new Array()
+    //this.script.push(this.makescene(this.valuelist))
 
     this.binarySearch(this.valuelist,200)
     
@@ -129,8 +129,8 @@ BinarySearchModel.prototype.makescene = function(somearray)
    var newscene = new Array()
    for (var idx=0; idx<somearray.length; idx++)
    {
-	  var item = somearray[idx].clone()   //make a copy
-	  newscene.push(item)
+      var item = somearray[idx].clone()   //make a copy
+      newscene.push(item)
    }   
    
    return newscene
