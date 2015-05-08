@@ -27,3 +27,6 @@ Provide an example
 
 The folder ``runestone/common/project_template/_sources`` folder is a great place to add a file
 that demonstrates your new feature or component in action.
+
+In fact you should provide two examples whenever possible to demonstrate that you can have 
+multiple instances of your component on a single web page.
