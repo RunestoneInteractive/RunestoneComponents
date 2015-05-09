@@ -4,32 +4,33 @@ import os
 import shutil
 import getpass
 import six
+import click
 from pkg_resources import resource_string, resource_filename
 
 
 def init():
-    template_base_dir = resource_filename('runestone', 'common/newproject_template')
-    config_stuff = resource_string('runestone','common/newproject_template/conf.py')
-    paver_stuff = resource_string('runestone','common/newproject_template/pavement.py')    
+    template_base_dir = resource_filename('runestone', 'common/project_template')
+    config_stuff = resource_string('runestone','common/project_template/conf.py')
+    paver_stuff = resource_string('runestone','common/project_template/pavement.py')
     conf_dict = {}
     print("This will create a new Runestone project in your current directory.")
-    proceed = eval(input("Do you want to proceed? Y/n")) or "Y"
-    if proceed[0].lower() == "n":
-        sys.exit(0)
+    click.confirm("Do you want to proceed? ", abort=True, default=True)
     print("Next we need to gather a few pieces of information to create your configuration files")
-    conf_dict['project_name'] = eval(input("Project name: (one word, no spaces)"))
-    conf_dict['build_dir'] = eval(input("path to build dir [./build] ")) or "build"
-    conf_dict['login_req'] = eval(input("require login [false] ")) or "false"
-    conf_dict['master_url'] = eval(input("URL for ajax server [http://127.0.0.1:8000] ")) or "http://127.0.0.1:8000"
-    conf_dict['author'] = eval(input("your Name ")) or getpass.getuser()
-    conf_dict['project_title'] = eval(input("Title for this project [Runestone Default]")) or "Runestone Default"
-    
+    conf_dict['project_name'] = click.prompt("Project name: (one word, no spaces)")
+    conf_dict['build_dir'] = click.prompt("path to build dir ", default="./build")
+    conf_dict['login_req'] = click.prompt("require login  ", default="false")
+    conf_dict['master_url'] = click.prompt("URL for ajax server ", default="http://127.0.0.1:8000")
+    conf_dict['author'] = click.prompt("your Name ", default=getpass.getuser())
+    conf_dict['project_title'] = click.prompt("Title for this project ", default="Runestone Default")
+    conf_dict['logging'] = click.prompt("Log student actions? ", type=bool, default=True)
+    conf_dict['log_level'] = 10 if conf_dict['logging'] else 0
+
     shutil.copytree(os.path.join(template_base_dir,'_sources'),'_sources')
     shutil.copytree(os.path.join(template_base_dir,'_static'),'_static')
     shutil.copytree(os.path.join(template_base_dir,'_templates'),'_templates')
     os.makedirs(conf_dict['build_dir'])
-    paver_final = paver_stuff % conf_dict
-    config_final = config_stuff % conf_dict
+    paver_final = paver_stuff.decode('utf-8') % conf_dict
+    config_final = config_stuff.decode('utf-8') % conf_dict
 
     with open('pavement.py','w') as pvf:
         pvf.write(paver_final)
@@ -74,7 +75,8 @@ def main(args=None):
     if not args:
         args = sys.argv[1:]
     foo_config = resource_filename('runestone', 'common')
-#    foo_string = resource_string('runestone', 'project/template/conf.py')    
+#    foo_string = resource_string('runestone', 'project/template/conf.py')
+    print(findProjectRoot())
     if args[0] == "init":
         init()
     elif args[0] == "build":
@@ -84,6 +86,13 @@ def main(args=None):
     else:
         print("Error:  I only understand init, build, and serve")
 
+def findProjectRoot():
+    start = os.getcwd()
+    done = False
+    while start != "/":
+        if os.path.exists(os.path.join(start,'pavement.py')):
+            return start
+        start = os.path.dirname(start)
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

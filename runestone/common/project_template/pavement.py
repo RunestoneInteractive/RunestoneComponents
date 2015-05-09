@@ -24,7 +24,7 @@ options(
         template_args={'course_id': '%(project_name)s',
                        'login_required':'%(login_req)s',
                        'appname':master_app,
-                       'loglevel':10,
+                       'loglevel': %(log_level)d,
                        'course_url':master_url }
     )
 )
