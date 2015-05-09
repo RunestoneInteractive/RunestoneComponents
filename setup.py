@@ -36,7 +36,7 @@ setup(
     # data_files=[('common',['runestone/common/*']),
     #             ('project/template', ['newproject_copy_me/*'])
     # ],
-    long_description=open('README.md').read(),
+    long_description=open('README.rst').read(),
     entry_points = {
         'console_scripts': [
             'runestone = runestone.__main__:main'
