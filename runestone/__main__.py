@@ -10,8 +10,8 @@ from pkg_resources import resource_string, resource_filename
 
 def init():
     template_base_dir = resource_filename('runestone', 'common/project_template')
-    config_stuff = resource_string('runestone','common/project_template/conf.py')
-    paver_stuff = resource_string('runestone','common/project_template/pavement.py')
+    config_stuff = resource_string('runestone','common/project_template/conf.tmpl')
+    paver_stuff = resource_string('runestone','common/project_template/pavement.tmpl')
     conf_dict = {}
     print("This will create a new Runestone project in your current directory.")
     click.confirm("Do you want to proceed? ", abort=True, default=True)
@@ -75,7 +75,7 @@ def main(args=None):
     if not args:
         args = sys.argv[1:]
     foo_config = resource_filename('runestone', 'common')
-#    foo_string = resource_string('runestone', 'project/template/conf.py')
+#    foo_string = resource_string('runestone', 'project/template/conf.tmpl')
     print(findProjectRoot())
     if args[0] == "init":
         init()
