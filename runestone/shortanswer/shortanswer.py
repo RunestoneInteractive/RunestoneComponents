@@ -34,9 +34,8 @@ def setup(app):
 TEXT = """
 <div id='%(divid)s' class='journal alert alert-%(optional)s'>
     <form id='%(divid)s_journal' name='%(divid)s_journal' action="">
-        <div class='directive-status-icon'><img src='../../images/spinner10.gif'/></div>
         <fieldset>
-            <legend>Journal</legend>
+            <legend>Short Answer</legend>
             <div class='journal-question'>%(qnum)s: %(content)s</div>
             <div id='%(divid)s_journal_input'>
                 <div class='journal-options'>
@@ -45,6 +44,7 @@ TEXT = """
                                   rows='4' cols='50'></textarea>
                     </label>
                 </div><br />
+                <div><button class="btn btn-default" onclick="submitJournal('%(divid)s');">Save</button></div>
                 Instructor's Feedback:
                 <div class='journal-options' style='padding-left:20px'>
                     <div class='bg-info form-control' style='width:530px; background-color: #eee; font-style:italic'
@@ -60,11 +60,6 @@ TEXT = """
         // check if the user has already answered this journal
         $(function() {
             loadJournal('%(divid)s');
-            $('#%(divid)s_solution').on('keyup input propertychange paste change', function() {
-                addDelay('%(divid)s', function() {
-                    submitJournal('%(divid)s');
-                });
-            });
         });
     </script>
 </div>
