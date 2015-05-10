@@ -47,8 +47,24 @@ You will now have a build folder with a file index.html in it, along with some d
     $ runestone serve
 
 
-Now from your browser you can open up http://localhost:8000/index.html
+Now from your browser you can open up ``http://localhost:8000/index.html``  You should see the table of contents for a sample page.  If you edit ``_sources/index.html`` or ``_sources/overview.rst`` and then rebuild and serve again you will see your changes.  The best documentation is probably the overview.rst file itself, as it demonstrates how to use all of the common components and shows most of their options.
 
-That is all.  For now.
+
+**Windows Users** I have tested the installation, along with init, build, and serve on Windows 8.1.
+The biggest pain is probably setting your PATH environment variable so you can simply type the commands
+from the shell.  Please note that I am not a regular user of windows, I only test things on my VMWare
+installation every so often.  If you are new to using Python on windows I recommend you check out this
+link on `Using Python with Windows <https://docs.python.org/3.4/using/windows.html>`_
+
+
+Notes for more Advanced Users
+-----------------------------
+
+If you already have an existing `Sphinx <http://sphinx-doc.org>`_  project and you want to incorporate the runestone components into your project you can just make a couple of simple edits to your existing ``conf.py`` file.
+
+* First add the following import line ``from runestone import runestone_static_dirs, runestone_extensions``
+* Then modify your extensions.  You may have a different set of extensions already enabled, but it doesn't matter just do this:  ``extensions = ['sphinx.ext.mathjax'] + runestone_extensions()``
+* Then modify your html_static_path:  ``html_static_path = ['_static']  + runestone_static_dirs()``  Again you may have your own set of static paths in the initial list.
+
 
 See https://github.com/bnmnetp/runestone/wiki/DevelopmentRoadmap to get a sense for how this is all going to come together.
