@@ -270,10 +270,10 @@ next line executed.
     x = 2
     y = 0
     if x % 2 == 1:
-        print 'x is odd'
+        print('x is odd')
         y = y + x
     else:
-        print 'x is even'
+        print('x is even')
         y = y - x
         
 Timed Exam Questions
