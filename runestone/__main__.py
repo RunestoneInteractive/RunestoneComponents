@@ -17,10 +17,12 @@ def init():
     click.confirm("Do you want to proceed? ", abort=True, default=True)
     print("Next we need to gather a few pieces of information to create your configuration files")
     conf_dict['project_name'] = click.prompt("Project name: (one word, no spaces)")
-    conf_dict['build_dir'] = click.prompt("path to build dir ", default="./build")
-    conf_dict['login_req'] = click.prompt("require login  ", default="false")
+    while ' ' in conf_dict['project_name']:
+        conf_dict['project_name'] = click.prompt("Project name: (one word, NO SPACES)")
+    conf_dict['build_dir'] = click.prompt("Path to build dir ", default="./build")
+    conf_dict['login_req'] = click.prompt("Require login  ", default="false")
     conf_dict['master_url'] = click.prompt("URL for ajax server ", default="http://127.0.0.1:8000")
-    conf_dict['author'] = click.prompt("your Name ", default=getpass.getuser())
+    conf_dict['author'] = click.prompt("Your Name ", default=getpass.getuser())
     conf_dict['project_title'] = click.prompt("Title for this project ", default="Runestone Default")
     conf_dict['logging'] = click.prompt("Log student actions? ", type=bool, default=True)
     conf_dict['log_level'] = 10 if conf_dict['logging'] else 0

@@ -1,4 +1,3 @@
-
 =====================
 This Is A New Project
 =====================
@@ -15,7 +14,7 @@ This Is A New Project
    (e.g. "DataStructures/queues.rst").
 
 SECTION 1: Introduction
-:::::::::::::::::::::::::::
+:::::::::::::::::::::::
 
 Congratulations!   If you can see this file you have probably successfully run the ``runestone init`` command.  If you are looking at this as a source file you should now run ``runestone build``  to generate html files.   Once you have run the build command you can run ``runestone serve`` and then view this in your browser at ``http://localhost:8000``
 
@@ -25,7 +24,7 @@ The overview section, which follows is an ideal section to look at both online a
 
 
 SECTION 2: An Overview of the extensions
-:::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::
 
 .. toctree::
    :maxdepth: 2
@@ -34,11 +33,8 @@ SECTION 2: An Overview of the extensions
 
 
 SECTION 2: Add more stuff here
-:::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::
 
 You can add more stuff here.
 
-..   morecontent.rst
-..   words.rst
-..   somestuff.rst
-..   MoreThings/apples.rst
+
