@@ -42,10 +42,12 @@ def init():
 
 def build():
     from paver.tasks import main as paver_main
+    os.chdir(findProjectRoot())
     sys.argv[0] = "build"
     paver_main()
     
 def serve():
+    os.chdir(findProjectRoot())
     sys.path.insert(0,os.getcwd())
     try:
         import pavement
@@ -76,7 +78,7 @@ def main(args=None):
         args = sys.argv[1:]
     foo_config = resource_filename('runestone', 'common')
 #    foo_string = resource_string('runestone', 'project/template/conf.tmpl')
-    print(findProjectRoot())
+
     if args[0] == "init":
         init()
     elif args[0] == "build":
@@ -88,11 +90,13 @@ def main(args=None):
 
 def findProjectRoot():
     start = os.getcwd()
-    done = False
-    while start != "/":
+    prevdir = ""
+    while start != prevdir:
         if os.path.exists(os.path.join(start,'pavement.py')):
             return start
+        prevdir = start
         start = os.path.dirname(start)
+    raise NotADirectoryError("You must be in a runestone project to run runestone")
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
