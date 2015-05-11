@@ -19,16 +19,7 @@ __author__ = 'bmiller'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
-import json
-import os
 
-# try:
-#     import conf
-#     version = conf.version
-#     staticserver = conf.staticserver
-# except:
-#     version = '2.1.0'
-#     staticserver = 'runestonestatic.appspot.com'
 
 def setup(app):
     app.add_directive('activecode', ActiveCode)
@@ -36,30 +27,28 @@ def setup(app):
     app.add_stylesheet('codemirror.css')
     app.add_stylesheet('activecode.css')
 
-    app.add_javascript('jquery.highlight.js' )
-    app.add_javascript('bookfuncs.js' )
-    app.add_javascript('codemirror.js' )
+    app.add_javascript('jquery.highlight.js')
+    app.add_javascript('bookfuncs.js')
+    app.add_javascript('codemirror.js')
     app.add_javascript('xml.js')
     app.add_javascript('css.js')
     app.add_javascript('htmlmixed.js')
     app.add_javascript('python.js')
-    app.add_javascript('javascript.js' )
+    app.add_javascript('javascript.js')
     app.add_javascript('activecode.js')
-    app.add_javascript('skulpt.min.js' )
+    app.add_javascript('skulpt.min.js')
     app.add_javascript('skulpt-stdlib.js')
 
     app.add_node(ActivcodeNode, html=(visit_ac_node, depart_ac_node))
 
-    app.connect('doctree-resolved',process_activcode_nodes)
+    app.connect('doctree-resolved', process_activcode_nodes)
     app.connect('env-purge-doc', purge_activecodes)
-
 
 
 START = '''
 <div id="cont"></div>
 <div id="%(divid)s" lang="%(language)s" time="%(timelimit)s" class="ac_section alert alert-warning" >
 '''
-
 
 EDIT1 = '''
 </div>
@@ -76,7 +65,7 @@ CAPTION = '''
 <p class="ac_caption"><span class="ac_caption_text">%(caption)s (%(divid)s)</span> </p>
 '''
 
-UNHIDE='''
+UNHIDE = '''
 <span class="ac_sep"></span>
 <button class='btn btn-default' id="%(divid)s_showb" onclick="$('#%(divid)s_code_div').toggle();cm_editors['%(divid)s_code'].refresh();$('#%(divid)s_saveb').toggle();$('#%(divid)s_loadb').toggle()">Show/Hide Code</button>
 '''
@@ -195,22 +184,24 @@ $(document).ready(function() {
 </script>
 '''
 
+
 class ActivcodeNode(nodes.General, nodes.Element):
-    def __init__(self,content):
+    def __init__(self, content):
         """
 
         Arguments:
         - `self`:
         - `content`:
         """
-        super(ActivcodeNode,self).__init__()
+        super(ActivcodeNode, self).__init__()
         self.ac_components = content
+
 
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
-def visit_ac_node(self,node):
-    #print self.settings.env.activecodecounter
+def visit_ac_node(self, node):
+    # print self.settings.env.activecodecounter
     res = START
     if 'above' in node.ac_components:
         res += CANVAS
@@ -256,11 +247,12 @@ def visit_ac_node(self,node):
     res += SCRIPT
     res += END
     res = res % node.ac_components
-    res = res.replace("u'","'")  # hack:  there must be a better way to include the list and avoid unicode strings
+    res = res.replace("u'", "'")  # hack:  there must be a better way to include the list and avoid unicode strings
 
     self.body.append(res)
 
-def depart_ac_node(self,node):
+
+def depart_ac_node(self, node):
     ''' This is called at the start of processing an activecode node.  If activecode had recursive nodes
         etc and did not want to do all of the processing in visit_ac_node any finishing touches could be
         added here.
@@ -268,11 +260,11 @@ def depart_ac_node(self,node):
     pass
 
 
-def process_activcode_nodes(app,env,docname):
+def process_activcode_nodes(app, env, docname):
     pass
 
 
-def purge_activecodes(app,env,docname):
+def purge_activecodes(app, env, docname):
     pass
 
 
@@ -281,28 +273,28 @@ class ActiveCode(Directive):
     optional_arguments = 1
     has_content = True
     option_spec = {
-        'nocanvas':directives.flag,
-        'nopre':directives.flag,
-        'above':directives.flag,  # put the canvas above the code
-        'autorun':directives.flag,
-        'caption':directives.unchanged,
-        'include':directives.unchanged,
-        'hidecode':directives.flag,
-        'language':directives.unchanged,
-        'tour_1':directives.unchanged,
-        'tour_2':directives.unchanged,
-        'tour_3':directives.unchanged,
-        'tour_4':directives.unchanged,
-        'tour_5':directives.unchanged,
-        'nocodelens':directives.flag,
-        'coach':directives.flag,
-        'timelimit':directives.unchanged
+        'nocanvas': directives.flag,
+        'nopre': directives.flag,
+        'above': directives.flag,  # put the canvas above the code
+        'autorun': directives.flag,
+        'caption': directives.unchanged,
+        'include': directives.unchanged,
+        'hidecode': directives.flag,
+        'language': directives.unchanged,
+        'tour_1': directives.unchanged,
+        'tour_2': directives.unchanged,
+        'tour_3': directives.unchanged,
+        'tour_4': directives.unchanged,
+        'tour_5': directives.unchanged,
+        'nocodelens': directives.flag,
+        'coach': directives.flag,
+        'timelimit': directives.unchanged
     }
 
     def run(self):
         env = self.state.document.settings.env
         # keep track of how many activecodes we have.... could be used to automatically make a unique id for them.
-        if not hasattr(env,'activecodecounter'):
+        if not hasattr(env, 'activecodecounter'):
             env.activecodecounter = 0
         env.activecodecounter += 1
 
@@ -312,7 +304,7 @@ class ActiveCode(Directive):
             if '====' in self.content:
                 idx = self.content.index('====')
                 source = "\n".join(self.content[:idx])
-                suffix = "\n".join(self.content[idx+1:])
+                suffix = "\n".join(self.content[idx + 1:])
             else:
                 source = "\n".join(self.content)
                 suffix = "\n"
@@ -322,23 +314,23 @@ class ActiveCode(Directive):
 
         self.options['initialcode'] = source
         self.options['suffix'] = suffix
-        str=source.replace("\n","*nline*")
-        str0=str.replace("\"","*doubleq*")
-        str1=str0.replace("(","*open*")
-        str2=str1.replace(")","*close*")
-        str3=str2.replace("'","*singleq*")
-        self.options['argu']=str3
+        str = source.replace("\n", "*nline*")
+        str0 = str.replace("\"", "*doubleq*")
+        str1 = str0.replace("(", "*open*")
+        str2 = str1.replace(")", "*close*")
+        str3 = str2.replace("'", "*singleq*")
+        self.options['argu'] = str3
 
-        complete=""
-        no_of_buttons=0
+        complete = ""
+        no_of_buttons = 0
         okeys = list(self.options.keys())
         for k in okeys:
             if '_' in k:
-                x,label = k.split('_')
-                no_of_buttons=no_of_buttons+1
-                complete=complete+self.options[k]+"*atype*"
+                x, label = k.split('_')
+                no_of_buttons = no_of_buttons + 1
+                complete = complete + self.options[k] + "*atype*"
 
-        newcomplete=complete.replace("\"","*doubleq*")
+        newcomplete = complete.replace("\"", "*doubleq*")
         self.options['ctext'] = newcomplete
         self.options['no_of_buttons'] = no_of_buttons
 

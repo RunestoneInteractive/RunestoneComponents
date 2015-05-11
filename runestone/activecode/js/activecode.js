@@ -37,15 +37,15 @@ var createAudioTourHTML = function (divid, code, bnum, audio_text) {
     var first = "<pre><div id='" + divid + "_l1'>" + "1.   " + codeArray[0] + "</div>";
     num_lines = codeArray.length;
     for (var i = 1; i < num_lines; i++) {
-       if (i < 9) {
-        first = first + "<div id='" + divid + "_l" + (i + 1) + "'>" + (i + 1) + ".   " + codeArray[i] + "</div>";
-       }
-       else if (i < 99) {
-        first = first + "<div id='" + divid + "_l" + (i + 1) + "'>" + (i + 1) + ".  " + codeArray[i] + "</div>";
-       }
-       else {
-        first = first + "<div id='" + divid + "_l" + (i + 1) + "'>" + (i + 1) + ". " + codeArray[i] + "</div>";
-       }
+        if (i < 9) {
+            first = first + "<div id='" + divid + "_l" + (i + 1) + "'>" + (i + 1) + ".   " + codeArray[i] + "</div>";
+        }
+        else if (i < 99) {
+            first = first + "<div id='" + divid + "_l" + (i + 1) + "'>" + (i + 1) + ".  " + codeArray[i] + "</div>";
+        }
+        else {
+            first = first + "<div id='" + divid + "_l" + (i + 1) + "'>" + (i + 1) + ". " + codeArray[i] + "</div>";
+        }
     }
     first = first + "</pre>"
 
@@ -211,12 +211,12 @@ function handlePlaying() {
 
     // if playing audio pause it 
     if (playing) {
-    
+
         elem.pause();
-        
+
         // unbind current ended
         $('#' + afile).unbind('ended');
-    
+
         // unhighlight the prev lines
         unhighlightLines(theDivid, ahash[aname[currIndex]]);
     }
@@ -242,23 +242,21 @@ var firstAudio = function () {
 
 var prevAudio = function () {
 
-   // if there is a previous audio
-   if (currIndex > 0)
-    {
+    // if there is a previous audio
+    if (currIndex > 0) {
 
-       // if audio is playing handle it
-       handlePlaying();
+        // if audio is playing handle it
+        handlePlaying();
 
-       //log change to db
-       logBookEvent({'event': 'Audio', 'change': 'prev', 'div_id': theDivid});
+        //log change to db
+        logBookEvent({'event': 'Audio', 'change': 'prev', 'div_id': theDivid});
 
-    
 
-       // move to previous to the current (but the current index has moved to the next)
-       currIndex = currIndex - 1;
+        // move to previous to the current (but the current index has moved to the next)
+        currIndex = currIndex - 1;
 
-       // start at the prev audio
-       playCurrIndexAudio();
+        // start at the prev audio
+        playCurrIndexAudio();
     }
 
 };
@@ -272,15 +270,13 @@ var nextAudio = function () {
     logBookEvent({'event': 'Audio', 'change': 'next', 'div_id': theDivid});
 
     // if not at the end
-    if (currIndex < (len - 1))
-    {
-      // start at the next audio
-      currIndex = currIndex + 1;
-      playCurrIndexAudio();
+    if (currIndex < (len - 1)) {
+        // start at the next audio
+        currIndex = currIndex + 1;
+        playCurrIndexAudio();
     }
-    else if (currIndex == (len - 1))
-    {
-       handleTourEnd();
+    else if (currIndex == (len - 1)) {
+        handleTourEnd();
     }
 };
 
@@ -304,38 +300,38 @@ var lastAudio = function () {
 var playCurrIndexAudio = function () {
 
     // set playing to false
-    playing = false; 
+    playing = false;
 
     // play the current audio and highlight the lines
     playaudio(currIndex, aname, theDivid, ahash);
-    
+
 };
 
 // handle the end of the tour
-var handleTourEnd = function() {
+var handleTourEnd = function () {
 
-   $('#status').html(" The " + tourName + " Ended");
+    $('#status').html(" The " + tourName + " Ended");
 
-        // disable the prev, pause/play, and next buttons and make them more invisible
-        $('#first_audio').attr('disabled', 'disabled');
-        $('#prev_audio').attr('disabled', 'disabled');
-        $('#pause_audio').attr('disabled', 'disabled');
-        $('#next_audio').attr('disabled', 'disabled');
-        $('#last_audio').attr('disabled', 'disabled');
-        $("#first_audio").css('opacity', 0.25);
-        $("#prev_audio").css('opacity', 0.25);
-        $("#pause_audio").css('opacity', 0.25);
-        $("#next_audio").css('opacity', 0.25);
-        $("#last_audio").css('opacity', 0.25);
+    // disable the prev, pause/play, and next buttons and make them more invisible
+    $('#first_audio').attr('disabled', 'disabled');
+    $('#prev_audio').attr('disabled', 'disabled');
+    $('#pause_audio').attr('disabled', 'disabled');
+    $('#next_audio').attr('disabled', 'disabled');
+    $('#last_audio').attr('disabled', 'disabled');
+    $("#first_audio").css('opacity', 0.25);
+    $("#prev_audio").css('opacity', 0.25);
+    $("#pause_audio").css('opacity', 0.25);
+    $("#next_audio").css('opacity', 0.25);
+    $("#last_audio").css('opacity', 0.25);
 
-        // enable the tour buttons
-        for (var j = 0; j < buttonCount; j++)
-            $('#button_audio_' + j).removeAttr('disabled');
-}
+    // enable the tour buttons
+    for (var j = 0; j < buttonCount; j++)
+        $('#button_audio_' + j).removeAttr('disabled');
+};
 
 // only call this one after the first time
 var outerAudio = function () {
-    
+
     // unbind ended
     $('#' + afile).unbind('ended');
 
@@ -346,37 +342,37 @@ var outerAudio = function () {
     unhighlightLines(theDivid, ahash[aname[currIndex]]);
 
     // increment the currIndex to point to the next one
-    currIndex++; 
+    currIndex++;
 
     // if the end of the tour reset the buttons
     if (currIndex == len) {
-       handleTourEnd();
+        handleTourEnd();
     }
-    
+
     // else not done yet so play the next audio
     else {
-    
+
         // play the audio at the current index
         playCurrIndexAudio();
     }
 };
 
 // play the audio now that it is ready
-var playWhenReady = function(afile,divid,ahash) { 
-        // unbind current
-        $('#' + afile).unbind('canplaythrough');
-        //console.log("in playWhenReady " + elem.duration);
-   
-        $('#status').html("Playing the " + tourName);
-        elem.currentTime = 0;
-        highlightLines(divid, ahash[afile]);
-        $('#' + afile).bind('ended',function() {
-            outerAudio();
-        });
-        playing = true;
-        elem.play();
+var playWhenReady = function (afile, divid, ahash) {
+    // unbind current
+    $('#' + afile).unbind('canplaythrough');
+    //console.log("in playWhenReady " + elem.duration);
 
-}; 
+    $('#status').html("Playing the " + tourName);
+    elem.currentTime = 0;
+    highlightLines(divid, ahash[afile]);
+    $('#' + afile).bind('ended', function () {
+        outerAudio();
+    });
+    playing = true;
+    elem.play();
+
+};
 
 
 // play the audio at the specified index i and set the duration and highlight the lines
@@ -386,17 +382,17 @@ var playaudio = function (i, aname, divid, ahash) {
 
     // if this isn't ready to play yet - no duration yet then wait
     //console.log("in playaudio " + elem.duration);
-    if (isNaN(elem.duration) || elem.duration == 0)
-    {
-       // set the status
-       $('#status').html("Loading audio.  Please wait.");
-       $('#' + afile).bind('canplaythrough',function() {
-         playWhenReady(afile,divid,ahash);
-       });
+    if (isNaN(elem.duration) || elem.duration == 0) {
+        // set the status
+        $('#status').html("Loading audio.  Please wait.");
+        $('#' + afile).bind('canplaythrough', function () {
+            playWhenReady(afile, divid, ahash);
+        });
     }
     // otherwise it is ready so play it
-    else 
-        playWhenReady(afile,divid,ahash);
+    else {
+        playWhenReady(afile, divid, ahash);
+    }
 };
 
 // pause if playing and play if paused
@@ -460,8 +456,9 @@ var setBackroundForLines = function (divid, lnum, color) {
         for (var k = start; k < end; k++) {
             //alert(k);
             var str = "#" + divid + "_l" + k;
-            if ($(str).text() != "")
+            if ($(str).text() != "") {
                 $(str).css('background-color', color);
+            }
             //$(str).effect("highlight",{},(dur*1000)+4500);
         }
     }
@@ -474,7 +471,7 @@ var setBackroundForLines = function (divid, lnum, color) {
 };
 
 
-function showChange(ed,b) {
+function showChange(ed, b) {
     if (ed.acEditEvent == false || ed.acEditEvent === undefined) {
         $('#' + ed.parentDiv + ' .CodeMirror').css('border-top', '2px solid #b43232');
         $('#' + ed.parentDiv + ' .CodeMirror').css('border-bottom', '2px solid #b43232');
@@ -512,40 +509,41 @@ function outf(text) {
 }
 
 
-JSoutput = function(a) {
+JSoutput = function (a) {
 
     var str = "["
 
-    if (typeof(a)=="object" && a.length) {
+    if (typeof(a) == "object" && a.length) {
 
-        for (var i=0; i < a.length; i++)
+        for (var i = 0; i < a.length; i++)
 
-            if (typeof(a[i])=="object" && a[i].length) {
+            if (typeof(a[i]) == "object" && a[i].length) {
 
-                str += (i==0?"":" ")+"["
+                str += (i == 0 ? "" : " ") + "["
 
-                for (var j=0; j<a[i].length; j++)
+                for (var j = 0; j < a[i].length; j++)
 
-                    str += a[i][j]+(j==a[i].length-1?
+                    str += a[i][j] + (j == a[i].length - 1 ?
 
-                            "]"+(i==a.length-1?"]":",")+"\n":", ");
+                        "]" + (i == a.length - 1 ? "]" : ",") + "\n" : ", ");
 
-            } else str += a[i]+(i==a.length-1?"]":", ");
+            } else {
+                str += a[i] + (i == a.length - 1 ? "]" : ", ");
+            }
 
     } else {
-      try {
-        str = JSON.stringify(a);
-      } catch(e) {
-        str = a;
-      }
+        try {
+            str = JSON.stringify(a);
+        } catch (e) {
+            str = a;
+        }
     }
     return str;
 
 }
 
 
-
-write = function(str) {
+write = function (str) {
 
     var outnode = document.getElementById(Sk.pre);
 
@@ -554,21 +552,21 @@ write = function(str) {
 }
 
 
+writeln = function (str) {
 
-writeln = function(str) {
-
-    if (!str) str="";
+    if (!str) {
+        str = "";
+    }
 
     var outnode = document.getElementById(Sk.pre);
 
-    outnode.innerHTML += JSoutput(str)+"<br />";
+    outnode.innerHTML += JSoutput(str) + "<br />";
 
 }
 
 
-
 var keymap = {
-    "Ctrl-Enter" : function (editor) {
+    "Ctrl-Enter": function (editor) {
         runit(editor.parentDiv);
         $("#" + editor.parentDiv).children('.ac_output').show();
     },
@@ -588,30 +586,30 @@ function createEditors() {
         if (includes !== "undefined") {
             includes = eval(includes)
             for (var j in includes) {
-                var edinclude = document.getElementById(includes[j]+'_code')
+                var edinclude = document.getElementById(includes[j] + '_code')
                 first_line = first_line + edinclude.textContent.match(/\n/g).length + 1;
             }
         } else {
             first_line = 1;
         }
-        var theMode = { name: 'python', version: 2, singleLineStringErrors: false };
+        var theMode = {name: 'python', version: 2, singleLineStringErrors: false};
         if (lang == 'html') {
             theMode = {name: 'htmlmixed'};
         } else if (lang == 'java') {
             theMode = {name: 'text/x-java'};
         }
         cm_editors[newEdId] = CodeMirror.fromTextArea(edList[i], {
-                                                          mode: theMode,
-                                                          lineNumbers: true,
-                                                          firstLineNumber: first_line,
-                                                          indentUnit: 4,
-                                                          indentWithTabs: false,
-                                                          matchBrackets: true,
-                                                          autoMatchParens: true,
-                                                          extraKeys: keymap
-                                                      }
+                mode: theMode,
+                lineNumbers: true,
+                firstLineNumber: first_line,
+                indentUnit: 4,
+                indentWithTabs: false,
+                matchBrackets: true,
+                autoMatchParens: true,
+                extraKeys: keymap
+            }
         );
-        cm_editors[newEdId].on('change',showChange);
+        cm_editors[newEdId].on('change', showChange);
         cm_editors[newEdId].parentDiv = edList[i].parentNode.parentNode.id;
         //requestCode(edList[i].parentNode.id) // populate with user's code
     }
@@ -619,7 +617,7 @@ function createEditors() {
     // allow ActiveCode editors to be dynamically resized by user
     $('.CodeMirror').each(function (_, cmNode) {
         $(cmNode).resizable({
-            resize: function() {
+            resize: function () {
                 cmNode.CodeMirror.setSize($(this).width(), $(this).height());
                 cmNode.CodeMirror.refresh();
             }
@@ -628,12 +626,13 @@ function createEditors() {
 }
 
 function builtinRead(x) {
-    if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
+    if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined) {
         throw "File not found: '" + x + "'";
+    }
     return Sk.builtinFiles["files"][x];
 }
 
-function createActiveCode(divid,suppliedSource,sid,language) {
+function createActiveCode(divid, suppliedSource, sid, language) {
     var edNode;
     var acblockid;
     if (sid !== undefined) {
@@ -647,35 +646,37 @@ function createActiveCode(divid,suppliedSource,sid,language) {
     if (language !== undefined && language !== "None") {
         edNode.lang = language;
     }
-    if (edNode.children.length == 0 ) {
+    if (edNode.children.length == 0) {
         //edNode.style.display = 'none';
         edNode.style.backgroundColor = "white";
         var editor;
         editor = CodeMirror(edNode, {
-                    mode: {name: "python",
-                        version: 2,
-                        singleLineStringErrors: false},
-                    lineNumbers: true,
-                    indentUnit: 4,
-                    tabMode: "indent",
-                    matchBrackets: true,
-                    autoMatchParens: true,
-                    extraKeys: keymap
-                });
+            mode: {
+                name: "python",
+                version: 2,
+                singleLineStringErrors: false
+            },
+            lineNumbers: true,
+            indentUnit: 4,
+            tabMode: "indent",
+            matchBrackets: true,
+            autoMatchParens: true,
+            extraKeys: keymap
+        });
 
-        editor.setSize(null,250);
+        editor.setSize(null, 250);
 
 
-        var myRun = function() {
+        var myRun = function () {
             runit(acblockid);
         };
-        var mySave = function() {
+        var mySave = function () {
             saveEditor(divid);
         };
-        var myLoad = function() {
-            requestCode(divid,sid);
+        var myLoad = function () {
+            requestCode(divid, sid);
         };
-        cm_editors[acblockid+"_code"] = editor;
+        cm_editors[acblockid + "_code"] = editor;
         editor.parentDiv = acblockid;
         var runButton = document.createElement("button");
         runButton.appendChild(document.createTextNode('Run'));
@@ -684,41 +685,41 @@ function createActiveCode(divid,suppliedSource,sid,language) {
         edNode.appendChild(runButton);
         edNode.appendChild(document.createElement('br'));
         if (sid === undefined) { // We don't need load and save buttons for grading
-            if(isLoggedIn() == true) {
+            if (isLoggedIn() == true) {
                 var saveButton = document.createElement("input");
-                saveButton.setAttribute('type','button');
-                saveButton.setAttribute('value','Save');
+                saveButton.setAttribute('type', 'button');
+                saveButton.setAttribute('value', 'Save');
                 saveButton.className = saveButton.className + ' btn btn-default';
                 saveButton.onclick = mySave;
                 edNode.appendChild(saveButton);
 
                 var loadButton = document.createElement("input");
-                loadButton.setAttribute('type','button');
-                loadButton.setAttribute('value','Load');
+                loadButton.setAttribute('type', 'button');
+                loadButton.setAttribute('value', 'Load');
                 loadButton.className = loadButton.className + ' btn btn-default';
                 loadButton.onclick = myLoad;
                 edNode.appendChild(loadButton);
             } else {
                 var saveButton = document.createElement("input");
-                saveButton.setAttribute('type','button');
-                saveButton.setAttribute('value','Save');
+                saveButton.setAttribute('type', 'button');
+                saveButton.setAttribute('value', 'Save');
                 saveButton.className = saveButton.className + ' btn btn-default disabled';
-                saveButton.setAttribute('data-toggle','tooltip');
-                saveButton.setAttribute('title','Register or log in to save your code');
+                saveButton.setAttribute('data-toggle', 'tooltip');
+                saveButton.setAttribute('title', 'Register or log in to save your code');
                 edNode.appendChild(saveButton);
-                $jqTheme(saveButton).tooltip( {
+                $jqTheme(saveButton).tooltip({
                     'selector': '',
                     'placement': 'bottom'
                 });
 
                 var loadButton = document.createElement("input");
-                loadButton.setAttribute('type','button');
-                loadButton.setAttribute('value','Load');
+                loadButton.setAttribute('type', 'button');
+                loadButton.setAttribute('value', 'Load');
                 loadButton.className = loadButton.className + ' btn btn-default disabled';
-                loadButton.setAttribute('data-toggle','tooltip');
-                loadButton.setAttribute('title','Register or log in to load your saved code');
+                loadButton.setAttribute('data-toggle', 'tooltip');
+                loadButton.setAttribute('title', 'Register or log in to load your saved code');
                 edNode.appendChild(loadButton);
-                $jqTheme(loadButton).tooltip( {
+                $jqTheme(loadButton).tooltip({
                     'selector': '',
                     'placement': 'bottom'
                 });
@@ -726,7 +727,7 @@ function createActiveCode(divid,suppliedSource,sid,language) {
         }
         edNode.appendChild(document.createElement('br'));
         var newCanvas = edNode.appendChild(document.createElement("div"));
-        newCanvas.id = acblockid+"_canvas";
+        newCanvas.id = acblockid + "_canvas";
         newCanvas.height = 400;
         newCanvas.width = 400;
         newCanvas.style.border = '2px solid black';
@@ -736,12 +737,12 @@ function createActiveCode(divid,suppliedSource,sid,language) {
         newPre.className = "active_out";
 
         myLoad();
-        if (! suppliedSource ) {
+        if (!suppliedSource) {
             suppliedSource = '\n\n\n\n\n';
         }
-        if (! editor.getValue()) {
-            suppliedSource = suppliedSource.replace(new RegExp('%22','g'),'"');
-            suppliedSource = suppliedSource.replace(new RegExp('%27','g'),"'");
+        if (!editor.getValue()) {
+            suppliedSource = suppliedSource.replace(new RegExp('%22', 'g'), '"');
+            suppliedSource = suppliedSource.replace(new RegExp('%27', 'g'), "'");
             editor.setValue(suppliedSource);
         }
         editor.refresh()
@@ -777,12 +778,14 @@ function runit(myDiv, theButton, includes, suffix) {
     prog = prog + editor.getValue();
 
     var suffix;
-    suffix = $('#'+myDiv+'_suffix').text() || '';
+    suffix = $('#' + myDiv + '_suffix').text() || '';
 
     prog = prog + '\n' + suffix;
 
     var mypre = document.getElementById(myDiv + "_pre");
-    if (mypre) mypre.innerHTML = '';
+    if (mypre) {
+        mypre.innerHTML = '';
+    }
     Sk.canvas = myDiv + "_canvas";
     Sk.pre = myDiv + "_pre";
     var can = document.getElementById(Sk.canvas);
@@ -797,13 +800,13 @@ function runit(myDiv, theButton, includes, suffix) {
             Sk.tg.turtleList = [];
         }
     }
-    var timelimit = $("#"+myDiv).attr("time")
+    var timelimit = $("#" + myDiv).attr("time")
     // set execLimit in milliseconds  -- for student projects set this to
     // 25 seconds -- just less than Chrome's own timer.
     if (prog.indexOf('ontimer') > -1 ||
         prog.indexOf('onclick') > -1 ||
-        prog.indexOf('onkey') > -1  ||
-        prog.indexOf('setDelay') > -1 ) {
+        prog.indexOf('onkey') > -1 ||
+        prog.indexOf('setDelay') > -1) {
         Sk.execLimit = null;
     } else {
         if (timelimit === "off") {
@@ -815,18 +818,20 @@ function runit(myDiv, theButton, includes, suffix) {
         }
     }
     // configure Skulpt output function, and module reader
-    Sk.configure({output : outf,
-                  read   : builtinRead,
-                  python3: true,
-                  imageProxy : 'http://image.runestone.academy:8080/320x'
-                 });
+    Sk.configure({
+        output: outf,
+        read: builtinRead,
+        python3: true,
+        imageProxy: 'http://image.runestone.academy:8080/320x'
+    });
     var lang = document.getElementById(myDiv).lang;
     try {
-        if(lang === 'python') {
-            var myPromise = Sk.misceval.asyncToPromise(function() {
-                return Sk.importMainWithBody("<stdin>",false,prog,true);
+        if (lang === 'python') {
+            var myPromise = Sk.misceval.asyncToPromise(function () {
+                return Sk.importMainWithBody("<stdin>", false, prog, true);
             });
-            myPromise.then(function(mod) {}, function(err) {
+            myPromise.then(function (mod) {
+            }, function (err) {
                 logRunEvent({'div_id': myDiv, 'code': prog, 'errinfo': err.toString()}); // Log the run event
                 addErrorMessage(err, myDiv)
             });
@@ -834,10 +839,10 @@ function runit(myDiv, theButton, includes, suffix) {
             eval(prog);
         } else {
             // html
-            $('#'+myDiv+'_iframe').remove();
-            $('#'+myDiv+'_htmlout').show();
-            $('#'+myDiv+'_htmlout').append('<iframe class="activehtml" id="' + myDiv + '_iframe" srcdoc="' +
-                prog.replace(/"/g,"'") + '">' + '</iframe>');
+            $('#' + myDiv + '_iframe').remove();
+            $('#' + myDiv + '_htmlout').show();
+            $('#' + myDiv + '_htmlout').append('<iframe class="activehtml" id="' + myDiv + '_iframe" srcdoc="' +
+                prog.replace(/"/g, "'") + '">' + '</iframe>');
         }
         logRunEvent({'div_id': myDiv, 'code': prog, 'errinfo': 'success'}); // Log the run event
     } catch (e) {
@@ -933,7 +938,7 @@ function saveSuccess(data, status, whatever) {
             opts = {
                 'trigger': 'manual',
                 'placement': 'bottom',
-                'delay': { show: 100, hide: 500}
+                'delay': {show: 100, hide: 500}
             };
             save_btn.tooltip(opts);
             save_btn.tooltip('show');
@@ -951,7 +956,7 @@ function saveEditor(divName) {
     // get editor from div name
     var editor = cm_editors[divName + "_code"];
     var data = {acid: divName, code: editor.getValue()};
-    data.lang = $('#'+divName).attr('lang');
+    data.lang = $('#' + divName).attr('lang');
     $(document).ajaxError(function (e, jqhxr, settings, exception) {
         alert("Request Failed for" + settings.url)
     });
@@ -985,18 +990,20 @@ function loadEditor(data, status, whatever) {
         editor = cm_editors[res.acid + "_code"];
     }
 
-    var loadbtn = $("#"+res.acid+"_loadb");
+    var loadbtn = $("#" + res.acid + "_loadb");
     if (res.source) {
         editor.setValue(res.source);
-        loadbtn.tooltip({'placement': 'bottom',
-                         'title': "Loaded your saved code.",
-                         'trigger': 'manual'
-                        });
+        loadbtn.tooltip({
+            'placement': 'bottom',
+            'title': "Loaded your saved code.",
+            'trigger': 'manual'
+        });
     } else {
-        loadbtn.tooltip({'placement': 'bottom',
-                         'title': "No saved code.",
-                         'trigger': 'manual'
-                        });
+        loadbtn.tooltip({
+            'placement': 'bottom',
+            'title': "No saved code.",
+            'trigger': 'manual'
+        });
     }
     loadbtn.tooltip('show');
     setTimeout(function () {
@@ -1017,27 +1024,27 @@ function disableAcOpt() {
             $jqTheme(value).attr('title', 'Register or log in to use Code Coach');
         }
         $jqTheme(value).tooltip({
-                                    'selector': '',
-                                    'delay': { show: 100, hide: 50 },
-                                    'placement': 'bottom',
-                                    'animation': true
-                                });
+            'selector': '',
+            'delay': {show: 100, hide: 50},
+            'placement': 'bottom',
+            'animation': true
+        });
     });
 }
 
 /* Listen for changes to/addition of a div containing unittest results
-(which are generated by Skulpt) and add some nice styles to it*/
+ (which are generated by Skulpt) and add some nice styles to it*/
 function styleUnittestResults() {
     $(document).on("DOMNodeInserted", '.unittest-results', function (ev) {
         // select the target node
         var unittest_results_target = ev.target;
         // create an observer instance
-        var observer = new MutationObserver(function(mutations) {
-            $(mutations).each(function() {
+        var observer = new MutationObserver(function (mutations) {
+            $(mutations).each(function () {
                 if (this.type == "attributes") {
                     var target = $(this.target);
                     // apply the .alert classes
-                    if(target.text().indexOf("Fail") === -1) {
+                    if (target.text().indexOf("Fail") === -1) {
                         target.removeClass('alert-danger');
                         target.addClass('alert alert-success');
                     } else if (target.text().indexOf('Fail') >= 0) {
@@ -1048,19 +1055,19 @@ function styleUnittestResults() {
                     var paragraph = target.find('p');
                     var result_text = paragraph.text().split(" ");
                     var pct = '';
-                    $(result_text).each(function() {
+                    $(result_text).each(function () {
                         if (this.indexOf("%") !== -1) {
                             pct = this;
                             var html = 'You passed:' +
-                                       '<div class="progress unittest-results-progress">';
+                                '<div class="progress unittest-results-progress">';
                             if (pct == '100.0%') {
-                                html += '  <div class="progress-bar progress-bar-success" style="width:'+pct+';">';
+                                html += '  <div class="progress-bar progress-bar-success" style="width:' + pct + ';">';
                             } else {
-                                html += '  <div class="progress-bar progress-bar-warning" style="width:'+pct+';">';
+                                html += '  <div class="progress-bar progress-bar-warning" style="width:' + pct + ';">';
                             }
                             html += pct +
-                                    '  </div>' +
-                                    '</div>';
+                                '  </div>' +
+                                '</div>';
                             paragraph.html(html);
                         }
                     });
@@ -1068,11 +1075,13 @@ function styleUnittestResults() {
             });
         });
         // configuration of the observer:
-        var config = { attributes: true,
-                       attributeFilter: ['style'],
-                       childList: true,
-                       characterData: true,
-                       subtree: false };
+        var config = {
+            attributes: true,
+            attributeFilter: ['style'],
+            childList: true,
+            characterData: true,
+            subtree: false
+        };
         // pass in the target node, as well as the observer options
         observer.observe($(unittest_results_target).get(0), config);
     });
@@ -1084,9 +1093,12 @@ function createScratchActivecode() {
     // use the URL to assign a divid - each page should have a unique Activecode block id.
     // Remove everything from the URL but the course and page name
     var divid = document.URL.split('#')[0];
-    divid = divid.split('static')[1];
+    divid = divid.substr(divid.lastIndexOf('/')+1);
+    divid = eBookConfig.course + divid;
     divid = divid.split('?')[0];  // remove any query string (e.g ?lastPosition)
     divid = divid.replaceAll('/', '').replace('.html', '');
+    divid = divid.replaceAll(':','');
+    eBookConfig.scratchId = divid;
 
     // generate the HTML
     var html = '<div id="ac_modal_' + divid + '" class="modal fade">' +
@@ -1132,14 +1144,15 @@ function createScratchActivecode() {
         });
     });
 
-    $(document).bind('keypress', '\\', function(evt) {
+    $(document).bind('keypress', '\\', function (evt) {
         toggleScratchActivecode();
         return false;
     });
 }
 
 function toggleScratchActivecode() {
-    var divid = "ac_modal_" + document.URL.split('#')[0].split('static')[1].split('?')[0].replaceAll('/', '').replace('.html', '');
+//    var divid = "ac_modal_" + document.URL.split('#')[0].split('static')[1].split('?')[0].replaceAll('/', '').replace('.html', '');
+    var divid = "ac_modal_" + eBookConfig.scratchId;
     var div = $("#" + divid);
 
     div.modal('toggle');
@@ -1148,13 +1161,13 @@ function toggleScratchActivecode() {
 
 
 function hideCodelens(button, div_id) {
-    var div = document.getElementById(div_id+'_codelens_div')
-    div.style.display='none'
+    var div = document.getElementById(div_id + '_codelens_div')
+    div.style.display = 'none'
 
 }
 
 function injectCodelens(button, div_id) {
-    var div = document.getElementById(div_id+'_codelens_div')
+    var div = document.getElementById(div_id + '_codelens_div')
     if (div.style.display == 'none') {
         div.style.display = 'block';
         button.innerText = "Hide Codelens";
@@ -1164,8 +1177,8 @@ function injectCodelens(button, div_id) {
         return;
     }
 
-    var cl = document.getElementById(div_id+'_codelens')
-    if (cl ) {
+    var cl = document.getElementById(div_id + '_codelens')
+    if (cl) {
         div.removeChild(cl)
     }
     var editor = cm_editors[div_id + "_code"]
@@ -1175,9 +1188,9 @@ function injectCodelens(button, div_id) {
     myVars.origin = "opt-frontend.js"
     myVars.cumulative = false
     myVars.heapPrimitives = false
-    myVars.drawParentPointers=false
+    myVars.drawParentPointers = false
     myVars.textReferences = false
-    myVars.showOnlyOutputs=false
+    myVars.showOnlyOutputs = false
     myVars.rawInputLstJSON = JSON.stringify([])
     myVars.py = 2
     myVars.curInstr = 0
@@ -1186,19 +1199,19 @@ function injectCodelens(button, div_id) {
     var srcURL = '//pythontutor.com/iframe-embed.html'
     var embedUrlStr = $.param.fragment(srcURL, myVars, 2 /* clobber all */)
     var myIframe = document.createElement('iframe')
-    myIframe.setAttribute("id",div_id+'_codelens')
-    myIframe.setAttribute("width","800")
-    myIframe.setAttribute("height","500")
-    myIframe.setAttribute("style","display:block")
+    myIframe.setAttribute("id", div_id + '_codelens')
+    myIframe.setAttribute("width", "800")
+    myIframe.setAttribute("height", "500")
+    myIframe.setAttribute("style", "display:block")
     myIframe.style.background = '#fff'
     //myIframe.setAttribute("src",srcURL)
     myIframe.src = embedUrlStr
     div.appendChild(myIframe)
     logBookEvent({
-                     'event': 'codelens',
-                     'act': 'view',
-                     'div_id': div_id
-                 });
+        'event': 'codelens',
+        'act': 'view',
+        'div_id': div_id
+    });
 
 }
 
@@ -1210,29 +1223,29 @@ function injectCodeCoach(div_id) {
     var myIframe;
     var srcURL;
     var cl;
-    var div = document.getElementById(div_id+'_coach_div')
-    div.style.display='block'
-    cl = document.getElementById(div_id+'_coach')
-    if (cl ) {
+    var div = document.getElementById(div_id + '_coach_div')
+    div.style.display = 'block'
+    cl = document.getElementById(div_id + '_coach')
+    if (cl) {
         div.removeChild(cl)
     }
 
-    srcURL = eBookConfig.app + '/admin/diffviewer?divid='+div_id;
+    srcURL = eBookConfig.app + '/admin/diffviewer?divid=' + div_id;
     myIframe = document.createElement('iframe');
-    myIframe.setAttribute("id",div_id+'_coach');
-    myIframe.setAttribute("width","800px");
-    myIframe.setAttribute("height","500px");
-    myIframe.setAttribute("style","display:block");
+    myIframe.setAttribute("id", div_id + '_coach');
+    myIframe.setAttribute("width", "800px");
+    myIframe.setAttribute("height", "500px");
+    myIframe.setAttribute("style", "display:block");
     myIframe.style.background = '#fff';
     myIframe.style.width = "100%"
     //myIframe.setAttribute("src",srcURL)
     myIframe.src = srcURL;
     div.appendChild(myIframe);
     logBookEvent({
-                     'event': 'coach',
-                     'act': 'view',
-                     'div_id': div_id
-                 });
+        'event': 'coach',
+        'act': 'view',
+        'div_id': div_id
+    });
 }
 
 

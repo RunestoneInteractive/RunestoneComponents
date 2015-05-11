@@ -55,12 +55,12 @@ function comment(blockid) {
 }
 
 function sendGrade(grade, sid, acid, id) {
-    data = {'sid': sid, 'acid': acid, 'grade': grade, 'id': id};
+    var data = {'sid': sid, 'acid': acid, 'grade': grade, 'id': id};
     jQuery.get(eBookConfig.ajaxURL + 'savegrade', data);
 }
 
 function sendComment(comment, sid, acid, id) {
-    data = {'sid': sid, 'acid': acid, 'comment': comment, 'id': id};
+    var data = {'sid': sid, 'acid': acid, 'comment': comment, 'id': id};
     jQuery.get(eBookConfig.ajaxURL + 'savegrade', data);
 }
 
@@ -94,19 +94,18 @@ function gotUser(data, status, whatever) {
         if (!caughtErr) {
             mess = d.email;
             eBookConfig.isLoggedIn = true;
-			eBookConfig.cohortId = d.cohortId;
+            eBookConfig.cohortId = d.cohortId;
             addNavbarLoginLink(); // will change navbar login link to say 'Log Out'
             enableUserHighlights();
             timedRefresh();
         }
     }
-    x = $(".loggedinuser").html();
     $(".loggedinuser").html(mess);
     logBookEvent({
-                     'event': 'page',
-                     'act': 'view',
-                     'div_id': window.location.pathname
-                 })
+        'event': 'page',
+        'act': 'view',
+        'div_id': window.location.pathname
+    })
 }
 
 
@@ -117,8 +116,9 @@ function timedRefresh() {
         // if needed when they want to go to a particular page.  This may not be perfect
         // but its an easy way to make sure laptop users are properly logged in when they
         // take quizzes and save stuff.
-        if (location.href.indexOf('index.html') < 0)
+        if (location.href.indexOf('index.html') < 0) {
             location.href = eBookConfig.app + '/static/' + eBookConfig.course + '/index.html'
+        }
     });
     $.idleTimer(timeoutPeriod);
 }
@@ -126,8 +126,9 @@ function timedRefresh() {
 function shouldLogin() {
     var sli = true;
 
-    if (window.location.href.indexOf('file://') > -1)
+    if (window.location.href.indexOf('file://') > -1) {
         sli = false;
+    }
 
     return sli;
 }
@@ -144,7 +145,6 @@ function addUserToFooter() {
     if (shouldLogin()) {
         jQuery.get(eBookConfig.ajaxURL + 'getuser', null, gotUser)
     } else {
-        x = $(".footer").html();
         $(".footer").html(x + 'not logged in');
         disableAcOpt();
         logBookEvent({'event': 'page', 'act': 'view', 'div_id': window.location.pathname})
@@ -153,18 +153,17 @@ function addUserToFooter() {
 
 function addNavbarLoginLink() {
     if (isLoggedIn()) {
-		if (eBookConfig.cohortId == null || eBookConfig.cohortId ==""){
-			$('#joinGroupLink').show();
-			$('#groupScheduleLink').hide();
-			$('#newChapterLink').hide();
-			$('#manageGroupLink').hide();
-		}
-		else{
-			$('#joinGroupLink').hide();
-			$('#groupScheduleLink').show();
-			$('#newChapterLink').show();
-			$('#manageGroupLink').show();
-		}
+        if (eBookConfig.cohortId == null || eBookConfig.cohortId == "") {
+            $('#joinGroupLink').show();
+            $('#groupScheduleLink').hide();
+            $('#newChapterLink').hide();
+            $('#manageGroupLink').hide();
+        } else {
+            $('#joinGroupLink').hide();
+            $('#groupScheduleLink').show();
+            $('#newChapterLink').show();
+            $('#manageGroupLink').show();
+        }
         $('#profilelink').show();
         $('#passwordlink').show();
         $('#registerlink').hide();
@@ -197,26 +196,25 @@ function setNumUsers(data) {
 }
 
 
-
 var storage = {
-    set: function(directive, value) {
-        localStorage.setItem(directive+"_value", value);
-        localStorage.setItem(directive+"_timestamp", $.now());
+    set: function (directive, value) {
+        localStorage.setItem(directive + "_value", value);
+        localStorage.setItem(directive + "_timestamp", $.now());
     },
-    remove: function(directive) {
-        localStorage.removeItem(directive+"_value");
-        localStorage.removeItem(directive+"_timestamp");
+    remove: function (directive) {
+        localStorage.removeItem(directive + "_value");
+        localStorage.removeItem(directive + "_timestamp");
     },
-    get: function(directive) {
-        return localStorage.getItem(directive+"_value");
+    get: function (directive) {
+        return localStorage.getItem(directive + "_value");
     },
-    has: function(directive) {
-        return localStorage.getItem(directive+"_value") !== null;
+    has: function (directive) {
+        return localStorage.getItem(directive + "_value") !== null;
     },
     // Tests whether the server has the newer version
-    is_new: function(directive, server_time) {
-        var stored_time = localStorage.getItem(directive+"_timestamp");
-        return (server_time >= stored_time+5000);
+    is_new: function (directive, server_time) {
+        var stored_time = localStorage.getItem(directive + "_timestamp");
+        return (server_time >= stored_time + 5000);
     },
 };
 

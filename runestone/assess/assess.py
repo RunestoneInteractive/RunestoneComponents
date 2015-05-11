@@ -22,8 +22,6 @@ from .assessbase import Assessment
 from .multiplechoice import *
 from .textfield import *
 from .blankfill import *
-import json
-import random
 
 
 def setup(app):
@@ -124,33 +122,21 @@ class StartTimer(Directive):
             ...
             """
 
-        if not 'duration' in self.options:
-            TEMPLATE_START = '''
-
-
-
-
-
-                    <p id="output"></p>
-                    <div id="controls">
-                        <button class='btn btn-inverse' id ="start" onclick="start(30)">Start</button>
-                        <button class='btn btn-inverse' id ="pause" onclick="pause()">Pause</button>
-
-
-                    '''
         if 'duration' in self.options:
             TEMPLATE_START = '''
-
-
-
-
                     <div id="startWrapper">
                     <p id="output"></p>
                     </div>
                     <div id="controls" style="text-align: center;">
                         <button class='btn btn-inverse' id ="start" onclick="start()">Start</button>
                         <button class='btn btn-inverse' id ="pause" onclick="pause()">Pause</button>
-
+                    '''
+        else:
+            TEMPLATE_START = '''
+                    <p id="output"></p>
+                    <div id="controls">
+                        <button class='btn btn-inverse' id ="start" onclick="start(30)">Start</button>
+                        <button class='btn btn-inverse' id ="pause" onclick="pause()">Pause</button>
                     '''
 
         TEMPLATE_END = '''
@@ -160,10 +146,6 @@ class StartTimer(Directive):
             </script>
 
             </div>
-
-
-
-
             '''
 
         self.options['divid'] = self.arguments[0]
