@@ -247,3 +247,30 @@ function addDelay(directive, action, delay) {
     clearTimeout(timers[directive]);
     timers[directive] = setTimeout(action, delay);
 }
+
+
+
+// initialize stuff
+$(document).ready(addUserToFooter);
+$(document).ready(addNavbarLoginLink);
+$(document).ready(getNumUsers);
+$(document).ready(getOnlineUsers);
+
+// misc stuff
+// todo:  This could be further distributed but making a video.js file just for one function seems dumb.
+$(document).ready(function() {
+  // add the video play button overlay image
+  $(".video-play-overlay").each(function() {
+    $(this).css('background-image', "url(\'{{pathto('_static/play_overlay_icon.png', 1)}}\')")
+    });
+
+  // This function is needed to allow the dropdown search bar to work;
+  // The default behaviour is that the dropdown menu closes when something in
+  // it (like the search bar) is clicked
+  $(function() {
+    // Fix input element click problem
+    $('.dropdown input, .dropdown label').click(function(e) {
+      e.stopPropagation();
+      });
+  });
+});

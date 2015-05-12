@@ -36,3 +36,11 @@ function redrawAllVisualizerArrows() {
             allVisualizers[v].redrawConnectors();
     }
 }
+function styleButtons(divid) {
+    var myVis = $("#"+divid);
+    $(myVis).find("#jmpFirstInstr").addClass('btn btn-default');
+    $(myVis).find("#jmpStepBack").addClass('btn btn-danger');
+    $(myVis).find("#jmpStepFwd").addClass('btn btn-success');
+    $(myVis).find("#jmpLastInstr").addClass('btn btn-default');
+}
+

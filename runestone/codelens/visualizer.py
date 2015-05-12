@@ -82,6 +82,7 @@ $(document).ready(function() {
                                     lang : '%(python)s'
                                     });
         attachLoggers(%(divid)s_vis,'%(divid)s');
+        styleButtons('%(divid)s');
         allVisualizers.push(%(divid)s_vis);
     } catch (e) {
         console.log("Failed to Initialize CodeLens component %(divid)s_vis" );

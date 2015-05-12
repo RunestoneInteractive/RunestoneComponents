@@ -1249,3 +1249,6 @@ function injectCodeCoach(div_id) {
 }
 
 
+$(document).ready(createEditors);
+$(document).ready(createScratchActivecode);
+$(document).ready(styleUnittestResults);
