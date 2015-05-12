@@ -25,6 +25,9 @@
 
  */
 
+//
+// Logging functions
+//
 
 function logBookEvent(eventInfo) {
     eventInfo.course = eBookConfig.course;
@@ -40,6 +43,10 @@ function logRunEvent(eventInfo) {
     }
 }
 
+
+//
+// Grading functions
+//
 
 function comment(blockid) {
     $.modal('<iframe width="600" height="400" src="/getcomment?id=' + blockid + '" style="background-color: white">', {
@@ -63,6 +70,11 @@ function sendComment(comment, sid, acid, id) {
     var data = {'sid': sid, 'acid': acid, 'comment': comment, 'id': id};
     jQuery.get(eBookConfig.ajaxURL + 'savegrade', data);
 }
+
+//
+// User login and page decoration functions
+//
+
 
 function gotUser(data, status, whatever) {
     var mess = '';
@@ -196,6 +208,11 @@ function setNumUsers(data) {
 }
 
 
+//
+// Nice interface for localstore  -- Thanks acbart
+//
+//
+
 var storage = {
     set: function (directive, value) {
         localStorage.setItem(directive + "_value", value);
@@ -217,6 +234,10 @@ var storage = {
         return (server_time >= stored_time + 5000);
     },
 };
+
+//
+// delay function used by VT to autosave some component data
+//
 
 var timers = {};
 function addDelay(directive, action, delay) {
