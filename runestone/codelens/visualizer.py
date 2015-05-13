@@ -23,8 +23,9 @@ from .pg_logger import exec_script_str_local
 import json
 import six
 
+
 def setup(app):
-    app.add_directive('codelens',Codelens)
+    app.add_directive('codelens', Codelens)
     app.add_stylesheet('pytutor.css')
     app.add_stylesheet('modal-basic.css')
 
@@ -32,7 +33,7 @@ def setup(app):
     app.add_javascript('jquery.ba-bbq.min.js')
     app.add_javascript('jquery.jsPlumb-1.3.10-all-min.js')
     app.add_javascript('pytutor.js')
-
+    app.add_javascript('codelens.js')
 
 
 VIS = '''
@@ -81,6 +82,7 @@ $(document).ready(function() {
                                     lang : '%(python)s'
                                     });
         attachLoggers(%(divid)s_vis,'%(divid)s');
+        styleButtons('%(divid)s');
         allVisualizers.push(%(divid)s_vis);
     } catch (e) {
         console.log("Failed to Initialize CodeLens component %(divid)s_vis" );
@@ -147,14 +149,14 @@ class Codelens(Directive):
     required_arguments = 1
     optional_arguments = 1
     option_spec = {
-        'tracedata':directives.unchanged,
-        'caption':directives.unchanged,
-        'showoutput':directives.flag,
-        'question':directives.unchanged,
-        'correct':directives.unchanged,
-        'feedback':directives.unchanged,
-        'breakline':directives.nonnegative_int,
-        'python':directives.unchanged
+        'tracedata': directives.unchanged,
+        'caption': directives.unchanged,
+        'showoutput': directives.flag,
+        'question': directives.unchanged,
+        'correct': directives.unchanged,
+        'feedback': directives.unchanged,
+        'breakline': directives.nonnegative_int,
+        'python': directives.unchanged
     }
 
     has_content = True
@@ -165,15 +167,14 @@ class Codelens(Directive):
         self.JS_VARVAL = ""
 
         def raw_dict(input_code, output_trace):
-          ret = dict(code=input_code, trace=output_trace)
-          return ret
+            ret = dict(code=input_code, trace=output_trace)
+            return ret
 
         def js_var_finalizer(input_code, output_trace):
-          global JS_VARNAME
-          ret = dict(code=input_code, trace=output_trace)
-          json_output = json.dumps(ret, indent=None)
-          return "var %s = %s;" % (self.JS_VARNAME, json_output)
-
+            global JS_VARNAME
+            ret = dict(code=input_code, trace=output_trace)
+            json_output = json.dumps(ret, indent=None)
+            return "var %s = %s;" % (self.JS_VARNAME, json_output)
 
         self.options['divid'] = self.arguments[0]
         if self.content:
@@ -181,8 +182,8 @@ class Codelens(Directive):
         else:
             source = '\n'
 
-        CUMULATIVE_MODE=False
-        self.JS_VARNAME = self.options['divid']+'_trace'
+        CUMULATIVE_MODE = False
+        self.JS_VARNAME = self.options['divid'] + '_trace'
         if 'showoutput' not in self.options:
             self.options['embedded'] = 'true'  # to set embeddedmode to true
         else:
@@ -211,15 +212,15 @@ class Codelens(Directive):
             res += QUESTION
         if 'tracedata' in self.options:
             res += DATA
-        return [nodes.raw('',res % self.options,format='html')]
+        return [nodes.raw('', res % self.options, format='html')]
 
-    def inject_questions(self,curTrace):
+    def inject_questions(self, curTrace):
         if 'breakline' not in self.options:
             raise RuntimeError('Must have breakline option')
         breakline = self.options['breakline']
         for frame in curTrace['trace']:
             if frame['line'] == breakline:
                 frame['question'] = dict(text=self.options['question'],
-                                      correct = self.options['correct'],
-                                      div = self.options['divid']+'_modal',
-                                      feedback = self.options['feedback'] )
+                                         correct=self.options['correct'],
+                                         div=self.options['divid'] + '_modal',
+                                         feedback=self.options['feedback'])

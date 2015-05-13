@@ -692,6 +692,159 @@ function increment(){
 
 };
 
+function instructorMchoiceModal(data) {
+    // data.reslist -- student and their answers
+    // data.answerDict  -- answers and count
+    // data.correct - correct answer
+    var res = '<table><tr><th>Student</th><th>Answer(s)</th></tr>';
+    for (var i in data) {
+        res += '<tr><td>' + data[i][0] + '</td><td>' + data[i][1] + '</td></tr>';
+    }
+    res += '</table>';
+    return res;
+}
+
+function compareModal(data, status, whatever) {
+    var datadict = eval(data)[0];
+    var answers = datadict.answerDict;
+    var misc = datadict.misc;
+    var kl = Object.keys(answers).sort();
+
+    var body = '<table>';
+    body += '<tr><th>Answer</th><th>Percent</th></tr>';
+
+    var theClass= '';
+    for (var k in kl) {
+        if (kl[k] == misc.correct) {
+            theClass = 'success';
+        } else {
+            theClass = 'info';
+        }
+
+        body += '<tr><td>' + kl[k] + '</td><td class="compare-me-progress">';
+        pct = answers[kl[k]] + '%';
+        body += '<div class="progress">';
+        body += '  <div class="progress-bar progress-bar-' + theClass + '" style="width:'+pct+';">' + pct;
+        body += '  </div>';
+        body += '</div></td></tr>';
+    }
+    body += '</table>';
+
+    if (misc['yourpct'] !== 'unavailable') {
+        body += '<br /><p>You have ' + misc['yourpct'] + '% correct for all questions</p>';
+    }
+
+    if (datadict.reslist !== undefined) {
+        body += instructorMchoiceModal(datadict.reslist);
+    }
+
+    var html = '<div class="modal fade">' +
+        '  <div class="modal-dialog compare-modal">' +
+        '    <div class="modal-content">' +
+        '      <div class="modal-header">' +
+        '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
+        '        <h4 class="modal-title">Distribution of Answers</h4>' +
+        '      </div>' +
+        '      <div class="modal-body">' +
+        body +
+        '      </div>' +
+        '    </div>' +
+        '  </div>' +
+        '</div>';
+
+    el = $(html);
+    el.modal();
+}
+
+function compareAnswers(div_id) {
+    data = {};
+    data.div_id = div_id;
+    data.course = eBookConfig.course;
+    jQuery.get(eBookConfig.ajaxURL + 'getaggregateresults', data, compareModal);
+}
+
+function compareFITB(data, status, whatever) {
+    var answers = eval(data)[0];
+    var misc = eval(data)[1];
+
+    var body = '<table>';
+    body += '<tr><th>Answer</th><th>Count</th></tr>';
+
+    for (var row in answers) {
+        body += '<tr><td>' + answers[row].answer + '</td><td>' + answers[row].count + ' times</td></tr>';
+    }
+    body += '</table>';
+    if (misc['yourpct'] !== 'unavailable') {
+        body += '<br /><p>You have ' + misc['yourpct'] + '% correct for all questions</p>';
+    }
+
+    var html = '<div class="modal fade">' +
+        '  <div class="modal-dialog compare-modal">' +
+        '    <div class="modal-content">' +
+        '      <div class="modal-header">' +
+        '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
+        '        <h4 class="modal-title">Top Answers</h4>' +
+        '      </div>' +
+        '      <div class="modal-body">' +
+        body +
+        '      </div>' +
+        '    </div>' +
+        '  </div>' +
+        '</div>';
+    el = $(html);
+    el.modal();
+}
+
+function compareFITBAnswers(div_id) {
+    data = {};
+    data.div_id = div_id;
+    data.course = eBookConfig.course;
+    jQuery.get(eBookConfig.ajaxURL + 'gettop10Answers', data, compareFITB);
+}
+
+
+
+function showGradeSummary(data, status, whatever) {
+    var report = eval(data)[0];
+    // check for report['message']
+    if (report['grade']) {
+	body = "<h4>Grade Report</h4>" +
+               "<p>This assignment: " + report['grade'] + "</p>" +
+               "<p>" + report['comment'] + "</p>" +
+	       "<p>Number of graded assignments: " + report['count'] + "</p>" +
+	       "<p>Average score: " +  report['avg'] + "</p>"
+
+    } else {
+	body = "<h4>You must be Logged in to see your grade</h4>";
+    }
+    var html = '<div class="modal fade">' +
+        '  <div class="modal-dialog compare-modal">' +
+        '    <div class="modal-content">' +
+        '      <div class="modal-header">' +
+        '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
+        '        <h4 class="modal-title">Assignment Feedback</h4>' +
+        '      </div>' +
+        '      <div class="modal-body">' +
+        body +
+        '      </div>' +
+        '    </div>' +
+        '  </div>' +
+        '</div>';
+
+    el = $(html);
+    el.modal();
+
+
+}
+
+function createGradeSummary(div_id) {
+    // get grade and comments for this assignment
+    // get summary of all grades for this student
+    // display grades in modal window
+    var data = {'div_id':div_id}
+    jQuery.get(eBookConfig.ajaxURL + 'getassignmentgrade', data, showGradeSummary);
+
+}
 
 
 
