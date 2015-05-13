@@ -112,7 +112,7 @@
             <i class="glyphicon glyphicon-search" style='opacity:0.9;'></i>
           </a>
           <ul class='dropdown-menu'>
-            {% if 'overview' in course_id: %}
+            {% if 'overview' in course_id %}
                 <li><a href='/{{appname}}/static/{{course_id}}/overview.html'>Table of Contents</a></li>
             {% else: %}
                 <li><a href='{{ pathto(master_doc) }}'>Table of Contents</a></li>
