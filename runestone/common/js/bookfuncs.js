@@ -138,7 +138,7 @@ function timedRefresh() {
 function shouldLogin() {
     var sli = true;
 
-    if (window.location.href.indexOf('file://') > -1) {
+    if (window.location.href.indexOf('file://') > -1 || (! eBookConfig.useRunestoneServices) ) {
         sli = false;
     }
 
@@ -154,6 +154,7 @@ function isLoggedIn() {
 
 function addUserToFooter() {
     // test to see if online before doing this.
+    var x = "user ";
     if (shouldLogin()) {
         jQuery.get(eBookConfig.ajaxURL + 'getuser', null, gotUser)
     } else {
@@ -190,11 +191,15 @@ function addNavbarLoginLink() {
 
 
 function getNumUsers() {
-    $.getJSON(eBookConfig.ajaxURL + 'getnumusers', setNumUsers)
+    if (eBookConfig.useRunestoneServices) {
+        $.getJSON(eBookConfig.ajaxURL + 'getnumusers', setNumUsers)
+    }
 }
 
 function getOnlineUsers() {
-    $.getJSON(eBookConfig.ajaxURL + 'getnumonline', setOnlineUsers)
+    if (eBookConfig.useRunestoneServices) {
+        $.getJSON(eBookConfig.ajaxURL + 'getnumonline', setOnlineUsers)
+    }
 }
 
 function setOnlineUsers(data) {
