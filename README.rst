@@ -73,8 +73,9 @@ So, you would like to help out with developing the Runestone Components.  What d
 
 1.  Make a Fork of this repository.
 2.  Setup your environment on your development machine
+
     1.  Make a virtual environment for testing and working  I recommend pyvenv-3.4  as it is baked in to Python 3.4 and higher.
-    2.  Rather than following the instructions above for installing runestone simply run ``pip install . `` from the top level runestone directory.  This will install all of the required prerequisites and setup the runestone install as a link to the development directory.
+    2.  Rather than following the instructions above for installing runestone simply run ``pip install .`` from the top level runestone directory.  This will install all of the required prerequisites and setup the runestone install as a link to the development directory.
 
 3.  When you have some changes to share, make a Pull Request.
 
