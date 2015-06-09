@@ -1,6 +1,10 @@
 RunestoneComponents
 ===================
 
+.. image:: https://badges.gitter.im/Join%20Chat.svg
+   :alt: Join the chat at https://gitter.im/RunestoneInteractive/RunestoneComponents
+   :target: https://gitter.im/RunestoneInteractive/RunestoneComponents?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
 Packaging of the Runestone components for publishing educational materials using Sphinx and restructuredText. Check out the `Overview <http://interactivepython.org/runestone/static/overview/overview.html>`_ To see all of the extensions in action.
 **NOTE** -- If you have used an older version of this repo, please know this is a total restart.  I think much better, and it WILL stay up to date as this is now the master copy of the components not just a copy.
 Check out the `Development Roadmap <https://github.com/bnmnetp/runestone/wiki>`_ to get an understanding of our migration towards webcomponents.
