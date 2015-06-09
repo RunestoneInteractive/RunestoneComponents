@@ -18,7 +18,7 @@ __author__ = 'bmiller'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
-from .assessbase import *
+from assessbase import *
 import json
 import random
 
@@ -48,7 +48,7 @@ def depart_mc_node(self,node):
     feedbackStr = "["
     currFeedback = ""
     # Add all of the possible answers
-    okeys = list(node.mc_options.keys())
+    okeys = node.mc_options.keys()
     okeys.sort()
     for k in okeys:
         if 'answer_' in k:
@@ -135,9 +135,6 @@ class MChoiceMF(Assessment):
             </div>
             '''
         super(MChoiceMF,self).run()
-
-
-
 
         mcNode = MChoiceNode(self.options)
         mcNode.template_start = TEMPLATE_START
@@ -306,7 +303,7 @@ class MChoiceRandomMF(Assessment):
         feedbackStr = "["
         currFeedback = ""
         # Add all of the possible answers
-        okeys = list(self.options.keys())
+        okeys = self.options.keys()
         okeys.sort()
 
 
@@ -327,7 +324,7 @@ class MChoiceRandomMF(Assessment):
                 answ=answ+self.options[ansArr[i]]+"*separator*"
                 feed=feed+self.options["feedback_"+feedArray[i]]+"*separator*"
                 self.options['opi']=i+1
-                res += OPTION % self.options
+                res += OPTION % self.options 
             i=i+1
 
         # Store the Answer and Feedback arrays getting stuf answ array and feedback array and placing into options
@@ -353,9 +350,9 @@ class MChoiceRandomMF(Assessment):
         return [nodes.raw('',res , format='html')] #return the array with the results in HTML Directive format stuff and spits out in HTML
 
 ######################################################################################################
-#####Timed MChoiceMF
+#####exam MChoiceMF
 
-class timedMChoiceMF(Assessment):
+class examMChoiceMF(Assessment):
     required_arguments = 1
     optional_arguments = 1
     final_argument_whitespace = True
@@ -402,33 +399,45 @@ class timedMChoiceMF(Assessment):
         OPTION = '''
             <input type="radio" name="group1" value="%(alabel)s" id="%(divid)s_opt_%(alabel)s" />
             <label for= "%(divid)s_opt_%(alabel)s">  %(alabel)s) %(atext)s</label><br />
-            <div id= "%(divid)s_eachFeedback_%(alabel)s"></div>
+	        <div id= "%(divid)s_eachFeedback_%(alabel)s"></div>
             '''
 
         TEMPLATE_END = '''
 
             <script>
-            populateArrays('%(divid)s','%(correct)s',%(feedback)s);
-            $(document).ready(function(){checkTimedRadio('%(divid)s');});
+		    populateArrays('%(divid)s','%(correct)s',%(feedback)s);
+            $(document).ready(function(){checkExamRadio('%(divid)s');});
             </script>
-
-
+            
+ 
             </form><br />
             <div id="%(divid)s_feedback">
             </div>
             </div>
             '''
-        super(timedMChoiceMF,self).run();
+            
+        CLOCK = '''
+            <div class="timeTip" title=" "><img src="./_static/clock.png" style="width:15px;height:15px"></div>
+            '''
+            
+        FORM_START = '''<form name="%(divid)s_form" method="get" action="" onsubmit="return false;">'''
+        
+        FORM_START = CLOCK + FORM_START  
+
+        super(examMChoiceMF,self).run();
 
         mcNode = MChoiceNode(self.options)
         mcNode.template_start = TEMPLATE_START
-        mcNode.template_form_start = '''<div class="timeTip" title=" "><img src="../_static/clock.png" style="width:15px;height:15px"></div><form name="%(divid)s_form" method="get" action="" onsubmit="return false;">'''
+        mcNode.template_form_start = FORM_START
         mcNode.template_option = OPTION
         mcNode.template_end = TEMPLATE_END
 
         self.state.nested_parse(self.content, self.content_offset, mcNode)
 
         return [mcNode]
+        
 
 
 ######################################################################
+
+

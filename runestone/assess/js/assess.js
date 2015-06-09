@@ -240,8 +240,8 @@ var len = localStorage.length;
     return null;
 }
 
-var checkTimedRadio = function (divid) {
-    // This function repopulates a MCMF question with a user's previous answer,
+var checkExamRadio = function (divid) {
+    // This function repopulates an exam multiple-choice multiple feedback (MCMF) question with a user's previous answer,
     // which was previously stored into local storage
 
     var len = localStorage.length;
@@ -261,7 +261,7 @@ var checkTimedRadio = function (divid) {
 
 var tookTimedExam = function () {
 
-   $("#output").css({
+   $("#timeOutput").css({
 			'width': '50%',
 			'margin': '0 auto',
 			'background-color': '#DFF0D8',
@@ -289,7 +289,7 @@ var tookTimedExam = function () {
    var len = localStorage.length;
    var pageName = getPageName();
    if (len > 0) {
-      if (localStorage.getItem(eBookConfig.email + ":timedExam:" + pageName) !== null) 
+      if (localStorage.getItem(eBookConfig.email + ":examResult:" + pageName) !== null) 
          return 1;
       else return 0;
    }
@@ -389,6 +389,7 @@ var checkMCMAStorage = function (divid, expected, feedbackArray) {
         correctArray.length, givenArray.length, feedback);
 
     document.getElementById(divid + '_bcomp').disabled = false;
+    
 };
 
 var checkMCMFStorage = function (divid, expected, feedbackArray) {
@@ -435,7 +436,7 @@ function getPageName() {
 	return name;
 }
 
-function checkTimedMCMFStorage(){
+function checkExam() {
     var given;
     var divid;
     var feedback = null;
@@ -448,8 +449,13 @@ function checkTimedMCMFStorage(){
     var answer = " ";
 
     if(!taken) {
-	$('#pause').attr('disabled',true);
-	$('#finish').attr('disabled',true);
+	disableButtons();
+	done = 1;
+	
+	// reset flags and log the time
+	taken = 1;
+    running = 0;
+	localStorage.setItem(eBookConfig.email + ":examTime:" + getPageName(), time);
 	
 	// loop through the items in the divArray
     for (var j = 0; j<= divArray.length -1;j++){
@@ -507,21 +513,38 @@ function checkTimedMCMFStorage(){
 
     }
     
-    // show the results
-	var percent = (correct/numQuest)*100;
-	var wrong = numQuest - correct - skipped;
-	document.getElementById("results").innerHTML = "Num Correct: " + correct + " Num Wrong: " + wrong + " Num Skipped: " + skipped + " Percent Correct: " + percent + "%";
-	var result = correct + ";" + wrong + ";" + skipped;
-	logBookEvent({'event': 'timedExam', 'act': 'end:' + correct + ":" + wrong + ":" + skipped, 'div_id': getPageName()});
-	localStorage.setItem(eBookConfig.email + ":timedExamResult:" + getPageName(), result);
+    
+    // log the answers and save to local storage
+    logBookEvent({'event': 'exam', 'act': 'end:' + correct + ":" + wrong + ":" + skipped, 'div_id': getPageName()});
+    var wrong = numQuest - correct - skipped;
+    var result = correct + ";" + wrong + ";" + skipped;
+	localStorage.setItem(eBookConfig.email + ":examResult:" + getPageName(), result);
 	
-	taken = 1;
-    running = 0;
+    // show the results
+    if (showResult)
+    {
+       // show the results
+	   var percent = (correct/numQuest)*100;
+	   document.getElementById("results").innerHTML = "Num Correct: " + correct + " Num Wrong: " + wrong + " Num Skipped: " + skipped + " Percent Correct: " + percent + "%";
+	}
+	else
+	{
+	   $("#timed_Test").hide();
+	   document.getElementById("results").innerHTML = "The exam has been finished.  All answers were recorded.";
+	}
+	$("#results").show();
+	
+	
   } // end if !taken
   
 };
 
-function resetTimedMCMFStorage(){
+function displayStoredTime() {
+   time = localStorage.getItem(eBookConfig.email + ":examTime:" + getPageName());
+   showTime(time);
+};
+
+function resetExamMCMFStorage(){
     var given;
     var divid;
     var feedback = null;
@@ -542,48 +565,71 @@ function resetTimedMCMFStorage(){
 		    given = buttonObjs[i].value;
 		    expected = correctArray[j];
 		    feedback = feedbackArray[j][i];
+		    
 		    feedBackTimedMCMF('#' + divid + '_eachFeedback_' + op, given == expected, feedback);
 	     } // end for
 	    
     } // end for loop through divArray
     
     
-    var result = localStorage.getItem(eBookConfig.email + ":timedExamResult:" + getPageName());
+    var result = localStorage.getItem(eBookConfig.email + ":examResult:" + getPageName());
     if (result !== null)
     {
+       time = localStorage.getItem(eBookConfig.email + ":examTime:" + getPageName());
+       showTime(time);
        var resultArr = result.split(";");
        var correct = resultArr[0];
        var wrong = resultArr[1];
        var skipped = resultArr[2];
        var percent = correct / divArray.length * 100;
+       $("#results").show();
        document.getElementById("results").innerHTML = "Num Correct: " + correct + " Num Wrong: " + wrong + " Num Skipped: " + skipped + " Percent Correct: " + percent + "%";
     }
   
 };
 
-
 var feedBackTimedMCMF = function (divid, correct, feedbackText) {
-    if (correct) {
-        $(divid).html('Correct Answer.  ' + feedbackText);
-        $(divid).attr('class','alert alert-success');
+    if (showFeedback && showResult)
+    {
+       if (correct) {
+           $(divid).html('Correct Answer.  ' + feedbackText);
+           $(divid).attr('class','alert alert-success');
 	
-    } else {
-        if (feedbackText == null) {
+       } else {
+           if (feedbackText == null) {
             feedbackText = '';
-        }
-        $(divid).html("Incorrect Answer.  " + feedbackText);
-        $(divid).attr('class','alert alert-danger');
+           }
+           $(divid).html("Incorrect Answer.  " + feedbackText);
+           $(divid).attr('class','alert alert-danger');
+       }
     }
+};
+
+var disableButtons = function () {
+       $('#examButton').attr('disabled',true);
+	   $('#finish').attr('disabled',true);
+}
+
+var showAnswers = function () {
+        disableButtons();
+        displayStoredTime();
+        if (showResult)
+        {
+			resetExamMCMFStorage();
+			$("#timed_Test").show();
+		}
+		else
+		{
+		   $("#timed_Test").hide();
+		   document.getElementById("results").innerHTML = "The exam has been finished.  All answers were recorded.";
+		   $("#results").show();
+		}
 };
 
 var checkIfFinished = function () {
    if(tookTimedExam())
    {
-        $('#start').attr('disabled',true);
-		$('#pause').attr('disabled',true);
-		$('#finish').attr('disabled',true);
-		resetTimedMCMFStorage();
-		$("#timed_Test").show();
+       showAnswers();
 	}
 };
 
@@ -593,47 +639,45 @@ var running = 0;
 var done = 0;
 var taken = 0;
 
+function handleExamButtonClick(){
 
-function start(){
-
-	if(tookTimedExam() == 0){
-
-		$('#start').attr('disabled',true);
-		if(running == 0 && paused == 0){
-			running = 1;
-			$("#timed_Test").show();
-			//document.getElementById("button_show").innerHTML = "Currently Taking Timed Quiz";
-			increment();
-			var name = getPageName();
-	        logBookEvent({'event': 'timedExam', 'act': 'start', 'div_id': name});
-	        localStorage.setItem(eBookConfig.email + ":timedExam:" + name, "started");
-		}
-	} 
-};
-
-
-
-function pause(){
+    // if haven't finished
 	if(done == 0){
-		if(running == 1){
+	
+	   // if not started 
+	   if (running == 0 && paused == 0) {
+	      var pageName = getPageName();
+          logBookEvent({'event': 'exam', 'act': 'start', 'div_id': pageName});
+	      running = 1;
+	      updateTime();
+	      document.getElementById("examButton").innerHTML = "Pause";
+	      $("#timed_Test").show();
+	   }
+	   
+	   // if started (running) and not paused
+	   else if(running == 1 && paused == 0){
 			running = 0;
 			paused = 1;
 			//document.getElementById("button_show").innerHTML = "Timed Quiz Paused/Not Started";
-			document.getElementById("pause").innerHTML = "Resume";
+			document.getElementById("examButton").innerHTML = "Resume";
 			$("#timed_Test").hide();
 			
 
-		}else{
+		} 
+		
+		// if paused and not running
+		else if (paused == 1 && running == 0) {
 			running = 1;
 			paused = 0;
-			increment();
+			updateTime();
 			//document.getElementById("button_show").innerHTML = "Currently Taking Timed Quiz";
-			document.getElementById("pause").innerHTML = "Pause";
+			document.getElementById("examButton").innerHTML = "Pause";
 			$("#timed_Test").show();
 			
 		}
 	}
 };
+
 
 function getTime() {
         var mins = Math.floor(time/60);
@@ -651,6 +695,7 @@ function getTime() {
 function showTime(time){
 		var mins = Math.floor(time/60);
 		var secs = Math.floor(time) % 60;
+		var message = "Time ";
 		
 		if(mins<10){
 			mins = "0" + mins;
@@ -659,32 +704,43 @@ function showTime(time){
 			secs = "0" + secs;
 		}
 		
-		document.getElementById("output").innerHTML = "Time Remaining  " + mins + ":" + secs;
+		if (change < 0) {
+		   message = message + "Remaining ";
+	    }
+	    else {
+	       message = message + "Used ";
+	    }
+		
+		document.getElementById("timeOutput").innerHTML = message + mins + ":" + secs;
 		var timeTips = document.getElementsByClassName("timeTip");
 			for(var i = 0; i<= timeTips.length - 1; i++){
 				timeTips[i].title = mins + ":" + secs;
 		}
 }		
 		
-function increment(){
+function updateTime(){
 
     // if running (not paused) and not taken
 	if(running == 1 & !taken) {
 	
 		setTimeout(function() {
-		time--;
+		time = time + change;
 		showTime(time);
 		
-		   if(time>0){
-			  increment();
+		   if (change > 0) {
+		      updateTime();
+		   }
+		   
+		   else if (change < 0 && time > 0) {
+			  updateTime();
 			  
-			// ran out of time
-		   }else{
+		   // if ran out of time during a countdown
+		   } else if (change < 0 && time == 0){
 			   running = 0;
 			   done = 1;
 			
 			   if(taken == 0){
-			     checkTimedMCMFStorage();
+			     checkExam();
 			   }
 		  }
 		},1000);		
@@ -692,159 +748,6 @@ function increment(){
 
 };
 
-function instructorMchoiceModal(data) {
-    // data.reslist -- student and their answers
-    // data.answerDict  -- answers and count
-    // data.correct - correct answer
-    var res = '<table><tr><th>Student</th><th>Answer(s)</th></tr>';
-    for (var i in data) {
-        res += '<tr><td>' + data[i][0] + '</td><td>' + data[i][1] + '</td></tr>';
-    }
-    res += '</table>';
-    return res;
-}
-
-function compareModal(data, status, whatever) {
-    var datadict = eval(data)[0];
-    var answers = datadict.answerDict;
-    var misc = datadict.misc;
-    var kl = Object.keys(answers).sort();
-
-    var body = '<table>';
-    body += '<tr><th>Answer</th><th>Percent</th></tr>';
-
-    var theClass= '';
-    for (var k in kl) {
-        if (kl[k] == misc.correct) {
-            theClass = 'success';
-        } else {
-            theClass = 'info';
-        }
-
-        body += '<tr><td>' + kl[k] + '</td><td class="compare-me-progress">';
-        pct = answers[kl[k]] + '%';
-        body += '<div class="progress">';
-        body += '  <div class="progress-bar progress-bar-' + theClass + '" style="width:'+pct+';">' + pct;
-        body += '  </div>';
-        body += '</div></td></tr>';
-    }
-    body += '</table>';
-
-    if (misc['yourpct'] !== 'unavailable') {
-        body += '<br /><p>You have ' + misc['yourpct'] + '% correct for all questions</p>';
-    }
-
-    if (datadict.reslist !== undefined) {
-        body += instructorMchoiceModal(datadict.reslist);
-    }
-
-    var html = '<div class="modal fade">' +
-        '  <div class="modal-dialog compare-modal">' +
-        '    <div class="modal-content">' +
-        '      <div class="modal-header">' +
-        '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
-        '        <h4 class="modal-title">Distribution of Answers</h4>' +
-        '      </div>' +
-        '      <div class="modal-body">' +
-        body +
-        '      </div>' +
-        '    </div>' +
-        '  </div>' +
-        '</div>';
-
-    el = $(html);
-    el.modal();
-}
-
-function compareAnswers(div_id) {
-    data = {};
-    data.div_id = div_id;
-    data.course = eBookConfig.course;
-    jQuery.get(eBookConfig.ajaxURL + 'getaggregateresults', data, compareModal);
-}
-
-function compareFITB(data, status, whatever) {
-    var answers = eval(data)[0];
-    var misc = eval(data)[1];
-
-    var body = '<table>';
-    body += '<tr><th>Answer</th><th>Count</th></tr>';
-
-    for (var row in answers) {
-        body += '<tr><td>' + answers[row].answer + '</td><td>' + answers[row].count + ' times</td></tr>';
-    }
-    body += '</table>';
-    if (misc['yourpct'] !== 'unavailable') {
-        body += '<br /><p>You have ' + misc['yourpct'] + '% correct for all questions</p>';
-    }
-
-    var html = '<div class="modal fade">' +
-        '  <div class="modal-dialog compare-modal">' +
-        '    <div class="modal-content">' +
-        '      <div class="modal-header">' +
-        '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
-        '        <h4 class="modal-title">Top Answers</h4>' +
-        '      </div>' +
-        '      <div class="modal-body">' +
-        body +
-        '      </div>' +
-        '    </div>' +
-        '  </div>' +
-        '</div>';
-    el = $(html);
-    el.modal();
-}
-
-function compareFITBAnswers(div_id) {
-    data = {};
-    data.div_id = div_id;
-    data.course = eBookConfig.course;
-    jQuery.get(eBookConfig.ajaxURL + 'gettop10Answers', data, compareFITB);
-}
-
-
-
-function showGradeSummary(data, status, whatever) {
-    var report = eval(data)[0];
-    // check for report['message']
-    if (report['grade']) {
-	body = "<h4>Grade Report</h4>" +
-               "<p>This assignment: " + report['grade'] + "</p>" +
-               "<p>" + report['comment'] + "</p>" +
-	       "<p>Number of graded assignments: " + report['count'] + "</p>" +
-	       "<p>Average score: " +  report['avg'] + "</p>"
-
-    } else {
-	body = "<h4>You must be Logged in to see your grade</h4>";
-    }
-    var html = '<div class="modal fade">' +
-        '  <div class="modal-dialog compare-modal">' +
-        '    <div class="modal-content">' +
-        '      <div class="modal-header">' +
-        '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
-        '        <h4 class="modal-title">Assignment Feedback</h4>' +
-        '      </div>' +
-        '      <div class="modal-body">' +
-        body +
-        '      </div>' +
-        '    </div>' +
-        '  </div>' +
-        '</div>';
-
-    el = $(html);
-    el.modal();
-
-
-}
-
-function createGradeSummary(div_id) {
-    // get grade and comments for this assignment
-    // get summary of all grades for this student
-    // display grades in modal window
-    var data = {'div_id':div_id}
-    jQuery.get(eBookConfig.ajaxURL + 'getassignmentgrade', data, showGradeSummary);
-
-}
 
 
 
