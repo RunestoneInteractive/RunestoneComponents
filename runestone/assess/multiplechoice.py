@@ -417,7 +417,7 @@ class examMChoiceMF(Assessment):
             '''
             
         CLOCK = '''
-            <div class="timeTip" title=" "><img src="./_static/clock.png" style="width:15px;height:15px"></div>
+            <div class="timeTip" title=" "><img src="../_static/clock.png" style="width:15px;height:15px"></div>
             '''
             
         FORM_START = '''<form name="%(divid)s_form" method="get" action="" onsubmit="return false;">'''
