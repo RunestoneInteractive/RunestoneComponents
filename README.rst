@@ -1,6 +1,10 @@
 RunestoneComponents
 ===================
 
+.. image:: https://badges.gitter.im/Join%20Chat.svg
+   :alt: Join the chat at https://gitter.im/RunestoneInteractive/RunestoneComponents
+   :target: https://gitter.im/RunestoneInteractive/RunestoneComponents?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
 Packaging of the Runestone components for publishing educational materials using Sphinx and restructuredText. Check out the `Overview <http://interactivepython.org/runestone/static/overview/overview.html>`_ To see all of the extensions in action.
 **NOTE** -- If you have used an older version of this repo, please know this is a total restart.  I think much better, and it WILL stay up to date as this is now the master copy of the components not just a copy.
 Check out the `Development Roadmap <https://github.com/bnmnetp/runestone/wiki>`_ to get an understanding of our migration towards webcomponents.
@@ -16,6 +20,13 @@ If you are completely new to pip and github text editors, I have written a more 
 ::
 
     pip install runestone
+
+On some versions of pip that will fail and you need to use:
+
+::
+
+    pip install --pre runestone
+
 
 
 Or, if you prefer to live on the development edge, you can check out the very latest from:
@@ -57,6 +68,20 @@ The biggest pain is probably setting your PATH environment variable so you can s
 from the shell.  Please note that I am not a regular user of windows, I only test things on my VMWare
 installation every so often.  If you are new to using Python on windows I recommend you check out this
 link on `Using Python with Windows <https://docs.python.org/3.4/using/windows.html>`_
+
+
+Developing and Hacking
+----------------------
+
+So, you would like to help out with developing the Runestone Components.  What do you need to know?
+
+1.  Make a Fork of this repository.
+2.  Setup your environment on your development machine
+
+    1.  Make a virtual environment for testing and working  I recommend pyvenv-3.4  as it is baked in to Python 3.4 and higher.
+    2.  Rather than following the instructions above for installing runestone simply run ``pip install .`` from the top level runestone directory.  This will install all of the required prerequisites and setup the runestone install as a link to the development directory.
+
+3.  When you have some changes to share, make a Pull Request.
 
 
 Notes for more Advanced Users
