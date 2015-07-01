@@ -20,23 +20,25 @@ from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from .assessbase import Assessment
 from .multiplechoice import *
-from .blankfill import *
+from .fitb import *
 from .timedassessment import *
 
 
 def setup(app):
     app.add_directive('mchoice', MChoice)
     app.add_directive('fillintheblank', FillInTheBlank)
+    app.add_directive('blank', Blank)
     app.add_directive('addbutton', AddButton)
     app.add_directive('qnum', QuestionNumber)
-    app.add_directive('starttimed', StartTimed)
-    app.add_directive('endtimed', EndTimed)
+    app.add_directive('timed', TimedDirective)
 
-    app.add_javascript('timedAssess.js')
+    app.add_stylesheet('fitb.css')
+    app.add_javascript('assess.js')
 
-    app.add_node(timedNode, html=(visit_timed_node, depart_timed_node))
+    app.add_node(TimedNode, html=(visit_timed_node, depart_timed_node))
     app.add_node(MChoiceNode, html=(visit_mc_node, depart_mc_node))
     app.add_node(FITBNode, html=(visit_fitb_node, depart_fitb_node))
+    app.add_node(BlankNode, html=(visit_blank_node, depart_blank_node))
 
 
 

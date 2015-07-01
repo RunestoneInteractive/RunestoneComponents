@@ -131,16 +131,16 @@ class MChoice(Assessment):
             ...
             """
         TEMPLATE_START = '''
-            <ul data-component="multiplechoice" data-multipleanswers="%(multipleAnswers)s" %(random)s %(timed)s id="%(divid)s">
+            <ul data-component="multiplechoice" data-multipleanswers="%(multipleAnswers)s" %(random)s %(timed)s id="%(divid)s">%(bodytext)s
             '''
 
         OPTION = '''
             <li data-component="answer" %(is_correct)s id="%(divid)s_opt_%(alabel)s">%(atext)s</li><li data-component="feedback" id="%(divid)s_opt_%(alabel)s">%(feedtext)s</li>
             '''
-            
+
 
         TEMPLATE_END = '''
- 
+
             </ul>
             '''
 
@@ -154,6 +154,6 @@ class MChoice(Assessment):
         mcNode.template_option = OPTION
         mcNode.template_end = TEMPLATE_END
 
-        self.state.nested_parse(self.content, self.content_offset, mcNode)
+        #self.state.nested_parse(self.content, self.content_offset, mcNode)
 
         return [mcNode]
