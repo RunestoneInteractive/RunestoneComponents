@@ -27,7 +27,7 @@ Each 2 <code>li</code> answer/feedback pair represents a possible answer to the 
 
 <ul>
 	<li><code>data-component</code> identifies this as a multiple choice component</li>
-	<li><code>class</class> Standard CSS class options </li>
+	<li><code>class</code> Standard CSS class options </li>
 	<li><code>id</code> must be unique in the document</li>
 	<li><code>data-multipleanswers</code> REQUIRED Attribute.  Possible values are true and false.  Determines whether the question can take one or more answers on submission (radio vs checkbox).</li>
 	<li><code>data-random</code> Randomizes the order that the possible answers are displayed on the page</li>
@@ -66,39 +66,39 @@ Each regex,text <code>span</code> pair represents a point of feedback for incorr
 Multiple blanks can also be put into the same FITB question as shown here.
 
 <code><pre>
-<p data-component="fillintheblank" data-casei="false" data-timed id="fill1412" >
+	<p data-component="fillintheblank" data-casei="false" data-timed id="fill1412" >
 
-        <span data-blank>Give me a string that has an 'e' in it. Now.<span data-answer id="blank2_answer">e</span>
+	        <span data-blank>Give me a string that has an 'e' in it. Now.<span data-answer id="blank2_answer">e</span>
 
-	        <span data-feedback="regex" id="feedback1">f</span>
-		<span data-feedback="text" for="feedback1">Oops</span>
+		        <span data-feedback="regex" id="feedback1">f</span>
+			<span data-feedback="text" for="feedback1">Oops</span>
 
-        	<span data-feedback="regex" id="feedback2">.*</span>
-        	<span data-feedback="text" for="feedback2">There's no e there!</span>
+	        	<span data-feedback="regex" id="feedback2">.*</span>
+	        	<span data-feedback="text" for="feedback2">There's no e there!</span>
 
-        </span>
+	        </span>
 
-        <span data-blank>Gimme an f. Please.<span data-answer id="blank12_answer">f</span>
+	        <span data-blank>Gimme an f. Please.<span data-answer id="blank12_answer">f</span>
 
-	        <span data-feedback="regex" id="feedback3">e</span>
-	        <span data-feedback="text" for="feedback3">Wrong.</span>
+		        <span data-feedback="regex" id="feedback3">e</span>
+		        <span data-feedback="text" for="feedback3">Wrong.</span>
 
-	        <span data-feedback="regex" id="feedback4">.*</span>
-	        <span data-feedback="text" for="feedback4">There's no f in that string!</span>
-        </span>
+		        <span data-feedback="regex" id="feedback4">.*</span>
+		        <span data-feedback="text" for="feedback4">There's no f in that string!</span>
+	        </span>
 
-		<span data-blank>Show me 44!<span data-answer id="blank3_answer">44</span>
-	        <span data-feedback="regex" id="feedback5">1</span>
-	        <span data-feedback="text" for="feedback5">nope</span>
+			<span data-blank>Show me 44!<span data-answer id="blank3_answer">44</span>
+		        <span data-feedback="regex" id="feedback5">1</span>
+		        <span data-feedback="text" for="feedback5">nope</span>
 
-	        <span data-feedback="regex" id="feedback6">4</span>
-	        <span data-feedback="text" for="feedback6">close</span>
+		        <span data-feedback="regex" id="feedback6">4</span>
+		        <span data-feedback="text" for="feedback6">close</span>
 
-	        <span data-feedback="regex" id="feedback7">.*</span>
-	        <span data-feedback="text" for="feedback7">Sorry bro</span>
+		        <span data-feedback="regex" id="feedback7">.*</span>
+		        <span data-feedback="text" for="feedback7">Sorry bro</span>
 
-	 </span>
-</p>
+		 </span>
+	</p>
 </pre></code>
 
 <ul>
