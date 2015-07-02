@@ -64,7 +64,7 @@ def depart_mc_node(self,node):
             node.mc_options['alabel'] = label
             node.mc_options['atext'] = node.mc_options[k]
             currFeedback = "feedback_" + label
-            node.mc_options['feedtext'] = escapejs(node.mc_options[currFeedback])
+            node.mc_options['feedtext'] = node.mc_options[currFeedback]
             if label in node.mc_options['correct']:
                 node.mc_options["is_correct"] = "data-correct"
             else:
@@ -94,12 +94,12 @@ class MChoice(Assessment):
         'answer_c':directives.unchanged,
         'answer_d':directives.unchanged,
         'answer_e':directives.unchanged,
+        'correct':directives.unchanged,
         'feedback_a':directives.unchanged,
         'feedback_b':directives.unchanged,
         'feedback_c':directives.unchanged,
         'feedback_d':directives.unchanged,
         'feedback_e':directives.unchanged,
-        'iscode':directives.flag,
         'random':directives.flag,
         'multiple_answers':directives.flag,
         'timed':directives.flag
