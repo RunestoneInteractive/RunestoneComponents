@@ -1,6 +1,6 @@
 <h2>Multiple Choice</h2>
 
-<pre>
+<code>
 	<ul data-component="multiplechoice" data-multipleanswers="true" data-random id="question-1">
 		The Question can go right here.
 
@@ -20,7 +20,7 @@
 		<li data-component="feedback" for="1112">Feedback for Five</li>
 
 	</ul>
-</pre>
+</code>
 
 Here the <code>ul</code> tag represents the entire component to be rendered.  
 Each 2 <code>li</code> answer/feedback pair represents a possible answer to the question and the feedback to be provided if that answer is selected.
