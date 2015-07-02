@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-__author__ = 'bmiller'
+__author__ = 'isaiahmayerchak'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -26,6 +26,9 @@ def setup(app):
     app.add_javascript('bookfuncs.js')
     app.add_javascript('skulpt.min.js')
     app.add_javascript('skulpt-stdlib.js')
+    app.add_javascript('datafile.js')
+
+    app.add_stylesheet('datafile.css')
 
     app.add_node(DataFileNode, html=(visit_df_node, depart_df_node))
 
@@ -33,17 +36,11 @@ def setup(app):
     app.connect('env-purge-doc', purge_datafiles)
 
 
-PRE = '''
-<pre id="%(divid)s" style="display: %(hide)s;">
+TEMPLATE = """
+<pre data-lang="python" data-component="datafile" id=%(divid)s %(hidden)s data-edit="%(edit)s" data-rows="%(rows)s" data-cols="%(cols)s">
 %(filecontent)s
-</pre>
-'''
-
-TEXTA = '''
-<textarea id="%(divid)s" rows="%(rows)d" cols="%(cols)d">
-%(filecontent)s
-</textarea>
-'''
+ </pre>
+"""
 
 class DataFileNode(nodes.General, nodes.Element):
     def __init__(self,content):
@@ -59,10 +56,7 @@ class DataFileNode(nodes.General, nodes.Element):
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
 def visit_df_node(self,node):
-    if node.df_content['edit'] == True:
-        res = TEXTA
-    else:
-        res = PRE
+    res = TEMPLATE
     res = res % node.df_content
 
     res = res.replace("u'","'")  # hack:  there must be a better way to include the list and avoid unicode strings
@@ -87,7 +81,7 @@ def purge_datafiles(app,env,docname):
 
 class DataFile(Directive):
     required_arguments = 1
-    optional_arguments = 2
+    optional_arguments = 0
     has_content = True
     option_spec = {
         'hide':directives.flag,
@@ -97,33 +91,51 @@ class DataFile(Directive):
     }
 
     def run(self):
+        """
+            process the multiplechoice directive and generate html for output.
+            :param self:
+            :return:
+            .. datafile:: identifier
+                :edit: Option that makes the datafile editable
+                :cols: If editable, number of columns--default is 20
+                :rows: If editable, number of rows--default is 40
+                :hide: Flag that sets a non-editable datafile to be hidden
+        """
         env = self.state.document.settings.env
 
         if not hasattr(env,'datafilecounter'):
             env.datafilecounter = 0
         env.datafilecounter += 1
-        
-        if 'cols' not in self.options:
+
+        #if 'cols' not in self.options:
+        #    self.options['cols'] = min(65,max([len(x) for x in self.content]))
+        #if 'rows'not in self.options:
+        #    self.options['rows'] = 20
+
+        if 'cols' in self.options:
+            self.options['cols'] = self.options['cols']
+        else:
             self.options['cols'] = min(65,max([len(x) for x in self.content]))
-        if 'rows'not in self.options:
+        if 'rows' in self.options:
+            self.options['rows'] = self.options['rows']
+        else:
             self.options['rows'] = 20
-        
+
         self.options['divid'] = self.arguments[0]
         if self.content:
             source = "\n".join(self.content)
         else:
             source = '\n'
         self.options['filecontent'] = source
-        
-        if 'hide' not in self.options:
-            self.options['hide'] = 'block'
-        else:
-            self.options['hide'] = 'none'
-            
-        if 'edit' not in self.options:
-            self.options['edit'] = False
-        else:
-            self.options['edit'] = True
-        
-        return [DataFileNode(self.options)]
 
+        if 'hide' in self.options:
+            self.options['hidden'] = 'data-hidden'
+        else:
+            self.options['hidden'] = ''
+
+        if 'edit' in self.options:
+            self.options['edit'] = "true"
+        else:
+            self.options['edit'] = "false"
+
+        return [DataFileNode(self.options)]
