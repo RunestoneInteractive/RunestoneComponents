@@ -1,26 +1,23 @@
 <h2>Multiple Choice</h2>
 
-<code>
-	<ul data-component="multiplechoice" data-multipleanswers="true" data-random id="question-1">
-		The Question can go right here.
+		<ul data-component="multiplechoice" data-multipleanswers="true" data-random id="question-1">
+			The Question can go right here.
 
-		<li data-component="answer" id="123" >Answer One</li>
-		<li data-component="feedback" for="123">Feedback for One</li>
+			<li data-component="answer" id="123" >Answer One</li>
+			<li data-component="feedback" for="123">Feedback for One</li>
 
-		<li data-component="answer" id="456">Answer Two</li>
-		<li data-component="feedback" for="456">Feedback for Two</li>
+			<li data-component="answer" id="456">Answer Two</li>
+			<li data-component="feedback" for="456">Feedback for Two</li>
 
-		<li data-component="answer" id="789" data-correct>Answer Three</li>
-		<li data-component="feedback" for="789">Feedback for Three</li>
+			<li data-component="answer" id="789" data-correct>Answer Three</li>
+			<li data-component="feedback" for="789">Feedback for Three</li>
 
-		<li data-component="answer" id="1011" data-correct>Answer Four</li>
-		<li data-component="feedback" for="1011">Feedback for Four</li>
+			<li data-component="answer" id="1011" data-correct>Answer Four</li>
+			<li data-component="feedback" for="1011">Feedback for Four</li>
 
-		<li data-component="answer" id="1112" data-correct>Answer Five</li>
-		<li data-component="feedback" for="1112">Feedback for Five</li>
-
-	</ul>
-</code>
+			<li data-component="answer" id="1112" data-correct>Answer Five</li>
+			<li data-component="feedback" for="1112">Feedback for Five</li>
+		</ul>
 
 Here the <code>ul</code> tag represents the entire component to be rendered.  
 Each 2 <code>li</code> answer/feedback pair represents a possible answer to the question and the feedback to be provided if that answer is selected.
@@ -42,21 +39,17 @@ Each 2 <code>li</code> answer/feedback pair represents a possible answer to the 
 
 <h2>Fill In the Blank</h2>
 
-<pre>
-	<p data-component="fillintheblank" data-casei="false" id="fill1412" >
+		<p data-component="fillintheblank" data-casei="false" id="fill1412" >
+	        <span data-blank>Without using the activecode infixToPostfix function, convert the following expression to postfix <code>10 + 3 * 5 / (16 - 4)</code>
+				<span data-answer id="blank2_answer">\\b10\\s+3\\s+5\\s*\\*\\s*16\\s+4\\s*-\\s*/\\s*\\+</span>
 
-        <span data-blank>Without using the activecode infixToPostfix function, convert the following expression to postfix <code>10 + 3 * 5 / (16 - 4)</code><span data-answer id="blank2_answer">\\b10\\s+3\\s+5\\s*\\*\\s*16\\s+4\\s*-\\s*/\\s*\\+</span>
+		        <span data-feedback="regex" id="feedback1">10.*3.*5.*16.*4</span>
+		        <span data-feedback="text" for="feedback1">The numbers appear to be in the correct order check your operators</span>
 
-        <span data-feedback="regex" id="feedback1">10.*3.*5.*16.*4</span>
-        <span data-feedback="text" for="feedback1">The numbers appear to be in the correct order check your operators</span>
-
-        <span data-feedback="regex" id="feedback2">.*</span>
-        <span data-feedback="text" for="feedback2">Remember the numbers will be in the same order as the original equation</span>
-
-	</span>
-
-	</p>
-</pre>
+		        <span data-feedback="regex" id="feedback2">.*</span>
+		        <span data-feedback="text" for="feedback2">Remember the numbers will be in the same order as the original equation</span>
+			</span>
+		</p>
 
 Here the <code>p</code> tag represents the entire component.
 The <code>data-blank</code><code>span</code>Holds the question text.
@@ -65,21 +58,17 @@ Each regex,text <code>span</code> pair represents a point of feedback for incorr
 
 Multiple blanks can also be put into the same FITB question as shown here.
 
-<pre>
-	<p data-component="fillintheblank" data-casei="false" data-timed id="fill1412" >
+		<p data-component="fillintheblank" data-casei="false" data-timed id="fill1412" >
 
 	        <span data-blank>Give me a string that has an 'e' in it. Now.<span data-answer id="blank2_answer">e</span>
-
 		        <span data-feedback="regex" id="feedback1">f</span>
-			<span data-feedback="text" for="feedback1">Oops</span>
+				<span data-feedback="text" for="feedback1">Oops</span>
 
 	        	<span data-feedback="regex" id="feedback2">.*</span>
 	        	<span data-feedback="text" for="feedback2">There's no e there!</span>
-
 	        </span>
 
 	        <span data-blank>Gimme an f. Please.<span data-answer id="blank12_answer">f</span>
-
 		        <span data-feedback="regex" id="feedback3">e</span>
 		        <span data-feedback="text" for="feedback3">Wrong.</span>
 
@@ -96,71 +85,65 @@ Multiple blanks can also be put into the same FITB question as shown here.
 
 		        <span data-feedback="regex" id="feedback7">.*</span>
 		        <span data-feedback="text" for="feedback7">Sorry bro</span>
-
-		 </span>
-	</p>
-</pre>
+			</span>
+		</p>
 
 <ul>
-	<ul><code>data-casei</code> Determines if the answer is case insensitive</li>
-	<ul><code>id</code> Must be unique in the document</li>
-	<ul><code>timed</code> Required for a FITB component inside of a timed assessment</li>
+	<li><code>data-casei</code> Determines if the answer is case insensitive</li>
+	<li><code>id</code> Must be unique in the document</li>
+	<li><code>timed</code> Required for a FITB component inside of a timed assessment</li>
 
 </ul>
 
 <h2>Timed</h2>
 
-<pre>
-	<ul data-component="timedAssessment" data-time id="timed_1">
-		<ul data-component="multiplechoice"  data-multipleanswers="true" data-timed data-random id="question_1">
-			The Question can go right here.
-			<li data-component="answer" id="123" >Answer One</li>
-			<li data-component="feedback" for="123">Feedback for One</li>
+		<ul data-component="timedAssessment" data-time id="timed_1">
+			<ul data-component="multiplechoice"  data-multipleanswers="true" data-timed data-random id="question_1">
+				The Question can go right here.
+				<li data-component="answer" id="123" >Answer One</li>
+				<li data-component="feedback" for="123">Feedback for One</li>
 
-			<li data-component="answer" id="456">Answer Two</li>
-			<li data-component="feedback" for="456">Feedback for Two</li>
+				<li data-component="answer" id="456">Answer Two</li>
+				<li data-component="feedback" for="456">Feedback for Two</li>
 
-			<li data-component="answer" id="789" data-correct>Answer Three</li>
-			<li data-component="feedback" for="789">Feedback for Three</li>
-		</ul>
+				<li data-component="answer" id="789" data-correct>Answer Three</li>
+				<li data-component="feedback" for="789">Feedback for Three</li>
+			</ul>
 
-		<ul data-component="multiplechoice" data-timed id="question_2">
-			The Question can go right here.
-			<li data-component="answer" id="123" >Answer One</li>
-			<li data-component="feedback" for="123">Feedback for One</li>
+			<ul data-component="multiplechoice" data-timed id="question_2">
+				The Question can go right here.
+				<li data-component="answer" id="123" >Answer One</li>
+				<li data-component="feedback" for="123">Feedback for One</li>
 
-			<li data-component="answer" id="456">Answer Two</li>
-			<li data-component="feedback" for="456">Feedback for Two</li>
+				<li data-component="answer" id="456">Answer Two</li>
+				<li data-component="feedback" for="456">Feedback for Two</li>
 
-			<li data-component="answer" id="789" data-correct>Answer Three</li>
-			<li data-component="feedback" for="789">Feedback for Three</li>
-		</ul>
+				<li data-component="answer" id="789" data-correct>Answer Three</li>
+				<li data-component="feedback" for="789">Feedback for Three</li>
+			</ul>
 
-	<p data-component="fillintheblank" data-casei="false" data-timed id="fill1412" >
+			<p data-component="fillintheblank" data-casei="false" data-timed id="fill1412" >
 
-			<span data-blank>Give me a string that has an 'e' in it. Now.<span data-answer id="blank2_answer">e</span>
+				<span data-blank>Give me a string that has an 'e' in it. Now.<span data-answer id="blank2_answer">e</span>
 
-			<span data-feedback="regex" id="feedback1">f</span>
-			<span data-feedback="text" for="feedback1">Oops</span>
+				<span data-feedback="regex" id="feedback1">f</span>
+				<span data-feedback="text" for="feedback1">Oops</span>
 
-			<span data-feedback="regex" id="feedback2">.*</span>
-			<span data-feedback="text" for="feedback2">There's no e there!</span>
+				<span data-feedback="regex" id="feedback2">.*</span>
+				<span data-feedback="text" for="feedback2">There's no e there!</span>
 
-			</span>
-
-
+				</span>
 			</p>
-	</ul>
-</pre>
+		</ul>
 
 Here the outermost <code>ul</code> tag marks the timed element, and the tags inside represent the questions in the timed assessment.
 
 Currently only 1 timed assessment is allowed per page.
 
 <ul>
-	<ul><code>data-time</code> Can either be set equal to the time limit for the assessment in minutes or left blank, in which case the assessment will keep track of how long it takes to complete the assessment.</li>
-	<ul><code>id</code> Must be unique in the document</li>
-	<ul><code>data-no-result</code> If present, it won't display the score to the user after the assessment is finished</li>
-	<ul><code>data-no-feedback</code> If present, feedback won't be displayed.</li>
+	<li><code>data-time</code> Can either be set equal to the time limit for the assessment in minutes or left blank, in which case the assessment will keep track of how long it takes to complete the assessment.</li>
+	<li><code>id</code> Must be unique in the document</li>
+	<li><code>data-no-result</code> If present, it won't display the score to the user after the assessment is finished</li>
+	<li><code>data-no-feedback</code> If present, feedback won't be displayed.</li>
 
 </ul>
