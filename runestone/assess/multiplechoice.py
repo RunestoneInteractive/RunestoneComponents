@@ -94,7 +94,6 @@ class MChoice(Assessment):
         'answer_c':directives.unchanged,
         'answer_d':directives.unchanged,
         'answer_e':directives.unchanged,
-        'correct':directives.unchanged,
         'feedback_a':directives.unchanged,
         'feedback_b':directives.unchanged,
         'feedback_c':directives.unchanged,
@@ -115,7 +114,6 @@ class MChoice(Assessment):
             :multiple_answers: boolean
             :random: boolean
             :timed: boolean
-            :iscode: boolean
             :answer_a: possible answer  -- what follows _ is label
             :answer_b: possible answer
             ...

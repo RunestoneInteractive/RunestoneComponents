@@ -1,6 +1,6 @@
 <h2>Multiple Choice</h2>
 
-<code><pre>
+<pre>
 	<ul data-component="multiplechoice" data-multipleanswers="true" data-random id="question-1">
 		The Question can go right here.
 
@@ -20,7 +20,7 @@
 		<li data-component="feedback" for="1112">Feedback for Five</li>
 
 	</ul>
-</pre></code>
+</pre>
 
 Here the <code>ul</code> tag represents the entire component to be rendered.  
 Each 2 <code>li</code> answer/feedback pair represents a possible answer to the question and the feedback to be provided if that answer is selected.
@@ -42,7 +42,7 @@ Each 2 <code>li</code> answer/feedback pair represents a possible answer to the 
 
 <h2>Fill In the Blank</h2>
 
-<code><pre>
+<pre>
 	<p data-component="fillintheblank" data-casei="false" id="fill1412" >
 
         <span data-blank>Without using the activecode infixToPostfix function, convert the following expression to postfix <code>10 + 3 * 5 / (16 - 4)</code><span data-answer id="blank2_answer">\\b10\\s+3\\s+5\\s*\\*\\s*16\\s+4\\s*-\\s*/\\s*\\+</span>
@@ -56,7 +56,7 @@ Each 2 <code>li</code> answer/feedback pair represents a possible answer to the 
 	</span>
 
 	</p>
-</pre></code>
+</pre>
 
 Here the <code>p</code> tag represents the entire component.
 The <code>data-blank</code><code>span</code>Holds the question text.
@@ -65,7 +65,7 @@ Each regex,text <code>span</code> pair represents a point of feedback for incorr
 
 Multiple blanks can also be put into the same FITB question as shown here.
 
-<code><pre>
+<pre>
 	<p data-component="fillintheblank" data-casei="false" data-timed id="fill1412" >
 
 	        <span data-blank>Give me a string that has an 'e' in it. Now.<span data-answer id="blank2_answer">e</span>
@@ -99,7 +99,7 @@ Multiple blanks can also be put into the same FITB question as shown here.
 
 		 </span>
 	</p>
-</pre></code>
+</pre>
 
 <ul>
 	<ul><code>data-casei</code> Determines if the answer is case insensitive</li>
@@ -110,7 +110,7 @@ Multiple blanks can also be put into the same FITB question as shown here.
 
 <h2>Timed</h2>
 
-<code><pre>
+<pre>
 	<ul data-component="timedAssessment" data-time id="timed_1">
 		<ul data-component="multiplechoice"  data-multipleanswers="true" data-timed data-random id="question_1">
 			The Question can go right here.
@@ -151,7 +151,7 @@ Multiple blanks can also be put into the same FITB question as shown here.
 
 			</p>
 	</ul>
-</pre></code>
+</pre>
 
 Here the outermost <code>ul</code> tag marks the timed element, and the tags inside represent the questions in the timed assessment.
 
