@@ -171,7 +171,7 @@ var tour = function (divid, audio_type, bcount) {
     $('#status').html("Starting the " + name);
 
     //log tour type to db
-    logBookEvent({'event': 'Audio', 'tour type': name, 'div_id': divid});
+    logBookEvent({'event': 'Audio', 'act': name, 'div_id': divid});
 
     var max = atype.length;
     var str = "";
@@ -229,7 +229,7 @@ var firstAudio = function () {
     handlePlaying();
 
     //log change to db
-    logBookEvent({'event': 'Audio', 'change': 'first', 'div_id': theDivid});
+    logBookEvent({'event': 'Audio', 'act': 'first', 'div_id': theDivid});
 
 
     // move to the first audio
@@ -249,7 +249,7 @@ var prevAudio = function () {
         handlePlaying();
 
         //log change to db
-        logBookEvent({'event': 'Audio', 'change': 'prev', 'div_id': theDivid});
+        logBookEvent({'event': 'Audio', 'act': 'prev', 'div_id': theDivid});
 
 
         // move to previous to the current (but the current index has moved to the next)
@@ -267,7 +267,7 @@ var nextAudio = function () {
     handlePlaying();
 
     //log change to db
-    logBookEvent({'event': 'Audio', 'change': 'next', 'div_id': theDivid});
+    logBookEvent({'event': 'Audio', 'act': 'next', 'div_id': theDivid});
 
     // if not at the end
     if (currIndex < (len - 1)) {
@@ -286,7 +286,7 @@ var lastAudio = function () {
     handlePlaying();
 
     //log change to db
-    logBookEvent({'event': 'Audio', 'change': 'last', 'div_id': theDivid});
+    logBookEvent({'event': 'Audio', 'act': 'last', 'div_id': theDivid});
 
     // move to the last audio
     currIndex = len - 1;
@@ -359,6 +359,7 @@ var outerAudio = function () {
 
 // play the audio now that it is ready
 var playWhenReady = function (afile, divid, ahash) {
+
     // unbind current
     $('#' + afile).unbind('canplaythrough');
     //console.log("in playWhenReady " + elem.duration);
@@ -383,15 +384,16 @@ var playaudio = function (i, aname, divid, ahash) {
     // if this isn't ready to play yet - no duration yet then wait
     //console.log("in playaudio " + elem.duration);
     if (isNaN(elem.duration) || elem.duration == 0) {
+
         // set the status
-        $('#status').html("Loading audio.  Please wait.");
+        $('#status').html("Loading audio.  Please wait.  If it doesn't start soon close this window (click on the red X) and try again");
         $('#' + afile).bind('canplaythrough', function () {
-            playWhenReady(afile, divid, ahash);
+             playWhenReady(afile, divid, ahash);
         });
     }
     // otherwise it is ready so play it
     else {
-        playWhenReady(afile, divid, ahash);
+      playWhenReady(afile, divid, ahash);
     }
 };
 
@@ -407,7 +409,7 @@ var pauseAndPlayAudio = function () {
         document.getElementById("pause_audio").src = "../_static/pause.png";
         document.getElementById("pause_audio").title = "Pause current audio";
         //log change to db
-        logBookEvent({'event': 'Audio', 'change': 'play', 'div_id': theDivid});
+        logBookEvent({'event': 'Audio', 'act': 'play', 'div_id': theDivid});
     }
 
     // if audio was playing pause it
@@ -416,7 +418,7 @@ var pauseAndPlayAudio = function () {
         document.getElementById("pause_audio").src = "../_static/play.png";
         document.getElementById("pause_audio").title = "Play paused audio";
         //log change to db
-        logBookEvent({'event': 'Audio', 'change': 'pause', 'div_id': theDivid});
+        logBookEvent({'event': 'Audio', 'act': 'pause', 'div_id': theDivid});
     }
 
 };
