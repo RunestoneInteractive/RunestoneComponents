@@ -279,20 +279,19 @@ next line executed.
 Timed Exam Questions
 ---------------------
 
-You can add a timed exam of multiple-choice questions that the user can only take once.  All the feedback will be shown after the time is up or after the user has clicked the "Submit Answers" button at the end of the timed exam.  To start the timed exam click on the "Start" button.  This will also start the countdown of the time remaining.  You can pause the timer by clicking on the "Pause" button and start it again by clicking on the "Resume" button.  When you pause the timed exam the questions will be hidden.  There is also a clock icon that will display the time remaining when the reader hovers over it.  
+You can add a timed exam of multiple-choice questions that the user can only take once. You can specify the maximum duration of the exam in minutes and it will display the time remaining.  If you don't include a duration it will keep track of the amount of time used and give the user unlimited time to finish the exam.   To start the exam click on the "Start" button.  You can pause the time by clicking on the "Pause" button and start it again by clicking on the "Resume" button.  When you pause the exam the questions will be hidden.  There is also a clock icon that will display the time remaining if it is a timed exam and the time used otherwise when the reader hovers over it.  
 
-Please note that you can currently only have one timed exam per html page.
+Please note that you can currently only have one timed exam per html page.  By default the feedback will be shown after the user clicks the "Submit Answer" button or also after the time runs out for an exam with a specified duration. 
 
-It currently needs at least 4 directives to function: starttimer, revealquestions, timedmchoicemf, and finishtimer.  You can have as many timedmchoicemf as you want.  The time is specified in minutes using the :duration option in starttimer.  
+It currently needs at least 3 directives to function: startexam,  exammchoicemf, and finishexam.  You can have as many exammchoicemf as you want.  
 
-.. starttimer:: Start
-    :duration: 38
 
-.. revealquestions:: timed_Test
+.. startexam:: timed_Test
     :showtitle: Timed Exam Paused or Not Started
     :hidetitle: Currently Taking Timed Exam
-    
-    .. timedmchoicemf:: te_1
+    :duration: 1
+
+    .. exammchoicemf:: te_1
        :answer_a: The value you are searching for is the first element in the array.
        :answer_b: The value you are searching for is the last element in the array
        :answer_c: The value you are searching for is in the middle of the array.
@@ -307,7 +306,7 @@ It currently needs at least 4 directives to function: starttimer, revealquestion
 
        Under which of these conditions will a sequential search be faster than a binary search?
 
-    .. timedmchoicemf:: te_2
+    .. exammchoicemf:: te_2
        :answer_a: (c || d)
        :answer_b: (c && d)
        :answer_c: (!c) || (!d)
@@ -326,7 +325,11 @@ It currently needs at least 4 directives to function: starttimer, revealquestion
 
            !(c || d)
            
-    .. finishtimer:: Finish
+    .. finishexam:: Finish
+    
+You can turn off the feedback by adding the :nofeedback option.
+You can turn off the display of the results (how many the user got right or wrong and what they answered) with the :noresult option.  It will tell the user that s/he finished the exam and that the answers were recorded.
+
 
 Unit Tests for Code
 -------------------
