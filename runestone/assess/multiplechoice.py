@@ -153,5 +153,27 @@ class MChoice(Assessment):
         mcNode.template_end = TEMPLATE_END
 
         #self.state.nested_parse(self.content, self.content_offset, mcNode)
-
         return [mcNode]
+
+class MChoiceMF(MChoice):
+    def run(self):
+        print("This directive has been depreciated. Please convert to the new directive 'mchoice'")
+        mcmfNode = super(MChoiceMF,self).run()[0]
+
+        return [mcmfNode]
+
+class MChoiceMA(MChoice):
+    def run(self):
+        self.options['multipleAnswers'] = 'multipleAnswers'
+        print("This directive has been depreciated. Please convert to the new directive 'mchoice'")
+        mchoicemaNode = super(MChoiceMA,self).run()[0]
+
+        return [mchoicemaNode]
+
+class MChoiceRandomMF(MChoice):
+    def run(self):
+        self.options['random'] = 'random'
+        print("This directive has been depreciated. Please convert to the new directive 'mchoice'")
+        mchoicerandommfNode = super(MChoiceRandomMF,self).run()[0]
+
+        return[mchoicerandommfNode]

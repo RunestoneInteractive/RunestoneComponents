@@ -26,6 +26,9 @@ from .timedassessment import *
 
 def setup(app):
     app.add_directive('mchoice', MChoice)
+    app.add_directive('mchoicemf', MChoiceMF)
+    app.add_directive('mchoicema', MChoiceMA)
+    app.add_directive('mchoicerandommf', MChoiceRandomMF)
     app.add_directive('fillintheblank', FillInTheBlank)
     app.add_directive('blank', Blank)
     app.add_directive('addbutton', AddButton)
