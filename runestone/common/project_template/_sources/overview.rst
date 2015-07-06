@@ -66,6 +66,12 @@ environment for learning a programming language like Python since you can experi
 
 Take a look at the activecode interpreter in action.  If we take a simple Python program and make it active, you will see that it can be executed directly by pressing the *run* button.   Try pressing the *run* button below.
 
+.. datafile:: df1
+
+    def main():
+        print("Hello world")
+        return 45
+
 .. activecode:: codeexample1
    :coach:
 
@@ -183,48 +189,44 @@ Finally, it is also possible to embed simple questions into the text.  These
 questions provide a way for the students to check themselves as they go along.  The questions also provide feedback so that you can
 understand why an answer may or may not be correct.
 
-**Check your understanding**
 
-.. mchoicemf:: question1_1
-   :answer_a: Python
-   :answer_b: Java
-   :answer_c: C
-   :answer_d: ML
-   :correct: a
-   :feedback_a: Yes, Python is a great language to learn, whether you are a beginner or an experienced programmer.
-   :feedback_b: Java is a good object oriented language but it has some details that make it hard for the beginner.
-   :feedback_c: C is an imperative programming language that has been around for a long time, but it is not the one that we use.
-   :feedback_d: No, ML is a functional programming language.  You can use Python to write functional programs as well.
+.. mchoice:: 1524142112
+    :correct: b
+    :answer_a: Peanuts
+    :answer_b: Cashews
+    :feedback_a: They're ok, but cashews are better.
+    :feedback_b: Good job.
 
-   What programming language does this site help you to learn?
-
+    Peanuts or cashews?
 
 This next type of question allows more than one correct answer to be required.  The feedback will tell you whether you have the
 correct number as well as the feedback for each.
 
 
-.. mchoicema:: question1_2
-   :answer_a: red
-   :answer_b: yellow
-   :answer_c: black
-   :answer_d: green
-   :correct: a,b,d
-   :feedback_a: Red is a definitely on of the colors.
-   :feedback_b: Yes, yellow is correct.
-   :feedback_c: Remember the acronym...ROY G BIV.  B stands for blue.
-   :feedback_d: Yes, green is one of the colors.
+.. mchoice:: 152414d
+    :multiple_answers:
+    :correct: a, c
+    :random:
+    :answer_a: Hi
+    :answer_b: Bye
+    :answer_c: Aloha
+    :feedback_a: Feedback for Hi
+    :feedback_b: Feedback for Bye
+    :feedback_c: Feedback for Aloha
 
-   Which colors might be found in a rainbow? (choose all that are correct)
-
+    Here is the question...
 
 Another type of question allows you as the instructor to ask for a value.  You can test for the value using Pythons regular expressions.  For example:
 
-.. fillintheblank:: baseconvert1
-   :correct: \\b31\\b
-   :blankid: baseconvert1_ans1
 
-   What is value of 25 expressed as an octal number (base 8) :textfield:`baseconvert1_ans1::mini`
+.. fillintheblank:: fill1412
 
+    .. blank:: blank21
+        :correct: \\bblue\\b
+        :feedback1: ("\\bred\\b", "You are an awful person.")
+        :feedback2: (".*", "(Hint: Sail Norse)")
+
+        What is the best color?
 
 And finally here is a way of giving your students some simple programming problems where the code is already there for them but not indented or in the correct order.  Use drag-and-drop to get everthing right.
 
@@ -285,48 +287,58 @@ Please note that you can currently only have one timed exam per html page.
 
 It currently needs at least 4 directives to function: starttimer, revealquestions, timedmchoicemf, and finishtimer.  You can have as many timedmchoicemf as you want.  The time is specified in minutes using the :duration option in starttimer.  
 
-.. starttimer:: Start
-    :duration: 38
+.. timed:: timed1
+    :timelimit: 10
 
-.. revealquestions:: timed_Test
-    :showtitle: Timed Exam Paused or Not Started
-    :hidetitle: Currently Taking Timed Exam
-    
-    .. timedmchoicemf:: te_1
-       :answer_a: The value you are searching for is the first element in the array.
-       :answer_b: The value you are searching for is the last element in the array
-       :answer_c: The value you are searching for is in the middle of the array.
-       :answer_d: The value you are searching for is not in the array
-       :answer_e: Sequential Search can never be faster than Binary Search.
-       :correct: a
-       :feedback_a: Only when the search value is the first item in the array, and thus the first value encountered in sequential search, will sequential be faster than binary.
-       :feedback_b: In this case a sequential search will have to check every element before finding the correct one, whereas a binary search will not.
-       :feedback_c: Results will differ depending on the exact location of the element, but Binary Search will still find the element faster while Sequential will have to check more elements.
-       :feedback_d: If the search value is not in the array, a sequential search will have to check every item in the array before failing, a binary search will be faster.
-       :feedback_e: When the search value is the first element, Sequential will always be faster, as it will only need to check one element.
+    .. mchoice:: 1524142112
+        :timed:
+        :correct: a
+        :answer_a: Red pill
+        :answer_b: Blue pill
+        :feedback_a: Time to see how far the rabbit hole goes.
+        :feedback_b: Wrong answer.
 
-       Under which of these conditions will a sequential search be faster than a binary search?
+        Choose the red pill or the blue pill...
 
-    .. timedmchoicemf:: te_2
-       :answer_a: (c || d)
-       :answer_b: (c && d)
-       :answer_c: (!c) || (!d)
-       :answer_d: !(c && d)
-       :answer_e: (!c) && (!d)
-       :correct: e
-       :feedback_a: NOTing an OR expression does not result in the same values ORed.
-       :feedback_b: You do negate the OR to AND, but you also need to negate the values of d and d.
-       :feedback_c: This would be equivalent to (!(c && d)) using De Morgans laws.
-       :feedback_d: This would be equivalent to (!c || !d)
-       :feedback_e: NOTing (negating) an OR expression is the same as the AND of the individual values NOTed (negated). See De Morgans laws.
 
-       Which of the following expressions is equivalent to the following? 
-   
-       .. code-block:: java
 
-           !(c || d)
-           
-    .. finishtimer:: Finish
+    .. mchoice:: 152414d
+        :timed:
+        :multiple_answers:
+        :correct: a, c
+        :answer_a: Answer a
+        :answer_b: Answer b
+        :answer_c: Answer c
+        :feedback_a: Feedback for a
+        :feedback_b: Feedback for b
+        :feedback_c: Feedback for c
+
+        Here is the question...
+
+    .. fillintheblank:: fill1412
+        :timed:
+
+        .. blank:: blank21
+            :correct: \\b31\\b
+            :feedback1: ("\\b25\\b", "NOOOOOOOOO NOT 25")
+            :feedback2: (".*", "You don't know your octal numbers...")
+
+            What is the octal of 25? Don't say 25.
+
+        .. blank:: blank123
+            :correct: 12
+            :feedback1: (".*", "There's no 12 in that string!")
+
+            Please write down 12 here. Please.
+
+        .. blank:: blank34
+            :correct: 44
+            :feedback1: ("1", "nope")
+            :feedback2: ("4", "close")
+            :feedback3: (".*", "Sorry bro")
+
+            Show me 44!
+
 
 Unit Tests for Code
 -------------------
