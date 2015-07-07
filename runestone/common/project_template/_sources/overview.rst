@@ -282,15 +282,15 @@ next line executed.
     else:
         print('x is even')
         y = y - x
-        
+
 Timed Exam Questions
 ---------------------
 
-You can add a timed exam of multiple-choice questions that the user can only take once.  All the feedback will be shown after the time is up or after the user has clicked the "Submit Answers" button at the end of the timed exam.  To start the timed exam click on the "Start" button.  This will also start the countdown of the time remaining.  You can pause the timer by clicking on the "Pause" button and start it again by clicking on the "Resume" button.  When you pause the timed exam the questions will be hidden.  There is also a clock icon that will display the time remaining when the reader hovers over it.  
+You can add a timed exam of multiple-choice questions that the user can only take once.  All the feedback will be shown after the time is up or after the user has clicked the "Submit Answers" button at the end of the timed exam.  To start the timed exam click on the "Start" button.  This will also start the countdown of the time remaining.  You can pause the timer by clicking on the "Pause" button and start it again by clicking on the "Resume" button.  When you pause the timed exam the questions will be hidden.  There is also a clock icon that will display the time remaining when the reader hovers over it.
 
 Please note that you can currently only have one timed exam per html page.
 
-It currently needs at least 4 directives to function: starttimer, revealquestions, timedmchoicemf, and finishtimer.  You can have as many timedmchoicemf as you want.  The time is specified in minutes using the :duration option in starttimer.  
+It currently needs at least 4 directives to function: starttimer, revealquestions, timedmchoicemf, and finishtimer.  You can have as many timedmchoicemf as you want.  The time is specified in minutes using the :duration option in starttimer.
 
 .. timed:: timed1
     :timelimit: 10
@@ -311,34 +311,36 @@ It currently needs at least 4 directives to function: starttimer, revealquestion
 
         Under which of these conditions will a sequential search be faster than a binary search?
 
-    .. mchoice:: 152414d
+    .. mchoice:: questiontimed2
         :timed:
+        :random:
         :multiple_answers:
         :correct: a, c
-        :answer_a: Answer a
-        :answer_b: Answer b
-        :answer_c: Answer c
-        :feedback_a: Feedback for a
-        :feedback_b: Feedback for b
-        :feedback_c: Feedback for c
+        :answer_a: Red
+        :answer_b: Blue
+        :answer_c: Brown
+        :answer_d: Indigo
+        :feedback_a: Yes, red is definitely one of the colors.
+        :feedback_b: Blue is correct!
+        :feedback_c: Remember ROY G BIV!
+        :feedback_d: Yes, indigo is also in the rainbow!
 
-        Here is the question...
+        Which of these are colors of the rainbow?
 
     .. fillintheblank:: fill1412
         :timed:
 
-        .. blank:: blank21
-            :correct: \\b31\\b
-            :feedback1: ("\\b25\\b", "Octal is not the same as decimal")
-            :feedback2: (".*", "You don't know your octal numbers...")
+        .. blank:: blank1345
+            :correct: \\bred\\b
+            :feedback1: (".*", "Try 'red'")
 
-            What is the octal of 25? Don't say 25.
+            Fill in the blanks to make the following sentence: "The red car drove away" The
 
-        .. blank:: blank123
-            :correct: 12
-            :feedback1: (".*", "There's no 12 in that string!")
+        .. blank:: blank52532
+            :correct: \\baway\\b
+            :feedback1: (".*", "Try 'away'")
 
-            Please write down 12.
+            car drove
 
 
 Unit Tests for Code
@@ -424,15 +426,15 @@ Any of the existing question types can be placed in a tabbed exhibit-style quest
 .. tabbed:: exercise1
 
     .. tab:: Question 1
-        
+
         Write a program that prints "Hello, world".
-            
+
         .. activecode:: helloworld
 
             print("Hello, world")
 
     .. tab:: Discussion
-        
+
         .. disqus::
             :shortname: interactivepython
             :identifier: helloworlddiscussion
@@ -559,14 +561,14 @@ Blockly
    variables
 
    preload::
-   <xml>  
-      <block type="variables_set" id="1" inline="true" x="25" y="9">    
-         <field name="VAR">X</field>    
-         <value name="VALUE">      
+   <xml>
+      <block type="variables_set" id="1" inline="true" x="25" y="9">
+         <field name="VAR">X</field>
+         <value name="VALUE">
             <block type="math_number" id="2">
                <field name="NUM">10</field>
-            </block>    
-         </value>  
+            </block>
+         </value>
       </block>
    </xml>
 
