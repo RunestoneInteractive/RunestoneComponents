@@ -24,6 +24,7 @@ import random
 
 
 
+
 class FITBNode(nodes.General, nodes.Element):
     def __init__(self,content):
         """
@@ -37,6 +38,12 @@ class FITBNode(nodes.General, nodes.Element):
 
 
 def visit_fitb_node(self,node):
+    res = ""
+
+    if 'casei' in node.fitb_options:
+        node.fitb_options['casei'] = 'true'
+    else:
+        node.fitb_options['casei'] = 'false'
     res = node.template_start % node.fitb_options
 
     self.body.append(res)
@@ -44,21 +51,24 @@ def visit_fitb_node(self,node):
 
 def depart_fitb_node(self,node):
     fbl = []
+    res = ""
+    feedCounter = 0
+
+
     for k in sorted(node.fitb_options.keys()):
         if 'feedback' in k:
+            feedCounter += 1
+            node.fitb_options['feedLabel'] = "feedback" + feedCounter
             pair = eval(node.fitb_options[k])
             p1 = escapejs(pair[1])
-            newpair = (pair[0],p1)
-            fbl.append(newpair)
-    
-    if 'casei' in node.fitb_options:
-        node.fitb_options['casei'] = 'true'
-    else:
-        node.fitb_options['casei'] = 'false'
+            #newpair = (pair[0],p1)
+            #fbl.append(newpair)
+            p0 = escapejs(pair[0])
+            node.fitb_options['feedExp'] = p0
+            node.fitb_options['feedText'] = p1
+            res += node.template_option % node.fitb_options
+
     node.fitb_options['fbl'] = json.dumps(fbl).replace('"',"'")
-    res = ""
-    
-    res += node.template_end % node.fitb_options
 
     self.body.append(res)
 
@@ -94,26 +104,24 @@ class FillInTheBlank(Assessment):
             """
         
         TEMPLATE_START = '''
-            <div id="%(divid)s" class="alert alert-warning">
+        <p data-component="fillintheblank" data-casei="%(casei)s" id="%(divid)s">%(bodytext)s
+        <span data-answer id="%(divid)s_answer">%(correct)s</span>
             '''
-        
+
+        TEMPLATE_OPTION = '''
+            <span data-feedback="regex" id="%(feedLabel)s">%(feedExp)s</span>
+            <span data-feedback="text" for="%(feedLabel)s">%(feedText)s</span>
+            '''
+
         TEMPLATE_END = '''
-            <script>
-            $(document).ready(function(){checkPreviousFIB('%(divid)s');});
-            </script>
-            <button class='btn btn-success' name="do answer" onclick="checkFIBStorage('%(divid)s', '%(blankid)s', '%(correct)s',%(fbl)s, %(casei)s)">Check Me</button>
-            <button class='btn btn-default' id="%(divid)s_bcomp" disabled name="compare" onclick="compareFITBAnswers('%(divid)s');">Compare Me</button>
-            <br />
-            <br />
-            <div id="%(divid)s_feedback">
-            </div>
-            </div>
+        </p>
             '''   
 
         super(FillInTheBlank,self).run()
 
         fitbNode = FITBNode(self.options)
         fitbNode.template_start = TEMPLATE_START
+        fitbNode.template_option = TEMPLATE_OPTION
         fitbNode.template_end = TEMPLATE_END
 
         self.state.nested_parse(self.content, self.content_offset, fitbNode)
