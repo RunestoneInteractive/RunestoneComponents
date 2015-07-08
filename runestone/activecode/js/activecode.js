@@ -43,6 +43,8 @@ ActiveCode.prototype.init = function(opts) {
     this.outerDiv = null;
     this.output = null; // create pre for output
     this.graphics = null; // create div for turtle graphics
+    this.codecoach = null;
+    this.codelens = null;
 
     if(this.includes !== undefined) {
         this.includes = this.includes.split(/\s+/);
@@ -123,6 +125,27 @@ ActiveCode.prototype.createControls = function () {
     this.loadButton = butt;
     ctrlDiv.appendChild(butt);
 
+    // CodeLens
+    if ($(this.origElem).data("codelens")) {
+        butt = document.createElement("button");
+        $(butt).addClass("ac_opt btn btn-default");
+        $(butt).text("Show CodeLens");
+        $(butt).css("margin-left", "10px");
+        this.clButton = butt;
+        ctrlDiv.appendChild(butt);
+        $(butt).click(this.showCodelens.bind(this));
+    }
+    // CodeCoach
+    if ($(this.origElem).data("coach")) {
+        butt = document.createElement("button");
+        $(butt).addClass("ac_opt btn btn-default");
+        $(butt).text("Code Coach");
+        $(butt).css("margin-left", "10px");
+        this.clButton = butt;
+        ctrlDiv.appendChild(butt);
+        $(butt).click(this.showCodeCoach.bind(this));
+    }
+
     $(this.outerDiv).prepend(ctrlDiv);
 
 };
@@ -163,13 +186,101 @@ ActiveCode.prototype.loadEditor = function () {
 
 };
 
-ActiveCode.prototype.showCodeCoach = function () {
+
+ActiveCode.prototype.hideCodelens = function (button, div_id) {
+    this.codelens.style.display = 'none'
+}
+
+ActiveCode.prototype.showCodelens = function (button, div_id) {
+    if (this.codelens === null) {
+        var lensDiv = document.createElement("div");
+        $(lensDiv).addClass("col-md-6");
+        $(lensDiv).css("display","none");
+        this.codelens = lensDiv;
+        this.outerDiv.appendChild(lensDiv);
+    }
+
+    if (this.codelens.style.display == 'none') {
+        this.codelens.style.display = 'block';
+        button.innerText = "Hide Codelens";
+    } else {
+        this.codelens.style.display = "none";
+        button.innerText = "Show in Codelens";
+        return;
+    }
+
+    var cl = this.codelens.firstChild
+    if (cl) {
+        div.removeChild(cl)
+    }
+    var code = this.editor.getValue()
+    var myVars = {}
+    myVars.code = code
+    myVars.origin = "opt-frontend.js"
+    myVars.cumulative = false
+    myVars.heapPrimitives = false
+    myVars.drawParentPointers = false
+    myVars.textReferences = false
+    myVars.showOnlyOutputs = false
+    myVars.rawInputLstJSON = JSON.stringify([])
+    myVars.py = 2
+    myVars.curInstr = 0
+    myVars.codeDivWidth = 350
+    myVars.codeDivHeight = 400
+    var srcURL = '//pythontutor.com/iframe-embed.html'
+    var embedUrlStr = $.param.fragment(srcURL, myVars, 2 /* clobber all */)
+    var myIframe = document.createElement('iframe')
+    myIframe.setAttribute("id", div_id + '_codelens')
+    myIframe.setAttribute("width", "800")
+    myIframe.setAttribute("height", "500")
+    myIframe.setAttribute("style", "display:block")
+    myIframe.style.background = '#fff'
+    //myIframe.setAttribute("src",srcURL)
+    myIframe.src = embedUrlStr
+    this.codelens.appendChild(myIframe)
+    this.logBookEvent({
+        'event': 'codelens',
+        'act': 'view',
+        'div_id': this.divid
+    });
 
 };
 
-ActiveCode.prototype.showCodeLens = function () {
+// <iframe id="%(divid)s_codelens" width="800" height="500" style="display:block"src="#">
+// </iframe>
 
+
+ActiveCode.prototype.showCodeCoach = function (div_id) {
+    var myIframe;
+    var srcURL;
+    var cl;
+    if (this.codecoach === null) {
+        this.codecoach = document.createElement("div");
+        this.codecoach.style.display = 'block'
+    }
+
+    cl = this.codecoach.firstChild;
+    if (cl) {
+        this.codecoach.removeChild(cl)
+    }
+
+    srcURL = eBookConfig.app + '/admin/diffviewer?divid=' + div_id;
+    myIframe = document.createElement('iframe');
+    myIframe.setAttribute("id", div_id + '_coach');
+    myIframe.setAttribute("width", "800px");
+    myIframe.setAttribute("height", "500px");
+    myIframe.setAttribute("style", "display:block");
+    myIframe.style.background = '#fff';
+    myIframe.style.width = "100%"
+    myIframe.src = srcURL;
+    this.codecoach.appendChild(myIframe);
+    logBookEvent({
+        'event': 'coach',
+        'act': 'view',
+        'div_id': this.divid
+    });
 };
+
 
 ActiveCode.prototype.toggleEditorVisibility = function () {
 
