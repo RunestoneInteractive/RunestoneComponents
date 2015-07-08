@@ -206,7 +206,7 @@ This next type of question allows more than one correct answer to be required.  
 correct number as well as the feedback for each.
 
 .. mchoice:: question1_2
-    :multipleanswers:
+    :multiple_answers:
     :correct: a,b,d
     :answer_a: red
     :answer_b: yellow
@@ -315,7 +315,7 @@ It currently needs at least 4 directives to function: starttimer, revealquestion
         :timed:
         :random:
         :multiple_answers:
-        :correct: a, c
+        :correct: a,b,d
         :answer_a: Red
         :answer_b: Blue
         :answer_c: Brown
