@@ -1012,6 +1012,7 @@ function loadEditor(data, status, whatever) {
 }
 
 function disableAcOpt() {
+    console.log("setup buttons for logged out");
     $jqTheme('button.ac_opt').each(function (index, value) {
         value.className = value.className + ' disabled';
         $jqTheme(value).attr('onclick', 'return false;');
@@ -1252,3 +1253,4 @@ function injectCodeCoach(div_id) {
 $(document).ready(createEditors);
 $(document).ready(createScratchActivecode);
 $(document).ready(styleUnittestResults);
+$(document).bind("runestone:logout",disableAcOpt);

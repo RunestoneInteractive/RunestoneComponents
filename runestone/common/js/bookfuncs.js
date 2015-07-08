@@ -87,7 +87,7 @@ function gotUser(data, status, whatever) {
             if (confirm("Error: " + err.toString() + "Please report this error!  Click OK to continue without logging in.  Cancel to retry.")) {
                 caughtErr = true;
                 mess = "Not logged in";
-                disableAcOpt();
+                $(document).trigger("runestone:logout")
                 $('li.loginout').html('<a href="' + eBookConfig.app + '/default/user/login">Login</a>')
             } else {
                 window.location.href = eBookConfig.app + '/default/user/login?_next=' + window.location.href
@@ -99,7 +99,7 @@ function gotUser(data, status, whatever) {
             window.location.href = eBookConfig.app + '/default/user/login?_next=' + window.location.href
         } else {
             mess = "Not logged in";
-            disableAcOpt();
+            $(document).trigger("runestone:logout")
             $('li.loginout').html('<a href="' + eBookConfig.app + '/default/user/login">Login</a>')
         }
     } else {
@@ -107,8 +107,7 @@ function gotUser(data, status, whatever) {
             mess = d.email;
             eBookConfig.isLoggedIn = true;
             eBookConfig.cohortId = d.cohortId;
-            addNavbarLoginLink(); // will change navbar login link to say 'Log Out'
-            enableUserHighlights();
+            $(document).trigger("runestone:login")
             timedRefresh();
         }
     }
@@ -152,43 +151,43 @@ function isLoggedIn() {
     return false;
 }
 
-function addUserToFooter() {
-    // test to see if online before doing this.
-    var x = "user ";
+function handleLoginLogout() {
     if (shouldLogin()) {
         jQuery.get(eBookConfig.ajaxURL + 'getuser', null, gotUser)
     } else {
-        $(".footer").html(x + 'not logged in');
-        disableAcOpt();
-        logBookEvent({'event': 'page', 'act': 'view', 'div_id': window.location.pathname})
+        $(document).trigger("runestone:logout")
     }
 }
 
-function addNavbarLoginLink() {
-    if (isLoggedIn()) {
-        if (eBookConfig.cohortId == null || eBookConfig.cohortId == "") {
-            $('#joinGroupLink').show();
-            $('#groupScheduleLink').hide();
-            $('#newChapterLink').hide();
-            $('#manageGroupLink').hide();
-        } else {
-            $('#joinGroupLink').hide();
-            $('#groupScheduleLink').show();
-            $('#newChapterLink').show();
-            $('#manageGroupLink').show();
-        }
-        $('#profilelink').show();
-        $('#passwordlink').show();
-        $('#registerlink').hide();
-        $('li.loginout').html('<a href="' + eBookConfig.app + '/default/user/logout">Log Out</a>')
+function setupNavbarLoggedIn() {
+    if (eBookConfig.cohortId == null || eBookConfig.cohortId == "") {
+        $('#joinGroupLink').show();
+        $('#groupScheduleLink').hide();
+        $('#newChapterLink').hide();
+        $('#manageGroupLink').hide();
     } else {
-        $('#registerlink').show();
-        $('#profilelink').hide();
-        $('#passwordlink').hide();
-        $('li.loginout').html('<a href="' + eBookConfig.app + '/default/user/login">Login</a>')
+        $('#joinGroupLink').hide();
+        $('#groupScheduleLink').show();
+        $('#newChapterLink').show();
+        $('#manageGroupLink').show();
     }
+    $('#profilelink').show();
+    $('#passwordlink').show();
+    $('#registerlink').hide();
+    $('li.loginout').html('<a href="' + eBookConfig.app + '/default/user/logout">Log Out</a>')
 }
+$(document).bind("runestone:login", setupNavbarLoggedIn);
 
+function setupNavbarLoggedOut() {
+    console.log("setup navbar for logged out");
+    $('#registerlink').show();
+    $('#profilelink').hide();
+    $('#passwordlink').hide();
+    $('li.loginout').html('<a href="' + eBookConfig.app + '/default/user/login">Login</a>')
+    $(".footer").html('user not logged in');
+    logBookEvent({'event': 'page', 'act': 'view', 'div_id': window.location.pathname})
+}
+$(document).bind("runestone:logout",setupNavbarLoggedOut);
 
 function getNumUsers() {
     if (eBookConfig.useRunestoneServices) {
@@ -256,8 +255,7 @@ function addDelay(directive, action, delay) {
 
 
 // initialize stuff
-$(document).ready(addUserToFooter);
-$(document).ready(addNavbarLoginLink);
+$(document).ready(handleLoginLogout);
 $(document).ready(getNumUsers);
 $(document).ready(getOnlineUsers);
 
