@@ -23,7 +23,6 @@ from docutils.parsers.rst import Directive
 
 def setup(app):
     app.add_directive('datafile',DataFile)
-    app.add_javascript('bookfuncs.js')
     app.add_javascript('skulpt.min.js')
     app.add_javascript('skulpt-stdlib.js')
     app.add_javascript('datafile.js')
