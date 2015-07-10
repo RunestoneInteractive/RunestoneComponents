@@ -72,13 +72,13 @@ li.correctPosition, .testcase.pass {
 .testcase .msg { font-weight: bold; }
 .testcase .error { color: red;}
 .testcase .feedback { font-weight: bolder;}
-.testcase.fail .expected, .testcase.fail .actual { 
-    color: red; 
+.testcase.fail .expected, .testcase.fail .actual {
+    color: red;
     font-weight: bolder;
 }
-.testcase .output { 
-    display: block; 
-    white-space: pre; 
+.testcase .output {
+    display: block;
+    white-space: pre;
     background-color: #555555;
     color: white;
     font-size: 12px;
