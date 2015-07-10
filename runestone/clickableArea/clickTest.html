@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+	<meta charset="UTF-8">
+    <title>Clickable test</title>
+	<link rel="stylesheet" href="../assess/css/bootstrap.min.css"/>
+	<link rel="stylesheet" href="css/clickable.css"/>
+	<script type="text/javascript" src="../assess/bower_components/jquery/dist/jquery.js"></script>
+	<script type="text/javascript" src="../assess/bower_components/jquery-ui/jquery-ui.js"></script>
+	<script type="text/javascript" src="../globalJS/runestoneBase.js"></script>
+	<script type="text/javascript" src="../globalJS/bookfuncs.js"></script>
+	<script type="text/javascript" src="js/clickable.js"></script>
+	<script type="text/javascript" src="http://www.interactivepython.org/runestone/static/thinkcspy/_static/bootstrap-3.0.0/js/bootstrap.min.js"></script>
+	<script type="text/javascript">
+		eBookConfig = {};
+		eBookConfig.host = 'http://interactivepython.org' ? 'http://interactivepython.org' : 'http://127.0.0.1:8000';
+		eBookConfig.app = eBookConfig.host+'/runestone';
+		eBookConfig.ajaxURL = eBookConfig.app+'/ajax/';
+		eBookConfig.course = 'thinkcspy';
+		eBookConfig.logLevel = 10;
+		eBookConfig.loginRequired = false
+		eBookConfig.build_info = "3.1.1";
+		eBookConfig.isLoggedIn = false;
+	</script>
+</head>
+<body>
+
+<pre data-component="clickablearea" id="clickable1">
+<span data-question>Click on all variable assignment statements</span><span data-feedback>Remember, don't think like an idiot. Or like Kirby.</span>def main():
+	<span data-incorrect>print("Hello world")</span>
+	<span data-correct>x = 4</span>
+	for i in range(5):
+		<span data-correct>y = i</span>
+		print(y)
+	<span data-incorrect>return 0</span>
+	</pre>
+
+<pre data-component="clickablearea" id="2342131">
+<span data-question>Hiiii answer me please</span><span data-feedback>Yo. Here's yo feedback yo</span>
+def main():
+<span data-correct>print("Hello")</span>
+x = 5
+<span data-incorrect>for i in range(4)</span>
+<span data-correct>print(i)</span>
+return 0
+</pre>
+
+</html>
