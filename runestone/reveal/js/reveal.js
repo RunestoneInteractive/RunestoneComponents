@@ -46,11 +46,10 @@ Reveal.prototype.init = function (opts) {
     this.showtitle = null;     // Title of button that shows the concealed data
     this.hidetitle = null;
     this.origContent = $(this.origElem).html();
-    this.children = this.origElem.childNodes;
+    this.children = [];
+    this.adoptChildren();
 
-    if (this.dataModal) {
-        this.checkForTitle();
-    }
+    this.checkForTitle();
 
     this.getButtonTitles();
     this.createShowButton();
@@ -63,6 +62,13 @@ Reveal.prototype.init = function (opts) {
 /*====================================
 == Get text for buttons/modal title ==
 ====================================*/
+
+Reveal.prototype.adoptChildren = function () {
+    for (var i = 0; i < this.origElem.childNodes.length; i++) {
+        this.children.push(this.origElem.childNodes[i]);
+    }
+};
+
 Reveal.prototype.getButtonTitles = function () {     // to support old functionality
     this.showtitle = $(this.origElem).data("showtitle");
     if (this.showtitle === undefined) {
@@ -87,21 +93,24 @@ Reveal.prototype.checkForTitle = function () {
 Reveal.prototype.createShowButton = function () {
     var _this = this;
     this.wrapDiv = document.createElement("div");     // wrapper div
-    this.revealDiv = document.createElement("div");     // Div that is hidden that contains content
-    this.revealDiv.id = this.divid;
-    this.wrapDiv.appendChild(this.revealDiv);
+    if (!this.dataModal) {
+        this.revealDiv = document.createElement("div");     // Div that is hidden that contains content
+        this.revealDiv.id = this.divid;
 
-    // Get original content, put it inside revealDiv and replace original div with revealDiv
-    //$(this.revealDiv).html(this.origContent);
-    for (var i = 0; i < this.children.length; i++) {
-        this.revealDiv.appendChild(this.children[i]);
+        // Get original content, put it inside revealDiv and replace original div with revealDiv
+        //$(this.revealDiv).html(this.origContent);
+
+        for (var i = 0; i < this.children.length; i++) {
+            this.revealDiv.appendChild(this.children[i]);
+        }
+        $(this.revealDiv).hide();
+        this.wrapDiv.appendChild(this.revealDiv);
     }
-    $(this.revealDiv).hide();
-    $(this.origElem).replaceWith(this.wrapDiv);
+
 
     this.sbutt = document.createElement("button");
-    this.sbutt.style = "margin-bottom:10px";
-    this.sbutt.class = "btn btn-default reveal_button";
+    $(this.sbutt).addClass("btn btn-default reveal_button");
+    $(this.sbutt).css("margin-bottom","10px");
     this.sbutt.textContent = this.showtitle;
     this.sbutt.id = this.divid + "_show";
     if (!this.dataModal) {
@@ -115,6 +124,7 @@ Reveal.prototype.createShowButton = function () {
                         "data-target":"#" + this.divid + "_modal"});
     }
     this.wrapDiv.appendChild(this.sbutt);
+    $(this.origElem).replaceWith(this.wrapDiv);
 };
 
 Reveal.prototype.createHideButton = function () {
@@ -122,7 +132,9 @@ Reveal.prototype.createHideButton = function () {
     this.hbutt = document.createElement("button");
     $(this.hbutt).hide();
     this.hbutt.textContent = this.hidetitle;
-    this.hbutt.class = "btn btn-default reveal_button";
+    this.hbutt.className = "btn btn-default reveal_button";
+    $(this.hbutt).css("margin-bottom","10px");
+
     this.hbutt.id = this.divid + "_hide";
     this.hbutt.onclick = function () {
         _this.hideInline();
