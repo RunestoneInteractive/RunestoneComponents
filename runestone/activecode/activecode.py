@@ -45,20 +45,13 @@ def setup(app):
     app.connect('env-purge-doc', purge_activecodes)
 
 
-START = '''
-<div id="cont"></div>
-<div id="%(divid)s" lang="%(language)s" time="%(timelimit)s" class="ac_section alert alert-warning" >
-'''
 
-EDIT1 = '''
-</div>
-<br/>
-<div id="%(divid)s_code_div" style="display: %(hidecode)s" class="ac_code_div">
-<textarea cols="50" rows="12" id="%(divid)s_code" class="active_code" prefixcode="%(include)s" lang="%(language)s">
+TEMPLATE = """
+<pre data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s data-audio='%(ctext)s' data-time='%(timelimit)s'>
 %(initialcode)s
-</textarea>
-</div>
-'''
+</pre>
+"""
+
 
 CAPTION = ''' 
 <div class="clearfix"></div>
@@ -90,67 +83,7 @@ EDIT2 = '''
 VIZB = '''<button class='btn btn-default' id="%(divid)s_vizb" onclick="injectCodelens(this,'%(divid)s');">Show in Codelens</button>
 '''
 
-COACHB = '''<button class='ac_opt btn btn-default' id="%(divid)s_coach_b" onclick="injectCodeCoach('%(divid)s');">Code Coach</button>
-'''
 
-SCRIPT = '''
-<script>
-if ('%(hidecode)s' == 'none') {
-    // a hack to preserve the inline-block display style. Toggle() will use display: block
-    // (instead of inline-block) if the previous display style was 'none'
-    $('#%(divid)s_saveb').toggle();
-    $('#%(divid)s_loadb').toggle();
-}
-if ($("#%(divid)s").attr("lang") !== "html" && $("#%(divid)s_code_div").parents(".admonition").length == 0 && $("#%(divid)s_code_div").parents("#exercises").length == 0){
-    if ($(window).width() > 975){
-        $("#%(divid)s_code_div").offset({
-            left: $("#%(divid)s .clearfix").offset().left
-        });
-    }
-    $("#%(divid)s_runb").one("click", function(){
-        $({})
-        .queue(function (next) {
-            if ($(window).width() > 975){
-                $("#%(divid)s_code_div").animate({
-                    left: 40
-                }, 500, next);
-                if (! Sk.TurtleGraphics ) {
-                    Sk.TurtleGraphics = {};
-                }
-                Sk.TurtleGraphics.height = 320;
-                Sk.TurtleGraphics.width = 320;
-            }
-            else{
-                next();
-            }
-        })
-        .queue(function (next) {
-            $("#%(divid)s_runb").parent().siblings(".ac_output").show();
-            runit('%(divid)s',this, %(include)s);
-            $("#%(divid)s_runb").on("click", function(){
-                runit('%(divid)s',this, %(include)s);
-            });
-        })
-
-    });
-}
-else{
-    $("#%(divid)s_code_div").css({float : "none", marginLeft : "auto", marginRight : "auto"});
-    $("#%(divid)s_runb").parent().siblings(".ac_output").show().css({float : "none", right : "0px"});
-    $("#%(divid)s_runb").on("click", function(){
-        runit('%(divid)s',this, %(include)s);
-    });
-}
-</script>
-'''
-OUTPUT_START = '''
-<div class="ac_output">'''
-
-CANVAS = '''
-<div style="text-align: center">
-<div id="%(divid)s_canvas" class="ac-canvas" style="border-style: solid; text-align: center"></div>
-</div>
-'''
 
 SUFF = '''<pre id="%(divid)s_suffix" style="display:none">%(suffix)s</pre>'''
 
@@ -202,50 +135,11 @@ class ActivcodeNode(nodes.General, nodes.Element):
 # The node that is passed as a parameter is an instance of our node class.
 def visit_ac_node(self, node):
     # print self.settings.env.activecodecounter
-    res = START
-    if 'above' in node.ac_components:
-        res += CANVAS
-    if 'tour_1' not in node.ac_components:
-        res += EDIT2
-    else:
-        res += EDIT2 + AUDIO
-    if node.ac_components['codelens']:
-        res += VIZB
+    res = TEMPLATE
+    #todo:  handle above in node.ac_components
+    #todo handle  'hidecode' not in node.ac_components:
+    # todo:  handle if 'gradebutton' in node.ac_components: res += GRADES
 
-    if 'coach' in node.ac_components:
-        res += COACHB
-
-    if 'hidecode' not in node.ac_components:
-        node.ac_components['hidecode'] = 'block'
-    if node.ac_components['hidecode'] == 'none':
-        res += UNHIDE
-    if 'gradebutton' in node.ac_components:
-        res += GRADES
-    res += EDIT1
-    res += OUTPUT_START
-    if 'above' not in node.ac_components:
-        if 'nocanvas' not in node.ac_components:
-            res += CANVAS
-    if 'suffix' in node.ac_components:
-        res += SUFF
-    if 'nopre' not in node.ac_components:
-        res += PRE
-    if 'autorun' in node.ac_components:
-        res += AUTO
-    res += OUTPUT_END
-    res += CAPTION
-
-    if node.ac_components['codelens']:
-        res += VIZ
-
-    if 'coach' in node.ac_components:
-        res += COACH
-
-    if node.ac_components['language'] == 'html':
-        res += HTMLOUT
-
-    res += SCRIPT
-    res += END
     res = res % node.ac_components
     res = res.replace("u'", "'")  # hack:  there must be a better way to include the list and avoid unicode strings
 
@@ -359,6 +253,16 @@ class ActiveCode(Directive):
 
         if 'timelimit' not in self.options:
             self.options['timelimit'] = ''
+
+        if 'autorun' not in self.options:
+            self.options['autorun'] = ''
+        else:
+            self.options['autorun'] = 'data-autorun'
+
+        if 'coach' in self.options:
+            self.options['coach'] = 'data-coach'
+        else:
+            self.options['coach'] = ''
 
         return [ActivcodeNode(self.options)]
 
