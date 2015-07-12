@@ -88,7 +88,7 @@ ActiveCode.prototype.createEditor = function (index) {
     editor.on('change', (function () {
         if (editor.acEditEvent == false || editor.acEditEvent === undefined) {
             $(editor.getWrapperElement()).css('border-top', '2px solid #b43232');
-            $(editor.getWrapperElement()).css('border-bottom', '2px solid #b43232');
+            $(editor.getWrapperthis.element()).css('border-bottom', '2px solid #b43232');
             this.logBookEvent({'event': 'activecode', 'act': 'edit', 'div_id': this.divid});
     }
         editor.acEditEvent = true;
@@ -144,6 +144,17 @@ ActiveCode.prototype.createControls = function () {
         this.clButton = butt;
         ctrlDiv.appendChild(butt);
         $(butt).click(this.showCodeCoach.bind(this));
+    }
+
+    // Audio Tour
+    if ($(this.origElem).data("tour_1")) {
+        butt = document.createElement("button");
+        $(butt).addClass("ac_opt btn btn-default");
+        $(butt).text("Audio Tour");
+        $(butt).css("margin-left", "10px");
+        this.clButton = butt;
+        ctrlDiv.appendChild(butt);
+        $(butt).click(function() {new AudioTour(this.divid, this.editor.getValue(), 1, $(this.origElem).data("tour_1"))});
     }
 
     $(this.outerDiv).prepend(ctrlDiv);
@@ -500,6 +511,480 @@ HTMLActiveCode.prototype.createOutput = function () {
     this.outerDiv.appendChild(clearDiv);
 
 };
+
+//todo -- make all of this ivars of the audiotour object
+
+String.prototype.replaceAll = function (target, replacement) {
+    return this.split(target).join(replacement);
+};
+
+// function to display the audio tours
+function AudioTour (divid, code, bnum, audio_text) {
+    this.elem = null; // current audio element playing
+    this.currIndex; // current index
+    this.len; // current length of audio files for tour
+    this.buttonCount; // number of audio tour buttons
+    this.aname; // the audio file name
+    this.ahash; // hash of the audio file name to the lines to highlight
+    this.theDivid; // div id
+    this.afile; // file name for audio
+    this.playing = false; // flag to say if playing or not
+    this.tourName;
+
+    // Replacing has been done here to make sure special characters in the code are displayed correctly
+    code = code.replaceAll("*doubleq*", "\"");
+    code = code.replaceAll("*singleq*", "'");
+    code = code.replaceAll("*open*", "(");
+    code = code.replaceAll("*close*", ")");
+    code = code.replaceAll("*nline*", "<br/>");
+    var codeArray = code.split("<br/>");
+
+    var audio_hash = new Array();
+    var bval = new Array();
+    var atype = audio_text.replaceAll("*doubleq*", "\"");
+    var audio_type = atype.split("*atype*");
+    for (var i = 0; i < audio_type.length - 1; i++) {
+        audio_hash[i] = audio_type[i];
+        var aword = audio_type[i].split(";");
+        bval.push(aword[0]);
+    }
+
+    var first = "<pre><div id='" + divid + "_l1'>" + "1.   " + codeArray[0] + "</div>";
+    num_lines = codeArray.length;
+    for (var i = 1; i < num_lines; i++) {
+        if (i < 9) {
+            first = first + "<div id='" + divid + "_l" + (i + 1) + "'>" + (i + 1) + ".   " + codeArray[i] + "</div>";
+        }
+        else if (i < 99) {
+            first = first + "<div id='" + divid + "_l" + (i + 1) + "'>" + (i + 1) + ".  " + codeArray[i] + "</div>";
+        }
+        else {
+            first = first + "<div id='" + divid + "_l" + (i + 1) + "'>" + (i + 1) + ". " + codeArray[i] + "</div>";
+        }
+    }
+    first = first + "</pre>"
+
+    //laying out the HTML content
+
+    var bcount = 0;
+    var html_string = "<div class='modal-lightsout'></div><div class='modal-profile'><h3>Take an audio tour!</h3><div class='modal-close-profile'></div><p id='windowcode'></p><p id='" + divid + "_audiocode'></p>";
+    html_string += "<p id='status'></p>";
+    html_string += "<input type='image' src='../_static/first.png' width='25' id='first_audio' name='first_audio' title='Play first audio in tour' alt='Play first audio in tour' disabled/>" + "<input type='image' src='../_static/prev.png' width='25' id='prev_audio' name='prev_audio' title='Play previous audio in tour' alt='Play previous audio in tour' disabled/>" + "<input type='image' src='../_static/pause.png' width='25' id='pause_audio' name='pause_audio' title='Pause current audio' alt='Pause current audio' disabled/><input type='image' src='../_static/next.png' width ='25' id='next_audio' name='next_audio' title='Play next audio in tour' alt='Play next audio in tour' disabled/><input type='image' src='../_static/last.png' width ='25' id='last_audio' name='last_audio' title='Play last audio in tour' alt='Play last audio in tour' disabled/><br/>";
+    for (var i = 0; i < audio_type.length - 1; i++) {
+        html_string += "<input type='button' style='margin-right:5px;' class='btn btn-default btn-sm' id='button_audio_" + i + "' name='button_audio_" + i + "' value=" + bval[i] + " />";
+        bcount++;
+    }
+    //html_string += "<p id='hightest'></p><p id='hightest1'></p><br/><br/><p id='test'></p><br/><p id='audi'></p></div>";
+    html_string += "</div>";
+
+    $('#cont').html(html_string);
+    $('#windowcode').html(first);
+
+    // Position modal box
+    $.fn.center = function () {
+        this.css("position", "absolute");
+        // y position
+        this.css("top", ($(window).scrollTop() + $(navbar).height() + 10 + "px"));
+        // show window on the left so that you can see the output from the code still
+        this.css("left", ($(window).scrollLeft() + "px"));
+        return this;
+    }
+
+    $(".modal-profile").center();
+    $('.modal-profile').fadeIn("slow");
+    //$('.modal-lightsout').css("height", $(document).height());
+    $('.modal-lightsout').fadeTo("slow", .5);
+    $('.modal-close-profile').show();
+
+    // closes modal box once close link is clicked, or if the lights out divis clicked
+    $('.modal-close-profile, .modal-lightsout').click(function () {
+        if (this.playing) {
+            this.elem.pause();
+        }
+        //log change to db
+        logBookEvent({'event': 'Audio', 'change': 'closeWindow', 'div_id': divid});
+        $('.modal-profile').fadeOut("slow");
+        $('.modal-lightsout').fadeOut("slow");
+    });
+
+    // Accommodate buttons for a maximum of five tours
+
+    $('#' + 'button_audio_0').click(function () {
+        this.tour(divid, audio_hash[0], bcount);
+    });
+    $('#' + 'button_audio_1').click(function () {
+        this.tour(divid, audio_hash[1], bcount);
+    });
+    $('#' + 'button_audio_2').click(function () {
+        this.tour(divid, audio_hash[2], bcount);
+    });
+    $('#' + 'button_audio_3').click(function () {
+        this.tour(divid, audio_hash[3], bcount);
+    });
+    $('#' + 'button_audio_4').click(function () {
+        this.tour(divid, audio_hash[4], bcount);
+    });
+
+    // handle the click to go to the next audio
+    $('#first_audio').click(function () {
+        this.firstAudio();
+    });
+
+    // handle the click to go to the next audio
+    $('#prev_audio').click(function () {
+        this.prevAudio();
+    });
+
+    // handle the click to pause or play the audio
+    $('#pause_audio').click(function () {
+        this.pauseAndPlayAudio();
+    });
+
+    // handle the click to go to the next audio
+    $('#next_audio').click(function () {
+        this.nextAudio();
+    });
+
+    // handle the click to go to the next audio
+    $('#last_audio').click(function () {
+        this.lastAudio();
+    });
+
+    // make the image buttons look disabled
+    $("#first_audio").css('opacity', 0.25);
+    $("#prev_audio").css('opacity', 0.25);
+    $("#pause_audio").css('opacity', 0.25);
+    $("#next_audio").css('opacity', 0.25);
+    $("#last_audio").css('opacity', 0.25);
+
+};
+
+AudioTour.prototype.tour = function (divid, audio_type, bcount) {
+    // set globals
+    this.buttonCount = bcount;
+    this.theDivid = divid;
+
+    // enable prev, pause/play and next buttons and make visible
+    $('#first_audio').removeAttr('disabled');
+    $('#prev_audio').removeAttr('disabled');
+    $('#pause_audio').removeAttr('disabled');
+    $('#next_audio').removeAttr('disabled');
+    $('#last_audio').removeAttr('disabled');
+    $("#first_audio").css('opacity', 1.0);
+    $("#prev_audio").css('opacity', 1.0);
+    $("#pause_audio").css('opacity', 1.0);
+    $("#next_audio").css('opacity', 1.0);
+    $("#last_audio").css('opacity', 1.0);
+
+    // disable tour buttons
+    for (var i = 0; i < bcount; i++)
+        $('#button_audio_' + i).attr('disabled', 'disabled');
+
+    var atype = audio_type.split(";");
+    var name = atype[0].replaceAll("\"", " ");
+    this.tourName = name;
+    $('#status').html("Starting the " + name);
+
+    //log tour type to db
+    logBookEvent({'event': 'Audio', 'tour type': name, 'div_id': divid});
+
+    var max = atype.length;
+    var str = "";
+    this.ahash = new Array();
+    this.aname = new Array();
+    for (i = 1; i < max - 1; i++) {
+        var temp = atype[i].split(":");
+        var temp_line = temp[0];
+        var temp_aname = temp[1];
+
+        var akey = temp_aname.substring(1, temp_aname.length);
+        var lnums = temp_line.substring(1, temp_line.length);
+
+        //alert("akey:"+akey+"lnum:"+lnums);
+
+        // str+="<audio id="+akey+" preload='auto'><source src='http://ice-web.cc.gatech.edu/ce21/audio/"+
+        // akey+".mp3' type='audio/mpeg'><source src='http://ice-web.cc.gatech.edu/ce21/audio/"+akey+
+        // ".ogg' type='audio/ogg'>Your browser does not support the audio tag</audio>";
+        str += "<audio id=" + akey + " preload='auto' ><source src='../_static/audio/" + akey +
+            ".wav' type='audio/wav'><source src='../_static/audio/" +
+            akey + ".mp3' type='audio/mpeg'><br />Your browser does not support the audio tag</audio>";
+        this.ahash[akey] = lnums;
+        this.aname.push(akey);
+    }
+    var ahtml = "#" + divid + "_audiocode";
+    $(ahtml).html(str); // set the html to the audio tags
+    this.len = this.aname.length; // set the number of audio file in the tour
+
+    // start at the first audio
+    this.currIndex = 0;
+
+    // play the first audio in the tour
+    this.playCurrIndexAudio();
+};
+
+AudioTour.prototype.handlePlaying = function() {
+
+    // if this.playing audio pause it
+    if (this.playing) {
+
+        this.elem.pause();
+
+        // unbind current ended
+        $('#' + this.afile).unbind('ended');
+
+        // unhighlight the prev lines
+        this.unhighlightLines(this.theDivid, this.ahash[this.aname[this.currIndex]]);
+    }
+
+}
+
+AudioTour.prototype.firstAudio = function () {
+
+    // if audio is this.playing handle it
+    this.handlePlaying();
+
+    //log change to db
+    this.logBookEvent({'event': 'Audio', 'change': 'first', 'div_id': this.theDivid});
+
+
+    // move to the first audio
+    this.currIndex = 0;
+
+    // start at the first audio
+    this.playCurrIndexAudio();
+
+};
+
+AudioTour.prototype.prevAudio = function () {
+
+    // if there is a previous audio
+    if (this.currIndex > 0) {
+
+        // if audio is this.playing handle it
+        this.handlePlaying();
+
+        //log change to db
+        this.logBookEvent({'event': 'Audio', 'change': 'prev', 'div_id': this.theDivid});
+
+
+        // move to previous to the current (but the current index has moved to the next)
+        this.currIndex = this.currIndex - 1;
+
+        // start at the prev audio
+        this.playCurrIndexAudio();
+    }
+
+};
+
+AudioTour.prototype.nextAudio = function () {
+
+    // if audio is this.playing handle it
+    this.handlePlaying();
+
+    //log change to db
+    this.logBookEvent({'event': 'Audio', 'change': 'next', 'div_id': this.theDivid});
+
+    // if not at the end
+    if (this.currIndex < (this.len - 1)) {
+        // start at the next audio
+        this.currIndex = this.currIndex + 1;
+        this.playCurrIndexAudio();
+    }
+    else if (this.currIndex == (this.len - 1)) {
+        this.handleTourEnd();
+    }
+};
+
+AudioTour.prototype.lastAudio = function () {
+
+    // if audio is this.playing handle it
+    this.handlePlaying();
+
+    //log change to db
+    this.logBookEvent({'event': 'Audio', 'change': 'last', 'div_id': this.theDivid});
+
+    // move to the last audio
+    this.currIndex = this.len - 1;
+
+    // start at last
+    this.playCurrIndexAudio();
+
+};
+
+// play the audio at the current index
+AudioTour.prototype.playCurrIndexAudio = function () {
+
+    // set this.playing to false
+    this.playing = false;
+
+    // play the current audio and highlight the lines
+    this.playaudio(this.currIndex, this.aname, this.theDivid, this.ahash);
+
+};
+
+// handle the end of the tour
+AudioTour.prototype.handleTourEnd = function () {
+
+    $('#status').html(" The " + this.tourName + " Ended");
+
+    // disable the prev, pause/play, and next buttons and make them more invisible
+    $('#first_audio').attr('disabled', 'disabled');
+    $('#prev_audio').attr('disabled', 'disabled');
+    $('#pause_audio').attr('disabled', 'disabled');
+    $('#next_audio').attr('disabled', 'disabled');
+    $('#last_audio').attr('disabled', 'disabled');
+    $("#first_audio").css('opacity', 0.25);
+    $("#prev_audio").css('opacity', 0.25);
+    $("#pause_audio").css('opacity', 0.25);
+    $("#next_audio").css('opacity', 0.25);
+    $("#last_audio").css('opacity', 0.25);
+
+    // enable the tour buttons
+    for (var j = 0; j < this.buttonCount; j++)
+        $('#button_audio_' + j).removeAttr('disabled');
+};
+
+// only call this one after the first time
+AudioTour.prototype.outerAudio = function () {
+
+    // unbind ended
+    $('#' + this.afile).unbind('ended');
+
+    // set this.playing to false
+    this.playing = false;
+
+    // unhighlight previous lines from the last audio
+    this.unhighlightLines(this.theDivid, this.ahash[this.aname[this.currIndex]]);
+
+    // increment the this.currIndex to point to the next one
+    this.currIndex++;
+
+    // if the end of the tour reset the buttons
+    if (this.currIndex == this.len) {
+        this.handleTourEnd();
+    }
+
+    // else not done yet so play the next audio
+    else {
+
+        // play the audio at the current index
+        this.playCurrIndexAudio();
+    }
+};
+
+// play the audio now that it is ready
+AudioTour.prototype.playWhenReady = function (afile, divid, ahash) {
+    // unbind current
+    $('#' + afile).unbind('canplaythrough');
+    //console.log("in playWhenReady " + elem.duration);
+
+    $('#status').html("Playing the " + this.tourName);
+    this.elem.currentTime = 0;
+    this.highlightLines(divid, ahash[afile]);
+    $('#' + afile).bind('ended', function () {
+        outerAudio();
+    });
+    this.playing = true;
+    this.elem.play();
+
+};
+
+
+// play the audio at the specified index i and set the duration and highlight the lines
+AudioTour.prototype.playaudio = function (i, aname, divid, ahash) {
+    this.afile = aname[i];
+    this.elem = document.getElementById(this.afile);
+
+    // if this isn't ready to play yet - no duration yet then wait
+    //console.log("in playaudio " + elem.duration);
+    if (isNaN(this.elem.duration) || this.elem.duration == 0) {
+        // set the status
+        $('#status').html("Loading audio.  Please wait.");
+        $('#' + this.afile).bind('canplaythrough', function () {
+            playWhenReady(this.afile, divid, ahash);
+        });
+    }
+    // otherwise it is ready so play it
+    else {
+        playWhenReady(this.afile, divid, ahash);
+    }
+};
+
+// pause if this.playing and play if paused
+AudioTour.prototype.pauseAndPlayAudio = function () {
+    var btn = document.getElementById('pause_audio');
+
+    // if paused and clicked then continue from current
+    if (this.elem.paused) {
+        // calcualte the time left to play in milliseconds
+        counter = (this.elem.duration - this.elem.currentTime) * 1000;
+        this.elem.play(); // start the audio from current spot
+        document.getElementById("pause_audio").src = "../_static/pause.png";
+        document.getElementById("pause_audio").title = "Pause current audio";
+        //log change to db
+        logBookEvent({'event': 'Audio', 'change': 'play', 'div_id': this.theDivid});
+    }
+
+    // if audio was this.playing pause it
+    else if (this.playing) {
+        this.elem.pause(); // pause the audio
+        document.getElementById("pause_audio").src = "../_static/play.png";
+        document.getElementById("pause_audio").title = "Play paused audio";
+        //log change to db
+        logBookEvent({'event': 'Audio', 'change': 'pause', 'div_id': this.theDivid});
+    }
+
+};
+
+// process the lines
+AudioTour.prototype.processLines = function (divid, lnum, color) {
+    var comma = lnum.split(",");
+
+    if (comma.length > 1) {
+        for (i = 0; i < comma.length; i++) {
+            this.setBackgroundForLines(divid, comma[i], color);
+        }
+    }
+    else {
+        this.setBackgroundForLines(divid, lnum, color);
+    }
+};
+
+// unhighlight the lines - set the background back to transparent
+AudioTour.prototype.unhighlightLines = function (divid, lnum) {
+    this.processLines(divid, lnum, 'transparent');
+};
+
+// highlight the lines - set the background to a yellow color
+AudioTour.prototype.highlightLines = function (divid, lnum) {
+    this.processLines(divid, lnum, '#ffff99');
+};
+
+// set the background to the passed color
+AudioTour.prototype.setBackgroundForLines = function (divid, lnum, color) {
+    var hyphen = lnum.split("-");
+
+    // if a range of lines
+    if (hyphen.length > 1) {
+        var start = parseInt(hyphen[0]);
+        var end = parseInt(hyphen[1]) + 1;
+        for (var k = start; k < end; k++) {
+            //alert(k);
+            var str = "#" + divid + "_l" + k;
+            if ($(str).text() != "") {
+                $(str).css('background-color', color);
+            }
+            //$(str).effect("highlight",{},(dur*1000)+4500);
+        }
+    }
+    else {
+        //alert(lnum);
+        var str = "#" + divid + "_l" + lnum;
+        $(str).css('background-color', color);
+        //$(str).effect("highlight",{},(dur*1000)+4500);
+    }
+};
+
 
 
 $(document).ready(function() {
