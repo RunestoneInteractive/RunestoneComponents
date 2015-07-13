@@ -8,18 +8,6 @@
 ===           Isaiah Mayerchak           ===
 ===                6/8/15                ===
 ==========================================*/
-// start with basic parent stuff
-function RunestoneBase () {
-
-}
-
-RunestoneBase.prototype.logBookEvent = function (info) {
-    console.log("logging event " + this.divid);
-};
-
-RunestoneBase.prototype.logRunEvent = function (info) {
-    console.log("running " + this.divid);
-};
 
 var prsList = {};    // Parsons dictionary
 
