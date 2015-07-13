@@ -8,17 +8,6 @@
 ===           Isaiah Mayerchak           ===
 ===               06/12/15               ===
 ==========================================*/
-function RunestoneBase () {    // Parent function
-
-}
-
-RunestoneBase.prototype.logBookEvent = function (info) {
-    console.log("logging event " + this.divid);
-};
-
-RunestoneBase.prototype.logRunEvent = function (info) {
-    console.log("running " + this.divid);
-};
 var RevealList = {};     // Dictionary that contains all instances of Reveal objects
 
 Reveal.prototype = new RunestoneBase();
