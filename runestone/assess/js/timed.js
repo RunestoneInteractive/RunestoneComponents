@@ -276,7 +276,6 @@ Timed.prototype.randomizeRQA = function () {
         this.renderedQuestionArray[randomIndex] = temporaryValue;
 
     }
-    console.log(this.renderedQuestionArray);
 };
 
 Timed.prototype.renderTimedQuestion = function () {
@@ -308,7 +307,6 @@ Timed.prototype.startAssessment = function () {
         this.running = 0;
         this.done = 1;
         $(this.timedDiv).show();
-        $(this.time).text("Already completed");
         this.submitTimedProblems();
     }
 };
@@ -348,7 +346,7 @@ Timed.prototype.showTime = function () { // displays the timer value
     }
     var timeString =  beginning + minsString + ":" + secsString;
 
-    if (this.done || this.finished) {
+    if (this.done || this.taken) {
         var minutes = Math.floor(this.timeTaken / 60);
         var seconds = Math.floor(this.timeTaken % 60);
         if (minutes < 10) {
@@ -365,6 +363,9 @@ Timed.prototype.showTime = function () { // displays the timer value
     for (var i = 0; i <= timeTips.length - 1; i++) {
         timeTips[i].title = timeString;
     }
+
+
+
 };
 
 Timed.prototype.increment = function () { // increments the timer
@@ -436,6 +437,7 @@ Timed.prototype.tookTimedExam = function () {
     if (len > 0) {
         if (localStorage.getItem(eBookConfig.email + ":" + this.divid) !== null) {
             this.taken = 1;
+            this.restoreFromStorage();
 
         } else {
             this.taken = 0;
@@ -517,6 +519,16 @@ Timed.prototype.storeScore = function () {
 
 Timed.prototype.logScore = function () {
     logBookEvent({"event": "timedExam", "act": "finish", "div_id": this.divid, "correct": this.score, "incorrect": this.incorrect, "skipped": this.skipped, "time": this.timeTaken});
+};
+
+Timed.prototype.restoreFromStorage = function () {
+    var tmpArr = localStorage.getItem(eBookConfig.email + ":" + this.divid).split(";");
+    this.score = tmpArr[0];
+    this.incorrect = tmpArr[1];
+    this.skipped = tmpArr[2];
+    this.timeTaken = tmpArr[3];
+    this.displayScore();
+    this.showTime();
 };
 
 Timed.prototype.displayScore = function () {
