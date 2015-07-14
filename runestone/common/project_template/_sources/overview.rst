@@ -535,7 +535,7 @@ as Python.  Here is a simple example:
       }
    }
    console.log(fact(10));
-   outf('hello world');
+   writeln('hello world');
 
 
 Adding a javascript example is just as easy as Python, all you need to do is add a ``:language:``
@@ -633,6 +633,13 @@ Other Languages - LiveCode
        }
 
    }
+
+.. activecode:: ch03_4
+    :nocanvas:
+    :tour_1: "Overall Tour"; 1-2: Example04_Tour01_Line01; 2: Example04_Tour01_Line02; 1: Example04_Tour01_Line03;
+
+    for name in ["Joe", "Amy", "Brad", "Angelina", "Zuki", "Thandi", "Paris"]:
+        print("Hi", name, "Please come to my party on Saturday!")
 
 
 
