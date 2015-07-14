@@ -44,10 +44,6 @@ def visit_fitb_node(self,node):
         node.fitb_options['casei'] = 'true'
     else:
         node.fitb_options['casei'] = 'false'
-    if 'timed' in node.fitb_options:
-        node.fitb_options['timed'] = 'data-timed'
-    else:
-        node.fitb_options['timed'] = ''
     res = node.template_start % node.fitb_options
 
     self.body.append(res)
@@ -66,7 +62,6 @@ class FillInTheBlank(Directive):
     final_argument_whitespace = True
     has_content = True
     option_spec = {'blankid':directives.unchanged,
-        'timed':directives.flag,
         'iscode':directives.flag,
         'casei':directives.flag  # case insensitive matching
     }
@@ -78,13 +73,12 @@ class FillInTheBlank(Directive):
             :return:
             .. fillintheblank:: qname
             :iscode: boolean
-            :timed: Flag that indicated this is part of a timed block
             :casei: Case insensitive boolean
             ...
             """
 
         TEMPLATE_START = '''
-        <p data-component="fillintheblank" data-casei="%(casei)s" id="%(divid)s" %(timed)s>
+        <p data-component="fillintheblank" data-casei="%(casei)s" id="%(divid)s">
             '''
 
         TEMPLATE_END = '''

@@ -28,7 +28,6 @@ Each 2 <code>li</code> answer/feedback pair represents a possible answer to the 
 	<li><code>id</code> must be unique in the document</li>
 	<li><code>data-multipleanswers</code> REQUIRED Attribute.  Possible values are true and false.  Determines whether the question can take one or more answers on submission (radio vs checkbox).</li>
 	<li><code>data-random</code> Randomizes the order that the possible answers are displayed on the page</li>
-	<li><code>data-timed</code> Required if this MC question is inside of a timed assessment, will break things if not.</li>
 	<br />
 	<p>Attributes of the question tags</p>
 	<br />
@@ -58,7 +57,7 @@ Each regex,text <code>span</code> pair represents a point of feedback for incorr
 
 Multiple blanks can also be put into the same FITB question as shown here.
 
-		<p data-component="fillintheblank" data-casei="false" data-timed id="fill1412" >
+		<p data-component="fillintheblank" data-casei="false" id="fill1412" >
 
 	        <span data-blank>Give me a string that has an 'e' in it. Now.<span data-answer id="blank2_answer">e</span>
 		        <span data-feedback="regex" id="feedback1">f</span>
@@ -91,14 +90,13 @@ Multiple blanks can also be put into the same FITB question as shown here.
 <ul>
 	<li><code>data-casei</code> Determines if the answer is case insensitive</li>
 	<li><code>id</code> Must be unique in the document</li>
-	<li><code>timed</code> Required for a FITB component inside of a timed assessment</li>
 
 </ul>
 
 <h2>Timed</h2>
 
 		<ul data-component="timedAssessment" data-time id="timed_1">
-			<ul data-component="multiplechoice"  data-multipleanswers="true" data-timed data-random id="question_1">
+			<ul data-component="multiplechoice"  data-multipleanswers="true" data-random id="question_1">
 				The Question can go right here.
 				<li data-component="answer" id="123" >Answer One</li>
 				<li data-component="feedback" for="123">Feedback for One</li>
@@ -110,7 +108,7 @@ Multiple blanks can also be put into the same FITB question as shown here.
 				<li data-component="feedback" for="789">Feedback for Three</li>
 			</ul>
 
-			<ul data-component="multiplechoice" data-timed id="question_2">
+			<ul data-component="multiplechoice" id="question_2">
 				The Question can go right here.
 				<li data-component="answer" id="123" >Answer One</li>
 				<li data-component="feedback" for="123">Feedback for One</li>
@@ -122,7 +120,7 @@ Multiple blanks can also be put into the same FITB question as shown here.
 				<li data-component="feedback" for="789">Feedback for Three</li>
 			</ul>
 
-			<p data-component="fillintheblank" data-casei="false" data-timed id="fill1412" >
+			<p data-component="fillintheblank" data-casei="false" id="fill1412" >
 
 				<span data-blank>Give me a string that has an 'e' in it. Now.<span data-answer id="blank2_answer">e</span>
 
