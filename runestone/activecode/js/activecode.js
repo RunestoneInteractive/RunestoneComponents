@@ -88,7 +88,7 @@ ActiveCode.prototype.createEditor = function (index) {
     editor.on('change', (function () {
         if (editor.acEditEvent == false || editor.acEditEvent === undefined) {
             $(editor.getWrapperElement()).css('border-top', '2px solid #b43232');
-            $(editor.getWrapperthis.element()).css('border-bottom', '2px solid #b43232');
+            $(editor.getWrapperElement()).css('border-bottom', '2px solid #b43232');
             this.logBookEvent({'event': 'activecode', 'act': 'edit', 'div_id': this.divid});
     }
         editor.acEditEvent = true;
@@ -141,20 +141,20 @@ ActiveCode.prototype.createControls = function () {
         $(butt).addClass("ac_opt btn btn-default");
         $(butt).text("Code Coach");
         $(butt).css("margin-left", "10px");
-        this.clButton = butt;
+        this.coachButton = butt;
         ctrlDiv.appendChild(butt);
         $(butt).click(this.showCodeCoach.bind(this));
     }
 
     // Audio Tour
-    if ($(this.origElem).data("tour_1")) {
+    if ($(this.origElem).data("audio")) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
         $(butt).text("Audio Tour");
         $(butt).css("margin-left", "10px");
-        this.clButton = butt;
+        this.atButton = butt;
         ctrlDiv.appendChild(butt);
-        $(butt).click(function() {new AudioTour(this.divid, this.editor.getValue(), 1, $(this.origElem).data("tour_1"))});
+        $(butt).click((function() {new AudioTour(this.divid, this.editor.getValue(), 1, $(this.origElem).data("audio"))}).bind(this));
     }
 
     $(this.outerDiv).prepend(ctrlDiv);
@@ -299,7 +299,7 @@ ActiveCode.prototype.toggleEditorVisibility = function () {
 
 ActiveCode.prototype.addErrorMessage = function (err) {
     //logRunEvent({'div_id': this.divid, 'code': this.prog, 'errinfo': err.toString()}); // Log the run event
-    console.log(err.toString());
+    console.log("Runtime Error: " + err.toString());
 };
 
 ActiveCode.prototype.setTimeLimit = function (timer) {
@@ -381,6 +381,7 @@ ActiveCode.prototype.runProg = function() {
               python3: true,
               imageProxy : 'http://image.runestone.academy:8080/320x'
         });
+        Sk.divid = this.divid;
         this.setTimeLimit();
         (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = this.graphics;
         $(this.runButton).attr('disabled', 'disabled');
@@ -395,9 +396,10 @@ ActiveCode.prototype.runProg = function() {
             $(this.runButton).removeAttr('disabled');
             this.logRunEvent({'div_id': this.id, 'code': prog, 'errinfo': 'success'}); // Log the run event
         }).bind(this),
-            function(err) {  // fail
+            (function(err) {  // fail
+            $(this.runButton).removeAttr('disabled');
             this.addErrorMessage(err)
-                });
+                }).bind(this));
 
         if (typeof(allVisualizers) != "undefined") {
             $.each(allVisualizers, function (i, e) {
@@ -609,46 +611,46 @@ function AudioTour (divid, code, bnum, audio_text) {
 
     // Accommodate buttons for a maximum of five tours
 
-    $('#' + 'button_audio_0').click(function () {
+    $('#' + 'button_audio_0').click((function () {
         this.tour(divid, audio_hash[0], bcount);
-    });
-    $('#' + 'button_audio_1').click(function () {
+    }).bind(this));
+    $('#' + 'button_audio_1').click((function () {
         this.tour(divid, audio_hash[1], bcount);
-    });
-    $('#' + 'button_audio_2').click(function () {
+    }).bind(this));
+    $('#' + 'button_audio_2').click((function () {
         this.tour(divid, audio_hash[2], bcount);
-    });
-    $('#' + 'button_audio_3').click(function () {
+    }).bind(this));
+    $('#' + 'button_audio_3').click((function () {
         this.tour(divid, audio_hash[3], bcount);
-    });
-    $('#' + 'button_audio_4').click(function () {
+    }).bind(this));
+    $('#' + 'button_audio_4').click((function () {
         this.tour(divid, audio_hash[4], bcount);
-    });
+    }).bind(this));
 
     // handle the click to go to the next audio
-    $('#first_audio').click(function () {
+    $('#first_audio').click((function () {
         this.firstAudio();
-    });
+    }).bind(this));
 
     // handle the click to go to the next audio
-    $('#prev_audio').click(function () {
+    $('#prev_audio').click((function () {
         this.prevAudio();
-    });
+    }).bind(this));
 
     // handle the click to pause or play the audio
-    $('#pause_audio').click(function () {
+    $('#pause_audio').click((function () {
         this.pauseAndPlayAudio();
-    });
+    }).bind(this));
 
     // handle the click to go to the next audio
-    $('#next_audio').click(function () {
+    $('#next_audio').click((function () {
         this.nextAudio();
-    });
+    }).bind(this));
 
     // handle the click to go to the next audio
-    $('#last_audio').click(function () {
+    $('#last_audio').click((function () {
         this.lastAudio();
-    });
+    }).bind(this));
 
     // make the image buttons look disabled
     $("#first_audio").css('opacity', 0.25);

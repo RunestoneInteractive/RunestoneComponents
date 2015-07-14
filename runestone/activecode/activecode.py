@@ -47,7 +47,7 @@ def setup(app):
 
 
 TEMPLATE = """
-<pre data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s data-audio='%(ctext)s' data-time='%(timelimit)s'>
+<pre data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s data-audio='%(ctext)s' %(timelimit)s'>
 %(initialcode)s
 </pre>
 """
@@ -68,43 +68,11 @@ GRADES = '''
 <input type="button" class='btn btn-default ' id="gradeb" name="Show Feedback" value="Show Feedback" onclick="createGradeSummary('%(divid)s')"/>
 '''
 
-AUDIO = '''
-<span class="ac_sep"></span>
-<input type="button" class='btn btn-default ' id="audiob" name="Play Audio" value="Start Audio Tour" onclick="createAudioTourHTML('%(divid)s','%(argu)s','%(no_of_buttons)s','%(ctext)s')"/>
-'''
 
-EDIT2 = '''
-<div class="ac_actions">
-<button class='btn btn-success' id="%(divid)s_runb">Run</button>
-<button class="ac_opt btn btn-default" style="display: inline-block" id="%(divid)s_saveb" onclick="saveEditor('%(divid)s');">Save</button>
-<button class="ac_opt btn btn-default" style="display: inline-block" id="%(divid)s_loadb" onclick="requestCode('%(divid)s');">Load</button>
-'''
-
-VIZB = '''<button class='btn btn-default' id="%(divid)s_vizb" onclick="injectCodelens(this,'%(divid)s');">Show in Codelens</button>
-'''
-
-
-
-SUFF = '''<pre id="%(divid)s_suffix" style="display:none">%(suffix)s</pre>'''
-
-PRE = '''<pre id="%(divid)s_pre" class="active_out"></pre>
-'''
-OUTPUT_END = '''
-</div> <!-- end output -->'''
-
-VIZ = '''<div id="%(divid)s_codelens_div" style="display:none"></div>'''
 
 # <iframe id="%(divid)s_codelens" width="800" height="500" style="display:block"src="#">
 # </iframe>
 
-COACH = '''<div id="%(divid)s_coach_div" style="display:none;"></div>'''
-
-HTMLOUT = '''<div id="%(divid)s_htmlout" style="display:none;" class="ac_htmlout"></div>'''
-
-END = '''
-</div>
-
-'''
 
 AUTO = '''
 <script type="text/javascript">
@@ -195,19 +163,11 @@ class ActiveCode(Directive):
         self.options['divid'] = self.arguments[0]
 
         if self.content:
-            if '====' in self.content:
-                idx = self.content.index('====')
-                source = "\n".join(self.content[:idx])
-                suffix = "\n".join(self.content[idx + 1:])
-            else:
-                source = "\n".join(self.content)
-                suffix = "\n"
+            source = "\n".join(self.content)
         else:
             source = '\n'
-            suffix = '\n'
 
         self.options['initialcode'] = source
-        self.options['suffix'] = suffix
         str = source.replace("\n", "*nline*")
         str0 = str.replace("\"", "*doubleq*")
         str1 = str0.replace("(", "*open*")
@@ -232,35 +192,40 @@ class ActiveCode(Directive):
             self.options['caption'] = ''
 
         if 'include' not in self.options:
-            self.options['include'] = 'undefined'
+            self.options['include'] = ''
         else:
             lst = self.options['include'].split(',')
             lst = [x.strip() for x in lst]
-            self.options['include'] = lst
+            self.options['include'] = 'data-include=' + " ".join(lst)
 
         if 'hidecode' in self.options:
-            self.options['hidecode'] = 'none'
+            self.options['hidecode'] = 'data-hidecode="true"'
         else:
-            self.options['hidecode'] = 'block'
+            self.options['hidecode'] = ''
 
         if 'language' not in self.options:
             self.options['language'] = 'python'
 
+        if 'language' == 'html':
+            self.options['language'] = 'htmlmixed'
+
         if 'nocodelens' in self.options or self.options['language'] != 'python':
-            self.options['codelens'] = False
+            self.options['codelens'] = ''
         else:
-            self.options['codelens'] = True
+            self.options['codelens'] = 'data-codelens="true"'
 
         if 'timelimit' not in self.options:
-            self.options['timelimit'] = ''
+            self.options['timelimit'] = 'data-timelimit=25000'
+        else:
+            self.options['timelimit'] = 'data-timelimit=%d' % self.options['timelimit']
 
         if 'autorun' not in self.options:
             self.options['autorun'] = ''
         else:
-            self.options['autorun'] = 'data-autorun'
+            self.options['autorun'] = 'data-autorun="true"'
 
         if 'coach' in self.options:
-            self.options['coach'] = 'data-coach'
+            self.options['coach'] = 'data-coach="true"'
         else:
             self.options['coach'] = ''
 
