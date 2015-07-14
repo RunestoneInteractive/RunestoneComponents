@@ -115,7 +115,6 @@ Example:
             self.options['code'] = "\n".join(self.options['code'])
 
         self.options['divid'] = self.arguments[0]
-        print(self.options)
 
         self.assert_has_content()
         return [ParsonsNode(self.options)]

@@ -70,7 +70,6 @@ def depart_dnd_node(self,node):
     # Add all of the possible answers
     okeys = list(node.dnd_options.keys())
     okeys.sort()
-    print(okeys)
     for k in okeys:
         if 'match' in k:
             x,label = k.split('_')
