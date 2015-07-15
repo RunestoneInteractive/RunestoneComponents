@@ -48,7 +48,7 @@ def setup(app):
 
 
 TEMPLATE = """
-<pre data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s data-audio='%(ctext)s' %(timelimit)s'>
+<pre data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s data-audio='%(ctext)s'>
 %(initialcode)s
 </pre>
 """
@@ -59,10 +59,6 @@ CAPTION = '''
 <p class="ac_caption"><span class="ac_caption_text">%(caption)s (%(divid)s)</span> </p>
 '''
 
-UNHIDE = '''
-<span class="ac_sep"></span>
-<button class='btn btn-default' id="%(divid)s_showb" onclick="$('#%(divid)s_code_div').toggle();cm_editors['%(divid)s_code'].refresh();$('#%(divid)s_saveb').toggle();$('#%(divid)s_loadb').toggle()">Show/Hide Code</button>
-'''
 
 GRADES = '''
 <span class="ac_sep"></span>
@@ -207,7 +203,7 @@ class ActiveCode(Directive):
         if 'language' not in self.options:
             self.options['language'] = 'python'
 
-        if 'language' == 'html':
+        if self.options['language'] == 'html':
             self.options['language'] = 'htmlmixed'
 
         if 'nocodelens' in self.options or self.options['language'] != 'python':
