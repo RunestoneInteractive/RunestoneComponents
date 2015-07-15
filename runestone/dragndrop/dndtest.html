@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+	<meta charset="UTF-8">
+    <title></title>
+	<link rel="stylesheet" href="../assess/bower_components/jquery-ui/themes/base/jquery-ui.css"/>
+	<link rel="stylesheet" href="../assess/testPages/bootstrap.min.css"/>
+	<link rel="stylesheet" href="css/dragndrop.css"/>
+	<script type="text/javascript" src="../assess/bower_components/jquery/dist/jquery.js"></script>
+	<script type="text/javascript" src="../assess/bower_components/jquery-ui/jquery-ui.js"></script>
+	<script type="text/javascript" src="../common/js/runestonebase.js"></script>
+	<script type="text/javascript" src="../assess/bower_components/bootstrap/dist/js/bootstrap.js"></script>
+	<script type="text/javascript" src="js/dragndrop.js"></script>
+	<script type="text/javascript" src="../assess/js/timed.js"></script>
+	<script type="text/javascript" src="http://www.interactivepython.org/runestone/static/thinkcspy/_static/bootstrap-3.0.0/js/bootstrap.min.js"></script>
+	<script type="text/javascript">
+		eBookConfig = {};
+		eBookConfig.host = 'http://interactivepython.org' ? 'http://interactivepython.org' : 'http://127.0.0.1:8000';
+		eBookConfig.app = eBookConfig.host+'/runestone';
+		eBookConfig.ajaxURL = eBookConfig.app+'/ajax/';
+		eBookConfig.course = 'thinkcspy';
+		eBookConfig.logLevel = 10;
+		eBookConfig.loginRequired = false
+		eBookConfig.build_info = "3.1.1";
+		eBookConfig.isLoggedIn = false;
+	</script>
+
+
+</head>
+<body>
+
+<ul data-component="dragndrop" id="dd1">
+    <span data-component="question">The Question goes here.</span>
+	<span data-component="feedback">This is feedback that is displayed when this is answered incorrectly.</span>
+
+    <li data-component="draggable" id="dd1_drag1">Drag to Answer A</li>
+    <li data-component="dropzone" for="dd1_drag1">Answer A</li>
+
+    <li data-component="draggable" id="dd1_drag2">Drag to Answer B</li>
+    <li data-component="dropzone" for="dd1_drag2">Answer B</li>
+
+    <li data-component="draggable" id="dd1_drag3">Drag to Answer C</li>
+    <li data-component="dropzone" for="dd1_drag3">Answer C</li>
+
+
+</ul>
+
+<ul data-component="dragndrop" id="dd2">
+    <span data-component="question">The Question goes here.</span>
+	<span data-component="feedback">This is feedback that is displayed when this is answered incorrectly.</span>
+
+    <li data-component="draggable" id="dd1_drag4">Drag to Answer A</li>
+    <li data-component="dropzone" for="dd1_drag4">Answer A</li>
+
+    <li data-component="draggable" id="dd1_drag5">Drag to Answer B</li>
+    <li data-component="dropzone" for="dd1_drag5">Answer B</li>
+
+    <li data-component="draggable" id="dd1_drag6">Drag to Answer C</li>
+    <li data-component="dropzone" for="dd1_drag6">Answer C</li>
+
+
+</ul>
+
+
+
+</body>
+
+</html>
