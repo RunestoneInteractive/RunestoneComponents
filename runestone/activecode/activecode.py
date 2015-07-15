@@ -19,11 +19,12 @@ __author__ = 'bmiller'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
-
+from .textfield import *
 
 def setup(app):
     app.add_directive('activecode', ActiveCode)
     app.add_directive('actex', ActiveExercise)
+    app.add_role('textfield',textfield_role)
     app.add_stylesheet('codemirror.css')
     app.add_stylesheet('activecode.css')
 

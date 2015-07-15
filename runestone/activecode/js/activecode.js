@@ -37,6 +37,7 @@ ActiveCode.prototype.init = function(opts) {
     this.language = $(orig).data('lang');
     this.timelimit = $(orig).data('timelimit');
     this.includes = $(orig).data('include');
+    this.hidecode = $(orig).data('hidecode');
     this.runButton = null;
     this.saveButton = null;
     this.loadButton = null;
@@ -95,6 +96,9 @@ ActiveCode.prototype.createEditor = function (index) {
         }).bind(this));  // use bind to preserve *this* inside the on handler.
 
     this.editor = editor;
+    if (this.hidecode) {
+        $(this.codeDiv).css("display","none");
+    }
 };
 
 ActiveCode.prototype.createControls = function () {
@@ -116,7 +120,9 @@ ActiveCode.prototype.createControls = function () {
     $(butt).css("margin-left","10px");
     this.saveButton = butt;
     ctrlDiv.appendChild(butt);
-
+    if (this.hidecode) {
+        $(butt).css("display","none")
+    }
     // Load
     butt = document.createElement("button");
     $(butt).addClass("ac_opt btn btn-default");
@@ -124,6 +130,23 @@ ActiveCode.prototype.createControls = function () {
     $(butt).css("margin-left","10px");
     this.loadButton = butt;
     ctrlDiv.appendChild(butt);
+    if (this.hidecode) {
+        $(butt).css("display","none")
+    }
+
+    // Show/Hide Code
+    if (this.hidecode) {
+        butt = document.createElement("button");
+        $(butt).addClass("ac_opt btn btn-default");
+        $(butt).text("Show/Hide Code");
+        $(butt).css("margin-left", "10px");
+        this.showHideButt = butt;
+        ctrlDiv.appendChild(butt);
+        $(butt).click( (function() { $(this.codeDiv).toggle();
+        $(this.loadButton).toggle();
+        $(this.saveButton).toggle();
+        }).bind(this));
+    }
 
     // CodeLens
     if ($(this.origElem).data("codelens")) {
