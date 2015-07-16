@@ -690,7 +690,7 @@ function AudioTour (divid, code, bnum, audio_text) {
             this.elem.pause();
         }
         //log change to db
-        logBookEvent({'event': 'Audio', 'change': 'closeWindow', 'div_id': divid});
+        logBookEvent({'event': 'Audio', 'act': 'closeWindow', 'div_id': divid});
         $('.modal-profile').fadeOut("slow");
         $('.modal-lightsout').fadeOut("slow");
     });
@@ -774,7 +774,7 @@ AudioTour.prototype.tour = function (divid, audio_type, bcount) {
     $('#status').html("Starting the " + name);
 
     //log tour type to db
-    logBookEvent({'event': 'Audio', 'tour type': name, 'div_id': divid});
+    logBookEvent({'event': 'Audio', 'act': name, 'div_id': divid});
 
     var max = atype.length;
     var str = "";
@@ -832,7 +832,7 @@ AudioTour.prototype.firstAudio = function () {
     this.handlePlaying();
 
     //log change to db
-    this.logBookEvent({'event': 'Audio', 'change': 'first', 'div_id': this.theDivid});
+    this.logBookEvent({'event': 'Audio', 'act': 'first', 'div_id': this.theDivid});
 
 
     // move to the first audio
@@ -852,7 +852,7 @@ AudioTour.prototype.prevAudio = function () {
         this.handlePlaying();
 
         //log change to db
-        this.logBookEvent({'event': 'Audio', 'change': 'prev', 'div_id': this.theDivid});
+        this.logBookEvent({'event': 'Audio', 'act': 'prev', 'div_id': this.theDivid});
 
 
         // move to previous to the current (but the current index has moved to the next)
@@ -870,7 +870,7 @@ AudioTour.prototype.nextAudio = function () {
     this.handlePlaying();
 
     //log change to db
-    this.logBookEvent({'event': 'Audio', 'change': 'next', 'div_id': this.theDivid});
+    this.logBookEvent({'event': 'Audio', 'act': 'next', 'div_id': this.theDivid});
 
     // if not at the end
     if (this.currIndex < (this.len - 1)) {
@@ -889,7 +889,7 @@ AudioTour.prototype.lastAudio = function () {
     this.handlePlaying();
 
     //log change to db
-    this.logBookEvent({'event': 'Audio', 'change': 'last', 'div_id': this.theDivid});
+    this.logBookEvent({'event': 'Audio', 'act': 'last', 'div_id': this.theDivid});
 
     // move to the last audio
     this.currIndex = this.len - 1;
@@ -987,7 +987,7 @@ AudioTour.prototype.playaudio = function (i, aname, divid, ahash) {
     //console.log("in playaudio " + elem.duration);
     if (isNaN(this.elem.duration) || this.elem.duration == 0) {
         // set the status
-        $('#status').html("Loading audio.  Please wait.");
+        $('#status').html("Loading audio.  Please wait.   If it doesn't start soon close this window (click on the red X) and try again");
         $('#' + this.afile).bind('canplaythrough', function () {
             playWhenReady(this.afile, divid, ahash);
         });
@@ -1010,7 +1010,7 @@ AudioTour.prototype.pauseAndPlayAudio = function () {
         document.getElementById("pause_audio").src = "../_static/pause.png";
         document.getElementById("pause_audio").title = "Pause current audio";
         //log change to db
-        logBookEvent({'event': 'Audio', 'change': 'play', 'div_id': this.theDivid});
+        logBookEvent({'event': 'Audio', 'act': 'play', 'div_id': this.theDivid});
     }
 
     // if audio was this.playing pause it
@@ -1019,7 +1019,7 @@ AudioTour.prototype.pauseAndPlayAudio = function () {
         document.getElementById("pause_audio").src = "../_static/play.png";
         document.getElementById("pause_audio").title = "Play paused audio";
         //log change to db
-        logBookEvent({'event': 'Audio', 'change': 'pause', 'div_id': this.theDivid});
+        logBookEvent({'event': 'Audio', 'act': 'pause', 'div_id': this.theDivid});
     }
 
 };
