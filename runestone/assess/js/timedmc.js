@@ -127,7 +127,16 @@ TimedMC.prototype.checkCorrectTimed = function () {
     }
 };
 
+TimedMC.prototype.hideFeedback = function () {
+    for (var i = 0; i < this.feedBackEachArray.length; i++) {
+        $(this.feedBackEachArray[i]).hide();
+    }
+};
+
 TimedMC.prototype.processTimedSubmission = function () {
+    for (var i = 0; i < this.optionArray.length; i++) {
+        this.optionArray[i]["input"].disabled = true;
+    }
     if (this.multipleanswers) {
         this.processMCMASubmission();
     } else {

@@ -23,6 +23,7 @@ from docutils.parsers.rst import Directive
 def setup(app):
     app.add_directive('clickablearea',ClickableArea)
     app.add_javascript('clickable.js')
+    app.add_javascript('timedclickable.js')
     app.add_stylesheet('clickable.css')
 
     app.add_node(ClickableAreaNode, html=(visit_ca_node, depart_ca_node))
