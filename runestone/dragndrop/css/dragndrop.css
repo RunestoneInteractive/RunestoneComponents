@@ -25,6 +25,10 @@
     background-color: black;
     color: white;
 }
+.drop-incorrect {
+    border: 1px solid red !important;
+    background-color: #f2dede !important;
+}
 .drag-reset:enabled {
     background-color: #474949;
     color: white;
