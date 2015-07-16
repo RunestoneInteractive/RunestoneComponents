@@ -74,6 +74,7 @@ Take a look at the activecode interpreter in action.  If we take a simple Python
 
 .. activecode:: codeexample1
    :coach:
+   :caption: This is a caption
 
    print("My first program adds a list of numbers")
    myList = [2, 4, 6, 8, 10]
@@ -108,6 +109,8 @@ are learning to program.
 
 .. activecode:: codeexample2
     :nocodelens:
+    :hidecode:
+    :autorun:
 
     import turtle
 
@@ -610,7 +613,7 @@ in the gray output area.
 Other Languages - LiveCode
 --------------------------
 
-.. livecode:: lc1
+.. activecode:: lc1
    :language: java
    :stdin: 100
 
