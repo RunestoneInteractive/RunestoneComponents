@@ -2,17 +2,6 @@
  * Created by bmiller on 3/19/15.
  */
 
-function RunestoneBase() {
-
-}
-
-RunestoneBase.prototype.logBookEvent = function(info) {
-    console.log("logging event " + this.divid);
-};
-
-RunestoneBase.prototype.logRunEvent = function(info) {
-    console.log("running " + this.divid);
-};
 
 var edList = {};
 
@@ -230,6 +219,13 @@ ActiveCode.prototype.createOutput = function () {
 
 };
 
+ActiveCode.prototype.disableSaveLoad = function() {
+    $(this.saveButton).addClass('disabled');
+    $(this.saveButton).attr('title','Login to save your code');
+    $(this.loadButton).addClass('disabled');
+    $(this.loadButton).attr('title','Login to load your code');
+};
+
 ActiveCode.prototype.addCaption = function() {
     //someElement.parentNode.insertBefore(newElement, someElement.nextSibling);
     var capDiv = document.createElement('p');
@@ -242,9 +238,81 @@ ActiveCode.prototype.addCaption = function() {
 
 ActiveCode.prototype.saveEditor = function () {
 
+    var saveSuccess = function(data, status, whatever) {
+        if (data.redirect) {
+            alert("Did not save!  It appears you are not logged in properly")
+        } else if (data == "") {
+            alert("Error:  Program not saved");
+        }
+        else {
+            var acid = eval(data)[0];
+            if (acid.indexOf("ERROR:") == 0) {
+                alert(acid);
+            } else {
+                // use a tooltip to provide some success feedback
+                var save_btn = $("#" + acid + "_saveb");
+                save_btn.attr('title', 'Saved your code.');
+                opts = {
+                    'trigger': 'manual',
+                    'placement': 'bottom',
+                    'delay': { show: 100, hide: 500}
+                };
+                save_btn.tooltip(opts);
+                save_btn.tooltip('show');
+                setTimeout(function () {
+                    save_btn.tooltip('destroy')
+                }, 4000);
+
+                $('#' + acid + ' .CodeMirror').css('border-top', '2px solid #aaa');
+                $('#' + acid + ' .CodeMirror').css('border-bottom', '2px solid #aaa');
+            }
+        }
+    };
+
+    var data = {acid: this.divid, code: this.editor.getValue()};
+    data.lang = this.language;
+    $(document).ajaxError(function (e, jqhxr, settings, exception) {
+        alert("Request Failed for" + settings.url)
+    });
+    jQuery.post(eBookConfig.ajaxURL + 'saveprog', data, saveSuccess);
+    if (this.editor.acEditEvent) {
+        logBookEvent({'event': 'activecode', 'act': 'edit', 'div_id': this.divid}); // Log the run event
+        this.editor.acEditEvent = false;
+    }
+    logBookEvent({'event': 'activecode', 'act': 'save', 'div_id': this.divid}); // Log the run event
+
 };
 
 ActiveCode.prototype.loadEditor = function () {
+
+    var loadEditor = (function (data, status, whatever) {
+        // function called when contents of database are returned successfully
+        var res = eval(data)[0];
+
+        if (res.source) {
+            this.editor.setValue(res.source);
+            this.loadButton.tooltip({'placement': 'bottom',
+                             'title': "Loaded your saved code.",
+                             'trigger': 'manual'
+                            });
+        } else {
+            this.loadButton.tooltip({'placement': 'bottom',
+                             'title': "No saved code.",
+                             'trigger': 'manual'
+                            });
+        }
+        this.loadButton.tooltip('show');
+        setTimeout(function () {
+            this.loadButton.tooltip('destroy')
+        }, 4000);
+    }).bind(this);
+
+    var data = {acid: this.divid};
+    if (sid !== undefined) {
+        data['sid'] = sid;
+    }
+    logBookEvent({'event': 'activecode', 'act': 'load', 'div_id': this.divid}); // Log the run event
+    jQuery.get(eBookConfig.ajaxURL + 'getprog', data, loadEditor);
 
 };
 
@@ -1280,5 +1348,13 @@ $(document).ready(function() {
             edList[this.id] = new ActiveCode({'orig': this});
         }
     });
-    });
+    if (loggedout) {
+        for (k in edList) {
+            edList[k].disableSaveLoad();
+        }
+    }
 
+});
+
+var loggedout;
+$(document).bind("runestone:logout",function() { loggedout=true;})
