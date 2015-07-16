@@ -61,7 +61,10 @@ ActiveCode.prototype.init = function(opts) {
     this.createOutput();
     this.createControls();
 
-        }
+    if ($(orig).data('autorun')) {
+        $(document).ready(this.runProg.bind(this));
+    }
+};
 
 ActiveCode.prototype.createEditor = function (index) {
     var newdiv = document.createElement('div');

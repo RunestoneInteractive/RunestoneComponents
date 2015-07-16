@@ -65,16 +65,7 @@ CAPTION = '''
 <p class="ac_caption"><span class="ac_caption_text">%(caption)s (%(divid)s)</span> </p>
 '''
 
-AUTO = '''
-<script type="text/javascript">
-$(document).ready(function() {
-    $(window).load(function() {
-        var runb = document.getElementById("%(divid)s_runb");
-        runit('%(divid)s',runb, %(include)s);
-    });
-});
-</script>
-'''
+
 
 
 class ActivcodeNode(nodes.General, nodes.Element):
