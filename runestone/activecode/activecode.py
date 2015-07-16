@@ -54,19 +54,10 @@ def setup(app):
 
 
 TEMPLATE = """
-<pre data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(gradebutton)s>
+<pre data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(gradebutton)s %(caption)s>
 %(initialcode)s
 </pre>
 """
-
-
-CAPTION = ''' 
-<div class="clearfix"></div>
-<p class="ac_caption"><span class="ac_caption_text">%(caption)s (%(divid)s)</span> </p>
-'''
-
-
-
 
 class ActivcodeNode(nodes.General, nodes.Element):
     def __init__(self, content):
@@ -175,6 +166,8 @@ class ActiveCode(Directive):
 
         if 'caption' not in self.options:
             self.options['caption'] = ''
+        else:
+            self.options['caption'] = "data-caption='%s'" % self.options['caption']
 
         if 'include' not in self.options:
             self.options['include'] = ''

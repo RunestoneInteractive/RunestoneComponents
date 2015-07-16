@@ -60,6 +60,12 @@ ActiveCode.prototype.init = function(opts) {
     this.createEditor();
     this.createOutput();
     this.createControls();
+    if ($(orig).data('caption')) {
+        this.caption = $(orig).data('caption');
+    } else {
+        this.caption = ""
+    }
+    this.addCaption()
 
     if ($(orig).data('autorun')) {
         $(document).ready(this.runProg.bind(this));
@@ -222,6 +228,16 @@ ActiveCode.prototype.createOutput = function () {
     $(clearDiv).css("clear","both");  // needed to make parent div resize properly
     this.outerDiv.appendChild(clearDiv);
 
+};
+
+ActiveCode.prototype.addCaption = function() {
+    //someElement.parentNode.insertBefore(newElement, someElement.nextSibling);
+    var capDiv = document.createElement('p');
+    $(capDiv).html(this.caption + " (" + this.divid + ")");
+    $(capDiv).addClass("ac_caption");
+    $(capDiv).addClass("ac_caption_text");
+
+    this.outerDiv.parentNode.insertBefore(capDiv, this.outerDiv.nextSibling);
 };
 
 ActiveCode.prototype.saveEditor = function () {
