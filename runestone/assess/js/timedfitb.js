@@ -1,4 +1,3 @@
-// FITB constructor
 function TimedFITB (opts) {
     if (opts) {
         this.timedInit(opts);
@@ -37,6 +36,13 @@ TimedFITB.prototype.renderTimedIcon = function (component) {
 TimedFITB.prototype.checkCorrectTimed = function () {
     // Returns if the question was correct.    Used for timed assessment grading.
     return this.correct;
+};
+
+TimedFITB.prototype.hideFeedback = function () {
+    for (var i = 0; i < this.blankArray.length; i++) {
+        $(this.blankArray[i]).removeClass("input-validation-error");
+    }
+    this.feedBackDiv.style.display = "none";
 };
 
 TimedFITB.prototype.processTimedSubmission = function () {
