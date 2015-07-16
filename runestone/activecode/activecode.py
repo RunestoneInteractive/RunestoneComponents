@@ -44,6 +44,7 @@ def setup(app):
     app.add_javascript('activecode.js')
     app.add_javascript('skulpt.min.js')
     app.add_javascript('skulpt-stdlib.js')
+    app.add_javascript('clike.js')
 
     app.add_node(ActivcodeNode, html=(visit_ac_node, depart_ac_node))
 
@@ -53,7 +54,7 @@ def setup(app):
 
 
 TEMPLATE = """
-<pre data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s data-audio='%(ctext)s'>
+<pre data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s>
 %(initialcode)s
 </pre>
 """
@@ -152,7 +153,10 @@ class ActiveCode(Directive):
         'tour_5': directives.unchanged,
         'nocodelens': directives.flag,
         'coach': directives.flag,
-        'timelimit': directives.unchanged
+        'timelimit': directives.unchanged,
+        'stdin' : directives.unchanged,
+        'datafile' : directives.unchanged,
+        'sourcefile' : directives.unchanged
     }
 
     def run(self):
@@ -231,6 +235,22 @@ class ActiveCode(Directive):
             self.options['coach'] = 'data-coach="true"'
         else:
             self.options['coach'] = ''
+
+        # livecode options
+        if 'stdin' in self.options:
+            self.options['stdin'] = "data-stdin='%s'" % self.options['stdin']
+        else:
+            self.options['stdin'] = ""
+
+        if 'datafile' not in self.options:
+            self.options['datafile'] = ""
+        else:
+            self.options['datafile'] = "data-datafile='%s'" % self.options['datafile']
+
+        if 'sourcefile' not in self.options:
+            self.options['sourcefile'] = ""
+        else:
+            self.options['sourcefile'] = "data-sourcefile='%s'" % self.options['sourcefile']
 
         return [ActivcodeNode(self.options)]
 

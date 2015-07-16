@@ -1008,7 +1008,200 @@ AudioTour.prototype.setBackgroundForLines = function (divid, lnum, color) {
     }
 };
 
+//
+//
 
+LiveCode.prototype = new ActiveCode();
+
+function LiveCode(opts) {
+    if (opts) {
+        this.init(opts)
+        }
+    }
+
+LiveCode.prototype.init = function(opts) {
+    ActiveCode.prototype.init.apply(this,arguments)
+
+    var orig = opts.orig;
+    this.stdin = $(orig).data('stdin');
+    this.datafile = $(orig).data('datafile');
+    this.sourcefile = $(orig).data('sourcefile');
+
+    this.API_KEY = "67033pV7eUUvqo07OJDIV8UZ049aLEK1"
+    this.USE_API_KEY = true;
+    this.JOBE_SERVER = 'http://jobe2.cosc.canterbury.ac.nz';
+    this.resource = '/jobe/index.php/restapi/runs/';
+    this.div2id = {}
+    if (this.stdin) {
+        this.createInputElement();
+    }
+    this.createErrorOutput();
+    };
+
+LiveCode.prototype.outputfun = function (a) {};
+
+LiveCode.prototype.createInputElement = function () {
+
+    var label = document.createElement('label');
+    label.for = this.divid + "_stdin";
+    $(label).text("Input for Program")
+    var input = document.createElement('input')
+    input.id = this.divid + "_stdin";
+    input.type = "text";
+    input.size = "35";
+    input.value = this.stdin;
+    this.outerDiv.appendChild(label);
+    this.outerDiv.appendChild(input);
+    this.stdin_el = input;
+};
+
+LiveCode.prototype.createErrorOutput = function () {
+
+}
+
+LiveCode.prototype.runProg = function() {
+        var xhr, stdin;
+        var runspec = {};
+        var data, host, source, editor;
+        var sfilemap = {java: '', cpp: 'test.cpp', c: 'test.c', python3: 'test.py', python2: 'test.py'}
+
+        xhr = new XMLHttpRequest();
+        source = this.editor.getValue();
+
+        if (this.stdin) {
+            stdin = $(this.stdin_el).val();
+        }
+
+        if (! this.sourcefile ) {
+            this.sourcefile = sfilemap[this.language];
+        }
+
+        runspec = {
+            language_id: this.language,
+            sourcecode: source,
+            sourcefilename: this.sourcefile
+        };
+
+
+        if (stdin) {
+            runspec.input = stdin
+        }
+
+        if (this.datafile) {
+            runspec['file_list'] = [[this.div2id[datafile],datafile]];
+        }
+        data = JSON.stringify({'run_spec': runspec});
+        host = this.JOBE_SERVER + this.resource
+
+        var odiv = this.output;
+        $(this.runButton).attr('disabled', 'disabled');
+        $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
+        $(this.outDiv).show({duration:700,queue:false});
+        $(this.errDiv).remove();
+
+        xhr.open("POST", host, true);
+        xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+        xhr.setRequestHeader('Accept', 'application/json');
+        xhr.setRequestHeader('X-API-KEY', this.API_KEY);
+
+        xhr.onload = (function () {
+            var logresult;
+            $(this.runButton).removeAttr('disabled');
+            try {
+                var result = JSON.parse(xhr.responseText);
+            } catch (e) {
+                result = {};
+                result.outcome = -1;
+            }
+
+            if (result.outcome === 15) {
+                logresult = 'success';
+            } else {
+                logresult = result.outcome;
+            }
+            logRunEvent({'div_id': this.divid, 'code': source, 'errinfo': logresult, 'event':'livecode'});
+            switch (result.outcome) {
+                case 15:
+                    $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
+                    break;
+                case 11: // compiler error
+                    $(odiv).html("There were errors compiling your code. See below.");
+                    this.addJobeErrorMessage(result.cmpinfo);
+                    break;
+                case 12:  // run time error
+                    $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
+                    if (result.stderr) {
+                        this.addJobeErrorMessage(result.stderr);
+                    }
+                    break;
+                case 13:  // time limit
+                    $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
+                    this.addJobeErrorMessage("Time Limit Exceeded on your program");
+                    break;
+                default:
+                    if(result.stderr) {
+                        $(odiv).html(result.stderr.replace(/\n/g, "<br>"));
+                    } else {
+                        this.addJobeErrorMessage("A server error occurred: " + xhr.status + " " + xhr.statusText);
+                    }
+            }
+
+            // todo: handle server busy and timeout errors too
+        }).bind(this);
+
+        ///$("#" + divid + "_errinfo").remove();
+        $(this.output).html("Compiling and Running your Code Now...")
+
+        xhr.onerror = function () {
+            this.addJobeErrorMessage("Error communicating with the server.");
+            $(this.runButton).removeAttr('disabled');
+        };
+
+        xhr.send(data);
+    };
+LiveCode.prototype.addJobeErrorMessage = function (err) {
+        var errHead = $('<h3>').html('Error');
+        var eContainer = this.outerDiv.appendChild(document.createElement('div'));
+        this.errDiv = eContainer;
+        eContainer.className = 'error alert alert-danger';
+        eContainer.id = this.divid + '_errinfo';
+        eContainer.appendChild(errHead[0]);
+        var errText = eContainer.appendChild(document.createElement('pre'))
+        errText.innerHTML = err;
+    };
+
+
+LiveCode.prototype.pushDataFile = function (datadiv) {
+
+        var file_id = 'runestone'+Math.floor(Math.random()*100000);
+        var contents = $(document.getElementById(datadiv)).text();
+        var contentsb64 = btoa(contents);
+        var data = JSON.stringify({ 'file_contents' : contentsb64 });
+        var resource = '/jobe/index.php/restapi/files/' + file_id
+        var host = JOBE_SERVER + resource
+        var xhr = new XMLHttpRequest();
+
+        if (this.div2id[datadiv] === undefined ) {
+            this.div2id[datadiv] = file_id;
+
+            xhr.open("PUT", host, true);
+            xhr.setRequestHeader('Content-type', 'application/json');
+            xhr.setRequestHeader('Accept', 'text/plain');
+            xhr.setRequestHeader('X-API-KEY', API_KEY);
+
+            xhr.onload = function () {
+                console.log("successfully sent file " + xhr.responseText);
+            }
+
+            xhr.onerror = function () {
+                console.log("error sending file" + xhr.responseText);
+            }
+
+            xhr.send(data)
+        }
+    };
+
+//
 
 $(document).ready(function() {
     $('[data-component=activecode]').each( function(index ) {
@@ -1016,9 +1209,11 @@ $(document).ready(function() {
             edList[this.id] = new JSActiveCode({'orig': this});
         } else if ($(this).data('lang') === 'htmlmixed') {
             edList[this.id] = new HTMLActiveCode({'orig': this});
+        } else if (['java', 'cpp', 'c', 'python3', 'python2'].includes($(this).data('lang'))) {
+            edList[this.id] = new LiveCode({'orig': this});
         } else {   // default is python
             edList[this.id] = new ActiveCode({'orig': this});
-}
+        }
     });
     });
 
