@@ -54,7 +54,7 @@ def setup(app):
 
 
 TEMPLATE = """
-<pre data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s>
+<pre data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(gradebutton)s>
 %(initialcode)s
 </pre>
 """
@@ -64,18 +64,6 @@ CAPTION = '''
 <div class="clearfix"></div>
 <p class="ac_caption"><span class="ac_caption_text">%(caption)s (%(divid)s)</span> </p>
 '''
-
-
-GRADES = '''
-<span class="ac_sep"></span>
-<input type="button" class='btn btn-default ' id="gradeb" name="Show Feedback" value="Show Feedback" onclick="createGradeSummary('%(divid)s')"/>
-'''
-
-
-
-# <iframe id="%(divid)s_codelens" width="800" height="500" style="display:block"src="#">
-# </iframe>
-
 
 AUTO = '''
 <script type="text/javascript">
@@ -252,6 +240,9 @@ class ActiveCode(Directive):
         else:
             self.options['sourcefile'] = "data-sourcefile='%s'" % self.options['sourcefile']
 
+        if 'gradebutton' not in self.options:
+            self.options['gradebutton'] = ''
+
         return [ActivcodeNode(self.options)]
 
 
@@ -261,9 +252,9 @@ class ActiveExercise(ActiveCode):
     has_content = True
 
     def run(self):
-        self.options['hidecode'] = True
-        self.options['gradebutton'] = True
-        self.options['coach'] = True
+        self.options['hidecode'] = "data-hidecode=true"
+        self.options['gradebutton'] = "data-gradebutton=true"
+        self.options['coach'] = "data-coach=true"
         return super(ActiveExercise, self).run()
 
 
