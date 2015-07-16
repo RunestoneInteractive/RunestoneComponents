@@ -513,7 +513,7 @@ HTMLActiveCode.prototype.runProg = function () {
 
 HTMLActiveCode.prototype.init = function(opts) {
     ActiveCode.prototype.init.apply(this,arguments)
-    this.code = $('<textarea />').html(orig.innerHTML).text();
+    this.code = $('<textarea />').html(this.origElem.innerHTML).text();
     this.editor.setValue(this.code);
         };
 

@@ -20,7 +20,11 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from .textfield import *
-import cgi
+
+try:
+    from html import escape  # py3
+except ImportError:
+    from cgi import escape  # py2
 
 def setup(app):
     app.add_directive('activecode', ActiveCode)
@@ -206,7 +210,7 @@ class ActiveCode(Directive):
 
         if self.options['language'] == 'html':
             self.options['language'] = 'htmlmixed'
-            self.options['initialcode'] = cgi.escape(self.options['initialcode'])
+            self.options['initialcode'] = escape(self.options['initialcode'])
 
         if 'nocodelens' in self.options or self.options['language'] != 'python':
             self.options['codelens'] = ''
