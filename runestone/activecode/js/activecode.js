@@ -508,26 +508,24 @@ HTMLActiveCode.prototype.runProg = function () {
     $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
     $(this.outDiv).show({duration:700,queue:false});
 
-    $(this.output).html(prog)
+    this.output.srcdoc = prog;
 };
 
 HTMLActiveCode.prototype.init = function(opts) {
     ActiveCode.prototype.init.apply(this,arguments)
-    this.code = $(this.origElem).html();
+    this.code = $('<textarea />').html(orig.innerHTML).text();
     this.editor.setValue(this.code);
         };
 
 HTMLActiveCode.prototype.createOutput = function () {
-    // Create a parent div with two elements:  pre for standard output and a div
-    // to hold turtle graphics output.  We use a div in case the turtle changes from
-    // using a canvas to using some other element like svg in the future.
-    console.log("creating html output")
     var outDiv = document.createElement("div");
     $(outDiv).addClass("ac_output col-md-6");
     this.outDiv = outDiv;
-    this.output = document.createElement('div');
+    this.output = document.createElement('iframe');
     $(this.output).css("background-color","white");
-
+    $(this.output).css("position","relative");
+    $(this.output).css("height","400px");
+    $(this.output).css("width","100%");
     outDiv.appendChild(this.output);
     this.outerDiv.appendChild(outDiv);
 
