@@ -82,14 +82,18 @@ DragNDrop.prototype.createNewElements = function () {
     $(this.containerDiv).text(this.question);
     this.containerDiv.appendChild(document.createElement("br"));
 
+    this.dragDropWrapDiv = document.createElement("div");   // Holds the draggables/dropzones, prevents feedback from bleeding in
+    $(this.dragDropWrapDiv).css("display", "block");
+    this.containerDiv.appendChild(this.dragDropWrapDiv);
+
     this.draggableDiv = document.createElement("div");
     $(this.draggableDiv).addClass("draggable dragzone");
     this.addDragDivListeners();
 
     this.dropZoneDiv = document.createElement("div");
     $(this.dropZoneDiv).addClass("draggable");
-    this.containerDiv.appendChild(this.draggableDiv);
-    this.containerDiv.appendChild(this.dropZoneDiv);
+    this.dragDropWrapDiv.appendChild(this.draggableDiv);
+    this.dragDropWrapDiv.appendChild(this.dropZoneDiv);
 
     this.createButtons();
     this.checkLocalStorage();
@@ -100,8 +104,12 @@ DragNDrop.prototype.createNewElements = function () {
     if (!this.hasStoredDropzones) {
         this.minheight = $(this.draggableDiv).height();
     }
-
     this.draggableDiv.style.minHeight = this.minheight.toString() + "px";
+    if ($(this.dropZoneDiv).height() > this.minheight) {
+        this.dragDropWrapDiv.style.minHeight = $(this.dropZoneDiv).height().toString() + "px";
+    } else {
+        this.dragDropWrapDiv.style.minHeight = this.minheight.toString() + "px";
+    }
 };
 
 DragNDrop.prototype.addDragDivListeners = function () {
@@ -368,7 +376,8 @@ DragNDrop.prototype.checkLocalStorage = function () {
 =================================*/
 $(document).ready(function () {
     $("[data-component=dragndrop]").each(function (index) {
-        ddList[this.id] = new DragNDrop({"orig": this});
+        if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
+            ddList[this.id] = new DragNDrop({"orig": this});
+        }
     });
-
 });
