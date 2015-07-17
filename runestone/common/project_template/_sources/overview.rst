@@ -74,6 +74,7 @@ Take a look at the activecode interpreter in action.  If we take a simple Python
 
 .. activecode:: codeexample1
    :coach:
+   :caption: This is a caption
 
    print("My first program adds a list of numbers")
    myList = [2, 4, 6, 8, 10]
@@ -108,6 +109,8 @@ are learning to program.
 
 .. activecode:: codeexample2
     :nocodelens:
+    :hidecode:
+    :autorun:
 
     import turtle
 
@@ -286,17 +289,17 @@ next line executed.
 Timed Exam Questions
 ---------------------
 
-You can add a timed exam of multiple-choice questions that the user can only take once.  All the feedback will be shown after the time is up or after the user has clicked the "Submit Answers" button at the end of the timed exam.  To start the timed exam click on the "Start" button.  This will also start the countdown of the time remaining.  You can pause the timer by clicking on the "Pause" button and start it again by clicking on the "Resume" button.  When you pause the timed exam the questions will be hidden.  There is also a clock icon that will display the time remaining when the reader hovers over it.
+You can add a timed exam of multiple-choice/fill-in-the-blank questions that the user can only take once.  All the feedback will be shown after the time is up or after the user has clicked the "Submit Answers" button at the end of the timed exam.  To start the timed exam click on the "Start" button.  This will also start the countdown of the time remaining.  You can pause the timer by clicking on the "Pause" button and start it again by clicking on the "Resume" button.  When you pause the timed exam the questions will be hidden.  There is also a clock icon that will display the time remaining when the reader hovers over it.
 
 Please note that you can currently only have one timed exam per html page.
 
-It currently needs at least 4 directives to function: starttimer, revealquestions, timedmchoicemf, and finishtimer.  You can have as many timedmchoicemf as you want.  The time is specified in minutes using the :duration option in starttimer.
+All you need is the timed directive--you can specify the time limit (in minutes), and there are options for no feedback, no results, and no time limit (in which case it will keep track of the amount of time taken to complete the exam).
+A timed exam can hold any number of multiple choice or fill in the blank questions.
 
 .. timed:: timed1
     :timelimit: 10
 
     .. mchoice:: questiontimed1_1
-        :timed:
         :answer_a: The value you are searching for is the first element in the array.
         :answer_b: The value you are searching for is the last element in the array
         :answer_c: The value you are searching for is in the middle of the array.
@@ -312,7 +315,6 @@ It currently needs at least 4 directives to function: starttimer, revealquestion
         Under which of these conditions will a sequential search be faster than a binary search?
 
     .. mchoice:: questiontimed2
-        :timed:
         :random:
         :multiple_answers:
         :correct: a,b,d
@@ -328,7 +330,6 @@ It currently needs at least 4 directives to function: starttimer, revealquestion
         Which of these are colors of the rainbow?
 
     .. fillintheblank:: fill1412
-        :timed:
 
         .. blank:: blank1345
             :correct: \\bred\\b
@@ -406,6 +407,37 @@ Fix the following code so that it always correctly adds two numbers.
    myTests().main()
 
 
+Drag N Drop
+------------------
+
+You can add a Drag n drop matching question to your page simply by defining the pairs of matchable elements within a dragndrop directive.
+The order of draggable elements and their respective dropzones will be randomized so the pairs aren't always side-by-side.
+
+.. dragndrop:: dnd1
+    :feedback: This is feedback.
+    :match_1: Drag me to 1|||I am 1
+    :match_2: Drag me to 2|||I am 2
+    :match_3: Drag me to 3|||I am 3
+
+    This is a drag n drop question.
+
+Clickable Area
+------------------
+
+Clickable area is another type of assess question you can use. All you need to do is write the code you wish to be in the question, and wrap the parts that you
+would like to be clickable in either a click-correct tag or a click-incorrect tag. The students can click on all elements you defined as being clickable, and
+will be evaluated once they click the 'Check Me' button.
+
+.. clickablearea:: click1
+    :question: Click on all assignment statements.
+    :feedback: Remember, the operator '=' is used for assignment.
+
+    :click-incorrect:def main()::endclick:
+        :click-correct:x = 4:endclick:
+        for i in range(5):
+            :click-correct:y = i:endclick:
+            :click-incorrect:if y > 2::endclick:
+                print(y)
 
 
 Disqus Comment Box
@@ -421,7 +453,7 @@ A comment box allowing users to add comments and start discussions can be added.
 Tabbed Question
 ---------------
 
-Any of the existing question types can be placed in a tabbed exhibit-style question. This may be used to provide an possible answer or a Disqus discussion box specifically related to a certain question.
+Any of the existing components can be placed in a tabbed exhibit-style question. This may be used to provide an possible answer or a Disqus discussion box specifically related to a certain question.
 
 .. tabbed:: exercise1
 
@@ -506,7 +538,7 @@ as Python.  Here is a simple example:
       }
    }
    console.log(fact(10));
-   outf('hello world');
+   writeln('hello world');
 
 
 Adding a javascript example is just as easy as Python, all you need to do is add a ``:language:``
@@ -581,7 +613,7 @@ in the gray output area.
 Other Languages - LiveCode
 --------------------------
 
-.. livecode:: lc1
+.. activecode:: lc1
    :language: java
    :stdin: 100
 
@@ -604,6 +636,13 @@ Other Languages - LiveCode
        }
 
    }
+
+.. activecode:: ch03_4
+    :nocanvas:
+    :tour_1: "Overall Tour"; 1-2: Example04_Tour01_Line01; 2: Example04_Tour01_Line02; 1: Example04_Tour01_Line03;
+
+    for name in ["Joe", "Amy", "Brad", "Angelina", "Zuki", "Thandi", "Paris"]:
+        print("Hi", name, "Please come to my party on Saturday!")
 
 
 

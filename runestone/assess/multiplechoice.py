@@ -44,10 +44,6 @@ def visit_mc_node(self,node):
         node.mc_options['multipleAnswers'] = 'true'
     else:
         node.mc_options['multipleAnswers'] = 'false'
-    if 'timed' in node.mc_options:
-        node.mc_options['timed'] = 'data-timed'
-    else:
-        node.mc_options['timed'] = ''
     res = node.template_start % node.mc_options
 
     self.body.append(res)
@@ -102,7 +98,6 @@ class MChoice(Assessment):
         'feedback_e':directives.unchanged,
         'random':directives.flag,
         'multiple_answers':directives.flag,
-        'timed':directives.flag
     }
 
     def run(self):
@@ -113,7 +108,6 @@ class MChoice(Assessment):
             .. mchoice:: qname
             :multiple_answers: boolean
             :random: boolean
-            :timed: boolean
             :answer_a: possible answer  -- what follows _ is label
             :answer_b: possible answer
             ...
@@ -129,7 +123,7 @@ class MChoice(Assessment):
             ...
             """
         TEMPLATE_START = '''
-            <ul data-component="multiplechoice" data-multipleanswers="%(multipleAnswers)s" %(random)s %(timed)s id="%(divid)s">%(bodytext)s
+            <ul data-component="multiplechoice" data-multipleanswers="%(multipleAnswers)s" %(random)s id="%(divid)s">%(bodytext)s
             '''
 
         OPTION = '''
@@ -155,6 +149,7 @@ class MChoice(Assessment):
         #self.state.nested_parse(self.content, self.content_offset, mcNode)
         return [mcNode]
 
+#backwards compatibility
 class MChoiceMF(MChoice):
     def run(self):
         print("This directive has been depreciated. Please convert to the new directive 'mchoice'")
