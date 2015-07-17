@@ -2,10 +2,19 @@ function RunestoneBase () {   // Basic parent stuff
 
 }
 
-RunestoneBase.prototype.logBookEvent = function (info) {
-    console.log("logging event " + this.divid);
+RunestoneBase.prototype.logBookEvent = function (eventInfo) {
+    eventInfo.course = eBookConfig.course;
+    if (eBookConfig.logLevel > 0) {
+        jQuery.get(eBookConfig.ajaxURL + 'hsblog', eventInfo); // Log the run event
+    }
+    console.log("logging event " + eventInfo);
 };
 
 RunestoneBase.prototype.logRunEvent = function (info) {
-    console.log("running " + this.divid);
+    eventInfo.course = eBookConfig.course;
+    if (eBookConfig.logLevel > 0) {
+        jQuery.post(eBookConfig.ajaxURL + 'runlog', eventInfo); // Log the run event
+    }
+    console.log("running " + eventInfo);
 };
+
