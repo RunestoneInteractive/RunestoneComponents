@@ -1,8 +1,15 @@
-/*=======================================
-=========================================
-==== Begin Multiple Choice Component ====
-=========================================
-=======================================*/
+/*==========================================
+========      Master mchoice.js     =========
+============================================
+===  This file contains the JS for the   ===
+=== Runestone multiple choice component. ===
+============================================
+===              Created By              ===
+===           Isaiah Mayerchak           ===
+===                 and                  ===
+===             Kirby Olson              ===
+===                6/4/15                ===
+==========================================*/
 
 var feedBack = function (elem, correct, feedbackText) {        // Displays feedback on page--miscellaneous function that can be used by multple objects
     // elem is the Element in which to put the feedback
@@ -527,3 +534,16 @@ MultipleChoice.prototype.compareAnswers = function () {
     data.course = eBookConfig.course;
     jQuery.get(eBookConfig.ajaxURL + "getaggregateresults", data, this.compareModal);
 };
+
+/*=================================
+== Find the custom HTML tags and ==
+==   execute our code on them    ==
+=================================*/
+$(document).ready(function () {
+    $("[data-component=multiplechoice]").each(function (index) {    // MC
+        if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
+            mcList[this.id] = new MultipleChoice({"orig": this});
+        }
+    });
+
+});

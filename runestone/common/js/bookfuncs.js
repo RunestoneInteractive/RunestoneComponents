@@ -29,19 +29,6 @@
 // Logging functions
 //
 
-function logBookEvent(eventInfo) {
-    eventInfo.course = eBookConfig.course;
-    if (eBookConfig.logLevel > 0) {
-        jQuery.get(eBookConfig.ajaxURL + 'hsblog', eventInfo); // Log the run event
-    }
-}
-
-function logRunEvent(eventInfo) {
-    eventInfo.course = eBookConfig.course;
-    if (eBookConfig.logLevel > 0) {
-        jQuery.post(eBookConfig.ajaxURL + 'runlog', eventInfo); // Log the run event
-    }
-}
 
 
 //
@@ -75,6 +62,7 @@ function sendComment(comment, sid, acid, id) {
 // User login and page decoration functions
 //
 
+var rb = new RunestoneBase();
 
 function gotUser(data, status, whatever) {
     var mess = '';
@@ -112,7 +100,7 @@ function gotUser(data, status, whatever) {
         }
     }
     $(".loggedinuser").html(mess);
-    logBookEvent({
+    rb.logBookEvent({
         'event': 'page',
         'act': 'view',
         'div_id': window.location.pathname
@@ -185,7 +173,7 @@ function setupNavbarLoggedOut() {
     $('#passwordlink').hide();
     $('li.loginout').html('<a href="' + eBookConfig.app + '/default/user/login">Login</a>')
     $(".footer").html('user not logged in');
-    logBookEvent({'event': 'page', 'act': 'view', 'div_id': window.location.pathname})
+    rb.logBookEvent({'event': 'page', 'act': 'view', 'div_id': window.location.pathname})
 }
 $(document).bind("runestone:logout",setupNavbarLoggedOut);
 

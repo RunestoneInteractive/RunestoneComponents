@@ -19,11 +19,17 @@ __author__ = 'bmiller'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
+from .textfield import *
 
+try:
+    from html import escape  # py3
+except ImportError:
+    from cgi import escape  # py2
 
 def setup(app):
     app.add_directive('activecode', ActiveCode)
     app.add_directive('actex', ActiveExercise)
+    app.add_role('textfield',textfield_role)
     app.add_stylesheet('codemirror.css')
     app.add_stylesheet('activecode.css')
 
@@ -38,6 +44,7 @@ def setup(app):
     app.add_javascript('activecode.js')
     app.add_javascript('skulpt.min.js')
     app.add_javascript('skulpt-stdlib.js')
+    app.add_javascript('clike.js')
 
     app.add_node(ActivcodeNode, html=(visit_ac_node, depart_ac_node))
 
@@ -45,145 +52,12 @@ def setup(app):
     app.connect('env-purge-doc', purge_activecodes)
 
 
-START = '''
-<div id="cont"></div>
-<div id="%(divid)s" lang="%(language)s" time="%(timelimit)s" class="ac_section alert alert-warning" >
-'''
 
-EDIT1 = '''
-</div>
-<br/>
-<div id="%(divid)s_code_div" style="display: %(hidecode)s" class="ac_code_div">
-<textarea cols="50" rows="12" id="%(divid)s_code" class="active_code" prefixcode="%(include)s" lang="%(language)s">
+TEMPLATE = """
+<pre data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(gradebutton)s %(caption)s>
 %(initialcode)s
-</textarea>
-</div>
-'''
-
-CAPTION = ''' 
-<div class="clearfix"></div>
-<p class="ac_caption"><span class="ac_caption_text">%(caption)s (%(divid)s)</span> </p>
-'''
-
-UNHIDE = '''
-<span class="ac_sep"></span>
-<button class='btn btn-default' id="%(divid)s_showb" onclick="$('#%(divid)s_code_div').toggle();cm_editors['%(divid)s_code'].refresh();$('#%(divid)s_saveb').toggle();$('#%(divid)s_loadb').toggle()">Show/Hide Code</button>
-'''
-
-GRADES = '''
-<span class="ac_sep"></span>
-<input type="button" class='btn btn-default ' id="gradeb" name="Show Feedback" value="Show Feedback" onclick="createGradeSummary('%(divid)s')"/>
-'''
-
-AUDIO = '''
-<span class="ac_sep"></span>
-<input type="button" class='btn btn-default ' id="audiob" name="Play Audio" value="Start Audio Tour" onclick="createAudioTourHTML('%(divid)s','%(argu)s','%(no_of_buttons)s','%(ctext)s')"/>
-'''
-
-EDIT2 = '''
-<div class="ac_actions">
-<button class='btn btn-success' id="%(divid)s_runb">Run</button>
-<button class="ac_opt btn btn-default" style="display: inline-block" id="%(divid)s_saveb" onclick="saveEditor('%(divid)s');">Save</button>
-<button class="ac_opt btn btn-default" style="display: inline-block" id="%(divid)s_loadb" onclick="requestCode('%(divid)s');">Load</button>
-'''
-
-VIZB = '''<button class='btn btn-default' id="%(divid)s_vizb" onclick="injectCodelens(this,'%(divid)s');">Show in Codelens</button>
-'''
-
-COACHB = '''<button class='ac_opt btn btn-default' id="%(divid)s_coach_b" onclick="injectCodeCoach('%(divid)s');">Code Coach</button>
-'''
-
-SCRIPT = '''
-<script>
-if ('%(hidecode)s' == 'none') {
-    // a hack to preserve the inline-block display style. Toggle() will use display: block
-    // (instead of inline-block) if the previous display style was 'none'
-    $('#%(divid)s_saveb').toggle();
-    $('#%(divid)s_loadb').toggle();
-}
-if ($("#%(divid)s").attr("lang") !== "html" && $("#%(divid)s_code_div").parents(".admonition").length == 0 && $("#%(divid)s_code_div").parents("#exercises").length == 0){
-    if ($(window).width() > 975){
-        $("#%(divid)s_code_div").offset({
-            left: $("#%(divid)s .clearfix").offset().left
-        });
-    }
-    $("#%(divid)s_runb").one("click", function(){
-        $({})
-        .queue(function (next) {
-            if ($(window).width() > 975){
-                $("#%(divid)s_code_div").animate({
-                    left: 40
-                }, 500, next);
-                if (! Sk.TurtleGraphics ) {
-                    Sk.TurtleGraphics = {};
-                }
-                Sk.TurtleGraphics.height = 320;
-                Sk.TurtleGraphics.width = 320;
-            }
-            else{
-                next();
-            }
-        })
-        .queue(function (next) {
-            $("#%(divid)s_runb").parent().siblings(".ac_output").show();
-            runit('%(divid)s',this, %(include)s);
-            $("#%(divid)s_runb").on("click", function(){
-                runit('%(divid)s',this, %(include)s);
-            });
-        })
-
-    });
-}
-else{
-    $("#%(divid)s_code_div").css({float : "none", marginLeft : "auto", marginRight : "auto"});
-    $("#%(divid)s_runb").parent().siblings(".ac_output").show().css({float : "none", right : "0px"});
-    $("#%(divid)s_runb").on("click", function(){
-        runit('%(divid)s',this, %(include)s);
-    });
-}
-</script>
-'''
-OUTPUT_START = '''
-<div class="ac_output">'''
-
-CANVAS = '''
-<div style="text-align: center">
-<div id="%(divid)s_canvas" class="ac-canvas" style="border-style: solid; text-align: center"></div>
-</div>
-'''
-
-SUFF = '''<pre id="%(divid)s_suffix" style="display:none">%(suffix)s</pre>'''
-
-PRE = '''<pre id="%(divid)s_pre" class="active_out"></pre>
-'''
-OUTPUT_END = '''
-</div> <!-- end output -->'''
-
-VIZ = '''<div id="%(divid)s_codelens_div" style="display:none"></div>'''
-
-# <iframe id="%(divid)s_codelens" width="800" height="500" style="display:block"src="#">
-# </iframe>
-
-COACH = '''<div id="%(divid)s_coach_div" style="display:none;"></div>'''
-
-HTMLOUT = '''<div id="%(divid)s_htmlout" style="display:none;" class="ac_htmlout"></div>'''
-
-END = '''
-</div>
-
-'''
-
-AUTO = '''
-<script type="text/javascript">
-$(document).ready(function() {
-    $(window).load(function() {
-        var runb = document.getElementById("%(divid)s_runb");
-        runit('%(divid)s',runb, %(include)s);
-    });
-});
-</script>
-'''
-
+</pre>
+"""
 
 class ActivcodeNode(nodes.General, nodes.Element):
     def __init__(self, content):
@@ -202,50 +76,11 @@ class ActivcodeNode(nodes.General, nodes.Element):
 # The node that is passed as a parameter is an instance of our node class.
 def visit_ac_node(self, node):
     # print self.settings.env.activecodecounter
-    res = START
-    if 'above' in node.ac_components:
-        res += CANVAS
-    if 'tour_1' not in node.ac_components:
-        res += EDIT2
-    else:
-        res += EDIT2 + AUDIO
-    if node.ac_components['codelens']:
-        res += VIZB
+    res = TEMPLATE
+    #todo:  handle above in node.ac_components
+    #todo handle  'hidecode' not in node.ac_components:
+    # todo:  handle if 'gradebutton' in node.ac_components: res += GRADES
 
-    if 'coach' in node.ac_components:
-        res += COACHB
-
-    if 'hidecode' not in node.ac_components:
-        node.ac_components['hidecode'] = 'block'
-    if node.ac_components['hidecode'] == 'none':
-        res += UNHIDE
-    if 'gradebutton' in node.ac_components:
-        res += GRADES
-    res += EDIT1
-    res += OUTPUT_START
-    if 'above' not in node.ac_components:
-        if 'nocanvas' not in node.ac_components:
-            res += CANVAS
-    if 'suffix' in node.ac_components:
-        res += SUFF
-    if 'nopre' not in node.ac_components:
-        res += PRE
-    if 'autorun' in node.ac_components:
-        res += AUTO
-    res += OUTPUT_END
-    res += CAPTION
-
-    if node.ac_components['codelens']:
-        res += VIZ
-
-    if 'coach' in node.ac_components:
-        res += COACH
-
-    if node.ac_components['language'] == 'html':
-        res += HTMLOUT
-
-    res += SCRIPT
-    res += END
     res = res % node.ac_components
     res = res.replace("u'", "'")  # hack:  there must be a better way to include the list and avoid unicode strings
 
@@ -288,7 +123,10 @@ class ActiveCode(Directive):
         'tour_5': directives.unchanged,
         'nocodelens': directives.flag,
         'coach': directives.flag,
-        'timelimit': directives.unchanged
+        'timelimit': directives.unchanged,
+        'stdin' : directives.unchanged,
+        'datafile' : directives.unchanged,
+        'sourcefile' : directives.unchanged
     }
 
     def run(self):
@@ -301,19 +139,11 @@ class ActiveCode(Directive):
         self.options['divid'] = self.arguments[0]
 
         if self.content:
-            if '====' in self.content:
-                idx = self.content.index('====')
-                source = "\n".join(self.content[:idx])
-                suffix = "\n".join(self.content[idx + 1:])
-            else:
-                source = "\n".join(self.content)
-                suffix = "\n"
+            source = "\n".join(self.content)
         else:
             source = '\n'
-            suffix = '\n'
 
         self.options['initialcode'] = source
-        self.options['suffix'] = suffix
         str = source.replace("\n", "*nline*")
         str0 = str.replace("\"", "*doubleq*")
         str1 = str0.replace("(", "*open*")
@@ -336,29 +166,66 @@ class ActiveCode(Directive):
 
         if 'caption' not in self.options:
             self.options['caption'] = ''
+        else:
+            self.options['caption'] = "data-caption='%s'" % self.options['caption']
 
         if 'include' not in self.options:
-            self.options['include'] = 'undefined'
+            self.options['include'] = ''
         else:
             lst = self.options['include'].split(',')
             lst = [x.strip() for x in lst]
-            self.options['include'] = lst
+            self.options['include'] = 'data-include=' + " ".join(lst)
 
         if 'hidecode' in self.options:
-            self.options['hidecode'] = 'none'
+            self.options['hidecode'] = 'data-hidecode="true"'
         else:
-            self.options['hidecode'] = 'block'
+            self.options['hidecode'] = ''
 
         if 'language' not in self.options:
             self.options['language'] = 'python'
 
+        if self.options['language'] == 'html':
+            self.options['language'] = 'htmlmixed'
+            self.options['initialcode'] = escape(self.options['initialcode'])
+
         if 'nocodelens' in self.options or self.options['language'] != 'python':
-            self.options['codelens'] = False
+            self.options['codelens'] = ''
         else:
-            self.options['codelens'] = True
+            self.options['codelens'] = 'data-codelens="true"'
 
         if 'timelimit' not in self.options:
-            self.options['timelimit'] = ''
+            self.options['timelimit'] = 'data-timelimit=25000'
+        else:
+            self.options['timelimit'] = 'data-timelimit=%d' % self.options['timelimit']
+
+        if 'autorun' not in self.options:
+            self.options['autorun'] = ''
+        else:
+            self.options['autorun'] = 'data-autorun="true"'
+
+        if 'coach' in self.options:
+            self.options['coach'] = 'data-coach="true"'
+        else:
+            self.options['coach'] = ''
+
+        # livecode options
+        if 'stdin' in self.options:
+            self.options['stdin'] = "data-stdin='%s'" % self.options['stdin']
+        else:
+            self.options['stdin'] = ""
+
+        if 'datafile' not in self.options:
+            self.options['datafile'] = ""
+        else:
+            self.options['datafile'] = "data-datafile='%s'" % self.options['datafile']
+
+        if 'sourcefile' not in self.options:
+            self.options['sourcefile'] = ""
+        else:
+            self.options['sourcefile'] = "data-sourcefile='%s'" % self.options['sourcefile']
+
+        if 'gradebutton' not in self.options:
+            self.options['gradebutton'] = ''
 
         return [ActivcodeNode(self.options)]
 
@@ -369,9 +236,9 @@ class ActiveExercise(ActiveCode):
     has_content = True
 
     def run(self):
-        self.options['hidecode'] = True
-        self.options['gradebutton'] = True
-        self.options['coach'] = True
+        self.options['hidecode'] = "data-hidecode=true"
+        self.options['gradebutton'] = "data-gradebutton=true"
+        self.options['coach'] = "data-coach=true"
         return super(ActiveExercise, self).run()
 
 

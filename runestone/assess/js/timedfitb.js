@@ -1,4 +1,3 @@
-// FITB constructor
 function TimedFITB (opts) {
     if (opts) {
         this.timedInit(opts);
@@ -39,6 +38,16 @@ TimedFITB.prototype.checkCorrectTimed = function () {
     return this.correct;
 };
 
+TimedFITB.prototype.hideFeedback = function () {
+    for (var i = 0; i < this.blankArray.length; i++) {
+        $(this.blankArray[i]).removeClass("input-validation-error");
+    }
+    this.feedBackDiv.style.display = "none";
+};
+
 TimedFITB.prototype.processTimedSubmission = function () {
+    for (var i = 0; i < this.blankArray.length; i++) {
+        this.blankArray[i].disabled = true;
+    }
     this.checkFITBStorage();
 };

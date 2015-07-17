@@ -1,8 +1,13 @@
-/*===================================
-=====================================
-==== Begin Timed Assessment Code ====
-=====================================
-===================================*/
+/*==========================================
+========      Master timed.js     =========
+============================================
+===     This file contains the JS for    ===
+===     the Runestone timed component.   ===
+============================================
+===              Created By              ===
+===             Kirby Olson              ===
+===               6/11/15                ===
+==========================================*/
 
 var TimedList = {};    // Timed dictionary
 
@@ -257,6 +262,10 @@ Timed.prototype.createRenderedQuestionArray = function () {
         } else if ($(tmpChild).is("[data-component=fillintheblank]")) {
             var newFITB = new TimedFITB({"orig": tmpChild});
             this.renderedQuestionArray.push(newFITB);
+        } else if ($(tmpChild).is("[data-component=dragndrop]")) {
+            this.renderedQuestionArray.push(new TimedDragNDrop({"orig": tmpChild}));
+        } else if ($(tmpChild).is("[data-component=clickablearea]")) {
+            this.renderedQuestionArray.push(new TimedClickableArea({"orig":tmpChild}));
         }
     }
     if (this.random) {
@@ -472,20 +481,7 @@ Timed.prototype.submitTimedProblems = function () {
 
 Timed.prototype.hideTimedFeedback = function () {
     for (var i = 0; i < this.renderedQuestionArray.length; i++) {
-        var blanks = this.renderedQuestionArray[i].blankArray;
-        if (blanks !== undefined) {
-            for (var j = 0; j < blanks.length; j++) {
-                $(blanks[j]).removeClass("input-validation-error");
-            }
-            this.renderedQuestionArray[i].feedBackDiv.style.display = "none";
-        }
-        var feedbacks = this.renderedQuestionArray[i].feedBackEachArray;
-        if (feedbacks !== undefined) {
-            for (var j = 0; j < feedbacks.length; j++) {
-                $(feedbacks[j]).hide();
-            }
-        }
-
+        this.renderedQuestionArray[i].hideFeedback();   // Defined in each timed class
     }
 };
 
@@ -550,22 +546,4 @@ $(document).ready(function () {
     $("[data-component=timedAssessment]").each(function (index) {
         TimedList[this.id] = new Timed({"orig": this});
     });
-    for (var key in TimedList) {
-        if (TimedList.hasOwnProperty(key)) {
-            var TimedChildren = TimedList[key].origElem.childNodes;
-        }
-    }
-
-    $("[data-component=fillintheblank]").each(function (index) {    // FITB
-        if ($.inArray(this.id, TimedChildren) < 0) { // If the fillintheblank element exists within a timed component, don"t render it here
-            FITBList[this.id] = new FITB({"orig": this});
-        }
-    });
-
-    $("[data-component=multiplechoice]").each(function (index) {    // MC
-        if ($.inArray(this.id, TimedChildren) < 0) { // If the MC element exists within a timed component, don"t render it here
-            mcList[this.id] = new MultipleChoice({"orig": this});
-        }
-    });
-
 });

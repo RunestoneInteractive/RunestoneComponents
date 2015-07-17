@@ -1,3 +1,16 @@
+/*==========================================
+========       Master fitb.js      =========
+============================================
+===   This file contains the JS for the  ===
+===  Runestone fillintheblank component. ===
+============================================
+===              Created By              ===
+===           Isaiah Mayerchak           ===
+===                 and                  ===
+===             Kirby Olson              ===
+===                6/4/15                ===
+==========================================*/
+
 /*=======================================
 ===         Global functions          ===
 === (used by more than one component) ===
@@ -343,3 +356,15 @@ FITB.prototype.compareFITB = function (data, status, whatever) {   // Creates a 
     var el = $(html);
     el.modal();
 };
+
+/*=================================
+== Find the custom HTML tags and ==
+==   execute our code on them    ==
+=================================*/
+$(document).ready(function () {
+    $("[data-component=fillintheblank]").each(function (index) {    // FITB
+        if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
+            FITBList[this.id] = new FITB({"orig": this});
+        }
+    });
+});

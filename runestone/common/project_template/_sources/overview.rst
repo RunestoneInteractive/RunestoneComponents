@@ -74,6 +74,7 @@ Take a look at the activecode interpreter in action.  If we take a simple Python
 
 .. activecode:: codeexample1
    :coach:
+   :caption: This is a caption
 
    print("My first program adds a list of numbers")
    myList = [2, 4, 6, 8, 10]
@@ -108,6 +109,8 @@ are learning to program.
 
 .. activecode:: codeexample2
     :nocodelens:
+    :hidecode:
+    :autorun:
 
     import turtle
 
@@ -535,7 +538,7 @@ as Python.  Here is a simple example:
       }
    }
    console.log(fact(10));
-   outf('hello world');
+   writeln('hello world');
 
 
 Adding a javascript example is just as easy as Python, all you need to do is add a ``:language:``
@@ -610,7 +613,7 @@ in the gray output area.
 Other Languages - LiveCode
 --------------------------
 
-.. livecode:: lc1
+.. activecode:: lc1
    :language: java
    :stdin: 100
 
@@ -633,6 +636,13 @@ Other Languages - LiveCode
        }
 
    }
+
+.. activecode:: ch03_4
+    :nocanvas:
+    :tour_1: "Overall Tour"; 1-2: Example04_Tour01_Line01; 2: Example04_Tour01_Line02; 1: Example04_Tour01_Line03;
+
+    for name in ["Joe", "Amy", "Brad", "Angelina", "Zuki", "Thandi", "Paris"]:
+        print("Hi", name, "Please come to my party on Saturday!")
 
 
 

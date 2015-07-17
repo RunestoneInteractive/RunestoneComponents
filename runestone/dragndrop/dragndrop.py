@@ -23,6 +23,7 @@ from docutils.parsers.rst import Directive
 def setup(app):
     app.add_directive('dragndrop',DragNDrop)
     app.add_javascript('dragndrop.js')
+    app.add_javascript('timeddnd.js')
     app.add_stylesheet('dragndrop.css')
 
     app.add_node(DragNDropNode, html=(visit_dnd_node, depart_dnd_node))
