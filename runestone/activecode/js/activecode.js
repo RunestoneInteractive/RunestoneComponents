@@ -1360,5 +1360,15 @@ $(document).ready(function() {
 
 });
 
+// This seems a bit hacky and possibly brittle, but its hard to know how long it will take to
+// figure out the login/logout status of the user.  Sometimes its immediate, and sometimes its
+// long.  So to be safe we'll do it both ways..
 var loggedout;
 $(document).bind("runestone:logout",function() { loggedout=true;})
+$(document).bind("runestone:logout",function() {
+    for (k in edList) {
+        if (edList.hasOwnProperty(k)) {
+            edList[k].disableSaveLoad();
+        }
+    }
+});
