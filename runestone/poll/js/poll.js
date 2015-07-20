@@ -18,7 +18,7 @@ function submitPoll(div_id) {
     var eventInfo = {'event':'poll', 'act':act, 'div_id':div_id};
 
     // log the response to the database
-    logBookEvent(eventInfo); // in bookfuncs.js
+    this.logBookEvent(eventInfo); // in bookfuncs.js
 
     // log the fact that the user has answered the poll to local storage
     localStorage.setItem(div_id, "true");
