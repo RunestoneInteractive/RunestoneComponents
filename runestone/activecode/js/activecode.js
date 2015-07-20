@@ -668,11 +668,12 @@ HTMLActiveCode.prototype.createOutput = function () {
 
 };
 
-//todo -- make all of this ivars of the audiotour object
 
 String.prototype.replaceAll = function (target, replacement) {
     return this.split(target).join(replacement);
 };
+
+AudioTour.prototype = new RunestoneBase();
 
 // function to display the audio tours
 function AudioTour (divid, code, bnum, audio_text) {
@@ -693,7 +694,7 @@ function AudioTour (divid, code, bnum, audio_text) {
     code = code.replaceAll("*open*", "(");
     code = code.replaceAll("*close*", ")");
     code = code.replaceAll("*nline*", "<br/>");
-    var codeArray = code.split("<br/>");
+    var codeArray = code.split("\n");
 
     var audio_hash = new Array();
     var bval = new Array();
@@ -733,7 +734,9 @@ function AudioTour (divid, code, bnum, audio_text) {
     //html_string += "<p id='hightest'></p><p id='hightest1'></p><br/><br/><p id='test'></p><br/><p id='audi'></p></div>";
     html_string += "</div>";
 
-    $('#cont').html(html_string);
+    var tourdiv = document.createElement('div');
+    document.body.appendChild(tourdiv);
+    $(tourdiv).html(html_string);
     $('#windowcode').html(first);
 
     // Position modal box
@@ -753,15 +756,16 @@ function AudioTour (divid, code, bnum, audio_text) {
     $('.modal-close-profile').show();
 
     // closes modal box once close link is clicked, or if the lights out divis clicked
-    $('.modal-close-profile, .modal-lightsout').click(function () {
+    $('.modal-close-profile, .modal-lightsout').click( (function () {
         if (this.playing) {
             this.elem.pause();
         }
         //log change to db
-        logBookEvent({'event': 'Audio', 'act': 'closeWindow', 'div_id': divid});
+        this.logBookEvent({'event': 'Audio', 'act': 'closeWindow', 'div_id': divid});
         $('.modal-profile').fadeOut("slow");
         $('.modal-lightsout').fadeOut("slow");
-    });
+        document.body.removeChild(tourdiv);
+    }).bind(this));
 
     // Accommodate buttons for a maximum of five tours
 
@@ -842,7 +846,7 @@ AudioTour.prototype.tour = function (divid, audio_type, bcount) {
     $('#status').html("Starting the " + name);
 
     //log tour type to db
-    logBookEvent({'event': 'Audio', 'act': name, 'div_id': divid});
+    this.logBookEvent({'event': 'Audio', 'act': name, 'div_id': divid});
 
     var max = atype.length;
     var str = "";
@@ -1037,9 +1041,9 @@ AudioTour.prototype.playWhenReady = function (afile, divid, ahash) {
     $('#status').html("Playing the " + this.tourName);
     this.elem.currentTime = 0;
     this.highlightLines(divid, ahash[afile]);
-    $('#' + afile).bind('ended', function () {
-        outerAudio();
-    });
+    $('#' + afile).bind('ended', (function () {
+        this.outerAudio();
+    }).bind(this));
     this.playing = true;
     this.elem.play();
 
@@ -1056,13 +1060,13 @@ AudioTour.prototype.playaudio = function (i, aname, divid, ahash) {
     if (isNaN(this.elem.duration) || this.elem.duration == 0) {
         // set the status
         $('#status').html("Loading audio.  Please wait.   If it doesn't start soon close this window (click on the red X) and try again");
-        $('#' + this.afile).bind('canplaythrough', function () {
-            playWhenReady(this.afile, divid, ahash);
-        });
+        $('#' + this.afile).bind('canplaythrough', (function () {
+            this.playWhenReady(this.afile, divid, ahash);
+        }).bind(this));
     }
     // otherwise it is ready so play it
     else {
-        playWhenReady(this.afile, divid, ahash);
+        this.playWhenReady(this.afile, divid, ahash);
     }
 };
 
@@ -1078,7 +1082,7 @@ AudioTour.prototype.pauseAndPlayAudio = function () {
         document.getElementById("pause_audio").src = "../_static/pause.png";
         document.getElementById("pause_audio").title = "Pause current audio";
         //log change to db
-        logBookEvent({'event': 'Audio', 'act': 'play', 'div_id': this.theDivid});
+        this.logBookEvent({'event': 'Audio', 'act': 'play', 'div_id': this.theDivid});
     }
 
     // if audio was this.playing pause it
@@ -1087,7 +1091,7 @@ AudioTour.prototype.pauseAndPlayAudio = function () {
         document.getElementById("pause_audio").src = "../_static/play.png";
         document.getElementById("pause_audio").title = "Play paused audio";
         //log change to db
-        logBookEvent({'event': 'Audio', 'act': 'pause', 'div_id': this.theDivid});
+        this.logBookEvent({'event': 'Audio', 'act': 'pause', 'div_id': this.theDivid});
     }
 
 };

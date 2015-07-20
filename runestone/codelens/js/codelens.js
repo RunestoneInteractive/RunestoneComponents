@@ -31,9 +31,11 @@ function attachLoggers(codelens, divid) {
 }
 
 function redrawAllVisualizerArrows() {
+    var i;
     if (allVisualizers !== undefined) {
-        for (var v in allVisualizers)
-            allVisualizers[v].redrawConnectors();
+        for (i = 0; i < allVisualizers.length; i++) {
+            allVisualizers[i].redrawConnectors();
+        }
     }
 }
 function styleButtons(divid) {
