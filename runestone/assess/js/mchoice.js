@@ -392,7 +392,7 @@ MultipleChoice.prototype.populateMCMALocalStorage = function () {
 
 MultipleChoice.prototype.logMCMAsubmission = function () {
     var answerInfo = "answer:" + this.givenlog.substring(0, this.givenlog.length - 1) + ":" + (this.correctCount == this.correctList.length ? "correct" : "no");
-    logBookEvent({"event": "mChoice", "act": answerInfo, "div_id": this.divid});
+    this.logBookEvent({"event": "mChoice", "act": answerInfo, "div_id": this.divid});
 };
 
 
@@ -444,7 +444,7 @@ MultipleChoice.prototype.populateMCMFLocalStorage = function () {
 
 MultipleChoice.prototype.logMCMFsubmission = function () {
     var answerInfo = "answer:" + this.givenArray[0] + ":" + (this.givenArray[0] == this.correctIndexList[0] ? "correct" : "no");
-    logBookEvent({"event": "mChoice", "act": answerInfo, "div_id": this.divid});
+    this.logBookEvent({"event": "mChoice", "act": answerInfo, "div_id": this.divid});
 };
 
 MultipleChoice.prototype.renderMCMFFeedback = function (correct, feedbackText) {
