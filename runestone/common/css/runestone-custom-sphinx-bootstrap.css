@@ -162,7 +162,7 @@ input[type="button"].btn.btn-sm {
 }
 
 .btn {
-    margin: 5px 0;
+    margin: 5px;
 }
 
 .btn.disabled {
@@ -184,6 +184,11 @@ input[type="button"].btn.btn-sm {
     background-color: #3a3c3c;
     border-color: #2e2f2f;
     color: #fff;
+}
+
+input[type="radio"],
+input[type="checkbox"] {
+    margin-right: 5px;
 }
 
 .tooltip {
