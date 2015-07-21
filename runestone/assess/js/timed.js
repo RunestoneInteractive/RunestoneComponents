@@ -18,12 +18,14 @@ function Timed (opts) {
     }
 }
 
+Timed.prototype = new RunestoneBase();
 
 /*====================================
 === Setting Timed Assess Variables ===
 ====================================*/
 
 Timed.prototype.init = function (opts) {
+    RunestoneBase.apply(this, arguments);
     var orig = opts.orig;
     this.origElem = orig; // the entire element of this timed assessment and all of its children
     this.divid = orig.id;
@@ -306,7 +308,7 @@ Timed.prototype.startAssessment = function () {
             this.running = 1;
             $(this.timedDiv).show();
             this.increment();
-            logBookEvent({"event": "timedExam", "act": "start", "div_id": this.divid});
+            this.logBookEvent({"event": "timedExam", "act": "start", "div_id": this.divid});
             localStorage.setItem(eBookConfig.email + ":" + this.divid, "started");
         }
     } else {
@@ -514,7 +516,7 @@ Timed.prototype.storeScore = function () {
 };
 
 Timed.prototype.logScore = function () {
-    logBookEvent({"event": "timedExam", "act": "finish", "div_id": this.divid, "correct": this.score, "incorrect": this.incorrect, "skipped": this.skipped, "time": this.timeTaken});
+    this.logBookEvent({"event": "timedExam", "act": "finish", "div_id": this.divid, "correct": this.score, "incorrect": this.incorrect, "skipped": this.skipped, "time": this.timeTaken});
 };
 
 Timed.prototype.restoreFromStorage = function () {
