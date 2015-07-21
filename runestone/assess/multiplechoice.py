@@ -123,7 +123,7 @@ class MChoice(Assessment):
             ...
             """
         TEMPLATE_START = '''
-            <ul data-component="multiplechoice" data-multipleanswers="%(multipleAnswers)s" %(random)s id="%(divid)s">%(bodytext)s
+            <ul data-component="multiplechoice" data-multipleanswers="%(multipleAnswers)s" %(random)s id="%(divid)s">
             '''
 
         OPTION = '''
@@ -146,7 +146,7 @@ class MChoice(Assessment):
         mcNode.template_option = OPTION
         mcNode.template_end = TEMPLATE_END
 
-        #self.state.nested_parse(self.content, self.content_offset, mcNode)
+        self.state.nested_parse(self.content, self.content_offset, mcNode)
         return [mcNode]
 
 #backwards compatibility
