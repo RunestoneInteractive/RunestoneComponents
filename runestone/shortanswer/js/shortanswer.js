@@ -40,7 +40,7 @@ function submitJournal(directive_id) {
                       function(data) {
                         console.log(data.message);
                       });  */
-    logBookEvent({'event': 'shortanswer', 'act': JSON.stringify(value), 'div_id': directive_id});
+    this.logBookEvent({'event': 'shortanswer', 'act': JSON.stringify(value), 'div_id': directive_id});
 }
 
 
