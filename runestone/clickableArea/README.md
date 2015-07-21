@@ -1,8 +1,10 @@
 <h2>Clickable Area</h2>
 
 ```html
-<pre data-component="clickablearea" id="clickable1">
-    <span data-question>Click on all variable assignment statements</span><span data-feedback>Remember, variable assignment statements usually involve the operator '='.</span>def main():
+<div data-component="clickablearea" id="clickable1">
+<span data-question>Click on all variable assignment statements</span><span data-feedback>Remember, variable assignment statements usually involve the operator '='.</span>
+<pre>
+def main():
 	<span data-incorrect>print("Hello world")</span>
 	<span data-correct>x = 4</span>
 	for i in range(5):
@@ -10,10 +12,28 @@
 		print(y)
 	<span data-incorrect>return 0</span>
 </pre>
+</div>
 ```
-Here the <code>pre</code> tag represents the entire component to be rendered.
-Each area that the author would like to be clickable is wrapped in a <code>span</code> tag that has the <code>data-correct</code> or <code>data-incorrect</code> attribute.
-After specifying the data-component, question and feedback (optional), the author can start his/her block of code, indented as he/he would like, using <code>span</code> elements to identify the clickable parts of the code.
+```html
+<div data-component="clickablearea"><span data-question>This is the question.</span>
+	<table border="1" style="width:100%">
+	  <tr id=test>
+	    <td data-correct>Table Cell 1</td>
+	    <td>Table Cell 2</td>
+	    <td><img data-incorrect src="http://images/example.jpg"></td>
+	  </tr>
+	  <tr data-correct>
+	    <td>Table Cell 4</td>
+	    <td>Table Cell 5</td>
+	    <td>Table Cell 6</td>
+	  </tr>
+	</table>
+</div>
+```
+Here the <code>div</code> tag represents the entire component to be rendered.
+
+Each element that the author would like to be clickable must have either the <code>data-correct</code> or <code>data-incorrect</code> attribute.
+After specifying the <code>data-component</code>, <code>data-question</code> and <code>data-feedback</code> (feedback is optional), the author can create any HTML elements he/she wants, and make any of them clickable with the <code>data-correct</code>/data-incorrect</code> tags. If the author would like to make a block of code with specific areas to be clickable, he/she can create a <code>pre</code> element and wrap the clickable parts of the code in <code>span</code> elements with the <code>data-correct</code>/<code>data-incorrect</code> attributes.
 
 Option spec:
 <ul>
