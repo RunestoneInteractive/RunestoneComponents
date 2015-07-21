@@ -66,8 +66,15 @@ environment for learning a programming language like Python since you can experi
 
 Take a look at the activecode interpreter in action.  If we take a simple Python program and make it active, you will see that it can be executed directly by pressing the *run* button.   Try pressing the *run* button below.
 
+.. datafile:: df1
+
+    def main():
+        print("Hello world")
+        return 45
+
 .. activecode:: codeexample1
    :coach:
+   :caption: This is a caption
 
    print("My first program adds a list of numbers")
    myList = [2, 4, 6, 8, 10]
@@ -102,6 +109,8 @@ are learning to program.
 
 .. activecode:: codeexample2
     :nocodelens:
+    :hidecode:
+    :autorun:
 
     import turtle
 
@@ -183,14 +192,12 @@ Finally, it is also possible to embed simple questions into the text.  These
 questions provide a way for the students to check themselves as they go along.  The questions also provide feedback so that you can
 understand why an answer may or may not be correct.
 
-**Check your understanding**
-
-.. mchoicemf:: question1_1
+.. mchoice:: question1_1
+   :correct: a
    :answer_a: Python
    :answer_b: Java
    :answer_c: C
    :answer_d: ML
-   :correct: a
    :feedback_a: Yes, Python is a great language to learn, whether you are a beginner or an experienced programmer.
    :feedback_b: Java is a good object oriented language but it has some details that make it hard for the beginner.
    :feedback_c: C is an imperative programming language that has been around for a long time, but it is not the one that we use.
@@ -198,33 +205,36 @@ understand why an answer may or may not be correct.
 
    What programming language does this site help you to learn?
 
-
 This next type of question allows more than one correct answer to be required.  The feedback will tell you whether you have the
 correct number as well as the feedback for each.
 
+.. mchoice:: question1_2
+    :multiple_answers:
+    :correct: a,b,d
+    :answer_a: red
+    :answer_b: yellow
+    :answer_c: black
+    :answer_d: green
+    :feedback_a: Red is a definitely on of the colors.
+    :feedback_b: Yes, yellow is correct.
+    :feedback_c: Remember the acronym...ROY G BIV.  B stands for blue.
+    :feedback_d: Yes, green is one of the colors.
 
-.. mchoicema:: question1_2
-   :answer_a: red
-   :answer_b: yellow
-   :answer_c: black
-   :answer_d: green
-   :correct: a,b,d
-   :feedback_a: Red is a definitely on of the colors.
-   :feedback_b: Yes, yellow is correct.
-   :feedback_c: Remember the acronym...ROY G BIV.  B stands for blue.
-   :feedback_d: Yes, green is one of the colors.
+    Which colors might be found in a rainbow? (choose all that are correct)
 
-   Which colors might be found in a rainbow? (choose all that are correct)
 
 
 Another type of question allows you as the instructor to ask for a value.  You can test for the value using Pythons regular expressions.  For example:
 
-.. fillintheblank:: baseconvert1
-   :correct: \\b31\\b
-   :blankid: baseconvert1_ans1
 
-   What is value of 25 expressed as an octal number (base 8) :textfield:`baseconvert1_ans1::mini`
+.. fillintheblank:: fill1512
 
+    .. blank:: blank21
+        :correct: \\b31\\b
+        :feedback1: ("\\b25\\b", "That's base 10!")
+        :feedback2: (".*", "25 in octal please!")
+
+        What is the value of 25 expressed as an octal number (base 8)?
 
 And finally here is a way of giving your students some simple programming problems where the code is already there for them but not indented or in the correct order.  Use drag-and-drop to get everthing right.
 
@@ -275,58 +285,64 @@ next line executed.
     else:
         print('x is even')
         y = y - x
-        
+
 Timed Exam Questions
 ---------------------
 
-You can add a timed exam of multiple-choice questions that the user can only take once.  All the feedback will be shown after the time is up or after the user has clicked the "Submit Answers" button at the end of the timed exam.  To start the timed exam click on the "Start" button.  This will also start the countdown of the time remaining.  You can pause the timer by clicking on the "Pause" button and start it again by clicking on the "Resume" button.  When you pause the timed exam the questions will be hidden.  There is also a clock icon that will display the time remaining when the reader hovers over it.  
+You can add a timed exam of multiple-choice/fill-in-the-blank questions that the user can only take once.  All the feedback will be shown after the time is up or after the user has clicked the "Submit Answers" button at the end of the timed exam.  To start the timed exam click on the "Start" button.  This will also start the countdown of the time remaining.  You can pause the timer by clicking on the "Pause" button and start it again by clicking on the "Resume" button.  When you pause the timed exam the questions will be hidden.  There is also a clock icon that will display the time remaining when the reader hovers over it.
 
 Please note that you can currently only have one timed exam per html page.
 
-It currently needs at least 4 directives to function: starttimer, revealquestions, timedmchoicemf, and finishtimer.  You can have as many timedmchoicemf as you want.  The time is specified in minutes using the :duration option in starttimer.  
+All you need is the timed directive--you can specify the time limit (in minutes), and there are options for no feedback, no results, and no time limit (in which case it will keep track of the amount of time taken to complete the exam).
+A timed exam can hold any number of multiple choice or fill in the blank questions.
 
-.. starttimer:: Start
-    :duration: 38
+.. timed:: timed1
+    :timelimit: 10
 
-.. revealquestions:: timed_Test
-    :showtitle: Timed Exam Paused or Not Started
-    :hidetitle: Currently Taking Timed Exam
-    
-    .. timedmchoicemf:: te_1
-       :answer_a: The value you are searching for is the first element in the array.
-       :answer_b: The value you are searching for is the last element in the array
-       :answer_c: The value you are searching for is in the middle of the array.
-       :answer_d: The value you are searching for is not in the array
-       :answer_e: Sequential Search can never be faster than Binary Search.
-       :correct: a
-       :feedback_a: Only when the search value is the first item in the array, and thus the first value encountered in sequential search, will sequential be faster than binary.
-       :feedback_b: In this case a sequential search will have to check every element before finding the correct one, whereas a binary search will not.
-       :feedback_c: Results will differ depending on the exact location of the element, but Binary Search will still find the element faster while Sequential will have to check more elements.
-       :feedback_d: If the search value is not in the array, a sequential search will have to check every item in the array before failing, a binary search will be faster.
-       :feedback_e: When the search value is the first element, Sequential will always be faster, as it will only need to check one element.
+    .. mchoice:: questiontimed1_1
+        :answer_a: The value you are searching for is the first element in the array.
+        :answer_b: The value you are searching for is the last element in the array
+        :answer_c: The value you are searching for is in the middle of the array.
+        :answer_d: The value you are searching for is not in the array
+        :answer_e: Sequential Search can never be faster than Binary Search.
+        :correct: a
+        :feedback_a: Only when the search value is the first item in the array, and thus the first value encountered in sequential search, will sequential be faster than binary.
+        :feedback_b: In this case a sequential search will have to check every element before finding the correct one, whereas a binary search will not.
+        :feedback_c: Results will differ depending on the exact location of the element, but Binary Search will still find the element faster while Sequential will have to check more elements.
+        :feedback_d: If the search value is not in the array, a sequential search will have to check every item in the array before failing, a binary search will be faster.
+        :feedback_e: When the search value is the first element, Sequential will always be faster, as it will only need to check one element.
 
-       Under which of these conditions will a sequential search be faster than a binary search?
+        Under which of these conditions will a sequential search be faster than a binary search?
 
-    .. timedmchoicemf:: te_2
-       :answer_a: (c || d)
-       :answer_b: (c && d)
-       :answer_c: (!c) || (!d)
-       :answer_d: !(c && d)
-       :answer_e: (!c) && (!d)
-       :correct: e
-       :feedback_a: NOTing an OR expression does not result in the same values ORed.
-       :feedback_b: You do negate the OR to AND, but you also need to negate the values of d and d.
-       :feedback_c: This would be equivalent to (!(c && d)) using De Morgans laws.
-       :feedback_d: This would be equivalent to (!c || !d)
-       :feedback_e: NOTing (negating) an OR expression is the same as the AND of the individual values NOTed (negated). See De Morgans laws.
+    .. mchoice:: questiontimed2
+        :random:
+        :multiple_answers:
+        :correct: a,b,d
+        :answer_a: Red
+        :answer_b: Blue
+        :answer_c: Brown
+        :answer_d: Indigo
+        :feedback_a: Yes, red is definitely one of the colors.
+        :feedback_b: Blue is correct!
+        :feedback_c: Remember ROY G BIV!
+        :feedback_d: Yes, indigo is also in the rainbow!
 
-       Which of the following expressions is equivalent to the following? 
-   
-       .. code-block:: java
+        Which of these are colors of the rainbow?
 
-           !(c || d)
-           
-    .. finishtimer:: Finish
+    .. fillintheblank:: fill1412
+
+        .. blank:: blank1345
+            :correct: \\bred\\b
+            :feedback1: (".*", "Try 'red'")
+
+            Fill in the blanks to make the following sentence: "The red car drove away" The
+
+        .. blank:: blank52532
+            :correct: \\baway\\b
+            :feedback1: (".*", "Try 'away'")
+
+            car drove
+
 
 Unit Tests for Code
 -------------------
@@ -391,6 +407,37 @@ Fix the following code so that it always correctly adds two numbers.
    myTests().main()
 
 
+Drag N Drop
+------------------
+
+You can add a Drag n drop matching question to your page simply by defining the pairs of matchable elements within a dragndrop directive.
+The order of draggable elements and their respective dropzones will be randomized so the pairs aren't always side-by-side.
+
+.. dragndrop:: dnd1
+    :feedback: This is feedback.
+    :match_1: Drag me to 1|||I am 1
+    :match_2: Drag me to 2|||I am 2
+    :match_3: Drag me to 3|||I am 3
+
+    This is a drag n drop question.
+
+Clickable Area
+------------------
+
+Clickable area is another type of assess question you can use. All you need to do is write the code you wish to be in the question, and wrap the parts that you
+would like to be clickable in either a click-correct tag or a click-incorrect tag. The students can click on all elements you defined as being clickable, and
+will be evaluated once they click the 'Check Me' button.
+
+.. clickablearea:: click1
+    :question: Click on all assignment statements.
+    :feedback: Remember, the operator '=' is used for assignment.
+
+    :click-incorrect:def main()::endclick:
+        :click-correct:x = 4:endclick:
+        for i in range(5):
+            :click-correct:y = i:endclick:
+            :click-incorrect:if y > 2::endclick:
+                print(y)
 
 
 Disqus Comment Box
@@ -406,20 +453,20 @@ A comment box allowing users to add comments and start discussions can be added.
 Tabbed Question
 ---------------
 
-Any of the existing question types can be placed in a tabbed exhibit-style question. This may be used to provide an possible answer or a Disqus discussion box specifically related to a certain question.
+Any of the existing components can be placed in a tabbed exhibit-style question. This may be used to provide an possible answer or a Disqus discussion box specifically related to a certain question.
 
 .. tabbed:: exercise1
 
     .. tab:: Question 1
-        
+
         Write a program that prints "Hello, world".
-            
+
         .. activecode:: helloworld
 
             print("Hello, world")
 
     .. tab:: Discussion
-        
+
         .. disqus::
             :shortname: interactivepython
             :identifier: helloworlddiscussion
@@ -491,7 +538,7 @@ as Python.  Here is a simple example:
       }
    }
    console.log(fact(10));
-   outf('hello world');
+   writeln('hello world');
 
 
 Adding a javascript example is just as easy as Python, all you need to do is add a ``:language:``
@@ -546,14 +593,14 @@ Blockly
    variables
 
    preload::
-   <xml>  
-      <block type="variables_set" id="1" inline="true" x="25" y="9">    
-         <field name="VAR">X</field>    
-         <value name="VALUE">      
+   <xml>
+      <block type="variables_set" id="1" inline="true" x="25" y="9">
+         <field name="VAR">X</field>
+         <value name="VALUE">
             <block type="math_number" id="2">
                <field name="NUM">10</field>
-            </block>    
-         </value>  
+            </block>
+         </value>
       </block>
    </xml>
 
@@ -566,7 +613,7 @@ in the gray output area.
 Other Languages - LiveCode
 --------------------------
 
-.. livecode:: lc1
+.. activecode:: lc1
    :language: java
    :stdin: 100
 
@@ -589,6 +636,13 @@ Other Languages - LiveCode
        }
 
    }
+
+.. activecode:: ch03_4
+    :nocanvas:
+    :tour_1: "Overall Tour"; 1-2: Example04_Tour01_Line01; 2: Example04_Tour01_Line02; 1: Example04_Tour01_Line03;
+
+    for name in ["Joe", "Amy", "Brad", "Angelina", "Zuki", "Thandi", "Paris"]:
+        print("Hi", name, "Please come to my party on Saturday!")
 
 
 

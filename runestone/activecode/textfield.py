@@ -21,28 +21,19 @@ from docutils.parsers.rst import Directive
 import json
 import random
 
-#    setup is called in assess.py
-
-#    app.add_node(MChoiceNode, html=(visit_mc_node, depart_mc_node))
-#    app.add_node(FITBNode, html=(visit_fitb_node, depart_fitb_node))    
-
+#    setup is called in activecode.py
 
 
 def textfield_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     '''
     Usage:
-
     In your document you can write :textfield:`myid:myvalue:width`
-
     This will translate to:
         <input type='text' id='myid' class="form-control input-small" style="display:inline; width:width;" value='myvalue'></input>
-     
+
     where width can be specified in pixels or percentage of page width (standard CSS syntax).
     Width can also be specified using relative sizes:
         mini, small, medium, large, xlarge, and xxlarge
-
-
-
     '''
     iid, value, width = text.split(':')
 
@@ -62,4 +53,3 @@ def textfield_role(name, rawtext, text, lineno, inliner, options={}, content=[])
     res = '''<input type='text' id='%s' class="form-control" style="display:inline; width: %s;" value="%s"></input>''' % (iid,width,value)
 
     return [nodes.raw('',res, format='html')],[]
-

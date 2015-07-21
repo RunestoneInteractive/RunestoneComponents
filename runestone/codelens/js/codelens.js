@@ -12,28 +12,31 @@
  return the buttons, but I'm having a hard time thinking of any other use for that besides mine.
  */
 function attachLoggers(codelens, divid) {
+    rb = new RunestoneBase();
     codelens.domRoot.find("#jmpFirstInstr").click(function () {
-        logBookEvent({'event': 'codelens', 'act': 'first', 'div_id': divid});
+        rb.logBookEvent({'event': 'codelens', 'act': 'first', 'div_id': divid});
     });
     codelens.domRoot.find("#jmpLastInstr").click(function () {
-        logBookEvent({'event': 'codelens', 'act': 'last', 'div_id': divid});
+        rb.logBookEvent({'event': 'codelens', 'act': 'last', 'div_id': divid});
     });
     codelens.domRoot.find("#jmpStepBack").click(function () {
-        logBookEvent({'event': 'codelens', 'act': 'back', 'div_id': divid});
+        rb.logBookEvent({'event': 'codelens', 'act': 'back', 'div_id': divid});
     });
     codelens.domRoot.find("#jmpStepFwd").click(function () {
-        logBookEvent({'event': 'codelens', 'act': 'fwd', 'div_id': divid});
+        rb.logBookEvent({'event': 'codelens', 'act': 'fwd', 'div_id': divid});
     });
     codelens.domRoot.find("#executionSlider").bind('slide', function (evt, ui) {
-        logBookEvent({'event': 'codelens', 'act': 'slide', 'div_id': divid});
+        rb.logBookEvent({'event': 'codelens', 'act': 'slide', 'div_id': divid});
     });
 
 }
 
 function redrawAllVisualizerArrows() {
+    var i;
     if (allVisualizers !== undefined) {
-        for (var v in allVisualizers)
-            allVisualizers[v].redrawConnectors();
+        for (i = 0; i < allVisualizers.length; i++) {
+            allVisualizers[i].redrawConnectors();
+        }
     }
 }
 function styleButtons(divid) {

@@ -1,0 +1,8 @@
+*.woff2
+*.woff
+*.ttf
+*.eot
+*.svg
+
+node_modules/
+bower_components/
