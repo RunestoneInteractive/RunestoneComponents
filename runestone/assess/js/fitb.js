@@ -43,11 +43,15 @@ function FITB (opts) {
         this.init(opts);
     }
 }
+
+FITB.prototype = new RunestoneBase();
+
 /*===================================
 ===    Setting FITB variables     ===
 ===================================*/
 
 FITB.prototype.init = function (opts) {
+    RunestoneBase.apply(this, arguments);
     var orig = opts.orig;    // entire <p> element
     this.origElem = orig;
     this.divid = orig.id;

@@ -34,11 +34,14 @@ function MultipleChoice (opts) {
     }
 }
 
+MultipleChoice.prototype = new RunestoneBase();
+
 /*===================================
 ===     Setting MC variables      ===
 ===================================*/
 
 MultipleChoice.prototype.init = function (opts) {
+    RunestoneBase.apply(this, arguments);
     var orig = opts.orig;    // entire <ul> element
     this.origElem = orig;
 
@@ -198,8 +201,11 @@ MultipleChoice.prototype.renderMCFormOpts = function () {
 
         // Create the label for the input
         var label = document.createElement("label");
-        $(label).attr("for", optid);
-        $(label).text(this.answerList[k].content);
+        var labelspan = document.createElement("span");
+        label.appendChild(input);
+        label.appendChild(labelspan);
+        //$(label).attr("for", optid);
+        $(labelspan).text(this.answerList[k].content);
 
         // create the object to store in optionArray
         var optObj = {
@@ -209,7 +215,6 @@ MultipleChoice.prototype.renderMCFormOpts = function () {
         this.optionArray.push(optObj);
 
         // add the option to the form
-        this.optsForm.appendChild(input);
         this.optsForm.appendChild(label);
         this.optsForm.appendChild(document.createElement("br"));
 
