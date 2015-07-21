@@ -8,8 +8,8 @@
 ===           Isaiah Mayerchak           ===
 ===                7/1/15                ===
 ==========================================*/
-var CAList = {};    // Dictionary that contains all instances of ClickableArea objects
 
+var CAList = {};    // Object that contains all instances of ClickableArea objects
 
 function ClickableArea (opts) {
     if (opts) {
@@ -24,12 +24,29 @@ ClickableArea.prototype = new RunestoneBase();
 =============================================*/
 ClickableArea.prototype.init = function (opts) {
     RunestoneBase.apply(this, arguments);
-    var orig = opts.orig;    // entire <pre> element that will be replaced by new HTML
+    var orig = opts.orig;    // entire <div> element that will be replaced by new HTML
     this.origElem = orig;
     this.divid = orig.id;
 
+    this.clickableArray = [];   // holds all clickable elements
     this.correctArray = [];   // holds the IDs of all correct clickable span elements, used for eval
     this.incorrectArray = [];   // holds IDs of all incorrect clickable span elements, used for eval
+
+    //For use with Sphinx-rendered html
+    this.isTable = false;
+    if ($(this.origElem).data("cc") !== undefined) {
+        if ($(this.origElem).is("[data-table]")) {
+            this.isTable = true;
+            this.ccArray = $(this.origElem).data("cc").split(";");
+            this.ciArray = $(this.origElem).data("ci").split(";");
+        } else {
+            this.ccArray = $(this.origElem).data("cc").split(",");
+            this.ciArray = $(this.origElem).data("ci").split(",");
+        }
+    }
+    // For use in the recursive replace function
+    this.clickIndex = 0;   // Index of this.clickedIndexArray that we're checking against
+    this.clickableCounter = 0;  // Index of the current clickable element
 
     this.getQuestion();
     this.getFeedback();
@@ -56,7 +73,7 @@ ClickableArea.prototype.getFeedback = function () {
             this.feedback = this.origElem.childNodes[i];
         }
     }
-    if (this.feedback !== "") {  // Get the feedback element out of the <pre> if the user has defined feedback
+    if (this.feedback !== "") {  // Get the feedback element out of the container if the user has defined feedback
         $(this.feedback).remove();
         this.feedback = this.feedback.innerHTML;
     }
@@ -73,9 +90,13 @@ ClickableArea.prototype.renderNewElements = function () {
     this.containerDiv.appendChild(this.question);
     $(this.containerDiv).addClass("alert alert-warning");
 
-    this.newPre = document.createElement("pre");
-    this.newPre.innerHTML = $(this.origElem).html();
-    this.containerDiv.appendChild(this.newPre);
+    this.newDiv = document.createElement("div");
+    var newContent = $(this.origElem).html();
+    while (newContent[0] === "\n") {
+        newContent = newContent.slice(1);
+    }
+    this.newDiv.innerHTML = newContent;
+    this.containerDiv.appendChild(this.newDiv);
 
     this.checkLocalStorage();
     this.createButtons();
@@ -95,47 +116,128 @@ ClickableArea.prototype.checkLocalStorage = function () {
             this.clickedIndexArray = ex.split(";");
         }
     }
-    this.replaceSpanElements();
+    if (this.ccArray === undefined) {
+        this.modifyClickables(this.newDiv.childNodes);
+    } else {   // For use with Sphinx-rendered HTML
+        this.ccCounter = 0;
+        this.ccIndex = 0;
+        this.ciIndex = 0;
+        if (!this.isTable) {
+            this.modifyViaCC(this.newDiv.children);
+        } else {
+            this.modifyTableViaCC(this.newDiv.children);
+        }
+    }
 };
 
-ClickableArea.prototype.replaceSpanElements = function () {
-    this.clickableArray = [];
-    this.clickIndex = 0;   // Index of this.clickedIndexArray that we're checking against
-    this.clickableCounter = 0;  // Index of the current clickable <span>
-    for (var i = 0; i < this.newPre.childNodes.length; i++) {
-        if ($(this.newPre.childNodes[i]).is("[data-correct]") || $(this.newPre.childNodes[i]).is("[data-incorrect]")) {
+ClickableArea.prototype.modifyClickables = function (childNodes) {
+    for (var i = 0; i < childNodes.length; i++) {
+        if ($(childNodes[i]).is("[data-correct]") || $(childNodes[i]).is("[data-incorrect]")) {
 
-            var replaceSpan = document.createElement("span");   // our new <span> that doesn't have the obvious data-correct/data-incorrect attribute
-            replaceSpan.innerHTML = this.newPre.childNodes[i].innerHTML;
-            $(replaceSpan).addClass("clickable");
+            this.manageNewClickable(childNodes[i]);
 
-            if (this.hasStoredAnswers) {   // Check if the span we're about to append to the pre was in local storage as clicked via its index
-                if (this.clickedIndexArray[this.clickIndex].toString() === this.clickableCounter.toString()) {
-                    $(replaceSpan).addClass("clickable-clicked");
-                    this.clickIndex++;
-                    if (this.clickIndex === this.clickedIndexArray.length) {   // Stop checking this if the index array is used up
-                        this.hasStoredAnswers = false;
+            if ($(childNodes[i]).is("[data-correct]")) {
+                $(childNodes[i]).removeAttr("data-correct");
+                this.correctArray.push(childNodes[i]);
+            } else {
+                $(childNodes[i]).removeAttr("data-incorrect");
+                this.incorrectArray.push(childNodes[i]);
+            }
+        }
+        if (childNodes[i].childNodes.length !== 0) {
+            this.modifyClickables(childNodes[i].childNodes);
+        }
+    }
+};
+
+ClickableArea.prototype.modifyViaCC = function (children) {
+    for (var i = 0; i < children.length; i++) {
+        if (children[i].children.length !== 0) {
+            this.modifyViaCC(children[i].children);
+        } else {
+            this.ccCounter++;
+            if (this.ccCounter === Math.floor(this.ccArray[this.ccIndex])) {
+                this.manageNewClickable(children[i]);
+                this.correctArray.push(children[i]);
+                this.ccIndex++;
+            } else if (this.ccCounter === Math.floor(this.ciArray[this.ciIndex])){
+                this.manageNewClickable(children[i]);
+                this.incorrectArray.push(children[i]);
+                this.ciIndex++;
+            }
+        }
+    }
+};
+
+ClickableArea.prototype.modifyTableViaCC = function (children) {
+    var tComponentArr = [];
+    for (var i = 0; i < children.length; i++) {
+        if (children[i].nodeName === "TABLE") {
+            var tmp = children[i];
+            for (var j = 0; j < tmp.children.length; j++) {
+                if (tmp.children[j].nodeName === "THEAD") {
+                    tComponentArr.push(tmp.children[j]);
+                } else if (tmp.children[j].nodeName === "TBODY") {
+                    tComponentArr.push(tmp.children[j]);
+                } else if (tmp.children[j].nodeName === "TFOOT") {
+                    tComponentArr.push(tmp.children[j]);
+                }
+            }
+        }
+    }
+    for (var t = 0; t < tComponentArr.length; t++) {
+        for (var i = 0; i < tComponentArr[t].children.length; i++) {
+            this.ccCounter++;
+            // First check if the entire row needs to be clickable
+            if (this.ccIndex < this.ccArray.length && this.ccCounter === Math.floor(this.ccArray[this.ccIndex].split(",")[0]) && Math.floor(this.ccArray[this.ccIndex].split(",")[1]) === 0) {
+                this.manageNewClickable(tComponentArr[t].children[i]);
+                this.correctArray.push(tComponentArr[t].children[i]);
+                this.ccIndex++;
+            } else if (this.ciIndex < this.ciArray.length && this.ccCounter === Math.floor(this.ciArray[this.ciIndex].split(",")[0]) && Math.floor(this.ciArray[this.ciIndex].split(",")[1]) === 0) {
+                this.manageNewClickable(tComponentArr[t].children[i]);
+                this.incorrectArray.push(tComponentArr[t].children[i]);
+                this.ciIndex++;
+            } else {
+                // If not, check the individual data cells
+                for (var j = 0; j < tComponentArr[t].children[i].children.length; j++) {
+                    var tmp = j + 1;
+                    if (this.ccIndex < this.ccArray.length && tmp === Math.floor(this.ccArray[this.ccIndex].split(",")[1]) && this.ccCounter === Math.floor(this.ccArray[this.ccIndex].split(",")[0])) {
+                        this.manageNewClickable(tComponentArr[t].children[i].children[j]);
+                        this.correctArray.push(tComponentArr[t].children[i].children[j]);
+                        this.ccIndex++;
+                    } else if (this.ciIndex < this.ciArray.length && tmp === Math.floor(this.ciArray[this.ciIndex].split(",")[1]) && this.ccCounter === Math.floor(this.ciArray[this.ciIndex].split(",")[0])) {
+                        this.manageNewClickable(tComponentArr[t].children[i].children[j]);
+                        this.incorrectArray.push(tComponentArr[t].children[i].children[j]);
+                        this.ciIndex++;
                     }
                 }
             }
-            replaceSpan.onclick = function () {
-                if ($(this).hasClass("clickable-clicked")) {
-                    $(this).removeClass("clickable-clicked");
-                } else {
-                    $(this).addClass("clickable-clicked");
-                }
-            };
-
-            if ($(this.newPre.childNodes[i]).is("[data-correct]")) {
-                this.correctArray.push(replaceSpan);
-            } else {
-                this.incorrectArray.push(replaceSpan);
-            }
-            this.clickableArray.push(replaceSpan);
-            $(this.newPre.childNodes[i]).replaceWith(replaceSpan);
-            this.clickableCounter++;
         }
     }
+};
+
+ClickableArea.prototype.manageNewClickable = function (clickable) {
+    $(clickable).addClass("clickable");
+
+    if (this.hasStoredAnswers) {   // Check if the element we're about to append to the pre was in local storage as clicked via its index
+        if (this.clickedIndexArray[this.clickIndex].toString() === this.clickableCounter.toString()) {
+            $(clickable).addClass("clickable-clicked");
+            this.clickIndex++;
+            if (this.clickIndex === this.clickedIndexArray.length) {   // Stop doing this if the index array is used up
+                this.hasStoredAnswers = false;
+            }
+        }
+    }
+    clickable.onclick = function () {
+        if ($(this).hasClass("clickable-clicked")) {
+            $(this).removeClass("clickable-clicked");
+            $(this).removeClass("clickable-incorrect");
+        } else {
+            $(this).addClass("clickable-clicked");
+        }
+    };
+    this.clickableArray.push(clickable);
+    this.clickableCounter++;
 };
 
 ClickableArea.prototype.createButtons = function () {
@@ -178,16 +280,20 @@ ClickableArea.prototype.clickableEval = function () {
     }
     for (var i = 0; i < this.incorrectArray.length; i++) {
         if ($(this.incorrectArray[i]).hasClass("clickable-clicked")) {
+            $(this.incorrectArray[i]).addClass("clickable-incorrect");
             this.correct = false;
             this.incorrectNum++;
+        } else {
+            $(this.incorrectArray[i]).removeClass("clickable-incorrect");
         }
     }
-
+    var answerInfo = "clicked:" + this.givenIndexArray + ";" + (this.correct ? "correct" : "incorrect");
+    this.logBookEvent({"event": "clickableArea", "act": answerInfo, "div_id": this.divid});
     this.renderFeedback();
 };
 
 ClickableArea.prototype.setLocalStorage = function () {
-    // Array of the indices of clicked span elements is passed to local storage
+    // Array of the indices of clicked elements is passed to local storage
     this.givenIndexArray = [];
     for (var i = 0; i < this.clickableArray.length; i++) {
         if ($(this.clickableArray[i]).hasClass("clickable-clicked")) {
@@ -216,7 +322,8 @@ ClickableArea.prototype.renderFeedback = function () {
 =================================*/
 $(document).ready(function () {
     $("[data-component=clickablearea]").each(function (index) {
-        CAList[this.id] = new ClickableArea({"orig": this});
+        if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
+            CAList[this.id] = new ClickableArea({"orig": this});
+        }
     });
-
 });
