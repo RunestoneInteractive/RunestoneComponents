@@ -1256,7 +1256,7 @@ LiveCode.prototype.runProg = function() {
             } else {
                 logresult = result.outcome;
             }
-            logRunEvent({'div_id': this.divid, 'code': source, 'errinfo': logresult, 'event':'livecode'});
+            this.logRunEvent({'div_id': this.divid, 'code': source, 'errinfo': logresult, 'event':'livecode'});
             switch (result.outcome) {
                 case 15:
                     $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
@@ -1346,7 +1346,7 @@ $(document).ready(function() {
             edList[this.id] = new JSActiveCode({'orig': this});
         } else if ($(this).data('lang') === 'htmlmixed') {
             edList[this.id] = new HTMLActiveCode({'orig': this});
-        } else if (['java', 'cpp', 'c', 'python3', 'python2'].includes($(this).data('lang'))) {
+        } else if (['java', 'cpp', 'c', 'python3', 'python2'].indexOf($(this).data('lang')) > -1) {
             edList[this.id] = new LiveCode({'orig': this});
         } else {   // default is python
             edList[this.id] = new ActiveCode({'orig': this});
