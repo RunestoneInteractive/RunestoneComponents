@@ -622,6 +622,11 @@ in the gray output area.
 Other Languages in ActiveCode
 -----------------------------
 
+Activecode now supports Java, C++ and C through a backend server, not in the browser.    You can
+use them by specifying the language to be `java`, `cpp` or `c` In addition it supports either Python3 or Python2
+outside of the browser using `python3` or `python2` as the language.   You are limited to non-graphical
+programs in any of these options.
+
 .. activecode:: lc1
    :language: java
    :stdin: 100
