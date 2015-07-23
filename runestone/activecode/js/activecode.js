@@ -217,6 +217,17 @@ ActiveCode.prototype.createOutput = function () {
     $(clearDiv).css("clear","both");  // needed to make parent div resize properly
     this.outerDiv.appendChild(clearDiv);
 
+
+    var lensDiv = document.createElement("div");
+    $(lensDiv).addClass("col-md-6");
+    $(lensDiv).css("display","none");
+    this.codelens = lensDiv;
+    this.outerDiv.appendChild(lensDiv);
+
+    clearDiv = document.createElement("div");
+    $(clearDiv).css("clear","both");  // needed to make parent div resize properly
+    this.outerDiv.appendChild(clearDiv);
+
 };
 
 ActiveCode.prototype.disableSaveLoad = function() {
@@ -359,13 +370,6 @@ ActiveCode.prototype.hideCodelens = function (button, div_id) {
 }
 
 ActiveCode.prototype.showCodelens = function () {
-    if (this.codelens === null) {
-        var lensDiv = document.createElement("div");
-        $(lensDiv).addClass("col-md-6");
-        $(lensDiv).css("display","none");
-        this.codelens = lensDiv;
-        this.outerDiv.appendChild(lensDiv);
-    }
 
     if (this.codelens.style.display == 'none') {
         this.codelens.style.display = 'block';
