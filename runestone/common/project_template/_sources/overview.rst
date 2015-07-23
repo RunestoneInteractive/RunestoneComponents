@@ -619,8 +619,8 @@ connect it to the print block.  Now click the run button and you should see 10 p
 in the gray output area.
 
 
-Other Languages - LiveCode
---------------------------
+Other Languages in ActiveCode
+-----------------------------
 
 .. activecode:: lc1
    :language: java
@@ -645,6 +645,11 @@ Other Languages - LiveCode
        }
 
    }
+
+
+Audio Tours
+-----------
+
 
 .. activecode:: ch03_4
     :nocanvas:
