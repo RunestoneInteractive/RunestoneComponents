@@ -730,7 +730,11 @@ function AudioTour (divid, code, bnum, audio_text) {
     var bcount = 0;
     var html_string = "<div class='modal-lightsout'></div><div class='modal-profile'><h3>Take an audio tour!</h3><div class='modal-close-profile'></div><p id='windowcode'></p><p id='" + divid + "_audiocode'></p>";
     html_string += "<p id='status'></p>";
-    html_string += "<input type='image' src='../_static/first.png' width='25' id='first_audio' name='first_audio' title='Play first audio in tour' alt='Play first audio in tour' disabled/>" + "<input type='image' src='../_static/prev.png' width='25' id='prev_audio' name='prev_audio' title='Play previous audio in tour' alt='Play previous audio in tour' disabled/>" + "<input type='image' src='../_static/pause.png' width='25' id='pause_audio' name='pause_audio' title='Pause current audio' alt='Pause current audio' disabled/><input type='image' src='../_static/next.png' width ='25' id='next_audio' name='next_audio' title='Play next audio in tour' alt='Play next audio in tour' disabled/><input type='image' src='../_static/last.png' width ='25' id='last_audio' name='last_audio' title='Play last audio in tour' alt='Play last audio in tour' disabled/><br/>";
+    html_string += "<input type='image' src='../_static/first.png' width='25' id='first_audio' name='first_audio' title='Play first audio in tour' alt='Play first audio in tour' onerror=\"this.onerror=null;this.src='_static/first.png'\" disabled/>" +
+                   "<input type='image' src='../_static/prev.png' width='25' id='prev_audio' name='prev_audio' title='Play previous audio in tour' alt='Play previous audio in tour' onerror=\"this.onerror=null;this.src='_static/prev.png'\" disabled/>" +
+                   "<input type='image' src='../_static/pause.png' width='25' id='pause_audio' name='pause_audio' title='Pause current audio' alt='Pause current audio' onerror=\"this.onerror=null;this.src='_static/pause.png'\" disabled/>" + "" +
+                   "<input type='image' src='../_static/next.png' width ='25' id='next_audio' name='next_audio' title='Play next audio in tour' alt='Play next audio in tour' onerror=\"this.onerror=null;this.src='_static/next.png'\" disabled/>" +
+                   "<input type='image' src='../_static/last.png' width ='25' id='last_audio' name='last_audio' title='Play last audio in tour' alt='Play last audio in tour' onerror=\"this.onerror=null;this.src='_static/last.png'\" disabled/><br/>";
     for (var i = 0; i < audio_type.length - 1; i++) {
         html_string += "<input type='button' style='margin-right:5px;' class='btn btn-default btn-sm' id='button_audio_" + i + "' name='button_audio_" + i + "' value=" + bval[i] + " />";
         bcount++;
@@ -869,9 +873,12 @@ AudioTour.prototype.tour = function (divid, audio_type, bcount) {
         // str+="<audio id="+akey+" preload='auto'><source src='http://ice-web.cc.gatech.edu/ce21/audio/"+
         // akey+".mp3' type='audio/mpeg'><source src='http://ice-web.cc.gatech.edu/ce21/audio/"+akey+
         // ".ogg' type='audio/ogg'>Your browser does not support the audio tag</audio>";
-        str += "<audio id=" + akey + " preload='auto' ><source src='../_static/audio/" + akey +
-            ".wav' type='audio/wav'><source src='../_static/audio/" +
-            akey + ".mp3' type='audio/mpeg'><br />Your browser does not support the audio tag</audio>";
+        str += "<audio id=" + akey + " preload='auto' >";
+        str += "<source src='../_static/audio/" + akey + ".wav' type='audio/wav'>";
+        str += "<source src='../_static/audio/" + akey + ".mp3' type='audio/mpeg'>";
+        str += "<source src='_static/audio/" + akey + ".wav' type='audio/wav'>";
+        str += "<source src='_static/audio/" + akey + ".mp3' type='audio/mpeg'>";
+        str +=  "<br />Your browser does not support the audio tag</audio>";
         this.ahash[akey] = lnums;
         this.aname.push(akey);
     }
