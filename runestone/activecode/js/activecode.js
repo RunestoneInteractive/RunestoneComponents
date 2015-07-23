@@ -358,7 +358,7 @@ ActiveCode.prototype.hideCodelens = function (button, div_id) {
     this.codelens.style.display = 'none'
 }
 
-ActiveCode.prototype.showCodelens = function (button, div_id) {
+ActiveCode.prototype.showCodelens = function () {
     if (this.codelens === null) {
         var lensDiv = document.createElement("div");
         $(lensDiv).addClass("col-md-6");
@@ -369,10 +369,10 @@ ActiveCode.prototype.showCodelens = function (button, div_id) {
 
     if (this.codelens.style.display == 'none') {
         this.codelens.style.display = 'block';
-        button.innerText = "Hide Codelens";
+        this.clButton.innerText = "Hide Codelens";
     } else {
         this.codelens.style.display = "none";
-        button.innerText = "Show in Codelens";
+        this.clButton.innerText = "Show in Codelens";
         return;
     }
 
@@ -397,7 +397,7 @@ ActiveCode.prototype.showCodelens = function (button, div_id) {
     var srcURL = '//pythontutor.com/iframe-embed.html'
     var embedUrlStr = $.param.fragment(srcURL, myVars, 2 /* clobber all */)
     var myIframe = document.createElement('iframe')
-    myIframe.setAttribute("id", div_id + '_codelens')
+    myIframe.setAttribute("id", this.divid + '_codelens')
     myIframe.setAttribute("width", "800")
     myIframe.setAttribute("height", "500")
     myIframe.setAttribute("style", "display:block")
