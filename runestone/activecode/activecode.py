@@ -196,7 +196,7 @@ class ActiveCode(Directive):
         if 'timelimit' not in self.options:
             self.options['timelimit'] = 'data-timelimit=25000'
         else:
-            self.options['timelimit'] = 'data-timelimit=%d' % self.options['timelimit']
+            self.options['timelimit'] = 'data-timelimit=%s' % self.options['timelimit']
 
         if 'autorun' not in self.options:
             self.options['autorun'] = ''
