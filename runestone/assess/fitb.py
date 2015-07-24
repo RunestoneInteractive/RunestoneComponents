@@ -125,7 +125,7 @@ def depart_blank_node(self,node):
     fbl = []
     res = ""
     feedCounter = 0
-    print self.body[-1]
+    print self.body[-2:]
 
     for k in sorted(node.blank_options.keys()):
         if 'feedback' in k:
@@ -191,13 +191,14 @@ class Blank(Directive):
             raise ValueError("missing correct value in %s"%self.options['divid'])
 
         TEMPLATE_BLANK_START = '''
-        <span data-blank>%(bodytext)s<span data-answer id="%(divid)s_answer">%(correct)s</span>
+        <span data-blank>
             '''
         TEMPLATE_BLANK_OPTION = '''
-        <span data-feedback="regex" id="%(divid)s_%(feedLabel)s">%(feedExp)s</span>
-        <span data-feedback="text" for="%(divid)s_%(feedLabel)s">%(feedText)s</span>
+        <span data-feedback="regex" style="display: none" id="%(divid)s_%(feedLabel)s">%(feedExp)s</span>
+        <span data-feedback="text" style="display: none" for="%(divid)s_%(feedLabel)s">%(feedText)s</span>
             '''
         TEMPLATE_BLANK_END = '''
+        <span data-answer style="display: none" id="%(divid)s_answer">%(correct)s</span>
         </span>
         '''
 
