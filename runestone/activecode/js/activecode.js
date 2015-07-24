@@ -615,7 +615,7 @@ ActiveCode.prototype.runProg = function() {
 
         myPromise.then((function(mod) { // success
             $(this.runButton).removeAttr('disabled');
-            this.logRunEvent({'div_id': this.id, 'code': prog, 'errinfo': 'success'}); // Log the run event
+            this.logRunEvent({'div_id': this.divid, 'code': prog, 'errinfo': 'success'}); // Log the run event
         }).bind(this),
             (function(err) {  // fail
             $(this.runButton).removeAttr('disabled');
