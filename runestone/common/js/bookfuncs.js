@@ -243,9 +243,11 @@ function addDelay(directive, action, delay) {
 
 
 // initialize stuff
-$(document).ready(handleLoginLogout);
-$(document).ready(getNumUsers);
-$(document).ready(getOnlineUsers);
+if (eBookConfig.useRunestoneServices) {
+    $(document).ready(handleLoginLogout);
+    $(document).ready(getNumUsers);
+    $(document).ready(getOnlineUsers);
+}
 
 // misc stuff
 // todo:  This could be further distributed but making a video.js file just for one function seems dumb.

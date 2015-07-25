@@ -44,7 +44,7 @@ MultipleChoice.prototype.init = function (opts) {
     RunestoneBase.apply(this, arguments);
     var orig = opts.orig;    // entire <ul> element
     this.origElem = orig;
-
+    this.useRunestoneServices = opts.useRunestoneServices;
     this.multipleanswers = false;
     this.divid = orig.id;
     if ($(this.origElem).data("multipleanswers") === true) {
@@ -243,18 +243,20 @@ MultipleChoice.prototype.renderMCFormButtons = function () {
     this.optsForm.appendChild(this.submitButton);
 
     // Create compare button
-    this.compareButton = document.createElement("button");
-    $(this.compareButton).attr({
-        "class": "btn btn-default",
-        "id": this.divid + "_bcomp",
-        "disabled": "",
-        "name": "compare"
-    });
-    this.compareButton.textContent = "Compare me";
-    this.compareButton.addEventListener("click", function () {
-        this.compareAnswers(this.divid);
-    }.bind(this), false);
-    this.optsForm.appendChild(this.compareButton);
+    if (this.useRunestoneServices) {
+        this.compareButton = document.createElement("button");
+        $(this.compareButton).attr({
+            "class": "btn btn-default",
+            "id": this.divid + "_bcomp",
+            "disabled": "",
+            "name": "compare"
+        });
+        this.compareButton.textContent = "Compare me";
+        this.compareButton.addEventListener("click", function () {
+            this.compareAnswers(this.divid);
+        }.bind(this), false);
+        this.optsForm.appendChild(this.compareButton);
+    }
 };
 
 MultipleChoice.prototype.renderMCfeedbackDiv = function () {
@@ -546,8 +548,9 @@ MultipleChoice.prototype.compareAnswers = function () {
 =================================*/
 $(document).ready(function () {
     $("[data-component=multiplechoice]").each(function (index) {    // MC
+        var opts = {"orig": this, 'useRunestoneServices':eBookConfig.useRunestoneServices};
         if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
-            mcList[this.id] = new MultipleChoice({"orig": this});
+            mcList[this.id] = new MultipleChoice(opts);
         }
     });
 

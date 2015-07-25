@@ -20,6 +20,7 @@ ActiveCode.prototype.init = function(opts) {
     var _this = this;
     var suffStart = -1;
     var orig = opts.orig
+    this.useRunestoneServices = opts.useRunestoneServices;
     this.origElem = orig;
     this.divid = orig.id;
     this.code = $(orig).text();
@@ -112,26 +113,29 @@ ActiveCode.prototype.createControls = function () {
     $(butt).click(this.runProg.bind(this));
 
     // Save
-    butt = document.createElement("button");
-    $(butt).addClass("ac_opt btn btn-default");
-    $(butt).text("Save");
-    $(butt).css("margin-left","10px");
-    this.saveButton = butt;
-    ctrlDiv.appendChild(butt);
-    if (this.hidecode) {
-        $(butt).css("display","none")
+    if (this.useRunestoneServices) {
+        butt = document.createElement("button");
+        $(butt).addClass("ac_opt btn btn-default");
+        $(butt).text("Save");
+        $(butt).css("margin-left", "10px");
+        this.saveButton = butt;
+        ctrlDiv.appendChild(butt);
+        if (this.hidecode) {
+            $(butt).css("display", "none")
+        }
     }
     // Load
-    butt = document.createElement("button");
-    $(butt).addClass("ac_opt btn btn-default");
-    $(butt).text("Load");
-    $(butt).css("margin-left","10px");
-    this.loadButton = butt;
-    ctrlDiv.appendChild(butt);
-    if (this.hidecode) {
-        $(butt).css("display","none")
+    if (this.useRunestoneServices) {
+        butt = document.createElement("button");
+        $(butt).addClass("ac_opt btn btn-default");
+        $(butt).text("Load");
+        $(butt).css("margin-left", "10px");
+        this.loadButton = butt;
+        ctrlDiv.appendChild(butt);
+        if (this.hidecode) {
+            $(butt).css("display", "none")
+        }
     }
-
     if ($(this.origElem).data('gradebutton')) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
@@ -166,7 +170,7 @@ ActiveCode.prototype.createControls = function () {
         $(butt).click(this.showCodelens.bind(this));
     }
     // CodeCoach
-    if ($(this.origElem).data("coach")) {
+    if (this.useRunestoneServices && $(this.origElem).data("coach")) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
         $(butt).text("Code Coach");
@@ -1414,14 +1418,15 @@ LiveCode.prototype.pushDataFile = function (datadiv) {
 
 $(document).ready(function() {
     $('[data-component=activecode]').each( function(index ) {
+        var opts = {'orig' : this, 'useRunestoneServices': eBookConfig.useRunestoneServices }
         if ($(this).data('lang') === "javascript") {
-            edList[this.id] = new JSActiveCode({'orig': this});
+            edList[this.id] = new JSActiveCode(opts);
         } else if ($(this).data('lang') === 'htmlmixed') {
-            edList[this.id] = new HTMLActiveCode({'orig': this});
+            edList[this.id] = new HTMLActiveCode(opts);
         } else if (['java', 'cpp', 'c', 'python3', 'python2'].indexOf($(this).data('lang')) > -1) {
-            edList[this.id] = new LiveCode({'orig': this});
+            edList[this.id] = new LiveCode(opts);
         } else {   // default is python
-            edList[this.id] = new ActiveCode({'orig': this});
+            edList[this.id] = new ActiveCode(opts);
         }
     });
     if (loggedout) {
