@@ -289,12 +289,12 @@ next line executed.
 Timed Exam Questions
 ---------------------
 
-You can add a timed exam of multiple-choice/fill-in-the-blank questions that the user can only take once.  All the feedback will be shown after the time is up or after the user has clicked the "Submit Answers" button at the end of the timed exam.  To start the timed exam click on the "Start" button.  This will also start the countdown of the time remaining.  You can pause the timer by clicking on the "Pause" button and start it again by clicking on the "Resume" button.  When you pause the timed exam the questions will be hidden.  There is also a clock icon that will display the time remaining when the reader hovers over it.
+You can add a timed exam of multiple-choice/fill-in-the-blank/clickable-area/drag-n-drop questions that the user can only take once.  All the feedback will be shown after the time is up or after the user has clicked the "Submit Answers" button at the end of the timed exam.  To start the timed exam click on the "Start" button.  This will also start the countdown of the time remaining.  You can pause the timer by clicking on the "Pause" button and start it again by clicking on the "Resume" button.  When you pause the timed exam the questions will be hidden.  There is also a clock icon that will display the time remaining when the reader hovers over it.
 
 Please note that you can currently only have one timed exam per html page.
 
 All you need is the timed directive--you can specify the time limit (in minutes), and there are options for no feedback, no results, and no time limit (in which case it will keep track of the amount of time taken to complete the exam).
-A timed exam can hold any number of multiple choice or fill in the blank questions.
+A timed exam can hold any number of multiple choice, fill in the blank, clickable area, and dragndrop components.
 
 .. timed:: timed1
     :timelimit: 10
@@ -314,20 +314,28 @@ A timed exam can hold any number of multiple choice or fill in the blank questio
 
         Under which of these conditions will a sequential search be faster than a binary search?
 
-    .. mchoice:: questiontimed2
-        :random:
-        :multiple_answers:
-        :correct: a,b,d
-        :answer_a: Red
-        :answer_b: Blue
-        :answer_c: Brown
-        :answer_d: Indigo
-        :feedback_a: Yes, red is definitely one of the colors.
-        :feedback_b: Blue is correct!
-        :feedback_c: Remember ROY G BIV!
-        :feedback_d: Yes, indigo is also in the rainbow!
+    .. clickablearea:: clicktimed1
+        :question: Click on the correct cells.
+        :feedback: Remember, the operator '=' is used for assignment.
+        :table:
+        :correct: 1,1;1,4;2,3;2,4
+        :incorrect: 2,1;2,2;3,0
 
-        Which of these are colors of the rainbow?
+        +------------------------+------------+----------+----------+
+        |        correct         |    N-A     |    N-A   | correct  |
+        +========================+============+==========+==========+
+        | Incorrect              | incorrect  | correct  | correct  |
+        +------------------------+------------+----------+----------+
+        | This row is incorrect  |   ...      |   ...    |   ...    |
+        +------------------------+------------+----------+----------+
+
+    .. dragndrop:: dnd2
+        :feedback: This is feedback.
+        :match_1: Drag to Answer A|||Answer A
+        :match_2: Drag me Answer B|||Answer B
+        :match_3: Drag to Answer C|||Answer C
+
+        This is a drag n drop question.
 
     .. fillintheblank:: fill1412
 
@@ -430,6 +438,7 @@ will be evaluated once they click the 'Check Me' button.
 
 .. clickablearea:: click1
     :question: Click on all assignment statements.
+    :iscode:
     :feedback: Remember, the operator '=' is used for assignment.
 
     :click-incorrect:def main()::endclick:
@@ -610,8 +619,13 @@ connect it to the print block.  Now click the run button and you should see 10 p
 in the gray output area.
 
 
-Other Languages - LiveCode
---------------------------
+Other Languages in ActiveCode
+-----------------------------
+
+Activecode now supports Java, C++ and C through a backend server, not in the browser.    You can
+use them by specifying the language to be `java`, `cpp` or `c` In addition it supports either Python3 or Python2
+outside of the browser using `python3` or `python2` as the language.   You are limited to non-graphical
+programs in any of these options.
 
 .. activecode:: lc1
    :language: java
@@ -636,6 +650,11 @@ Other Languages - LiveCode
        }
 
    }
+
+
+Audio Tours
+-----------
+
 
 .. activecode:: ch03_4
     :nocanvas:

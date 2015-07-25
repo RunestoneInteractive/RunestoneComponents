@@ -116,7 +116,6 @@ class BlankNode(nodes.General, nodes.Element):
 def visit_blank_node(self,node):
     res = ""
 
-
     res = node.template_blank_start % node.blank_options
 
     self.body.append(res)
@@ -126,7 +125,7 @@ def depart_blank_node(self,node):
     fbl = []
     res = ""
     feedCounter = 0
-
+    print self.body[-2:]
 
     for k in sorted(node.blank_options.keys()):
         if 'feedback' in k:
@@ -177,7 +176,8 @@ class Blank(Directive):
 
             Question text
             ...
-            """
+        """
+
         self.options['divid'] = self.arguments[0]
         if self.content:
             if 'iscode' in self.options:
@@ -187,23 +187,26 @@ class Blank(Directive):
         else:
             self.options['bodytext'] = '\n'
 
+        if 'correct' not in self.options:
+            raise ValueError("missing correct value in %s"%self.options['divid'])
+
         TEMPLATE_BLANK_START = '''
-        <span data-blank>%(bodytext)s<span data-answer id="%(divid)s_answer">%(correct)s</span>
+        <span data-blank>
             '''
         TEMPLATE_BLANK_OPTION = '''
-        <span data-feedback="regex" id="%(divid)s_%(feedLabel)s">%(feedExp)s</span>
-        <span data-feedback="text" for="%(divid)s_%(feedLabel)s">%(feedText)s</span>
+        <span data-feedback="regex" style="display: none" id="%(divid)s_%(feedLabel)s">%(feedExp)s</span>
+        <span data-feedback="text" style="display: none" for="%(divid)s_%(feedLabel)s">%(feedText)s</span>
             '''
         TEMPLATE_BLANK_END = '''
+        <span data-answer style="display: none" id="%(divid)s_answer">%(correct)s</span>
         </span>
         '''
-
-
 
         blankNode = BlankNode(self.options)
         blankNode.template_blank_start = TEMPLATE_BLANK_START
         blankNode.template_blank_option = TEMPLATE_BLANK_OPTION
         blankNode.template_option_end = TEMPLATE_BLANK_END
 
+        self.state.nested_parse(self.content, self.content_offset, blankNode)
 
         return [blankNode]

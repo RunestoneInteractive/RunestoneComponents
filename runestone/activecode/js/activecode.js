@@ -217,6 +217,17 @@ ActiveCode.prototype.createOutput = function () {
     $(clearDiv).css("clear","both");  // needed to make parent div resize properly
     this.outerDiv.appendChild(clearDiv);
 
+
+    var lensDiv = document.createElement("div");
+    $(lensDiv).addClass("col-md-6");
+    $(lensDiv).css("display","none");
+    this.codelens = lensDiv;
+    this.outerDiv.appendChild(lensDiv);
+
+    clearDiv = document.createElement("div");
+    $(clearDiv).css("clear","both");  // needed to make parent div resize properly
+    this.outerDiv.appendChild(clearDiv);
+
 };
 
 ActiveCode.prototype.disableSaveLoad = function() {
@@ -358,21 +369,14 @@ ActiveCode.prototype.hideCodelens = function (button, div_id) {
     this.codelens.style.display = 'none'
 }
 
-ActiveCode.prototype.showCodelens = function (button, div_id) {
-    if (this.codelens === null) {
-        var lensDiv = document.createElement("div");
-        $(lensDiv).addClass("col-md-6");
-        $(lensDiv).css("display","none");
-        this.codelens = lensDiv;
-        this.outerDiv.appendChild(lensDiv);
-    }
+ActiveCode.prototype.showCodelens = function () {
 
     if (this.codelens.style.display == 'none') {
         this.codelens.style.display = 'block';
-        button.innerText = "Hide Codelens";
+        this.clButton.innerText = "Hide Codelens";
     } else {
         this.codelens.style.display = "none";
-        button.innerText = "Show in Codelens";
+        this.clButton.innerText = "Show in Codelens";
         return;
     }
 
@@ -397,7 +401,7 @@ ActiveCode.prototype.showCodelens = function (button, div_id) {
     var srcURL = '//pythontutor.com/iframe-embed.html'
     var embedUrlStr = $.param.fragment(srcURL, myVars, 2 /* clobber all */)
     var myIframe = document.createElement('iframe')
-    myIframe.setAttribute("id", div_id + '_codelens')
+    myIframe.setAttribute("id", this.divid + '_codelens')
     myIframe.setAttribute("width", "800")
     myIframe.setAttribute("height", "500")
     myIframe.setAttribute("style", "display:block")
@@ -455,8 +459,69 @@ ActiveCode.prototype.toggleEditorVisibility = function () {
 
 ActiveCode.prototype.addErrorMessage = function (err) {
     //logRunEvent({'div_id': this.divid, 'code': this.prog, 'errinfo': err.toString()}); // Log the run event
-    console.log("Runtime Error: " + err.toString());
+    var errHead = $('<h3>').html('Error')
+    this.eContainer = this.outerDiv.appendChild(document.createElement('div'))
+    this.eContainer.className = 'error alert alert-danger';
+    this.eContainer.id = this.divid + '_errinfo';
+    this.eContainer.appendChild(errHead[0]);
+    var errText = this.eContainer.appendChild(document.createElement('pre'))
+    var errString = err.toString()
+    var to = errString.indexOf(":")
+    var errName = errString.substring(0, to);
+    errText.innerHTML = errString;
+    $(this.eContainer).append('<h3>Description</h3>');
+    var errDesc = this.eContainer.appendChild(document.createElement('p'));
+    errDesc.innerHTML = errorText[errName];
+    $(this.eContainer).append('<h3>To Fix</h3>');
+    var errFix = this.eContainer.appendChild(document.createElement('p'));
+    errFix.innerHTML = errorText[errName + 'Fix'];
+    var moreInfo = '../ErrorHelp/' + errName.toLowerCase() + '.html';
+    //console.log("Runtime Error: " + err.toString());
 };
+
+
+
+var errorText = {};
+
+errorText.ParseError = "A parse error means that Python does not understand the syntax on the line the error message points out.  Common examples are forgetting commas beteween arguments or forgetting a : on a for statement";
+errorText.ParseErrorFix = "To fix a parse error you just need to look carefully at the line with the error and possibly the line before it.  Make sure it conforms to all of Python's rules.";
+errorText.TypeError = "Type errors most often occur when an expression tries to combine two objects with types that should not be combined.  Like raising a string to a power";
+errorText.TypeErrorFix = "To fix a type error you will most likely need to trace through your code and make sure the variables have the types you expect them to have.  It may be helpful to print out each variable along the way to be sure its value is what you think it should be.";
+errorText.NameError = "A name error almost always means that you have used a variable before it has a value.  Often this may be a simple typo, so check the spelling carefully.";
+errorText.NameErrorFix = "Check the right hand side of assignment statements and your function calls, this is the most likely place for a NameError to be found.";
+errorText.ValueError = "A ValueError most often occurs when you pass a parameter to a function and the function is expecting one type and you pass another.";
+errorText.ValueErrorFix = "The error message gives you a pretty good hint about the name of the function as well as the value that is incorrect.  Look at the error message closely and then trace back to the variable containing the problematic value.";
+errorText.AttributeError = "This error message is telling you that the object on the left hand side of the dot, does not have the attribute or method on the right hand side.";
+errorText.AttributeErrorFix = "The most common variant of this message is that the object undefined does not have attribute X.  This tells you that the object on the left hand side of the dot is not what you think. Trace the variable back and print it out in various places until you discover where it becomes undefined.  Otherwise check the attribute on the right hand side of the dot for a typo.";
+errorText.TokenError = "Most of the time this error indicates that you have forgotten a right parenthesis or have forgotten to close a pair of quotes.";
+errorText.TokenErrorFix = "Check each line of your program and make sure that your parenthesis are balanced.";
+errorText.TimeLimitError = "Your program is running too long.  Most programs in this book should run in less than 10 seconds easily. This probably indicates your program is in an infinite loop.";
+errorText.TimeLimitErrorFix = "Add some print statements to figure out if your program is in an infinte loop.  If it is not you can increase the run time with sys.setExecutionLimit(msecs)";
+errorText.Error = "Your program is running for too long.  Most programs in this book should run in less than 30 seconds easily. This probably indicates your program is in an infinite loop.";
+errorText.ErrorFix = "Add some print statements to figure out if your program is in an infinte loop.  If it is not you can increase the run time with sys.setExecutionLimit(msecs)";
+errorText.SyntaxError = "This message indicates that Python can't figure out the syntax of a particular statement.  Some examples are assigning to a literal, or a function call";
+errorText.SyntaxErrorFix = "Check your assignment statments and make sure that the left hand side of the assignment is a variable, not a literal or a function.";
+errorText.IndexError = "This message means that you are trying to index past the end of a string or a list.  For example if your list has 3 things in it and you try to access the item at position 3 or more.";
+errorText.IndexErrorFix = "Remember that the first item in a list or string is at index position 0, quite often this message comes about because you are off by one.  Remember in a list of length 3 the last legal index is 2";
+errorText.URIError = "";
+errorText.URIErrorFix = "";
+errorText.ImportError = "This error message indicates that you are trying to import a module that does not exist";
+errorText.ImportErrorFix = "One problem may simply be that you have a typo.  It may also be that you are trying to import a module that exists in 'real' Python, but does not exist in this book.  If this is the case, please submit a feature request to have the module added.";
+errorText.ReferenceError = "This is most likely an internal error, particularly if the message references the console.";
+errorText.ReferenceErrorFix = "Try refreshing the webpage, and if the error continues, submit a bug report along with your code";
+errorText.ZeroDivisionError = "This tells you that you are trying to divide by 0. Typically this is because the value of the variable in the denominator of a division expression has the value 0";
+errorText.ZeroDivisionErrorFix = "You may need to protect against dividing by 0 with an if statment, or you may need to rexamine your assumptions about the legal values of variables, it could be an earlier statment that is unexpectedly assigning a value of zero to the variable in question.";
+errorText.RangeError = "This message almost always shows up in the form of Maximum call stack size exceeded.";
+errorText.RangeErrorFix = "This always occurs when a function calls itself.  Its pretty likely that you are not doing this on purpose. Except in the chapter on recursion.  If you are in that chapter then its likely you haven't identified a good base case.";
+errorText.InternalError = "An Internal error may mean that you've triggered a bug in our Python";
+errorText.InternalErrorFix = "Report this error, along with your code as a bug.";
+errorText.IndentationError = "This error occurs when you have not indented your code properly.  This is most likely to happen as part of an if, for, while or def statement.";
+errorText.IndentationErrorFix = "Check your if, def, for, and while statements to be sure the lines are properly indented beneath them.  Another source of this error comes from copying and pasting code where you have accidentally left some bits of code lying around that don't belong there anymore.";
+errorText.NotImplementedError = "This error occurs when you try to use a builtin function of Python that has not been implemented in this in-browser version of Python.";
+errorText.NotImplementedErrorFix = "For now the only way to fix this is to not use the function.  There may be workarounds.  If you really need this builtin function then file a bug report and tell us how you are trying to use the function.";
+
+
+
 
 ActiveCode.prototype.setTimeLimit = function (timer) {
     var timelimit = this.timeLimit;
@@ -531,7 +596,7 @@ ActiveCode.prototype.runProg = function() {
 
         $(this.output).text('');
 
-
+        $(this.eContainer).remove();
         Sk.configure({output : this.outputfun.bind(this),
               read   : this.builtinRead,
               python3: true,
@@ -550,7 +615,7 @@ ActiveCode.prototype.runProg = function() {
 
         myPromise.then((function(mod) { // success
             $(this.runButton).removeAttr('disabled');
-            this.logRunEvent({'div_id': this.id, 'code': prog, 'errinfo': 'success'}); // Log the run event
+            this.logRunEvent({'div_id': this.divid, 'code': prog, 'errinfo': 'success'}); // Log the run event
         }).bind(this),
             (function(err) {  // fail
             $(this.runButton).removeAttr('disabled');
@@ -726,7 +791,11 @@ function AudioTour (divid, code, bnum, audio_text) {
     var bcount = 0;
     var html_string = "<div class='modal-lightsout'></div><div class='modal-profile'><h3>Take an audio tour!</h3><div class='modal-close-profile'></div><p id='windowcode'></p><p id='" + divid + "_audiocode'></p>";
     html_string += "<p id='status'></p>";
-    html_string += "<input type='image' src='../_static/first.png' width='25' id='first_audio' name='first_audio' title='Play first audio in tour' alt='Play first audio in tour' disabled/>" + "<input type='image' src='../_static/prev.png' width='25' id='prev_audio' name='prev_audio' title='Play previous audio in tour' alt='Play previous audio in tour' disabled/>" + "<input type='image' src='../_static/pause.png' width='25' id='pause_audio' name='pause_audio' title='Pause current audio' alt='Pause current audio' disabled/><input type='image' src='../_static/next.png' width ='25' id='next_audio' name='next_audio' title='Play next audio in tour' alt='Play next audio in tour' disabled/><input type='image' src='../_static/last.png' width ='25' id='last_audio' name='last_audio' title='Play last audio in tour' alt='Play last audio in tour' disabled/><br/>";
+    html_string += "<input type='image' src='../_static/first.png' width='25' id='first_audio' name='first_audio' title='Play first audio in tour' alt='Play first audio in tour' onerror=\"this.onerror=null;this.src='_static/first.png'\" disabled/>" +
+                   "<input type='image' src='../_static/prev.png' width='25' id='prev_audio' name='prev_audio' title='Play previous audio in tour' alt='Play previous audio in tour' onerror=\"this.onerror=null;this.src='_static/prev.png'\" disabled/>" +
+                   "<input type='image' src='../_static/pause.png' width='25' id='pause_audio' name='pause_audio' title='Pause current audio' alt='Pause current audio' onerror=\"this.onerror=null;this.src='_static/pause.png'\" disabled/>" + "" +
+                   "<input type='image' src='../_static/next.png' width ='25' id='next_audio' name='next_audio' title='Play next audio in tour' alt='Play next audio in tour' onerror=\"this.onerror=null;this.src='_static/next.png'\" disabled/>" +
+                   "<input type='image' src='../_static/last.png' width ='25' id='last_audio' name='last_audio' title='Play last audio in tour' alt='Play last audio in tour' onerror=\"this.onerror=null;this.src='_static/last.png'\" disabled/><br/>";
     for (var i = 0; i < audio_type.length - 1; i++) {
         html_string += "<input type='button' style='margin-right:5px;' class='btn btn-default btn-sm' id='button_audio_" + i + "' name='button_audio_" + i + "' value=" + bval[i] + " />";
         bcount++;
@@ -865,9 +934,12 @@ AudioTour.prototype.tour = function (divid, audio_type, bcount) {
         // str+="<audio id="+akey+" preload='auto'><source src='http://ice-web.cc.gatech.edu/ce21/audio/"+
         // akey+".mp3' type='audio/mpeg'><source src='http://ice-web.cc.gatech.edu/ce21/audio/"+akey+
         // ".ogg' type='audio/ogg'>Your browser does not support the audio tag</audio>";
-        str += "<audio id=" + akey + " preload='auto' ><source src='../_static/audio/" + akey +
-            ".wav' type='audio/wav'><source src='../_static/audio/" +
-            akey + ".mp3' type='audio/mpeg'><br />Your browser does not support the audio tag</audio>";
+        str += "<audio id=" + akey + " preload='auto' >";
+        str += "<source src='../_static/audio/" + akey + ".wav' type='audio/wav'>";
+        str += "<source src='../_static/audio/" + akey + ".mp3' type='audio/mpeg'>";
+        str += "<source src='_static/audio/" + akey + ".wav' type='audio/wav'>";
+        str += "<source src='_static/audio/" + akey + ".mp3' type='audio/mpeg'>";
+        str +=  "<br />Your browser does not support the audio tag</audio>";
         this.ahash[akey] = lnums;
         this.aname.push(akey);
     }
@@ -1256,7 +1328,7 @@ LiveCode.prototype.runProg = function() {
             } else {
                 logresult = result.outcome;
             }
-            logRunEvent({'div_id': this.divid, 'code': source, 'errinfo': logresult, 'event':'livecode'});
+            this.logRunEvent({'div_id': this.divid, 'code': source, 'errinfo': logresult, 'event':'livecode'});
             switch (result.outcome) {
                 case 15:
                     $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
@@ -1346,7 +1418,7 @@ $(document).ready(function() {
             edList[this.id] = new JSActiveCode({'orig': this});
         } else if ($(this).data('lang') === 'htmlmixed') {
             edList[this.id] = new HTMLActiveCode({'orig': this});
-        } else if (['java', 'cpp', 'c', 'python3', 'python2'].includes($(this).data('lang'))) {
+        } else if (['java', 'cpp', 'c', 'python3', 'python2'].indexOf($(this).data('lang')) > -1) {
             edList[this.id] = new LiveCode({'orig': this});
         } else {   // default is python
             edList[this.id] = new ActiveCode({'orig': this});
