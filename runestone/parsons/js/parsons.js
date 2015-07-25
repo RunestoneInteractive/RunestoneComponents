@@ -58,6 +58,9 @@ Parsons.prototype.populateContentArray = function () {
     var temp = fulltext.split(delimiter);
     var content = temp[1];
     this.contentArray = content.split("---");
+    if (this.contentArray.length === 1) {   // If there are no ---, then every line is its own block
+        this.contentArray = content.split("\n");
+    }
 
     // remove newline characters that precede and follow the --- delimiters
     for (var i = 0; i < this.contentArray.length; i++) {
@@ -66,6 +69,19 @@ Parsons.prototype.populateContentArray = function () {
         }
         if (this.contentArray[i][this.contentArray[i].length - 1] === "\n") {
             this.contentArray[i] = this.contentArray[i].slice(0, -1);
+        }
+    }
+    for (var i = 0; i < this.contentArray.length; i++) {
+        if ($.inArray("\n", this.contentArray[i])) {
+            var newString = "";
+            for (var j = 0; j < this.contentArray[i].length; j ++) {
+                if (this.contentArray[i][j] === "\n") {
+                    newString += "</br>";
+                } else {
+                    newString += this.contentArray[i][j];
+                }
+            }
+            this.contentArray[i] = newString;
         }
     }
 };
@@ -186,7 +202,6 @@ Parsons.prototype.createParsonsWidget = function () {
         return false;
     });
 
-    this.styleNewHTML();
     this.pwidget = new ParsonsWidget({
         "sortableId": "parsons-sortableCode-" + Parsons.counter,
         "trashId": "parsons-sortableTrash-" + Parsons.counter,
@@ -195,28 +210,29 @@ Parsons.prototype.createParsonsWidget = function () {
         "feedback_cb": this.displayErrors.bind(this)
     });
 
-    this.pwidget.init($(this.origDiv).text());
+    this.pwidget.init($(this.origDiv).html());
     this.pwidget.shuffleLines();
     this.tryLocalStorage();
+    this.styleNewHTML();
 };
 
 Parsons.prototype.styleNewHTML = function () {
-    $(window).load(function () {
-        // set min width and height
-        var sortableul = $("#ul-parsons-sortableCode-" + Parsons.counter);
-        var trashul = $("#ul-parsons-sortableTrash-" + Parsons.counter);
-        var sortableHeight = sortableul.height();
-        var sortableWidth = sortableul.width();
-        var trashWidth = trashul.width();
-        var trashHeight = trashul.height();
-        var minHeight = Math.max(trashHeight, sortableHeight);
-        var minWidth = Math.max(trashWidth, sortableWidth);
-        trashul.css("min-height", minHeight + "px");
-        sortableul.css("min-height", minHeight + "px");
-        sortableul.height(minHeight);
-        trashul.css("min-width", minWidth + "px");
-        sortableul.css("min-width", minWidth + "px");
-    });
+    // set min width and height
+    var sortableul = $("#ul-parsons-sortableCode-" + Parsons.counter);
+    var trashul = $("#ul-parsons-sortableTrash-" + Parsons.counter);
+    var sortableHeight = sortableul.height();
+    var sortableWidth = sortableul.width();
+    var trashWidth = trashul.width();
+    var trashHeight = trashul.height();
+    var minHeight = Math.max(trashHeight, sortableHeight);
+    var minWidth = Math.max(trashWidth, sortableWidth);
+    var test = document.getElementById("ul-parsons-sortableTrash-" + Parsons.counter);
+    trashul.css("min-height", minHeight + "px");
+    sortableul.css("min-height", minHeight + "px");
+    sortableul.height(minHeight);
+    trashul.css("min-width", minWidth + "px");
+    sortableul.css("min-width", minWidth + "px");
+    test.minWidth = minWidth + "px";
 };
 
 Parsons.prototype.displayErrors = function (fb) {     // Feedback function

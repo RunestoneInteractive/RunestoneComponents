@@ -103,14 +103,15 @@ Example:
         self.options['qnumber'] = self.getNumber()
         self.options['instructions'] = ""
         self.options['code'] = self.content
-
         if '-----' in self.content:
             index = self.content.index('-----')
             self.options['instructions'] = "\n".join(self.content[:index])
             self.options['code'] = self.content[index + 1:]
 
         if '=====' in self.options['code']:
-            self.options['code'] = self.options['code'].replace('====', '---')
+            self.options['code'] = "\n".join(self.options['code'])
+
+            self.options['code'] = self.options['code'].replace('=====', '---')
         else:
             self.options['code'] = "\n".join(self.options['code'])
 
