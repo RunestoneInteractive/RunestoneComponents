@@ -244,10 +244,14 @@ function addDelay(directive, action, delay) {
 
 // initialize stuff
 $(document).ready(function() {
-    if (eBookConfig.useRunestoneServices) {
+    if (eBookConfig && eBookConfig.useRunestoneServices) {
         $(document).ready(handleLoginLogout);
         $(document).ready(getNumUsers);
         $(document).ready(getOnlineUsers);
+    } else {
+        if (typeof eBookConfig === 'undefined') {
+            console.log("eBookConfig is not defined.  This page must not be set up for Runestone");
+        }
     }
 });
 
