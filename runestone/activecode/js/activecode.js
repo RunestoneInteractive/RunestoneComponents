@@ -21,6 +21,7 @@ ActiveCode.prototype.init = function(opts) {
     var suffStart = -1;
     var orig = opts.orig
     this.useRunestoneServices = opts.useRunestoneServices;
+    this.python3 = opts.python3;
     this.origElem = orig;
     this.divid = orig.id;
     this.code = $(orig).text();
@@ -603,7 +604,7 @@ ActiveCode.prototype.runProg = function() {
         $(this.eContainer).remove();
         Sk.configure({output : this.outputfun.bind(this),
               read   : this.builtinRead,
-              python3: true,
+              python3: this.python3,
               imageProxy : 'http://image.runestone.academy:8080/320x'
         });
         Sk.divid = this.divid;
@@ -1418,7 +1419,7 @@ LiveCode.prototype.pushDataFile = function (datadiv) {
 
 $(document).ready(function() {
     $('[data-component=activecode]').each( function(index ) {
-        var opts = {'orig' : this, 'useRunestoneServices': eBookConfig.useRunestoneServices }
+        var opts = {'orig' : this, 'useRunestoneServices': eBookConfig.useRunestoneServices, 'python3' : eBookConfig.python3 }
         if ($(this).data('lang') === "javascript") {
             edList[this.id] = new JSActiveCode(opts);
         } else if ($(this).data('lang') === 'htmlmixed') {
