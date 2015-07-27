@@ -13,8 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-__author__ = 'acbart'
-
+__author__ = 'isaiahmayerchak'
+#acbart did most of this code, I mostly just changed the template
 import os
 
 from docutils import nodes
@@ -28,41 +28,10 @@ def setup(app):
     app.add_node(JournalNode, html=(visit_journal_node, depart_journal_node))
 
     app.add_javascript('shortanswer.js')
-    app.add_stylesheet('shortanswer.css')
 
 
 TEXT = """
-<div id='%(divid)s' class='journal alert alert-%(optional)s'>
-    <form id='%(divid)s_journal' name='%(divid)s_journal' action="">
-        <fieldset>
-            <legend>Short Answer</legend>
-            <div class='journal-question'>%(qnum)s: %(content)s</div>
-            <div id='%(divid)s_journal_input'>
-                <div class='journal-options'>
-                    <label class='radio-inline'>
-                        <textarea id='%(divid)s_solution' class="form-control" style="display:inline; width: 530px;"
-                                  rows='4' cols='50'></textarea>
-                    </label>
-                </div><br />
-                <div><button class="btn btn-default" onclick="submitJournal('%(divid)s');">Save</button></div>
-                Instructor's Feedback:
-                <div class='journal-options' style='padding-left:20px'>
-                    <div class='bg-info form-control' style='width:530px; background-color: #eee; font-style:italic'
-                         id='%(divid)s_feedback'>
-                        There is no feedback yet.
-                    </div>
-                </div><br />
-            </div>
-        </fieldset>
-    </form>
-    <div id='%(divid)s_results'></div>
-    <script type='text/javascript'>
-        // check if the user has already answered this journal
-        $(function() {
-            loadJournal('%(divid)s');
-        });
-    </script>
-</div>
+<p data-component="shortanswer" id=%(divid)s %(optional)s>%(qnum)s: %(content)s</p>
 """
 
 class JournalNode(nodes.General, nodes.Element):
@@ -96,16 +65,14 @@ class JournalDirective(Assessment):
     node_class = JournalNode
 
     def run(self):
-        # Raise an error if the directive does not have contents.        
-        
+        # Raise an error if the directive does not have contents.
+
         self.assert_has_content()
-        
-        self.options['optional'] = 'success' if 'optional' in self.options else 'warning'
+
+        self.options['optional'] = 'data-optional' if 'optional' in self.options else ''
         self.options['divid'] = self.arguments[0]
         self.options['content'] = "<p>".join(self.content)
         self.options['qnum'] = self.getNumber()
         journal_node = JournalNode(self.options)
 
         return [journal_node]
-
-
