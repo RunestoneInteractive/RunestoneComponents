@@ -24,7 +24,7 @@ from docutils.parsers.rst import Directive
 def setup(app):
     app.add_directive('poll',Poll)
     app.add_javascript('poll.js')
-
+    app.add_stylesheet('poll.css')
     app.add_node(PollNode, html=(visit_poll_node, depart_poll_node))
 
 
