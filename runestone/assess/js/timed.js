@@ -259,15 +259,16 @@ Timed.prototype.createRenderedQuestionArray = function () {
     // Also adds them to this.renderedQuestionArray
     for (var i = 0; i < this.newChildren.length; i++) {
         var tmpChild = this.newChildren[i];
+        opts = {'orig':tmpChild, 'useRunestoneServices':eBookConfig.useRunestoneServices}
         if ($(tmpChild).is("[data-component=multiplechoice]")) {
-            this.renderedQuestionArray.push(new TimedMC({"orig": tmpChild}));
+            this.renderedQuestionArray.push(new TimedMC(opts));
         } else if ($(tmpChild).is("[data-component=fillintheblank]")) {
-            var newFITB = new TimedFITB({"orig": tmpChild});
+            var newFITB = new TimedFITB(opts);
             this.renderedQuestionArray.push(newFITB);
         } else if ($(tmpChild).is("[data-component=dragndrop]")) {
-            this.renderedQuestionArray.push(new TimedDragNDrop({"orig": tmpChild}));
+            this.renderedQuestionArray.push(new TimedDragNDrop(opts));
         } else if ($(tmpChild).is("[data-component=clickablearea]")) {
-            this.renderedQuestionArray.push(new TimedClickableArea({"orig":tmpChild}));
+            this.renderedQuestionArray.push(new TimedClickableArea(opts));
         }
     }
     if (this.random) {
