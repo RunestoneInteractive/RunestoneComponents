@@ -120,6 +120,7 @@ ActiveCode.prototype.createControls = function () {
         $(butt).text("Save");
         $(butt).css("margin-left", "10px");
         this.saveButton = butt;
+        this.saveButton.onclick = this.saveEditor.bind(this);
         ctrlDiv.appendChild(butt);
         if (this.hidecode) {
             $(butt).css("display", "none")
@@ -132,6 +133,7 @@ ActiveCode.prototype.createControls = function () {
         $(butt).text("Load");
         $(butt).css("margin-left", "10px");
         this.loadButton = butt;
+        this.loadButton.onclick = this.loadEditor.bind(this);
         ctrlDiv.appendChild(butt);
         if (this.hidecode) {
             $(butt).css("display", "none")
@@ -253,7 +255,7 @@ ActiveCode.prototype.addCaption = function() {
 };
 
 ActiveCode.prototype.saveEditor = function () {
-
+    var res;
     var saveSuccess = function(data, status, whatever) {
         if (data.redirect) {
             alert("Did not save!  It appears you are not logged in properly")
@@ -266,7 +268,7 @@ ActiveCode.prototype.saveEditor = function () {
                 alert(acid);
             } else {
                 // use a tooltip to provide some success feedback
-                var save_btn = $("#" + acid + "_saveb");
+                var save_btn = $(this.saveButton);
                 save_btn.attr('title', 'Saved your code.');
                 opts = {
                     'trigger': 'manual',
@@ -283,19 +285,25 @@ ActiveCode.prototype.saveEditor = function () {
                 $('#' + acid + ' .CodeMirror').css('border-bottom', '2px solid #aaa');
             }
         }
-    };
+    }.bind(this);
 
     var data = {acid: this.divid, code: this.editor.getValue()};
     data.lang = this.language;
+    if (data.code.match(/^\s$/m)) {
+        res = confirm("You are about to save an empty program, this will overwrite a previously saved program.  Continue?");
+        if (! res) {
+            return;
+        }
+    }
     $(document).ajaxError(function (e, jqhxr, settings, exception) {
         alert("Request Failed for" + settings.url)
     });
     jQuery.post(eBookConfig.ajaxURL + 'saveprog', data, saveSuccess);
     if (this.editor.acEditEvent) {
-        logBookEvent({'event': 'activecode', 'act': 'edit', 'div_id': this.divid}); // Log the run event
+        this.logBookEvent({'event': 'activecode', 'act': 'edit', 'div_id': this.divid}); // Log the run event
         this.editor.acEditEvent = false;
     }
-    logBookEvent({'event': 'activecode', 'act': 'save', 'div_id': this.divid}); // Log the run event
+    this.logBookEvent({'event': 'activecode', 'act': 'save', 'div_id': this.divid}); // Log the run event
 
 };
 
@@ -307,27 +315,27 @@ ActiveCode.prototype.loadEditor = function () {
 
         if (res.source) {
             this.editor.setValue(res.source);
-            this.loadButton.tooltip({'placement': 'bottom',
+            $(this.loadButton).tooltip({'placement': 'bottom',
                              'title': "Loaded your saved code.",
                              'trigger': 'manual'
                             });
         } else {
-            this.loadButton.tooltip({'placement': 'bottom',
+            $(this.loadButton).tooltip({'placement': 'bottom',
                              'title': "No saved code.",
                              'trigger': 'manual'
                             });
         }
-        this.loadButton.tooltip('show');
+        $(this.loadButton).tooltip('show');
         setTimeout(function () {
-            this.loadButton.tooltip('destroy')
-        }, 4000);
+            $(this.loadButton).tooltip('destroy')
+        }.bind(this), 4000);
     }).bind(this);
 
     var data = {acid: this.divid};
-    if (sid !== undefined) {
+    if (this.sid !== undefined) {
         data['sid'] = sid;
     }
-    logBookEvent({'event': 'activecode', 'act': 'load', 'div_id': this.divid}); // Log the run event
+    this.logBookEvent({'event': 'activecode', 'act': 'load', 'div_id': this.divid}); // Log the run event
     jQuery.get(eBookConfig.ajaxURL + 'getprog', data, loadEditor);
 
 };
