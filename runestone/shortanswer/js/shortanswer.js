@@ -94,6 +94,7 @@ ShortAnswer.prototype.renderHTML = function() {
 
     this.submitButton = document.createElement("button");
     $(this.submitButton).addClass("btn btn-default");
+    this.submitButton.type = "button";
     this.submitButton.textContent = "Save";
     this.submitButton.onclick = function () {
         this.submitJournal();
