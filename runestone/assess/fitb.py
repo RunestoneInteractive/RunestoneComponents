@@ -125,7 +125,6 @@ def depart_blank_node(self,node):
     fbl = []
     res = ""
     feedCounter = 0
-    print self.body[-2:]
 
     for k in sorted(node.blank_options.keys()):
         if 'feedback' in k:
