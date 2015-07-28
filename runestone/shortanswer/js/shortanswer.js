@@ -131,18 +131,37 @@ ShortAnswer.prototype.submitJournal = function () {
                       function(data) {
                         console.log(data.message);
                       });  */
-    this.logBookEvent({'event': 'shortanswer', 'act': JSON.stringify(value), 'div_id': directive_id});
+    this.logBookEvent({'event': 'shortanswer', 'act': JSON.stringify(value), 'div_id': this.divid});
 };
 
 ShortAnswer.prototype.loadJournal = function () {
-    var len = localStorage.length;
-    if (len > 0) {
-        var ex = localStorage.getItem(this.divid);
-        if (ex !== null) {
-            var solution = $("#" + this.divid + "_solution");
-            solution.text(localStorage.getItem(this.divid));
+
+    // Ask the server to send the latest
+    var loadAnswer = function(data,status,whatever) {
+        var len = localStorage.length;
+        var answer = "";
+        console.log(data);
+        if (! jQuery.isEmptyObject(data)) {
+            answer = data;
         }
-}
+        console.log(answer.toString());
+        var solution = $("#" + this.divid + "_solution");
+        if (len > 0) {
+            var ex = localStorage.getItem(this.divid);
+            if (ex !== null ) {
+                if (storage.is_new(answer.divid, new Date(answer.timestamp))) {
+                    solution.text(localStorage.getItem(this.divid));
+                // now send the newer answer to the server...
+                } else {
+                    solution.text(answer.answer);
+                }
+            } else {
+                solution.text(answer);
+            }
+        }
+    }.bind(this);
+    var data = {'div_id' : this.divid};
+    jQuery.get(eBookConfig.ajaxURL + 'getlastanswer', data, loadAnswer );
 };
 
 /*
