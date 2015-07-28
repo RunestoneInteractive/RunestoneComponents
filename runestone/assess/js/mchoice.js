@@ -313,7 +313,7 @@ MultipleChoice.prototype.restoreMultipleSelect = function () {
                         $(this.optionArray[b].input).attr("checked", "true");
                     }
                 }
-                this.enableMCComparison;
+                this.enableMCComparison();
             } // end for
         } // end if
     } // end if len > 0
@@ -335,7 +335,7 @@ MultipleChoice.prototype.restoreRadio = function () {
                     $(this.optionArray[b].input).attr("checked", "true");
                 }
             }
-            this.enableMCComparison;
+            this.enableMCComparison();
         } // end if not null
     } // end if (len > 0)
 };
