@@ -13,7 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-__author__ = 'isaacdontjelindell'
+
+__author__ = 'isaiahmayerchak'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -21,129 +22,108 @@ from docutils.parsers.rst import Directive
 
 
 def setup(app):
-    app.add_directive('poll', PollDirective)
+    app.add_directive('poll',Poll)
+    app.add_javascript('poll.js')
 
     app.add_node(PollNode, html=(visit_poll_node, depart_poll_node))
 
-    app.add_javascript('poll.js')
-    app.add_stylesheet('poll.css')
 
 
-BEGIN = """ <div id='%(divid)s' class='poll alert alert-warning'> """
-
-BEGIN_FORM = """
-    <form id='%(divid)s_poll' name='%(divid)s_poll' action="">
-        <fieldset>
-            <legend>Poll</legend>
-            <div class='poll-question'>%(content)s</div>
-            <div id='%(divid)s_poll_input'>
-                <div class='poll-options'>
+TEMPLATE_START = """
+<ul data-component="poll" id=%(divid)s %(comment)s>%(question)s
 """
 
-POLL_ELEMENT = """
-<label class='radio-inline'>
-    <input type='radio' name='%(divid)s_opt' id='%(divid)s_%(value)s' value='%(value)s'>
-    %(value)s
-</label>
+TEMPLATE_OPTION = """
+<li>%(optiontext)s</li>
 """
 
-END_POLL_OPTIONS = """ </div> """
-
-COMMENT = """
-<br />
-<input type='text' class='form-control' style='width:300px;' name='%(divid)s_comment' placeholder='Any comments?'>
-<br />
-"""
-
-END_POLL_INPUT = """
-            <button type='button' id='%(divid)s_submit' class='btn btn-success' onclick="submitPoll('%(divid)s');">Submit</button>
-        </div>
-"""
-
-END_FORM = """
-        </fieldset>
-    </form>
-"""
-
-RESULTS_DIV = """ <div id='%(divid)s_results'></div> """
-
-
-
-END = """
-    <script type='text/javascript'>
-        // check if the user has already answered this poll
-        $(function() {
-            var len = localStorage.length;
-            if (len > 0) {
-                for (var i = 0; i < len; i++) {
-                    var key = localStorage.key(i);
-                    if (key === '%(divid)s') {
-                        var ex = localStorage.getItem(key);
-                        if(ex === "true") {
-                            // hide the poll inputs
-                            $("#%(divid)s_poll_input").hide();
-
-                            // show the results of the poll
-                            var data = {};
-                            data.div_id = '%(divid)s';
-                            data.course = eBookConfig.course;
-                            jQuery.get(eBookConfig.ajaxURL+'getpollresults', data, showPollResults);
-                        }
-                    }
-                }
-            }
-        });
-    </script>
-</div>
-"""
+TEMPLATE_END = """</ul>"""
 
 class PollNode(nodes.General, nodes.Element):
-    def __init__(self, options):
-        super(PollNode, self).__init__()
-        self.pollnode_components = options
+    def __init__(self,content):
+        """
+        Arguments:
+        - `self`:
+        - `content`:
+        """
+        super(PollNode,self).__init__()
+        self.poll_content = content
 
-def visit_poll_node(self, node):
-    res = BEGIN
-    res += BEGIN_FORM
+# self for these functions is an instance of the writer class.  For example
+# in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
+# The node that is passed as a parameter is an instance of our node class.
+def visit_poll_node(self,node):
+    res = TEMPLATE_START
+    res = res % node.poll_content
 
-    for i in range(1, node.pollnode_components['scale']+1):
-        res += POLL_ELEMENT % {'divid':node.pollnode_components['divid'], 'value':i}
-
-    res += END_POLL_OPTIONS
-
-    if 'allowcomment' in node.pollnode_components:
-        res += COMMENT
-
-    res += END_POLL_INPUT
-    res += END_FORM
-    res += RESULTS_DIV
-    res += END
-
-    res = res % node.pollnode_components
+    if node.poll_content["scale"] == "":
+        okeys = list(node.poll_content.keys())
+        okeys.sort()
+        for k in okeys:
+            if 'option_' in k:
+                node.poll_content["optiontext"] = node.poll_content[k]
+                res += TEMPLATE_OPTION % node.poll_content
+    else:
+        for i in range(node.poll_content["scale"]):
+            node.poll_content["optiontext"] = i + 1
+            res += TEMPLATE_OPTION % node.poll_content
+    res += TEMPLATE_END
     self.body.append(res)
 
 def depart_poll_node(self,node):
+    ''' This is called at the start of processing a poll node.  If poll had recursive nodes
+        etc and did not want to do all of the processing in visit_poll_node any finishing touches could be
+        added here.
+    '''
     pass
 
 
-class PollDirective(Directive):
-    required_arguments = 1  # the div id
+class Poll(Directive):
+    required_arguments = 1
     optional_arguments = 0
-    final_argument_whitespace = True
     has_content = True
-    option_spec = {'scale':directives.positive_int,
-                   'allowcomment': directives.flag}
-
-    node_class = PollNode
+    option_spec = {
+        'scale':directives.positive_int,
+        'allowcomment':directives.flag,
+        'option_1':directives.unchanged,
+        'option_2':directives.unchanged,
+        'option_3':directives.unchanged,
+        'option_4':directives.unchanged,
+        'option_5':directives.unchanged,
+        'option_6':directives.unchanged,
+        'option_7':directives.unchanged,
+        'option_8':directives.unchanged,
+        'option_9':directives.unchanged,
+        'option_10':directives.unchanged,
+    }
 
     def run(self):
-        # Raise an error if the directive does not have contents.
-        self.assert_has_content()
-        
+        """
+            process the multiplechoice directive and generate html for output.
+            :param self:
+            :return:
+            .. poll:: identifier
+                :scale: Mode 1--Implements the "On a scale of 1 to x" type method of poll--x is provided by author
+                :allowcomment: Boolean--provides comment box
+                :option_1: Mode 2--Implements the "Choose one of these options" type method of poll.
+                :option_2: Option 2
+                :option_3: Option 3
+                ...etc...(Up to 10 options in mode 2)
+        """
+
         self.options['divid'] = self.arguments[0]
-        self.options['content'] = "<p>".join(self.content)
-        poll_node = PollNode(self.options)
+        if self.content:
+            source = "\n".join(self.content)
+        else:
+            source = '\n'
+        self.options['question'] = source
 
-        return [poll_node]
+        if not "scale" in self.options:
+            self.options["scale"] = ""
+        if "allowcomment" in self.options:
+            self.options["comment"] = "data-comment"
+        else:
+            self.options["comment"] = ""
 
 
+        return [PollNode(self.options)]
