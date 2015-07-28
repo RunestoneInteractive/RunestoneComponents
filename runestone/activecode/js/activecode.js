@@ -17,9 +17,8 @@ function ActiveCode(opts) {
 
 ActiveCode.prototype.init = function(opts) {
     RunestoneBase.apply( this, arguments );  // call parent constructor
-    var _this = this;
     var suffStart = -1;
-    var orig = opts.orig
+    var orig = opts.orig;
     this.useRunestoneServices = opts.useRunestoneServices;
     this.python3 = opts.python3;
     this.origElem = orig;
@@ -56,7 +55,7 @@ ActiveCode.prototype.init = function(opts) {
     } else {
         this.caption = ""
     }
-    this.addCaption()
+    this.addCaption();
 
     if ($(orig).data('autorun')) {
         $(document).ready(this.runProg.bind(this));
@@ -373,14 +372,14 @@ ActiveCode.prototype.createGradeSummary = function () {
 
         el = $(html);
         el.modal();
-    }
-    var data = {'div_id': this.divid}
+    };
+    var data = {'div_id': this.divid};
     jQuery.get(eBookConfig.ajaxURL + 'getassignmentgrade', data, showGradeSummary);
-}
+};
 
 ActiveCode.prototype.hideCodelens = function (button, div_id) {
     this.codelens.style.display = 'none'
-}
+};
 
 ActiveCode.prototype.showCodelens = function () {
 
@@ -393,35 +392,35 @@ ActiveCode.prototype.showCodelens = function () {
         return;
     }
 
-    var cl = this.codelens.firstChild
+    var cl = this.codelens.firstChild;
     if (cl) {
         div.removeChild(cl)
     }
-    var code = this.editor.getValue()
-    var myVars = {}
-    myVars.code = code
-    myVars.origin = "opt-frontend.js"
-    myVars.cumulative = false
-    myVars.heapPrimitives = false
-    myVars.drawParentPointers = false
-    myVars.textReferences = false
-    myVars.showOnlyOutputs = false
-    myVars.rawInputLstJSON = JSON.stringify([])
-    myVars.py = 2
-    myVars.curInstr = 0
-    myVars.codeDivWidth = 350
-    myVars.codeDivHeight = 400
-    var srcURL = '//pythontutor.com/iframe-embed.html'
-    var embedUrlStr = $.param.fragment(srcURL, myVars, 2 /* clobber all */)
-    var myIframe = document.createElement('iframe')
-    myIframe.setAttribute("id", this.divid + '_codelens')
-    myIframe.setAttribute("width", "800")
-    myIframe.setAttribute("height", "500")
-    myIframe.setAttribute("style", "display:block")
-    myIframe.style.background = '#fff'
+    var code = this.editor.getValue();
+    var myVars = {};
+    myVars.code = code;
+    myVars.origin = "opt-frontend.js";
+    myVars.cumulative = false;
+    myVars.heapPrimitives = false;
+    myVars.drawParentPointers = false;
+    myVars.textReferences = false;
+    myVars.showOnlyOutputs = false;
+    myVars.rawInputLstJSON = JSON.stringify([]);
+    myVars.py = 2;
+    myVars.curInstr = 0;
+    myVars.codeDivWidth = 350;
+    myVars.codeDivHeight = 400;
+    var srcURL = '//pythontutor.com/iframe-embed.html';
+    var embedUrlStr = $.param.fragment(srcURL, myVars, 2 /* clobber all */);
+    var myIframe = document.createElement('iframe');
+    myIframe.setAttribute("id", this.divid + '_codelens');
+    myIframe.setAttribute("width", "800");
+    myIframe.setAttribute("height", "500");
+    myIframe.setAttribute("style", "display:block");
+    myIframe.style.background = '#fff';
     //myIframe.setAttribute("src",srcURL)
-    myIframe.src = embedUrlStr
-    this.codelens.appendChild(myIframe)
+    myIframe.src = embedUrlStr;
+    this.codelens.appendChild(myIframe);
     this.logBookEvent({
         'event': 'codelens',
         'act': 'view',
@@ -455,7 +454,7 @@ ActiveCode.prototype.showCodeCoach = function (div_id) {
     myIframe.setAttribute("height", "500px");
     myIframe.setAttribute("style", "display:block");
     myIframe.style.background = '#fff';
-    myIframe.style.width = "100%"
+    myIframe.style.width = "100%";
     myIframe.src = srcURL;
     this.codecoach.appendChild(myIframe);
     logBookEvent({
@@ -472,14 +471,14 @@ ActiveCode.prototype.toggleEditorVisibility = function () {
 
 ActiveCode.prototype.addErrorMessage = function (err) {
     //logRunEvent({'div_id': this.divid, 'code': this.prog, 'errinfo': err.toString()}); // Log the run event
-    var errHead = $('<h3>').html('Error')
-    this.eContainer = this.outerDiv.appendChild(document.createElement('div'))
+    var errHead = $('<h3>').html('Error');
+    this.eContainer = this.outerDiv.appendChild(document.createElement('div'));
     this.eContainer.className = 'error alert alert-danger';
     this.eContainer.id = this.divid + '_errinfo';
     this.eContainer.appendChild(errHead[0]);
-    var errText = this.eContainer.appendChild(document.createElement('pre'))
-    var errString = err.toString()
-    var to = errString.indexOf(":")
+    var errText = this.eContainer.appendChild(document.createElement('pre'));
+    var errString = err.toString();
+    var to = errString.indexOf(":");
     var errName = errString.substring(0, to);
     errText.innerHTML = errString;
     $(this.eContainer).append('<h3>Description</h3>');
@@ -605,7 +604,7 @@ ActiveCode.prototype.buildProg = function() {
 };
 
 ActiveCode.prototype.runProg = function() {
-        var prog = this.buildProg()
+        var prog = this.buildProg();
 
         $(this.output).text('');
 
@@ -643,6 +642,61 @@ ActiveCode.prototype.runProg = function() {
 
     };
 
+
+ActiveCode.createScratchActivecode = function() {
+    /* set up the scratch Activecode editor in the search menu */
+    // use the URL to assign a divid - each page should have a unique Activecode block id.
+    // Remove everything from the URL but the course and page name
+    // todo:  this could probably be eliminated and simply moved to the template file
+    var divid = document.URL.split('#')[0];
+    divid = divid.split('static')[1];
+    divid = divid.split('?')[0];  // remove any query string (e.g ?lastPosition)
+    divid = divid.replaceAll('/', '').replace('.html', '');
+
+    // generate the HTML
+    var html = '<div id="ac_modal_' + divid + '" class="modal fade">' +
+        '  <div class="modal-dialog scratch-ac-modal">' +
+        '    <div class="modal-content">' +
+        '      <div class="modal-header">' +
+        '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
+        '        <h4 class="modal-title">Scratch ActiveCode</h4>' +
+        '      </div> ' +
+        '      <div class="modal-body">' +
+        '      <pre data-component="activecode" id="' + divid + '">' +
+        '<br />   ' +
+        '<br />   ' +
+        '<br />   ' +
+        '      </pre>' +
+        '      </div>' +
+        '    </div>' +
+        '  </div>' +
+        '</div>';
+    el = $(html);
+    $('body').append(el);
+
+    el.on('shown.bs.modal show.bs.modal', function () {
+        el.find('.CodeMirror').each(function (i, e) {
+            e.CodeMirror.refresh();
+            e.CodeMirror.focus();
+        });
+    });
+
+    $(document).bind('keypress', '\\', function(evt) {
+        toggleScratchActivecode();
+        return false;
+    });
+};
+
+
+ActiveCode.toggleScratchActivecode = function () {
+    var divid = "ac_modal_" + document.URL.split('#')[0].split('static')[1].split('?')[0].replaceAll('/', '').replace('.html', '');
+    var div = $("#" + divid);
+
+    div.modal('toggle');
+
+};
+
+
 JSActiveCode.prototype = new ActiveCode();
 
 function JSActiveCode(opts) {
@@ -656,11 +710,11 @@ JSActiveCode.prototype.init = function(opts) {
     }
 
 JSActiveCode.prototype.outputfun = function (a) {
-    var str = "["
+    var str = "[";
     if (typeof(a) == "object" && a.length) {
         for (var i = 0; i < a.length; i++)
             if (typeof(a[i]) == "object" && a[i].length) {
-                str += (i == 0 ? "" : " ") + "["
+                str += (i == 0 ? "" : " ") + "[";
                 for (var j = 0; j < a[i].length; j++)
                     str += a[i][j] + (j == a[i].length - 1 ?
                     "]" + (i == a.length - 1 ? "]" : ",") + "\n" : ", ");
@@ -673,7 +727,7 @@ JSActiveCode.prototype.outputfun = function (a) {
     }
     }
     return str;
-}
+};
 
 JSActiveCode.prototype.runProg = function() {
     var _this = this;
@@ -688,7 +742,7 @@ JSActiveCode.prototype.runProg = function() {
         _this.output.innerHTML += _this.outputfun(str)+"<br />";
             };
 
-    $(this.output).text('')
+    $(this.output).text('');
     $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
     $(this.outDiv).show({duration:700,queue:false});
 
@@ -723,7 +777,7 @@ HTMLActiveCode.prototype.runProg = function () {
 };
 
 HTMLActiveCode.prototype.init = function(opts) {
-    ActiveCode.prototype.init.apply(this,arguments)
+    ActiveCode.prototype.init.apply(this,arguments);
     this.code = $('<textarea />').html(this.origElem.innerHTML).text();
     this.editor.setValue(this.code);
         };
@@ -797,7 +851,7 @@ function AudioTour (divid, code, bnum, audio_text) {
             first = first + "<div id='" + divid + "_l" + (i + 1) + "'>" + (i + 1) + ". " + codeArray[i] + "</div>";
         }
     }
-    first = first + "</pre>"
+    first = first + "</pre>";
 
     //laying out the HTML content
 
@@ -829,7 +883,7 @@ function AudioTour (divid, code, bnum, audio_text) {
         // show window on the left so that you can see the output from the code still
         this.css("left", ($(window).scrollLeft() + "px"));
         return this;
-    }
+    };
 
     $(".modal-profile").center();
     $('.modal-profile').fadeIn("slow");
@@ -899,7 +953,7 @@ function AudioTour (divid, code, bnum, audio_text) {
     $("#next_audio").css('opacity', 0.25);
     $("#last_audio").css('opacity', 0.25);
 
-};
+}
 
 AudioTour.prototype.tour = function (divid, audio_type, bcount) {
     // set globals
@@ -981,7 +1035,7 @@ AudioTour.prototype.handlePlaying = function() {
         this.unhighlightLines(this.theDivid, this.ahash[this.aname[this.currIndex]]);
     }
 
-}
+};
 
 AudioTour.prototype.firstAudio = function () {
 
@@ -1242,18 +1296,18 @@ function LiveCode(opts) {
     }
 
 LiveCode.prototype.init = function(opts) {
-    ActiveCode.prototype.init.apply(this,arguments)
+    ActiveCode.prototype.init.apply(this,arguments);
 
     var orig = opts.orig;
     this.stdin = $(orig).data('stdin');
     this.datafile = $(orig).data('datafile');
     this.sourcefile = $(orig).data('sourcefile');
 
-    this.API_KEY = "67033pV7eUUvqo07OJDIV8UZ049aLEK1"
+    this.API_KEY = "67033pV7eUUvqo07OJDIV8UZ049aLEK1";
     this.USE_API_KEY = true;
     this.JOBE_SERVER = 'http://jobe2.cosc.canterbury.ac.nz';
     this.resource = '/jobe/index.php/restapi/runs/';
-    this.div2id = {}
+    this.div2id = {};
     if (this.stdin) {
         this.createInputElement();
     }
@@ -1266,8 +1320,8 @@ LiveCode.prototype.createInputElement = function () {
 
     var label = document.createElement('label');
     label.for = this.divid + "_stdin";
-    $(label).text("Input for Program")
-    var input = document.createElement('input')
+    $(label).text("Input for Program");
+    var input = document.createElement('input');
     input.id = this.divid + "_stdin";
     input.type = "text";
     input.size = "35";
@@ -1279,13 +1333,13 @@ LiveCode.prototype.createInputElement = function () {
 
 LiveCode.prototype.createErrorOutput = function () {
 
-}
+};
 
 LiveCode.prototype.runProg = function() {
         var xhr, stdin;
         var runspec = {};
         var data, host, source, editor;
-        var sfilemap = {java: '', cpp: 'test.cpp', c: 'test.c', python3: 'test.py', python2: 'test.py'}
+        var sfilemap = {java: '', cpp: 'test.cpp', c: 'test.c', python3: 'test.py', python2: 'test.py'};
 
         xhr = new XMLHttpRequest();
         source = this.editor.getValue();
@@ -1313,7 +1367,7 @@ LiveCode.prototype.runProg = function() {
             runspec['file_list'] = [[this.div2id[datafile],datafile]];
         }
         data = JSON.stringify({'run_spec': runspec});
-        host = this.JOBE_SERVER + this.resource
+        host = this.JOBE_SERVER + this.resource;
 
         var odiv = this.output;
         $(this.runButton).attr('disabled', 'disabled');
@@ -1372,7 +1426,7 @@ LiveCode.prototype.runProg = function() {
         }).bind(this);
 
         ///$("#" + divid + "_errinfo").remove();
-        $(this.output).html("Compiling and Running your Code Now...")
+        $(this.output).html("Compiling and Running your Code Now...");
 
         xhr.onerror = function () {
             this.addJobeErrorMessage("Error communicating with the server.");
@@ -1388,7 +1442,7 @@ LiveCode.prototype.addJobeErrorMessage = function (err) {
         eContainer.className = 'error alert alert-danger';
         eContainer.id = this.divid + '_errinfo';
         eContainer.appendChild(errHead[0]);
-        var errText = eContainer.appendChild(document.createElement('pre'))
+        var errText = eContainer.appendChild(document.createElement('pre'));
         errText.innerHTML = err;
     };
 
@@ -1399,8 +1453,8 @@ LiveCode.prototype.pushDataFile = function (datadiv) {
         var contents = $(document.getElementById(datadiv)).text();
         var contentsb64 = btoa(contents);
         var data = JSON.stringify({ 'file_contents' : contentsb64 });
-        var resource = '/jobe/index.php/restapi/files/' + file_id
-        var host = JOBE_SERVER + resource
+        var resource = '/jobe/index.php/restapi/files/' + file_id;
+        var host = JOBE_SERVER + resource;
         var xhr = new XMLHttpRequest();
 
         if (this.div2id[datadiv] === undefined ) {
@@ -1413,11 +1467,11 @@ LiveCode.prototype.pushDataFile = function (datadiv) {
 
             xhr.onload = function () {
                 console.log("successfully sent file " + xhr.responseText);
-            }
+            };
 
             xhr.onerror = function () {
                 console.log("error sending file" + xhr.responseText);
-            }
+            };
 
             xhr.send(data)
         }
@@ -1426,8 +1480,9 @@ LiveCode.prototype.pushDataFile = function (datadiv) {
 //
 
 $(document).ready(function() {
+    ActiveCode.createScratchActivecode();
     $('[data-component=activecode]').each( function(index ) {
-        var opts = {'orig' : this, 'useRunestoneServices': eBookConfig.useRunestoneServices, 'python3' : eBookConfig.python3 }
+        var opts = {'orig' : this, 'useRunestoneServices': eBookConfig.useRunestoneServices, 'python3' : eBookConfig.python3 };
         if ($(this).data('lang') === "javascript") {
             edList[this.id] = new JSActiveCode(opts);
         } else if ($(this).data('lang') === 'htmlmixed') {
@@ -1450,7 +1505,7 @@ $(document).ready(function() {
 // figure out the login/logout status of the user.  Sometimes its immediate, and sometimes its
 // long.  So to be safe we'll do it both ways..
 var loggedout;
-$(document).bind("runestone:logout",function() { loggedout=true;})
+$(document).bind("runestone:logout",function() { loggedout=true;});
 $(document).bind("runestone:logout",function() {
     for (k in edList) {
         if (edList.hasOwnProperty(k)) {
