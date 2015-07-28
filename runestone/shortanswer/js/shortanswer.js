@@ -26,6 +26,7 @@ ShortAnswer.prototype = new RunestoneBase();
 ShortAnswer.prototype.init = function (opts) {
     RunestoneBase.apply(this, arguments);
     var orig = opts.orig;    // entire <p> element that will be replaced by new HTML
+    this.useRunestoneServies = opts.useRunestoneServices || eBookConfig.useRunestoneServices;
     this.origElem = orig;
     this.divid = orig.id;
     this.question = this.origElem.innerHTML;
@@ -139,73 +140,36 @@ ShortAnswer.prototype.loadJournal = function () {
     // Ask the server to send the latest
     var loadAnswer = function(data,status,whatever) {
         var len = localStorage.length;
-        var answer = "";
-        console.log(data);
+        var answer = {};
         if (! jQuery.isEmptyObject(data)) {
             answer = data;
+        }  else {
+            answer.answer = "";
         }
-        console.log(answer.toString());
         var solution = $("#" + this.divid + "_solution");
         if (len > 0) {
-            var ex = localStorage.getItem(this.divid);
+            var ex = storage.get(this.divid);
             if (ex !== null ) {
-                if (storage.is_new(answer.divid, new Date(answer.timestamp))) {
-                    solution.text(localStorage.getItem(this.divid));
+                if (! storage.is_new(answer.divid, new Date(answer.timestamp))) {
+                    solution.text(storage.get(this.divid));
                 // now send the newer answer to the server...
                 } else {
                     solution.text(answer.answer);
                 }
             } else {
-                solution.text(answer);
+                solution.text(answer.answer);
             }
+        } else {
+            solution.text(answer.answer);
         }
     }.bind(this);
     var data = {'div_id' : this.divid};
-    jQuery.get(eBookConfig.ajaxURL + 'getlastanswer', data, loadAnswer );
+    if (this.useRunestoneServies) {
+        jQuery.get(eBookConfig.ajaxURL + 'getlastanswer', data, loadAnswer);
+    } else {
+        loadAnswer({},null,null);
+    }
 };
-
-/*
-
-<div id='%(divid)s' class='journal alert alert-%(optional)s'>
-    <form id='%(divid)s_journal' name='%(divid)s_journal' action="">
-        <fieldset>
-            <legend>Short Answer</legend>
-            <div class='journal-question'>%(qnum)s: %(content)s</div>
-            <div id='%(divid)s_journal_input'>
-                <div class='journal-options'>
-                    <label class='radio-inline'>
-                        <textarea id='%(divid)s_solution' class="form-control" style="display:inline; width: 530px;"
-                                  rows='4' cols='50'></textarea>
-                    </label>
-                </div><br />
-                <div><button class="btn btn-default" onclick="submitJournal('%(divid)s');">Save</button></div>
-                Instructor's Feedback:
-                <div class='journal-options' style='padding-left:20px'>
-                    <div class='bg-info form-control' style='width:530px; background-color: #eee; font-style:italic'
-                         id='%(divid)s_feedback'>
-                        There is no feedback yet.
-                    </div>
-                </div><br />
-            </div>
-        </fieldset>
-    </form>
-    <div id='%(divid)s_results'></div>
-    <script type='text/javascript'>
-        // check if the user has already answered this journal
-        $(function() {
-            loadJournal('%(divid)s');
-        });
-    </script>
-</div>
-
-
-
-*/
-
-
-
-
-
 
 
 /*=================================
@@ -214,7 +178,7 @@ ShortAnswer.prototype.loadJournal = function () {
 =================================*/
 $(document).ready(function () {
     $("[data-component=shortanswer]").each(function (index) {
-        saList[this.id] = new ShortAnswer({"orig": this});
+        saList[this.id] = new ShortAnswer({"orig": this, 'useRunestoneServices': eBookConfig.useRunestoneServices});
     });
 
 });
