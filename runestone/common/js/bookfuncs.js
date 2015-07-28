@@ -93,6 +93,7 @@ function gotUser(data, status, whatever) {
     } else {
         if (!caughtErr) {
             mess = d.email;
+            eBookConfig.email = d.email;
             eBookConfig.isLoggedIn = true;
             eBookConfig.cohortId = d.cohortId;
             $(document).trigger("runestone:login")
