@@ -175,7 +175,7 @@ Poll.prototype.showPollResults = function(data) {
     var count_list = results[2];
     var div_id = results[3];
 
-    this.resultsDiv.html("<b>Results:</b><br><br>");
+    $(this.resultsDiv).html("<b>Results:</b><br><br>");
 
     var list = $(document.createElement("ol"));
     for(var i=0; i<opt_list.length; i++) {
@@ -183,11 +183,11 @@ Poll.prototype.showPollResults = function(data) {
         var percent = (count / total) * 100;
         var text = Math.round(10*percent)/10 + "%";   // round percent to 10ths
 
-        var html = "<li value='"+opt_list[i]+"'><div class='progress'><div class='progress-bar progress-bar-success' style=width:'"+percent+"'%;><span class='poll-text'>"+text+"</span></div></div></li>";
+        var html = "<li value='"+opt_list[i]+"'><div class='progress'><div class='progress-bar progress-bar-success' style=width:"+percent+"%;><span class='poll-text'>"+text+"</span></div></div></li>";
         var el = $(html);
         list.append(el);
     }
-    this.resultsDiv.append(list);
+    $(this.resultsDiv).append(list);
 };
 
 Poll.prototype.disableOptions = function() {
@@ -202,7 +202,7 @@ Poll.prototype.checkPollStorage = function() {
         var data = {};
         data.div_id = this.divid;
         data.course = eBookConfig.course;
-        jQuery.get(eBookConfig.ajaxURL+"getpollresults", data, this.showPollResults);
+        jQuery.get(eBookConfig.ajaxURL+"getpollresults", data, this.showPollResults.bind(this));
     }
 };
 
