@@ -290,7 +290,7 @@ ActiveCode.prototype.saveEditor = function () {
 
     var data = {acid: this.divid, code: this.editor.getValue()};
     data.lang = this.language;
-    if (data.code.match(/^\s$/m)) {
+    if (data.code.match(/^\s+$/)) {
         res = confirm("You are about to save an empty program, this will overwrite a previously saved program.  Continue?");
         if (! res) {
             return;
