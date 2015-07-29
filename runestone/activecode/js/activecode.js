@@ -205,6 +205,7 @@ ActiveCode.prototype.createOutput = function () {
     $(outDiv).addClass("ac_output col-md-6");
     this.outDiv = outDiv;
     this.output = document.createElement('pre');
+    $(this.output).css("visibility","hidden");
 
     this.graphics = document.createElement('div');
     $(this.graphics).addClass("ac-canvas");
@@ -567,17 +568,28 @@ ActiveCode.prototype.builtinRead = function (x) {
 
 ActiveCode.prototype.outputfun = function(text) {
     // bnm python 3
-        var x = text;
-    if (x.charAt(0) == '(') {
-        x = x.slice(1, -1);
-        x = '[' + x + ']';
-        try {
-            var xl = eval(x);
-            xl = xl.map(pyStr);
-            x = xl.join(' ');
-        } catch (err) {
+    pyStr = function(x) {
+        if (x instanceof Array) {
+            return '[' + x.join(", ") + ']';
+        } else {
+            return x
         }
     }
+
+    var x = text;
+    if (! this.python3 ) {
+        if (x.charAt(0) == '(') {
+            x = x.slice(1, -1);
+            x = '[' + x + ']';
+            try {
+                var xl = eval(x);
+                xl = xl.map(pyStr);
+                x = xl.join(' ');
+            } catch (err) {
+            }
+        }
+    }
+    $(this.output).css("visibility","visible");
     text = x;
     text = text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br/>");
         $(this.output).append(text);
