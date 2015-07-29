@@ -208,6 +208,7 @@ ActiveCode.prototype.createOutput = function () {
     $(this.output).css("visibility","hidden");
 
     this.graphics = document.createElement('div');
+    this.graphics.id = this.divid + "_graphics";
     $(this.graphics).addClass("ac-canvas");
     // This bit of magic adds an event which waits for a canvas child to be created on our
     // newly created div.  When a canvas child is added we add a new class so that the visible
@@ -629,6 +630,7 @@ ActiveCode.prototype.runProg = function() {
         Sk.divid = this.divid;
         this.setTimeLimit();
         (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = this.graphics;
+        Sk.canvas = this.graphics.id; //todo: get rid of this here and in image
         $(this.runButton).attr('disabled', 'disabled');
         $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
         $(this.outDiv).show({duration:700,queue:false});
