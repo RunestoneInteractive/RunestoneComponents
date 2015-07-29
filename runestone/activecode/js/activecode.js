@@ -649,10 +649,15 @@ ActiveCode.createScratchActivecode = function() {
     // Remove everything from the URL but the course and page name
     // todo:  this could probably be eliminated and simply moved to the template file
     var divid = document.URL.split('#')[0];
-    divid = divid.split('static')[1];
+    if (divid.indexOf('static') > -1) {
+        divid = divid.split('static')[1];
+    } else {
+        divid = divid.split('/');
+        divid = divid.slice(-2).join("");
+    }
     divid = divid.split('?')[0];  // remove any query string (e.g ?lastPosition)
     divid = divid.replaceAll('/', '').replace('.html', '');
-
+    eBookConfig.scratchDiv = divid;
     // generate the HTML
     var html = '<div id="ac_modal_' + divid + '" class="modal fade">' +
         '  <div class="modal-dialog scratch-ac-modal">' +
@@ -689,7 +694,7 @@ ActiveCode.createScratchActivecode = function() {
 
 
 ActiveCode.toggleScratchActivecode = function () {
-    var divid = "ac_modal_" + document.URL.split('#')[0].split('static')[1].split('?')[0].replaceAll('/', '').replace('.html', '');
+    var divid = "ac_modal_" + eBookConfig.scratchDiv;
     var div = $("#" + divid);
 
     div.modal('toggle');
