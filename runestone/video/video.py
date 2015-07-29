@@ -54,17 +54,18 @@ POPUP = """\
 INLINE = """\
 <script>
    jQuery(function($) {
+      var rb = new RunestoneBase();
       $('#%(divid)s_thumb').click(function(e) {
          $('#%(divid)s').show();
          $('#%(divid)s_thumb').hide();
-         logBookEvent({'event':'video','act':'play','div_id': '%(divid)s'});
+         rb.logBookEvent({'event':'video','act':'play','div_id': '%(divid)s'});
          // Log the run event
       });
       $('#%(divid)s video').one("click", function(){
         this.play();
       });
       $('#%(divid)s video').one("play", function(){
-        logBookEvent({'event':'video','act':'play','div_id': '%(divid)s'});
+        rb.logBookEvent({'event':'video','act':'play','div_id': '%(divid)s'});
       });
    });
 </script>
