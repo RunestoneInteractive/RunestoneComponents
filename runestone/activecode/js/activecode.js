@@ -23,7 +23,7 @@ ActiveCode.prototype.init = function(opts) {
     this.python3 = opts.python3;
     this.origElem = orig;
     this.divid = orig.id;
-    this.code = $(orig).text();
+    this.code = $(orig).text() || "\n\n\n\n\n";
     this.language = $(orig).data('lang');
     this.timelimit = $(orig).data('timelimit');
     this.includes = $(orig).data('include');
@@ -316,6 +316,9 @@ ActiveCode.prototype.loadEditor = function () {
 
         if (res.source) {
             this.editor.setValue(res.source);
+            setTimeout(function() {
+                this.editor.refresh();
+            }.bind(this),500);
             $(this.loadButton).tooltip({'placement': 'bottom',
                              'title': "Loaded your saved code.",
                              'trigger': 'manual'
@@ -657,19 +660,21 @@ ActiveCode.prototype.runProg = function() {
     };
 
 ActiveCode.addActiveCodeToDiv = function(outerdiv, acdiv, sid, initialcode, language) {
-    var acdiv, thepre, newac;
+    var  thepre, newac;
+    $("#"+acdiv).empty();
     thepre = document.createElement("pre");
     thepre['data-component'] = "activecode";
     thepre.id = acdiv;
     thepre['data-lang'] = language;
     $("#"+acdiv).append(thepre);
     var opts = {'orig' : thepre, 'useRunestoneServices': true };
-    newac = new ActiveCode(opts)
+    // todo: look at lang to decide what kind of ActiveCode to make
+    newac = new ActiveCode(opts);
     savediv = newac.divid;
     newac.divid = outerdiv;
     newac.loadEditor();
     newac.divid = savediv;
-
+    newac.editor.setSize(500,300);
 };
 
 ActiveCode.createScratchActivecode = function() {
