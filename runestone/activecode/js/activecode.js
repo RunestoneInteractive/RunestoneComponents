@@ -656,6 +656,21 @@ ActiveCode.prototype.runProg = function() {
 
     };
 
+ActiveCode.addActiveCodeToDiv = function(outerdiv, acdiv, sid, initialcode, language) {
+    var acdiv, thepre, newac;
+    thepre = document.createElement("pre");
+    thepre['data-component'] = "activecode";
+    thepre.id = acdiv;
+    thepre['data-lang'] = language;
+    $("#"+acdiv).append(thepre);
+    var opts = {'orig' : thepre, 'useRunestoneServices': true };
+    newac = new ActiveCode(opts)
+    savediv = newac.divid;
+    newac.divid = outerdiv;
+    newac.loadEditor();
+    newac.divid = savediv;
+
+};
 
 ActiveCode.createScratchActivecode = function() {
     /* set up the scratch Activecode editor in the search menu */
@@ -729,6 +744,7 @@ JSActiveCode.prototype.init = function(opts) {
     }
 
 JSActiveCode.prototype.outputfun = function (a) {
+    $(this.output).css("visibility","visible");
     var str = "[";
     if (typeof(a) == "object" && a.length) {
         for (var i = 0; i < a.length; i++)
@@ -1393,6 +1409,7 @@ LiveCode.prototype.runProg = function() {
         $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
         $(this.outDiv).show({duration:700,queue:false});
         $(this.errDiv).remove();
+        $(this.output).css("visibility","visible");
 
         xhr.open("POST", host, true);
         xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
