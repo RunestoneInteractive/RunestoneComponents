@@ -108,7 +108,7 @@ MultipleChoice.prototype.findAnswers = function () {
         if ($(ChildAnswerList[j]).is("[data-correct]")) {    // If data-correct attribute exists, answer is correct
             is_correct = true;
         }
-        var answer_text = $(ChildAnswerList[j]).text();
+        var answer_text = $(ChildAnswerList[j]).html();
         var answer_object = {id: answer_id, correct: is_correct, content: answer_text};
         this.answerList.push(answer_object);
     }
@@ -205,7 +205,7 @@ MultipleChoice.prototype.renderMCFormOpts = function () {
         label.appendChild(input);
         label.appendChild(labelspan);
         //$(label).attr("for", optid);
-        $(labelspan).text(this.answerList[k].content);
+        $(labelspan).html(this.answerList[k].content);
 
         // create the object to store in optionArray
         var optObj = {
