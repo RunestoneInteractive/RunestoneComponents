@@ -659,81 +659,7 @@ ActiveCode.prototype.runProg = function() {
 
     };
 
-ActiveCode.addActiveCodeToDiv = function(outerdiv, acdiv, sid, initialcode, language) {
-    var  thepre, newac;
-    $("#"+acdiv).empty();
-    thepre = document.createElement("pre");
-    thepre['data-component'] = "activecode";
-    thepre.id = acdiv;
-    thepre['data-lang'] = language;
-    $("#"+acdiv).append(thepre);
-    var opts = {'orig' : thepre, 'useRunestoneServices': true };
-    // todo: look at lang to decide what kind of ActiveCode to make
-    newac = new ActiveCode(opts);
-    savediv = newac.divid;
-    newac.divid = outerdiv;
-    newac.loadEditor();
-    newac.divid = savediv;
-    newac.editor.setSize(500,300);
-};
 
-ActiveCode.createScratchActivecode = function() {
-    /* set up the scratch Activecode editor in the search menu */
-    // use the URL to assign a divid - each page should have a unique Activecode block id.
-    // Remove everything from the URL but the course and page name
-    // todo:  this could probably be eliminated and simply moved to the template file
-    var divid = document.URL.split('#')[0];
-    if (divid.indexOf('static') > -1) {
-        divid = divid.split('static')[1];
-    } else {
-        divid = divid.split('/');
-        divid = divid.slice(-2).join("");
-    }
-    divid = divid.split('?')[0];  // remove any query string (e.g ?lastPosition)
-    divid = divid.replaceAll('/', '').replace('.html', '');
-    eBookConfig.scratchDiv = divid;
-    // generate the HTML
-    var html = '<div id="ac_modal_' + divid + '" class="modal fade">' +
-        '  <div class="modal-dialog scratch-ac-modal">' +
-        '    <div class="modal-content">' +
-        '      <div class="modal-header">' +
-        '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
-        '        <h4 class="modal-title">Scratch ActiveCode</h4>' +
-        '      </div> ' +
-        '      <div class="modal-body">' +
-        '      <pre data-component="activecode" id="' + divid + '">' +
-        '<br />   ' +
-        '<br />   ' +
-        '<br />   ' +
-        '      </pre>' +
-        '      </div>' +
-        '    </div>' +
-        '  </div>' +
-        '</div>';
-    el = $(html);
-    $('body').append(el);
-
-    el.on('shown.bs.modal show.bs.modal', function () {
-        el.find('.CodeMirror').each(function (i, e) {
-            e.CodeMirror.refresh();
-            e.CodeMirror.focus();
-        });
-    });
-
-    $(document).bind('keypress', '\\', function(evt) {
-        toggleScratchActivecode();
-        return false;
-    });
-};
-
-
-ActiveCode.toggleScratchActivecode = function () {
-    var divid = "ac_modal_" + eBookConfig.scratchDiv;
-    var div = $("#" + divid);
-
-    div.modal('toggle');
-
-};
 
 
 JSActiveCode.prototype = new ActiveCode();
@@ -1518,21 +1444,103 @@ LiveCode.prototype.pushDataFile = function (datadiv) {
         }
     };
 
-//
+ACFactory = {};
+
+ACFactory.createActiveCode = function (orig, lang) {
+    var opts = {'orig' : orig, 'useRunestoneServices': eBookConfig.useRunestoneServices, 'python3' : eBookConfig.python3 };
+    if (lang === "javascript") {
+        edList[orig.id] = new JSActiveCode(opts);
+    } else if (lang === 'htmlmixed') {
+        edList[orig.id] = new HTMLActiveCode(opts);
+    } else if (['java', 'cpp', 'c', 'python3', 'python2'].indexOf(lang) > -1) {
+        edList[orig.id] = new LiveCode(opts);
+    } else {   // default is python
+        edList[orig.id] = new ActiveCode(opts);
+    }
+
+}
+
+// used by web2py controller(s)
+ACFactory.addActiveCodeToDiv = function(outerdiv, acdiv, sid, initialcode, language) {
+    var  thepre, newac;
+    $("#"+acdiv).empty();
+    thepre = document.createElement("pre");
+    thepre['data-component'] = "activecode";
+    thepre.id = acdiv;
+    thepre['data-lang'] = language;
+    $("#"+acdiv).append(thepre);
+    var opts = {'orig' : thepre, 'useRunestoneServices': true };
+    // todo: look at lang to decide what kind of ActiveCode to make
+    newac = ACFactory.createActiveCode(thepre,language);
+    savediv = newac.divid;
+    newac.divid = outerdiv;
+    newac.loadEditor();
+    newac.divid = savediv;
+    newac.editor.setSize(500,300);
+};
+
+ACFactory.createScratchActivecode = function() {
+    /* set up the scratch Activecode editor in the search menu */
+    // use the URL to assign a divid - each page should have a unique Activecode block id.
+    // Remove everything from the URL but the course and page name
+    // todo:  this could probably be eliminated and simply moved to the template file
+    var divid = document.URL.split('#')[0];
+    if (divid.indexOf('static') > -1) {
+        divid = divid.split('static')[1];
+    } else {
+        divid = divid.split('/');
+        divid = divid.slice(-2).join("");
+    }
+    divid = divid.split('?')[0];  // remove any query string (e.g ?lastPosition)
+    divid = divid.replaceAll('/', '').replace('.html', '');
+    eBookConfig.scratchDiv = divid;
+    // generate the HTML
+    var html = '<div id="ac_modal_' + divid + '" class="modal fade">' +
+        '  <div class="modal-dialog scratch-ac-modal">' +
+        '    <div class="modal-content">' +
+        '      <div class="modal-header">' +
+        '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
+        '        <h4 class="modal-title">Scratch ActiveCode</h4>' +
+        '      </div> ' +
+        '      <div class="modal-body">' +
+        '      <pre data-component="activecode" id="' + divid + '">' +
+        '<br />   ' +
+        '<br />   ' +
+        '<br />   ' +
+        '      </pre>' +
+        '      </div>' +
+        '    </div>' +
+        '  </div>' +
+        '</div>';
+    el = $(html);
+    $('body').append(el);
+
+    el.on('shown.bs.modal show.bs.modal', function () {
+        el.find('.CodeMirror').each(function (i, e) {
+            e.CodeMirror.refresh();
+            e.CodeMirror.focus();
+        });
+    });
+
+    $(document).bind('keypress', '\\', function(evt) {
+        ACFactory.toggleScratchActivecode();
+        return false;
+    });
+};
+
+
+ACFactory.toggleScratchActivecode = function () {
+    var divid = "ac_modal_" + eBookConfig.scratchDiv;
+    var div = $("#" + divid);
+
+    div.modal('toggle');
+
+};
 
 $(document).ready(function() {
-    ActiveCode.createScratchActivecode();
+    ACFactory.createScratchActivecode();
     $('[data-component=activecode]').each( function(index ) {
-        var opts = {'orig' : this, 'useRunestoneServices': eBookConfig.useRunestoneServices, 'python3' : eBookConfig.python3 };
-        if ($(this).data('lang') === "javascript") {
-            edList[this.id] = new JSActiveCode(opts);
-        } else if ($(this).data('lang') === 'htmlmixed') {
-            edList[this.id] = new HTMLActiveCode(opts);
-        } else if (['java', 'cpp', 'c', 'python3', 'python2'].indexOf($(this).data('lang')) > -1) {
-            edList[this.id] = new LiveCode(opts);
-        } else {   // default is python
-            edList[this.id] = new ActiveCode(opts);
-        }
+        ACFactory.createActiveCode(this, $(this).data('lang'));
     });
     if (loggedout) {
         for (k in edList) {
