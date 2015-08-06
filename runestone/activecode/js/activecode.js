@@ -411,7 +411,11 @@ ActiveCode.prototype.showCodelens = function () {
     myVars.textReferences = false;
     myVars.showOnlyOutputs = false;
     myVars.rawInputLstJSON = JSON.stringify([]);
-    myVars.py = 2;
+    if (this.python3) {
+        myVars.py = 3;
+    } else {
+        myVars.py = 2;
+    }
     myVars.curInstr = 0;
     myVars.codeDivWidth = 350;
     myVars.codeDivHeight = 400;
