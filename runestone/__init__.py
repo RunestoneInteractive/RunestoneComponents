@@ -48,10 +48,15 @@ def build(options):
 
     try:
         bi = sh('git describe --long',capture=True)[:-1]
-        bi = bi.split('-')[0]
-        options.build.template_args["build_info"] = bi
+        bnum = bi.split('-')[0]
+        options.build.template_args["build_info"] = bnum
     except:
+        bi = "unknown-0-0"
         options.build.template_args["build_info"] = 'unknown'
+
+    with open('build_info','w') as bif:
+        bif.write(bi)
+        bif.write("\n")
 
     if 'outputdir' in options.build:
         options.build.outdir = options.build.outputdir
