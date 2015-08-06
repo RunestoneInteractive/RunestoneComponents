@@ -1449,13 +1449,13 @@ ACFactory = {};
 ACFactory.createActiveCode = function (orig, lang) {
     var opts = {'orig' : orig, 'useRunestoneServices': eBookConfig.useRunestoneServices, 'python3' : eBookConfig.python3 };
     if (lang === "javascript") {
-        edList[orig.id] = new JSActiveCode(opts);
+        return new JSActiveCode(opts);
     } else if (lang === 'htmlmixed') {
-        edList[orig.id] = new HTMLActiveCode(opts);
+        return new HTMLActiveCode(opts);
     } else if (['java', 'cpp', 'c', 'python3', 'python2'].indexOf(lang) > -1) {
-        edList[orig.id] = new LiveCode(opts);
+        return new LiveCode(opts);
     } else {   // default is python
-        edList[orig.id] = new ActiveCode(opts);
+        return new ActiveCode(opts);
     }
 
 }
@@ -1467,10 +1467,10 @@ ACFactory.addActiveCodeToDiv = function(outerdiv, acdiv, sid, initialcode, langu
     thepre = document.createElement("pre");
     thepre['data-component'] = "activecode";
     thepre.id = acdiv;
-    thepre['data-lang'] = language;
+    $(thepre).data('lang', language);
     $("#"+acdiv).append(thepre);
     var opts = {'orig' : thepre, 'useRunestoneServices': true };
-    // todo: look at lang to decide what kind of ActiveCode to make
+
     newac = ACFactory.createActiveCode(thepre,language);
     savediv = newac.divid;
     newac.divid = outerdiv;
@@ -1522,10 +1522,10 @@ ACFactory.createScratchActivecode = function() {
         });
     });
 
-    $(document).bind('keypress', '\\', function(evt) {
-        ACFactory.toggleScratchActivecode();
-        return false;
-    });
+    //$(document).bind('keypress', '\\', function(evt) {
+    //    ACFactory.toggleScratchActivecode();
+    //    return false;
+    //});
 };
 
 
@@ -1540,7 +1540,7 @@ ACFactory.toggleScratchActivecode = function () {
 $(document).ready(function() {
     ACFactory.createScratchActivecode();
     $('[data-component=activecode]').each( function(index ) {
-        ACFactory.createActiveCode(this, $(this).data('lang'));
+        edList[this.id] = ACFactory.createActiveCode(this, $(this).data('lang'));
     });
     if (loggedout) {
         for (k in edList) {
