@@ -337,7 +337,7 @@ ActiveCode.prototype.loadEditor = function () {
 
     var data = {acid: this.divid};
     if (this.sid !== undefined) {
-        data['sid'] = sid;
+        data['sid'] = this.sid;
     }
     this.logBookEvent({'event': 'activecode', 'act': 'load', 'div_id': this.divid}); // Log the run event
     jQuery.get(eBookConfig.ajaxURL + 'getprog', data, loadEditor);
@@ -1478,6 +1478,7 @@ ACFactory.addActiveCodeToDiv = function(outerdiv, acdiv, sid, initialcode, langu
     newac = ACFactory.createActiveCode(thepre,language);
     savediv = newac.divid;
     newac.divid = outerdiv;
+    newac.sid = sid;
     newac.loadEditor();
     newac.divid = savediv;
     newac.editor.setSize(500,300);
