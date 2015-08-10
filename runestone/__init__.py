@@ -13,7 +13,8 @@ from .reveal import *
 from .tabbedStuff import *
 from .video import *
 
-import os
+import os, sys
+
 def runestone_static_dirs():
     basedir = os.path.dirname(__file__)
     module_paths = [ x for x in os.listdir(basedir) if os.path.isdir(os.path.join(basedir,x))]
@@ -72,11 +73,14 @@ def build(options):
 
 
     try:
+        sys.path.insert(0,os.path.join('..','..','modules'))
         from chapternames import populateChapterInfo
         populateChapterInfo(options.build.project_name, "%s/index.rst" % options.build.sourcedir)
         print('Creating Chapter Information')
-    except ImportError:
-        print('Chapter information database population skipped, This is OK for a standalone build.')
+    except ImportError as e:
+        print('Chapter information database population skipped, This is OK for a standalone build.',e)
+    except Exception as e:
+        print('Chapter Information Creation Failed with', e)
 
     if rc == 0:
         print("Done, {} build successful".format(options.build.project_name))
