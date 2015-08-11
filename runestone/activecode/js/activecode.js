@@ -1468,7 +1468,7 @@ ACFactory.createActiveCode = function (orig, lang) {
 ACFactory.addActiveCodeToDiv = function(outerdiv, acdiv, sid, initialcode, language) {
     var  thepre, newac;
     $("#"+acdiv).empty();
-    thepre = document.createElement("pre");
+    thepre = document.createElement("textarea");
     thepre['data-component'] = "activecode";
     thepre.id = acdiv;
     $(thepre).data('lang', language);
@@ -1497,7 +1497,7 @@ ACFactory.createScratchActivecode = function() {
         divid = divid.slice(-2).join("");
     }
     divid = divid.split('?')[0];  // remove any query string (e.g ?lastPosition)
-    divid = divid.replaceAll('/', '').replace('.html', '');
+    divid = divid.replaceAll('/', '').replace('.html', '').replace(':', '');
     eBookConfig.scratchDiv = divid;
     // generate the HTML
     var html = '<div id="ac_modal_' + divid + '" class="modal fade">' +
@@ -1508,11 +1508,11 @@ ACFactory.createScratchActivecode = function() {
         '        <h4 class="modal-title">Scratch ActiveCode</h4>' +
         '      </div> ' +
         '      <div class="modal-body">' +
-        '      <pre data-component="activecode" id="' + divid + '">' +
-        '<br />   ' +
-        '<br />   ' +
-        '<br />   ' +
-        '      </pre>' +
+        '      <textarea data-component="activecode" id="' + divid + '">' +
+        '\n' +
+        '\n' +
+        '\n' +
+        '      </textarea>' +
         '      </div>' +
         '    </div>' +
         '  </div>' +
