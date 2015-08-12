@@ -74,8 +74,12 @@ def build(options):
 
     try:
         sys.path.insert(0,os.path.join('..','..','modules'))
+        if os.path.exists(os.path.join(options.build.sourcedir,'toc.rst')):
+            idxfile = os.path.join(options.build.sourcedir,'toc.rst')
+        else:
+            idxfile = os.path.join(options.build.sourcedir,'index.rst')
         from chapternames import populateChapterInfo
-        populateChapterInfo(options.build.project_name, "%s/index.rst" % options.build.sourcedir)
+        populateChapterInfo(options.build.project_name, idxfile)
         print('Creating Chapter Information')
     except ImportError as e:
         print('Chapter information database population skipped, This is OK for a standalone build.',e)
