@@ -64,6 +64,8 @@ ActiveCode.prototype.init = function(opts) {
 
 ActiveCode.prototype.createEditor = function (index) {
     var newdiv = document.createElement('div');
+    var linkdiv = document.createElement('div')
+    linkdiv.id = this.divid.replace(/_/g,'-').toLowerCase();  // :ref: changes _ to - so add this as a target
     $(newdiv).addClass("ac_section alert alert-warning");
     var codeDiv = document.createElement("div");
     $(codeDiv).addClass("ac_code_div col-md-12");
@@ -73,6 +75,9 @@ ActiveCode.prototype.createEditor = function (index) {
     this.outerDiv = newdiv;
 
     $(this.origElem).replaceWith(newdiv);
+    if (linkdiv.id !== this.divid) {  // Don't want the 'extra' target if they match.
+        newdiv.appendChild(linkdiv);
+    }
     newdiv.appendChild(codeDiv);
     var editor = CodeMirror(codeDiv, {value: this.code, lineNumbers: true, mode: newdiv.lang});
 
