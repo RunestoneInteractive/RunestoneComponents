@@ -21,12 +21,6 @@ If you are completely new to pip and github text editors, I have written a more 
 
     pip install runestone
 
-On some versions of pip that will fail and you need to use:
-
-::
-
-    pip install --pre runestone
-
 
 
 Or, if you prefer to live on the development edge, you can check out the very latest from:
