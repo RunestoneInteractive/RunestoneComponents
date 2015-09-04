@@ -13,7 +13,8 @@ from .reveal import *
 from .tabbedStuff import *
 from .video import *
 
-import os
+import os, sys
+
 def runestone_static_dirs():
     basedir = os.path.dirname(__file__)
     module_paths = [ x for x in os.listdir(basedir) if os.path.isdir(os.path.join(basedir,x))]
@@ -48,10 +49,15 @@ def build(options):
 
     try:
         bi = sh('git describe --long',capture=True)[:-1]
-        bi = bi.split('-')[0]
-        options.build.template_args["build_info"] = bi
+        bnum = bi.split('-')[0]
+        options.build.template_args["build_info"] = bnum
     except:
+        bi = "unknown-0-0"
         options.build.template_args["build_info"] = 'unknown'
+
+    with open('build_info','w') as bif:
+        bif.write(bi)
+        bif.write("\n")
 
     if 'outputdir' in options.build:
         options.build.outdir = options.build.outputdir
@@ -67,11 +73,18 @@ def build(options):
 
 
     try:
+        sys.path.insert(0,os.path.join('..','..','modules'))
+        if os.path.exists(os.path.join(options.build.sourcedir,'toc.rst')):
+            idxfile = os.path.join(options.build.sourcedir,'toc.rst')
+        else:
+            idxfile = os.path.join(options.build.sourcedir,'index.rst')
         from chapternames import populateChapterInfo
-        populateChapterInfo(options.build.project_name, "%s/index.rst" % options.build.sourcedir)
+        populateChapterInfo(options.build.project_name, idxfile)
         print('Creating Chapter Information')
-    except ImportError:
-        print('Chapter information database population skipped, This is OK for a standalone build.')
+    except ImportError as e:
+        print('Chapter information database population skipped, This is OK for a standalone build.',e)
+    except Exception as e:
+        print('Chapter Information Creation Failed with', e)
 
     if rc == 0:
         print("Done, {} build successful".format(options.build.project_name))

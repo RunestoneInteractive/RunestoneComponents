@@ -866,7 +866,7 @@ ParsonsWidget.prototype.getRandomPermutation = function (n) {
 ParsonsWidget.prototype.shuffleLines = function () {
     var permutation = this.getRandomPermutation(this.modified_lines.length);
     var idlist = [];
-    for (var i in permutation) {
+    for (var i = 0; i < permutation.length; i++) {
         idlist.push(this.modified_lines[permutation[i]].id);
     }
     if (this.options.trashId) {
@@ -895,7 +895,7 @@ ParsonsWidget.prototype.codeLineToHTML = function (codeline) {
 
 ParsonsWidget.prototype.codeLinesToHTML = function (codelineIDs, destinationID) {
     var lineHTML = [];
-    for (var id in codelineIDs) {
+    for (var id = 0; id < codelineIDs.length; id++) {
         var line = this.getLineById(codelineIDs[id]);
         lineHTML.push(this.codeLineToHTML(line));
     }

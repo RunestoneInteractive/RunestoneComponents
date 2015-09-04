@@ -54,9 +54,9 @@ def setup(app):
 
 
 TEMPLATE = """
-<pre data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(gradebutton)s %(caption)s>
+<textarea data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(gradebutton)s %(caption)s>
 %(initialcode)s
-</pre>
+</textarea>
 """
 
 class ActivcodeNode(nodes.General, nodes.Element):
@@ -67,7 +67,7 @@ class ActivcodeNode(nodes.General, nodes.Element):
         - `self`:
         - `content`:
         """
-        super(ActivcodeNode, self).__init__()
+        super(ActivcodeNode, self).__init__(name=content['name'])
         self.ac_components = content
 
 
@@ -136,6 +136,8 @@ class ActiveCode(Directive):
             env.activecodecounter = 0
         env.activecodecounter += 1
 
+        self.options['name'] = self.arguments[0].strip()
+
         self.options['divid'] = self.arguments[0]
 
         if self.content:
@@ -196,7 +198,7 @@ class ActiveCode(Directive):
         if 'timelimit' not in self.options:
             self.options['timelimit'] = 'data-timelimit=25000'
         else:
-            self.options['timelimit'] = 'data-timelimit=%d' % self.options['timelimit']
+            self.options['timelimit'] = 'data-timelimit=%s' % self.options['timelimit']
 
         if 'autorun' not in self.options:
             self.options['autorun'] = ''
@@ -227,7 +229,9 @@ class ActiveCode(Directive):
         if 'gradebutton' not in self.options:
             self.options['gradebutton'] = ''
 
-        return [ActivcodeNode(self.options)]
+        acnode = ActivcodeNode(self.options)
+        self.add_name(acnode)    # make this divid available as a target for :ref:
+        return [acnode]
 
 
 class ActiveExercise(ActiveCode):

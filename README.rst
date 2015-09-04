@@ -21,12 +21,6 @@ If you are completely new to pip and github text editors, I have written a more 
 
     pip install runestone
 
-On some versions of pip that will fail and you need to use:
-
-::
-
-    pip install --pre runestone
-
 
 
 Or, if you prefer to live on the development edge, you can check out the very latest from:
@@ -79,7 +73,7 @@ So, you would like to help out with developing the Runestone Components.  What d
 2.  Setup your environment on your development machine
 
     1.  Make a virtual environment for testing and working  I recommend pyvenv-3.4  as it is baked in to Python 3.4 and higher.
-    2.  Rather than following the instructions above for installing runestone simply run ``pip install .`` from the top level runestone directory.  This will install all of the required prerequisites and setup the runestone install as a link to the development directory.
+    2.  Rather than following the instructions above for installing runestone simply run ``pip install -e .`` from the top level runestone directory.  This will install all of the required prerequisites and setup the runestone install as a link to the development directory.
 
 3.  When you have some changes to share, make a Pull Request.
 

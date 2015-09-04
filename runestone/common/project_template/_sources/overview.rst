@@ -369,7 +369,7 @@ Its nice to be able to have students solve a particular problem by writing some 
 
        def testOne(self):
            self.assertEqual(add(2,2),4,"A feedback string when the test fails")
-           self.assertAlmostEqual(add(2.0,3.0),5.0,"Your function failed on inputs of 2.0 and 3.0")
+           self.assertAlmostEqual(add(2.0,3.0),5.0,feedback="Your function failed on inputs of 2.0 and 3.0")
 
    myTests().main()
 
@@ -389,7 +389,7 @@ Before you go on, fix the add function in the activecode box.  The full compleme
 
            def testOne(self):
                self.assertEqual(add(2,2),4,"A feedback string when the test fails")
-               self.assertAlmostEqual(add(2.0,3.0),5.0,"Your function failed on inputs of 2.0 and 3.0")
+               self.assertAlmostEqual(add(2.0,3.0),5.0,feedback="Your function failed on inputs of 2.0 and 3.0")
 
        myTests().main()
 
@@ -410,7 +410,7 @@ Fix the following code so that it always correctly adds two numbers.
 
        def testOne(self):
            self.assertEqual(add(2,2),4,"A feedback string when the test fails")
-           self.assertAlmostEqual(add(2.0,3.0),5.0,"Your function failed on inputs of 2.0 and 3.0")
+           self.assertAlmostEqual(add(2.0,3.0),5.0,feedback="Your function failed on inputs of 2.0 and 3.0")
 
    myTests().main()
 
@@ -619,8 +619,13 @@ connect it to the print block.  Now click the run button and you should see 10 p
 in the gray output area.
 
 
-Other Languages - LiveCode
---------------------------
+Other Languages in ActiveCode
+-----------------------------
+
+Activecode now supports Java, C++ and C through a backend server, not in the browser.    You can
+use them by specifying the language to be `java`, `cpp` or `c` In addition it supports either Python3 or Python2
+outside of the browser using `python3` or `python2` as the language.   You are limited to non-graphical
+programs in any of these options.
 
 .. activecode:: lc1
    :language: java
@@ -645,6 +650,11 @@ Other Languages - LiveCode
        }
 
    }
+
+
+Audio Tours
+-----------
+
 
 .. activecode:: ch03_4
     :nocanvas:

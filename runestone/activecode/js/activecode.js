@@ -17,12 +17,13 @@ function ActiveCode(opts) {
 
 ActiveCode.prototype.init = function(opts) {
     RunestoneBase.apply( this, arguments );  // call parent constructor
-    var _this = this;
     var suffStart = -1;
-    var orig = opts.orig
+    var orig = opts.orig;
+    this.useRunestoneServices = opts.useRunestoneServices;
+    this.python3 = opts.python3;
     this.origElem = orig;
     this.divid = orig.id;
-    this.code = $(orig).text();
+    this.code = $(orig).text() || "\n\n\n\n\n";
     this.language = $(orig).data('lang');
     this.timelimit = $(orig).data('timelimit');
     this.includes = $(orig).data('include');
@@ -54,7 +55,7 @@ ActiveCode.prototype.init = function(opts) {
     } else {
         this.caption = ""
     }
-    this.addCaption()
+    this.addCaption();
 
     if ($(orig).data('autorun')) {
         $(document).ready(this.runProg.bind(this));
@@ -63,6 +64,8 @@ ActiveCode.prototype.init = function(opts) {
 
 ActiveCode.prototype.createEditor = function (index) {
     var newdiv = document.createElement('div');
+    var linkdiv = document.createElement('div')
+    linkdiv.id = this.divid.replace(/_/g,'-').toLowerCase();  // :ref: changes _ to - so add this as a target
     $(newdiv).addClass("ac_section alert alert-warning");
     var codeDiv = document.createElement("div");
     $(codeDiv).addClass("ac_code_div col-md-12");
@@ -72,6 +75,9 @@ ActiveCode.prototype.createEditor = function (index) {
     this.outerDiv = newdiv;
 
     $(this.origElem).replaceWith(newdiv);
+    if (linkdiv.id !== this.divid) {  // Don't want the 'extra' target if they match.
+        newdiv.appendChild(linkdiv);
+    }
     newdiv.appendChild(codeDiv);
     var editor = CodeMirror(codeDiv, {value: this.code, lineNumbers: true, mode: newdiv.lang});
 
@@ -112,26 +118,31 @@ ActiveCode.prototype.createControls = function () {
     $(butt).click(this.runProg.bind(this));
 
     // Save
-    butt = document.createElement("button");
-    $(butt).addClass("ac_opt btn btn-default");
-    $(butt).text("Save");
-    $(butt).css("margin-left","10px");
-    this.saveButton = butt;
-    ctrlDiv.appendChild(butt);
-    if (this.hidecode) {
-        $(butt).css("display","none")
+    if (this.useRunestoneServices) {
+        butt = document.createElement("button");
+        $(butt).addClass("ac_opt btn btn-default");
+        $(butt).text("Save");
+        $(butt).css("margin-left", "10px");
+        this.saveButton = butt;
+        this.saveButton.onclick = this.saveEditor.bind(this);
+        ctrlDiv.appendChild(butt);
+        if (this.hidecode) {
+            $(butt).css("display", "none")
+        }
     }
     // Load
-    butt = document.createElement("button");
-    $(butt).addClass("ac_opt btn btn-default");
-    $(butt).text("Load");
-    $(butt).css("margin-left","10px");
-    this.loadButton = butt;
-    ctrlDiv.appendChild(butt);
-    if (this.hidecode) {
-        $(butt).css("display","none")
+    if (this.useRunestoneServices) {
+        butt = document.createElement("button");
+        $(butt).addClass("ac_opt btn btn-default");
+        $(butt).text("Load");
+        $(butt).css("margin-left", "10px");
+        this.loadButton = butt;
+        this.loadButton.onclick = this.loadEditor.bind(this);
+        ctrlDiv.appendChild(butt);
+        if (this.hidecode) {
+            $(butt).css("display", "none")
+        }
     }
-
     if ($(this.origElem).data('gradebutton')) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
@@ -166,7 +177,7 @@ ActiveCode.prototype.createControls = function () {
         $(butt).click(this.showCodelens.bind(this));
     }
     // CodeCoach
-    if ($(this.origElem).data("coach")) {
+    if (this.useRunestoneServices && $(this.origElem).data("coach")) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
         $(butt).text("Code Coach");
@@ -199,8 +210,10 @@ ActiveCode.prototype.createOutput = function () {
     $(outDiv).addClass("ac_output col-md-6");
     this.outDiv = outDiv;
     this.output = document.createElement('pre');
+    $(this.output).css("visibility","hidden");
 
     this.graphics = document.createElement('div');
+    this.graphics.id = this.divid + "_graphics";
     $(this.graphics).addClass("ac-canvas");
     // This bit of magic adds an event which waits for a canvas child to be created on our
     // newly created div.  When a canvas child is added we add a new class so that the visible
@@ -212,6 +225,17 @@ ActiveCode.prototype.createOutput = function () {
     outDiv.appendChild(this.output);
     outDiv.appendChild(this.graphics);
     this.outerDiv.appendChild(outDiv);
+
+    clearDiv = document.createElement("div");
+    $(clearDiv).css("clear","both");  // needed to make parent div resize properly
+    this.outerDiv.appendChild(clearDiv);
+
+
+    var lensDiv = document.createElement("div");
+    $(lensDiv).addClass("col-md-6");
+    $(lensDiv).css("display","none");
+    this.codelens = lensDiv;
+    this.outerDiv.appendChild(lensDiv);
 
     clearDiv = document.createElement("div");
     $(clearDiv).css("clear","both");  // needed to make parent div resize properly
@@ -237,7 +261,7 @@ ActiveCode.prototype.addCaption = function() {
 };
 
 ActiveCode.prototype.saveEditor = function () {
-
+    var res;
     var saveSuccess = function(data, status, whatever) {
         if (data.redirect) {
             alert("Did not save!  It appears you are not logged in properly")
@@ -250,7 +274,7 @@ ActiveCode.prototype.saveEditor = function () {
                 alert(acid);
             } else {
                 // use a tooltip to provide some success feedback
-                var save_btn = $("#" + acid + "_saveb");
+                var save_btn = $(this.saveButton);
                 save_btn.attr('title', 'Saved your code.');
                 opts = {
                     'trigger': 'manual',
@@ -267,19 +291,25 @@ ActiveCode.prototype.saveEditor = function () {
                 $('#' + acid + ' .CodeMirror').css('border-bottom', '2px solid #aaa');
             }
         }
-    };
+    }.bind(this);
 
     var data = {acid: this.divid, code: this.editor.getValue()};
     data.lang = this.language;
+    if (data.code.match(/^\s+$/)) {
+        res = confirm("You are about to save an empty program, this will overwrite a previously saved program.  Continue?");
+        if (! res) {
+            return;
+        }
+    }
     $(document).ajaxError(function (e, jqhxr, settings, exception) {
         alert("Request Failed for" + settings.url)
     });
     jQuery.post(eBookConfig.ajaxURL + 'saveprog', data, saveSuccess);
     if (this.editor.acEditEvent) {
-        logBookEvent({'event': 'activecode', 'act': 'edit', 'div_id': this.divid}); // Log the run event
+        this.logBookEvent({'event': 'activecode', 'act': 'edit', 'div_id': this.divid}); // Log the run event
         this.editor.acEditEvent = false;
     }
-    logBookEvent({'event': 'activecode', 'act': 'save', 'div_id': this.divid}); // Log the run event
+    this.logBookEvent({'event': 'activecode', 'act': 'save', 'div_id': this.divid}); // Log the run event
 
 };
 
@@ -291,27 +321,30 @@ ActiveCode.prototype.loadEditor = function () {
 
         if (res.source) {
             this.editor.setValue(res.source);
-            this.loadButton.tooltip({'placement': 'bottom',
+            setTimeout(function() {
+                this.editor.refresh();
+            }.bind(this),500);
+            $(this.loadButton).tooltip({'placement': 'bottom',
                              'title': "Loaded your saved code.",
                              'trigger': 'manual'
                             });
         } else {
-            this.loadButton.tooltip({'placement': 'bottom',
+            $(this.loadButton).tooltip({'placement': 'bottom',
                              'title': "No saved code.",
                              'trigger': 'manual'
                             });
         }
-        this.loadButton.tooltip('show');
+        $(this.loadButton).tooltip('show');
         setTimeout(function () {
-            this.loadButton.tooltip('destroy')
-        }, 4000);
+            $(this.loadButton).tooltip('destroy')
+        }.bind(this), 4000);
     }).bind(this);
 
     var data = {acid: this.divid};
-    if (sid !== undefined) {
-        data['sid'] = sid;
+    if (this.sid !== undefined) {
+        data['sid'] = this.sid;
     }
-    logBookEvent({'event': 'activecode', 'act': 'load', 'div_id': this.divid}); // Log the run event
+    this.logBookEvent({'event': 'activecode', 'act': 'load', 'div_id': this.divid}); // Log the run event
     jQuery.get(eBookConfig.ajaxURL + 'getprog', data, loadEditor);
 
 };
@@ -349,62 +382,59 @@ ActiveCode.prototype.createGradeSummary = function () {
 
         el = $(html);
         el.modal();
-    }
-    var data = {'div_id': this.divid}
+    };
+    var data = {'div_id': this.divid};
     jQuery.get(eBookConfig.ajaxURL + 'getassignmentgrade', data, showGradeSummary);
-}
+};
 
 ActiveCode.prototype.hideCodelens = function (button, div_id) {
     this.codelens.style.display = 'none'
-}
+};
 
-ActiveCode.prototype.showCodelens = function (button, div_id) {
-    if (this.codelens === null) {
-        var lensDiv = document.createElement("div");
-        $(lensDiv).addClass("col-md-6");
-        $(lensDiv).css("display","none");
-        this.codelens = lensDiv;
-        this.outerDiv.appendChild(lensDiv);
-    }
+ActiveCode.prototype.showCodelens = function () {
 
     if (this.codelens.style.display == 'none') {
         this.codelens.style.display = 'block';
-        button.innerText = "Hide Codelens";
+        this.clButton.innerText = "Hide Codelens";
     } else {
         this.codelens.style.display = "none";
-        button.innerText = "Show in Codelens";
+        this.clButton.innerText = "Show in Codelens";
         return;
     }
 
-    var cl = this.codelens.firstChild
+    var cl = this.codelens.firstChild;
     if (cl) {
         div.removeChild(cl)
     }
-    var code = this.editor.getValue()
-    var myVars = {}
-    myVars.code = code
-    myVars.origin = "opt-frontend.js"
-    myVars.cumulative = false
-    myVars.heapPrimitives = false
-    myVars.drawParentPointers = false
-    myVars.textReferences = false
-    myVars.showOnlyOutputs = false
-    myVars.rawInputLstJSON = JSON.stringify([])
-    myVars.py = 2
-    myVars.curInstr = 0
-    myVars.codeDivWidth = 350
-    myVars.codeDivHeight = 400
-    var srcURL = '//pythontutor.com/iframe-embed.html'
-    var embedUrlStr = $.param.fragment(srcURL, myVars, 2 /* clobber all */)
-    var myIframe = document.createElement('iframe')
-    myIframe.setAttribute("id", div_id + '_codelens')
-    myIframe.setAttribute("width", "800")
-    myIframe.setAttribute("height", "500")
-    myIframe.setAttribute("style", "display:block")
-    myIframe.style.background = '#fff'
+    var code = this.editor.getValue();
+    var myVars = {};
+    myVars.code = code;
+    myVars.origin = "opt-frontend.js";
+    myVars.cumulative = false;
+    myVars.heapPrimitives = false;
+    myVars.drawParentPointers = false;
+    myVars.textReferences = false;
+    myVars.showOnlyOutputs = false;
+    myVars.rawInputLstJSON = JSON.stringify([]);
+    if (this.python3) {
+        myVars.py = 3;
+    } else {
+        myVars.py = 2;
+    }
+    myVars.curInstr = 0;
+    myVars.codeDivWidth = 350;
+    myVars.codeDivHeight = 400;
+    var srcURL = '//pythontutor.com/iframe-embed.html';
+    var embedUrlStr = $.param.fragment(srcURL, myVars, 2 /* clobber all */);
+    var myIframe = document.createElement('iframe');
+    myIframe.setAttribute("id", this.divid + '_codelens');
+    myIframe.setAttribute("width", "800");
+    myIframe.setAttribute("height", "500");
+    myIframe.setAttribute("style", "display:block");
+    myIframe.style.background = '#fff';
     //myIframe.setAttribute("src",srcURL)
-    myIframe.src = embedUrlStr
-    this.codelens.appendChild(myIframe)
+    myIframe.src = embedUrlStr;
+    this.codelens.appendChild(myIframe);
     this.logBookEvent({
         'event': 'codelens',
         'act': 'view',
@@ -438,7 +468,7 @@ ActiveCode.prototype.showCodeCoach = function (div_id) {
     myIframe.setAttribute("height", "500px");
     myIframe.setAttribute("style", "display:block");
     myIframe.style.background = '#fff';
-    myIframe.style.width = "100%"
+    myIframe.style.width = "100%";
     myIframe.src = srcURL;
     this.codecoach.appendChild(myIframe);
     logBookEvent({
@@ -455,8 +485,69 @@ ActiveCode.prototype.toggleEditorVisibility = function () {
 
 ActiveCode.prototype.addErrorMessage = function (err) {
     //logRunEvent({'div_id': this.divid, 'code': this.prog, 'errinfo': err.toString()}); // Log the run event
-    console.log("Runtime Error: " + err.toString());
+    var errHead = $('<h3>').html('Error');
+    this.eContainer = this.outerDiv.appendChild(document.createElement('div'));
+    this.eContainer.className = 'error alert alert-danger';
+    this.eContainer.id = this.divid + '_errinfo';
+    this.eContainer.appendChild(errHead[0]);
+    var errText = this.eContainer.appendChild(document.createElement('pre'));
+    var errString = err.toString();
+    var to = errString.indexOf(":");
+    var errName = errString.substring(0, to);
+    errText.innerHTML = errString;
+    $(this.eContainer).append('<h3>Description</h3>');
+    var errDesc = this.eContainer.appendChild(document.createElement('p'));
+    errDesc.innerHTML = errorText[errName];
+    $(this.eContainer).append('<h3>To Fix</h3>');
+    var errFix = this.eContainer.appendChild(document.createElement('p'));
+    errFix.innerHTML = errorText[errName + 'Fix'];
+    var moreInfo = '../ErrorHelp/' + errName.toLowerCase() + '.html';
+    //console.log("Runtime Error: " + err.toString());
 };
+
+
+
+var errorText = {};
+
+errorText.ParseError = "A parse error means that Python does not understand the syntax on the line the error message points out.  Common examples are forgetting commas beteween arguments or forgetting a : on a for statement";
+errorText.ParseErrorFix = "To fix a parse error you just need to look carefully at the line with the error and possibly the line before it.  Make sure it conforms to all of Python's rules.";
+errorText.TypeError = "Type errors most often occur when an expression tries to combine two objects with types that should not be combined.  Like raising a string to a power";
+errorText.TypeErrorFix = "To fix a type error you will most likely need to trace through your code and make sure the variables have the types you expect them to have.  It may be helpful to print out each variable along the way to be sure its value is what you think it should be.";
+errorText.NameError = "A name error almost always means that you have used a variable before it has a value.  Often this may be a simple typo, so check the spelling carefully.";
+errorText.NameErrorFix = "Check the right hand side of assignment statements and your function calls, this is the most likely place for a NameError to be found.";
+errorText.ValueError = "A ValueError most often occurs when you pass a parameter to a function and the function is expecting one type and you pass another.";
+errorText.ValueErrorFix = "The error message gives you a pretty good hint about the name of the function as well as the value that is incorrect.  Look at the error message closely and then trace back to the variable containing the problematic value.";
+errorText.AttributeError = "This error message is telling you that the object on the left hand side of the dot, does not have the attribute or method on the right hand side.";
+errorText.AttributeErrorFix = "The most common variant of this message is that the object undefined does not have attribute X.  This tells you that the object on the left hand side of the dot is not what you think. Trace the variable back and print it out in various places until you discover where it becomes undefined.  Otherwise check the attribute on the right hand side of the dot for a typo.";
+errorText.TokenError = "Most of the time this error indicates that you have forgotten a right parenthesis or have forgotten to close a pair of quotes.";
+errorText.TokenErrorFix = "Check each line of your program and make sure that your parenthesis are balanced.";
+errorText.TimeLimitError = "Your program is running too long.  Most programs in this book should run in less than 10 seconds easily. This probably indicates your program is in an infinite loop.";
+errorText.TimeLimitErrorFix = "Add some print statements to figure out if your program is in an infinte loop.  If it is not you can increase the run time with sys.setExecutionLimit(msecs)";
+errorText.Error = "Your program is running for too long.  Most programs in this book should run in less than 30 seconds easily. This probably indicates your program is in an infinite loop.";
+errorText.ErrorFix = "Add some print statements to figure out if your program is in an infinte loop.  If it is not you can increase the run time with sys.setExecutionLimit(msecs)";
+errorText.SyntaxError = "This message indicates that Python can't figure out the syntax of a particular statement.  Some examples are assigning to a literal, or a function call";
+errorText.SyntaxErrorFix = "Check your assignment statments and make sure that the left hand side of the assignment is a variable, not a literal or a function.";
+errorText.IndexError = "This message means that you are trying to index past the end of a string or a list.  For example if your list has 3 things in it and you try to access the item at position 3 or more.";
+errorText.IndexErrorFix = "Remember that the first item in a list or string is at index position 0, quite often this message comes about because you are off by one.  Remember in a list of length 3 the last legal index is 2";
+errorText.URIError = "";
+errorText.URIErrorFix = "";
+errorText.ImportError = "This error message indicates that you are trying to import a module that does not exist";
+errorText.ImportErrorFix = "One problem may simply be that you have a typo.  It may also be that you are trying to import a module that exists in 'real' Python, but does not exist in this book.  If this is the case, please submit a feature request to have the module added.";
+errorText.ReferenceError = "This is most likely an internal error, particularly if the message references the console.";
+errorText.ReferenceErrorFix = "Try refreshing the webpage, and if the error continues, submit a bug report along with your code";
+errorText.ZeroDivisionError = "This tells you that you are trying to divide by 0. Typically this is because the value of the variable in the denominator of a division expression has the value 0";
+errorText.ZeroDivisionErrorFix = "You may need to protect against dividing by 0 with an if statment, or you may need to rexamine your assumptions about the legal values of variables, it could be an earlier statment that is unexpectedly assigning a value of zero to the variable in question.";
+errorText.RangeError = "This message almost always shows up in the form of Maximum call stack size exceeded.";
+errorText.RangeErrorFix = "This always occurs when a function calls itself.  Its pretty likely that you are not doing this on purpose. Except in the chapter on recursion.  If you are in that chapter then its likely you haven't identified a good base case.";
+errorText.InternalError = "An Internal error may mean that you've triggered a bug in our Python";
+errorText.InternalErrorFix = "Report this error, along with your code as a bug.";
+errorText.IndentationError = "This error occurs when you have not indented your code properly.  This is most likely to happen as part of an if, for, while or def statement.";
+errorText.IndentationErrorFix = "Check your if, def, for, and while statements to be sure the lines are properly indented beneath them.  Another source of this error comes from copying and pasting code where you have accidentally left some bits of code lying around that don't belong there anymore.";
+errorText.NotImplementedError = "This error occurs when you try to use a builtin function of Python that has not been implemented in this in-browser version of Python.";
+errorText.NotImplementedErrorFix = "For now the only way to fix this is to not use the function.  There may be workarounds.  If you really need this builtin function then file a bug report and tell us how you are trying to use the function.";
+
+
+
 
 ActiveCode.prototype.setTimeLimit = function (timer) {
     var timelimit = this.timeLimit;
@@ -490,17 +581,28 @@ ActiveCode.prototype.builtinRead = function (x) {
 
 ActiveCode.prototype.outputfun = function(text) {
     // bnm python 3
-        var x = text;
-    if (x.charAt(0) == '(') {
-        x = x.slice(1, -1);
-        x = '[' + x + ']';
-        try {
-            var xl = eval(x);
-            xl = xl.map(pyStr);
-            x = xl.join(' ');
-        } catch (err) {
+    pyStr = function(x) {
+        if (x instanceof Array) {
+            return '[' + x.join(", ") + ']';
+        } else {
+            return x
         }
     }
+
+    var x = text;
+    if (! this.python3 ) {
+        if (x.charAt(0) == '(') {
+            x = x.slice(1, -1);
+            x = '[' + x + ']';
+            try {
+                var xl = eval(x);
+                xl = xl.map(pyStr);
+                x = xl.join(' ');
+            } catch (err) {
+            }
+        }
+    }
+    $(this.output).css("visibility","visible");
     text = x;
     text = text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br/>");
         $(this.output).append(text);
@@ -527,19 +629,20 @@ ActiveCode.prototype.buildProg = function() {
 };
 
 ActiveCode.prototype.runProg = function() {
-        var prog = this.buildProg()
+        var prog = this.buildProg();
 
         $(this.output).text('');
 
-
+        $(this.eContainer).remove();
         Sk.configure({output : this.outputfun.bind(this),
               read   : this.builtinRead,
-              python3: true,
+              python3: this.python3,
               imageProxy : 'http://image.runestone.academy:8080/320x'
         });
         Sk.divid = this.divid;
         this.setTimeLimit();
         (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = this.graphics;
+        Sk.canvas = this.graphics.id; //todo: get rid of this here and in image
         $(this.runButton).attr('disabled', 'disabled');
         $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
         $(this.outDiv).show({duration:700,queue:false});
@@ -550,7 +653,7 @@ ActiveCode.prototype.runProg = function() {
 
         myPromise.then((function(mod) { // success
             $(this.runButton).removeAttr('disabled');
-            this.logRunEvent({'div_id': this.id, 'code': prog, 'errinfo': 'success'}); // Log the run event
+            this.logRunEvent({'div_id': this.divid, 'code': prog, 'errinfo': 'success'}); // Log the run event
         }).bind(this),
             (function(err) {  // fail
             $(this.runButton).removeAttr('disabled');
@@ -565,6 +668,9 @@ ActiveCode.prototype.runProg = function() {
 
     };
 
+
+
+
 JSActiveCode.prototype = new ActiveCode();
 
 function JSActiveCode(opts) {
@@ -578,11 +684,12 @@ JSActiveCode.prototype.init = function(opts) {
     }
 
 JSActiveCode.prototype.outputfun = function (a) {
-    var str = "["
+    $(this.output).css("visibility","visible");
+    var str = "[";
     if (typeof(a) == "object" && a.length) {
         for (var i = 0; i < a.length; i++)
             if (typeof(a[i]) == "object" && a[i].length) {
-                str += (i == 0 ? "" : " ") + "["
+                str += (i == 0 ? "" : " ") + "[";
                 for (var j = 0; j < a[i].length; j++)
                     str += a[i][j] + (j == a[i].length - 1 ?
                     "]" + (i == a.length - 1 ? "]" : ",") + "\n" : ", ");
@@ -595,7 +702,7 @@ JSActiveCode.prototype.outputfun = function (a) {
     }
     }
     return str;
-}
+};
 
 JSActiveCode.prototype.runProg = function() {
     var _this = this;
@@ -610,7 +717,7 @@ JSActiveCode.prototype.runProg = function() {
         _this.output.innerHTML += _this.outputfun(str)+"<br />";
             };
 
-    $(this.output).text('')
+    $(this.output).text('');
     $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
     $(this.outDiv).show({duration:700,queue:false});
 
@@ -720,14 +827,18 @@ function AudioTour (divid, code, bnum, audio_text) {
             first = first + "<div id='" + divid + "_l" + (i + 1) + "'>" + (i + 1) + ". " + codeArray[i] + "</div>";
         }
     }
-    first = first + "</pre>"
+    first = first + "</pre>";
 
     //laying out the HTML content
 
     var bcount = 0;
     var html_string = "<div class='modal-lightsout'></div><div class='modal-profile'><h3>Take an audio tour!</h3><div class='modal-close-profile'></div><p id='windowcode'></p><p id='" + divid + "_audiocode'></p>";
     html_string += "<p id='status'></p>";
-    html_string += "<input type='image' src='../_static/first.png' width='25' id='first_audio' name='first_audio' title='Play first audio in tour' alt='Play first audio in tour' disabled/>" + "<input type='image' src='../_static/prev.png' width='25' id='prev_audio' name='prev_audio' title='Play previous audio in tour' alt='Play previous audio in tour' disabled/>" + "<input type='image' src='../_static/pause.png' width='25' id='pause_audio' name='pause_audio' title='Pause current audio' alt='Pause current audio' disabled/><input type='image' src='../_static/next.png' width ='25' id='next_audio' name='next_audio' title='Play next audio in tour' alt='Play next audio in tour' disabled/><input type='image' src='../_static/last.png' width ='25' id='last_audio' name='last_audio' title='Play last audio in tour' alt='Play last audio in tour' disabled/><br/>";
+    html_string += "<input type='image' src='../_static/first.png' width='25' id='first_audio' name='first_audio' title='Play first audio in tour' alt='Play first audio in tour' onerror=\"this.onerror=null;this.src='_static/first.png'\" disabled/>" +
+                   "<input type='image' src='../_static/prev.png' width='25' id='prev_audio' name='prev_audio' title='Play previous audio in tour' alt='Play previous audio in tour' onerror=\"this.onerror=null;this.src='_static/prev.png'\" disabled/>" +
+                   "<input type='image' src='../_static/pause.png' width='25' id='pause_audio' name='pause_audio' title='Pause current audio' alt='Pause current audio' onerror=\"this.onerror=null;this.src='_static/pause.png'\" disabled/>" + "" +
+                   "<input type='image' src='../_static/next.png' width ='25' id='next_audio' name='next_audio' title='Play next audio in tour' alt='Play next audio in tour' onerror=\"this.onerror=null;this.src='_static/next.png'\" disabled/>" +
+                   "<input type='image' src='../_static/last.png' width ='25' id='last_audio' name='last_audio' title='Play last audio in tour' alt='Play last audio in tour' onerror=\"this.onerror=null;this.src='_static/last.png'\" disabled/><br/>";
     for (var i = 0; i < audio_type.length - 1; i++) {
         html_string += "<input type='button' style='margin-right:5px;' class='btn btn-default btn-sm' id='button_audio_" + i + "' name='button_audio_" + i + "' value=" + bval[i] + " />";
         bcount++;
@@ -748,7 +859,7 @@ function AudioTour (divid, code, bnum, audio_text) {
         // show window on the left so that you can see the output from the code still
         this.css("left", ($(window).scrollLeft() + "px"));
         return this;
-    }
+    };
 
     $(".modal-profile").center();
     $('.modal-profile').fadeIn("slow");
@@ -818,7 +929,7 @@ function AudioTour (divid, code, bnum, audio_text) {
     $("#next_audio").css('opacity', 0.25);
     $("#last_audio").css('opacity', 0.25);
 
-};
+}
 
 AudioTour.prototype.tour = function (divid, audio_type, bcount) {
     // set globals
@@ -866,9 +977,12 @@ AudioTour.prototype.tour = function (divid, audio_type, bcount) {
         // str+="<audio id="+akey+" preload='auto'><source src='http://ice-web.cc.gatech.edu/ce21/audio/"+
         // akey+".mp3' type='audio/mpeg'><source src='http://ice-web.cc.gatech.edu/ce21/audio/"+akey+
         // ".ogg' type='audio/ogg'>Your browser does not support the audio tag</audio>";
-        str += "<audio id=" + akey + " preload='auto' ><source src='../_static/audio/" + akey +
-            ".wav' type='audio/wav'><source src='../_static/audio/" +
-            akey + ".mp3' type='audio/mpeg'><br />Your browser does not support the audio tag</audio>";
+        str += "<audio id=" + akey + " preload='auto' >";
+        str += "<source src='../_static/audio/" + akey + ".wav' type='audio/wav'>";
+        str += "<source src='../_static/audio/" + akey + ".mp3' type='audio/mpeg'>";
+        str += "<source src='_static/audio/" + akey + ".wav' type='audio/wav'>";
+        str += "<source src='_static/audio/" + akey + ".mp3' type='audio/mpeg'>";
+        str +=  "<br />Your browser does not support the audio tag</audio>";
         this.ahash[akey] = lnums;
         this.aname.push(akey);
     }
@@ -897,7 +1011,7 @@ AudioTour.prototype.handlePlaying = function() {
         this.unhighlightLines(this.theDivid, this.ahash[this.aname[this.currIndex]]);
     }
 
-}
+};
 
 AudioTour.prototype.firstAudio = function () {
 
@@ -1158,18 +1272,18 @@ function LiveCode(opts) {
     }
 
 LiveCode.prototype.init = function(opts) {
-    ActiveCode.prototype.init.apply(this,arguments)
+    ActiveCode.prototype.init.apply(this,arguments);
 
     var orig = opts.orig;
     this.stdin = $(orig).data('stdin');
     this.datafile = $(orig).data('datafile');
     this.sourcefile = $(orig).data('sourcefile');
 
-    this.API_KEY = "67033pV7eUUvqo07OJDIV8UZ049aLEK1"
+    this.API_KEY = "67033pV7eUUvqo07OJDIV8UZ049aLEK1";
     this.USE_API_KEY = true;
     this.JOBE_SERVER = 'http://jobe2.cosc.canterbury.ac.nz';
     this.resource = '/jobe/index.php/restapi/runs/';
-    this.div2id = {}
+    this.div2id = {};
     if (this.stdin) {
         this.createInputElement();
     }
@@ -1182,8 +1296,8 @@ LiveCode.prototype.createInputElement = function () {
 
     var label = document.createElement('label');
     label.for = this.divid + "_stdin";
-    $(label).text("Input for Program")
-    var input = document.createElement('input')
+    $(label).text("Input for Program");
+    var input = document.createElement('input');
     input.id = this.divid + "_stdin";
     input.type = "text";
     input.size = "35";
@@ -1195,13 +1309,13 @@ LiveCode.prototype.createInputElement = function () {
 
 LiveCode.prototype.createErrorOutput = function () {
 
-}
+};
 
 LiveCode.prototype.runProg = function() {
         var xhr, stdin;
         var runspec = {};
         var data, host, source, editor;
-        var sfilemap = {java: '', cpp: 'test.cpp', c: 'test.c', python3: 'test.py', python2: 'test.py'}
+        var sfilemap = {java: '', cpp: 'test.cpp', c: 'test.c', python3: 'test.py', python2: 'test.py'};
 
         xhr = new XMLHttpRequest();
         source = this.editor.getValue();
@@ -1229,13 +1343,14 @@ LiveCode.prototype.runProg = function() {
             runspec['file_list'] = [[this.div2id[datafile],datafile]];
         }
         data = JSON.stringify({'run_spec': runspec});
-        host = this.JOBE_SERVER + this.resource
+        host = this.JOBE_SERVER + this.resource;
 
         var odiv = this.output;
         $(this.runButton).attr('disabled', 'disabled');
         $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
         $(this.outDiv).show({duration:700,queue:false});
         $(this.errDiv).remove();
+        $(this.output).css("visibility","visible");
 
         xhr.open("POST", host, true);
         xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
@@ -1288,7 +1403,7 @@ LiveCode.prototype.runProg = function() {
         }).bind(this);
 
         ///$("#" + divid + "_errinfo").remove();
-        $(this.output).html("Compiling and Running your Code Now...")
+        $(this.output).html("Compiling and Running your Code Now...");
 
         xhr.onerror = function () {
             this.addJobeErrorMessage("Error communicating with the server.");
@@ -1304,7 +1419,7 @@ LiveCode.prototype.addJobeErrorMessage = function (err) {
         eContainer.className = 'error alert alert-danger';
         eContainer.id = this.divid + '_errinfo';
         eContainer.appendChild(errHead[0]);
-        var errText = eContainer.appendChild(document.createElement('pre'))
+        var errText = eContainer.appendChild(document.createElement('pre'));
         errText.innerHTML = err;
     };
 
@@ -1315,8 +1430,8 @@ LiveCode.prototype.pushDataFile = function (datadiv) {
         var contents = $(document.getElementById(datadiv)).text();
         var contentsb64 = btoa(contents);
         var data = JSON.stringify({ 'file_contents' : contentsb64 });
-        var resource = '/jobe/index.php/restapi/files/' + file_id
-        var host = JOBE_SERVER + resource
+        var resource = '/jobe/index.php/restapi/files/' + file_id;
+        var host = JOBE_SERVER + resource;
         var xhr = new XMLHttpRequest();
 
         if (this.div2id[datadiv] === undefined ) {
@@ -1329,29 +1444,114 @@ LiveCode.prototype.pushDataFile = function (datadiv) {
 
             xhr.onload = function () {
                 console.log("successfully sent file " + xhr.responseText);
-            }
+            };
 
             xhr.onerror = function () {
                 console.log("error sending file" + xhr.responseText);
-            }
+            };
 
             xhr.send(data)
         }
     };
 
-//
+ACFactory = {};
+
+ACFactory.createActiveCode = function (orig, lang) {
+    var opts = {'orig' : orig, 'useRunestoneServices': eBookConfig.useRunestoneServices, 'python3' : eBookConfig.python3 };
+    if (lang === "javascript") {
+        return new JSActiveCode(opts);
+    } else if (lang === 'htmlmixed') {
+        return new HTMLActiveCode(opts);
+    } else if (['java', 'cpp', 'c', 'python3', 'python2'].indexOf(lang) > -1) {
+        return new LiveCode(opts);
+    } else {   // default is python
+        return new ActiveCode(opts);
+    }
+
+}
+
+// used by web2py controller(s)
+ACFactory.addActiveCodeToDiv = function(outerdiv, acdiv, sid, initialcode, language) {
+    var  thepre, newac;
+    $("#"+acdiv).empty();
+    thepre = document.createElement("textarea");
+    thepre['data-component'] = "activecode";
+    thepre.id = acdiv;
+    $(thepre).data('lang', language);
+    $("#"+acdiv).append(thepre);
+    var opts = {'orig' : thepre, 'useRunestoneServices': true };
+
+    newac = ACFactory.createActiveCode(thepre,language);
+    savediv = newac.divid;
+    newac.divid = outerdiv;
+    newac.sid = sid;
+    newac.loadEditor();
+    newac.divid = savediv;
+    newac.editor.setSize(500,300);
+};
+
+ACFactory.createScratchActivecode = function() {
+    /* set up the scratch Activecode editor in the search menu */
+    // use the URL to assign a divid - each page should have a unique Activecode block id.
+    // Remove everything from the URL but the course and page name
+    // todo:  this could probably be eliminated and simply moved to the template file
+    var divid = document.URL.split('#')[0];
+    if (divid.indexOf('static') > -1) {
+        divid = divid.split('static')[1];
+    } else {
+        divid = divid.split('/');
+        divid = divid.slice(-2).join("");
+    }
+    divid = divid.split('?')[0];  // remove any query string (e.g ?lastPosition)
+    divid = divid.replaceAll('/', '').replace('.html', '').replace(':', '');
+    eBookConfig.scratchDiv = divid;
+    // generate the HTML
+    var html = '<div id="ac_modal_' + divid + '" class="modal fade">' +
+        '  <div class="modal-dialog scratch-ac-modal">' +
+        '    <div class="modal-content">' +
+        '      <div class="modal-header">' +
+        '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
+        '        <h4 class="modal-title">Scratch ActiveCode</h4>' +
+        '      </div> ' +
+        '      <div class="modal-body">' +
+        '      <textarea data-component="activecode" id="' + divid + '">' +
+        '\n' +
+        '\n' +
+        '\n' +
+        '      </textarea>' +
+        '      </div>' +
+        '    </div>' +
+        '  </div>' +
+        '</div>';
+    el = $(html);
+    $('body').append(el);
+
+    el.on('shown.bs.modal show.bs.modal', function () {
+        el.find('.CodeMirror').each(function (i, e) {
+            e.CodeMirror.refresh();
+            e.CodeMirror.focus();
+        });
+    });
+
+    //$(document).bind('keypress', '\\', function(evt) {
+    //    ACFactory.toggleScratchActivecode();
+    //    return false;
+    //});
+};
+
+
+ACFactory.toggleScratchActivecode = function () {
+    var divid = "ac_modal_" + eBookConfig.scratchDiv;
+    var div = $("#" + divid);
+
+    div.modal('toggle');
+
+};
 
 $(document).ready(function() {
+    ACFactory.createScratchActivecode();
     $('[data-component=activecode]').each( function(index ) {
-        if ($(this).data('lang') === "javascript") {
-            edList[this.id] = new JSActiveCode({'orig': this});
-        } else if ($(this).data('lang') === 'htmlmixed') {
-            edList[this.id] = new HTMLActiveCode({'orig': this});
-        } else if (['java', 'cpp', 'c', 'python3', 'python2'].indexOf($(this).data('lang')) > -1) {
-            edList[this.id] = new LiveCode({'orig': this});
-        } else {   // default is python
-            edList[this.id] = new ActiveCode({'orig': this});
-        }
+        edList[this.id] = ACFactory.createActiveCode(this, $(this).data('lang'));
     });
     if (loggedout) {
         for (k in edList) {
@@ -1365,7 +1565,7 @@ $(document).ready(function() {
 // figure out the login/logout status of the user.  Sometimes its immediate, and sometimes its
 // long.  So to be safe we'll do it both ways..
 var loggedout;
-$(document).bind("runestone:logout",function() { loggedout=true;})
+$(document).bind("runestone:logout",function() { loggedout=true;});
 $(document).bind("runestone:logout",function() {
     for (k in edList) {
         if (edList.hasOwnProperty(k)) {
