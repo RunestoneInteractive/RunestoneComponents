@@ -645,10 +645,11 @@ HTMLActiveCode.prototype.runProg = function () {
 };
 
 HTMLActiveCode.prototype.init = function(opts) {
-    ActiveCode.prototype.init.apply(this,arguments)
+    ActiveCode.prototype.init.apply(this,arguments);
     this.code = $('<textarea />').html(this.origElem.innerHTML).text();
+    $(this.runButton).text('Render');
     this.editor.setValue(this.code);
-        };
+};
 
 HTMLActiveCode.prototype.createOutput = function () {
     var outDiv = document.createElement("div");
