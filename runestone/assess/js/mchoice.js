@@ -539,7 +539,7 @@ MultipleChoice.prototype.compareAnswers = function () {
     var data = {};
     data.div_id = this.divid;
     data.course = eBookConfig.course;
-    jQuery.get(eBookConfig.ajaxURL + "getaggregateresults", data, this.compareModal);
+    jQuery.get(eBookConfig.ajaxURL + "getaggregateresults", data, this.compareModal.bind(this));
 };
 
 /*=================================
