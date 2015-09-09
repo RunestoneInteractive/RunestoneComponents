@@ -64,6 +64,8 @@ ActiveCode.prototype.init = function(opts) {
 
 ActiveCode.prototype.createEditor = function (index) {
     var newdiv = document.createElement('div');
+    var linkdiv = document.createElement('div')
+    linkdiv.id = this.divid.replace(/_/g,'-').toLowerCase();  // :ref: changes _ to - so add this as a target
     $(newdiv).addClass("ac_section alert alert-warning");
     var codeDiv = document.createElement("div");
     $(codeDiv).addClass("ac_code_div col-md-12");
@@ -73,6 +75,9 @@ ActiveCode.prototype.createEditor = function (index) {
     this.outerDiv = newdiv;
 
     $(this.origElem).replaceWith(newdiv);
+    if (linkdiv.id !== this.divid) {  // Don't want the 'extra' target if they match.
+        newdiv.appendChild(linkdiv);
+    }
     newdiv.appendChild(codeDiv);
     var editor = CodeMirror(codeDiv, {value: this.code, lineNumbers: true, mode: newdiv.lang});
 
@@ -337,7 +342,7 @@ ActiveCode.prototype.loadEditor = function () {
 
     var data = {acid: this.divid};
     if (this.sid !== undefined) {
-        data['sid'] = sid;
+        data['sid'] = this.sid;
     }
     this.logBookEvent({'event': 'activecode', 'act': 'load', 'div_id': this.divid}); // Log the run event
     jQuery.get(eBookConfig.ajaxURL + 'getprog', data, loadEditor);
@@ -749,8 +754,9 @@ HTMLActiveCode.prototype.runProg = function () {
 HTMLActiveCode.prototype.init = function(opts) {
     ActiveCode.prototype.init.apply(this,arguments);
     this.code = $('<textarea />').html(this.origElem.innerHTML).text();
+    $(this.runButton).text('Render');
     this.editor.setValue(this.code);
-        };
+};
 
 HTMLActiveCode.prototype.createOutput = function () {
     var outDiv = document.createElement("div");
@@ -1468,7 +1474,7 @@ ACFactory.createActiveCode = function (orig, lang) {
 ACFactory.addActiveCodeToDiv = function(outerdiv, acdiv, sid, initialcode, language) {
     var  thepre, newac;
     $("#"+acdiv).empty();
-    thepre = document.createElement("pre");
+    thepre = document.createElement("textarea");
     thepre['data-component'] = "activecode";
     thepre.id = acdiv;
     $(thepre).data('lang', language);
@@ -1478,6 +1484,7 @@ ACFactory.addActiveCodeToDiv = function(outerdiv, acdiv, sid, initialcode, langu
     newac = ACFactory.createActiveCode(thepre,language);
     savediv = newac.divid;
     newac.divid = outerdiv;
+    newac.sid = sid;
     newac.loadEditor();
     newac.divid = savediv;
     newac.editor.setSize(500,300);
@@ -1496,7 +1503,7 @@ ACFactory.createScratchActivecode = function() {
         divid = divid.slice(-2).join("");
     }
     divid = divid.split('?')[0];  // remove any query string (e.g ?lastPosition)
-    divid = divid.replaceAll('/', '').replace('.html', '');
+    divid = divid.replaceAll('/', '').replace('.html', '').replace(':', '');
     eBookConfig.scratchDiv = divid;
     // generate the HTML
     var html = '<div id="ac_modal_' + divid + '" class="modal fade">' +
@@ -1507,11 +1514,11 @@ ACFactory.createScratchActivecode = function() {
         '        <h4 class="modal-title">Scratch ActiveCode</h4>' +
         '      </div> ' +
         '      <div class="modal-body">' +
-        '      <pre data-component="activecode" id="' + divid + '">' +
-        '<br />   ' +
-        '<br />   ' +
-        '<br />   ' +
-        '      </pre>' +
+        '      <textarea data-component="activecode" id="' + divid + '">' +
+        '\n' +
+        '\n' +
+        '\n' +
+        '      </textarea>' +
         '      </div>' +
         '    </div>' +
         '  </div>' +

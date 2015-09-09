@@ -159,7 +159,7 @@ class MChoiceMF(MChoice):
 
 class MChoiceMA(MChoice):
     def run(self):
-        self.options['multipleAnswers'] = 'multipleAnswers'
+        self.options['multiple_answers'] = 'multipleAnswers'
         print("This directive has been depreciated. Please convert to the new directive 'mchoice'")
         mchoicemaNode = super(MChoiceMA,self).run()[0]
 
