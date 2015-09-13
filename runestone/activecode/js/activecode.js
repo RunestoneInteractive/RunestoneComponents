@@ -1485,7 +1485,12 @@ ACFactory.addActiveCodeToDiv = function(outerdiv, acdiv, sid, initialcode, langu
     savediv = newac.divid;
     newac.divid = outerdiv;
     newac.sid = sid;
-    newac.loadEditor();
+    if (! initialcode ) {
+        newac.loadEditor();
+    } else {
+        newac.editor.setValue(initialcode);
+        // Maybe need a refresh? but probably not since we are setting size below.
+    }
     newac.divid = savediv;
     newac.editor.setSize(500,300);
 };
