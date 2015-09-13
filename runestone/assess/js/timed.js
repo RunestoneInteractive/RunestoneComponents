@@ -201,6 +201,8 @@ Timed.prototype.renderNavControls = function () {
     this.pagNavList.appendChild(this.rightContainer);
     this.ensureButtonSafety();
     this.navDiv.appendChild(this.pagNavList);
+    this.break = document.createElement("br");
+    this.navDiv.appendChild(this.break);
     
     // render the question number jump buttons
     this.qNumList = document.createElement("ul");
@@ -224,6 +226,7 @@ Timed.prototype.renderNavControls = function () {
         };
         tmpLi.appendChild(tmpA);
         this.qNumList.appendChild(tmpLi);
+            
     }
     this.navDiv.appendChild(this.qNumList);
 
