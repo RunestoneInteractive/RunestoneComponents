@@ -1471,19 +1471,21 @@ ACFactory.createActiveCode = function (orig, lang) {
 }
 
 // used by web2py controller(s)
-ACFactory.addActiveCodeToDiv = function(outerdiv, acdiv, sid, initialcode, language) {
+ACFactory.addActiveCodeToDiv = function(outerdivid, acdivid, sid, initialcode, language) {
     var  thepre, newac;
-    $("#"+acdiv).empty();
+
+    acdiv = document.getElementById(acdivid);
+    $(acdiv).empty();
     thepre = document.createElement("textarea");
     thepre['data-component'] = "activecode";
     thepre.id = acdiv;
     $(thepre).data('lang', language);
-    $("#"+acdiv).append(thepre);
+    $(acdiv).append(thepre);
     var opts = {'orig' : thepre, 'useRunestoneServices': true };
 
     newac = ACFactory.createActiveCode(thepre,language);
     savediv = newac.divid;
-    newac.divid = outerdiv;
+    newac.divid = outerdivid;
     newac.sid = sid;
     if (! initialcode ) {
         newac.loadEditor();
