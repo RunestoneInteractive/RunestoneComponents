@@ -173,11 +173,15 @@ Timed.prototype.renderNavControls = function () {
         this.currentQuestionIndex--;
         this.renderTimedQuestion();
         this.ensureButtonSafety();
-        for (var i = 0; i < this.qNumList.childNodes.length; i++) {
-            $(this.qNumList.childNodes[i]).removeClass("active");
-        }
-        $(this.qNumList.childNodes[this.currentQuestionIndex]).addClass("active");
-    }.bind(this), false);
+		for (var i = 0; i < this.qNumList.childNodes.length; i++) {
+			for (var j = 0; j < this.qNumList.childNodes[i].childNodes.length; j++) {
+				$(this.qNumList.childNodes[i].childNodes[j]).removeClass("active");
+			}
+		}
+		var currentListItem = this.currentQuestionIndex;
+		$("ul#pageNums > ul > li:eq(" + currentListItem +")").addClass("active");	
+		
+	}.bind(this), false);
     this.leftContainer.appendChild(this.leftNavButton);
     this.pagNavList.appendChild(this.leftContainer);
     this.rightContainer = document.createElement("li");
@@ -192,10 +196,14 @@ Timed.prototype.renderNavControls = function () {
         this.currentQuestionIndex++;
         this.renderTimedQuestion();
         this.ensureButtonSafety();
-        for (var i = 0; i < this.qNumList.childNodes.length; i++) {
-            $(this.qNumList.childNodes[i]).removeClass("active");
-        }
-        $(this.qNumList.childNodes[this.currentQuestionIndex]).addClass("active");
+		for (var i = 0; i < this.qNumList.childNodes.length; i++) {
+			for (var j = 0; j < this.qNumList.childNodes[i].childNodes.length; j++) {
+				$(this.qNumList.childNodes[i].childNodes[j]).removeClass("active");
+			}
+		}
+		var currentListItem = this.currentQuestionIndex;
+		$("ul#pageNums > ul > li:eq(" + currentListItem +")").addClass("active");	
+		
     }.bind(this), false);
     this.rightContainer.appendChild(this.rightNavButton);
     this.pagNavList.appendChild(this.rightContainer);
@@ -206,10 +214,10 @@ Timed.prototype.renderNavControls = function () {
     
     // render the question number jump buttons
     this.qNumList = document.createElement("ul");
-    $(this.qNumList).addClass("pagination");
+	$(this.qNumList).attr("id", "pageNums");
     for (var i = 0; i < this.renderedQuestionArray.length; i++) {
-        var tmpLi = document.createElement("li");
-        var tmpA = document.createElement("a");
+	    var tmpLi = document.createElement("li");
+		var tmpA = document.createElement("a");
         tmpA.innerHTML = i + 1;
         $(tmpA).css("cursor", "pointer");
         if (i === 0) {
@@ -220,18 +228,27 @@ Timed.prototype.renderNavControls = function () {
             _this.renderTimedQuestion();
             _this.ensureButtonSafety();
             for (var i = 0; i < _this.qNumList.childNodes.length; i++) {
-                $(_this.qNumList.childNodes[i]).removeClass("active");
+				for (var j = 0; j < _this.qNumList.childNodes[i].childNodes.length; j++) {
+					$(_this.qNumList.childNodes[i].childNodes[j]).removeClass("active"); 
+				}
             }
             $(this.parentNode).addClass("active");
         };
         tmpLi.appendChild(tmpA);
-        this.qNumList.appendChild(tmpLi);
-            
+        this.qNumList.appendChild(tmpLi);	
     }
-    this.navDiv.appendChild(this.qNumList);
-
+       
+	this.navDiv.appendChild(this.qNumList);
+	$(function(){
+		var tenSet = $("ul#pageNums li");
+		for (var i = 0; i < tenSet.length; i += 10) {
+			tenSet.slice(i, i + 10).wrapAll("<ul class=\"pagination\"></ul>");
+		}
+	});
 };
 
+
+	
 Timed.prototype.renderSubmitButton = function () {
     this.buttonContainer = document.createElement("div");
     $(this.buttonContainer).attr({"style": "text-align:center"});
@@ -515,25 +532,29 @@ Timed.prototype.hideTimedFeedback = function () {
 };
 
 Timed.prototype.checkScore = function () {
-    this.correctStr = "";
+    this.fullStr = $("ul#pageNums > ul > li");
+	this.correctStr = "";
     this.skippedStr = "";
     this.incorrectStr = "";
-    
-    // Gets the score of each problem
+    // Gets the score of each problem (UPDATED 9/16/2015)...and highlight button backgrounds
     for (var i = 0; i < this.renderedQuestionArray.length; i++) {
         var correct = this.renderedQuestionArray[i].checkCorrectTimed();
         if (correct) {
-            this.score++;
-            this.correctStr = this.correctStr + (i + 1) + ", ";
+		    this.score++;
+            this.fullStr.eq(i).addClass("correctCount");
+			this.correctStr = this.correctStr + (i + 1) + ", ";				
+			
         } else if (correct === null) {
             this.skipped++;
-            this.skippedStr = this.skippedStr + (i + 1) + ", ";
+			this.fullStr.eq(i).addClass("skippedCount");
+			this.skippedStr = this.skippedStr + (i + 1) + ", ";
+			
         } else {
             this.incorrect++;
-            this.incorrectStr = this.incorrectStr + (i + 1) + ", ";
+            this.fullStr.eq(i).addClass("incorrectCount");
+			this.incorrectStr = this.incorrectStr + (i + 1) + ", ";
         }
     }
-    
     // remove extra comma and space at end if any
     if (this.correctStr.length > 0) this.correctStr = this.correctStr.substring(0,this.correctStr.length-2);
     else this.correctStr = "None";
@@ -618,6 +639,9 @@ Timed.prototype.displayScore = function () {
       }
    }
 };
+
+
+
 
 /*=======================================================
 === Function that calls the constructors on page load ===
