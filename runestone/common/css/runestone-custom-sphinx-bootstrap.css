@@ -542,3 +542,33 @@ div.ExecutionVisualizer table.visualizer {
     margin-right: auto;
     background-color: #fff;
 }
+
+
+/* TIMED ASSESSMENT BUTTON STYLES */
+ul#pageNums, ul#pageNums li {
+ text-align: center;
+ padding: 10px 0;
+}
+
+/* The following pagination styles override styles in Bootstrap distribution files */
+.pagination > .correctCount > a,
+.pagination > .correctCount > span {
+background-color: #dff0d8; 
+color: #000000;
+border-color: #000000;
+}
+
+.pagination > .skippedCount > a,
+.pagination > .skippedCount > span {
+background-color: #fcf8e3; 
+color: #000000;
+border-color: #000000;
+}
+
+.pagination > .incorrectCount > a,
+.pagination > .incorrectCount > span {
+background-color: #f2dede; 
+color: #000000;
+border-color: #000000;
+}
+/* END TIMED ASSESSMENT BUTTON STYLES */
