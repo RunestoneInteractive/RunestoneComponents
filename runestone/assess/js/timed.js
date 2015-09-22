@@ -240,7 +240,7 @@ Timed.prototype.renderSubmitButton = function () {
         "id": "finish",
         "class": "btn btn-inverse"
     });
-    this.finishButton.textContent = "Submit Answers";
+    this.finishButton.textContent = "Finish Exam";
     this.finishButton.addEventListener("click", function () {
         this.finishAssessment();
     }.bind(this), false);
@@ -486,17 +486,19 @@ Timed.prototype.tookTimedExam = function () {
 };
 
 Timed.prototype.finishAssessment = function () {
-    this.findTimeTaken();
-    this.running = 0;
-    this.done = 1;
-    this.taken = 1;
-    this.submitTimedProblems();
-    this.checkScore();
-    this.displayScore();
-    this.storeScore();
-    this.logScore();
-    $(this.pauseBtn).attr("disabled", true);
-    this.finishButton.disabled = true;
+    if (window.confirm("Clicking OK means you are ready to submit your answers and are finished with this assessment.")) {
+        this.findTimeTaken();
+        this.running = 0;
+        this.done = 1;
+        this.taken = 1;
+        this.submitTimedProblems();
+        this.checkScore();
+        this.displayScore();
+        this.storeScore();
+        this.logScore();
+        $(this.pauseBtn).attr("disabled", true);
+        this.finishButton.disabled = true;
+    }
 };
 
 Timed.prototype.submitTimedProblems = function () {
