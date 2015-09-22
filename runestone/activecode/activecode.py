@@ -126,7 +126,8 @@ class ActiveCode(Directive):
         'timelimit': directives.unchanged,
         'stdin' : directives.unchanged,
         'datafile' : directives.unchanged,
-        'sourcefile' : directives.unchanged
+        'sourcefile' : directives.unchanged,
+        'available_files' : directives.unchanged
     }
 
     def run(self):
