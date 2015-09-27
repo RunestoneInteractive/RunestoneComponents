@@ -356,7 +356,7 @@ ActiveCode.prototype.createGradeSummary = function () {
     var showGradeSummary = function (data, status, whatever) {
         var report = eval(data)[0];
         // check for report['message']
-        if (report['grade']) {
+        if (report) {
             body = "<h4>Grade Report</h4>" +
                    "<p>This assignment: " + report['grade'] + "</p>" +
                    "<p>" + report['comment'] + "</p>" +
@@ -364,7 +364,7 @@ ActiveCode.prototype.createGradeSummary = function () {
                    "<p>Average score: " +  report['avg'] + "</p>"
 
         } else {
-            body = "<h4>You must be Logged in to see your grade</h4>";
+            body = "<h4>The server did not return any grade information</h4>";
         }
         var html = '<div class="modal fade">' +
             '  <div class="modal-dialog compare-modal">' +
