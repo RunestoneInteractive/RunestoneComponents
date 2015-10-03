@@ -1508,10 +1508,8 @@ ACFactory.addActiveCodeToDiv = function(outerdivid, acdivid, sid, initialcode, l
     } else {
         newac.editor.setValue(initialcode);
         setTimeout(function() {
-            newac.editor.refresh();
-        },500);
-
-        // Maybe need a refresh? but probably not since we are setting size below.
+                newac.editor.refresh();
+            },500);
     }
     newac.divid = savediv;
     newac.editor.setSize(500,300);
