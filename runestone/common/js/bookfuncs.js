@@ -26,11 +26,11 @@
  */
 
 //
-// Chevron functions
+// Chevron functions - Must correspond with width in runestone-custom-sphinx-bootstrap.css
 // 
 $(function () {
 	var resizeWindow = false;
-    var	resizeWidth = 400;
+    var	resizeWidth = 600;
 	$(window).on('resize', function (event){
 		if ($(window).width() <= resizeWidth && resizeWindow == false){ 
 			resizeWindow = true;

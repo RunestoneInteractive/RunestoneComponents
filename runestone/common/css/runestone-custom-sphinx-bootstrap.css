@@ -435,7 +435,7 @@ div.flash {
 	left: 35px;
 }
 
-@media (max-width: 400px) {
+@media (max-width: 600px) {
     /* Styling definitions for chevron function in bookfuncs.js */
 	.navLink{
 		z-index:2;
@@ -581,13 +581,16 @@ ul#pageNums, ul#pageNums li {
 	color: #000 !important;
 }
 
-/* The following pagination styles override styles in Bootstrap distribution files */
+
+/* The following override styles in Bootstrap distribution file (bootstrap.min.css) */
 .pagination > .active > a,
 .pagination > .active > span {
 background-color: #428bca !important; 
 color: #fff !important;
 }
 /* end */
+
+
 
 .pagination > .answered > a,
 .pagination > .answered > span {
