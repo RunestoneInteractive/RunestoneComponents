@@ -19,6 +19,7 @@ __author__ = 'isaiahmayerchak'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
+from sqlalchemy import create_engine, Table, MetaData, select, delete
 
 
 def setup(app):
@@ -122,7 +123,7 @@ class DataFile(Directive):
 
         self.options['divid'] = self.arguments[0]
         if self.content:
-            source = "\n".join(self.content)
+            source = "\n".join(self.content)+"\n"
         else:
             source = '\n'
         self.options['filecontent'] = source
@@ -136,5 +137,26 @@ class DataFile(Directive):
             self.options['edit'] = "true"
         else:
             self.options['edit'] = "false"
+
+        try:
+            engine = create_engine(env.config['dburl'])
+            meta = MetaData()
+            Source_code = Table('source_code', meta, autoload=True, autoload_with=engine)
+            course_id = env.config['course_id']
+            divid = self.options['divid']
+
+            engine.execute(Source_code.delete().where(Source_code.c.acid == divid).where(Source_code.c.course_id == course_id))
+            engine.execute(Source_code.insert().values(
+                acid = divid,
+                course_id = course_id,
+                main_code= source,
+            ))
+        except:
+            print "Unable to save to source_code table in datafile__init__.py. Possible problems:"
+            print "  1. dburl or course_id are not set in conf.py for your book"
+            print "  2. unable to connect to the database using dburl"
+            print
+            print "This should only affect the grading interface. Everything else should be fine."
+
 
         return [DataFileNode(self.options)]
