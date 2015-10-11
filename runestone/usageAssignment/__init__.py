@@ -78,7 +78,8 @@ class usageAssignment(Directive):
         'subchapters':directives.unchanged,
         'assignment_name':directives.unchanged,
         'deadline':directives.unchanged,
-        'pct_required':directives.positive_int
+        'pct_required':directives.positive_int,
+        'points':directives.positive_int
     }
 
     def get_or_make_assignment_type(self, engine, session, AssignmentType):
@@ -93,7 +94,6 @@ class usageAssignment(Directive):
                 assignments_count = 23,
                 assignments_dropped = 3))
             a = session.query(AssignmentType).filter(AssignmentType.c.grade_type == 'use').first()
-        print "assignment type", a.id
         return a.id
 
     def get_or_make_course_section(self, course_id, engine, session, Section):
@@ -106,7 +106,6 @@ class usageAssignment(Directive):
                 course_id = course_id,
                 name = 'Default Section'))
             a = session.query(Section).filter(Section.c.course_id == course_id).first()
-        print "section id", a.id
         return a.id
 
     def run(self):
@@ -119,30 +118,31 @@ class usageAssignment(Directive):
             :deadline: <str>
             :sections: <comma separated int ids of the section objects; kind of a hack>
             :pct_required: <int>
+            :points: <int>
         """
         self.options['divid'] = self.arguments[0]
-        # try:
-        env = self.state.document.settings.env
-        engine = create_engine(env.config['dburl'])
-        meta = MetaData()
-        Assignment = Table('assignments', meta, autoload=True, autoload_with=engine)
-        Chapter = Table('chapters', meta, autoload=True, autoload_with=engine)
-        SubChapter = Table('sub_chapters', meta, autoload=True, autoload_with=engine)
-        Problem = Table('problems', meta, autoload=True, autoload_with=engine)
-        Div = Table('div_ids', meta, autoload=True, autoload_with=engine)
-        Course = Table('courses', meta, autoload=True, autoload_with=engine)
-        PIPDeadline = Table('pipactex_deadline', meta, autoload=True, autoload_with=engine)
-        Deadline = Table('deadlines', meta, autoload=True, autoload_with=engine)
-        AssignmentType = Table('assignment_types', meta, autoload=True, autoload_with=engine)
-        Section = Table('sections', meta, autoload=True, autoload_with=engine)
-        # create a configured "Session" class
-        Session = sessionmaker(bind=engine)
-        # except:
-        #     print "Unable to create and save usage assignment. Possible problems:"
-        #     print "  1. dburl or course_id are not set in conf.py for your book"
-        #     print "  2. unable to connect to the database using dburl"
-        #     print
-        #     print "This should only affect the grading interface. Everything else should be fine."
+        try:
+            env = self.state.document.settings.env
+            engine = create_engine(env.config['dburl'])
+            meta = MetaData()
+            Assignment = Table('assignments', meta, autoload=True, autoload_with=engine)
+            Chapter = Table('chapters', meta, autoload=True, autoload_with=engine)
+            SubChapter = Table('sub_chapters', meta, autoload=True, autoload_with=engine)
+            Problem = Table('problems', meta, autoload=True, autoload_with=engine)
+            Div = Table('div_ids', meta, autoload=True, autoload_with=engine)
+            Course = Table('courses', meta, autoload=True, autoload_with=engine)
+            PIPDeadline = Table('pipactex_deadline', meta, autoload=True, autoload_with=engine)
+            Deadline = Table('deadlines', meta, autoload=True, autoload_with=engine)
+            AssignmentType = Table('assignment_types', meta, autoload=True, autoload_with=engine)
+            Section = Table('sections', meta, autoload=True, autoload_with=engine)
+            # create a configured "Session" class
+            Session = sessionmaker(bind=engine)
+        except:
+            print "Unable to create and save usage assignment. Possible problems:"
+            print "  1. dburl or course_id are not set in conf.py for your book"
+            print "  2. unable to connect to the database using dburl"
+            print
+            print "This should only affect the grading interface. Everything else should be fine."
 
 
         # create a Session
@@ -155,32 +155,27 @@ class usageAssignment(Directive):
         # For each chapter, accumulate all subchapters
         sub_chs = []
         for nm in self.options.get('chapters', '').split(','):
-            print course_name, nm.strip()
-            q = session.query(Chapter).filter(Chapter.c.course_id == course_name, Chapter.c.chapter_name == nm.strip())
-            from sqlalchemy.dialects import postgresql
-            ch = q.first()
+            ch = session.query(Chapter).filter(Chapter.c.course_id == course_name, Chapter.c.chapter_label == nm.strip()).first()
             results = session.query(SubChapter).filter(SubChapter.c.chapter_id == str(ch.id)).all()
             sub_chs += results
         # Add any explicit subchapters
         if 'sub_chapter' in self.options:
             for nm in self.options.get('sub_chapters').split(','):
-                (ch, subch) = nm.strip().split('/')
-                ch_id = session.query(Chapter).filter(Chapter.c.course_id == course_id, Chapter.chapter_name == ch).first()
-                sub_chs += session.query(SubChapter).filter(SubChapter.c.chapter_id == ch_id, SubChapter.c.sub_chapter_name == subch)
+                (ch_dir, subch_name) = nm.strip().split('/')
+                ch_id = session.query(Chapter).filter(Chapter.c.course_id == course_id, Chapter.chapter_label == ch_dir).first()
+                sub_chs += session.query(SubChapter).filter(SubChapter.c.chapter_id == ch_id, SubChapter.c.chapter_label == subch).first()
 
-        print "subchs", [sub.sub_chapter_name for sub in sub_chs]
         # Accumulate all the ActiveCodes that are to be run and URL paths to be visited
         divs = []
         paths = []
         for subch in sub_chs:
-            ch_name = session.query(Chapter).filter(Chapter.c.id == subch.chapter_id).first().chapter_name
+            ch_name = session.query(Chapter).filter(Chapter.c.id == subch.chapter_id).first().chapter_label
             divs += session.query(Div).filter(Div.c.course_name == course_name,
                                               Div.c.chapter == ch_name,
-                                              Div.c.subchapter == subch.sub_chapter_name).all()
-            paths.append('/runestone/static/%s/%s/%s.html' % (course_name, ch_name, subch.sub_chapter_name))
-        tracked_div_types = ['activecode']
+                                              Div.c.subchapter == subch.sub_chapter_label).all()
+            paths.append('/runestone/static/%s/%s/%s.html' % (course_name, ch_name, subch.sub_chapter_label))
+        tracked_div_types = ['activecode', 'actex']
         active_codes = [d.div_id for d in divs if d.div_type in tracked_div_types]
-        print "paths", paths
 
 
 
