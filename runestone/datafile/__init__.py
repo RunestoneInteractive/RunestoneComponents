@@ -143,7 +143,7 @@ class DataFile(Directive):
             engine = create_engine(env.config['dburl'])
             meta = MetaData()
             Source_code = Table('source_code', meta, autoload=True, autoload_with=engine)
-            course_id = env.config['course_id']
+            course_id = env.config.html_context['course_id']
             divid = self.options['divid']
 
             engine.execute(Source_code.delete().where(Source_code.c.acid == divid).where(Source_code.c.course_id == course_id))
@@ -152,7 +152,8 @@ class DataFile(Directive):
                 course_id = course_id,
                 main_code= source,
             ))
-        except:
+        except Exception as e:
+            print("the error is ", e)
             print("Unable to save to source_code table in datafile__init__.py. Possible problems:")
             print("  1. dburl or course_id are not set in conf.py for your book")
             print("  2. unable to connect to the database using dburl")

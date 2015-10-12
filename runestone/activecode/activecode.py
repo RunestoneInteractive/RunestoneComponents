@@ -247,7 +247,7 @@ class ActiveCode(Directive):
         try:
             engine = create_engine(env.config['dburl'])
             meta = MetaData()
-            course_name = env.config['course_id']
+            course_name = env.config.html_context['course_id']
             Source_code = Table('source_code', meta, autoload=True, autoload_with=engine)
             divid = self.options['divid']
 
@@ -279,7 +279,9 @@ class ActiveCode(Directive):
             ))
 
 
-        except:
+        except Exception as e:
+            print("The exception is ", e)
+            print(env.config.html_context['course_id'])
             print("Unable to save to source_code table in activecode.py. Possible problems:")
             print("  1. dburl or course_id are not set in conf.py for your book")
             print("  2. unable to connect to the database using dburl")

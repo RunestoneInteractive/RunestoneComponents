@@ -124,6 +124,7 @@ class usageAssignment(Directive):
         self.options['divid'] = self.arguments[0]
         try:
             env = self.state.document.settings.env
+            print("DBURL = ",env.config['dburl'])
             engine = create_engine(env.config['dburl'])
             meta = MetaData()
             Assignment = Table('assignments', meta, autoload=True, autoload_with=engine)
@@ -149,7 +150,7 @@ class usageAssignment(Directive):
         # create a Session
         session = Session()
 
-        course_name = env.config['course_id']
+        course_name = env.config.html_context['course_id']
         course_id = str(session.query(Course).filter(Course.c.course_name == course_name).first().id)
 
         # Accumulate all the Chapters and SubChapters that are to be visited
