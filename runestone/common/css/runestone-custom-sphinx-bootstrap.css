@@ -49,7 +49,8 @@ div.section {
 	padding-right:0;
 }
  .container  .section >*:not(.section) {
-	width: 500pt;
+	/*max-width: 500pt;*/
+	width: 60%;
 	margin-left: auto;
 	margin-right: auto;
 }
