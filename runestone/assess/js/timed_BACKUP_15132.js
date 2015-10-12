@@ -503,6 +503,21 @@ Timed.prototype.tookTimedExam = function () {
 };
 
 Timed.prototype.finishAssessment = function () {
+<<<<<<< HEAD
+	if (window.confirm("Clicking OK means you are ready to submit your answers and are finished with this assessment.")) {
+		this.findTimeTaken();
+		this.running = 0;
+		this.done = 1;
+		this.taken = 1;
+		this.submitTimedProblems();
+		this.checkScore();
+		this.displayScore();
+		this.storeScore();
+		this.logScore();
+		$(this.pauseBtn).attr("disabled", true);
+		this.finishButton.disabled = true;
+	}
+=======
     if (window.confirm("Clicking OK means you are ready to submit your answers and are finished with this assessment.")) {
         this.findTimeTaken();
         this.running = 0;
@@ -516,6 +531,7 @@ Timed.prototype.finishAssessment = function () {
         $(this.pauseBtn).attr("disabled", true);
         this.finishButton.disabled = true;
     }
+>>>>>>> upstream/master
 };
 
 Timed.prototype.submitTimedProblems = function () {
