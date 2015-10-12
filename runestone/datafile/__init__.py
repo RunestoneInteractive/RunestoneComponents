@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+from __future__ import print_function
 
 __author__ = 'isaiahmayerchak'
 
@@ -152,11 +153,11 @@ class DataFile(Directive):
                 main_code= source,
             ))
         except:
-            print "Unable to save to source_code table in datafile__init__.py. Possible problems:"
-            print "  1. dburl or course_id are not set in conf.py for your book"
-            print "  2. unable to connect to the database using dburl"
-            print
-            print "This should only affect the grading interface. Everything else should be fine."
+            print("Unable to save to source_code table in datafile__init__.py. Possible problems:")
+            print("  1. dburl or course_id are not set in conf.py for your book")
+            print("  2. unable to connect to the database using dburl")
+            print()
+            print("This should only affect the grading interface. Everything else should be fine.")
 
 
         return [DataFileNode(self.options)]

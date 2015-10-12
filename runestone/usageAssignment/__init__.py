@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+from __future__ import print_function
 
 __author__ = 'Paul Resnick'
 
@@ -86,7 +87,7 @@ class usageAssignment(Directive):
         # There will normally be only one "usage" type of assignment; we'll take that, or create it if it doesn't exist
         a = session.query(AssignmentType).filter(AssignmentType.c.grade_type == 'use').first()
         if not a:
-            print "creating Lecture Prep assignment type"
+            print("creating Lecture Prep assignment type")
             engine.execute(AssignmentType.insert().values(
                 name = 'Lecture Prep',
                 grade_type = 'use',
@@ -101,7 +102,7 @@ class usageAssignment(Directive):
         # Could add sections to the directive to allow different sections to get different deadlines
         a = session.query(Section).filter(Section.c.course_id == course_id).first()
         if not a:
-            print "creating default course section"
+            print("creating default course section")
             engine.execute(Section.insert().values(
                 course_id = course_id,
                 name = 'Default Section'))
@@ -138,11 +139,11 @@ class usageAssignment(Directive):
             # create a configured "Session" class
             Session = sessionmaker(bind=engine)
         except:
-            print "Unable to create and save usage assignment. Possible problems:"
-            print "  1. dburl or course_id are not set in conf.py for your book"
-            print "  2. unable to connect to the database using dburl"
-            print
-            print "This should only affect the grading interface. Everything else should be fine."
+            print("Unable to create and save usage assignment. Possible problems:")
+            print("  1. dburl or course_id are not set in conf.py for your book")
+            print("  2. unable to connect to the database using dburl")
+            print()
+            print("This should only affect the grading interface. Everything else should be fine.")
 
 
         # create a Session
