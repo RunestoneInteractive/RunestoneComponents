@@ -244,9 +244,9 @@ class ActiveCode(Directive):
             source = '\n'
             suffix = '\n'
         try:
-            engine = create_engine(env.config['dburl'])
+            engine = create_engine(env.config.html_context['dburl'])
             meta = MetaData()
-            course_name = env.config['course_id']
+            course_name = env.config.html_context['course_id']
             Source_code = Table('source_code', meta, autoload=True, autoload_with=engine)
             divid = self.options['divid']
 
@@ -280,7 +280,7 @@ class ActiveCode(Directive):
 
         except:
             print "Unable to save to source_code table in activecode.py. Possible problems:"
-            print "  1. dburl or course_id are not set in conf.py for your book"
+            print "  1. dburl or project_name are not set in pavement.py for your book"
             print "  2. unable to connect to the database using dburl"
             print
             print "This should only affect the grading interface. Everything else should be fine."

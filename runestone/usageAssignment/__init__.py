@@ -123,7 +123,7 @@ class usageAssignment(Directive):
         self.options['divid'] = self.arguments[0]
         try:
             env = self.state.document.settings.env
-            engine = create_engine(env.config['dburl'])
+            engine = create_engine(env.config.html_context['dburl'])
             meta = MetaData()
             Assignment = Table('assignments', meta, autoload=True, autoload_with=engine)
             Chapter = Table('chapters', meta, autoload=True, autoload_with=engine)
@@ -139,7 +139,7 @@ class usageAssignment(Directive):
             Session = sessionmaker(bind=engine)
         except:
             print "Unable to create and save usage assignment. Possible problems:"
-            print "  1. dburl or course_id are not set in conf.py for your book"
+            print "  1. dburl or project_name are not set in pavement.py for your book"
             print "  2. unable to connect to the database using dburl"
             print
             print "This should only affect the grading interface. Everything else should be fine."
@@ -148,7 +148,7 @@ class usageAssignment(Directive):
         # create a Session
         session = Session()
 
-        course_name = env.config['course_id']
+        course_name = env.config.html_context['course_id']
         course_id = str(session.query(Course).filter(Course.c.course_name == course_name).first().id)
 
         # Accumulate all the Chapters and SubChapters that are to be visited
