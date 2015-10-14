@@ -140,7 +140,7 @@ class DataFile(Directive):
             self.options['edit'] = "false"
 
         try:
-            engine = create_engine(env.config['dburl'])
+            engine = create_engine(env.config.html_context['dburl'])
             meta = MetaData()
             Source_code = Table('source_code', meta, autoload=True, autoload_with=engine)
             course_id = env.config.html_context['course_id']

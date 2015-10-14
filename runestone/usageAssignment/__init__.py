@@ -125,7 +125,7 @@ class usageAssignment(Directive):
         try:
             env = self.state.document.settings.env
             print("DBURL = ",env.config['dburl'])
-            engine = create_engine(env.config['dburl'])
+            engine = create_engine(env.config.html_context['dburl'])
             meta = MetaData()
             Assignment = Table('assignments', meta, autoload=True, autoload_with=engine)
             Chapter = Table('chapters', meta, autoload=True, autoload_with=engine)

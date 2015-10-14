@@ -245,7 +245,7 @@ class ActiveCode(Directive):
             source = '\n'
             suffix = '\n'
         try:
-            engine = create_engine(env.config['dburl'])
+            engine = create_engine(env.config.html_context['dburl'])
             meta = MetaData()
             course_name = env.config.html_context['course_id']
             Source_code = Table('source_code', meta, autoload=True, autoload_with=engine)
