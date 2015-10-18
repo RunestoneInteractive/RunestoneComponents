@@ -21,6 +21,7 @@ ActiveCode.prototype.init = function(opts) {
     var orig = opts.orig;
     this.useRunestoneServices = opts.useRunestoneServices;
     this.python3 = opts.python3;
+    this.alignVertical = opts.vertical;
     this.origElem = orig;
     this.divid = orig.id;
     this.code = $(orig).text() || "\n\n\n\n\n";
@@ -356,7 +357,7 @@ ActiveCode.prototype.createGradeSummary = function () {
     var showGradeSummary = function (data, status, whatever) {
         var report = eval(data)[0];
         // check for report['message']
-        if (report['grade']) {
+        if (report) {
             body = "<h4>Grade Report</h4>" +
                    "<p>This assignment: " + report['grade'] + "</p>" +
                    "<p>" + report['comment'] + "</p>" +
@@ -364,7 +365,7 @@ ActiveCode.prototype.createGradeSummary = function () {
                    "<p>Average score: " +  report['avg'] + "</p>"
 
         } else {
-            body = "<h4>You must be Logged in to see your grade</h4>";
+            body = "<h4>The server did not return any grade information</h4>";
         }
         var html = '<div class="modal fade">' +
             '  <div class="modal-dialog compare-modal">' +
@@ -745,10 +746,13 @@ HTMLActiveCode.prototype.runProg = function () {
 //    $('#'+myDiv+'_htmlout').append('<iframe class="activehtml" id="' + myDiv + '_iframe" srcdoc="' +
 //        prog.replace(/"/g,"'") + '">' + '</iframe>');
     $(this.output).text('');
-    $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
+    if (! this.alignVertical ) {
+        $(this.codeDiv).switchClass("col-md-12", "col-md-6", {duration: 500, queue: false});
+    }
     $(this.outDiv).show({duration:700,queue:false});
-
+    prog = "<script type=text/javascript>window.onerror = function(msg,url,line) {alert(msg+' on line: '+line);};</script>" + prog;
     this.output.srcdoc = prog;
+
 };
 
 HTMLActiveCode.prototype.init = function(opts) {
@@ -760,7 +764,12 @@ HTMLActiveCode.prototype.init = function(opts) {
 
 HTMLActiveCode.prototype.createOutput = function () {
     var outDiv = document.createElement("div");
-    $(outDiv).addClass("ac_output col-md-6");
+    $(outDiv).addClass("ac_output");
+    if(this.alignVertical) {
+        $(outDiv).addClass("col-md-12");
+    } else {
+        $(outDiv).addClass("col-md-6");
+    }
     this.outDiv = outDiv;
     this.output = document.createElement('iframe');
     $(this.output).css("background-color","white");
@@ -1456,8 +1465,13 @@ LiveCode.prototype.pushDataFile = function (datadiv) {
 
 ACFactory = {};
 
-ACFactory.createActiveCode = function (orig, lang) {
+ACFactory.createActiveCode = function (orig, lang, addopts) {
     var opts = {'orig' : orig, 'useRunestoneServices': eBookConfig.useRunestoneServices, 'python3' : eBookConfig.python3 };
+    if (addopts) {
+        for (var attrname in addopts) {
+            opts[attrname] = addopts[attrname];
+        }
+    }
     if (lang === "javascript") {
         return new JSActiveCode(opts);
     } else if (lang === 'htmlmixed') {
@@ -1482,8 +1496,11 @@ ACFactory.addActiveCodeToDiv = function(outerdivid, acdivid, sid, initialcode, l
     $(thepre).data('lang', language);
     $(acdiv).append(thepre);
     var opts = {'orig' : thepre, 'useRunestoneServices': true };
-
-    newac = ACFactory.createActiveCode(thepre,language);
+    addopts = {}
+    if(language === 'htmlmixed') {
+        var addopts = {'vertical': true};
+    }
+    newac = ACFactory.createActiveCode(thepre,language,addopts);
     savediv = newac.divid;
     newac.divid = outerdivid;
     newac.sid = sid;
@@ -1491,7 +1508,9 @@ ACFactory.addActiveCodeToDiv = function(outerdivid, acdivid, sid, initialcode, l
         newac.loadEditor();
     } else {
         newac.editor.setValue(initialcode);
-        // Maybe need a refresh? but probably not since we are setting size below.
+        setTimeout(function() {
+                newac.editor.refresh();
+            },500);
     }
     newac.divid = savediv;
     newac.editor.setSize(500,300);

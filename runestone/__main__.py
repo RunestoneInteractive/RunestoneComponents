@@ -35,11 +35,13 @@ def init():
         conf_dict['master_url'] = click.prompt("URL for ajax server ", default="http://127.0.0.1:8000")
         conf_dict['logging'] = click.prompt("Log student actions? ", type=bool, default=True)
         conf_dict['log_level'] = 10 if conf_dict['logging'] else 0
+        conf_dict['dburl'] = click.prompt("DataBase Connection URL", default="postgresql://user:password@localhost/runestone")
     else:
         conf_dict['login_req'] = "false"
         conf_dict['master_url'] = "http://127.0.0.1:8000"
         conf_dict['logging'] = False
         conf_dict['log_level'] = 0
+        conf_dict['dburl'] = ""
 
     shutil.copytree(os.path.join(template_base_dir,'_sources'),'_sources')
     shutil.copytree(os.path.join(template_base_dir,'_static'),'_static')
