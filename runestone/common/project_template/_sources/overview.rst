@@ -369,7 +369,7 @@ Its nice to be able to have students solve a particular problem by writing some 
 
        def testOne(self):
            self.assertEqual(add(2,2),4,"A feedback string when the test fails")
-           self.assertAlmostEqual(add(2.0,3.0),5.0,"Your function failed on inputs of 2.0 and 3.0")
+           self.assertAlmostEqual(add(2.0,3.0),5.0,feedback="Your function failed on inputs of 2.0 and 3.0")
 
    myTests().main()
 
@@ -389,7 +389,7 @@ Before you go on, fix the add function in the activecode box.  The full compleme
 
            def testOne(self):
                self.assertEqual(add(2,2),4,"A feedback string when the test fails")
-               self.assertAlmostEqual(add(2.0,3.0),5.0,"Your function failed on inputs of 2.0 and 3.0")
+               self.assertAlmostEqual(add(2.0,3.0),5.0,feedback="Your function failed on inputs of 2.0 and 3.0")
 
        myTests().main()
 
@@ -410,7 +410,7 @@ Fix the following code so that it always correctly adds two numbers.
 
        def testOne(self):
            self.assertEqual(add(2,2),4,"A feedback string when the test fails")
-           self.assertAlmostEqual(add(2.0,3.0),5.0,"Your function failed on inputs of 2.0 and 3.0")
+           self.assertAlmostEqual(add(2.0,3.0),5.0,feedback="Your function failed on inputs of 2.0 and 3.0")
 
    myTests().main()
 

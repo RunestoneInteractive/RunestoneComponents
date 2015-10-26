@@ -44,7 +44,7 @@ MultipleChoice.prototype.init = function (opts) {
     RunestoneBase.apply(this, arguments);
     var orig = opts.orig;    // entire <ul> element
     this.origElem = orig;
-
+    this.useRunestoneServices = opts.useRunestoneServices;
     this.multipleanswers = false;
     this.divid = orig.id;
     if ($(this.origElem).data("multipleanswers") === true) {
@@ -108,7 +108,7 @@ MultipleChoice.prototype.findAnswers = function () {
         if ($(ChildAnswerList[j]).is("[data-correct]")) {    // If data-correct attribute exists, answer is correct
             is_correct = true;
         }
-        var answer_text = $(ChildAnswerList[j]).text();
+        var answer_text = $(ChildAnswerList[j]).html();
         var answer_object = {id: answer_id, correct: is_correct, content: answer_text};
         this.answerList.push(answer_object);
     }
@@ -205,7 +205,7 @@ MultipleChoice.prototype.renderMCFormOpts = function () {
         label.appendChild(input);
         label.appendChild(labelspan);
         //$(label).attr("for", optid);
-        $(labelspan).text(this.answerList[k].content);
+        $(labelspan).html(this.answerList[k].content);
 
         // create the object to store in optionArray
         var optObj = {
@@ -243,18 +243,20 @@ MultipleChoice.prototype.renderMCFormButtons = function () {
     this.optsForm.appendChild(this.submitButton);
 
     // Create compare button
-    this.compareButton = document.createElement("button");
-    $(this.compareButton).attr({
-        "class": "btn btn-default",
-        "id": this.divid + "_bcomp",
-        "disabled": "",
-        "name": "compare"
-    });
-    this.compareButton.textContent = "Compare me";
-    this.compareButton.addEventListener("click", function () {
-        this.compareAnswers(this.divid);
-    }.bind(this), false);
-    this.optsForm.appendChild(this.compareButton);
+    if (this.useRunestoneServices) {
+        this.compareButton = document.createElement("button");
+        $(this.compareButton).attr({
+            "class": "btn btn-default",
+            "id": this.divid + "_bcomp",
+            "disabled": "",
+            "name": "compare"
+        });
+        this.compareButton.textContent = "Compare me";
+        this.compareButton.addEventListener("click", function () {
+            this.compareAnswers(this.divid);
+        }.bind(this), false);
+        this.optsForm.appendChild(this.compareButton);
+    }
 };
 
 MultipleChoice.prototype.renderMCfeedbackDiv = function () {
@@ -311,7 +313,7 @@ MultipleChoice.prototype.restoreMultipleSelect = function () {
                         $(this.optionArray[b].input).attr("checked", "true");
                     }
                 }
-                this.enableMCComparison;
+                this.enableMCComparison();
             } // end for
         } // end if
     } // end if len > 0
@@ -333,7 +335,7 @@ MultipleChoice.prototype.restoreRadio = function () {
                     $(this.optionArray[b].input).attr("checked", "true");
                 }
             }
-            this.enableMCComparison;
+            this.enableMCComparison();
         } // end if not null
     } // end if (len > 0)
 };
@@ -537,7 +539,7 @@ MultipleChoice.prototype.compareAnswers = function () {
     var data = {};
     data.div_id = this.divid;
     data.course = eBookConfig.course;
-    jQuery.get(eBookConfig.ajaxURL + "getaggregateresults", data, this.compareModal);
+    jQuery.get(eBookConfig.ajaxURL + "getaggregateresults", data, this.compareModal.bind(this));
 };
 
 /*=================================
@@ -546,8 +548,9 @@ MultipleChoice.prototype.compareAnswers = function () {
 =================================*/
 $(document).ready(function () {
     $("[data-component=multiplechoice]").each(function (index) {    // MC
+        var opts = {"orig": this, 'useRunestoneServices':eBookConfig.useRunestoneServices};
         if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
-            mcList[this.id] = new MultipleChoice({"orig": this});
+            mcList[this.id] = new MultipleChoice(opts);
         }
     });
 

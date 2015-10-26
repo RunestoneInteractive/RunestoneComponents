@@ -6,6 +6,7 @@ var highlightResponseText;
 var extendHighlightClass;
 var urlList;
 var extendType;
+var rsb = new RunestoneBase();
 
 function getCompletions() {
 // Get the completion status
@@ -362,7 +363,7 @@ function saveHighlight(parentSelectorClass, serializedRange, saveMethod) {
         newId = returndata;
     });
     if (eBookConfig.logLevel > 0) {
-        logBookEvent({'event': 'highlight', 'act': 'save', 'div_id': currPage}); // Log the run event
+        rsb.logBookEvent({'event': 'highlight', 'act': 'save', 'div_id': currPage}); // Log the run event
     }
     return newId;
 }
@@ -376,7 +377,7 @@ function deleteHighlight(uniqueId) {
     });
     jQuery.post(eBookConfig.ajaxURL + 'deletehighlight', data);
     if (eBookConfig.logLevel > 0) {
-        logBookEvent({'event': 'highlight', 'act': 'delete', 'div_id': currPage}); // Log the run event
+        rsb.logBookEvent({'event': 'highlight', 'act': 'delete', 'div_id': currPage}); // Log the run event
     }
 
 }

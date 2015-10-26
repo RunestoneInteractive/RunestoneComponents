@@ -26,6 +26,34 @@
  */
 
 //
+// Chevron functions - Must correspond with width in runestone-custom-sphinx-bootstrap.css
+// 
+$(function () {
+	var resizeWindow = false;
+    var	resizeWidth = 600;
+	$(window).on('resize', function (event){
+		if ($(window).width() <= resizeWidth && resizeWindow == false){ 
+			resizeWindow = true;
+			var topPrev = $("#relations-prev").clone().attr("id", "top-relations-prev");
+			var topNext = $("#relations-next").clone().attr("id", "top-relations-next");
+			$("#relations-prev, #relations-next").hide();
+			var bottomPrev = topPrev.clone().attr("id", "bottom-relations-prev");
+			var bottomNext = topNext.clone().attr("id", "bottom-relations-next");
+			$("div#main-content > div").prepend(topPrev, topNext);
+			$("#top-relations-prev, #top-relations-next").wrapAll("<ul id=\"top-relations-console\"></ul>");
+			$("div#main-content > div").append(bottomPrev, bottomNext);
+			$("#bottom-relations-prev, #bottom-relations-next").wrapAll("<ul id=\"bottom-relations-console\"></ul>");
+		}
+		if ($(window).width() >= resizeWidth + 1 && resizeWindow == true){ 
+			resizeWindow = false;
+			$("#top-relations-console, #bottom-relations-console").remove();
+			$("#relations-prev, #relations-next").show();
+		}
+	}).resize();
+});	
+ 
+ 
+//
 // Logging functions
 //
 
@@ -92,7 +120,8 @@ function gotUser(data, status, whatever) {
         }
     } else {
         if (!caughtErr) {
-            mess = d.email;
+            mess = "username: " + d.nick;
+            eBookConfig.email = d.email;
             eBookConfig.isLoggedIn = true;
             eBookConfig.cohortId = d.cohortId;
             $(document).trigger("runestone:login")
@@ -243,9 +272,17 @@ function addDelay(directive, action, delay) {
 
 
 // initialize stuff
-$(document).ready(handleLoginLogout);
-$(document).ready(getNumUsers);
-$(document).ready(getOnlineUsers);
+$(document).ready(function() {
+    if (eBookConfig && eBookConfig.useRunestoneServices) {
+        $(document).ready(handleLoginLogout);
+        $(document).ready(getNumUsers);
+        $(document).ready(getOnlineUsers);
+    } else {
+        if (typeof eBookConfig === 'undefined') {
+            console.log("eBookConfig is not defined.  This page must not be set up for Runestone");
+        }
+    }
+});
 
 // misc stuff
 // todo:  This could be further distributed but making a video.js file just for one function seems dumb.

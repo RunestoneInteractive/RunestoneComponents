@@ -53,6 +53,7 @@ FITB.prototype = new RunestoneBase();
 FITB.prototype.init = function (opts) {
     RunestoneBase.apply(this, arguments);
     var orig = opts.orig;    // entire <p> element
+    this.useRunestoneServices = opts.useRunestoneServices;
     this.origElem = orig;
     this.divid = orig.id;
     this.questionArray = [];
@@ -188,21 +189,24 @@ FITB.prototype.renderFITBButtons = function () {
     this.submitButton.addEventListener("click", function () {
         this.checkFITBStorage();
     }.bind(this), false);
-    this.compareButton = document.createElement("button");    // Compare me button
-    $(this.compareButton).attr({
-        "class": "btn btn-default",
-        "id": this.origElem.id + "_bcomp",
-        "disabled": "",
-        "name": "compare"
-    });
-    this.compareButton.textContent = "Compare Me";
-    this.compareButton.addEventListener("click", function () {
-        this.compareFITBAnswers();
-    }.bind(this), false);
     this.containerDiv.appendChild(document.createElement("br"));
     this.containerDiv.appendChild(document.createElement("br"));
     this.containerDiv.appendChild(this.submitButton);
-    this.containerDiv.appendChild(this.compareButton);
+    if (this.useRunestoneServices) {
+        this.compareButton = document.createElement("button");    // Compare me button
+        $(this.compareButton).attr({
+            "class": "btn btn-default",
+            "id": this.origElem.id + "_bcomp",
+            "disabled": "",
+            "name": "compare"
+        });
+        this.compareButton.textContent = "Compare Me";
+        this.compareButton.addEventListener("click", function () {
+            this.compareFITBAnswers();
+        }.bind(this), false);
+        this.containerDiv.appendChild(this.compareButton);
+    }
+
     this.containerDiv.appendChild(document.createElement("div"));
 };
 
@@ -367,8 +371,9 @@ FITB.prototype.compareFITB = function (data, status, whatever) {   // Creates a 
 =================================*/
 $(document).ready(function () {
     $("[data-component=fillintheblank]").each(function (index) {    // FITB
+        var opts = {'orig' : this, 'useRunestoneServices': eBookConfig.useRunestoneServices }
         if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
-            FITBList[this.id] = new FITB({"orig": this});
+            FITBList[this.id] = new FITB(opts);
         }
     });
 });

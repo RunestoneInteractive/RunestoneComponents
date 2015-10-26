@@ -144,7 +144,7 @@ Reveal.prototype.createModal = function () {     // Displays popup dialog modal 
     document.body.appendChild(this.modalContainerDiv);
 
     this.modalDialogDiv = document.createElement("div");
-    $(this.modalDialogDiv).addClass("modal-dialog compare-modal");
+    $(this.modalDialogDiv).addClass("modal-dialog");
     this.modalContainerDiv.appendChild(this.modalDialogDiv);
 
     this.modalContentDiv = document.createElement("div");

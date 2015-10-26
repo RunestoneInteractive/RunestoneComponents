@@ -17,12 +17,14 @@ function ActiveCode(opts) {
 
 ActiveCode.prototype.init = function(opts) {
     RunestoneBase.apply( this, arguments );  // call parent constructor
-    var _this = this;
     var suffStart = -1;
-    var orig = opts.orig
+    var orig = opts.orig;
+    this.useRunestoneServices = opts.useRunestoneServices;
+    this.python3 = opts.python3;
+    this.alignVertical = opts.vertical;
     this.origElem = orig;
     this.divid = orig.id;
-    this.code = $(orig).text();
+    this.code = $(orig).text() || "\n\n\n\n\n";
     this.language = $(orig).data('lang');
     this.timelimit = $(orig).data('timelimit');
     this.includes = $(orig).data('include');
@@ -54,7 +56,7 @@ ActiveCode.prototype.init = function(opts) {
     } else {
         this.caption = ""
     }
-    this.addCaption()
+    this.addCaption();
 
     if ($(orig).data('autorun')) {
         $(document).ready(this.runProg.bind(this));
@@ -63,6 +65,8 @@ ActiveCode.prototype.init = function(opts) {
 
 ActiveCode.prototype.createEditor = function (index) {
     var newdiv = document.createElement('div');
+    var linkdiv = document.createElement('div')
+    linkdiv.id = this.divid.replace(/_/g,'-').toLowerCase();  // :ref: changes _ to - so add this as a target
     $(newdiv).addClass("ac_section alert alert-warning");
     var codeDiv = document.createElement("div");
     $(codeDiv).addClass("ac_code_div col-md-12");
@@ -72,6 +76,9 @@ ActiveCode.prototype.createEditor = function (index) {
     this.outerDiv = newdiv;
 
     $(this.origElem).replaceWith(newdiv);
+    if (linkdiv.id !== this.divid) {  // Don't want the 'extra' target if they match.
+        newdiv.appendChild(linkdiv);
+    }
     newdiv.appendChild(codeDiv);
     var editor = CodeMirror(codeDiv, {value: this.code, lineNumbers: true, mode: newdiv.lang});
 
@@ -112,26 +119,31 @@ ActiveCode.prototype.createControls = function () {
     $(butt).click(this.runProg.bind(this));
 
     // Save
-    butt = document.createElement("button");
-    $(butt).addClass("ac_opt btn btn-default");
-    $(butt).text("Save");
-    $(butt).css("margin-left","10px");
-    this.saveButton = butt;
-    ctrlDiv.appendChild(butt);
-    if (this.hidecode) {
-        $(butt).css("display","none")
+    if (this.useRunestoneServices) {
+        butt = document.createElement("button");
+        $(butt).addClass("ac_opt btn btn-default");
+        $(butt).text("Save");
+        $(butt).css("margin-left", "10px");
+        this.saveButton = butt;
+        this.saveButton.onclick = this.saveEditor.bind(this);
+        ctrlDiv.appendChild(butt);
+        if (this.hidecode) {
+            $(butt).css("display", "none")
+        }
     }
     // Load
-    butt = document.createElement("button");
-    $(butt).addClass("ac_opt btn btn-default");
-    $(butt).text("Load");
-    $(butt).css("margin-left","10px");
-    this.loadButton = butt;
-    ctrlDiv.appendChild(butt);
-    if (this.hidecode) {
-        $(butt).css("display","none")
+    if (this.useRunestoneServices) {
+        butt = document.createElement("button");
+        $(butt).addClass("ac_opt btn btn-default");
+        $(butt).text("Load");
+        $(butt).css("margin-left", "10px");
+        this.loadButton = butt;
+        this.loadButton.onclick = this.loadEditor.bind(this);
+        ctrlDiv.appendChild(butt);
+        if (this.hidecode) {
+            $(butt).css("display", "none")
+        }
     }
-
     if ($(this.origElem).data('gradebutton')) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
@@ -166,7 +178,7 @@ ActiveCode.prototype.createControls = function () {
         $(butt).click(this.showCodelens.bind(this));
     }
     // CodeCoach
-    if ($(this.origElem).data("coach")) {
+    if (this.useRunestoneServices && $(this.origElem).data("coach")) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
         $(butt).text("Code Coach");
@@ -199,8 +211,10 @@ ActiveCode.prototype.createOutput = function () {
     $(outDiv).addClass("ac_output col-md-6");
     this.outDiv = outDiv;
     this.output = document.createElement('pre');
+    $(this.output).css("visibility","hidden");
 
     this.graphics = document.createElement('div');
+    this.graphics.id = this.divid + "_graphics";
     $(this.graphics).addClass("ac-canvas");
     // This bit of magic adds an event which waits for a canvas child to be created on our
     // newly created div.  When a canvas child is added we add a new class so that the visible
@@ -248,7 +262,7 @@ ActiveCode.prototype.addCaption = function() {
 };
 
 ActiveCode.prototype.saveEditor = function () {
-
+    var res;
     var saveSuccess = function(data, status, whatever) {
         if (data.redirect) {
             alert("Did not save!  It appears you are not logged in properly")
@@ -261,7 +275,7 @@ ActiveCode.prototype.saveEditor = function () {
                 alert(acid);
             } else {
                 // use a tooltip to provide some success feedback
-                var save_btn = $("#" + acid + "_saveb");
+                var save_btn = $(this.saveButton);
                 save_btn.attr('title', 'Saved your code.');
                 opts = {
                     'trigger': 'manual',
@@ -278,19 +292,25 @@ ActiveCode.prototype.saveEditor = function () {
                 $('#' + acid + ' .CodeMirror').css('border-bottom', '2px solid #aaa');
             }
         }
-    };
+    }.bind(this);
 
     var data = {acid: this.divid, code: this.editor.getValue()};
     data.lang = this.language;
+    if (data.code.match(/^\s+$/)) {
+        res = confirm("You are about to save an empty program, this will overwrite a previously saved program.  Continue?");
+        if (! res) {
+            return;
+        }
+    }
     $(document).ajaxError(function (e, jqhxr, settings, exception) {
         alert("Request Failed for" + settings.url)
     });
     jQuery.post(eBookConfig.ajaxURL + 'saveprog', data, saveSuccess);
     if (this.editor.acEditEvent) {
-        logBookEvent({'event': 'activecode', 'act': 'edit', 'div_id': this.divid}); // Log the run event
+        this.logBookEvent({'event': 'activecode', 'act': 'edit', 'div_id': this.divid}); // Log the run event
         this.editor.acEditEvent = false;
     }
-    logBookEvent({'event': 'activecode', 'act': 'save', 'div_id': this.divid}); // Log the run event
+    this.logBookEvent({'event': 'activecode', 'act': 'save', 'div_id': this.divid}); // Log the run event
 
 };
 
@@ -302,27 +322,30 @@ ActiveCode.prototype.loadEditor = function () {
 
         if (res.source) {
             this.editor.setValue(res.source);
-            this.loadButton.tooltip({'placement': 'bottom',
+            setTimeout(function() {
+                this.editor.refresh();
+            }.bind(this),500);
+            $(this.loadButton).tooltip({'placement': 'bottom',
                              'title': "Loaded your saved code.",
                              'trigger': 'manual'
                             });
         } else {
-            this.loadButton.tooltip({'placement': 'bottom',
+            $(this.loadButton).tooltip({'placement': 'bottom',
                              'title': "No saved code.",
                              'trigger': 'manual'
                             });
         }
-        this.loadButton.tooltip('show');
+        $(this.loadButton).tooltip('show');
         setTimeout(function () {
-            this.loadButton.tooltip('destroy')
-        }, 4000);
+            $(this.loadButton).tooltip('destroy')
+        }.bind(this), 4000);
     }).bind(this);
 
     var data = {acid: this.divid};
-    if (sid !== undefined) {
-        data['sid'] = sid;
+    if (this.sid !== undefined) {
+        data['sid'] = this.sid;
     }
-    logBookEvent({'event': 'activecode', 'act': 'load', 'div_id': this.divid}); // Log the run event
+    this.logBookEvent({'event': 'activecode', 'act': 'load', 'div_id': this.divid}); // Log the run event
     jQuery.get(eBookConfig.ajaxURL + 'getprog', data, loadEditor);
 
 };
@@ -334,7 +357,7 @@ ActiveCode.prototype.createGradeSummary = function () {
     var showGradeSummary = function (data, status, whatever) {
         var report = eval(data)[0];
         // check for report['message']
-        if (report['grade']) {
+        if (report) {
             body = "<h4>Grade Report</h4>" +
                    "<p>This assignment: " + report['grade'] + "</p>" +
                    "<p>" + report['comment'] + "</p>" +
@@ -342,7 +365,7 @@ ActiveCode.prototype.createGradeSummary = function () {
                    "<p>Average score: " +  report['avg'] + "</p>"
 
         } else {
-            body = "<h4>You must be Logged in to see your grade</h4>";
+            body = "<h4>The server did not return any grade information</h4>";
         }
         var html = '<div class="modal fade">' +
             '  <div class="modal-dialog compare-modal">' +
@@ -360,14 +383,14 @@ ActiveCode.prototype.createGradeSummary = function () {
 
         el = $(html);
         el.modal();
-    }
-    var data = {'div_id': this.divid}
+    };
+    var data = {'div_id': this.divid};
     jQuery.get(eBookConfig.ajaxURL + 'getassignmentgrade', data, showGradeSummary);
-}
+};
 
 ActiveCode.prototype.hideCodelens = function (button, div_id) {
     this.codelens.style.display = 'none'
-}
+};
 
 ActiveCode.prototype.showCodelens = function () {
 
@@ -380,35 +403,39 @@ ActiveCode.prototype.showCodelens = function () {
         return;
     }
 
-    var cl = this.codelens.firstChild
+    var cl = this.codelens.firstChild;
     if (cl) {
         div.removeChild(cl)
     }
-    var code = this.editor.getValue()
-    var myVars = {}
-    myVars.code = code
-    myVars.origin = "opt-frontend.js"
-    myVars.cumulative = false
-    myVars.heapPrimitives = false
-    myVars.drawParentPointers = false
-    myVars.textReferences = false
-    myVars.showOnlyOutputs = false
-    myVars.rawInputLstJSON = JSON.stringify([])
-    myVars.py = 2
-    myVars.curInstr = 0
-    myVars.codeDivWidth = 350
-    myVars.codeDivHeight = 400
-    var srcURL = '//pythontutor.com/iframe-embed.html'
-    var embedUrlStr = $.param.fragment(srcURL, myVars, 2 /* clobber all */)
-    var myIframe = document.createElement('iframe')
-    myIframe.setAttribute("id", this.divid + '_codelens')
-    myIframe.setAttribute("width", "800")
-    myIframe.setAttribute("height", "500")
-    myIframe.setAttribute("style", "display:block")
-    myIframe.style.background = '#fff'
+    var code = this.editor.getValue();
+    var myVars = {};
+    myVars.code = code;
+    myVars.origin = "opt-frontend.js";
+    myVars.cumulative = false;
+    myVars.heapPrimitives = false;
+    myVars.drawParentPointers = false;
+    myVars.textReferences = false;
+    myVars.showOnlyOutputs = false;
+    myVars.rawInputLstJSON = JSON.stringify([]);
+    if (this.python3) {
+        myVars.py = 3;
+    } else {
+        myVars.py = 2;
+    }
+    myVars.curInstr = 0;
+    myVars.codeDivWidth = 350;
+    myVars.codeDivHeight = 400;
+    var srcURL = '//pythontutor.com/iframe-embed.html';
+    var embedUrlStr = $.param.fragment(srcURL, myVars, 2 /* clobber all */);
+    var myIframe = document.createElement('iframe');
+    myIframe.setAttribute("id", this.divid + '_codelens');
+    myIframe.setAttribute("width", "800");
+    myIframe.setAttribute("height", "500");
+    myIframe.setAttribute("style", "display:block");
+    myIframe.style.background = '#fff';
     //myIframe.setAttribute("src",srcURL)
-    myIframe.src = embedUrlStr
-    this.codelens.appendChild(myIframe)
+    myIframe.src = embedUrlStr;
+    this.codelens.appendChild(myIframe);
     this.logBookEvent({
         'event': 'codelens',
         'act': 'view',
@@ -442,7 +469,7 @@ ActiveCode.prototype.showCodeCoach = function (div_id) {
     myIframe.setAttribute("height", "500px");
     myIframe.setAttribute("style", "display:block");
     myIframe.style.background = '#fff';
-    myIframe.style.width = "100%"
+    myIframe.style.width = "100%";
     myIframe.src = srcURL;
     this.codecoach.appendChild(myIframe);
     logBookEvent({
@@ -459,14 +486,14 @@ ActiveCode.prototype.toggleEditorVisibility = function () {
 
 ActiveCode.prototype.addErrorMessage = function (err) {
     //logRunEvent({'div_id': this.divid, 'code': this.prog, 'errinfo': err.toString()}); // Log the run event
-    var errHead = $('<h3>').html('Error')
-    this.eContainer = this.outerDiv.appendChild(document.createElement('div'))
+    var errHead = $('<h3>').html('Error');
+    this.eContainer = this.outerDiv.appendChild(document.createElement('div'));
     this.eContainer.className = 'error alert alert-danger';
     this.eContainer.id = this.divid + '_errinfo';
     this.eContainer.appendChild(errHead[0]);
-    var errText = this.eContainer.appendChild(document.createElement('pre'))
-    var errString = err.toString()
-    var to = errString.indexOf(":")
+    var errText = this.eContainer.appendChild(document.createElement('pre'));
+    var errString = err.toString();
+    var to = errString.indexOf(":");
     var errName = errString.substring(0, to);
     errText.innerHTML = errString;
     $(this.eContainer).append('<h3>Description</h3>');
@@ -555,17 +582,28 @@ ActiveCode.prototype.builtinRead = function (x) {
 
 ActiveCode.prototype.outputfun = function(text) {
     // bnm python 3
-        var x = text;
-    if (x.charAt(0) == '(') {
-        x = x.slice(1, -1);
-        x = '[' + x + ']';
-        try {
-            var xl = eval(x);
-            xl = xl.map(pyStr);
-            x = xl.join(' ');
-        } catch (err) {
+    pyStr = function(x) {
+        if (x instanceof Array) {
+            return '[' + x.join(", ") + ']';
+        } else {
+            return x
         }
     }
+
+    var x = text;
+    if (! this.python3 ) {
+        if (x.charAt(0) == '(') {
+            x = x.slice(1, -1);
+            x = '[' + x + ']';
+            try {
+                var xl = eval(x);
+                xl = xl.map(pyStr);
+                x = xl.join(' ');
+            } catch (err) {
+            }
+        }
+    }
+    $(this.output).css("visibility","visible");
     text = x;
     text = text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br/>");
         $(this.output).append(text);
@@ -592,19 +630,20 @@ ActiveCode.prototype.buildProg = function() {
 };
 
 ActiveCode.prototype.runProg = function() {
-        var prog = this.buildProg()
+        var prog = this.buildProg();
 
         $(this.output).text('');
 
         $(this.eContainer).remove();
         Sk.configure({output : this.outputfun.bind(this),
               read   : this.builtinRead,
-              python3: true,
+              python3: this.python3,
               imageProxy : 'http://image.runestone.academy:8080/320x'
         });
         Sk.divid = this.divid;
         this.setTimeLimit();
         (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = this.graphics;
+        Sk.canvas = this.graphics.id; //todo: get rid of this here and in image
         $(this.runButton).attr('disabled', 'disabled');
         $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
         $(this.outDiv).show({duration:700,queue:false});
@@ -630,6 +669,9 @@ ActiveCode.prototype.runProg = function() {
 
     };
 
+
+
+
 JSActiveCode.prototype = new ActiveCode();
 
 function JSActiveCode(opts) {
@@ -643,11 +685,12 @@ JSActiveCode.prototype.init = function(opts) {
     }
 
 JSActiveCode.prototype.outputfun = function (a) {
-    var str = "["
+    $(this.output).css("visibility","visible");
+    var str = "[";
     if (typeof(a) == "object" && a.length) {
         for (var i = 0; i < a.length; i++)
             if (typeof(a[i]) == "object" && a[i].length) {
-                str += (i == 0 ? "" : " ") + "["
+                str += (i == 0 ? "" : " ") + "[";
                 for (var j = 0; j < a[i].length; j++)
                     str += a[i][j] + (j == a[i].length - 1 ?
                     "]" + (i == a.length - 1 ? "]" : ",") + "\n" : ", ");
@@ -660,7 +703,7 @@ JSActiveCode.prototype.outputfun = function (a) {
     }
     }
     return str;
-}
+};
 
 JSActiveCode.prototype.runProg = function() {
     var _this = this;
@@ -675,7 +718,7 @@ JSActiveCode.prototype.runProg = function() {
         _this.output.innerHTML += _this.outputfun(str)+"<br />";
             };
 
-    $(this.output).text('')
+    $(this.output).text('');
     $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
     $(this.outDiv).show({duration:700,queue:false});
 
@@ -703,21 +746,30 @@ HTMLActiveCode.prototype.runProg = function () {
 //    $('#'+myDiv+'_htmlout').append('<iframe class="activehtml" id="' + myDiv + '_iframe" srcdoc="' +
 //        prog.replace(/"/g,"'") + '">' + '</iframe>');
     $(this.output).text('');
-    $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
+    if (! this.alignVertical ) {
+        $(this.codeDiv).switchClass("col-md-12", "col-md-6", {duration: 500, queue: false});
+    }
     $(this.outDiv).show({duration:700,queue:false});
-
+    prog = "<script type=text/javascript>window.onerror = function(msg,url,line) {alert(msg+' on line: '+line);};</script>" + prog;
     this.output.srcdoc = prog;
+
 };
 
 HTMLActiveCode.prototype.init = function(opts) {
-    ActiveCode.prototype.init.apply(this,arguments)
+    ActiveCode.prototype.init.apply(this,arguments);
     this.code = $('<textarea />').html(this.origElem.innerHTML).text();
+    $(this.runButton).text('Render');
     this.editor.setValue(this.code);
-        };
+};
 
 HTMLActiveCode.prototype.createOutput = function () {
     var outDiv = document.createElement("div");
-    $(outDiv).addClass("ac_output col-md-6");
+    $(outDiv).addClass("ac_output");
+    if(this.alignVertical) {
+        $(outDiv).addClass("col-md-12");
+    } else {
+        $(outDiv).addClass("col-md-6");
+    }
     this.outDiv = outDiv;
     this.output = document.createElement('iframe');
     $(this.output).css("background-color","white");
@@ -784,7 +836,7 @@ function AudioTour (divid, code, bnum, audio_text) {
             first = first + "<div id='" + divid + "_l" + (i + 1) + "'>" + (i + 1) + ". " + codeArray[i] + "</div>";
         }
     }
-    first = first + "</pre>"
+    first = first + "</pre>";
 
     //laying out the HTML content
 
@@ -816,7 +868,7 @@ function AudioTour (divid, code, bnum, audio_text) {
         // show window on the left so that you can see the output from the code still
         this.css("left", ($(window).scrollLeft() + "px"));
         return this;
-    }
+    };
 
     $(".modal-profile").center();
     $('.modal-profile').fadeIn("slow");
@@ -886,7 +938,7 @@ function AudioTour (divid, code, bnum, audio_text) {
     $("#next_audio").css('opacity', 0.25);
     $("#last_audio").css('opacity', 0.25);
 
-};
+}
 
 AudioTour.prototype.tour = function (divid, audio_type, bcount) {
     // set globals
@@ -968,7 +1020,7 @@ AudioTour.prototype.handlePlaying = function() {
         this.unhighlightLines(this.theDivid, this.ahash[this.aname[this.currIndex]]);
     }
 
-}
+};
 
 AudioTour.prototype.firstAudio = function () {
 
@@ -1229,18 +1281,18 @@ function LiveCode(opts) {
     }
 
 LiveCode.prototype.init = function(opts) {
-    ActiveCode.prototype.init.apply(this,arguments)
+    ActiveCode.prototype.init.apply(this,arguments);
 
     var orig = opts.orig;
     this.stdin = $(orig).data('stdin');
     this.datafile = $(orig).data('datafile');
     this.sourcefile = $(orig).data('sourcefile');
 
-    this.API_KEY = "67033pV7eUUvqo07OJDIV8UZ049aLEK1"
+    this.API_KEY = "67033pV7eUUvqo07OJDIV8UZ049aLEK1";
     this.USE_API_KEY = true;
     this.JOBE_SERVER = 'http://jobe2.cosc.canterbury.ac.nz';
     this.resource = '/jobe/index.php/restapi/runs/';
-    this.div2id = {}
+    this.div2id = {};
     if (this.stdin) {
         this.createInputElement();
     }
@@ -1253,8 +1305,8 @@ LiveCode.prototype.createInputElement = function () {
 
     var label = document.createElement('label');
     label.for = this.divid + "_stdin";
-    $(label).text("Input for Program")
-    var input = document.createElement('input')
+    $(label).text("Input for Program");
+    var input = document.createElement('input');
     input.id = this.divid + "_stdin";
     input.type = "text";
     input.size = "35";
@@ -1266,13 +1318,13 @@ LiveCode.prototype.createInputElement = function () {
 
 LiveCode.prototype.createErrorOutput = function () {
 
-}
+};
 
 LiveCode.prototype.runProg = function() {
         var xhr, stdin;
         var runspec = {};
         var data, host, source, editor;
-        var sfilemap = {java: '', cpp: 'test.cpp', c: 'test.c', python3: 'test.py', python2: 'test.py'}
+        var sfilemap = {java: '', cpp: 'test.cpp', c: 'test.c', python3: 'test.py', python2: 'test.py'};
 
         xhr = new XMLHttpRequest();
         source = this.editor.getValue();
@@ -1300,13 +1352,14 @@ LiveCode.prototype.runProg = function() {
             runspec['file_list'] = [[this.div2id[datafile],datafile]];
         }
         data = JSON.stringify({'run_spec': runspec});
-        host = this.JOBE_SERVER + this.resource
+        host = this.JOBE_SERVER + this.resource;
 
         var odiv = this.output;
         $(this.runButton).attr('disabled', 'disabled');
         $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
         $(this.outDiv).show({duration:700,queue:false});
         $(this.errDiv).remove();
+        $(this.output).css("visibility","visible");
 
         xhr.open("POST", host, true);
         xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
@@ -1359,7 +1412,7 @@ LiveCode.prototype.runProg = function() {
         }).bind(this);
 
         ///$("#" + divid + "_errinfo").remove();
-        $(this.output).html("Compiling and Running your Code Now...")
+        $(this.output).html("Compiling and Running your Code Now...");
 
         xhr.onerror = function () {
             this.addJobeErrorMessage("Error communicating with the server.");
@@ -1375,7 +1428,7 @@ LiveCode.prototype.addJobeErrorMessage = function (err) {
         eContainer.className = 'error alert alert-danger';
         eContainer.id = this.divid + '_errinfo';
         eContainer.appendChild(errHead[0]);
-        var errText = eContainer.appendChild(document.createElement('pre'))
+        var errText = eContainer.appendChild(document.createElement('pre'));
         errText.innerHTML = err;
     };
 
@@ -1386,8 +1439,8 @@ LiveCode.prototype.pushDataFile = function (datadiv) {
         var contents = $(document.getElementById(datadiv)).text();
         var contentsb64 = btoa(contents);
         var data = JSON.stringify({ 'file_contents' : contentsb64 });
-        var resource = '/jobe/index.php/restapi/files/' + file_id
-        var host = JOBE_SERVER + resource
+        var resource = '/jobe/index.php/restapi/files/' + file_id;
+        var host = JOBE_SERVER + resource;
         var xhr = new XMLHttpRequest();
 
         if (this.div2id[datadiv] === undefined ) {
@@ -1400,29 +1453,131 @@ LiveCode.prototype.pushDataFile = function (datadiv) {
 
             xhr.onload = function () {
                 console.log("successfully sent file " + xhr.responseText);
-            }
+            };
 
             xhr.onerror = function () {
                 console.log("error sending file" + xhr.responseText);
-            }
+            };
 
             xhr.send(data)
         }
     };
 
-//
+ACFactory = {};
+
+ACFactory.createActiveCode = function (orig, lang, addopts) {
+    var opts = {'orig' : orig, 'useRunestoneServices': eBookConfig.useRunestoneServices, 'python3' : eBookConfig.python3 };
+    if (addopts) {
+        for (var attrname in addopts) {
+            opts[attrname] = addopts[attrname];
+        }
+    }
+    if (lang === "javascript") {
+        return new JSActiveCode(opts);
+    } else if (lang === 'htmlmixed') {
+        return new HTMLActiveCode(opts);
+    } else if (['java', 'cpp', 'c', 'python3', 'python2'].indexOf(lang) > -1) {
+        return new LiveCode(opts);
+    } else {   // default is python
+        return new ActiveCode(opts);
+    }
+
+}
+
+// used by web2py controller(s)
+ACFactory.addActiveCodeToDiv = function(outerdivid, acdivid, sid, initialcode, language) {
+    var  thepre, newac;
+
+    acdiv = document.getElementById(acdivid);
+    $(acdiv).empty();
+    thepre = document.createElement("textarea");
+    thepre['data-component'] = "activecode";
+    thepre.id = acdiv;
+    $(thepre).data('lang', language);
+    $(acdiv).append(thepre);
+    var opts = {'orig' : thepre, 'useRunestoneServices': true };
+    addopts = {}
+    if(language === 'htmlmixed') {
+        var addopts = {'vertical': true};
+    }
+    newac = ACFactory.createActiveCode(thepre,language,addopts);
+    savediv = newac.divid;
+    newac.divid = outerdivid;
+    newac.sid = sid;
+    if (! initialcode ) {
+        newac.loadEditor();
+    } else {
+        newac.editor.setValue(initialcode);
+        setTimeout(function() {
+                newac.editor.refresh();
+            },500);
+    }
+    newac.divid = savediv;
+    newac.editor.setSize(500,300);
+};
+
+ACFactory.createScratchActivecode = function() {
+    /* set up the scratch Activecode editor in the search menu */
+    // use the URL to assign a divid - each page should have a unique Activecode block id.
+    // Remove everything from the URL but the course and page name
+    // todo:  this could probably be eliminated and simply moved to the template file
+    var divid = document.URL.split('#')[0];
+    if (divid.indexOf('static') > -1) {
+        divid = divid.split('static')[1];
+    } else {
+        divid = divid.split('/');
+        divid = divid.slice(-2).join("");
+    }
+    divid = divid.split('?')[0];  // remove any query string (e.g ?lastPosition)
+    divid = divid.replaceAll('/', '').replace('.html', '').replace(':', '');
+    eBookConfig.scratchDiv = divid;
+    // generate the HTML
+    var html = '<div id="ac_modal_' + divid + '" class="modal fade">' +
+        '  <div class="modal-dialog scratch-ac-modal">' +
+        '    <div class="modal-content">' +
+        '      <div class="modal-header">' +
+        '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
+        '        <h4 class="modal-title">Scratch ActiveCode</h4>' +
+        '      </div> ' +
+        '      <div class="modal-body">' +
+        '      <textarea data-component="activecode" id="' + divid + '">' +
+        '\n' +
+        '\n' +
+        '\n' +
+        '      </textarea>' +
+        '      </div>' +
+        '    </div>' +
+        '  </div>' +
+        '</div>';
+    el = $(html);
+    $('body').append(el);
+
+    el.on('shown.bs.modal show.bs.modal', function () {
+        el.find('.CodeMirror').each(function (i, e) {
+            e.CodeMirror.refresh();
+            e.CodeMirror.focus();
+        });
+    });
+
+    //$(document).bind('keypress', '\\', function(evt) {
+    //    ACFactory.toggleScratchActivecode();
+    //    return false;
+    //});
+};
+
+
+ACFactory.toggleScratchActivecode = function () {
+    var divid = "ac_modal_" + eBookConfig.scratchDiv;
+    var div = $("#" + divid);
+
+    div.modal('toggle');
+
+};
 
 $(document).ready(function() {
+    ACFactory.createScratchActivecode();
     $('[data-component=activecode]').each( function(index ) {
-        if ($(this).data('lang') === "javascript") {
-            edList[this.id] = new JSActiveCode({'orig': this});
-        } else if ($(this).data('lang') === 'htmlmixed') {
-            edList[this.id] = new HTMLActiveCode({'orig': this});
-        } else if (['java', 'cpp', 'c', 'python3', 'python2'].indexOf($(this).data('lang')) > -1) {
-            edList[this.id] = new LiveCode({'orig': this});
-        } else {   // default is python
-            edList[this.id] = new ActiveCode({'orig': this});
-        }
+        edList[this.id] = ACFactory.createActiveCode(this, $(this).data('lang'));
     });
     if (loggedout) {
         for (k in edList) {
@@ -1436,7 +1591,7 @@ $(document).ready(function() {
 // figure out the login/logout status of the user.  Sometimes its immediate, and sometimes its
 // long.  So to be safe we'll do it both ways..
 var loggedout;
-$(document).bind("runestone:logout",function() { loggedout=true;})
+$(document).bind("runestone:logout",function() { loggedout=true;});
 $(document).bind("runestone:logout",function() {
     for (k in edList) {
         if (edList.hasOwnProperty(k)) {

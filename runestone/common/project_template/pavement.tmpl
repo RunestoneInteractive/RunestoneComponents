@@ -12,6 +12,7 @@ home_dir = os.getcwd()
 master_url = '%(master_url)s'
 master_app = 'runestone'
 serving_dir = "%(build_dir)s/%(project_name)s"
+dest = "%(dest)s"
 
 options(
     sphinx = Bunch(docroot=".",),
@@ -28,7 +29,8 @@ options(
                        'loglevel': %(log_level)d,
                        'course_url':master_url,
                        'use_services': '%(use_services)s',
-                       'python3': '%(python3)s'
+                       'python3': '%(python3)s',
+                       'dburl': '%(dburl)s'
                         }
     )
 )

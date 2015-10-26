@@ -57,6 +57,9 @@ Timed.prototype.init = function (opts) {
     this.taken = 0;
     this.score = 0;
     this.incorrect = 0;
+    this.correctStr = "";
+    this.incorrectStr = "";
+    this.skippedStr = "";
     this.skipped = 0;
 
     this.currentQuestionIndex = 0;   // Which question is currently displaying on the page
@@ -87,9 +90,15 @@ Timed.prototype.renderTimedAssess = function () {
     this.renderNavControls();
     this.renderSubmitButton();
     this.renderFeedbackContainer();
-
+	
     // Replace intermediate HTML with rendered HTML
     $(this.origElem).replaceWith(this.assessDiv);
+    
+    // check if already taken and if so show results
+    this.tookTimedExam();
+    if (this.taken) {
+       this.handlePrevAssessment();
+    }
 };
 
 Timed.prototype.renderContainer = function () {
@@ -98,9 +107,9 @@ Timed.prototype.renderContainer = function () {
     this.timedDiv = document.createElement("div"); // div that will hold the questions for the timed assessment
     this.navDiv = document.createElement("div"); // For navigation control
     $(this.navDiv).attr({"style": "text-align:center"});
-    this.timedDiv.appendChild(this.navDiv);
     this.switchDiv = document.createElement("div"); // is replaced by the questions
     this.timedDiv.appendChild(this.switchDiv);
+    this.timedDiv.appendChild(this.navDiv);
     $(this.timedDiv).attr({ // set the id, and style the div to be hidden
         "id": "timed_Test",
         "style": "display:none"
@@ -113,6 +122,7 @@ Timed.prototype.renderTimer = function () {
     this.wrapperDiv.id = "startWrapper";
     this.timerContainer.id = "output";
     this.wrapperDiv.appendChild(this.timerContainer);
+    this.showTime();
 };
 
 Timed.prototype.renderControlButtons = function () {
@@ -124,7 +134,7 @@ Timed.prototype.renderControlButtons = function () {
     this.startBtn = document.createElement("btn");
     this.pauseBtn = document.createElement("btn");
     $(this.startBtn).attr({
-        "class": "btn btn-default",
+        "class": "btn btn-success",
         "id": "start"
     });
     this.startBtn.textContent = "Start";
@@ -145,72 +155,104 @@ Timed.prototype.renderControlButtons = function () {
     this.assessDiv.appendChild(this.wrapperDiv);
     this.assessDiv.appendChild(this.controlDiv);
 };
+
 Timed.prototype.renderNavControls = function () {
-    var _this = this;
-    this.pagNavList = document.createElement("ul");
+	this.pagNavList = document.createElement("ul");
     $(this.pagNavList).addClass("pagination");
-    this.leftContainer = document.createElement("li");
+	this.leftContainer = document.createElement("li");
     this.leftNavButton = document.createElement("a");
-    this.leftNavButton.innerHTML = "&laquo";
+    this.leftNavButton.innerHTML = "&#8249; Prev";
     $(this.leftNavButton).attr("aria-label", "Previous");
     $(this.leftNavButton).css("cursor", "pointer");
-    this.leftNavButton.addEventListener("click", function () {
-        if ($(this.leftContainer).hasClass("disabled")) {
-            return;
-        }
-        this.currentQuestionIndex--;
-        this.renderTimedQuestion();
-        this.ensureButtonSafety();
-        for (var i = 0; i < _this.pagNavList.childNodes.length; i++) {
-            $(this.pagNavList.childNodes[i]).removeClass("active");
-        }
-        $(this.pagNavList.childNodes[this.currentQuestionIndex + 1]).addClass("active");
-    }.bind(this), false);
-    this.leftContainer.appendChild(this.leftNavButton);
+	this.leftContainer.appendChild(this.leftNavButton);
     this.pagNavList.appendChild(this.leftContainer);
+    this.rightContainer = document.createElement("li");
+    this.rightNavButton = document.createElement("a");
+    $(this.rightNavButton).attr("aria-label", "Next");
+    this.rightNavButton.innerHTML = "Next &#8250;";
+    $(this.rightNavButton).css("cursor", "pointer");
+    this.rightContainer.appendChild(this.rightNavButton);
+	this.pagNavList.appendChild(this.rightContainer);
+	this.ensureButtonSafety();
+	this.navDiv.appendChild(this.pagNavList);
+    this.break = document.createElement("br");
+    this.navDiv.appendChild(this.break);
+    
+    // render the question number jump buttons
+    this.qNumList = document.createElement("ul");
+	$(this.qNumList).attr("id", "pageNums");
+	var tmpLi, tmpA;
     for (var i = 0; i < this.renderedQuestionArray.length; i++) {
-        var tmpLi = document.createElement("li");
-        var tmpA = document.createElement("a");
+	    tmpLi = document.createElement("li");
+		tmpA = document.createElement("a");
         tmpA.innerHTML = i + 1;
         $(tmpA).css("cursor", "pointer");
         if (i === 0) {
             $(tmpLi).addClass("active");
         }
-        tmpA.onclick = function () {
-            _this.currentQuestionIndex = this.innerHTML - 1;
-            _this.renderTimedQuestion();
-            _this.ensureButtonSafety();
-            for (var i = 0; i < _this.pagNavList.childNodes.length; i++) {
-                $(_this.pagNavList.childNodes[i]).removeClass("active");
-            }
-            $(this.parentNode).addClass("active");
-        };
         tmpLi.appendChild(tmpA);
-        this.pagNavList.appendChild(tmpLi);
+        this.qNumList.appendChild(tmpLi);	
     }
-    this.rightContainer = document.createElement("li");
-    this.rightNavButton = document.createElement("a");
-    $(this.rightNavButton).attr("aria-label", "Next");
-    this.rightNavButton.innerHTML = "&raquo";
-    $(this.rightNavButton).css("cursor", "pointer");
-    this.rightNavButton.addEventListener("click", function () {
-        if ($(this.rightContainer).hasClass("disabled")) {
-            return;
-        }
-        this.currentQuestionIndex++;
-        this.renderTimedQuestion();
-        this.ensureButtonSafety();
-        for (var i = 0; i < _this.pagNavList.childNodes.length; i++) {
-            $(this.pagNavList.childNodes[i]).removeClass("active");
-        }
-        $(this.pagNavList.childNodes[this.currentQuestionIndex + 1]).addClass("active");
-    }.bind(this), false);
-    this.rightContainer.appendChild(this.rightNavButton);
-    this.pagNavList.appendChild(this.rightContainer);
-    this.ensureButtonSafety();
-    this.navDiv.appendChild(this.pagNavList);
-
+    this.navDiv.appendChild(this.qNumList);
+	this.navBtnListeners();  
+	
+	$(function(){
+		var tenSet = $("ul#pageNums li");
+		for (var i = 0; i < tenSet.length; i += 10) {
+			tenSet.slice(i, i + 10).wrapAll("<ul class=\"pagination\"></ul>");
+		}
+	});
+	
 };
+
+Timed.prototype.navBtnListeners = function() {
+	// Next and Prev Listener
+	this.pagNavList.addEventListener("click", function (event) {
+		if ($("div#timed_Test form input[name='group1']").is(":checked")) {
+			$("ul#pageNums > ul > li:eq(" + this.currentQuestionIndex +")").addClass("answered");
+		}	
+		var target = $(event.target).text();
+		if (target.match(/Next/)) {
+			if ($(this.rightContainer).hasClass("disabled")) {
+				return; 
+			} 
+			this.currentQuestionIndex++;
+		} 
+		else if (target.match(/Prev/)) {
+			if ($(this.leftContainer).hasClass("disabled")) {
+				return;
+			} 
+			this.currentQuestionIndex--;
+		}
+		this.renderTimedQuestion();
+		this.ensureButtonSafety();
+		for (var i = 0; i < this.qNumList.childNodes.length; i++) {
+			for (var j = 0; j < this.qNumList.childNodes[i].childNodes.length; j++) {
+				$(this.qNumList.childNodes[i].childNodes[j]).removeClass("active");
+			}
+		}
+		$("ul#pageNums > ul > li:eq(" + this.currentQuestionIndex +")").addClass("active");
+	}.bind(this), false);
+
+	// Numbered Listener
+	this.qNumList.addEventListener("click", function (event) {
+		if ($("div#timed_Test form input[name='group1']").is(":checked")) {
+			$("ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")").addClass("answered");
+		}
+		for (var i = 0; i < this.qNumList.childNodes.length; i++) {
+			for (var j = 0; j < this.qNumList.childNodes[i].childNodes.length; j++) {
+				$(this.qNumList.childNodes[i].childNodes[j]).removeClass("active"); 
+			}
+		}
+		var target = $(event.target).text();
+		this.currentQuestionIndex = parseInt(target) - 1;
+		$("ul#pageNums > ul > li:eq(" + this.currentQuestionIndex +")").addClass("active");
+		this.renderTimedQuestion();
+		this.ensureButtonSafety();
+	}.bind(this), false);
+	
+};
+
 Timed.prototype.renderSubmitButton = function () {
     this.buttonContainer = document.createElement("div");
     $(this.buttonContainer).attr({"style": "text-align:center"});
@@ -219,7 +261,7 @@ Timed.prototype.renderSubmitButton = function () {
         "id": "finish",
         "class": "btn btn-inverse"
     });
-    this.finishButton.textContent = "Submit answers";
+    this.finishButton.textContent = "Finish Exam";
     this.finishButton.addEventListener("click", function () {
         this.finishAssessment();
     }.bind(this), false);
@@ -259,15 +301,16 @@ Timed.prototype.createRenderedQuestionArray = function () {
     // Also adds them to this.renderedQuestionArray
     for (var i = 0; i < this.newChildren.length; i++) {
         var tmpChild = this.newChildren[i];
+        opts = {'orig':tmpChild, 'useRunestoneServices':eBookConfig.useRunestoneServices}
         if ($(tmpChild).is("[data-component=multiplechoice]")) {
-            this.renderedQuestionArray.push(new TimedMC({"orig": tmpChild}));
+            this.renderedQuestionArray.push(new TimedMC(opts));
         } else if ($(tmpChild).is("[data-component=fillintheblank]")) {
-            var newFITB = new TimedFITB({"orig": tmpChild});
+            var newFITB = new TimedFITB(opts);
             this.renderedQuestionArray.push(newFITB);
         } else if ($(tmpChild).is("[data-component=dragndrop]")) {
-            this.renderedQuestionArray.push(new TimedDragNDrop({"orig": tmpChild}));
+            this.renderedQuestionArray.push(new TimedDragNDrop(opts));
         } else if ($(tmpChild).is("[data-component=clickablearea]")) {
-            this.renderedQuestionArray.push(new TimedClickableArea({"orig":tmpChild}));
+            this.renderedQuestionArray.push(new TimedClickableArea(opts));
         }
     }
     if (this.random) {
@@ -299,26 +342,31 @@ Timed.prototype.renderTimedQuestion = function () {
 === Timer and control Functions ===
 =================================*/
 
-Timed.prototype.startAssessment = function () {
-    this.tookTimedExam();
-    if (!this.taken) {
-        $(this.startBtn).attr("disabled", true);
-        $(this.pauseBtn).attr("disabled", false);
-        if (this.running === 0 && this.paused === 0) {
-            this.running = 1;
-            $(this.timedDiv).show();
-            this.increment();
-            this.logBookEvent({"event": "timedExam", "act": "start", "div_id": this.divid});
-            localStorage.setItem(eBookConfig.email + ":" + this.divid, "started");
-        }
-    } else {
-        $(this.startBtn).attr("disabled", true);
+Timed.prototype.handlePrevAssessment = function () {
+		$(this.startBtn).hide();
         $(this.pauseBtn).attr("disabled", true);
         $(this.finishButton).attr("disabled", true);
         this.running = 0;
         this.done = 1;
         $(this.timedDiv).show();
         this.submitTimedProblems();
+}
+
+Timed.prototype.startAssessment = function () {
+    this.tookTimedExam();
+    if (!this.taken) {
+        $(this.startBtn).hide();
+        $(this.pauseBtn).attr("disabled", false);
+        if (this.running === 0 && this.paused === 0) {
+            this.running = 1;
+            $(this.timedDiv).show();
+            this.increment();
+            this.logBookEvent({"event": "timedExam", "act": "start", "div_id": this.divid});
+            var resultStr = "0; ;0; ;" + this.renderedQuestionArray.length +"; ;0";
+            localStorage.setItem(eBookConfig.email + ":" + this.divid, resultStr);
+        }
+    } else {
+       this.handlePrevAssessment();
     }
 };
 
@@ -374,9 +422,6 @@ Timed.prototype.showTime = function () { // displays the timer value
     for (var i = 0; i <= timeTips.length - 1; i++) {
         timeTips[i].title = timeString;
     }
-
-
-
 };
 
 Timed.prototype.increment = function () { // increments the timer
@@ -412,7 +457,6 @@ Timed.prototype.checkIfFinished = function () {
         $(this.pauseBtn).attr("disabled", true);
         $(this.finishButton).attr("disabled", true);
         this.resetTimedMCMFStorage();
-        //$(this.timedDiv).show();
     }
 };
 
@@ -459,17 +503,19 @@ Timed.prototype.tookTimedExam = function () {
 };
 
 Timed.prototype.finishAssessment = function () {
-    this.findTimeTaken();
-    this.running = 0;
-    this.done = 1;
-    this.taken = 1;
-    this.submitTimedProblems();
-    this.checkScore();
-    this.displayScore();
-    this.storeScore();
-    this.logScore();
-    $(this.pauseBtn).attr("disabled", true);
-    this.finishButton.disabled = true;
+    if (window.confirm("Clicking OK means you are ready to submit your answers and are finished with this assessment.")) {
+        this.findTimeTaken();
+        this.running = 0;
+        this.done = 1;
+        this.taken = 1;
+        this.submitTimedProblems();
+        this.checkScore();
+        this.displayScore();
+        this.storeScore();
+        this.logScore();
+        $(this.pauseBtn).attr("disabled", true);
+        this.finishButton.disabled = true;
+    }
 };
 
 Timed.prototype.submitTimedProblems = function () {
@@ -488,17 +534,32 @@ Timed.prototype.hideTimedFeedback = function () {
 };
 
 Timed.prototype.checkScore = function () {
+	this.correctStr = "";
+    this.skippedStr = "";
+    this.incorrectStr = "";
     // Gets the score of each problem
     for (var i = 0; i < this.renderedQuestionArray.length; i++) {
         var correct = this.renderedQuestionArray[i].checkCorrectTimed();
         if (correct) {
-            this.score++;
+		    this.score++;
+			this.correctStr = this.correctStr + (i + 1) + ", ";				
+			
         } else if (correct === null) {
             this.skipped++;
+			this.skippedStr = this.skippedStr + (i + 1) + ", ";
+			
         } else {
             this.incorrect++;
+			this.incorrectStr = this.incorrectStr + (i + 1) + ", ";
         }
     }
+	// remove extra comma and space at end if any
+    if (this.correctStr.length > 0) this.correctStr = this.correctStr.substring(0,this.correctStr.length-2);
+    else this.correctStr = "None";
+    if (this.skippedStr.length > 0) this.skippedStr = this.skippedStr.substring(0,this.skippedStr.length-2);
+    else this.skippedStr = "None";
+    if (this.incorrectStr.length > 0) this.incorrectStr = this.incorrectStr.substring(0,this.incorrectStr.length-2);
+    else this.incorrectStr = "None";
 };
 
 Timed.prototype.findTimeTaken = function () {
@@ -511,7 +572,7 @@ Timed.prototype.findTimeTaken = function () {
 
 Timed.prototype.storeScore = function () {
     var storage_arr = [];
-    storage_arr.push(this.score, this.incorrect, this.skipped, this.timeTaken);
+    storage_arr.push(this.score, this.correctStr, this.incorrect, this.incorrectStr, this.skipped, this.skippedStr, this.timeTaken);
     localStorage.setItem(eBookConfig.email + ":" + this.divid, storage_arr.join(";"));
 };
 
@@ -521,24 +582,91 @@ Timed.prototype.logScore = function () {
 
 Timed.prototype.restoreFromStorage = function () {
     var tmpArr = localStorage.getItem(eBookConfig.email + ":" + this.divid).split(";");
-    this.score = tmpArr[0];
-    this.incorrect = tmpArr[1];
-    this.skipped = tmpArr[2];
-    this.timeTaken = tmpArr[3];
+    if (tmpArr.length == 4)
+    {
+       this.score = tmpArr[0];
+       this.incorrect = tmpArr[1];
+       this.skipped = tmpArr[2];
+       this.timeTaken = tmpArr[3];
+    }
+    else if (tmpArr.length == 7)
+    {
+       this.score = tmpArr[0];
+       this.correctStr = tmpArr[1];
+       this.incorrect = tmpArr[2];
+       this.incorrectStr = tmpArr[3];
+       this.skipped = tmpArr[4];
+       this.skippedStr = tmpArr[5];
+       this.timeTaken = tmpArr[6];
+    }
+    else {
+       this.score = 0;
+       this.incorrect = 0;
+       this.skipped = this.renderedQuestionArray.length;
+       this.timeTaken = 0;
+    }
     this.displayScore();
-    this.showTime();
+	this.showTime();
 };
 
 Timed.prototype.displayScore = function () {
-    if (this.showResults) {
-        var scoreString = "Num Correct: " + this.score + " Num Wrong: " + this.incorrect + " Num Skipped: " + this.skipped;
-        var numQuestions = this.renderedQuestionArray.length;
-        var percentCorrect = (this.score / numQuestions) * 100;
-        scoreString += "    Percent Correct: " + percentCorrect + "%";
-        $(this.scoreDiv).text(scoreString);
-        this.scoreDiv.style.display = "block";
-    }
+ 
+	if (this.showResults)
+    {   
+       // If we have the list of 
+       if (this.correctStr.length > 0 || this.incorrectStr.length > 0 || this.skippedStr.length > 0)
+       {
+          var scoreString = "Num Correct: " + this.score + ". Questions: " + this.correctStr + "<br>" +
+          "Num Wrong: " + this.incorrect + ". Questions: " + this.incorrectStr + "<br>" +
+          "Num Skipped: " + this.skipped + ". Questions: " + this.skippedStr + "<br>";
+          var numQuestions = this.renderedQuestionArray.length;
+          var percentCorrect = (this.score / numQuestions) * 100;
+          scoreString += "Percent Correct: " + percentCorrect + "%";
+          $(this.scoreDiv).html(scoreString);
+          this.scoreDiv.style.display = "block";
+      }
+      else 
+      {
+          var scoreString = "Num Correct: " + this.score + "<br>" +
+          "Num Wrong: " + this.incorrect + "<br>" +
+          "Num Skipped: " + this.skipped + "<br>";
+          var numQuestions = this.renderedQuestionArray.length;
+          var percentCorrect = (this.score / numQuestions) * 100;
+          scoreString += "Percent Correct: " + percentCorrect + "%";
+          $(this.scoreDiv).html(scoreString);
+          this.scoreDiv.style.display = "block";
+      }
+   }
+   this.highlightNumberedList();
 };
+										
+Timed.prototype.highlightNumberedList = function () {
+	var correctCount = this.correctStr;
+	var	incorrectCount = this.incorrectStr;
+	var skippedCount = this.skippedStr;
+
+	correctCount = correctCount.replace(/ /g,'').split(',');
+	incorrectCount = incorrectCount.replace(/ /g,'').split(',');
+	skippedCount = skippedCount.replace(/ /g,'').split(',');
+		
+	$(function () {		// This code is wrapped in a function so that it executes only after DOM has loaded
+		var numberedBtns = $("ul#pageNums > ul > li");
+		if (numberedBtns.hasClass("answered")) {
+			numberedBtns.removeClass("answered"); 
+		}	
+		for (var i = 0; i < correctCount.length; i++) {
+			var test = parseInt(correctCount[i])-1; 
+			numberedBtns.eq(parseInt(correctCount[i])-1).addClass("correctCount");	
+		}
+		for (var j = 0; j < incorrectCount.length; j++) {
+			numberedBtns.eq(parseInt(incorrectCount[j])-1).addClass("incorrectCount");	
+		}
+		for (var k = 0; k < skippedCount.length; k++) {
+			numberedBtns.eq(parseInt(skippedCount[k])-1).addClass("skippedCount");	
+		} 
+	});
+};	
+
 
 /*=======================================================
 === Function that calls the constructors on page load ===
