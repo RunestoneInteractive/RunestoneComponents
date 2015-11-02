@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="bower_components/codemirror/lib/codemirror.css"/>
+    <link rel="stylesheet" href="css/activecode.css"/>
+    <link rel="stylesheet" href="../common/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../common/css/runestone-custom-sphinx-bootstrap.css"/>
+    <link rel="stylesheet" href="bower_components/jquery-ui/themes/base/jquery-ui.css"/>
+
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/codemirror/lib/codemirror.js"></script>
+    <script src="bower_components/codemirror/mode/python/python.js"></script>
+    <script src="bower_components/jquery-ui/jquery-ui.js"></script>
+    <script src="bower_components/skulpt/skulpt.min.js"></script>
+    <script src="bower_components/skulpt/skulpt-stdlib.js"></script>
+    <script src="js/activecode.js"></script>
+    <script src="js/jquery.ba-bbq.min.js"></script>
+    <style>
+        .CodeMirror {
+            height: auto;
+            width: 500px;
+            border: 2px solid darkslategray;
+        }
+    </style>
+</head>
+<body>
+<pre data-component="activecode" data-lang="python" id="test1">
+def foo():
+    print 'hello world'
+
+foo()
+</pre>
+
+<pre data-component="activecode" data-lang="python" id="test2" data-include="test1 test2">
+def main():
+    print 'goodbye girl'
+
+main()
+====
+print "This is hidden suffix code you don't see it in the editor"
+</pre>
+
+
+<pre data-component="activecode" data-lang="javascript" id="test3">
+    writeln('hello world');
+</pre>
+
+<pre data-component="activecode" data-lang="htmlmixed" id="test4">
+<h1>Hello World</h1>
+    <ul>
+        <li>one</li>
+        <li>two</li>
+        <li>three</li>
+    </ul>
+</pre>
+
+</body>
+</html>

@@ -103,7 +103,9 @@ if (allVisualizers === undefined) {
 
 
 $(window).resize(function() {
-    %(divid)s_vis.redrawConnectors();
+    if (%(divid)s_vis) {
+        %(divid)s_vis.redrawConnectors();
+    }
 });
 </script>
 '''

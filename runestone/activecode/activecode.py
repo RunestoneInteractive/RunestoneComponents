@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+from __future__ import print_function
 
 __author__ = 'bmiller'
 
@@ -20,6 +21,7 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from .textfield import *
+from sqlalchemy import create_engine, Table, MetaData, select, delete
 
 try:
     from html import escape  # py3
@@ -126,7 +128,8 @@ class ActiveCode(Directive):
         'timelimit': directives.unchanged,
         'stdin' : directives.unchanged,
         'datafile' : directives.unchanged,
-        'sourcefile' : directives.unchanged
+        'sourcefile' : directives.unchanged,
+        'available_files' : directives.unchanged
     }
 
     def run(self):
@@ -135,10 +138,11 @@ class ActiveCode(Directive):
         if not hasattr(env, 'activecodecounter'):
             env.activecodecounter = 0
         env.activecodecounter += 1
-
         self.options['name'] = self.arguments[0].strip()
 
         self.options['divid'] = self.arguments[0]
+        if not self.options['divid']:
+            raise Exception("No divid for ..activecode or ..actex in activecode.py")
 
         if self.content:
             source = "\n".join(self.content)
@@ -228,6 +232,62 @@ class ActiveCode(Directive):
 
         if 'gradebutton' not in self.options:
             self.options['gradebutton'] = ''
+
+        if self.content:
+            if '====' in self.content:
+                idx = self.content.index('====')
+                source = "\n".join(self.content[:idx])
+                suffix = "\n".join(self.content[idx+1:])
+            else:
+                source = "\n".join(self.content)
+                suffix = "\n"
+        else:
+            source = '\n'
+            suffix = '\n'
+        try:
+            engine = create_engine(env.config.html_context['dburl'])
+            meta = MetaData()
+            course_name = env.config.html_context['course_id']
+            Source_code = Table('source_code', meta, autoload=True, autoload_with=engine)
+            divid = self.options['divid']
+
+            engine.execute(Source_code.delete().where(Source_code.c.acid == divid).where(Source_code.c.course_id == course_name))
+            engine.execute(Source_code.insert().values(
+                acid = divid,
+                course_id = course_name,
+                main_code= source,
+                suffix_code = suffix,
+                includes = self.options['include'],
+                available_files = self.options.get('available_files', "")
+            ))
+            try:
+                ch, sub_ch = env.docname.split('/')
+            except:
+                ch, sub_ch = (env.docname, 'null subchapter')
+            Div = Table('div_ids', meta, autoload=True, autoload_with=engine)
+            engine.execute(Div.delete()\
+                           .where(Div.c.course_name == course_name)\
+                           .where(Div.c.chapter == ch)\
+                           .where(Div.c.subchapter==sub_ch)\
+                           .where(Div.c.div_id==divid))
+            engine.execute(Div.insert().values(
+                course_name = course_name,
+                chapter = ch,
+                subchapter = sub_ch,
+                div_id = divid,
+                div_type = 'activecode'
+            ))
+
+
+        except Exception as e:
+            print("The exception is ", e)
+            print(env.config.html_context['course_id'])
+            print("Unable to save to source_code table in activecode.py. Possible problems:")
+            print("  1. dburl or course_id are not set in conf.py for your book")
+            print("  2. unable to connect to the database using dburl")
+            print("")
+            print("This should only affect the grading interface. Everything else should be fine.")
+
 
         acnode = ActivcodeNode(self.options)
         self.add_name(acnode)    # make this divid available as a target for :ref:
