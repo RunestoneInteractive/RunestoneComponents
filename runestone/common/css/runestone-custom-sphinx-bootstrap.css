@@ -48,15 +48,10 @@ div.section {
 	padding-left:0;
 	padding-right:0;
 }
-<<<<<<< HEAD
+
 
 .container  .section >*:not(.section) {
-	/*max-width: 500pt;*/
-	width: 500pt;
-=======
- .container  .section >*:not(.section) {
 	max-width: 500pt;
->>>>>>> upstream/master
 	margin-left: auto;
 	margin-right: auto;
 }
