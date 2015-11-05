@@ -335,7 +335,9 @@ MultipleChoice.prototype.restoreRadio = function () {
                     $(this.optionArray[b].input).attr("checked", "true");
                 }
             }
-            this.enableMCComparison();
+            if (this.useRunestoneServices) {
+                this.enableMCComparison();
+            }
         } // end if not null
     } // end if (len > 0)
 };
@@ -351,7 +353,9 @@ MultipleChoice.prototype.processMCMASubmission = function () {
     this.populateMCMALocalStorage();
     this.logMCMAsubmission();
     this.renderMCMAFeedBack();
-    this.enableMCComparison();
+    if (this.useRunestoneServices) {
+        this.enableMCComparison();
+    }
 };
 
 MultipleChoice.prototype.getSubmittedOpts = function () {
@@ -431,7 +435,9 @@ MultipleChoice.prototype.processMCMFSubmission = function () {
     this.scoreMCMFSubmission();
     this.logMCMFsubmission();
     this.renderMCMFFeedback(this.givenArray[0] == this.correctIndexList[0], this.singlefeedback);
-    this.enableMCComparison();
+    if (this.useRunestoneServices) {
+        this.enableMCComparison();
+    }
 };
 
 MultipleChoice.prototype.scoreMCMFSubmission = function () {
