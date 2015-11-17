@@ -155,7 +155,7 @@ class usageAssignment(Directive):
         # Accumulate all the Chapters and SubChapters that are to be visited
         # For each chapter, accumulate all subchapters
         sub_chs = []
-        if 'chapter' in self.options:
+        if 'chapters' in self.options:
             for nm in self.options.get('chapters').split(','):
                 ch = session.query(Chapter).filter(Chapter.c.course_id == course_name,
                                                    Chapter.c.chapter_label == nm.strip()).first()
