@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+from __future__ import print_function
 
 __author__ = 'bmiller'
 
@@ -278,12 +279,14 @@ class ActiveCode(Directive):
             ))
 
 
-        except:
-            print "Unable to save to source_code table in activecode.py. Possible problems:"
-            print "  1. dburl or project_name are not set in pavement.py for your book"
-            print "  2. unable to connect to the database using dburl"
-            print
-            print "This should only affect the grading interface. Everything else should be fine."
+        except Exception as e:
+            print("The exception is ", e)
+            print(env.config.html_context['course_id'])
+            print("Unable to save to source_code table in activecode.py. Possible problems:")
+            print("  1. dburl or course_id are not set in conf.py for your book")
+            print("  2. unable to connect to the database using dburl")
+            print("")
+            print("This should only affect the grading interface. Everything else should be fine.")
 
 
         acnode = ActivcodeNode(self.options)

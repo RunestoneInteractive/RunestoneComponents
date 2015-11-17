@@ -750,8 +750,9 @@ HTMLActiveCode.prototype.runProg = function () {
         $(this.codeDiv).switchClass("col-md-12", "col-md-6", {duration: 500, queue: false});
     }
     $(this.outDiv).show({duration:700,queue:false});
-
+    prog = "<script type=text/javascript>window.onerror = function(msg,url,line) {alert(msg+' on line: '+line);};</script>" + prog;
     this.output.srcdoc = prog;
+
 };
 
 HTMLActiveCode.prototype.init = function(opts) {
