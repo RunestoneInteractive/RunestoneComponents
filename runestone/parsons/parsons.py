@@ -33,6 +33,7 @@ def setup(app):
     # jquery to their original versions
     app.add_javascript('lib/jquery.min.js')
     app.add_javascript('lib/jquery-ui.min.js')
+    app.add_javascript('lib/jquery.ui.touch-punch.min.js')
     app.add_javascript('lib/prettify.js')
     app.add_javascript('lib/underscore-min.js')
     app.add_javascript('lib/lis.js')
