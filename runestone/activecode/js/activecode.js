@@ -2,6 +2,333 @@
  * Created by bmiller on 3/19/15.
  */
 
+var defaultLanguage = "en";
+var activeLanguage = defaultLanguage;
+var localizations = {
+    "en": {
+        RunButtonCaption: "Run",
+        LoadButtonCaption: "Load",
+        SaveButtonCaption: "Save",
+        FeedbackButtonCaption: "Show Feedback",
+        ShowHideCodeButtonCaption: "Show/Hide Code",
+        CodeLensButtonCaptionShow: "Show CodeLens",
+        CodeLensButtonCaptionShowIn: "Show in CodeLens",
+        CodeLensButtonCaptionHide: "Hide CodeLens",
+        CodeCoachButtonCaption: "Code Coach",
+        AudioTourButtonCaption: "Audio Tour",
+        ErrorSaveRedirected: "Did not save! It appears you are not logged in properly",
+        ErrorSaveOther: "Error: Program not saved",
+        PromptLoginToLoad: "Login to load your code",
+        PromptLoginToSave: "Login to save your code",
+        InformCodeSaved: "Saved your code.",
+        PromptSavingEmptyProgram: "You are about to save an empty program, this will overwrite a previously saved program. Continue?",
+        ErrorRequestFailed: "Request Failed for",
+        InformSavedCodeLoaded: "Loaded your saved code.",
+        InformSavedCodeNotFound: "No saved code.",
+        LabelGradeReportTitle: "Grade Report",
+        LabelGradeReportThisAssignment: "This assignment:",
+        LabelGradeReportNumOfAssignments: "Number of graded assignments:",
+        LabelGradeReportAverageScore: "Average score:",
+        ErrorNoGradeInformationReceived: "The server did not return any grade information",
+        LabelAssignmentFeedbackTitle: "Assignment Feedback",
+        LabelCodeRunErrorTitle: "Error",
+        LabelCodeRunErrorDescription: "Description",
+        LabelCodeRunErrorFixing: "To Fix",
+
+	ErrorFromCodeRun_ParseError:
+                "A parse error means that Python does not understand the syntax on the line the error message points out. " + 
+                "Common examples are forgetting commas beteween arguments or forgetting a : on a for statement",
+
+	ErrorFromCodeRun_ParseErrorFix:
+                "To fix a parse error you just need to look carefully at the line with the error and possibly " +
+                "the line before it. Make sure it conforms to all of Python's rules.",
+
+	ErrorFromCodeRun_TypeError:
+                "Type errors most often occur when an expression tries to combine two objects with types that should not " + 
+                "be combined. Like raising a string to a power",
+
+	ErrorFromCodeRun_TypeErrorFix:
+                "To fix a type error you will most likely need to trace through your code and make sure the variables have " + 
+                "the types you expect them to have.  It may be helpful to print out each variable along the way to be sure its " +
+                "value is what you think it should be.",
+
+	ErrorFromCodeRun_NameError:
+                "A name error almost always means that you have used a variable before it has a value. Often this may be a simple typo, so check the spelling carefully.",
+
+	ErrorFromCodeRun_NameErrorFix:
+                "Check the right hand side of assignment statements and your function calls, this is the most likely place for a NameError to be found.",
+
+	ErrorFromCodeRun_ValueError:
+                "A ValueError most often occurs when you pass a parameter to a function and the function is expecting one type and you pass another.",
+
+	ErrorFromCodeRun_ValueErrorFix:
+                "The error message gives you a pretty good hint about the name of the function as well as the value that is incorrect. " +
+                "Look at the error message closely and then trace back to the variable containing the problematic value.",
+
+	ErrorFromCodeRun_AttributeError:
+                "This error message is telling you that the object on the left hand side of the dot, does not have the attribute or method on the right hand side.",
+
+	ErrorFromCodeRun_AttributeErrorFix:
+                "The most common variant of this message is that the object undefined does not have attribute X. This tells you that the object " +
+                "on the left hand side of the dot is not what you think. Trace the variable back and print it out in various places until you " +
+                "discover where it becomes undefined. Otherwise check the attribute on the right hand side of the dot for a typo.",
+
+	ErrorFromCodeRun_TokenError: "Most of the time this error indicates that you have forgotten a right parenthesis or have forgotten to close a pair of quotes.",
+
+	ErrorFromCodeRun_TokenErrorFix: "Check each line of your program and make sure that your parenthesis are balanced.",
+
+	ErrorFromCodeRun_TimeLimitError:
+                "Your program is running too long. Most programs in this book should run in less than 10 seconds easily. " +
+                "This probably indicates your program is in an infinite loop.",
+
+	ErrorFromCodeRun_TimeLimitErrorFix:
+                "Add some print statements to figure out if your program is in an infinte loop. If it is not you can increase the run time with sys.setExecutionLimit(msecs)",
+
+	ErrorFromCodeRun_Error:
+                "Your program is running for too long. Most programs in this book should run in less than 30 seconds easily. " +
+                "This probably indicates your program is in an infinite loop.",
+
+	ErrorFromCodeRun_ErrorFix:
+                "Add some print statements to figure out if your program is in an infinte loop. If it is not you can increase the run time with sys.setExecutionLimit(msecs)",
+
+	ErrorFromCodeRun_SyntaxError:
+                "This message indicates that Python can't figure out the syntax of a particular statement. Some examples are assigning to a literal, or a function call",
+
+	ErrorFromCodeRun_SyntaxErrorFix:
+                 "Check your assignment statments and make sure that the left hand side of the assignment is a variable, not a literal or a function.",
+
+	ErrorFromCodeRun_IndexError:
+                "This message means that you are trying to index past the end of a string or a list.  For example if your list has " +
+                "3 things in it and you try to access the item at position 3 or more.",
+
+	ErrorFromCodeRun_IndexErrorFix:
+                "Remember that the first item in a list or string is at index position 0, quite often this message comes about " +
+                "because you are off by one.  Remember in a list of length 3 the last legal index is 2",
+
+	ErrorFromCodeRun_URIError: "",
+	ErrorFromCodeRun_URIErrorFix: "",
+
+	ErrorFromCodeRun_ImportError: "This error message indicates that you are trying to import a module that does not exist",
+
+	ErrorFromCodeRun_ImportErrorFix:
+                "One problem may simply be that you have a typo. It may also be that you are trying to import a module that exists " +
+                "in 'real' Python, but does not exist in this book. If this is the case, please submit a feature request to have the module added.",
+
+	ErrorFromCodeRun_ReferenceError: "This is most likely an internal error, particularly if the message references the console.",
+
+	ErrorFromCodeRun_ReferenceErrorFix: "Try refreshing the webpage, and if the error continues, submit a bug report along with your code",
+
+	ErrorFromCodeRun_ZeroDivisionError:
+                "This tells you that you are trying to divide by 0. Typically this is because the value of the variable in the denominator " +
+                "of a division expression has the value 0",
+
+	ErrorFromCodeRun_ZeroDivisionErrorFix:
+                "You may need to protect against dividing by 0 with an if statment, or you may need to rexamine your assumptions about the legal " +
+                "values of variables, it could be an earlier statment that is unexpectedly assigning a value of zero to the variable in question.",
+
+	ErrorFromCodeRun_RangeError: "This message almost always shows up in the form of Maximum call stack size exceeded.",
+
+	ErrorFromCodeRun_RangeErrorFix:
+                "This always occurs when a function calls itself. Its pretty likely that you are not doing this on purpose. " +
+                "Except in the chapter on recursion. If you are in that chapter then its likely you haven't identified a good base case.",
+
+	ErrorFromCodeRun_InternalError: "An Internal error may mean that you've triggered a bug in our Python",
+
+	ErrorFromCodeRun_InternalErrorFix: "Report this error, along with your code as a bug.",
+
+	ErrorFromCodeRun_IndentationError:
+                "This error occurs when you have not indented your code properly. This is most likely to happen as part of an if, for, while or def statement.",
+
+	ErrorFromCodeRun_IndentationErrorFix:
+                "Check your if, def, for, and while statements to be sure the lines are properly indented beneath them. Another source of this error " +
+                "comes from copying and pasting code where you have accidentally left some bits of code lying around that don't belong there anymore.",
+
+	ErrorFromCodeRun_NotImplementedError:
+                "This error occurs when you try to use a builtin function of Python that has not been implemented in this in-browser version of Python.",
+
+	ErrorFromCodeRun_NotImplementedErrorFix:
+                "For now the only way to fix this is to not use the function. There may be workarounds. If you really need this builtin function " +
+                "then file a bug report and tell us how you are trying to use the function.",
+    },
+    "fi": {
+        RunButtonCaption: "Suorita",
+        LoadButtonCaption: "Lataa",
+        SaveButtonCaption: "Tallenna",
+        FeedbackButtonCaption: "Näytä palaute",
+        ShowHideCodeButtonCaption: "Näytä/piilota ohjelmakoodi",
+        CodeLensButtonCaptionShow: "Näytä Koodilinssi",
+        CodeLensButtonCaptionShowIn: "Näytä Koodilinssissä",
+        CodeLensButtonCaptionHide: "Piilota Koodilinssi",
+        CodeCoachButtonCaption: "Näytä Koodausapuri",
+        AudioTourButtonCaption: "Toista ääniselite",
+        ErrorSaveRedirected: "Koodia ei voitu tallentaa. Oletko varmasti sisäänkirjautunut kurssisivustolle?",
+        ErrorSaveOther: "Tapahtui odottamaton virhe, jonka vuoksi koodia ei voitu tallentaa.",
+        PromptLoginToLoad: "Aiemmin tallennetun ohjelmakoodin lataaminen kurssipalvelimelta edellyttää sisäänkirjautumista.",
+        PromptLoginToSave: "Ohjelmakoodin tallentaminen kurssipalvelimelle edellyttää sisäänkirjautumista.",
+        InformCodeSaved: "Ohjelmakoodisi on tallennettu.",
+        PromptSavingEmptyProgram: "Olet tallentamassa pelkkää tyhjää, joka ylikirjoittaa mahdollisen aiemmin tallennetun ohjelmakoodin.\n\nHaluatko varmasti jatkaa?",
+        ErrorRequestFailed: "Seuraavaan osoitteeseen lähetetty pyyntö epäonnistui:\n",
+        InformSavedCodeLoaded: "Aiemmin tallennettu ohjelmakoodi on ladattu.",
+        InformSavedCodeNotFound: "Aiemmin tallennettua ohjelmakoodia ei löytynyt.",
+        LabelGradeReportTitle: "Arvosanatiedote",
+        LabelGradeReportThisAssignment: "Tämä tehtävä:",
+        LabelGradeReportNumOfAssignments: "Arvioitujen tehtävien määrä:",
+        LabelGradeReportAverageScore: "Pisteiden keskiarvo:",
+        ErrorNoGradeInformationReceived: "Kurssipalvelin ei palauttanut arvostelutietoja",
+        LabelAssignmentFeedbackTitle: "Tehtäväpalaute",
+        LabelCodeRunErrorTitle: "Virheilmoitus",
+        LabelCodeRunErrorDescription: "Virheen kuvaus",
+        LabelCodeRunErrorFixing: "Korjausvihjeitä",
+
+	ErrorFromCodeRun_ParseError:
+                "<i>Parse error</i> eli <i>jäsennysvirhe</i> tarkoittaa, ettei Python-tulkki/kääntäjä ymmärrä jotain virheessä osoitetulla rivillä olevaa ohjelmakoodinosaa. " + 
+                "Yleisiä syitä tähän ovat esimerkiksi parametreja toisistaan erottavien pilkkujen tai esimerkiksi for-lauseeseen kuuluvan kaksoispisteen unohtaminen.",
+
+	ErrorFromCodeRun_ParseErrorFix:
+                "Jäsennysvirheen korjaamiseksi täytyy virheilmoituksessa osoitettua ohjelmakoodiriviä sekä sitä edeltävää koodia tarkastella huolellisesti " +
+                "yrittäen löytää kohta, joka ei ole Python-kielen kieliopin mukainen. Virheilmoituksessa ilmoitettu kohta ohjelmakoodissa on kohta, jolla koodia " +
+                "ymmärtää yrittävä tulkki tai kääntäjä ei enää pysty tulkitsemaan sitä Pythonin kielioppisääntöjen mukaisesti; tämä kohta ei kuitenkaan " +
+                "välttämättä ole se, jolla kieliopista poikkeaminen on tapahtunut: Usein esimerkiksi edellisen rivin lopusta on unohtunut pilkku, kaksoispiste, " +
+                "plus-merkki tai muu sellainen, mikä huomataan vasta myöhemmin, jossain vaiheessa tätä kohtaa seuraavan ohjelmakoodin tulkitsemista yritettäessä. " +
+                "<br /><br />Kannattaa myös muistaa, että usein ihminen on sokea omille virheilleen ja virhe, jota itse ei ole millään löytää, saattaa pistää toisen " +
+                "ihmisen silmiin kuin suuri punainen rasti keskellä koodia. Kannattaa siis pyytää Pythonia ymmärtävää kaveria vilkaisemaan, ellei itse keksi, " +
+                "missä ongelma sijaitsee.",
+
+	ErrorFromCodeRun_TypeError:
+                "<i>Type error</i> eli <i>tyyppivirhe</i> seuraa usein tilanteesta, jossa lausekkeessa yritetään yhdistää kaksi oliota tavalla, joka ei ole sallittua. " + 
+                "Esimerkiksi merkkijonon korottaminen potenssiin tai jakaminen luvulla ei tarkoita mitään järkevää, ellei tllaisia operaatioita erikseen määritellä.",
+
+	ErrorFromCodeRun_TypeErrorFix:
+                "Tyyppivirheen korjaamiseksi kannattaa varmistaa, että ohjelmakoodin jokaisella muuttujalla on juuri se tyyppi, jonka sillä olettaa olevan. " +
+                "Voi myös olla hyödyllistä lisätä ohjelmaan väliaikaisia tulostuskäskyjä muuttujien arvojen tulostamiseksi.",
+
+	ErrorFromCodeRun_NameError:
+                "<i>Name error</i> eli <i>nimivirhe</i> tarkoittaa lähes aina, että joko muuttujaa on käytetty ennen kuin sillä on arvo, tai jokin " +
+                "ohjelmakoodiin sisältyvistä nimistä (muuttujat, funktiot, oliot ja niin edelleen) on väärin kirjoitettu. Python-koodia lukeva tulkki/kääntäjä ei " +
+                "voi tietää, onko jonkin nimen tarkoitus olla juuri sellainen vai onko se väärin kirjoitettu; tietokone ei ymmärrä mitään samoin kuin ihminen.",
+
+	ErrorFromCodeRun_NameErrorFix:
+                "Tarkastele ohjelmakoodia selvittääksesi, onko virheilmoituksen osoittama nimi oikein kirjoitettu, ja jos on, niin onko se määritelty ja onko " +
+                "kyseinen määrittely varmasti oikein kirjoitettu.",
+
+	ErrorFromCodeRun_ValueError:
+                "<i>Value error</i> eli <i>arvovirhe</i> tarkoittaa, että ohjelmassa yritetään käyttää jotain arvoa tavalla, joka ei ole sallittu. " +
+                "Eräs mahdollisuus virheen syyksi on, että funktio olettaa saavansa parametrikseen toisen tyyppisen arvon kuin mitä se todellisuudessa saa. " +
+                "Toisaalta, ohjelma saattaa esimerkiksi yrittää vertailla toisiinsa vaikkapa funktiota ja lukuarvoa (esim. \"2 < print\"), mikä ei tietenkään " +
+                "oletettavasti tarkoita mitään.",
+
+	ErrorFromCodeRun_ValueErrorFix:
+                "Virheen sijainti ja virheellinen arvo selviävät mahdollisesti suoraan virheilmoituksesta. Nämä tietäen kannattaa etsiä virheellisen arvon sisältävä " +
+                "kohta sekä selvittää, miksi tässä kohdassa vaaditaan toisenlainen arvo sekä miksi siinä kohdassa todellisuudessa oli vääränlainen arvo.",
+
+	ErrorFromCodeRun_AttributeError:
+                "<i>Attribute error</i> eli <i>ominaisuusvirhe</i> kertoo, ettei pisteen vasemmalla puolella olevalla oliolla ole pisteen oikealla puolella " +
+                "mainittua ominaisuutta tai metodia.",
+
+	ErrorFromCodeRun_AttributeErrorFix:
+                "Yleisimmin tämä virhe ilmoittaa, ettei oliolla \"undefined\" ole jotain attribuuttia X. Tästä voi päätellä, että joko pisteen oikealla puolella on " +
+                "kirjoitusvirhe, tai sen vasemmalla puolella olio ei todellisuudessa ole se, joka sen on tarkoitettu olevan. Oliomuuttujan arvojen järjestelmällinen " +
+                "tulostaminen useassa kohdassa ennen virhettä auttaa huomaamaan, missä kohden muuttujan arvoksi tulee \"undefined\".",
+
+	ErrorFromCodeRun_TokenError: "<i>Token error</i> eli <i>symbolivirhe</i> tarkoittaa usein käytännössä, että oikeanpuoleinen sulje- tai lainausmerkki on unohtunut.",
+
+	ErrorFromCodeRun_TokenErrorFix: "Kannattaa varmistaa, että ohjelman jokaisella avaavalla sulkeella on vastaava sulkeva pari ja että ne ovat oikeassa järjestyksessä.",
+
+	ErrorFromCodeRun_TimeLimitError:
+                "Ohjelman suoritus kestää liian pitkään. Tämän oppikirjan ohjelmista suurimman osan suorituksen pitäisi kestää korkeintaan 10 sekuntia. " +
+                "Eräs syy tähän virheeseen on, että ohjelmassa on päättymätön silmukka.",
+
+	ErrorFromCodeRun_TimeLimitErrorFix:
+                "Kannattaa lisätä ohjelmaan sopiviin kohtiin tulostuslauseita, joiden tulosteista voi päätellä, ettei ohjelmassa ole päättymätöntä silmukkaa. Jos " +
+                "tällaista silmukkaa ei löydy, voi kokeilla kasvattaa ohjelmalle asetettua suoritusaikarajaa kutsulla sys.setExecutionLimit(<i>millisekuntimäärä</i>).",
+
+	ErrorFromCodeRun_Error:
+                "Ohjelman suoritus kestää liian pitkään. Tämän oppikirjan ohjelmista suurimman osan suorituksen pitäisi kestää korkeintaan 10 sekuntia. " +
+                "Eräs syy tähän virheeseen on, että ohjelmassa on päättymätön silmukka.",
+
+	ErrorFromCodeRun_ErrorFix:
+                "Kannattaa lisätä ohjelmaan sopiviin kohtiin tulostuslauseita, joiden tulosteista voi päätellä, ettei ohjelmassa ole päättymätöntä silmukkaa. Jos " +
+                "tällaista silmukkaa ei löydy, voi kokeilla kasvattaa ohjelmalle asetettua suoritusaikarajaa kutsulla sys.setExecutionLimit(<i>millisekuntimäärä</i>).",
+
+	ErrorFromCodeRun_SyntaxError:
+                "<i>Syntax error</i> eli <i>kielioppivirhe</i> tarkoittaa, ettei Python-tulkki/kääntäjä ymmärrä jonkin lauseen kielioppia, koska lause " + 
+                "ei ole Python-kielen mukainen. Tällaisia tilanteita ovat esimerkiksi sijoittaminen lukuun (23 = muuttuja) tai funktioon (auto.aja() = \"heippa\").",
+
+	ErrorFromCodeRun_SyntaxErrorFix:
+                 "Kannattaa tarkistaa sijoituslauseet varmistaen, että niiden vasemmat puolet ovat muuttujia eivätkä esimerkiksi lukuja, muuttujia tai functioita.",
+
+	ErrorFromCodeRun_IndexError:
+                "<i>Index error</i> eli <i>osoitusvirhe</i> tarkoittaa, että ohjelmakoodissa yritetään osoittaa esimerkiksi merkkijonon tai listan \"reunojen\" ulkopuolelle. " +
+                "Tämä virhe sattuu esimerkiksi yritettäessä osoittaa kolmialkioisen listan alkioita numeroilla 3 tai -4 (listan alkioiden numerot ovat 0, 1 ja 2).",
+
+	ErrorFromCodeRun_IndexErrorFix:
+                "Muista, että listan ensimmäisen alkion numero on 0 sekä että vaikkapa 6-alkioisen listan viimeisen alkion numero on 5. Usein on kyse " +
+                "yksinkertaisesesta ajatus- tai laskuvirheestä, josta käytetään englanniksi nimeä off-by-one (yhdellä ohi): Laskeminen alkaa tai päättyy " +
+                "yhden alkion päässä siitä/siinä, mistä/missä sen todellisuudessa tulisi alkaa/päättyä.",
+
+	ErrorFromCodeRun_URIError: "",
+	ErrorFromCodeRun_URIErrorFix: "",
+
+	ErrorFromCodeRun_ImportError:
+                "<i>Import error</i> eli <i>tuontivirhe</i> tarkoittaa, että ohjelmakoodi yrittää tuoda import-lauseella käyttöön moduulia, jota ei löydy.",
+
+	ErrorFromCodeRun_ImportErrorFix:
+                "Ensimmäiseksi kannattaa tarkistaa, että import-lauseessa olevat nimet on kirjoitettu oikein. Toinen mahdollisuus on, että ladattavaksi " +
+                "tarkoitettu moduuli on olemassa \"oikeassa\" Python-ympäristössä, mutta ei tässä selainpohjaisessa Python-toteutuksessa. Jälkimmäisessä " +
+                "tapauksessa on mahdollista lähettää tämän Python-toteutuksen kehittäjille pyyntö kyseisen moduulin lisäämiseksi.",
+
+	ErrorFromCodeRun_ReferenceError: "Tämä on todennäköisesti sisäinen virhe erityisesti silloin, jos virheilmoitus viittaa konsoliin.",
+
+	ErrorFromCodeRun_ReferenceErrorFix: "Ensimmäisenä kannattaa kokeilla uudelleenladata tämä web-sivu selaimeen. Jollei se auta, voi tämän " +
+                "Python-toteutuksen kehittäjille lähettää virheilmoituksen sekä ohjelmakoodin, joka sillä oli tarkoitus suorittaa.",
+
+	ErrorFromCodeRun_ZeroDivisionError:
+                "<i>Zero division error</i> eli <i>nollallajakovirhe</i> ilmoittaa, että ohjelmakoodissa yritettiin jakaa jotain lukua nollalla (mitä ei ole määritelty).",
+
+	ErrorFromCodeRun_ZeroDivisionErrorFix:
+                "Ensimmäiseksi kannattaa miettiä, onko virheilmoituksen tarkoittamassa kohdassa sallittua olla arvo nolla; jokin aiempi osa ohjelmakoodia " +
+                "saattaa vahingossa esimerkiksi asettaa jakajana käytetylle muuttujalle arvon nolla. Nollalla jakamista vastaan voi luonnollisestikin suojautua " +
+                "vaikkapa if-lauseita käyttäen. Ohjelman ulkopuolelta saatujen syötteiden (esimerkiksi käyttäjältä luetut arvot) kelvollisuus täytyy aina tarkistaa, " +
+                "ja virheellisistä syötteistä tulee jollain tavoin antaa virheilmoitus.",
+
+	ErrorFromCodeRun_RangeError:
+                "Tämä virheilmoitus tarkoittaa lähes aina, että kutsupinon maksimikoko on ylitetty, eli ohjelma on tehnyt sisäkkäisiä kutsuja " +
+                "enemmän, kuin mitä niiden käyttöön varatulle muistialueelle mahdutaan tallentamaan.",
+
+	ErrorFromCodeRun_RangeErrorFix:
+                "Alkeisesimerkki tämän virheen syystä on funktio, joka kutsuu itse itseään (ns. rekursion yksinkertaisin muoto) ilman kelvollista " +
+                "lopetusehtoa. Jollei rekursiota tietoisesti harjoittele tai käytä, ei todennäköisesti halua näin tapahtuvan. Tällöin kannattaa " +
+                "tarkistaa, ettei ohjelmakoodissa ole itseään tai toisiaan sisäkkäin kutsuvia funktioita. Muussa tapauksessa kannattaa tarkistaa " +
+                "ehdot, joiden on tarkoitus aiheuttaa rekursion päättyminen hallitusti.",
+
+	ErrorFromCodeRun_InternalError: "<i>Internal error</i> eli <i>sisäinen virhe</i> tarkoittaa, että tästä selainpohjaisesta Python-toteutuksesta on löytynyt virhe.",
+
+	ErrorFromCodeRun_InternalErrorFix:
+                "Tästä virheestä kannattaa lähettää tämän Python-toteutuksen kehittäjille virheraportti, jonka mukana on suoritettavaksi aiottu ohjelmakoodi.",
+
+	ErrorFromCodeRun_IndentationError:
+                "<i>Indentation error</i> eli <i>sisennysvirhe</i> johtuu siitä, ettei ohjelmakoodia ole sisennetty kelvollisesti. Tämä tapahtuu " +
+                "todennäköisimmin if-, for-, while- ja def-lauseiden yhteydessä.",
+
+	ErrorFromCodeRun_IndentationErrorFix:
+                "Tarkista ohjelmasi if-, def-, for- ja while-lauseet ollaksesi varma, että niihin liittyvät koodilohkot ovat oikein sisennetyt. " +
+                "Eräs mahdollinen syy tämän virheen taustalla on ohjelmakoodin kopioiminen paikasta toiseen tai käyttämättömän ohjelmakoodin unohtaminen lojumaan jonnekin.",
+
+	ErrorFromCodeRun_NotImplementedError:
+                "<i>Not implemented error</i> eli <i>toteutuksenpuutevirhe</i> aiheutuu yritettäessä käyttää \"oikeiden\" Python-toteutusten mukana " +
+                "seuraavasta ohjelmakirjastosta (ns. standardikirjasto eli aina jonkin kielen kehitystyökalujen mukana saatava kirjasto) funktiota, jota ei " +
+                "tässä selainpohjaisessa Python-toteutuksessa ole toteutettu.",
+
+	ErrorFromCodeRun_NotImplementedErrorFix:
+                "Tällä hetkellä ainoa ratkaisu on olla käyttämättä funktiota, jota virheilmoitus koskee. Kannattaa myös miettiä, voisiko kyseisen funktion käytön " +
+                "jollain tavoin kiertää. Jos tätä funktiota todella välttämättä tarvitaan, voi tämän selainpohjaisen Python-toteutuksen kehittäjille lähettää " +
+                "toteutuspyynnön, jossa kerrotaan myös, miten funktiota yritettiin/halutaan käyttää.",
+    },
+};
+
+function getLocalizedString(id) {
+    return localizations[activeLanguage][id];
+};
 
 var edList = {};
 
@@ -12,8 +339,8 @@ ActiveCode.prototype = new RunestoneBase();
 function ActiveCode(opts) {
     if (opts) {
         this.init(opts);
-        }
     }
+};
 
 ActiveCode.prototype.init = function(opts) {
     RunestoneBase.apply( this, arguments );  // call parent constructor
@@ -51,6 +378,11 @@ ActiveCode.prototype.init = function(opts) {
     this.createEditor();
     this.createOutput();
     this.createControls();
+    if ($(orig).data('hidecaption')) {
+        this.hidecaption = true;
+    } else {
+        this.hidecaption = false;
+    }
     if ($(orig).data('caption')) {
         this.caption = $(orig).data('caption');
     } else {
@@ -63,7 +395,10 @@ ActiveCode.prototype.init = function(opts) {
     }
 };
 
-ActiveCode.prototype.createEditor = function (index) {
+ActiveCode.prototype.createEditor = function(index) {
+    if (eBookConfig.language != undefined && localizations[eBookConfig.language] != undefined) {
+        activeLanguage = eBookConfig.language;
+    }
     var newdiv = document.createElement('div');
     var linkdiv = document.createElement('div')
     linkdiv.id = this.divid.replace(/_/g,'-').toLowerCase();  // :ref: changes _ to - so add this as a target
@@ -91,7 +426,7 @@ ActiveCode.prototype.createEditor = function (index) {
     });
 
     // give the user a visual cue that they have changed but not saved
-    editor.on('change', (function () {
+    editor.on('change', (function() {
         if (editor.acEditEvent == false || editor.acEditEvent === undefined) {
             $(editor.getWrapperElement()).css('border-top', '2px solid #b43232');
             $(editor.getWrapperElement()).css('border-bottom', '2px solid #b43232');
@@ -106,13 +441,13 @@ ActiveCode.prototype.createEditor = function (index) {
     }
 };
 
-ActiveCode.prototype.createControls = function () {
+ActiveCode.prototype.createControls = function() {
     var ctrlDiv = document.createElement("div");
     $(ctrlDiv).addClass("ac_actions");
 
     // Run
     var butt = document.createElement("button");
-    $(butt).text("Run");
+    $(butt).text(getLocalizedString("RunButtonCaption"));
     $(butt).addClass("btn btn-success");
     ctrlDiv.appendChild(butt);
     this.runButton = butt;
@@ -122,7 +457,7 @@ ActiveCode.prototype.createControls = function () {
     if (this.useRunestoneServices) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Save");
+        $(butt).text(getLocalizedString("SaveButtonCaption"));
         $(butt).css("margin-left", "10px");
         this.saveButton = butt;
         this.saveButton.onclick = this.saveEditor.bind(this);
@@ -135,7 +470,7 @@ ActiveCode.prototype.createControls = function () {
     if (this.useRunestoneServices) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Load");
+        $(butt).text(getLocalizedString("LoadButtonCaption"));
         $(butt).css("margin-left", "10px");
         this.loadButton = butt;
         this.loadButton.onclick = this.loadEditor.bind(this);
@@ -147,7 +482,7 @@ ActiveCode.prototype.createControls = function () {
     if ($(this.origElem).data('gradebutton')) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Show Feedback");
+        $(butt).text(getLocalizedString("FeedbackButtonCaption"));
         $(butt).css("margin-left","10px");
         this.gradeButton = butt;
         ctrlDiv.appendChild(butt);
@@ -157,7 +492,7 @@ ActiveCode.prototype.createControls = function () {
     if (this.hidecode) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Show/Hide Code");
+        $(butt).text(getLocalizedString("ShowHideCodeButtonCaption"));
         $(butt).css("margin-left", "10px");
         this.showHideButt = butt;
         ctrlDiv.appendChild(butt);
@@ -171,7 +506,7 @@ ActiveCode.prototype.createControls = function () {
     if ($(this.origElem).data("codelens")) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Show CodeLens");
+        $(butt).text(getLocalizedString("CodeLensButtonCaptionShow"));
         $(butt).css("margin-left", "10px");
         this.clButton = butt;
         ctrlDiv.appendChild(butt);
@@ -181,7 +516,7 @@ ActiveCode.prototype.createControls = function () {
     if (this.useRunestoneServices && $(this.origElem).data("coach")) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Code Coach");
+        $(butt).text(getLocalizedString("CodeCoachButtonCaption"));
         $(butt).css("margin-left", "10px");
         this.coachButton = butt;
         ctrlDiv.appendChild(butt);
@@ -192,7 +527,7 @@ ActiveCode.prototype.createControls = function () {
     if ($(this.origElem).data("audio")) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Audio Tour");
+        $(butt).text(getLocalizedString("AudioTourButtonCaption"));
         $(butt).css("margin-left", "10px");
         this.atButton = butt;
         ctrlDiv.appendChild(butt);
@@ -203,7 +538,7 @@ ActiveCode.prototype.createControls = function () {
 
 };
 
-ActiveCode.prototype.createOutput = function () {
+ActiveCode.prototype.createOutput = function() {
     // Create a parent div with two elements:  pre for standard output and a div
     // to hold turtle graphics output.  We use a div in case the turtle changes from
     // using a canvas to using some other element like svg in the future.
@@ -246,28 +581,31 @@ ActiveCode.prototype.createOutput = function () {
 
 ActiveCode.prototype.disableSaveLoad = function() {
     $(this.saveButton).addClass('disabled');
-    $(this.saveButton).attr('title','Login to save your code');
+    $(this.saveButton).attr('title', getLocalizedString("PromptLoginToSave"));
     $(this.loadButton).addClass('disabled');
-    $(this.loadButton).attr('title','Login to load your code');
+    $(this.loadButton).attr('title', getLocalizedString("PromptLoginToLoad"));
 };
 
 ActiveCode.prototype.addCaption = function() {
     //someElement.parentNode.insertBefore(newElement, someElement.nextSibling);
-    var capDiv = document.createElement('p');
-    $(capDiv).html(this.caption + " (" + this.divid + ")");
-    $(capDiv).addClass("ac_caption");
-    $(capDiv).addClass("ac_caption_text");
 
-    this.outerDiv.parentNode.insertBefore(capDiv, this.outerDiv.nextSibling);
+    if (eBookConfig.hideControlCaptions == false) {
+        var capDiv = document.createElement('p');
+        $(capDiv).html(this.caption + " (" + this.divid + ")");
+        $(capDiv).addClass("ac_caption");
+        $(capDiv).addClass("ac_caption_text");
+
+        this.outerDiv.parentNode.insertBefore(capDiv, this.outerDiv.nextSibling);
+    }
 };
 
-ActiveCode.prototype.saveEditor = function () {
+ActiveCode.prototype.saveEditor = function() {
     var res;
     var saveSuccess = function(data, status, whatever) {
         if (data.redirect) {
-            alert("Did not save!  It appears you are not logged in properly")
+            alert(getLocalizedString("ErrorSaveRedirected"))
         } else if (data == "") {
-            alert("Error:  Program not saved");
+            alert(getLocalizedString("ErrorSaveOther"));
         }
         else {
             var acid = eval(data)[0];
@@ -276,7 +614,7 @@ ActiveCode.prototype.saveEditor = function () {
             } else {
                 // use a tooltip to provide some success feedback
                 var save_btn = $(this.saveButton);
-                save_btn.attr('title', 'Saved your code.');
+                save_btn.attr('title', getLocalizedString("InformCodeSaved"));
                 opts = {
                     'trigger': 'manual',
                     'placement': 'bottom',
@@ -284,7 +622,7 @@ ActiveCode.prototype.saveEditor = function () {
                 };
                 save_btn.tooltip(opts);
                 save_btn.tooltip('show');
-                setTimeout(function () {
+                setTimeout(function() {
                     save_btn.tooltip('destroy')
                 }, 4000);
 
@@ -297,13 +635,13 @@ ActiveCode.prototype.saveEditor = function () {
     var data = {acid: this.divid, code: this.editor.getValue()};
     data.lang = this.language;
     if (data.code.match(/^\s+$/)) {
-        res = confirm("You are about to save an empty program, this will overwrite a previously saved program.  Continue?");
+        res = confirm(getLocalizedString("PromptSavingEmptyProgram"));
         if (! res) {
             return;
         }
     }
-    $(document).ajaxError(function (e, jqhxr, settings, exception) {
-        alert("Request Failed for" + settings.url)
+    $(document).ajaxError(function(e, jqhxr, settings, exception) {
+        alert(getLocalizedString("ErrorRequestFailed") + settings.url)
     });
     jQuery.post(eBookConfig.ajaxURL + 'saveprog', data, saveSuccess);
     if (this.editor.acEditEvent) {
@@ -314,9 +652,9 @@ ActiveCode.prototype.saveEditor = function () {
 
 };
 
-ActiveCode.prototype.loadEditor = function () {
+ActiveCode.prototype.loadEditor = function() {
 
-    var loadEditor = (function (data, status, whatever) {
+    var loadEditor = (function(data, status, whatever) {
         // function called when contents of database are returned successfully
         var res = eval(data)[0];
 
@@ -326,17 +664,17 @@ ActiveCode.prototype.loadEditor = function () {
                 this.editor.refresh();
             }.bind(this),500);
             $(this.loadButton).tooltip({'placement': 'bottom',
-                             'title': "Loaded your saved code.",
+                             'title': getLocalizedString("InformSavedCodeLoaded"),
                              'trigger': 'manual'
                             });
         } else {
             $(this.loadButton).tooltip({'placement': 'bottom',
-                             'title': "No saved code.",
+                             'title': getLocalizedString("InformSavedCodeNotFound"),
                              'trigger': 'manual'
                             });
         }
         $(this.loadButton).tooltip('show');
-        setTimeout(function () {
+        setTimeout(function() {
             $(this.loadButton).tooltip('destroy')
         }.bind(this), 4000);
     }).bind(this);
@@ -350,29 +688,29 @@ ActiveCode.prototype.loadEditor = function () {
 
 };
 
-ActiveCode.prototype.createGradeSummary = function () {
+ActiveCode.prototype.createGradeSummary = function() {
     // get grade and comments for this assignment
     // get summary of all grades for this student
     // display grades in modal window
-    var showGradeSummary = function (data, status, whatever) {
+    var showGradeSummary = function(data, status, whatever) {
         var report = eval(data)[0];
         // check for report['message']
         if (report) {
-            body = "<h4>Grade Report</h4>" +
-                   "<p>This assignment: " + report['grade'] + "</p>" +
+            body = "<h4>" + getLocalizedString("LabelGradeReportTitle") + "</h4>" +
+                   "<p>" + getLocalizedString("LabelGradeReportThisAssignment") + " " + report['grade'] + "</p>" +
                    "<p>" + report['comment'] + "</p>" +
-                   "<p>Number of graded assignments: " + report['count'] + "</p>" +
-                   "<p>Average score: " +  report['avg'] + "</p>"
+                   "<p>" + getLocalizedString("LabelGradeReportNumOfAssignments") + " " + report['count'] + "</p>" +
+                   "<p>" + getLocalizedString("LabelGradeReportAverageScore") + " " + report['avg'] + "</p>"
 
         } else {
-            body = "<h4>The server did not return any grade information</h4>";
+            body = "<h4>" + getLocalizedString("ErrorNoGradeInformationReceived") + "</h4>";
         }
         var html = '<div class="modal fade">' +
             '  <div class="modal-dialog compare-modal">' +
             '    <div class="modal-content">' +
             '      <div class="modal-header">' +
             '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
-            '        <h4 class="modal-title">Assignment Feedback</h4>' +
+            '        <h4 class="modal-title">' + getLocalizedString("LabelAssignmentFeedbackTitle") + '</h4>' +
             '      </div>' +
             '      <div class="modal-body">' +
             body +
@@ -388,18 +726,18 @@ ActiveCode.prototype.createGradeSummary = function () {
     jQuery.get(eBookConfig.ajaxURL + 'getassignmentgrade', data, showGradeSummary);
 };
 
-ActiveCode.prototype.hideCodelens = function (button, div_id) {
+ActiveCode.prototype.hideCodelens = function(button, div_id) {
     this.codelens.style.display = 'none'
 };
 
-ActiveCode.prototype.showCodelens = function () {
+ActiveCode.prototype.showCodelens = function() {
 
     if (this.codelens.style.display == 'none') {
         this.codelens.style.display = 'block';
-        this.clButton.innerText = "Hide Codelens";
+        this.clButton.innerText = getLocalizedString("CodeLensButtonCaptionHide");
     } else {
         this.codelens.style.display = "none";
-        this.clButton.innerText = "Show in Codelens";
+        this.clButton.innerText = getLocalizedString("CodeLensButtonCaptionShowIn");
         return;
     }
 
@@ -448,7 +786,7 @@ ActiveCode.prototype.showCodelens = function () {
 // </iframe>
 
 
-ActiveCode.prototype.showCodeCoach = function (div_id) {
+ActiveCode.prototype.showCodeCoach = function(div_id) {
     var myIframe;
     var srcURL;
     var cl;
@@ -480,13 +818,13 @@ ActiveCode.prototype.showCodeCoach = function (div_id) {
 };
 
 
-ActiveCode.prototype.toggleEditorVisibility = function () {
+ActiveCode.prototype.toggleEditorVisibility = function() {
 
 };
 
-ActiveCode.prototype.addErrorMessage = function (err) {
+ActiveCode.prototype.addErrorMessage = function(err) {
     //logRunEvent({'div_id': this.divid, 'code': this.prog, 'errinfo': err.toString()}); // Log the run event
-    var errHead = $('<h3>').html('Error');
+    var errHead = $('<h3>').html(getLocalizedString("LabelCodeRunErrorTitle"));
     this.eContainer = this.outerDiv.appendChild(document.createElement('div'));
     this.eContainer.className = 'error alert alert-danger';
     this.eContainer.id = this.divid + '_errinfo';
@@ -496,61 +834,17 @@ ActiveCode.prototype.addErrorMessage = function (err) {
     var to = errString.indexOf(":");
     var errName = errString.substring(0, to);
     errText.innerHTML = errString;
-    $(this.eContainer).append('<h3>Description</h3>');
+    $(this.eContainer).append('<h3>' + getLocalizedString("LabelCodeRunErrorDescription") + '</h3>');
     var errDesc = this.eContainer.appendChild(document.createElement('p'));
-    errDesc.innerHTML = errorText[errName];
-    $(this.eContainer).append('<h3>To Fix</h3>');
+    errDesc.innerHTML = getLocalizedString("ErrorFromCodeRun_" + errName);
+    $(this.eContainer).append('<h3>' + getLocalizedString("LabelCodeRunErrorFixing") + '</h3>');
     var errFix = this.eContainer.appendChild(document.createElement('p'));
-    errFix.innerHTML = errorText[errName + 'Fix'];
+    errFix.innerHTML = getLocalizedString("ErrorFromCodeRun_" + errName + 'Fix');
     var moreInfo = '../ErrorHelp/' + errName.toLowerCase() + '.html';
     //console.log("Runtime Error: " + err.toString());
 };
 
-
-
-var errorText = {};
-
-errorText.ParseError = "A parse error means that Python does not understand the syntax on the line the error message points out.  Common examples are forgetting commas beteween arguments or forgetting a : on a for statement";
-errorText.ParseErrorFix = "To fix a parse error you just need to look carefully at the line with the error and possibly the line before it.  Make sure it conforms to all of Python's rules.";
-errorText.TypeError = "Type errors most often occur when an expression tries to combine two objects with types that should not be combined.  Like raising a string to a power";
-errorText.TypeErrorFix = "To fix a type error you will most likely need to trace through your code and make sure the variables have the types you expect them to have.  It may be helpful to print out each variable along the way to be sure its value is what you think it should be.";
-errorText.NameError = "A name error almost always means that you have used a variable before it has a value.  Often this may be a simple typo, so check the spelling carefully.";
-errorText.NameErrorFix = "Check the right hand side of assignment statements and your function calls, this is the most likely place for a NameError to be found.";
-errorText.ValueError = "A ValueError most often occurs when you pass a parameter to a function and the function is expecting one type and you pass another.";
-errorText.ValueErrorFix = "The error message gives you a pretty good hint about the name of the function as well as the value that is incorrect.  Look at the error message closely and then trace back to the variable containing the problematic value.";
-errorText.AttributeError = "This error message is telling you that the object on the left hand side of the dot, does not have the attribute or method on the right hand side.";
-errorText.AttributeErrorFix = "The most common variant of this message is that the object undefined does not have attribute X.  This tells you that the object on the left hand side of the dot is not what you think. Trace the variable back and print it out in various places until you discover where it becomes undefined.  Otherwise check the attribute on the right hand side of the dot for a typo.";
-errorText.TokenError = "Most of the time this error indicates that you have forgotten a right parenthesis or have forgotten to close a pair of quotes.";
-errorText.TokenErrorFix = "Check each line of your program and make sure that your parenthesis are balanced.";
-errorText.TimeLimitError = "Your program is running too long.  Most programs in this book should run in less than 10 seconds easily. This probably indicates your program is in an infinite loop.";
-errorText.TimeLimitErrorFix = "Add some print statements to figure out if your program is in an infinte loop.  If it is not you can increase the run time with sys.setExecutionLimit(msecs)";
-errorText.Error = "Your program is running for too long.  Most programs in this book should run in less than 30 seconds easily. This probably indicates your program is in an infinite loop.";
-errorText.ErrorFix = "Add some print statements to figure out if your program is in an infinte loop.  If it is not you can increase the run time with sys.setExecutionLimit(msecs)";
-errorText.SyntaxError = "This message indicates that Python can't figure out the syntax of a particular statement.  Some examples are assigning to a literal, or a function call";
-errorText.SyntaxErrorFix = "Check your assignment statments and make sure that the left hand side of the assignment is a variable, not a literal or a function.";
-errorText.IndexError = "This message means that you are trying to index past the end of a string or a list.  For example if your list has 3 things in it and you try to access the item at position 3 or more.";
-errorText.IndexErrorFix = "Remember that the first item in a list or string is at index position 0, quite often this message comes about because you are off by one.  Remember in a list of length 3 the last legal index is 2";
-errorText.URIError = "";
-errorText.URIErrorFix = "";
-errorText.ImportError = "This error message indicates that you are trying to import a module that does not exist";
-errorText.ImportErrorFix = "One problem may simply be that you have a typo.  It may also be that you are trying to import a module that exists in 'real' Python, but does not exist in this book.  If this is the case, please submit a feature request to have the module added.";
-errorText.ReferenceError = "This is most likely an internal error, particularly if the message references the console.";
-errorText.ReferenceErrorFix = "Try refreshing the webpage, and if the error continues, submit a bug report along with your code";
-errorText.ZeroDivisionError = "This tells you that you are trying to divide by 0. Typically this is because the value of the variable in the denominator of a division expression has the value 0";
-errorText.ZeroDivisionErrorFix = "You may need to protect against dividing by 0 with an if statment, or you may need to rexamine your assumptions about the legal values of variables, it could be an earlier statment that is unexpectedly assigning a value of zero to the variable in question.";
-errorText.RangeError = "This message almost always shows up in the form of Maximum call stack size exceeded.";
-errorText.RangeErrorFix = "This always occurs when a function calls itself.  Its pretty likely that you are not doing this on purpose. Except in the chapter on recursion.  If you are in that chapter then its likely you haven't identified a good base case.";
-errorText.InternalError = "An Internal error may mean that you've triggered a bug in our Python";
-errorText.InternalErrorFix = "Report this error, along with your code as a bug.";
-errorText.IndentationError = "This error occurs when you have not indented your code properly.  This is most likely to happen as part of an if, for, while or def statement.";
-errorText.IndentationErrorFix = "Check your if, def, for, and while statements to be sure the lines are properly indented beneath them.  Another source of this error comes from copying and pasting code where you have accidentally left some bits of code lying around that don't belong there anymore.";
-errorText.NotImplementedError = "This error occurs when you try to use a builtin function of Python that has not been implemented in this in-browser version of Python.";
-errorText.NotImplementedErrorFix = "For now the only way to fix this is to not use the function.  There may be workarounds.  If you really need this builtin function then file a bug report and tell us how you are trying to use the function.";
-
-
-
-
-ActiveCode.prototype.setTimeLimit = function (timer) {
+ActiveCode.prototype.setTimeLimit = function(timer) {
     var timelimit = this.timeLimit;
     if (timer !== undefined ) {
         timelimit = timer
@@ -574,7 +868,7 @@ ActiveCode.prototype.setTimeLimit = function (timer) {
 
 };
 
-ActiveCode.prototype.builtinRead = function (x) {
+ActiveCode.prototype.builtinRead = function(x) {
         if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
             throw "File not found: '" + x + "'";
         return Sk.builtinFiles["files"][x];
@@ -662,7 +956,7 @@ ActiveCode.prototype.runProg = function() {
                 }).bind(this));
 
         if (typeof(allVisualizers) != "undefined") {
-            $.each(allVisualizers, function (i, e) {
+            $.each(allVisualizers, function(i, e) {
                 e.redrawConnectors();
                 });
             }
@@ -684,7 +978,7 @@ JSActiveCode.prototype.init = function(opts) {
     ActiveCode.prototype.init.apply(this,arguments)
     }
 
-JSActiveCode.prototype.outputfun = function (a) {
+JSActiveCode.prototype.outputfun = function(a) {
     $(this.output).css("visibility","visible");
     var str = "[";
     if (typeof(a) == "object" && a.length) {
@@ -738,7 +1032,7 @@ function HTMLActiveCode (opts) {
     }
 }
 
-HTMLActiveCode.prototype.runProg = function () {
+HTMLActiveCode.prototype.runProg = function() {
     var prog = this.buildProg();
 
 //    $('#'+myDiv+'_iframe').remove();
@@ -762,7 +1056,7 @@ HTMLActiveCode.prototype.init = function(opts) {
     this.editor.setValue(this.code);
 };
 
-HTMLActiveCode.prototype.createOutput = function () {
+HTMLActiveCode.prototype.createOutput = function() {
     var outDiv = document.createElement("div");
     $(outDiv).addClass("ac_output");
     if(this.alignVertical) {
@@ -786,7 +1080,7 @@ HTMLActiveCode.prototype.createOutput = function () {
 };
 
 
-String.prototype.replaceAll = function (target, replacement) {
+String.prototype.replaceAll = function(target, replacement) {
     return this.split(target).join(replacement);
 };
 
@@ -861,7 +1155,7 @@ function AudioTour (divid, code, bnum, audio_text) {
     $('#windowcode').html(first);
 
     // Position modal box
-    $.fn.center = function () {
+    $.fn.center = function() {
         this.css("position", "absolute");
         // y position
         this.css("top", ($(window).scrollTop() + $(navbar).height() + 10 + "px"));
@@ -877,7 +1171,7 @@ function AudioTour (divid, code, bnum, audio_text) {
     $('.modal-close-profile').show();
 
     // closes modal box once close link is clicked, or if the lights out divis clicked
-    $('.modal-close-profile, .modal-lightsout').click( (function () {
+    $('.modal-close-profile, .modal-lightsout').click( (function() {
         if (this.playing) {
             this.elem.pause();
         }
@@ -890,44 +1184,44 @@ function AudioTour (divid, code, bnum, audio_text) {
 
     // Accommodate buttons for a maximum of five tours
 
-    $('#' + 'button_audio_0').click((function () {
+    $('#' + 'button_audio_0').click((function() {
         this.tour(divid, audio_hash[0], bcount);
     }).bind(this));
-    $('#' + 'button_audio_1').click((function () {
+    $('#' + 'button_audio_1').click((function() {
         this.tour(divid, audio_hash[1], bcount);
     }).bind(this));
-    $('#' + 'button_audio_2').click((function () {
+    $('#' + 'button_audio_2').click((function() {
         this.tour(divid, audio_hash[2], bcount);
     }).bind(this));
-    $('#' + 'button_audio_3').click((function () {
+    $('#' + 'button_audio_3').click((function() {
         this.tour(divid, audio_hash[3], bcount);
     }).bind(this));
-    $('#' + 'button_audio_4').click((function () {
+    $('#' + 'button_audio_4').click((function() {
         this.tour(divid, audio_hash[4], bcount);
     }).bind(this));
 
     // handle the click to go to the next audio
-    $('#first_audio').click((function () {
+    $('#first_audio').click((function() {
         this.firstAudio();
     }).bind(this));
 
     // handle the click to go to the next audio
-    $('#prev_audio').click((function () {
+    $('#prev_audio').click((function() {
         this.prevAudio();
     }).bind(this));
 
     // handle the click to pause or play the audio
-    $('#pause_audio').click((function () {
+    $('#pause_audio').click((function() {
         this.pauseAndPlayAudio();
     }).bind(this));
 
     // handle the click to go to the next audio
-    $('#next_audio').click((function () {
+    $('#next_audio').click((function() {
         this.nextAudio();
     }).bind(this));
 
     // handle the click to go to the next audio
-    $('#last_audio').click((function () {
+    $('#last_audio').click((function() {
         this.lastAudio();
     }).bind(this));
 
@@ -940,7 +1234,7 @@ function AudioTour (divid, code, bnum, audio_text) {
 
 }
 
-AudioTour.prototype.tour = function (divid, audio_type, bcount) {
+AudioTour.prototype.tour = function(divid, audio_type, bcount) {
     // set globals
     this.buttonCount = bcount;
     this.theDivid = divid;
@@ -1022,7 +1316,7 @@ AudioTour.prototype.handlePlaying = function() {
 
 };
 
-AudioTour.prototype.firstAudio = function () {
+AudioTour.prototype.firstAudio = function() {
 
     // if audio is this.playing handle it
     this.handlePlaying();
@@ -1039,7 +1333,7 @@ AudioTour.prototype.firstAudio = function () {
 
 };
 
-AudioTour.prototype.prevAudio = function () {
+AudioTour.prototype.prevAudio = function() {
 
     // if there is a previous audio
     if (this.currIndex > 0) {
@@ -1060,7 +1354,7 @@ AudioTour.prototype.prevAudio = function () {
 
 };
 
-AudioTour.prototype.nextAudio = function () {
+AudioTour.prototype.nextAudio = function() {
 
     // if audio is this.playing handle it
     this.handlePlaying();
@@ -1079,7 +1373,7 @@ AudioTour.prototype.nextAudio = function () {
     }
 };
 
-AudioTour.prototype.lastAudio = function () {
+AudioTour.prototype.lastAudio = function() {
 
     // if audio is this.playing handle it
     this.handlePlaying();
@@ -1096,7 +1390,7 @@ AudioTour.prototype.lastAudio = function () {
 };
 
 // play the audio at the current index
-AudioTour.prototype.playCurrIndexAudio = function () {
+AudioTour.prototype.playCurrIndexAudio = function() {
 
     // set this.playing to false
     this.playing = false;
@@ -1107,7 +1401,7 @@ AudioTour.prototype.playCurrIndexAudio = function () {
 };
 
 // handle the end of the tour
-AudioTour.prototype.handleTourEnd = function () {
+AudioTour.prototype.handleTourEnd = function() {
 
     $('#status').html(" The " + this.tourName + " Ended");
 
@@ -1129,7 +1423,7 @@ AudioTour.prototype.handleTourEnd = function () {
 };
 
 // only call this one after the first time
-AudioTour.prototype.outerAudio = function () {
+AudioTour.prototype.outerAudio = function() {
 
     // unbind ended
     $('#' + this.afile).unbind('ended');
@@ -1157,7 +1451,7 @@ AudioTour.prototype.outerAudio = function () {
 };
 
 // play the audio now that it is ready
-AudioTour.prototype.playWhenReady = function (afile, divid, ahash) {
+AudioTour.prototype.playWhenReady = function(afile, divid, ahash) {
     // unbind current
     $('#' + afile).unbind('canplaythrough');
     //console.log("in playWhenReady " + elem.duration);
@@ -1165,7 +1459,7 @@ AudioTour.prototype.playWhenReady = function (afile, divid, ahash) {
     $('#status').html("Playing the " + this.tourName);
     this.elem.currentTime = 0;
     this.highlightLines(divid, ahash[afile]);
-    $('#' + afile).bind('ended', (function () {
+    $('#' + afile).bind('ended', (function() {
         this.outerAudio();
     }).bind(this));
     this.playing = true;
@@ -1175,7 +1469,7 @@ AudioTour.prototype.playWhenReady = function (afile, divid, ahash) {
 
 
 // play the audio at the specified index i and set the duration and highlight the lines
-AudioTour.prototype.playaudio = function (i, aname, divid, ahash) {
+AudioTour.prototype.playaudio = function(i, aname, divid, ahash) {
     this.afile = aname[i];
     this.elem = document.getElementById(this.afile);
 
@@ -1184,7 +1478,7 @@ AudioTour.prototype.playaudio = function (i, aname, divid, ahash) {
     if (isNaN(this.elem.duration) || this.elem.duration == 0) {
         // set the status
         $('#status').html("Loading audio.  Please wait.   If it doesn't start soon close this window (click on the red X) and try again");
-        $('#' + this.afile).bind('canplaythrough', (function () {
+        $('#' + this.afile).bind('canplaythrough', (function() {
             this.playWhenReady(this.afile, divid, ahash);
         }).bind(this));
     }
@@ -1195,7 +1489,7 @@ AudioTour.prototype.playaudio = function (i, aname, divid, ahash) {
 };
 
 // pause if this.playing and play if paused
-AudioTour.prototype.pauseAndPlayAudio = function () {
+AudioTour.prototype.pauseAndPlayAudio = function() {
     var btn = document.getElementById('pause_audio');
 
     // if paused and clicked then continue from current
@@ -1221,7 +1515,7 @@ AudioTour.prototype.pauseAndPlayAudio = function () {
 };
 
 // process the lines
-AudioTour.prototype.processLines = function (divid, lnum, color) {
+AudioTour.prototype.processLines = function(divid, lnum, color) {
     var comma = lnum.split(",");
 
     if (comma.length > 1) {
@@ -1235,17 +1529,17 @@ AudioTour.prototype.processLines = function (divid, lnum, color) {
 };
 
 // unhighlight the lines - set the background back to transparent
-AudioTour.prototype.unhighlightLines = function (divid, lnum) {
+AudioTour.prototype.unhighlightLines = function(divid, lnum) {
     this.processLines(divid, lnum, 'transparent');
 };
 
 // highlight the lines - set the background to a yellow color
-AudioTour.prototype.highlightLines = function (divid, lnum) {
+AudioTour.prototype.highlightLines = function(divid, lnum) {
     this.processLines(divid, lnum, '#ffff99');
 };
 
 // set the background to the passed color
-AudioTour.prototype.setBackgroundForLines = function (divid, lnum, color) {
+AudioTour.prototype.setBackgroundForLines = function(divid, lnum, color) {
     var hyphen = lnum.split("-");
 
     // if a range of lines
@@ -1299,9 +1593,9 @@ LiveCode.prototype.init = function(opts) {
     this.createErrorOutput();
     };
 
-LiveCode.prototype.outputfun = function (a) {};
+LiveCode.prototype.outputfun = function(a) {};
 
-LiveCode.prototype.createInputElement = function () {
+LiveCode.prototype.createInputElement = function() {
 
     var label = document.createElement('label');
     label.for = this.divid + "_stdin";
@@ -1316,7 +1610,7 @@ LiveCode.prototype.createInputElement = function () {
     this.stdin_el = input;
 };
 
-LiveCode.prototype.createErrorOutput = function () {
+LiveCode.prototype.createErrorOutput = function() {
 
 };
 
@@ -1366,7 +1660,7 @@ LiveCode.prototype.runProg = function() {
         xhr.setRequestHeader('Accept', 'application/json');
         xhr.setRequestHeader('X-API-KEY', this.API_KEY);
 
-        xhr.onload = (function () {
+        xhr.onload = (function() {
             var logresult;
             $(this.runButton).removeAttr('disabled');
             try {
@@ -1414,14 +1708,14 @@ LiveCode.prototype.runProg = function() {
         ///$("#" + divid + "_errinfo").remove();
         $(this.output).html("Compiling and Running your Code Now...");
 
-        xhr.onerror = function () {
+        xhr.onerror = function() {
             this.addJobeErrorMessage("Error communicating with the server.");
             $(this.runButton).removeAttr('disabled');
         };
 
         xhr.send(data);
     };
-LiveCode.prototype.addJobeErrorMessage = function (err) {
+LiveCode.prototype.addJobeErrorMessage = function(err) {
         var errHead = $('<h3>').html('Error');
         var eContainer = this.outerDiv.appendChild(document.createElement('div'));
         this.errDiv = eContainer;
@@ -1433,7 +1727,7 @@ LiveCode.prototype.addJobeErrorMessage = function (err) {
     };
 
 
-LiveCode.prototype.pushDataFile = function (datadiv) {
+LiveCode.prototype.pushDataFile = function(datadiv) {
 
         var file_id = 'runestone'+Math.floor(Math.random()*100000);
         var contents = $(document.getElementById(datadiv)).text();
@@ -1451,11 +1745,11 @@ LiveCode.prototype.pushDataFile = function (datadiv) {
             xhr.setRequestHeader('Accept', 'text/plain');
             xhr.setRequestHeader('X-API-KEY', API_KEY);
 
-            xhr.onload = function () {
+            xhr.onload = function() {
                 console.log("successfully sent file " + xhr.responseText);
             };
 
-            xhr.onerror = function () {
+            xhr.onerror = function() {
                 console.log("error sending file" + xhr.responseText);
             };
 
@@ -1465,7 +1759,7 @@ LiveCode.prototype.pushDataFile = function (datadiv) {
 
 ACFactory = {};
 
-ACFactory.createActiveCode = function (orig, lang, addopts) {
+ACFactory.createActiveCode = function(orig, lang, addopts) {
     var opts = {'orig' : orig, 'useRunestoneServices': eBookConfig.useRunestoneServices, 'python3' : eBookConfig.python3 };
     if (addopts) {
         for (var attrname in addopts) {
@@ -1552,8 +1846,8 @@ ACFactory.createScratchActivecode = function() {
     el = $(html);
     $('body').append(el);
 
-    el.on('shown.bs.modal show.bs.modal', function () {
-        el.find('.CodeMirror').each(function (i, e) {
+    el.on('shown.bs.modal show.bs.modal', function() {
+        el.find('.CodeMirror').each(function(i, e) {
             e.CodeMirror.refresh();
             e.CodeMirror.focus();
         });
@@ -1566,7 +1860,7 @@ ACFactory.createScratchActivecode = function() {
 };
 
 
-ACFactory.toggleScratchActivecode = function () {
+ACFactory.toggleScratchActivecode = function() {
     var divid = "ac_modal_" + eBookConfig.scratchDiv;
     var div = $("#" + divid);
 
@@ -1576,7 +1870,7 @@ ACFactory.toggleScratchActivecode = function () {
 
 $(document).ready(function() {
     ACFactory.createScratchActivecode();
-    $('[data-component=activecode]').each( function(index ) {
+    $('[data-component=activecode]').each( function(index) {
         edList[this.id] = ACFactory.createActiveCode(this, $(this).data('lang'));
     });
     if (loggedout) {
