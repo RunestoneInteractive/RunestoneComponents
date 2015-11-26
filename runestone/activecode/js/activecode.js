@@ -34,119 +34,142 @@ var localizations = {
         LabelCodeRunErrorTitle: "Error",
         LabelCodeRunErrorDescription: "Description",
         LabelCodeRunErrorFixing: "To Fix",
+        ErrorFileNotFound: "File not found:",
+        LabelAudioTourTitle: "Take an audio tour!",
+        LabelAudioTourBtnFirst: "Play first audio in tour",
+        LabelAudioTourBtnPrevious: "Play previous audio in tour",
+        LabelAudioTourBtnPause: "Pause current audio",
+        LabelAudioTourBtnNext: "Play next audio in tour",
+        LabelAudioTourBtnLast: "Play last audio in tour",
+        InformAudioTourStartingTour: "Starting the",
+        ErrorAudioTourBrowserDoesntSupport: "Your browser does not support the audio tag",
+        InformAudioTourEndedPrefix: "The ",
+        InformAudioTourEndedPostfix: " ended",
+        InformAudioTourPlayingPrefix: "Playing the ",
+        InformAudioTourLoading: "Loading audio.  Please wait.   If it doesn't start soon close this window (click on the red X) and try again",
+        LabelAudioTourBtnPauseCurrent: "Pause current audio",
+        LabelAudioTourBtnPlayPaused: "Play paused audio",
+        LabelInputForProgram: "Input for Program",
+        ErrorCompileErrors: "There were errors compiling your code. See below.",
+        ErrorTimeLimitExceeded: "Time Limit Exceeded on your program",
+        ErrorServerError: "A server error occurred: ",
+        InformCompilingCode: "Compiling and Running your Code Now...",
+        ErrorServerCommunication: "Error communicating with the server.",
+        LabelError: "Error",
+        LabelScratchActiveCode: "Scratch ActiveCode",
 
-	ErrorFromCodeRun_ParseError:
-                "A parse error means that Python does not understand the syntax on the line the error message points out. " + 
+        ErrorFromCodeRun_ParseError:
+                "A parse error means that Python does not understand the syntax on the line the error message points out. " +
                 "Common examples are forgetting commas beteween arguments or forgetting a : on a for statement",
 
-	ErrorFromCodeRun_ParseErrorFix:
+        ErrorFromCodeRun_ParseErrorFix:
                 "To fix a parse error you just need to look carefully at the line with the error and possibly " +
                 "the line before it. Make sure it conforms to all of Python's rules.",
 
-	ErrorFromCodeRun_TypeError:
-                "Type errors most often occur when an expression tries to combine two objects with types that should not " + 
+        ErrorFromCodeRun_TypeError:
+                "Type errors most often occur when an expression tries to combine two objects with types that should not " +
                 "be combined. Like raising a string to a power",
 
-	ErrorFromCodeRun_TypeErrorFix:
-                "To fix a type error you will most likely need to trace through your code and make sure the variables have " + 
+        ErrorFromCodeRun_TypeErrorFix:
+                "To fix a type error you will most likely need to trace through your code and make sure the variables have " +
                 "the types you expect them to have.  It may be helpful to print out each variable along the way to be sure its " +
                 "value is what you think it should be.",
 
-	ErrorFromCodeRun_NameError:
+        ErrorFromCodeRun_NameError:
                 "A name error almost always means that you have used a variable before it has a value. Often this may be a simple typo, so check the spelling carefully.",
 
-	ErrorFromCodeRun_NameErrorFix:
+        ErrorFromCodeRun_NameErrorFix:
                 "Check the right hand side of assignment statements and your function calls, this is the most likely place for a NameError to be found.",
 
-	ErrorFromCodeRun_ValueError:
+        ErrorFromCodeRun_ValueError:
                 "A ValueError most often occurs when you pass a parameter to a function and the function is expecting one type and you pass another.",
 
-	ErrorFromCodeRun_ValueErrorFix:
+        ErrorFromCodeRun_ValueErrorFix:
                 "The error message gives you a pretty good hint about the name of the function as well as the value that is incorrect. " +
                 "Look at the error message closely and then trace back to the variable containing the problematic value.",
 
-	ErrorFromCodeRun_AttributeError:
+        ErrorFromCodeRun_AttributeError:
                 "This error message is telling you that the object on the left hand side of the dot, does not have the attribute or method on the right hand side.",
 
-	ErrorFromCodeRun_AttributeErrorFix:
+        ErrorFromCodeRun_AttributeErrorFix:
                 "The most common variant of this message is that the object undefined does not have attribute X. This tells you that the object " +
                 "on the left hand side of the dot is not what you think. Trace the variable back and print it out in various places until you " +
                 "discover where it becomes undefined. Otherwise check the attribute on the right hand side of the dot for a typo.",
 
-	ErrorFromCodeRun_TokenError: "Most of the time this error indicates that you have forgotten a right parenthesis or have forgotten to close a pair of quotes.",
+        ErrorFromCodeRun_TokenError: "Most of the time this error indicates that you have forgotten a right parenthesis or have forgotten to close a pair of quotes.",
 
-	ErrorFromCodeRun_TokenErrorFix: "Check each line of your program and make sure that your parenthesis are balanced.",
+        ErrorFromCodeRun_TokenErrorFix: "Check each line of your program and make sure that your parenthesis are balanced.",
 
-	ErrorFromCodeRun_TimeLimitError:
+        ErrorFromCodeRun_TimeLimitError:
                 "Your program is running too long. Most programs in this book should run in less than 10 seconds easily. " +
                 "This probably indicates your program is in an infinite loop.",
 
-	ErrorFromCodeRun_TimeLimitErrorFix:
+        ErrorFromCodeRun_TimeLimitErrorFix:
                 "Add some print statements to figure out if your program is in an infinte loop. If it is not you can increase the run time with sys.setExecutionLimit(msecs)",
 
-	ErrorFromCodeRun_Error:
+        ErrorFromCodeRun_Error:
                 "Your program is running for too long. Most programs in this book should run in less than 30 seconds easily. " +
                 "This probably indicates your program is in an infinite loop.",
 
-	ErrorFromCodeRun_ErrorFix:
+        ErrorFromCodeRun_ErrorFix:
                 "Add some print statements to figure out if your program is in an infinte loop. If it is not you can increase the run time with sys.setExecutionLimit(msecs)",
 
-	ErrorFromCodeRun_SyntaxError:
+        ErrorFromCodeRun_SyntaxError:
                 "This message indicates that Python can't figure out the syntax of a particular statement. Some examples are assigning to a literal, or a function call",
 
-	ErrorFromCodeRun_SyntaxErrorFix:
+        ErrorFromCodeRun_SyntaxErrorFix:
                  "Check your assignment statments and make sure that the left hand side of the assignment is a variable, not a literal or a function.",
 
-	ErrorFromCodeRun_IndexError:
+        ErrorFromCodeRun_IndexError:
                 "This message means that you are trying to index past the end of a string or a list.  For example if your list has " +
                 "3 things in it and you try to access the item at position 3 or more.",
 
-	ErrorFromCodeRun_IndexErrorFix:
+        ErrorFromCodeRun_IndexErrorFix:
                 "Remember that the first item in a list or string is at index position 0, quite often this message comes about " +
                 "because you are off by one.  Remember in a list of length 3 the last legal index is 2",
 
-	ErrorFromCodeRun_URIError: "",
-	ErrorFromCodeRun_URIErrorFix: "",
+        ErrorFromCodeRun_URIError: "",
+        ErrorFromCodeRun_URIErrorFix: "",
 
-	ErrorFromCodeRun_ImportError: "This error message indicates that you are trying to import a module that does not exist",
+        ErrorFromCodeRun_ImportError: "This error message indicates that you are trying to import a module that does not exist",
 
-	ErrorFromCodeRun_ImportErrorFix:
+        ErrorFromCodeRun_ImportErrorFix:
                 "One problem may simply be that you have a typo. It may also be that you are trying to import a module that exists " +
                 "in 'real' Python, but does not exist in this book. If this is the case, please submit a feature request to have the module added.",
 
-	ErrorFromCodeRun_ReferenceError: "This is most likely an internal error, particularly if the message references the console.",
+        ErrorFromCodeRun_ReferenceError: "This is most likely an internal error, particularly if the message references the console.",
 
-	ErrorFromCodeRun_ReferenceErrorFix: "Try refreshing the webpage, and if the error continues, submit a bug report along with your code",
+        ErrorFromCodeRun_ReferenceErrorFix: "Try refreshing the webpage, and if the error continues, submit a bug report along with your code",
 
-	ErrorFromCodeRun_ZeroDivisionError:
+        ErrorFromCodeRun_ZeroDivisionError:
                 "This tells you that you are trying to divide by 0. Typically this is because the value of the variable in the denominator " +
                 "of a division expression has the value 0",
 
-	ErrorFromCodeRun_ZeroDivisionErrorFix:
+        ErrorFromCodeRun_ZeroDivisionErrorFix:
                 "You may need to protect against dividing by 0 with an if statment, or you may need to rexamine your assumptions about the legal " +
                 "values of variables, it could be an earlier statment that is unexpectedly assigning a value of zero to the variable in question.",
 
-	ErrorFromCodeRun_RangeError: "This message almost always shows up in the form of Maximum call stack size exceeded.",
+        ErrorFromCodeRun_RangeError: "This message almost always shows up in the form of Maximum call stack size exceeded.",
 
-	ErrorFromCodeRun_RangeErrorFix:
+        ErrorFromCodeRun_RangeErrorFix:
                 "This always occurs when a function calls itself. Its pretty likely that you are not doing this on purpose. " +
                 "Except in the chapter on recursion. If you are in that chapter then its likely you haven't identified a good base case.",
 
-	ErrorFromCodeRun_InternalError: "An Internal error may mean that you've triggered a bug in our Python",
+        ErrorFromCodeRun_InternalError: "An Internal error may mean that you've triggered a bug in our Python",
 
-	ErrorFromCodeRun_InternalErrorFix: "Report this error, along with your code as a bug.",
+        ErrorFromCodeRun_InternalErrorFix: "Report this error, along with your code as a bug.",
 
-	ErrorFromCodeRun_IndentationError:
+        ErrorFromCodeRun_IndentationError:
                 "This error occurs when you have not indented your code properly. This is most likely to happen as part of an if, for, while or def statement.",
 
-	ErrorFromCodeRun_IndentationErrorFix:
+        ErrorFromCodeRun_IndentationErrorFix:
                 "Check your if, def, for, and while statements to be sure the lines are properly indented beneath them. Another source of this error " +
                 "comes from copying and pasting code where you have accidentally left some bits of code lying around that don't belong there anymore.",
 
-	ErrorFromCodeRun_NotImplementedError:
+        ErrorFromCodeRun_NotImplementedError:
                 "This error occurs when you try to use a builtin function of Python that has not been implemented in this in-browser version of Python.",
 
-	ErrorFromCodeRun_NotImplementedErrorFix:
+        ErrorFromCodeRun_NotImplementedErrorFix:
                 "For now the only way to fix this is to not use the function. There may be workarounds. If you really need this builtin function " +
                 "then file a bug report and tell us how you are trying to use the function.",
     },
@@ -179,12 +202,35 @@ var localizations = {
         LabelCodeRunErrorTitle: "Virheilmoitus",
         LabelCodeRunErrorDescription: "Virheen kuvaus",
         LabelCodeRunErrorFixing: "Korjausvihjeitä",
+        ErrorFileNotFound: "Seuraavaa tiedostoa ei löydy:",
+        LabelAudioTourTitle: "Tervetuloa ääniselitteiden pariin!",
+        LabelAudioTourBtnFirst: "Toista ensimmäinen ääniselite",
+        LabelAudioTourBtnPrevious: "Toista edellinen ääniselite",
+        LabelAudioTourBtnPause: "Pysäytä parhaillaan toistettava ääniselite",
+        LabelAudioTourBtnNext: "Toista seuraava ääniselite",
+        LabelAudioTourBtnLast: "Toista viimeinen ääniselite",
+        InformAudioTourStartingTour: "Aletaan toistamaan ääniselitettä",
+        ErrorAudioTourBrowserDoesntSupport: "Selaimesi ei tue ääniselitteen toistamista",
+        InformAudioTourEndedPrefix: "Ääniselitteen ",
+        InformAudioTourEndedPostfix: " toistaminen on päättynyt",
+        InformAudioTourPlayingPrefix: "Toistetaan ääniselitettä ",
+        InformAudioTourLoading: "Ladataan ääniselitettä.  Ole hyvä ja odota.  Jos ääniselitteen toisto ei ala pian, sulje tämä ikkuna ja yritä uudelleen.",
+        LabelAudioTourBtnPauseCurrent: "Pysäytä parhaillaan toistettava ääniselite",
+        LabelAudioTourBtnPlayPaused: "Toista pysäytetty ääniselite",
+        LabelInputForProgram: "Ohjelman saama syöte",
+        ErrorCompileErrors: "Ohjelmakoodia käännettäessä sattuivat alla kuvatut virheet:",
+        ErrorTimeLimitExceeded: "Ohjelman suorittaminen kesti liian pitkään",
+        ErrorServerError: "Tapahtui seuraava palvelinvirhe: ",
+        InformCompilingCode: "Ohjelmakoodia käännetään ja suoritetaan...",
+        ErrorServerCommunication: "Virhe tiedonsiirrossa palvelimen kanssa.",
+        LabelError: "Virhe",
+        LabelScratchActiveCode: "Scratch ActiveCode",
 
-	ErrorFromCodeRun_ParseError:
-                "<i>Parse error</i> eli <i>jäsennysvirhe</i> tarkoittaa, ettei Python-tulkki/kääntäjä ymmärrä jotain virheessä osoitetulla rivillä olevaa ohjelmakoodinosaa. " + 
+        ErrorFromCodeRun_ParseError:
+                "<i>Parse error</i> eli <i>jäsennysvirhe</i> tarkoittaa, ettei Python-tulkki/kääntäjä ymmärrä jotain virheessä osoitetulla rivillä olevaa ohjelmakoodinosaa. " +
                 "Yleisiä syitä tähän ovat esimerkiksi parametreja toisistaan erottavien pilkkujen tai esimerkiksi for-lauseeseen kuuluvan kaksoispisteen unohtaminen.",
 
-	ErrorFromCodeRun_ParseErrorFix:
+        ErrorFromCodeRun_ParseErrorFix:
                 "Jäsennysvirheen korjaamiseksi täytyy virheilmoituksessa osoitettua ohjelmakoodiriviä sekä sitä edeltävää koodia tarkastella huolellisesti " +
                 "yrittäen löytää kohta, joka ei ole Python-kielen kieliopin mukainen. Virheilmoituksessa ilmoitettu kohta ohjelmakoodissa on kohta, jolla koodia " +
                 "ymmärtää yrittävä tulkki tai kääntäjä ei enää pysty tulkitsemaan sitä Pythonin kielioppisääntöjen mukaisesti; tämä kohta ei kuitenkaan " +
@@ -194,132 +240,132 @@ var localizations = {
                 "ihmisen silmiin kuin suuri punainen rasti keskellä koodia. Kannattaa siis pyytää Pythonia ymmärtävää kaveria vilkaisemaan, ellei itse keksi, " +
                 "missä ongelma sijaitsee.",
 
-	ErrorFromCodeRun_TypeError:
-                "<i>Type error</i> eli <i>tyyppivirhe</i> seuraa usein tilanteesta, jossa lausekkeessa yritetään yhdistää kaksi oliota tavalla, joka ei ole sallittua. " + 
+        ErrorFromCodeRun_TypeError:
+                "<i>Type error</i> eli <i>tyyppivirhe</i> seuraa usein tilanteesta, jossa lausekkeessa yritetään yhdistää kaksi oliota tavalla, joka ei ole sallittua. " +
                 "Esimerkiksi merkkijonon korottaminen potenssiin tai jakaminen luvulla ei tarkoita mitään järkevää, ellei tllaisia operaatioita erikseen määritellä.",
 
-	ErrorFromCodeRun_TypeErrorFix:
+        ErrorFromCodeRun_TypeErrorFix:
                 "Tyyppivirheen korjaamiseksi kannattaa varmistaa, että ohjelmakoodin jokaisella muuttujalla on juuri se tyyppi, jonka sillä olettaa olevan. " +
                 "Voi myös olla hyödyllistä lisätä ohjelmaan väliaikaisia tulostuskäskyjä muuttujien arvojen tulostamiseksi.",
 
-	ErrorFromCodeRun_NameError:
+        ErrorFromCodeRun_NameError:
                 "<i>Name error</i> eli <i>nimivirhe</i> tarkoittaa lähes aina, että joko muuttujaa on käytetty ennen kuin sillä on arvo, tai jokin " +
                 "ohjelmakoodiin sisältyvistä nimistä (muuttujat, funktiot, oliot ja niin edelleen) on väärin kirjoitettu. Python-koodia lukeva tulkki/kääntäjä ei " +
                 "voi tietää, onko jonkin nimen tarkoitus olla juuri sellainen vai onko se väärin kirjoitettu; tietokone ei ymmärrä mitään samoin kuin ihminen.",
 
-	ErrorFromCodeRun_NameErrorFix:
+        ErrorFromCodeRun_NameErrorFix:
                 "Tarkastele ohjelmakoodia selvittääksesi, onko virheilmoituksen osoittama nimi oikein kirjoitettu, ja jos on, niin onko se määritelty ja onko " +
                 "kyseinen määrittely varmasti oikein kirjoitettu.",
 
-	ErrorFromCodeRun_ValueError:
+        ErrorFromCodeRun_ValueError:
                 "<i>Value error</i> eli <i>arvovirhe</i> tarkoittaa, että ohjelmassa yritetään käyttää jotain arvoa tavalla, joka ei ole sallittu. " +
                 "Eräs mahdollisuus virheen syyksi on, että funktio olettaa saavansa parametrikseen toisen tyyppisen arvon kuin mitä se todellisuudessa saa. " +
                 "Toisaalta, ohjelma saattaa esimerkiksi yrittää vertailla toisiinsa vaikkapa funktiota ja lukuarvoa (esim. \"2 < print\"), mikä ei tietenkään " +
                 "oletettavasti tarkoita mitään.",
 
-	ErrorFromCodeRun_ValueErrorFix:
+        ErrorFromCodeRun_ValueErrorFix:
                 "Virheen sijainti ja virheellinen arvo selviävät mahdollisesti suoraan virheilmoituksesta. Nämä tietäen kannattaa etsiä virheellisen arvon sisältävä " +
                 "kohta sekä selvittää, miksi tässä kohdassa vaaditaan toisenlainen arvo sekä miksi siinä kohdassa todellisuudessa oli vääränlainen arvo.",
 
-	ErrorFromCodeRun_AttributeError:
+        ErrorFromCodeRun_AttributeError:
                 "<i>Attribute error</i> eli <i>ominaisuusvirhe</i> kertoo, ettei pisteen vasemmalla puolella olevalla oliolla ole pisteen oikealla puolella " +
                 "mainittua ominaisuutta tai metodia.",
 
-	ErrorFromCodeRun_AttributeErrorFix:
+        ErrorFromCodeRun_AttributeErrorFix:
                 "Yleisimmin tämä virhe ilmoittaa, ettei oliolla \"undefined\" ole jotain attribuuttia X. Tästä voi päätellä, että joko pisteen oikealla puolella on " +
                 "kirjoitusvirhe, tai sen vasemmalla puolella olio ei todellisuudessa ole se, joka sen on tarkoitettu olevan. Oliomuuttujan arvojen järjestelmällinen " +
                 "tulostaminen useassa kohdassa ennen virhettä auttaa huomaamaan, missä kohden muuttujan arvoksi tulee \"undefined\".",
 
-	ErrorFromCodeRun_TokenError: "<i>Token error</i> eli <i>symbolivirhe</i> tarkoittaa usein käytännössä, että oikeanpuoleinen sulje- tai lainausmerkki on unohtunut.",
+        ErrorFromCodeRun_TokenError: "<i>Token error</i> eli <i>symbolivirhe</i> tarkoittaa usein käytännössä, että oikeanpuoleinen sulje- tai lainausmerkki on unohtunut.",
 
-	ErrorFromCodeRun_TokenErrorFix: "Kannattaa varmistaa, että ohjelman jokaisella avaavalla sulkeella on vastaava sulkeva pari ja että ne ovat oikeassa järjestyksessä.",
+        ErrorFromCodeRun_TokenErrorFix: "Kannattaa varmistaa, että ohjelman jokaisella avaavalla sulkeella on vastaava sulkeva pari ja että ne ovat oikeassa järjestyksessä.",
 
-	ErrorFromCodeRun_TimeLimitError:
+        ErrorFromCodeRun_TimeLimitError:
                 "Ohjelman suoritus kestää liian pitkään. Tämän oppikirjan ohjelmista suurimman osan suorituksen pitäisi kestää korkeintaan 10 sekuntia. " +
                 "Eräs syy tähän virheeseen on, että ohjelmassa on päättymätön silmukka.",
 
-	ErrorFromCodeRun_TimeLimitErrorFix:
+        ErrorFromCodeRun_TimeLimitErrorFix:
                 "Kannattaa lisätä ohjelmaan sopiviin kohtiin tulostuslauseita, joiden tulosteista voi päätellä, ettei ohjelmassa ole päättymätöntä silmukkaa. Jos " +
                 "tällaista silmukkaa ei löydy, voi kokeilla kasvattaa ohjelmalle asetettua suoritusaikarajaa kutsulla sys.setExecutionLimit(<i>millisekuntimäärä</i>).",
 
-	ErrorFromCodeRun_Error:
+        ErrorFromCodeRun_Error:
                 "Ohjelman suoritus kestää liian pitkään. Tämän oppikirjan ohjelmista suurimman osan suorituksen pitäisi kestää korkeintaan 10 sekuntia. " +
                 "Eräs syy tähän virheeseen on, että ohjelmassa on päättymätön silmukka.",
 
-	ErrorFromCodeRun_ErrorFix:
+        ErrorFromCodeRun_ErrorFix:
                 "Kannattaa lisätä ohjelmaan sopiviin kohtiin tulostuslauseita, joiden tulosteista voi päätellä, ettei ohjelmassa ole päättymätöntä silmukkaa. Jos " +
                 "tällaista silmukkaa ei löydy, voi kokeilla kasvattaa ohjelmalle asetettua suoritusaikarajaa kutsulla sys.setExecutionLimit(<i>millisekuntimäärä</i>).",
 
-	ErrorFromCodeRun_SyntaxError:
-                "<i>Syntax error</i> eli <i>kielioppivirhe</i> tarkoittaa, ettei Python-tulkki/kääntäjä ymmärrä jonkin lauseen kielioppia, koska lause " + 
+        ErrorFromCodeRun_SyntaxError:
+                "<i>Syntax error</i> eli <i>kielioppivirhe</i> tarkoittaa, ettei Python-tulkki/kääntäjä ymmärrä jonkin lauseen kielioppia, koska lause " +
                 "ei ole Python-kielen mukainen. Tällaisia tilanteita ovat esimerkiksi sijoittaminen lukuun (23 = muuttuja) tai funktioon (auto.aja() = \"heippa\").",
 
-	ErrorFromCodeRun_SyntaxErrorFix:
+        ErrorFromCodeRun_SyntaxErrorFix:
                  "Kannattaa tarkistaa sijoituslauseet varmistaen, että niiden vasemmat puolet ovat muuttujia eivätkä esimerkiksi lukuja, muuttujia tai functioita.",
 
-	ErrorFromCodeRun_IndexError:
+        ErrorFromCodeRun_IndexError:
                 "<i>Index error</i> eli <i>osoitusvirhe</i> tarkoittaa, että ohjelmakoodissa yritetään osoittaa esimerkiksi merkkijonon tai listan \"reunojen\" ulkopuolelle. " +
                 "Tämä virhe sattuu esimerkiksi yritettäessä osoittaa kolmialkioisen listan alkioita numeroilla 3 tai -4 (listan alkioiden numerot ovat 0, 1 ja 2).",
 
-	ErrorFromCodeRun_IndexErrorFix:
+        ErrorFromCodeRun_IndexErrorFix:
                 "Muista, että listan ensimmäisen alkion numero on 0 sekä että vaikkapa 6-alkioisen listan viimeisen alkion numero on 5. Usein on kyse " +
                 "yksinkertaisesesta ajatus- tai laskuvirheestä, josta käytetään englanniksi nimeä off-by-one (yhdellä ohi): Laskeminen alkaa tai päättyy " +
                 "yhden alkion päässä siitä/siinä, mistä/missä sen todellisuudessa tulisi alkaa/päättyä.",
 
-	ErrorFromCodeRun_URIError: "",
-	ErrorFromCodeRun_URIErrorFix: "",
+        ErrorFromCodeRun_URIError: "",
+        ErrorFromCodeRun_URIErrorFix: "",
 
-	ErrorFromCodeRun_ImportError:
+        ErrorFromCodeRun_ImportError:
                 "<i>Import error</i> eli <i>tuontivirhe</i> tarkoittaa, että ohjelmakoodi yrittää tuoda import-lauseella käyttöön moduulia, jota ei löydy.",
 
-	ErrorFromCodeRun_ImportErrorFix:
+        ErrorFromCodeRun_ImportErrorFix:
                 "Ensimmäiseksi kannattaa tarkistaa, että import-lauseessa olevat nimet on kirjoitettu oikein. Toinen mahdollisuus on, että ladattavaksi " +
                 "tarkoitettu moduuli on olemassa \"oikeassa\" Python-ympäristössä, mutta ei tässä selainpohjaisessa Python-toteutuksessa. Jälkimmäisessä " +
                 "tapauksessa on mahdollista lähettää tämän Python-toteutuksen kehittäjille pyyntö kyseisen moduulin lisäämiseksi.",
 
-	ErrorFromCodeRun_ReferenceError: "Tämä on todennäköisesti sisäinen virhe erityisesti silloin, jos virheilmoitus viittaa konsoliin.",
+        ErrorFromCodeRun_ReferenceError: "Tämä on todennäköisesti sisäinen virhe erityisesti silloin, jos virheilmoitus viittaa konsoliin.",
 
-	ErrorFromCodeRun_ReferenceErrorFix: "Ensimmäisenä kannattaa kokeilla uudelleenladata tämä web-sivu selaimeen. Jollei se auta, voi tämän " +
+        ErrorFromCodeRun_ReferenceErrorFix: "Ensimmäisenä kannattaa kokeilla uudelleenladata tämä web-sivu selaimeen. Jollei se auta, voi tämän " +
                 "Python-toteutuksen kehittäjille lähettää virheilmoituksen sekä ohjelmakoodin, joka sillä oli tarkoitus suorittaa.",
 
-	ErrorFromCodeRun_ZeroDivisionError:
+        ErrorFromCodeRun_ZeroDivisionError:
                 "<i>Zero division error</i> eli <i>nollallajakovirhe</i> ilmoittaa, että ohjelmakoodissa yritettiin jakaa jotain lukua nollalla (mitä ei ole määritelty).",
 
-	ErrorFromCodeRun_ZeroDivisionErrorFix:
+        ErrorFromCodeRun_ZeroDivisionErrorFix:
                 "Ensimmäiseksi kannattaa miettiä, onko virheilmoituksen tarkoittamassa kohdassa sallittua olla arvo nolla; jokin aiempi osa ohjelmakoodia " +
                 "saattaa vahingossa esimerkiksi asettaa jakajana käytetylle muuttujalle arvon nolla. Nollalla jakamista vastaan voi luonnollisestikin suojautua " +
                 "vaikkapa if-lauseita käyttäen. Ohjelman ulkopuolelta saatujen syötteiden (esimerkiksi käyttäjältä luetut arvot) kelvollisuus täytyy aina tarkistaa, " +
                 "ja virheellisistä syötteistä tulee jollain tavoin antaa virheilmoitus.",
 
-	ErrorFromCodeRun_RangeError:
+        ErrorFromCodeRun_RangeError:
                 "Tämä virheilmoitus tarkoittaa lähes aina, että kutsupinon maksimikoko on ylitetty, eli ohjelma on tehnyt sisäkkäisiä kutsuja " +
                 "enemmän, kuin mitä niiden käyttöön varatulle muistialueelle mahdutaan tallentamaan.",
 
-	ErrorFromCodeRun_RangeErrorFix:
+        ErrorFromCodeRun_RangeErrorFix:
                 "Alkeisesimerkki tämän virheen syystä on funktio, joka kutsuu itse itseään (ns. rekursion yksinkertaisin muoto) ilman kelvollista " +
                 "lopetusehtoa. Jollei rekursiota tietoisesti harjoittele tai käytä, ei todennäköisesti halua näin tapahtuvan. Tällöin kannattaa " +
                 "tarkistaa, ettei ohjelmakoodissa ole itseään tai toisiaan sisäkkäin kutsuvia funktioita. Muussa tapauksessa kannattaa tarkistaa " +
                 "ehdot, joiden on tarkoitus aiheuttaa rekursion päättyminen hallitusti.",
 
-	ErrorFromCodeRun_InternalError: "<i>Internal error</i> eli <i>sisäinen virhe</i> tarkoittaa, että tästä selainpohjaisesta Python-toteutuksesta on löytynyt virhe.",
+        ErrorFromCodeRun_InternalError: "<i>Internal error</i> eli <i>sisäinen virhe</i> tarkoittaa, että tästä selainpohjaisesta Python-toteutuksesta on löytynyt virhe.",
 
-	ErrorFromCodeRun_InternalErrorFix:
+        ErrorFromCodeRun_InternalErrorFix:
                 "Tästä virheestä kannattaa lähettää tämän Python-toteutuksen kehittäjille virheraportti, jonka mukana on suoritettavaksi aiottu ohjelmakoodi.",
 
-	ErrorFromCodeRun_IndentationError:
+        ErrorFromCodeRun_IndentationError:
                 "<i>Indentation error</i> eli <i>sisennysvirhe</i> johtuu siitä, ettei ohjelmakoodia ole sisennetty kelvollisesti. Tämä tapahtuu " +
                 "todennäköisimmin if-, for-, while- ja def-lauseiden yhteydessä.",
 
-	ErrorFromCodeRun_IndentationErrorFix:
+        ErrorFromCodeRun_IndentationErrorFix:
                 "Tarkista ohjelmasi if-, def-, for- ja while-lauseet ollaksesi varma, että niihin liittyvät koodilohkot ovat oikein sisennetyt. " +
                 "Eräs mahdollinen syy tämän virheen taustalla on ohjelmakoodin kopioiminen paikasta toiseen tai käyttämättömän ohjelmakoodin unohtaminen lojumaan jonnekin.",
 
-	ErrorFromCodeRun_NotImplementedError:
+        ErrorFromCodeRun_NotImplementedError:
                 "<i>Not implemented error</i> eli <i>toteutuksenpuutevirhe</i> aiheutuu yritettäessä käyttää \"oikeiden\" Python-toteutusten mukana " +
                 "seuraavasta ohjelmakirjastosta (ns. standardikirjasto eli aina jonkin kielen kehitystyökalujen mukana saatava kirjasto) funktiota, jota ei " +
                 "tässä selainpohjaisessa Python-toteutuksessa ole toteutettu.",
 
-	ErrorFromCodeRun_NotImplementedErrorFix:
+        ErrorFromCodeRun_NotImplementedErrorFix:
                 "Tällä hetkellä ainoa ratkaisu on olla käyttämättä funktiota, jota virheilmoitus koskee. Kannattaa myös miettiä, voisiko kyseisen funktion käytön " +
                 "jollain tavoin kiertää. Jos tätä funktiota todella välttämättä tarvitaan, voi tämän selainpohjaisen Python-toteutuksen kehittäjille lähettää " +
                 "toteutuspyynnön, jossa kerrotaan myös, miten funktiota yritettiin/halutaan käyttää.",
@@ -328,7 +374,7 @@ var localizations = {
 
 function getLocalizedString(id) {
     return localizations[activeLanguage][id];
-};
+}
 
 var edList = {};
 
@@ -340,7 +386,7 @@ function ActiveCode(opts) {
     if (opts) {
         this.init(opts);
     }
-};
+}
 
 ActiveCode.prototype.init = function(opts) {
     RunestoneBase.apply( this, arguments );  // call parent constructor
@@ -386,7 +432,7 @@ ActiveCode.prototype.init = function(opts) {
     if ($(orig).data('caption')) {
         this.caption = $(orig).data('caption');
     } else {
-        this.caption = ""
+        this.caption = "";
     }
     this.addCaption();
 
@@ -400,7 +446,7 @@ ActiveCode.prototype.createEditor = function(index) {
         activeLanguage = eBookConfig.language;
     }
     var newdiv = document.createElement('div');
-    var linkdiv = document.createElement('div')
+    var linkdiv = document.createElement('div');
     linkdiv.id = this.divid.replace(/_/g,'-').toLowerCase();  // :ref: changes _ to - so add this as a target
     $(newdiv).addClass("ac_section alert alert-warning");
     var codeDiv = document.createElement("div");
@@ -463,7 +509,7 @@ ActiveCode.prototype.createControls = function() {
         this.saveButton.onclick = this.saveEditor.bind(this);
         ctrlDiv.appendChild(butt);
         if (this.hidecode) {
-            $(butt).css("display", "none")
+            $(butt).css("display", "none");
         }
     }
     // Load
@@ -476,7 +522,7 @@ ActiveCode.prototype.createControls = function() {
         this.loadButton.onclick = this.loadEditor.bind(this);
         ctrlDiv.appendChild(butt);
         if (this.hidecode) {
-            $(butt).css("display", "none")
+            $(butt).css("display", "none");
         }
     }
     if ($(this.origElem).data('gradebutton')) {
@@ -486,7 +532,7 @@ ActiveCode.prototype.createControls = function() {
         $(butt).css("margin-left","10px");
         this.gradeButton = butt;
         ctrlDiv.appendChild(butt);
-        $(butt).click(this.createGradeSummary.bind(this))
+        $(butt).click(this.createGradeSummary.bind(this));
     }
     // Show/Hide Code
     if (this.hidecode) {
@@ -555,7 +601,7 @@ ActiveCode.prototype.createOutput = function() {
     // newly created div.  When a canvas child is added we add a new class so that the visible
     // canvas can be styled in CSS.  Which a the moment means just adding a border.
     $(this.graphics).on("DOMNodeInserted", 'canvas', (function(e) {
-        $(this.graphics).addClass("visible-ac-canvas")
+        $(this.graphics).addClass("visible-ac-canvas");
     }).bind(this));
 
     outDiv.appendChild(this.output);
@@ -603,7 +649,7 @@ ActiveCode.prototype.saveEditor = function() {
     var res;
     var saveSuccess = function(data, status, whatever) {
         if (data.redirect) {
-            alert(getLocalizedString("ErrorSaveRedirected"))
+            alert(getLocalizedString("ErrorSaveRedirected"));
         } else if (data == "") {
             alert(getLocalizedString("ErrorSaveOther"));
         }
@@ -623,7 +669,7 @@ ActiveCode.prototype.saveEditor = function() {
                 save_btn.tooltip(opts);
                 save_btn.tooltip('show');
                 setTimeout(function() {
-                    save_btn.tooltip('destroy')
+                    save_btn.tooltip('destroy');
                 }, 4000);
 
                 $('#' + acid + ' .CodeMirror').css('border-top', '2px solid #aaa');
@@ -641,7 +687,7 @@ ActiveCode.prototype.saveEditor = function() {
         }
     }
     $(document).ajaxError(function(e, jqhxr, settings, exception) {
-        alert(getLocalizedString("ErrorRequestFailed") + settings.url)
+        alert(getLocalizedString("ErrorRequestFailed") + settings.url);
     });
     jQuery.post(eBookConfig.ajaxURL + 'saveprog', data, saveSuccess);
     if (this.editor.acEditEvent) {
@@ -675,7 +721,7 @@ ActiveCode.prototype.loadEditor = function() {
         }
         $(this.loadButton).tooltip('show');
         setTimeout(function() {
-            $(this.loadButton).tooltip('destroy')
+            $(this.loadButton).tooltip('destroy');
         }.bind(this), 4000);
     }).bind(this);
 
@@ -727,7 +773,7 @@ ActiveCode.prototype.createGradeSummary = function() {
 };
 
 ActiveCode.prototype.hideCodelens = function(button, div_id) {
-    this.codelens.style.display = 'none'
+    this.codelens.style.display = 'none';
 };
 
 ActiveCode.prototype.showCodelens = function() {
@@ -743,7 +789,7 @@ ActiveCode.prototype.showCodelens = function() {
 
     var cl = this.codelens.firstChild;
     if (cl) {
-        div.removeChild(cl)
+        div.removeChild(cl);
     }
     var code = this.editor.getValue();
     var myVars = {};
@@ -792,12 +838,12 @@ ActiveCode.prototype.showCodeCoach = function(div_id) {
     var cl;
     if (this.codecoach === null) {
         this.codecoach = document.createElement("div");
-        this.codecoach.style.display = 'block'
+        this.codecoach.style.display = 'block';
     }
 
     cl = this.codecoach.firstChild;
     if (cl) {
-        this.codecoach.removeChild(cl)
+        this.codecoach.removeChild(cl);
     }
 
     srcURL = eBookConfig.app + '/admin/diffviewer?divid=' + div_id;
@@ -847,7 +893,7 @@ ActiveCode.prototype.addErrorMessage = function(err) {
 ActiveCode.prototype.setTimeLimit = function(timer) {
     var timelimit = this.timeLimit;
     if (timer !== undefined ) {
-        timelimit = timer
+        timelimit = timer;
     }
     // set execLimit in milliseconds  -- for student projects set this to
     // 25 seconds -- just less than Chrome's own timer.
@@ -870,7 +916,7 @@ ActiveCode.prototype.setTimeLimit = function(timer) {
 
 ActiveCode.prototype.builtinRead = function(x) {
         if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
-            throw "File not found: '" + x + "'";
+            throw getLocalizedString("ErrorFileNotFound") + " '" + x + "'";
         return Sk.builtinFiles["files"][x];
 };
 
@@ -880,9 +926,9 @@ ActiveCode.prototype.outputfun = function(text) {
         if (x instanceof Array) {
             return '[' + x.join(", ") + ']';
         } else {
-            return x
+            return x;
         }
-    }
+    };
 
     var x = text;
     if (! this.python3 ) {
@@ -913,7 +959,7 @@ ActiveCode.prototype.buildProg = function() {
         for (var x=0; x < this.includes.length; x++) {
             pretext = pretext + edList[this.includes[x]].editor.getValue();
             }
-        prog = pretext + prog
+        prog = pretext + prog;
     }
 
     if(this.suffix) {
@@ -952,7 +998,7 @@ ActiveCode.prototype.runProg = function() {
         }).bind(this),
             (function(err) {  // fail
             $(this.runButton).removeAttr('disabled');
-            this.addErrorMessage(err)
+            this.addErrorMessage(err);
                 }).bind(this));
 
         if (typeof(allVisualizers) != "undefined") {
@@ -970,13 +1016,13 @@ JSActiveCode.prototype = new ActiveCode();
 
 function JSActiveCode(opts) {
     if (opts) {
-        this.init(opts)
+        this.init(opts);
         }
     }
 
 JSActiveCode.prototype.init = function(opts) {
-    ActiveCode.prototype.init.apply(this,arguments)
-    }
+    ActiveCode.prototype.init.apply(this,arguments);
+};
 
 JSActiveCode.prototype.outputfun = function(a) {
     $(this.output).css("visibility","visible");
@@ -1017,7 +1063,7 @@ JSActiveCode.prototype.runProg = function() {
     $(this.outDiv).show({duration:700,queue:false});
 
     try {
-        eval(prog)
+        eval(prog);
     } catch(e) {
         this.addErrorMessage(e);
     }
@@ -1135,13 +1181,13 @@ function AudioTour (divid, code, bnum, audio_text) {
     //laying out the HTML content
 
     var bcount = 0;
-    var html_string = "<div class='modal-lightsout'></div><div class='modal-profile'><h3>Take an audio tour!</h3><div class='modal-close-profile'></div><p id='windowcode'></p><p id='" + divid + "_audiocode'></p>";
+    var html_string = "<div class='modal-lightsout'></div><div class='modal-profile'><h3>" + getLocalizedString("LabelAudioTourTitle") + "</h3><div class='modal-close-profile'></div><p id='windowcode'></p><p id='" + divid + "_audiocode'></p>";
     html_string += "<p id='status'></p>";
-    html_string += "<input type='image' src='../_static/first.png' width='25' id='first_audio' name='first_audio' title='Play first audio in tour' alt='Play first audio in tour' onerror=\"this.onerror=null;this.src='_static/first.png'\" disabled/>" +
-                   "<input type='image' src='../_static/prev.png' width='25' id='prev_audio' name='prev_audio' title='Play previous audio in tour' alt='Play previous audio in tour' onerror=\"this.onerror=null;this.src='_static/prev.png'\" disabled/>" +
-                   "<input type='image' src='../_static/pause.png' width='25' id='pause_audio' name='pause_audio' title='Pause current audio' alt='Pause current audio' onerror=\"this.onerror=null;this.src='_static/pause.png'\" disabled/>" + "" +
-                   "<input type='image' src='../_static/next.png' width ='25' id='next_audio' name='next_audio' title='Play next audio in tour' alt='Play next audio in tour' onerror=\"this.onerror=null;this.src='_static/next.png'\" disabled/>" +
-                   "<input type='image' src='../_static/last.png' width ='25' id='last_audio' name='last_audio' title='Play last audio in tour' alt='Play last audio in tour' onerror=\"this.onerror=null;this.src='_static/last.png'\" disabled/><br/>";
+    html_string += "<input type='image' src='../_static/first.png' width='25' id='first_audio' name='first_audio' title='" + getLocalizedString("LabelAudioTourBtnFirst") + "' alt='" + getLocalizedString("LabelAudioTourBtnFirst") + "' onerror=\"this.onerror=null;this.src='_static/first.png'\" disabled/>" +
+                   "<input type='image' src='../_static/prev.png' width='25' id='prev_audio' name='prev_audio' title='" + getLocalizedString("LabelAudioTourBtnPrevious") + "' alt='" + getLocalizedString("LabelAudioTourBtnPrevious") + "' onerror=\"this.onerror=null;this.src='_static/prev.png'\" disabled/>" +
+                   "<input type='image' src='../_static/pause.png' width='25' id='pause_audio' name='pause_audio' title='" + getLocalizedString("LabelAudioTourBtnPause") + "' alt='" + getLocalizedString("LabelAudioTourBtnPause") + "' onerror=\"this.onerror=null;this.src='_static/pause.png'\" disabled/>" +
+                   "<input type='image' src='../_static/next.png' width ='25' id='next_audio' name='next_audio' title='" + getLocalizedString("LabelAudioTourBtnNext") + "' alt='" + getLocalizedString("LabelAudioTourBtnNext") + "' onerror=\"this.onerror=null;this.src='_static/next.png'\" disabled/>" +
+                   "<input type='image' src='../_static/last.png' width ='25' id='last_audio' name='last_audio' title='" + getLocalizedString("LabelAudioTourBtnLast") + "' alt='" + getLocalizedString("LabelAudioTourBtnLast") + "' onerror=\"this.onerror=null;this.src='_static/last.png'\" disabled/><br/>";
     for (var i = 0; i < audio_type.length - 1; i++) {
         html_string += "<input type='button' style='margin-right:5px;' class='btn btn-default btn-sm' id='button_audio_" + i + "' name='button_audio_" + i + "' value=" + bval[i] + " />";
         bcount++;
@@ -1258,7 +1304,7 @@ AudioTour.prototype.tour = function(divid, audio_type, bcount) {
     var atype = audio_type.split(";");
     var name = atype[0].replaceAll("\"", " ");
     this.tourName = name;
-    $('#status').html("Starting the " + name);
+    $('#status').html(getLocalizedString("InformAudioTourStartingTour") + " " + name);
 
     //log tour type to db
     this.logBookEvent({'event': 'Audio', 'act': name, 'div_id': divid});
@@ -1285,7 +1331,7 @@ AudioTour.prototype.tour = function(divid, audio_type, bcount) {
         str += "<source src='../_static/audio/" + akey + ".mp3' type='audio/mpeg'>";
         str += "<source src='_static/audio/" + akey + ".wav' type='audio/wav'>";
         str += "<source src='_static/audio/" + akey + ".mp3' type='audio/mpeg'>";
-        str +=  "<br />Your browser does not support the audio tag</audio>";
+        str +=  "<br />" + getLocalizedString("ErrorAudioTourBrowserDoesntSupport") + "</audio>";
         this.ahash[akey] = lnums;
         this.aname.push(akey);
     }
@@ -1403,7 +1449,7 @@ AudioTour.prototype.playCurrIndexAudio = function() {
 // handle the end of the tour
 AudioTour.prototype.handleTourEnd = function() {
 
-    $('#status').html(" The " + this.tourName + " Ended");
+    $('#status').html(" " + getLocalizedString("InformAudioTourEndedPrefix") + this.tourName + getLocalizedString("InformAudioTourEndedPostfix"));
 
     // disable the prev, pause/play, and next buttons and make them more invisible
     $('#first_audio').attr('disabled', 'disabled');
@@ -1456,7 +1502,7 @@ AudioTour.prototype.playWhenReady = function(afile, divid, ahash) {
     $('#' + afile).unbind('canplaythrough');
     //console.log("in playWhenReady " + elem.duration);
 
-    $('#status').html("Playing the " + this.tourName);
+    $('#status').html(getLocalizedString("InformAudioTourPlayingPrefix") + this.tourName);
     this.elem.currentTime = 0;
     this.highlightLines(divid, ahash[afile]);
     $('#' + afile).bind('ended', (function() {
@@ -1477,7 +1523,7 @@ AudioTour.prototype.playaudio = function(i, aname, divid, ahash) {
     //console.log("in playaudio " + elem.duration);
     if (isNaN(this.elem.duration) || this.elem.duration == 0) {
         // set the status
-        $('#status').html("Loading audio.  Please wait.   If it doesn't start soon close this window (click on the red X) and try again");
+        $('#status').html(getLocalizedString("InformAudioTourLoading"));
         $('#' + this.afile).bind('canplaythrough', (function() {
             this.playWhenReady(this.afile, divid, ahash);
         }).bind(this));
@@ -1498,7 +1544,7 @@ AudioTour.prototype.pauseAndPlayAudio = function() {
         counter = (this.elem.duration - this.elem.currentTime) * 1000;
         this.elem.play(); // start the audio from current spot
         document.getElementById("pause_audio").src = "../_static/pause.png";
-        document.getElementById("pause_audio").title = "Pause current audio";
+        document.getElementById("pause_audio").title = getLocalizedString("LabelAudioTourBtnPauseCurrent");
         //log change to db
         this.logBookEvent({'event': 'Audio', 'act': 'play', 'div_id': this.theDivid});
     }
@@ -1507,7 +1553,7 @@ AudioTour.prototype.pauseAndPlayAudio = function() {
     else if (this.playing) {
         this.elem.pause(); // pause the audio
         document.getElementById("pause_audio").src = "../_static/play.png";
-        document.getElementById("pause_audio").title = "Play paused audio";
+        document.getElementById("pause_audio").title = getLocalizedString("LabelAudioTourBtnPlayPaused");
         //log change to db
         this.logBookEvent({'event': 'Audio', 'act': 'pause', 'div_id': this.theDivid});
     }
@@ -1599,7 +1645,7 @@ LiveCode.prototype.createInputElement = function() {
 
     var label = document.createElement('label');
     label.for = this.divid + "_stdin";
-    $(label).text("Input for Program");
+    $(label).text(getLocalizedString("LabelInputForProgram"));
     var input = document.createElement('input');
     input.id = this.divid + "_stdin";
     input.type = "text";
@@ -1639,7 +1685,7 @@ LiveCode.prototype.runProg = function() {
 
 
         if (stdin) {
-            runspec.input = stdin
+            runspec.input = stdin;
         }
 
         if (this.datafile) {
@@ -1681,7 +1727,7 @@ LiveCode.prototype.runProg = function() {
                     $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
                     break;
                 case 11: // compiler error
-                    $(odiv).html("There were errors compiling your code. See below.");
+                    $(odiv).html(getLocalizedString("ErrorCompileErrors"));
                     this.addJobeErrorMessage(result.cmpinfo);
                     break;
                 case 12:  // run time error
@@ -1692,13 +1738,13 @@ LiveCode.prototype.runProg = function() {
                     break;
                 case 13:  // time limit
                     $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
-                    this.addJobeErrorMessage("Time Limit Exceeded on your program");
+                    this.addJobeErrorMessage(getLocalizedString("ErrorTimeLimitExceeded"));
                     break;
                 default:
                     if(result.stderr) {
                         $(odiv).html(result.stderr.replace(/\n/g, "<br>"));
                     } else {
-                        this.addJobeErrorMessage("A server error occurred: " + xhr.status + " " + xhr.statusText);
+                        this.addJobeErrorMessage(getLocalizedString("ErrorServerError") + xhr.status + " " + xhr.statusText);
                     }
             }
 
@@ -1706,17 +1752,17 @@ LiveCode.prototype.runProg = function() {
         }).bind(this);
 
         ///$("#" + divid + "_errinfo").remove();
-        $(this.output).html("Compiling and Running your Code Now...");
+        $(this.output).html(getLocalizedString("InformCompilingCode"));
 
         xhr.onerror = function() {
-            this.addJobeErrorMessage("Error communicating with the server.");
+            this.addJobeErrorMessage(getLocalizedString("ErrorServerCommunication"));
             $(this.runButton).removeAttr('disabled');
         };
 
         xhr.send(data);
     };
 LiveCode.prototype.addJobeErrorMessage = function(err) {
-        var errHead = $('<h3>').html('Error');
+        var errHead = $('<h3>').html(getLocalizedString("LabelError"));
         var eContainer = this.outerDiv.appendChild(document.createElement('div'));
         this.errDiv = eContainer;
         eContainer.className = 'error alert alert-danger';
@@ -1831,7 +1877,7 @@ ACFactory.createScratchActivecode = function() {
         '    <div class="modal-content">' +
         '      <div class="modal-header">' +
         '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
-        '        <h4 class="modal-title">Scratch ActiveCode</h4>' +
+        '        <h4 class="modal-title">' + getLocalizedString("LabelScratchActiveCode") + '</h4>' +
         '      </div> ' +
         '      <div class="modal-body">' +
         '      <textarea data-component="activecode" id="' + divid + '">' +
