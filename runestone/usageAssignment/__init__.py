@@ -113,7 +113,7 @@ class usageAssignment(Directive):
         """
           .. usageassignment:: prep_1
             :chapters: chap_name1[, chapname2]*
-            :subchapter: subchapter_name[, subchaptername2]*
+            :subchapters: subchapter_name[, subchaptername2]*
             :assignment_name: <str>
             :assignment_type: <int id of the assignment type object; kind of a hack>
             :deadline: <str>
@@ -163,7 +163,7 @@ class usageAssignment(Directive):
                 results = session.query(SubChapter).filter(SubChapter.c.chapter_id == str(ch.id)).all()
                 sub_chs += results
         # Add any explicit subchapters
-        if 'sub_chapter' in self.options:
+        if 'subchapters' in self.options:
             for nm in self.options.get('sub_chapters').split(','):
                 (ch_dir, subch_name) = nm.strip().split('/')
                 ch_id = session.query(Chapter).filter(Chapter.c.course_id == course_id, Chapter.chapter_label == ch_dir).first()
