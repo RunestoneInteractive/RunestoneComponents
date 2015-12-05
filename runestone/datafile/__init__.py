@@ -143,13 +143,13 @@ class DataFile(Directive):
             engine = create_engine(env.config.html_context['dburl'])
             meta = MetaData()
             Source_code = Table('source_code', meta, autoload=True, autoload_with=engine)
-            course_id = env.config.html_context['course_id']
+            course_name = env.config.html_context['course_id']
             divid = self.options['divid']
 
-            engine.execute(Source_code.delete().where(Source_code.c.acid == divid).where(Source_code.c.course_id == course_id))
+            engine.execute(Source_code.delete().where(Source_code.c.acid == divid).where(Source_code.c.course_id == course_name))
             engine.execute(Source_code.insert().values(
                 acid = divid,
-                course_id = course_id,
+                course_id = course_name,
                 main_code= source,
             ))
         except Exception as e:

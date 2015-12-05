@@ -124,7 +124,7 @@ class usageAssignment(Directive):
         self.options['divid'] = self.arguments[0]
         try:
             env = self.state.document.settings.env
-            print("DBURL = ",env.config['dburl'])
+            # print("DBURL = ",env.config['dburl'])
             engine = create_engine(env.config.html_context['dburl'])
             meta = MetaData()
             Assignment = Table('assignments', meta, autoload=True, autoload_with=engine)
@@ -156,10 +156,12 @@ class usageAssignment(Directive):
         # Accumulate all the Chapters and SubChapters that are to be visited
         # For each chapter, accumulate all subchapters
         sub_chs = []
-        for nm in self.options.get('chapters', '').split(','):
-            ch = session.query(Chapter).filter(Chapter.c.course_id == course_name, Chapter.c.chapter_label == nm.strip()).first()
-            results = session.query(SubChapter).filter(SubChapter.c.chapter_id == str(ch.id)).all()
-            sub_chs += results
+        if 'chapters' in self.options:
+            for nm in self.options.get('chapters').split(','):
+                ch = session.query(Chapter).filter(Chapter.c.course_id == course_name,
+                                                   Chapter.c.chapter_label == nm.strip()).first()
+                results = session.query(SubChapter).filter(SubChapter.c.chapter_id == str(ch.id)).all()
+                sub_chs += results
         # Add any explicit subchapters
         if 'sub_chapter' in self.options:
             for nm in self.options.get('sub_chapters').split(','):
