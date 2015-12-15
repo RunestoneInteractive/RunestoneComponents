@@ -113,7 +113,7 @@ class usageAssignment(Directive):
         """
           .. usageassignment:: prep_1
             :chapters: chap_name1[, chapname2]*
-            :subchapter: subchapter_name[, subchaptername2]*
+            :subchapters: subchapter_name[, subchaptername2]*
             :assignment_name: <str>
             :assignment_type: <int id of the assignment type object; kind of a hack>
             :deadline: <str>
@@ -163,11 +163,12 @@ class usageAssignment(Directive):
                 results = session.query(SubChapter).filter(SubChapter.c.chapter_id == str(ch.id)).all()
                 sub_chs += results
         # Add any explicit subchapters
-        if 'sub_chapter' in self.options:
-            for nm in self.options.get('sub_chapters').split(','):
+        if 'subchapters' in self.options:
+            for nm in self.options.get('subchapters').split(','):
                 (ch_dir, subch_name) = nm.strip().split('/')
-                ch_id = session.query(Chapter).filter(Chapter.c.course_id == course_id, Chapter.chapter_label == ch_dir).first()
-                sub_chs += session.query(SubChapter).filter(SubChapter.c.chapter_id == ch_id, SubChapter.c.chapter_label == subch).first()
+                ch_id = session.query(Chapter).filter(Chapter.c.course_id == course_name, Chapter.c.chapter_label == ch_dir).first().id
+                subch = session.query(SubChapter).filter(SubChapter.c.chapter_id == ch_id, SubChapter.c.sub_chapter_label == subch_name).first()
+                sub_chs.append(subch)
 
         # Accumulate all the ActiveCodes that are to be run and URL paths to be visited
         divs = []
