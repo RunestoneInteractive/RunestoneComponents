@@ -313,7 +313,9 @@ MultipleChoice.prototype.restoreMultipleSelect = function () {
                         $(this.optionArray[b].input).attr("checked", "true");
                     }
                 }
-                this.enableMCComparison();
+                if (this.useRunestoneServices) {
+                    this.enableMCComparison();
+                }
             } // end for
         } // end if
     } // end if len > 0
