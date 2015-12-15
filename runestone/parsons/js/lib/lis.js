@@ -95,6 +95,31 @@ var LIS = {};
     return _.difference(list, best);
   };
 
+  // Returns an array of those indices of the input that 
+  // are not included in the chosen longest increasing
+  // subsequence of the input values.
+  LIS.best_lise_inverse_indices = function(input) {
+    var decks = this.patience_sort(_.toArray(input)),
+        lises = this.find_lises(decks),
+        best = this.best_lise(lises),
+        inverse_indices = [];
+    var j = 0;
+    for (var i = 0; i < best.length; i++) {
+      for ( ; j < input.length; j++) {
+    	if (input[j] === best[i]) {
+    	  j++;
+    	  break;
+    	} else {
+      	  inverse_indices.push(j);
+  		}
+      }
+    }
+    for ( ; j < input.length; j++) {
+ 	  inverse_indices.push(j);
+    }
+    return inverse_indices;
+  };
+  
 // Takes an iterable sequence and returns a list of the inverses of
 // all the longest increasing subsequences of this sequence
 /*
