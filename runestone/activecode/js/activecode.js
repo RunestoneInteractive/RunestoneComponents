@@ -551,7 +551,7 @@ errorText.NotImplementedErrorFix = "For now the only way to fix this is to not u
 
 
 ActiveCode.prototype.setTimeLimit = function (timer) {
-    var timelimit = this.timeLimit;
+    var timelimit = this.timelimit;
     if (timer !== undefined ) {
         timelimit = timer
     }
