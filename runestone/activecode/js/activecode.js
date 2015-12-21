@@ -21,7 +21,6 @@ ActiveCode.prototype.init = function(opts) {
     var orig = opts.orig;
     this.useRunestoneServices = opts.useRunestoneServices;
     this.python3 = opts.python3;
-    this.alignVertical = opts.vertical;
     this.origElem = orig;
     this.divid = orig.id;
     this.code = $(orig).text() || "\n\n\n\n\n";
@@ -171,7 +170,7 @@ ActiveCode.prototype.createControls = function () {
     if ($(this.origElem).data("codelens")) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Show CodeLens");
+        $(butt).text("Show in CodeLens");
         $(butt).css("margin-left", "10px");
         this.clButton = butt;
         ctrlDiv.appendChild(butt);
@@ -233,8 +232,8 @@ ActiveCode.prototype.createOutput = function () {
 
 
     var lensDiv = document.createElement("div");
-    $(lensDiv).addClass("col-md-6");
-    $(lensDiv).css("display","none");
+    $(lensDiv).addClass("col-md-6-override");
+    $(lensDiv).css({"display" : "none"});
     this.codelens = lensDiv;
     this.outerDiv.appendChild(lensDiv);
 
@@ -357,7 +356,7 @@ ActiveCode.prototype.createGradeSummary = function () {
     var showGradeSummary = function (data, status, whatever) {
         var report = eval(data)[0];
         // check for report['message']
-        if (report) {
+        if (report['grade']) {
             body = "<h4>Grade Report</h4>" +
                    "<p>This assignment: " + report['grade'] + "</p>" +
                    "<p>" + report['comment'] + "</p>" +
@@ -365,7 +364,7 @@ ActiveCode.prototype.createGradeSummary = function () {
                    "<p>Average score: " +  report['avg'] + "</p>"
 
         } else {
-            body = "<h4>The server did not return any grade information</h4>";
+            body = "<h4>You must be Logged in to see your grade</h4>";
         }
         var html = '<div class="modal fade">' +
             '  <div class="modal-dialog compare-modal">' +
@@ -394,12 +393,15 @@ ActiveCode.prototype.hideCodelens = function (button, div_id) {
 
 ActiveCode.prototype.showCodelens = function () {
 
-    if (this.codelens.style.display == 'none') {
-        this.codelens.style.display = 'block';
-        this.clButton.innerText = "Hide Codelens";
+	if (this.codelens.style.display == 'none') {		
+		this.codelens.style.display = 'block';    														
+		//$(".container .section >*:not(.section)").animate({width: '90%', display: 'block'}, 600);
+		this.clButton.textContent = "Hide Codelens";													// changed from innerText for non-IE web browsers (W3C compliancy)
+		
     } else {
-        this.codelens.style.display = "none";
-        this.clButton.innerText = "Show in Codelens";
+		this.codelens.style.display = "none";
+		//$(".container .section >*:not(.section)").animate({width: '60%'}, 600);
+        this.clButton.textContent = "Show in Codelens";													// changed from innerText for non-IE web browsers (W3C compliancy)
         return;
     }
 
@@ -429,9 +431,9 @@ ActiveCode.prototype.showCodelens = function () {
     var embedUrlStr = $.param.fragment(srcURL, myVars, 2 /* clobber all */);
     var myIframe = document.createElement('iframe');
     myIframe.setAttribute("id", this.divid + '_codelens');
-    myIframe.setAttribute("width", "800");
+    myIframe.setAttribute("width", "100%");
     myIframe.setAttribute("height", "500");
-    myIframe.setAttribute("style", "display:block");
+	myIframe.setAttribute('style', 'display: block; margin: 0 auto; border: 1px solid #000');
     myIframe.style.background = '#fff';
     //myIframe.setAttribute("src",srcURL)
     myIframe.src = embedUrlStr;
@@ -468,7 +470,7 @@ ActiveCode.prototype.showCodeCoach = function (div_id) {
     myIframe.setAttribute("width", "800px");
     myIframe.setAttribute("height", "500px");
     myIframe.setAttribute("style", "display:block");
-    myIframe.style.background = '#fff';
+	myIframe.style.background = '#fff';
     myIframe.style.width = "100%";
     myIframe.src = srcURL;
     this.codecoach.appendChild(myIframe);
@@ -746,9 +748,7 @@ HTMLActiveCode.prototype.runProg = function () {
 //    $('#'+myDiv+'_htmlout').append('<iframe class="activehtml" id="' + myDiv + '_iframe" srcdoc="' +
 //        prog.replace(/"/g,"'") + '">' + '</iframe>');
     $(this.output).text('');
-    if (! this.alignVertical ) {
-        $(this.codeDiv).switchClass("col-md-12", "col-md-6", {duration: 500, queue: false});
-    }
+    $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
     $(this.outDiv).show({duration:700,queue:false});
     prog = "<script type=text/javascript>window.onerror = function(msg,url,line) {alert(msg+' on line: '+line);};</script>" + prog;
     this.output.srcdoc = prog;
@@ -764,12 +764,7 @@ HTMLActiveCode.prototype.init = function(opts) {
 
 HTMLActiveCode.prototype.createOutput = function () {
     var outDiv = document.createElement("div");
-    $(outDiv).addClass("ac_output");
-    if(this.alignVertical) {
-        $(outDiv).addClass("col-md-12");
-    } else {
-        $(outDiv).addClass("col-md-6");
-    }
+    $(outDiv).addClass("ac_output col-md-6");
     this.outDiv = outDiv;
     this.output = document.createElement('iframe');
     $(this.output).css("background-color","white");
@@ -1465,13 +1460,8 @@ LiveCode.prototype.pushDataFile = function (datadiv) {
 
 ACFactory = {};
 
-ACFactory.createActiveCode = function (orig, lang, addopts) {
+ACFactory.createActiveCode = function (orig, lang) {
     var opts = {'orig' : orig, 'useRunestoneServices': eBookConfig.useRunestoneServices, 'python3' : eBookConfig.python3 };
-    if (addopts) {
-        for (var attrname in addopts) {
-            opts[attrname] = addopts[attrname];
-        }
-    }
     if (lang === "javascript") {
         return new JSActiveCode(opts);
     } else if (lang === 'htmlmixed') {
@@ -1485,33 +1475,21 @@ ACFactory.createActiveCode = function (orig, lang, addopts) {
 }
 
 // used by web2py controller(s)
-ACFactory.addActiveCodeToDiv = function(outerdivid, acdivid, sid, initialcode, language) {
+ACFactory.addActiveCodeToDiv = function(outerdiv, acdiv, sid, initialcode, language) {
     var  thepre, newac;
-
-    acdiv = document.getElementById(acdivid);
-    $(acdiv).empty();
+    $("#"+acdiv).empty();
     thepre = document.createElement("textarea");
     thepre['data-component'] = "activecode";
     thepre.id = acdiv;
     $(thepre).data('lang', language);
-    $(acdiv).append(thepre);
+    $("#"+acdiv).append(thepre);
     var opts = {'orig' : thepre, 'useRunestoneServices': true };
-    addopts = {}
-    if(language === 'htmlmixed') {
-        var addopts = {'vertical': true};
-    }
-    newac = ACFactory.createActiveCode(thepre,language,addopts);
+
+    newac = ACFactory.createActiveCode(thepre,language);
     savediv = newac.divid;
-    newac.divid = outerdivid;
+    newac.divid = outerdiv;
     newac.sid = sid;
-    if (! initialcode ) {
-        newac.loadEditor();
-    } else {
-        newac.editor.setValue(initialcode);
-        setTimeout(function() {
-                newac.editor.refresh();
-            },500);
-    }
+    newac.loadEditor();
     newac.divid = savediv;
     newac.editor.setSize(500,300);
 };
