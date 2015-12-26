@@ -26,6 +26,34 @@
  */
 
 //
+// Chevron functions - Must correspond with width in runestone-custom-sphinx-bootstrap.css
+// 
+$(function () {
+	var resizeWindow = false;
+    var	resizeWidth = 600;
+	$(window).on('resize', function (event){
+		if ($(window).width() <= resizeWidth && resizeWindow == false){ 
+			resizeWindow = true;
+			var topPrev = $("#relations-prev").clone().attr("id", "top-relations-prev");
+			var topNext = $("#relations-next").clone().attr("id", "top-relations-next");
+			$("#relations-prev, #relations-next").hide();
+			var bottomPrev = topPrev.clone().attr("id", "bottom-relations-prev");
+			var bottomNext = topNext.clone().attr("id", "bottom-relations-next");
+			$("div#main-content > div").prepend(topPrev, topNext);
+			$("#top-relations-prev, #top-relations-next").wrapAll("<ul id=\"top-relations-console\"></ul>");
+			$("div#main-content > div").append(bottomPrev, bottomNext);
+			$("#bottom-relations-prev, #bottom-relations-next").wrapAll("<ul id=\"bottom-relations-console\"></ul>");
+		}
+		if ($(window).width() >= resizeWidth + 1 && resizeWindow == true){ 
+			resizeWindow = false;
+			$("#top-relations-console, #bottom-relations-console").remove();
+			$("#relations-prev, #relations-next").show();
+		}
+	}).resize();
+});	
+ 
+ 
+//
 // Logging functions
 //
 

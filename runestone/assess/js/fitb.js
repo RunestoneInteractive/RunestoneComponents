@@ -231,7 +231,9 @@ FITB.prototype.checkPreviousFIB = function () {
             var arr = ex.split(";");
             for (var i = 0; i < this.blankArray.length; i++) {
                 $(this.blankArray[i]).attr("value", arr[i]);
-                this.enableCompareButton();
+                if (this.useRunestoneServices) {
+                    this.enableCompareButton();
+                }
             }
 
         } // end if ex not null

@@ -91,3 +91,7 @@
 .visible-ac-canvas {
     border: 2px solid black;
 }
+
+ol.arabic {
+	max-width: 100% !important;
+}

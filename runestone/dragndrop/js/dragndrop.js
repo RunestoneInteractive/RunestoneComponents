@@ -327,6 +327,9 @@ DragNDrop.prototype.dragEval = function () {
         }
     }
     this.correctNum = this.dragNum - this.incorrectNum - this.unansweredNum;
+
+    var answerInfo = "Number-correct:" + this.correctNum + ":number-incorrect:" + this.incorrectNum + ":number-unanswered:" + this.unansweredNum;
+    this.logBookEvent({"event": "dragNdrop", "act": answerInfo, "div_id": this.divid});
     this.setLocalStorage();
     this.renderFeedback();
 };
