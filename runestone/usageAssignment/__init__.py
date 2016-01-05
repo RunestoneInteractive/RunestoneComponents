@@ -1,4 +1,4 @@
-# Copyright (C) 2011  Bradley N. Miller
+# Copyright (C) 2015  Paul Resnick
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,39 +27,50 @@ from sqlalchemy.orm import sessionmaker
 def setup(app):
     app.add_directive('usageassignment',usageAssignment)
 
-    # app.add_node(usageAssignmentNode, html=(visit_df_node, depart_df_node))
+    app.add_node(usageAssignmentNode, html=(visit_ua_node, depart_ua_node))
 
     app.connect('doctree-resolved',process_nodes)
     app.connect('env-purge-doc', purge)
 
-
-# class usageAssignmentNode(nodes.General, nodes.Element):
-#     def __init__(self,content):
-#         """
-#         Arguments:
-#         - `self`:
-#         - `content`:
-#         """
-#         super(DataFileNode,self).__init__()
-#         self.df_content = content
+class usageAssignmentNode(nodes.General, nodes.Element):
+    def __init__(self,content):
+        """
+        Arguments:
+        - `self`:
+        - `content`:
+        """
+        super(usageAssignmentNode,self).__init__()
+        self.ua_content = content
 
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
-# def visit_df_node(self,node):
-#     res = TEMPLATE
-#     res = res % node.df_content
-#
-#     res = res.replace("u'","'")  # hack:  there must be a better way to include the list and avoid unicode strings
-#
-#     self.body.append(res)
-#
-# def depart_df_node(self,node):
-#     ''' This is called at the start of processing an datafile node.  If datafile had recursive nodes
-#         etc and did not want to do all of the processing in visit_ac_node any finishing touches could be
-#         added here.
-#     '''
-#     pass
+def visit_ua_node(self,node):
+    course_name = node.ua_content['course_name']
+    s = ""
+    for d in node.ua_content['chapter_data']:
+        ch_name, sub_chs = d['ch'], d['sub_chs']
+        s += '<div class="panel-heading">'
+        s += ch_name
+        s += '<ul class="list-group">'
+        for sub_ch_name in sub_chs:
+            s += '<li class="simple">'
+            s += '<a href = "/runestone/static/%s/%s/%s.html">%s</a>' % (course_name, ch_name, sub_ch_name, sub_ch_name)
+            s += '</li>'
+        s += '</ul>'
+        s += '</div>'
+
+    # is this needed??
+    s = s.replace("u'","'")  # hack:  there must be a better way to include the list and avoid unicode strings
+
+    self.body.append(s)
+
+def depart_ua_node(self,node):
+    ''' This is called at the start of processing a ua node.  If ua had recursive nodes
+        etc and did not want to do all of the processing in visit_ua_node any finishing touches could be
+        added here.
+    '''
+    pass
 
 
 def process_nodes(app,env,docname):
@@ -68,6 +79,8 @@ def process_nodes(app,env,docname):
 
 def purge(app,env,docname):
     pass
+
+
 class usageAssignment(Directive):
     required_arguments = 1  # requires an id for the directive
     optional_arguments = 0
@@ -151,34 +164,49 @@ class usageAssignment(Directive):
         session = Session()
 
         course_name = env.config.html_context['course_id']
+        self.options['course_name'] = course_name
         course_id = str(session.query(Course).filter(Course.c.course_name == course_name).first().id)
 
         # Accumulate all the Chapters and SubChapters that are to be visited
         # For each chapter, accumulate all subchapters
+        self.options['chapter_data'] = []
         sub_chs = []
         if 'chapters' in self.options:
-            for nm in self.options.get('chapters').split(','):
-                ch = session.query(Chapter).filter(Chapter.c.course_id == course_name,
-                                                   Chapter.c.chapter_label == nm.strip()).first()
-                results = session.query(SubChapter).filter(SubChapter.c.chapter_id == str(ch.id)).all()
-                sub_chs += results
+            try:
+                for nm in self.options.get('chapters').split(','):
+                    ch = session.query(Chapter).filter(Chapter.c.course_id == course_name,
+                                                       Chapter.c.chapter_label == nm.strip()).first()
+
+                    results = session.query(SubChapter).filter(SubChapter.c.chapter_id == str(ch.id)).all()
+                    sub_chs += results
+                    chapter_data = {'ch': nm, 'sub_chs': [r.sub_chapter_label for r in results]}
+                    self.options['chapter_data'].append(chapter_data)
+            except:
+                print("Chapters requested not found: %s" % (self.options.get('chapters')))
         # Add any explicit subchapters
         if 'subchapters' in self.options:
-            for nm in self.options.get('subchapters').split(','):
-                (ch_dir, subch_name) = nm.strip().split('/')
-                ch_id = session.query(Chapter).filter(Chapter.c.course_id == course_name, Chapter.c.chapter_label == ch_dir).first().id
-                subch = session.query(SubChapter).filter(SubChapter.c.chapter_id == ch_id, SubChapter.c.sub_chapter_label == subch_name).first()
-                sub_chs.append(subch)
+            try:
+                for nm in self.options.get('subchapters').split(','):
+                    (ch_dir, subch_name) = nm.strip().split('/')
+                    ch_id = session.query(Chapter).filter(Chapter.c.course_id == course_name, Chapter.c.chapter_label == ch_dir).first().id
+                    subch = session.query(SubChapter).filter(SubChapter.c.chapter_id == ch_id, SubChapter.c.sub_chapter_label == subch_name).first()
+                    sub_chs.append(subch)
+                    self.options['chapter_data'].append({'ch': ch_dir, 'sub_chs': [subch_name]})
+            except:
+                print("Subchapters requested not found: %s" % (self.options.get('subchapters')))
 
         # Accumulate all the ActiveCodes that are to be run and URL paths to be visited
         divs = []
         paths = []
         for subch in sub_chs:
-            ch_name = session.query(Chapter).filter(Chapter.c.id == subch.chapter_id).first().chapter_label
-            divs += session.query(Div).filter(Div.c.course_name == course_name,
-                                              Div.c.chapter == ch_name,
-                                              Div.c.subchapter == subch.sub_chapter_label).all()
-            paths.append('/runestone/static/%s/%s/%s.html' % (course_name, ch_name, subch.sub_chapter_label))
+            try:
+                ch_name = session.query(Chapter).filter(Chapter.c.id == subch.chapter_id).first().chapter_label
+                divs += session.query(Div).filter(Div.c.course_name == course_name,
+                                                  Div.c.chapter == ch_name,
+                                                  Div.c.subchapter == subch.sub_chapter_label).all()
+                paths.append('/runestone/static/%s/%s/%s.html' % (course_name, ch_name, subch.sub_chapter_label))
+            except:
+                print ("Subchapter not found: %s" % (subch))
         tracked_div_types = ['activecode', 'actex']
         active_codes = [d.div_id for d in divs if d.div_type in tracked_div_types]
 
@@ -240,4 +268,4 @@ class usageAssignment(Directive):
 
         session.commit()
 
-        return []
+        return [usageAssignmentNode(self.options)]
