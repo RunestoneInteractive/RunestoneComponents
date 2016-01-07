@@ -658,7 +658,7 @@ ActiveCode.prototype.saveEditor = function() {
             if (acid.indexOf("ERROR:") == 0) {
                 alert(acid);
             } else {
-                // use a tooltip to provide some success feedback
+7s                // use a tooltip to provide some success feedback
                 var save_btn = $(this.saveButton);
                 save_btn.attr('title', getLocalizedString("InformCodeSaved"));
                 opts = {
