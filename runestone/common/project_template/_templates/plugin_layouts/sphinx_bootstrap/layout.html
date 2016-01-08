@@ -218,6 +218,21 @@
   eBookConfig.python3 = {{ python3 }};
   eBookConfig.language = '{{language}}';
   eBookConfig.hideControlCaptions = {{hide_control_captions}};
+
+  var defaultLocalizationLanguage = "en";
+  var activeLocalizationLanguage = defaultLocalizationLanguage;
+
+  if (eBookConfig.language != undefined) {
+    activeLocalizationLanguage = eBookConfig.language;
+  }
+
+  function getLocalizedString(localizationColl, id) {
+    if (localizationColl[activeLocalizationLanguage] == undefined) {
+      return "$$ string " + activeLocalizationLanguage + "/" + id + " undefined $$"
+    }
+
+    return localizationColl[activeLocalizationLanguage][id];
+  }
 </script>
 
 <div id="fb-root"></div>
