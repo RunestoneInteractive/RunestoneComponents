@@ -2,9 +2,7 @@
  * Created by bmiller on 3/19/15.
  */
 
-var defaultLanguage = "en";
-var activeLanguage = defaultLanguage;
-var localizations = {
+var activeCodeLocalizationColl = {
     "en": {
         RunButtonCaption: "Run",
         LoadButtonCaption: "Load",
@@ -372,9 +370,6 @@ var localizations = {
     },
 };
 
-function getLocalizedString(id) {
-    return localizations[activeLanguage][id];
-}
 
 var edList = {};
 
@@ -442,9 +437,6 @@ ActiveCode.prototype.init = function(opts) {
 };
 
 ActiveCode.prototype.createEditor = function(index) {
-    if (eBookConfig.language != undefined && localizations[eBookConfig.language] != undefined) {
-        activeLanguage = eBookConfig.language;
-    }
     var newdiv = document.createElement('div');
     var linkdiv = document.createElement('div');
     linkdiv.id = this.divid.replace(/_/g,'-').toLowerCase();  // :ref: changes _ to - so add this as a target
@@ -493,7 +485,7 @@ ActiveCode.prototype.createControls = function() {
 
     // Run
     var butt = document.createElement("button");
-    $(butt).text(getLocalizedString("RunButtonCaption"));
+    $(butt).text(getLocalizedString(activeCodeLocalizationColl, "RunButtonCaption"));
     $(butt).addClass("btn btn-success");
     ctrlDiv.appendChild(butt);
     this.runButton = butt;
@@ -503,7 +495,7 @@ ActiveCode.prototype.createControls = function() {
     if (this.useRunestoneServices) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text(getLocalizedString("SaveButtonCaption"));
+        $(butt).text(getLocalizedString(activeCodeLocalizationColl, "SaveButtonCaption"));
         $(butt).css("margin-left", "10px");
         this.saveButton = butt;
         this.saveButton.onclick = this.saveEditor.bind(this);
@@ -516,7 +508,7 @@ ActiveCode.prototype.createControls = function() {
     if (this.useRunestoneServices) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text(getLocalizedString("LoadButtonCaption"));
+        $(butt).text(getLocalizedString(activeCodeLocalizationColl, "LoadButtonCaption"));
         $(butt).css("margin-left", "10px");
         this.loadButton = butt;
         this.loadButton.onclick = this.loadEditor.bind(this);
@@ -528,7 +520,7 @@ ActiveCode.prototype.createControls = function() {
     if ($(this.origElem).data('gradebutton')) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text(getLocalizedString("FeedbackButtonCaption"));
+        $(butt).text(getLocalizedString(activeCodeLocalizationColl, "FeedbackButtonCaption"));
         $(butt).css("margin-left","10px");
         this.gradeButton = butt;
         ctrlDiv.appendChild(butt);
@@ -538,7 +530,7 @@ ActiveCode.prototype.createControls = function() {
     if (this.hidecode) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text(getLocalizedString("ShowHideCodeButtonCaption"));
+        $(butt).text(getLocalizedString(activeCodeLocalizationColl, "ShowHideCodeButtonCaption"));
         $(butt).css("margin-left", "10px");
         this.showHideButt = butt;
         ctrlDiv.appendChild(butt);
@@ -552,7 +544,7 @@ ActiveCode.prototype.createControls = function() {
     if ($(this.origElem).data("codelens")) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text(getLocalizedString("CodeLensButtonCaptionShow"));
+        $(butt).text(getLocalizedString(activeCodeLocalizationColl, "CodeLensButtonCaptionShow"));
         $(butt).css("margin-left", "10px");
         this.clButton = butt;
         ctrlDiv.appendChild(butt);
@@ -562,7 +554,7 @@ ActiveCode.prototype.createControls = function() {
     if (this.useRunestoneServices && $(this.origElem).data("coach")) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text(getLocalizedString("CodeCoachButtonCaption"));
+        $(butt).text(getLocalizedString(activeCodeLocalizationColl, "CodeCoachButtonCaption"));
         $(butt).css("margin-left", "10px");
         this.coachButton = butt;
         ctrlDiv.appendChild(butt);
@@ -573,7 +565,7 @@ ActiveCode.prototype.createControls = function() {
     if ($(this.origElem).data("audio")) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text(getLocalizedString("AudioTourButtonCaption"));
+        $(butt).text(getLocalizedString(activeCodeLocalizationColl, "AudioTourButtonCaption"));
         $(butt).css("margin-left", "10px");
         this.atButton = butt;
         ctrlDiv.appendChild(butt);
@@ -627,9 +619,9 @@ ActiveCode.prototype.createOutput = function() {
 
 ActiveCode.prototype.disableSaveLoad = function() {
     $(this.saveButton).addClass('disabled');
-    $(this.saveButton).attr('title', getLocalizedString("PromptLoginToSave"));
+    $(this.saveButton).attr('title', getLocalizedString(activeCodeLocalizationColl, "PromptLoginToSave"));
     $(this.loadButton).addClass('disabled');
-    $(this.loadButton).attr('title', getLocalizedString("PromptLoginToLoad"));
+    $(this.loadButton).attr('title', getLocalizedString(activeCodeLocalizationColl, "PromptLoginToLoad"));
 };
 
 ActiveCode.prototype.addCaption = function() {
@@ -649,18 +641,18 @@ ActiveCode.prototype.saveEditor = function() {
     var res;
     var saveSuccess = function(data, status, whatever) {
         if (data.redirect) {
-            alert(getLocalizedString("ErrorSaveRedirected"));
+            alert(getLocalizedString(activeCodeLocalizationColl, "ErrorSaveRedirected"));
         } else if (data == "") {
-            alert(getLocalizedString("ErrorSaveOther"));
+            alert(getLocalizedString(activeCodeLocalizationColl, "ErrorSaveOther"));
         }
         else {
             var acid = eval(data)[0];
             if (acid.indexOf("ERROR:") == 0) {
                 alert(acid);
             } else {
-7s                // use a tooltip to provide some success feedback
+                // use a tooltip to provide some success feedback
                 var save_btn = $(this.saveButton);
-                save_btn.attr('title', getLocalizedString("InformCodeSaved"));
+                save_btn.attr('title', getLocalizedString(activeCodeLocalizationColl, "InformCodeSaved"));
                 opts = {
                     'trigger': 'manual',
                     'placement': 'bottom',
@@ -681,13 +673,13 @@ ActiveCode.prototype.saveEditor = function() {
     var data = {acid: this.divid, code: this.editor.getValue()};
     data.lang = this.language;
     if (data.code.match(/^\s+$/)) {
-        res = confirm(getLocalizedString("PromptSavingEmptyProgram"));
+        res = confirm(getLocalizedString(activeCodeLocalizationColl, "PromptSavingEmptyProgram"));
         if (! res) {
             return;
         }
     }
     $(document).ajaxError(function(e, jqhxr, settings, exception) {
-        alert(getLocalizedString("ErrorRequestFailed") + settings.url);
+        alert(getLocalizedString(activeCodeLocalizationColl, "ErrorRequestFailed") + settings.url);
     });
     jQuery.post(eBookConfig.ajaxURL + 'saveprog', data, saveSuccess);
     if (this.editor.acEditEvent) {
@@ -710,12 +702,12 @@ ActiveCode.prototype.loadEditor = function() {
                 this.editor.refresh();
             }.bind(this),500);
             $(this.loadButton).tooltip({'placement': 'bottom',
-                             'title': getLocalizedString("InformSavedCodeLoaded"),
+                             'title': getLocalizedString(activeCodeLocalizationColl, "InformSavedCodeLoaded"),
                              'trigger': 'manual'
                             });
         } else {
             $(this.loadButton).tooltip({'placement': 'bottom',
-                             'title': getLocalizedString("InformSavedCodeNotFound"),
+                             'title': getLocalizedString(activeCodeLocalizationColl, "InformSavedCodeNotFound"),
                              'trigger': 'manual'
                             });
         }
@@ -742,21 +734,21 @@ ActiveCode.prototype.createGradeSummary = function() {
         var report = eval(data)[0];
         // check for report['message']
         if (report) {
-            body = "<h4>" + getLocalizedString("LabelGradeReportTitle") + "</h4>" +
-                   "<p>" + getLocalizedString("LabelGradeReportThisAssignment") + " " + report['grade'] + "</p>" +
+            body = "<h4>" + getLocalizedString(activeCodeLocalizationColl, "LabelGradeReportTitle") + "</h4>" +
+                   "<p>" + getLocalizedString(activeCodeLocalizationColl, "LabelGradeReportThisAssignment") + " " + report['grade'] + "</p>" +
                    "<p>" + report['comment'] + "</p>" +
-                   "<p>" + getLocalizedString("LabelGradeReportNumOfAssignments") + " " + report['count'] + "</p>" +
-                   "<p>" + getLocalizedString("LabelGradeReportAverageScore") + " " + report['avg'] + "</p>"
+                   "<p>" + getLocalizedString(activeCodeLocalizationColl, "LabelGradeReportNumOfAssignments") + " " + report['count'] + "</p>" +
+                   "<p>" + getLocalizedString(activeCodeLocalizationColl, "LabelGradeReportAverageScore") + " " + report['avg'] + "</p>"
 
         } else {
-            body = "<h4>" + getLocalizedString("ErrorNoGradeInformationReceived") + "</h4>";
+            body = "<h4>" + getLocalizedString(activeCodeLocalizationColl, "ErrorNoGradeInformationReceived") + "</h4>";
         }
         var html = '<div class="modal fade">' +
             '  <div class="modal-dialog compare-modal">' +
             '    <div class="modal-content">' +
             '      <div class="modal-header">' +
             '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
-            '        <h4 class="modal-title">' + getLocalizedString("LabelAssignmentFeedbackTitle") + '</h4>' +
+            '        <h4 class="modal-title">' + getLocalizedString(activeCodeLocalizationColl, "LabelAssignmentFeedbackTitle") + '</h4>' +
             '      </div>' +
             '      <div class="modal-body">' +
             body +
@@ -780,10 +772,10 @@ ActiveCode.prototype.showCodelens = function() {
 
     if (this.codelens.style.display == 'none') {
         this.codelens.style.display = 'block';
-        this.clButton.innerText = getLocalizedString("CodeLensButtonCaptionHide");
+        this.clButton.innerText = getLocalizedString(activeCodeLocalizationColl, "CodeLensButtonCaptionHide");
     } else {
         this.codelens.style.display = "none";
-        this.clButton.innerText = getLocalizedString("CodeLensButtonCaptionShowIn");
+        this.clButton.innerText = getLocalizedString(activeCodeLocalizationColl, "CodeLensButtonCaptionShowIn");
         return;
     }
 
@@ -870,7 +862,7 @@ ActiveCode.prototype.toggleEditorVisibility = function() {
 
 ActiveCode.prototype.addErrorMessage = function(err) {
     //logRunEvent({'div_id': this.divid, 'code': this.prog, 'errinfo': err.toString()}); // Log the run event
-    var errHead = $('<h3>').html(getLocalizedString("LabelCodeRunErrorTitle"));
+    var errHead = $('<h3>').html(getLocalizedString(activeCodeLocalizationColl, "LabelCodeRunErrorTitle"));
     this.eContainer = this.outerDiv.appendChild(document.createElement('div'));
     this.eContainer.className = 'error alert alert-danger';
     this.eContainer.id = this.divid + '_errinfo';
@@ -880,12 +872,12 @@ ActiveCode.prototype.addErrorMessage = function(err) {
     var to = errString.indexOf(":");
     var errName = errString.substring(0, to);
     errText.innerHTML = errString;
-    $(this.eContainer).append('<h3>' + getLocalizedString("LabelCodeRunErrorDescription") + '</h3>');
+    $(this.eContainer).append('<h3>' + getLocalizedString(activeCodeLocalizationColl, "LabelCodeRunErrorDescription") + '</h3>');
     var errDesc = this.eContainer.appendChild(document.createElement('p'));
-    errDesc.innerHTML = getLocalizedString("ErrorFromCodeRun_" + errName);
-    $(this.eContainer).append('<h3>' + getLocalizedString("LabelCodeRunErrorFixing") + '</h3>');
+    errDesc.innerHTML = getLocalizedString(activeCodeLocalizationColl, "ErrorFromCodeRun_" + errName);
+    $(this.eContainer).append('<h3>' + getLocalizedString(activeCodeLocalizationColl, "LabelCodeRunErrorFixing") + '</h3>');
     var errFix = this.eContainer.appendChild(document.createElement('p'));
-    errFix.innerHTML = getLocalizedString("ErrorFromCodeRun_" + errName + 'Fix');
+    errFix.innerHTML = getLocalizedString(activeCodeLocalizationColl, "ErrorFromCodeRun_" + errName + 'Fix');
     var moreInfo = '../ErrorHelp/' + errName.toLowerCase() + '.html';
     //console.log("Runtime Error: " + err.toString());
 };
@@ -916,7 +908,7 @@ ActiveCode.prototype.setTimeLimit = function(timer) {
 
 ActiveCode.prototype.builtinRead = function(x) {
         if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
-            throw getLocalizedString("ErrorFileNotFound") + " '" + x + "'";
+            throw getLocalizedString(activeCodeLocalizationColl, "ErrorFileNotFound") + " '" + x + "'";
         return Sk.builtinFiles["files"][x];
 };
 
@@ -1181,13 +1173,13 @@ function AudioTour (divid, code, bnum, audio_text) {
     //laying out the HTML content
 
     var bcount = 0;
-    var html_string = "<div class='modal-lightsout'></div><div class='modal-profile'><h3>" + getLocalizedString("LabelAudioTourTitle") + "</h3><div class='modal-close-profile'></div><p id='windowcode'></p><p id='" + divid + "_audiocode'></p>";
+    var html_string = "<div class='modal-lightsout'></div><div class='modal-profile'><h3>" + getLocalizedString(activeCodeLocalizationColl, "LabelAudioTourTitle") + "</h3><div class='modal-close-profile'></div><p id='windowcode'></p><p id='" + divid + "_audiocode'></p>";
     html_string += "<p id='status'></p>";
-    html_string += "<input type='image' src='../_static/first.png' width='25' id='first_audio' name='first_audio' title='" + getLocalizedString("LabelAudioTourBtnFirst") + "' alt='" + getLocalizedString("LabelAudioTourBtnFirst") + "' onerror=\"this.onerror=null;this.src='_static/first.png'\" disabled/>" +
-                   "<input type='image' src='../_static/prev.png' width='25' id='prev_audio' name='prev_audio' title='" + getLocalizedString("LabelAudioTourBtnPrevious") + "' alt='" + getLocalizedString("LabelAudioTourBtnPrevious") + "' onerror=\"this.onerror=null;this.src='_static/prev.png'\" disabled/>" +
-                   "<input type='image' src='../_static/pause.png' width='25' id='pause_audio' name='pause_audio' title='" + getLocalizedString("LabelAudioTourBtnPause") + "' alt='" + getLocalizedString("LabelAudioTourBtnPause") + "' onerror=\"this.onerror=null;this.src='_static/pause.png'\" disabled/>" +
-                   "<input type='image' src='../_static/next.png' width ='25' id='next_audio' name='next_audio' title='" + getLocalizedString("LabelAudioTourBtnNext") + "' alt='" + getLocalizedString("LabelAudioTourBtnNext") + "' onerror=\"this.onerror=null;this.src='_static/next.png'\" disabled/>" +
-                   "<input type='image' src='../_static/last.png' width ='25' id='last_audio' name='last_audio' title='" + getLocalizedString("LabelAudioTourBtnLast") + "' alt='" + getLocalizedString("LabelAudioTourBtnLast") + "' onerror=\"this.onerror=null;this.src='_static/last.png'\" disabled/><br/>";
+    html_string += "<input type='image' src='../_static/first.png' width='25' id='first_audio' name='first_audio' title='" + getLocalizedString(activeCodeLocalizationColl, "LabelAudioTourBtnFirst") + "' alt='" + getLocalizedString(activeCodeLocalizationColl, "LabelAudioTourBtnFirst") + "' onerror=\"this.onerror=null;this.src='_static/first.png'\" disabled/>" +
+                   "<input type='image' src='../_static/prev.png' width='25' id='prev_audio' name='prev_audio' title='" + getLocalizedString(activeCodeLocalizationColl, "LabelAudioTourBtnPrevious") + "' alt='" + getLocalizedString(activeCodeLocalizationColl, "LabelAudioTourBtnPrevious") + "' onerror=\"this.onerror=null;this.src='_static/prev.png'\" disabled/>" +
+                   "<input type='image' src='../_static/pause.png' width='25' id='pause_audio' name='pause_audio' title='" + getLocalizedString(activeCodeLocalizationColl, "LabelAudioTourBtnPause") + "' alt='" + getLocalizedString(activeCodeLocalizationColl, "LabelAudioTourBtnPause") + "' onerror=\"this.onerror=null;this.src='_static/pause.png'\" disabled/>" +
+                   "<input type='image' src='../_static/next.png' width ='25' id='next_audio' name='next_audio' title='" + getLocalizedString(activeCodeLocalizationColl, "LabelAudioTourBtnNext") + "' alt='" + getLocalizedString(activeCodeLocalizationColl, "LabelAudioTourBtnNext") + "' onerror=\"this.onerror=null;this.src='_static/next.png'\" disabled/>" +
+                   "<input type='image' src='../_static/last.png' width ='25' id='last_audio' name='last_audio' title='" + getLocalizedString(activeCodeLocalizationColl, "LabelAudioTourBtnLast") + "' alt='" + getLocalizedString(activeCodeLocalizationColl, "LabelAudioTourBtnLast") + "' onerror=\"this.onerror=null;this.src='_static/last.png'\" disabled/><br/>";
     for (var i = 0; i < audio_type.length - 1; i++) {
         html_string += "<input type='button' style='margin-right:5px;' class='btn btn-default btn-sm' id='button_audio_" + i + "' name='button_audio_" + i + "' value=" + bval[i] + " />";
         bcount++;
@@ -1304,7 +1296,7 @@ AudioTour.prototype.tour = function(divid, audio_type, bcount) {
     var atype = audio_type.split(";");
     var name = atype[0].replaceAll("\"", " ");
     this.tourName = name;
-    $('#status').html(getLocalizedString("InformAudioTourStartingTour") + " " + name);
+    $('#status').html(getLocalizedString(activeCodeLocalizationColl, "InformAudioTourStartingTour") + " " + name);
 
     //log tour type to db
     this.logBookEvent({'event': 'Audio', 'act': name, 'div_id': divid});
@@ -1331,7 +1323,7 @@ AudioTour.prototype.tour = function(divid, audio_type, bcount) {
         str += "<source src='../_static/audio/" + akey + ".mp3' type='audio/mpeg'>";
         str += "<source src='_static/audio/" + akey + ".wav' type='audio/wav'>";
         str += "<source src='_static/audio/" + akey + ".mp3' type='audio/mpeg'>";
-        str +=  "<br />" + getLocalizedString("ErrorAudioTourBrowserDoesntSupport") + "</audio>";
+        str +=  "<br />" + getLocalizedString(activeCodeLocalizationColl, "ErrorAudioTourBrowserDoesntSupport") + "</audio>";
         this.ahash[akey] = lnums;
         this.aname.push(akey);
     }
@@ -1449,7 +1441,7 @@ AudioTour.prototype.playCurrIndexAudio = function() {
 // handle the end of the tour
 AudioTour.prototype.handleTourEnd = function() {
 
-    $('#status').html(" " + getLocalizedString("InformAudioTourEndedPrefix") + this.tourName + getLocalizedString("InformAudioTourEndedPostfix"));
+    $('#status').html(" " + getLocalizedString(activeCodeLocalizationColl, "InformAudioTourEndedPrefix") + this.tourName + getLocalizedString(activeCodeLocalizationColl, "InformAudioTourEndedPostfix"));
 
     // disable the prev, pause/play, and next buttons and make them more invisible
     $('#first_audio').attr('disabled', 'disabled');
@@ -1502,7 +1494,7 @@ AudioTour.prototype.playWhenReady = function(afile, divid, ahash) {
     $('#' + afile).unbind('canplaythrough');
     //console.log("in playWhenReady " + elem.duration);
 
-    $('#status').html(getLocalizedString("InformAudioTourPlayingPrefix") + this.tourName);
+    $('#status').html(getLocalizedString(activeCodeLocalizationColl, "InformAudioTourPlayingPrefix") + this.tourName);
     this.elem.currentTime = 0;
     this.highlightLines(divid, ahash[afile]);
     $('#' + afile).bind('ended', (function() {
@@ -1523,7 +1515,7 @@ AudioTour.prototype.playaudio = function(i, aname, divid, ahash) {
     //console.log("in playaudio " + elem.duration);
     if (isNaN(this.elem.duration) || this.elem.duration == 0) {
         // set the status
-        $('#status').html(getLocalizedString("InformAudioTourLoading"));
+        $('#status').html(getLocalizedString(activeCodeLocalizationColl, "InformAudioTourLoading"));
         $('#' + this.afile).bind('canplaythrough', (function() {
             this.playWhenReady(this.afile, divid, ahash);
         }).bind(this));
@@ -1544,7 +1536,7 @@ AudioTour.prototype.pauseAndPlayAudio = function() {
         counter = (this.elem.duration - this.elem.currentTime) * 1000;
         this.elem.play(); // start the audio from current spot
         document.getElementById("pause_audio").src = "../_static/pause.png";
-        document.getElementById("pause_audio").title = getLocalizedString("LabelAudioTourBtnPauseCurrent");
+        document.getElementById("pause_audio").title = getLocalizedString(activeCodeLocalizationColl, "LabelAudioTourBtnPauseCurrent");
         //log change to db
         this.logBookEvent({'event': 'Audio', 'act': 'play', 'div_id': this.theDivid});
     }
@@ -1553,7 +1545,7 @@ AudioTour.prototype.pauseAndPlayAudio = function() {
     else if (this.playing) {
         this.elem.pause(); // pause the audio
         document.getElementById("pause_audio").src = "../_static/play.png";
-        document.getElementById("pause_audio").title = getLocalizedString("LabelAudioTourBtnPlayPaused");
+        document.getElementById("pause_audio").title = getLocalizedString(activeCodeLocalizationColl, "LabelAudioTourBtnPlayPaused");
         //log change to db
         this.logBookEvent({'event': 'Audio', 'act': 'pause', 'div_id': this.theDivid});
     }
@@ -1645,7 +1637,7 @@ LiveCode.prototype.createInputElement = function() {
 
     var label = document.createElement('label');
     label.for = this.divid + "_stdin";
-    $(label).text(getLocalizedString("LabelInputForProgram"));
+    $(label).text(getLocalizedString(activeCodeLocalizationColl, "LabelInputForProgram"));
     var input = document.createElement('input');
     input.id = this.divid + "_stdin";
     input.type = "text";
@@ -1727,7 +1719,7 @@ LiveCode.prototype.runProg = function() {
                     $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
                     break;
                 case 11: // compiler error
-                    $(odiv).html(getLocalizedString("ErrorCompileErrors"));
+                    $(odiv).html(getLocalizedString(activeCodeLocalizationColl, "ErrorCompileErrors"));
                     this.addJobeErrorMessage(result.cmpinfo);
                     break;
                 case 12:  // run time error
@@ -1738,13 +1730,13 @@ LiveCode.prototype.runProg = function() {
                     break;
                 case 13:  // time limit
                     $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
-                    this.addJobeErrorMessage(getLocalizedString("ErrorTimeLimitExceeded"));
+                    this.addJobeErrorMessage(getLocalizedString(activeCodeLocalizationColl, "ErrorTimeLimitExceeded"));
                     break;
                 default:
                     if(result.stderr) {
                         $(odiv).html(result.stderr.replace(/\n/g, "<br>"));
                     } else {
-                        this.addJobeErrorMessage(getLocalizedString("ErrorServerError") + xhr.status + " " + xhr.statusText);
+                        this.addJobeErrorMessage(getLocalizedString(activeCodeLocalizationColl, "ErrorServerError") + xhr.status + " " + xhr.statusText);
                     }
             }
 
@@ -1752,17 +1744,17 @@ LiveCode.prototype.runProg = function() {
         }).bind(this);
 
         ///$("#" + divid + "_errinfo").remove();
-        $(this.output).html(getLocalizedString("InformCompilingCode"));
+        $(this.output).html(getLocalizedString(activeCodeLocalizationColl, "InformCompilingCode"));
 
         xhr.onerror = function() {
-            this.addJobeErrorMessage(getLocalizedString("ErrorServerCommunication"));
+            this.addJobeErrorMessage(getLocalizedString(activeCodeLocalizationColl, "ErrorServerCommunication"));
             $(this.runButton).removeAttr('disabled');
         };
 
         xhr.send(data);
     };
 LiveCode.prototype.addJobeErrorMessage = function(err) {
-        var errHead = $('<h3>').html(getLocalizedString("LabelError"));
+        var errHead = $('<h3>').html(getLocalizedString(activeCodeLocalizationColl, "LabelError"));
         var eContainer = this.outerDiv.appendChild(document.createElement('div'));
         this.errDiv = eContainer;
         eContainer.className = 'error alert alert-danger';
@@ -1877,7 +1869,7 @@ ACFactory.createScratchActivecode = function() {
         '    <div class="modal-content">' +
         '      <div class="modal-header">' +
         '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
-        '        <h4 class="modal-title">' + getLocalizedString("LabelScratchActiveCode") + '</h4>' +
+        '        <h4 class="modal-title">' + getLocalizedString(activeCodeLocalizationColl, "LabelScratchActiveCode") + '</h4>' +
         '      </div> ' +
         '      <div class="modal-body">' +
         '      <textarea data-component="activecode" id="' + divid + '">' +
