@@ -174,8 +174,9 @@ class usageAssignment(Directive):
         if 'chapters' in self.options:
             try:
                 for nm in self.options.get('chapters').split(','):
+                    nm = nm.strip()
                     ch = session.query(Chapter).filter(Chapter.c.course_id == course_name,
-                                                       Chapter.c.chapter_label == nm.strip()).first()
+                                                       Chapter.c.chapter_label == nm).first()
 
                     results = session.query(SubChapter).filter(SubChapter.c.chapter_id == str(ch.id)).all()
                     sub_chs += results
