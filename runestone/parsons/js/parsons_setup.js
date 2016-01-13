@@ -12,6 +12,28 @@
 var prsList = {};    // Parsons dictionary
 
 
+var runestoneParsonsTranslations = {
+    "fi": {
+        checkme_button_caption: "Tarkista vastaus",
+        reset_button_caption: "Palauta tehtävä alkutilaan",
+        trash_label: "Vedä koodipalikoita tästä",
+        solution_label: "Pudota koodipalikoita tänne",
+        msg_correctly_solved: "Ratkaisu on oikein! Hienosti tehty!",
+        msg_error_state_restore_1: "Tapahtui virhe palautettaessa vanhaa tilaa \"",
+        msg_error_state_restore_2: "\". Virhe: ",
+    },
+    "en": {
+        checkme_button_caption: "Check Me",
+        reset_button_caption: "Reset",
+        trash_label: "Drag from here",
+        solution_label: "Drop blocks here",
+        msg_correctly_solved: "Perfect!",
+        msg_error_state_restore_1: "An error occured restoring old ",
+        msg_error_state_restore_2: " state.    Error: ",
+    }
+};
+
+
 // <pre> constructor
 function Parsons (opts) {
     if (opts) {
@@ -135,13 +157,13 @@ Parsons.prototype.createParsonsView = function () {         // Create DOM elemen
 
     this.checkButt = document.createElement("button");
     $(this.checkButt).attr("class", "btn btn-success");
-    this.checkButt.textContent = "Check Me";
+    this.checkButt.textContent = getLocalizedString(runestoneParsonsTranslations, "checkme_button_caption");
     this.checkButt.id = "checkMe" + this.counterId;
     this.parsonsControlDiv.appendChild(this.checkButt);
 
     this.resetButt = document.createElement("button");
     $(this.resetButt).attr("class", "btn btn-default");
-    this.resetButt.textContent = "Reset";
+    this.resetButt.textContent = getLocalizedString(runestoneParsonsTranslations, "reset_button_caption");
     this.resetButt.id = "reset" + this.counterId;
     this.parsonsControlDiv.appendChild(this.resetButt);
 
@@ -205,10 +227,12 @@ Parsons.prototype.createParsonsWidget = function () {
     });
 
     this.pwidget = new ParsonsWidget({
+        "lang": activeLocalizationLanguage,
         "sortableId": "parsons-sortableCode-" + this.counterId,
         "trashId": "parsons-sortableTrash-" + this.counterId,
         "max_wrong_lines": 1,
-        "solution_label": "Drop blocks here",
+        "trash_label": getLocalizedString(runestoneParsonsTranslations, "trash_label"),
+        "solution_label": getLocalizedString(runestoneParsonsTranslations, "solution_label"),
         "feedback_cb": this.displayErrors.bind(this)
     });
 
@@ -248,7 +272,7 @@ Parsons.prototype.displayErrors = function (fb) {     // Feedback function
         this.logBookEvent({"event": "parsons", "act": "yes", "div_id": this.divid});
         $(this.messageDiv).fadeIn(100);
         $(this.messageDiv).attr("class", "alert alert-success");
-        $(this.messageDiv).html("Perfect!");
+        $(this.messageDiv).html(getLocalizedString(runestoneParsonsTranslations, "msg_correctly_solved"));
     }
 };
 
@@ -260,7 +284,8 @@ Parsons.prototype.tryLocalStorage = function () {
             this.pwidget.createHTMLFromHashes(solution, trash);
             this.pwidget.getFeedback();
         } catch(err) {
-            var text = "An error occured restoring old " + this.divid + " state.    Error: ";
+            var text = getLocalizedString(runestoneParsonsTranslations, "msg_error_state_restore_1") + this.divid +
+                       getLocalizedString(runestoneParsonsTranslations, "msg_error_state_restore_2");
             console.log(text + err.message);
         }
     }
