@@ -192,6 +192,8 @@ class usageAssignment(Directive):
                     ch_id = session.query(Chapter).filter(Chapter.c.course_id == course_name, Chapter.c.chapter_label == ch_dir).first().id
                     subch = session.query(SubChapter).filter(SubChapter.c.chapter_id == ch_id, SubChapter.c.sub_chapter_label == subch_name).first()
                     sub_chs.append(subch)
+                    if not subch:
+                        print("problem with: %s" % nm)
                     self.options['chapter_data'].append({'ch': ch_dir, 'sub_chs': [subch_name]})
             except:
                 print("Subchapters requested not found: %s" % (self.options.get('subchapters')))
