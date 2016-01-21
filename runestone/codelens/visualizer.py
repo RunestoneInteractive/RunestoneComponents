@@ -79,7 +79,8 @@ $(document).ready(function() {
                                     verticalStack: false,
                                     heightChangeCallback: redrawAllVisualizerArrows,
                                     codeDivWidth: 500,
-                                    lang : '%(python)s'
+                                    lang : '%(python)s',
+                                    localizationLanguage: activeLocalizationLanguage,
                                     });
         attachLoggers(%(divid)s_vis,'%(divid)s');
         styleButtons('%(divid)s');
