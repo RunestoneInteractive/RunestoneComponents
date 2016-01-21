@@ -635,7 +635,7 @@ textarea.bubbleInputText {
 	.ui-tooltip-pgbootstrap .ui-tooltip-content{
 		padding: 5px /* 5px is minimum or else it might look ugly */ 8px;
 	}
-	
+
 
 		.ui-tooltip-pgbootstrap .ui-tooltip-titlebar .ui-state-default{
 			right: 9px; top: 49%;
@@ -689,7 +689,7 @@ textarea.bubbleInputText {
 	.ui-tooltip-pgbootstrap-stub .ui-tooltip-content{
 		padding: 6px 9px;
 	}
-	
+
 
 div.ExecutionVisualizer .annotationText,
 div.ExecutionVisualizer .vizDescriptionText {
@@ -769,7 +769,6 @@ div.ExecutionVisualizer .pycrazy-highlight-prev-and-cur {
   border-bottom: 1px solid #999999;
 }
 
-
 #optTabularView thead.stepTableThead {
   background-color: #bbb;
 }
@@ -779,4 +778,8 @@ div.ExecutionVisualizer .pycrazy-highlight-prev-and-cur {
 
 #optTabularView td.stepTableTd {
   padding: 3px 10px;
+}
+
+p.cl_caption {
+    display: none;
 }
