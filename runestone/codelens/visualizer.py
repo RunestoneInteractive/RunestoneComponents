@@ -84,6 +84,9 @@ $(document).ready(function() {
         attachLoggers(%(divid)s_vis,'%(divid)s');
         styleButtons('%(divid)s');
         allVisualizers.push(%(divid)s_vis);
+        if (eBookConfig.hideControlCaptions == false) {
+            $("p.cl_caption").css("display", "block");
+        }
     } catch (e) {
         console.log("Failed to Initialize CodeLens component %(divid)s_vis" );
         console.log(e.toString());
