@@ -6,7 +6,7 @@ with open('requirements.txt', 'r') as fh:
 setup(
     name='runestone',
     description='Sphinx extensions for writing interactive documents.',
-    version='2.1.3',
+    version='2.1.4',
     author = 'Brad Miller',
     author_email = 'bonelake@mac.com',
     packages= find_packages(),
@@ -17,7 +17,7 @@ setup(
     package_data = { '' : ['js/*.js', 'css/*.css', '*.txt']},
     license='GPL',
     url = 'https://github.com/RunestoneInteractive/RunestoneTools',
-    download_url = 'https://github.com/RunestoneInteractive/RunestoneTools/tarball/2.0a6',
+    download_url = 'https://github.com/RunestoneInteractive/RunestoneTools/tarball/2.1.4',
     keywords = ['runestone', 'sphinx', 'ebook'], # arbitrary keywords
     classifiers=('Development Status :: 5 - Production/Stable',
                    'Environment :: Console',
