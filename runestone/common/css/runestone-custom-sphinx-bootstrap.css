@@ -58,7 +58,7 @@ div.section {
    previous rule since it is not possible to exclude
    more than one section in the not() part of the rule
 */
-.container .section div.full_width.container {
+.container .section div.full-width.container {
 	margin-left: auto;
 	margin-right: auto;
     max-width: 90%;
