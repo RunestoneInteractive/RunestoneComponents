@@ -11,16 +11,59 @@
 ===                6/4/15                ===
 ==========================================*/
 
+
+var MChoiceJsLocalizationColl = {
+    "en": {
+        CaptionCheckMeButton: "Check Me",
+        CaptionCompareMeButton: "Compare Me",
+        MsgCorrectHTML: "You are Correct! ",
+        MsgIncorrectHTML: "Incorrect. ",
+        MsgMcmaFeedbackAnswer: "answer",
+        MsgMcmaFeedbackAnswers: "answers",
+        MsgMcmaFeedbackYouGave: "You gave ",
+        MsgMcmaFeedbackAndGot: " and got ",
+        MsgMcmaFeedbackCorrectOf: " correct of ",
+        MsgMcmaFeedbackNeeded: " needed.",
+        MsgPercentageCorrectStart: "You have ",
+        MsgPercentageCorrectEnd: "% correct for all questions",
+        HeaderStudent: "Student",
+        HeaderAnswers: "Answer(s)",
+        HeaderAnswer: "Answer",
+        HeaderPercent: "Percent",
+        LabelDistributionOfAnswers: "Distribution of Answers",
+    },
+    "fi": {
+        CaptionCheckMeButton: "Tarkista vastaus",
+        CaptionCompareMeButton: "Vertaile vastauksia",
+        MsgCorrectHTML: "Oikein! ",
+        MsgIncorrectHTML: "Väärin. ",
+        MsgMcmaFeedbackAnswer: "vastauksen, ja sait ",
+        MsgMcmaFeedbackAnswers: "vastausta, ja sait ",
+        MsgMcmaFeedbackYouGave: "Annoit ",
+        MsgMcmaFeedbackAndGot: " ja sait ",
+        MsgMcmaFeedbackCorrectOf: " oikein ",
+        MsgMcmaFeedbackNeeded: " tarvittavasta vastauksesta.",
+        MsgPercentageCorrectStart: "Olet vastannut oikein ",
+        MsgPercentageCorrectEnd: " prosenttiin kaikista kysymyksistä.",
+        HeaderStudent: "Opiskelija",
+        HeaderAnswers: "Vastaukset",
+        HeaderAnswer: "Vastaus",
+        HeaderPercent: "Prosenttiosuus",
+        LabelDistributionOfAnswers: "Vastausjakauma",
+    },
+};
+
+
 var feedBack = function (elem, correct, feedbackText) {        // Displays feedback on page--miscellaneous function that can be used by multple objects
     // elem is the Element in which to put the feedback
     if (correct) {
-        $(elem).html("You are Correct!");
+        $(elem).html(getLocalizedString(MChoiceJsLocalizationColl, "MsgCorrectHTML"));
         $(elem).attr("class", "alert alert-success");
     } else {
         if (feedbackText === null) {
             feedbackText = "";
         }
-        $(elem).html("Incorrect.    " + feedbackText);
+        $(elem).html(getLocalizedString(MChoiceJsLocalizationColl, "MsgIncorrectHTML") + feedbackText);
         $(elem).attr("class", "alert alert-danger");
     }
 };
@@ -225,7 +268,7 @@ MultipleChoice.prototype.renderMCFormOpts = function () {
 MultipleChoice.prototype.renderMCFormButtons = function () {
     // Create submit button
     this.submitButton = document.createElement("button");
-    this.submitButton.textContent = "Check Me";
+    this.submitButton.textContent = getLocalizedString(MChoiceJsLocalizationColl, "CaptionCheckMeButton");
     $(this.submitButton).attr({
         "class": "btn btn-success",
         "name": "do answer"
@@ -251,7 +294,7 @@ MultipleChoice.prototype.renderMCFormButtons = function () {
             "disabled": "",
             "name": "compare"
         });
-        this.compareButton.textContent = "Compare me";
+        this.compareButton.textContent = getLocalizedString(MChoiceJsLocalizationColl, "CaptionCompareMeButton");
         this.compareButton.addEventListener("click", function () {
             this.compareAnswers(this.divid);
         }.bind(this), false);
@@ -410,22 +453,25 @@ MultipleChoice.prototype.logMCMAsubmission = function () {
 
 
 MultipleChoice.prototype.renderMCMAFeedBack = function () {
-    var answerStr = "answers";
+    var answerStr = getLocalizedString(MChoiceJsLocalizationColl, "MsgMcmaFeedbackAnswers");
     var numGiven = this.givenArray.length;
     if (numGiven === 1) {
-        answerStr = "answer";
+        answerStr = getLocalizedString(MChoiceJsLocalizationColl, "MsgMcmaFeedbackAnswer");
     }
     var numCorrect = this.correctCount;
     var numNeeded = this.correctList.length;
     var feedbackText = this.feedbackString;
 
     if (numCorrect === numNeeded && numNeeded === numGiven) {
-        $(this.feedBackDiv).html("Correct!    <br />" + feedbackText);
+        $(this.feedBackDiv).html(getLocalizedString(MChoiceJsLocalizationColl, "MsgCorrectHTML") + "<br />" + feedbackText);
         $(this.feedBackDiv).attr("class", "alert alert-success");
     } else {
-        $(this.feedBackDiv).html("Incorrect.    " + "You gave " + numGiven +
-            " " + answerStr + " and got " + numCorrect + " correct of " +
-            numNeeded + " needed.<br /> " + feedbackText);
+        $(this.feedBackDiv).html(
+            getLocalizedString(MChoiceJsLocalizationColl, "MsgIncorrectHTML") + " " +
+            getLocalizedString(MChoiceJsLocalizationColl, "MsgMcmaFeedbackYouGave") + numGiven + " " + answerStr +
+            getLocalizedString(MChoiceJsLocalizationColl, "MsgMcmaFeedbackAndGot") + numCorrect +
+            getLocalizedString(MChoiceJsLocalizationColl, "MsgMcmaFeedbackCorrectOf") + numNeeded +
+            getLocalizedString(MChoiceJsLocalizationColl, "MsgMcmaFeedbackNeeded") + "<br /> " + feedbackText);
         $(this.feedBackDiv).attr("class", "alert alert-danger");
     }
 };
@@ -464,13 +510,13 @@ MultipleChoice.prototype.logMCMFsubmission = function () {
 
 MultipleChoice.prototype.renderMCMFFeedback = function (correct, feedbackText) {
     if (correct) {
-        $(this.feedBackDiv).html("Correct!    " + feedbackText);
+        $(this.feedBackDiv).html(getLocalizedString(MChoiceJsLocalizationColl, "MsgCorrectHTML") + feedbackText);
         $(this.feedBackDiv).attr("class", "alert alert-success");
     } else {
         if (feedbackText == null) {
             feedbackText = "";
         }
-        $(this.feedBackDiv).html("Incorrect.    " + feedbackText);
+        $(this.feedBackDiv).html(getLocalizedString(MChoiceJsLocalizationColl, "MsgIncorrectHTML") + feedbackText);
         $(this.feedBackDiv).attr("class", "alert alert-danger");
     }
 };
@@ -483,7 +529,8 @@ MultipleChoice.prototype.instructorMchoiceModal = function (data) {
     // data.reslist -- student and their answers
     // data.answerDict    -- answers and count
     // data.correct - correct answer
-    var res = "<table><tr><th>Student</th><th>Answer(s)</th></tr>";
+    var res = "<table><tr><th>" + getLocalizedString(MChoiceJsLocalizationColl, "HeaderStudent") +
+                    "</th><th>" + getLocalizedString(MChoiceJsLocalizationColl, "HeaderAnswers") + "</th></tr>";
     for (var i in data) {
         res += "<tr><td>" + data[i][0] + "</td><td>" + data[i][1] + "</td></tr>";
     }
@@ -498,7 +545,8 @@ MultipleChoice.prototype.compareModal = function (data, status, whatever) {
     var kl = Object.keys(answers).sort();
 
     var body = "<table>";
-    body += "<tr><th>Answer</th><th>Percent</th></tr>";
+    body += "<tr><th>" + getLocalizedString(MChoiceJsLocalizationColl, "HeaderAnswer") +
+            "</th><th>" + getLocalizedString(MChoiceJsLocalizationColl, "HeaderPercent") + "</th></tr>";
 
     var theClass = "";
     for (var k in kl) {
@@ -518,7 +566,8 @@ MultipleChoice.prototype.compareModal = function (data, status, whatever) {
     body += "</table>";
 
     if (misc["yourpct"] !== "unavailable") {
-        body += "<br /><p>You have " + misc["yourpct"] + "% correct for all questions</p>";
+        body += "<br /><p>" + getLocalizedString(MChoiceJsLocalizationColl, "MsgPercentageCorrectStart") + misc["yourpct"] +
+                    getLocalizedString(MChoiceJsLocalizationColl, "MsgPercentageCorrectEnd") + "</p>";
     }
 
     if (datadict.reslist !== undefined) {
@@ -530,7 +579,7 @@ MultipleChoice.prototype.compareModal = function (data, status, whatever) {
         "        <div class='modal-content'>" +
         "            <div class='modal-header'>" +
         "                <button type='button' class='close' data-dismiss='modal' aria-hidden='true'>&times;</button>" +
-        "                <h4 class='modal-title'>Distribution of Answers</h4>" +
+        "                <h4 class='modal-title'>" + getLocalizedString(MChoiceJsLocalizationColl, "LabelDistributionOfAnswers") + "</h4>" +
         "            </div>" +
         "            <div class='modal-body'>" +
         body +

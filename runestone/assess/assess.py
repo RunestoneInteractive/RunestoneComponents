@@ -50,12 +50,23 @@ def setup(app):
 
 
 
-
 class AddButton(Directive):
     required_arguments = 1
     optional_arguments = 1
     final_argument_whitespace = True
     has_content = True
+
+    def translatedStr(self, string_id):
+        t = {
+            "en": {
+                "CaptionBtnForgetMyAnswers": "Forget My Answers",
+            },
+            "fi": {
+                "CaptionBtnForgetMyAnswers": "Unohda vastaukseni",
+            }
+        }
+        lang_id = self.state.document.settings.env.config.html_context["language"]
+        return t[lang_id][string_id]
 
     def run(self):
         """
@@ -72,16 +83,16 @@ class AddButton(Directive):
             '''
 
         TEMPLATE_END = '''
-            <button class='btn btn-inverse' name="reset" onclick="resetPage('%(divid)s')">Forget My Answers</button>
+            <button class='btn btn-inverse' name="reset" onclick="resetPage('%(divid)s')">%(buttonCaption)s</button>
             </form>
             </div>
             '''
 
+        self.options['buttonCaption'] = self.translatedStr("CaptionBtnForgetMyAnswers")
         self.options['divid'] = self.arguments[0]
 
         res = ""
         res = TEMPLATE_START % self.options
-
         res += TEMPLATE_END % self.options
         return [nodes.raw('', res, format='html')]
 

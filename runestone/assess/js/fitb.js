@@ -11,6 +11,34 @@
 ===                6/4/15                ===
 ==========================================*/
 
+var FillInTheBlankJsLocalizationColl = {
+    "en": {
+        CaptionCheckMeButton: "Check Me",
+        CaptionCompareMeButton: "Compare Me",
+        MsgCorrectHTML: "You are Correct! ",
+        MsgIncorrectHTML: "Incorrect. ",
+        MsgPercentageCorrectStart: "You have ",
+        MsgPercentageCorrectEnd: "% correct for all questions",
+        HeaderAnswer: "Answer",
+        HeaderCount: "Count",
+        LabelTopAnswers: "Top Answers",
+        UnitTimes: " times",
+    },
+    "fi": {
+        CaptionCheckMeButton: "Tarkista vastaus",
+        CaptionCompareMeButton: "Vertaile vastauksia",
+        MsgCorrectHTML: "Oikein! ",
+        MsgIncorrectHTML: "Väärin. ",
+        MsgPercentageCorrectStart: "Olet vastannut oikein ",
+        MsgPercentageCorrectEnd: " prosenttiin kaikista kysymyksistä.",
+        HeaderAnswer: "Vastaus",
+        HeaderCount: "Lukumäärä",
+        LabelTopAnswers: "Parhaat vastaukset",
+        UnitTimes: " kertaa",
+    },
+};
+
+
 /*=======================================
 ===         Global functions          ===
 === (used by more than one component) ===
@@ -19,13 +47,13 @@
 var feedBack = function (elem, correct, feedbackText) {        // Displays feedback on page--miscellaneous function that can be used by multple objects
     // elem is the Element in which to put the feedback
     if (correct) {
-        $(elem).html("You are Correct!");
+        $(elem).html(getLocalizedString(MChoiceJsLocalizationColl, "MsgCorrectHTML"));
         $(elem).attr("class", "alert alert-success");
     } else {
         if (feedbackText === null) {
             feedbackText = "";
         }
-        $(elem).html("Incorrect.    " + feedbackText);
+        $(elem).html(getLocalizedString(MChoiceJsLocalizationColl, "MsgIncorrectHTML") + feedbackText);
         $(elem).attr("class", "alert alert-danger");
     }
 };
@@ -181,7 +209,7 @@ FITB.prototype.renderFITBInput = function () {
 
 FITB.prototype.renderFITBButtons = function () {
     this.submitButton = document.createElement("button");    // Check me button
-    this.submitButton.textContent = "Check Me";
+    this.submitButton.textContent = getLocalizedString(MChoiceJsLocalizationColl, "CaptionCheckMeButton");
     $(this.submitButton).attr({
         "class": "btn btn-success",
         "name": "do answer"
@@ -200,7 +228,7 @@ FITB.prototype.renderFITBButtons = function () {
             "disabled": "",
             "name": "compare"
         });
-        this.compareButton.textContent = "Compare Me";
+        this.compareButton.textContent = getLocalizedString(MChoiceJsLocalizationColl, "CaptionCompareMeButton");
         this.compareButton.addEventListener("click", function () {
             this.compareFITBAnswers();
         }.bind(this), false);
@@ -299,7 +327,7 @@ FITB.prototype.populateDisplayFeed = function (index, given) {
 
 FITB.prototype.renderFITBFeedback = function () {
     if (this.correct) {
-        $(this.feedBackDiv).html("You are Correct!");
+        $(this.feedBackDiv).html(getLocalizedString(MChoiceJsLocalizationColl, "MsgCorrectHTML"));
         $(this.feedBackDiv).attr("class", "alert alert-success");
         for (var j = 0; j < this.blankArray.length; j++) {
             $(this.blankArray[j]).removeClass("input-validation-error");
@@ -308,7 +336,7 @@ FITB.prototype.renderFITBFeedback = function () {
         if (this.displayFeed === null) {
             this.displayFeed = "";
         }
-        $(this.feedBackDiv).html("Incorrect.    ");
+        $(this.feedBackDiv).html(getLocalizedString(MChoiceJsLocalizationColl, "MsgIncorrectHTML"));
         for (var j = 0; j < this.blankArray.length; j++) {
             if (!this.isCorrectArray[j]) {
                 $(this.blankArray[j]).addClass("input-validation-error");
@@ -340,14 +368,17 @@ FITB.prototype.compareFITB = function (data, status, whatever) {   // Creates a 
     var misc = eval(data)[1];
 
     var body = "<table>";
-    body += "<tr><th>Answer</th><th>Count</th></tr>";
+    body += "<tr><th>" + getLocalizedString(MChoiceJsLocalizationColl, "HeaderAnswer") +
+            "</th><th>" + getLocalizedString(MChoiceJsLocalizationColl, "HeaderCount") + "</th></tr>";
 
     for (var row in answers) {
-        body += "<tr><td>" + answers[row].answer + "</td><td>" + answers[row].count + " times</td></tr>";
+        body += "<tr><td>" + answers[row].answer + "</td><td>" + answers[row].count +
+                getLocalizedString(MChoiceJsLocalizationColl, "UnitTimes") + "</td></tr>";
     }
     body += "</table>";
     if (misc["yourpct"] !== "unavailable") {
-        body += "<br /><p>You have " + misc["yourpct"] + "% correct for all questions</p>";
+        body += "<br /><p>" + getLocalizedString(MChoiceJsLocalizationColl, "MsgPercentageCorrectStart") + misc["yourpct"] +
+                    getLocalizedString(MChoiceJsLocalizationColl, "MsgPercentageCorrectEnd") + "</p>";
     }
 
     var html = "<div class='modal fade'>" +
@@ -355,7 +386,7 @@ FITB.prototype.compareFITB = function (data, status, whatever) {   // Creates a 
         "        <div class='modal-content'>" +
         "            <div class='modal-header'>" +
         "                <button type='button' class='close' data-dismiss='modal' aria-hidden='true'>&times;</button>" +
-        "                <h4 class='modal-title'>Top Answers</h4>" +
+        "                <h4 class='modal-title'>" + getLocalizedString(MChoiceJsLocalizationColl, "LabelTopAnswers") + "</h4>" +
         "            </div>" +
         "            <div class='modal-body'>" +
         body +
