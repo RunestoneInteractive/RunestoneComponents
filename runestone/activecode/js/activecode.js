@@ -987,7 +987,7 @@ AudioTour.prototype.tour = function (divid, audio_type, bcount) {
         // akey+".mp3' type='audio/mpeg'><source src='http://ice-web.cc.gatech.edu/ce21/audio/"+akey+
         // ".ogg' type='audio/ogg'>Your browser does not support the audio tag</audio>";
         
-        var dir = "http://media.interactivepython.org/studentcsp/audio/" 
+        var dir = "http://media.interactivepython.org/" + eBookConfig.basecourse + "/audio/" 
         //var dir = "../_static/audio/"
         str += "<audio id=" + akey + " preload='auto' >";
         str += "<source src='" + dir + akey + ".wav' type='audio/wav'>";
