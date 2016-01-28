@@ -799,9 +799,7 @@
     if (codestring) {
       // Consecutive lines to be dragged as a single block of code have strings "\\n" to
       // represent newlines => replace them with actual new line characters "\n"
-      console.log(codestring);
       codestring = codestring.replace(/\\n\s+/g,"\\n"); // remove leading spaced if more than one line in a code block
-      console.log(codestring);
       this.code = codestring.replace(/#distractor\s*$/, "").replace(trimRegexp, "$1").replace(/\\n/g, "\n");
       this.indent = codestring.length - codestring.replace(/^\s+/, "").length;
     }
