@@ -170,6 +170,14 @@ var activeCodeLocalizationColl = {
         ErrorFromCodeRun_NotImplementedErrorFix:
                 "For now the only way to fix this is to not use the function. There may be workarounds. If you really need this builtin function " +
                 "then file a bug report and tell us how you are trying to use the function.",
+
+        ErrorFromCodeRun_IOError:
+                "The program code tried to read or write information (input/output), but was not able to finish that operation correctly. " +
+                "There are numerous case-specific reasons for this error to occur, such as incorrect file names and paths, file system corruption, " +
+                "congested or broken network connection, and physical device breakage.",
+
+        ErrorFromCodeRun_IOErrorFix:
+                "If your program tried for example to read an image file, ensure the right spelling of its file name and path.",
     },
     "fi": {
         RunButtonCaption: "Suorita",
@@ -367,6 +375,14 @@ var activeCodeLocalizationColl = {
                 "Tällä hetkellä ainoa ratkaisu on olla käyttämättä funktiota, jota virheilmoitus koskee. Kannattaa myös miettiä, voisiko kyseisen funktion käytön " +
                 "jollain tavoin kiertää. Jos tätä funktiota todella välttämättä tarvitaan, voi tämän selainpohjaisen Python-toteutuksen kehittäjille lähettää " +
                 "toteutuspyynnön, jossa kerrotaan myös, miten funktiota yritettiin/halutaan käyttää.",
+
+        ErrorFromCodeRun_IOError:
+                "Ohjelmakoodissa yritettiin lukea jotain jostain <i>(input)</i> tai kirjoittaa jotain jonnekin <i>(output)</i>, mutta operaatiota ei voitu " +
+                "suorittaa kelvollisesti loppuun. Tähän on lukemattomia tapauskohtaisia syitä, kuten väärät tiedosto- ja hakemistonimet, tietostojärjestelmän " +
+                "vioittuminen, ruuhkainen tai katkennut verkkoyhteys sekä fyysiset laitevauriot.",
+
+        ErrorFromCodeRun_IOErrorFix:
+                "Jos ohjelmasi yritti esimerkiksi lukea kuvatiedostoa, varmista kyseisen tiedoston nimen ja polun oikeellisuus.",
     },
 };
 
