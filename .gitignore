@@ -37,5 +37,3 @@ nosetests.xml
 .idea
 bower_componenets/
 test/
-
-runestone/assess/js/timedparson.js
