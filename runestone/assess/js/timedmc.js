@@ -133,13 +133,13 @@ TimedMC.prototype.hideFeedback = function () {
     }
 };
 
-TimedMC.prototype.processTimedSubmission = function () {
+TimedMC.prototype.processTimedSubmission = function (logFlag) {
     for (var i = 0; i < this.optionArray.length; i++) {
         this.optionArray[i]["input"].disabled = true;
     }
     if (this.multipleanswers) {
-        this.processMCMASubmission();
+        this.processMCMASubmission(logFlag);
     } else {
-        this.processMCMFSubmission();
+        this.processMCMFSubmission(logFlag);
     }
 };
