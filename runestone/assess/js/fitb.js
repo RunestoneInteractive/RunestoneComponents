@@ -250,7 +250,7 @@ FITB.prototype.checkFITBStorage = function () {
     // Starts chain of functions which ends with feedBack() displaying feedback to user
     this.evaluateAnswers();
     this.renderFITBFeedback();
-    var answerInfo = "answer:" + this.given_arr + ":" + (this.isCorrect ? "correct" : "no");
+    var answerInfo = "answer:" + this.given_arr + ":" + (this.correct ? "correct" : "no");
     this.logBookEvent({"event": "fillb", "act": answerInfo, "div_id": this.divid});
     this.enableCompareButton.disabled = false;
 };
