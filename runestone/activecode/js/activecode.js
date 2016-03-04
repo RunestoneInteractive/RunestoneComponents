@@ -472,7 +472,7 @@ ActiveCode.prototype.showCodeCoach = function (div_id) {
     myIframe.style.width = "100%";
     myIframe.src = srcURL;
     this.codecoach.appendChild(myIframe);
-    logBookEvent({
+    this.logBookEvent({
         'event': 'coach',
         'act': 'view',
         'div_id': this.divid
