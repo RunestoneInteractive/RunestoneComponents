@@ -208,7 +208,7 @@ ActiveCode.prototype.createOutput = function () {
     // to hold turtle graphics output.  We use a div in case the turtle changes from
     // using a canvas to using some other element like svg in the future.
     var outDiv = document.createElement("div");
-    $(outDiv).addClass("ac_output col-md-6");
+    $(outDiv).addClass("ac_output col-md-5");
     this.outDiv = outDiv;
     this.output = document.createElement('pre');
     $(this.output).css("visibility","hidden");
@@ -220,7 +220,7 @@ ActiveCode.prototype.createOutput = function () {
     // newly created div.  When a canvas child is added we add a new class so that the visible
     // canvas can be styled in CSS.  Which a the moment means just adding a border.
     $(this.graphics).on("DOMNodeInserted", 'canvas', (function(e) {
-        $(this.graphics).addClass("visible-ac-canvas")
+        $(this.graphics).addClass("visible-ac-canvas");
     }).bind(this));
 
     outDiv.appendChild(this.output);
@@ -237,6 +237,13 @@ ActiveCode.prototype.createOutput = function () {
     $(lensDiv).css("display","none");
     this.codelens = lensDiv;
     this.outerDiv.appendChild(lensDiv);
+
+    var coachDiv = document.createElement("div")
+    $(coachDiv).addClass("col-md-12");
+    $(coachDiv).css("display","none");
+    this.codecoach = coachDiv;
+    this.outerDiv.appendChild(coachDiv);
+
 
     clearDiv = document.createElement("div");
     $(clearDiv).css("clear","both");  // needed to make parent div resize properly
@@ -448,10 +455,11 @@ ActiveCode.prototype.showCodelens = function () {
 // </iframe>
 
 
-ActiveCode.prototype.showCodeCoach = function (div_id) {
+ActiveCode.prototype.showCodeCoach = function () {
     var myIframe;
     var srcURL;
     var cl;
+    var div_id = this.divid;
     if (this.codecoach === null) {
         this.codecoach = document.createElement("div");
         this.codecoach.style.display = 'block'
@@ -472,6 +480,7 @@ ActiveCode.prototype.showCodeCoach = function (div_id) {
     myIframe.style.width = "100%";
     myIframe.src = srcURL;
     this.codecoach.appendChild(myIframe);
+    $(this.codecoach).show()
     this.logBookEvent({
         'event': 'coach',
         'act': 'view',
@@ -645,7 +654,7 @@ ActiveCode.prototype.runProg = function() {
         (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = this.graphics;
         Sk.canvas = this.graphics.id; //todo: get rid of this here and in image
         $(this.runButton).attr('disabled', 'disabled');
-        $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
+        $(this.codeDiv).switchClass("col-md-12","col-md-7",{duration:500,queue:false});
         $(this.outDiv).show({duration:700,queue:false});
         var myPromise = Sk.misceval.asyncToPromise(function() {
 
@@ -658,6 +667,7 @@ ActiveCode.prototype.runProg = function() {
         }).bind(this),
             (function(err) {  // fail
             $(this.runButton).removeAttr('disabled');
+            this.logRunEvent({'div_id': this.divid, 'code': prog, 'errinfo': err.toString()}); // Log the run event
             this.addErrorMessage(err)
                 }).bind(this));
 
@@ -768,7 +778,7 @@ HTMLActiveCode.prototype.createOutput = function () {
     if(this.alignVertical) {
         $(outDiv).addClass("col-md-12");
     } else {
-        $(outDiv).addClass("col-md-6");
+        $(outDiv).addClass("col-md-5");
     }
     this.outDiv = outDiv;
     this.output = document.createElement('iframe');
