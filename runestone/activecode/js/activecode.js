@@ -151,8 +151,11 @@ ActiveCode.prototype.createControls = function () {
         this.showHideButt = butt;
         ctrlDiv.appendChild(butt);
         $(butt).click( (function() { $(this.codeDiv).toggle();
-        $(this.loadButton).toggle();
-        $(this.saveButton).toggle();
+            if (this.historyScrubber == null) {
+                this.addHistoryScrubber(true);
+            } else {
+                $(this.historyScrubber.parentElement).toggle();
+            }
         }).bind(this));
     }
 
@@ -198,7 +201,7 @@ ActiveCode.prototype.createControls = function () {
 // add an initial load history button
 // if there is no edit then there is no append   to_save (True/False)
 
-ActiveCode.prototype.addHistoryScrubber = function () {
+ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
 
     var data = {acid: this.divid};
     if (this.sid !== undefined) {
@@ -219,12 +222,19 @@ ActiveCode.prototype.addHistoryScrubber = function () {
         scrubber.type = "range";
         scrubber.min = 0;
         scrubber.max = this.history.length-1;
-        scrubber.value = 0;
         scrubberDiv.appendChild(scrubber);
         this.scrubberTime = document.createElement("p");
         this.scrubberTime.innerHTML = "Original";
         $(this.scrubberTime).css("font-size","xx-small");
         scrubberDiv.appendChild(this.scrubberTime);
+
+        if (pos_last) {
+            scrubber.value = scrubber.max
+            this.editor.setValue(this.history[scrubber.value]);
+            this.scrubberTime.innerHTML = this.timestamps[scrubber.value]
+        } else {
+            scrubber.value = 0;
+        }
 
         $(this.histButton).remove();
         this.histButton = null;
