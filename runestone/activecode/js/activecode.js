@@ -205,21 +205,26 @@ ActiveCode.prototype.addHistoryScrubber = function () {
         data['sid'] = this.sid;
     }
     jQuery.get(eBookConfig.ajaxURL + 'gethist', data, function(data, status, whatever) {
-        this.history = this.history.concat(data.history);
-        this.timestamps = this.timestamps.concat(data.timestamps);
+        if (data.history !== undefined) {
+            this.history = this.history.concat(data.history);
+            for (t in data.timestamps) {
+                this.timestamps.push( (new Date(data.timestamps[t])).toLocaleString() )
+            }
+        }
 
         var scrubberDiv = document.createElement("div");
-        $(scrubberDiv).css("display","inline");
-        $(scrubberDiv).css("width","140px");
-        scrubberTitle = document.createTextNode("Source Timeline");
-        //scrubberDiv.appendChild(scrubberTitle);
+        $(scrubberDiv).css("display","inline-block");
+        $(scrubberDiv).width("180px");
         scrubber = document.createElement("input");
         scrubber.type = "range";
         scrubber.min = 0;
         scrubber.max = this.history.length-1;
         scrubber.value = 0;
         scrubberDiv.appendChild(scrubber);
-        this.scrubberTime = document.createElement("p")
+        this.scrubberTime = document.createElement("p");
+        this.scrubberTime.innerHTML = "Original";
+        $(this.scrubberTime).css("font-size","xx-small");
+        scrubberDiv.appendChild(this.scrubberTime);
 
         $(this.histButton).remove();
         this.histButton = null;
@@ -229,11 +234,7 @@ ActiveCode.prototype.addHistoryScrubber = function () {
         scrubber.onmousemove = function() {
             if (isMouseDown) {
                 this.editor.setValue(this.history[scrubber.value]);
-                if (scrubber.value > 0) {
-                    scrubber.title = (new Date(this.timestamps[scrubber.value])).toString();
-                } else {
-                    scrubber.title = this.timestamps[scrubber.value];
-                }
+                this.scrubberTime.innerHTML = this.timestamps[scrubber.value]
             }
         }.bind(this);
     }.bind(this));
@@ -722,9 +723,10 @@ ActiveCode.prototype.runProg = function() {
 
         if (this.historyScrubber && (this.history[this.historyScrubber.value] != this.editor.getValue())) {
             this.history.push(this.editor.getValue());
-            this.timestamps.push((new Date()).toString());
+            this.timestamps.push((new Date()).toLocaleString());
             this.historyScrubber.max = this.history.length - 1;
             this.historyScrubber.value = this.historyScrubber.max;
+            this.scrubberTime.innerHTML = this.timestamps[this.historyScrubber.value]
         }
 
         if (typeof(allVisualizers) != "undefined") {
