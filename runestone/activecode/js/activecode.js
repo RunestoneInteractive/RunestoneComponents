@@ -201,20 +201,27 @@ ActiveCode.prototype.addHistoryScrubber = function () {
     if (this.sid !== undefined) {
         data['sid'] = this.sid;
     }
-    jQuery.get(eBookConfig.ajaxURL + 'getprog', data, function(data, status, whatever) {
+    jQuery.get(eBookConfig.ajaxURL + 'gethist', data, function(data, status, whatever) {
         this.history = this.history.concat(data.history);
         this.timestamps = this.timestamps.concat(data.timestamps);
 
+        var scrubberDiv = document.createElement("div");
+        $(scrubberDiv).css("display","inline");
+        $(scrubberDiv).css("width","140px");
+        scrubberTitle = document.createTextNode("Source Timeline");
+        //scrubberDiv.appendChild(scrubberTitle);
         scrubber = document.createElement("input");
         scrubber.type = "range";
         scrubber.min = 0;
         scrubber.max = this.history.length-1;
-        scrubber.value = 0
+        scrubber.value = 0;
+        scrubberDiv.appendChild(scrubber);
+        this.scrubberTime = document.createElement("p")
 
         $(this.histButton).remove();
         this.histButton = null;
         this.historyScrubber = scrubber;
-        $(scrubber).insertAfter(this.runButton)
+        $(scrubberDiv).insertAfter(this.runButton)
 
         scrubber.onmousemove = function() {
             this.editor.setValue(this.history[scrubber.value]);
