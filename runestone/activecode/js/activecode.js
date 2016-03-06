@@ -37,6 +37,10 @@ ActiveCode.prototype.init = function(opts) {
     this.graphics = null; // create div for turtle graphics
     this.codecoach = null;
     this.codelens = null;
+    this.controlDiv = null;
+    this.historyScrubber = null;
+    this.history = [this.code]
+    this.timestamps = ["Original"]
 
     if(this.includes !== undefined) {
         this.includes = this.includes.split(/\s+/);
@@ -118,32 +122,14 @@ ActiveCode.prototype.createControls = function () {
     this.runButton = butt;
     $(butt).click(this.runProg.bind(this));
 
-    // Save
-    if (this.useRunestoneServices) {
-        butt = document.createElement("button");
-        $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Save");
-        $(butt).css("margin-left", "10px");
-        this.saveButton = butt;
-        this.saveButton.onclick = this.saveEditor.bind(this);
-        ctrlDiv.appendChild(butt);
-        if (this.hidecode) {
-            $(butt).css("display", "none")
-        }
-    }
-    // Load
-    if (this.useRunestoneServices) {
-        butt = document.createElement("button");
-        $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Load");
-        $(butt).css("margin-left", "10px");
-        this.loadButton = butt;
-        this.loadButton.onclick = this.loadEditor.bind(this);
-        ctrlDiv.appendChild(butt);
-        if (this.hidecode) {
-            $(butt).css("display", "none")
-        }
-    }
+    var butt = document.createElement("button");
+    $(butt).text("Load History");
+    $(butt).addClass("btn btn-default");
+    ctrlDiv.appendChild(butt);
+    this.histButton = butt;
+    $(butt).click(this.addHistoryScrubber.bind(this));
+
+
     if ($(this.origElem).data('gradebutton')) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
@@ -200,8 +186,47 @@ ActiveCode.prototype.createControls = function () {
     }
 
     $(this.outerDiv).prepend(ctrlDiv);
+    this.controlDiv = ctrlDiv;
 
 };
+
+// Activecode -- If the code has not changed wrt the scrubber position value then don't save the code or reposition the scrubber
+//  -- still call runlog, but add a parameter to not save the code
+// add an initial load history button
+// if there is no edit then there is no append   to_save (True/False)
+
+ActiveCode.prototype.addHistoryScrubber = function () {
+
+    var data = {acid: this.divid};
+    if (this.sid !== undefined) {
+        data['sid'] = this.sid;
+    }
+    jQuery.get(eBookConfig.ajaxURL + 'getprog', data, function(data, status, whatever) {
+        this.history = this.history.concat(data.history);
+        this.timestamps = this.timestamps.concat(data.timestamps);
+
+        scrubber = document.createElement("input");
+        scrubber.type = "range";
+        scrubber.min = 0;
+        scrubber.max = this.history.length-1;
+        scrubber.value = 0
+
+        $(this.histButton).remove();
+        this.histButton = null;
+        this.historyScrubber = scrubber;
+        $(scrubber).insertAfter(this.runButton)
+
+        scrubber.onmousemove = function() {
+            this.editor.setValue(this.history[scrubber.value]);
+            if (scrubber.value > 0) {
+                scrubber.title = (new Date(this.timestamps[scrubber.value])).toString();
+            } else {
+                scrubber.title = this.timestamps[scrubber.value];
+            }
+        }.bind(this);
+    }.bind(this));
+}
+
 
 ActiveCode.prototype.createOutput = function () {
     // Create a parent div with two elements:  pre for standard output and a div
@@ -640,6 +665,7 @@ ActiveCode.prototype.buildProg = function() {
 
 ActiveCode.prototype.runProg = function() {
         var prog = this.buildProg();
+        var saveCode;
 
         $(this.output).text('');
 
@@ -661,15 +687,33 @@ ActiveCode.prototype.runProg = function() {
             return Sk.importMainWithBody("<stdin>", false, prog, true);
         });
 
+        if (this.historyScrubber === null) {
+            this.addHistoryScrubber();
+        }
+
+        if (this.historyScrubber === null || (this.history[this.historyScrubber.value] == this.editor.getValue())) {
+            saveCode = "False"
+        } else {
+            saveCode = "True"
+        }
+
         myPromise.then((function(mod) { // success
             $(this.runButton).removeAttr('disabled');
-            this.logRunEvent({'div_id': this.divid, 'code': prog, 'errinfo': 'success'}); // Log the run event
+            this.logRunEvent({'div_id': this.divid, 'code': prog, 'errinfo': 'success', 'to_save':saveCode}); // Log the run event
         }).bind(this),
             (function(err) {  // fail
             $(this.runButton).removeAttr('disabled');
-            this.logRunEvent({'div_id': this.divid, 'code': prog, 'errinfo': err.toString()}); // Log the run event
+            this.logRunEvent({'div_id': this.divid, 'code': prog, 'errinfo': err.toString(), 'to_save':saveCode}); // Log the run event
             this.addErrorMessage(err)
                 }).bind(this));
+
+
+        if (this.historyScrubber && (this.history[this.historyScrubber.value] != this.editor.getValue())) {
+            this.history.push(this.editor.getValue());
+            this.timestamps.push((new Date()).toString());
+            this.historyScrubber.max = this.history.length - 1;
+            this.historyScrubber.value = this.historyScrubber.max;
+        }
 
         if (typeof(allVisualizers) != "undefined") {
             $.each(allVisualizers, function (i, e) {
