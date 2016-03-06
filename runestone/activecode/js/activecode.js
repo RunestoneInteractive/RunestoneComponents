@@ -2,6 +2,9 @@
  * Created by bmiller on 3/19/15.
  */
 
+var isMouseDown = false;
+document.onmousedown = function() { isMouseDown = true };
+document.onmouseup   = function() { isMouseDown = false };
 
 var edList = {};
 
@@ -224,11 +227,13 @@ ActiveCode.prototype.addHistoryScrubber = function () {
         $(scrubberDiv).insertAfter(this.runButton)
 
         scrubber.onmousemove = function() {
-            this.editor.setValue(this.history[scrubber.value]);
-            if (scrubber.value > 0) {
-                scrubber.title = (new Date(this.timestamps[scrubber.value])).toString();
-            } else {
-                scrubber.title = this.timestamps[scrubber.value];
+            if (isMouseDown) {
+                this.editor.setValue(this.history[scrubber.value]);
+                if (scrubber.value > 0) {
+                    scrubber.title = (new Date(this.timestamps[scrubber.value])).toString();
+                } else {
+                    scrubber.title = this.timestamps[scrubber.value];
+                }
             }
         }.bind(this);
     }.bind(this));
