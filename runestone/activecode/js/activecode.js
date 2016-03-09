@@ -207,7 +207,7 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
     if (this.sid !== undefined) {
         data['sid'] = this.sid;
     }
-    jQuery.get(eBookConfig.ajaxURL + 'gethist', data, function(data, status, whatever) {
+    jQuery.get(eBookConfig.ajaxURL + 'gethist.json', data, function(data, status, whatever) {
         if (data.history !== undefined) {
             this.history = this.history.concat(data.history);
             for (t in data.timestamps) {
