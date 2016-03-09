@@ -247,6 +247,12 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
                 this.scrubberTime.innerHTML = this.timestamps[scrubber.value]
             }
         }.bind(this);
+
+        scrubber.onclick = function() {
+                this.editor.setValue(this.history[scrubber.value]);
+                this.scrubberTime.innerHTML = this.timestamps[scrubber.value]
+        }.bind(this);
+
     }.bind(this));
 }
 
