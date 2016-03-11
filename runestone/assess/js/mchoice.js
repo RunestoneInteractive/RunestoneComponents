@@ -289,15 +289,48 @@ MultipleChoice.prototype.randomizeAnswers = function () {
 ====================================*/
 
 MultipleChoice.prototype.restoreLocalAnswers = function () {         // Handles local storage
-    if (this.multipleanswers) {
-        this.restoreMultipleSelect();
+    // Check if the server has stored answer
+    if (this.useRunestoneServices) {
+        var data = {};
+        data.div_id = this.divid;
+        data.course = eBookConfig.course;
+        data.event = "mChoice";
+        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this));
     } else {
-        this.restoreRadio();
+        this.restoreMultipleSelect();   // just go right to local storage
+    }
+
+};
+
+MultipleChoice.prototype.repopulateFromStorage = function (data, status, whatever) {
+    if (data !== "") {
+        console.log("Loading from server");
+        var arr = data.slice(1, data.length-1).split(",");   // remove quotations at either end
+        var answers = [];
+        for (var i=0; i<arr.length; i++) {
+            answers.push(arr[0].charCodeAt(0) - 97);   // Get index for lowercase letter
+        }
+        console.log("Answers are: ", answers);
+        for (var a = 0; a < answers.length; a++) {
+            var index = answers[a];
+            for (var b = 0; b < this.optionArray.length; b++) {
+                if (this.optionArray[b].input.value == index) {
+                    $(this.optionArray[b].input).attr("checked", "true");
+                }
+            }
+            if (this.useRunestoneServices) {
+                this.enableMCComparison();
+            }
+        }
+
+    } else {
+        console.log("Loading from local storage");
+        this.restoreMultipleSelect();
     }
 };
 
 MultipleChoice.prototype.restoreMultipleSelect = function () {
-    // This function repopulates MCMA questions with a user"s previous answers,
+    // This function repopulates MCMA questions with a user's previous answers,
     // which were stored into local storage.
     var len = localStorage.length;
     if (len > 0) {
@@ -305,6 +338,7 @@ MultipleChoice.prototype.restoreMultipleSelect = function () {
         var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid);
         if (ex !== null) {
             var arr = ex.split(";");
+            console.log("MA: ", arr);
             var answers = arr[0].split(",");
             for (var a = 0; a < answers.length; a++) {
                 var index = answers[a];
@@ -316,32 +350,9 @@ MultipleChoice.prototype.restoreMultipleSelect = function () {
                 if (this.useRunestoneServices) {
                     this.enableMCComparison();
                 }
-            } // end for
-        } // end if
-    } // end if len > 0
-};
-
-MultipleChoice.prototype.restoreRadio = function () {
-    // This function repopulates a MCMF question with a user"s previous answer,
-    // which was previously stored into local storage
-    var len = localStorage.length;
-
-    // retrieving data from local storage
-    if (len > 0) {
-        var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid);
-        if (ex !== null) {
-            var arr = ex.split(";");
-            var index = arr[0];
-            for (var b = 0; b < this.optionArray.length; b++) {
-                if (this.optionArray[b].input.value == index) {
-                    $(this.optionArray[b].input).attr("checked", "true");
-                }
             }
-            if (this.useRunestoneServices) {
-                this.enableMCComparison();
-            }
-        } // end if not null
-    } // end if (len > 0)
+        }
+    }
 };
 
 /*===============================

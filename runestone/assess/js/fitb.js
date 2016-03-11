@@ -223,11 +223,16 @@ FITB.prototype.renderFITBFeedbackDiv = function () {
 
 FITB.prototype.checkPreviousFIB = function () {
     // Check if the server has stored answer
-    var data = {};
-    data.div_id = this.divid;
-    data.course = eBookConfig.course;
-    data.event = "fillb";
-    jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this));
+    if (this.useRunestoneServices) {
+        var data = {};
+        data.div_id = this.divid;
+        data.course = eBookConfig.course;
+        data.event = "fillb";
+        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this));
+    } else {
+        this.repopulateFromStorage("", null, null);   // use dummy parameters so we go right to local storage
+    }
+
 };
 
 FITB.prototype.repopulateFromStorage = function (data, status, whatever) {
