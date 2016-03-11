@@ -222,22 +222,43 @@ FITB.prototype.renderFITBFeedbackDiv = function () {
 ===============================*/
 
 FITB.prototype.checkPreviousFIB = function () {
-    // This function repoplulates FIB questions with a user"s previous answers,
-    // which were stored into local storage
-    var len = localStorage.length;
-    if (len > 0) {
-        var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
-        if (ex !== null) {
-            var arr = ex.split(";");
-            for (var i = 0; i < this.blankArray.length; i++) {
-                $(this.blankArray[i]).attr("value", arr[i]);
-                if (this.useRunestoneServices) {
-                    this.enableCompareButton();
-                }
-            }
+    // Check if the server has stored answer
+    var data = {};
+    data.div_id = this.divid;
+    data.course = eBookConfig.course;
+    data.event = "fillb";
+    jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this));
+};
 
-        } // end if ex not null
-    } // end if len > 0
+FITB.prototype.repopulateFromStorage = function (data, status, whatever) {
+    if (data !== "") {
+        console.log("Loading from server");
+        // Load from the server
+        var tmp = data.slice(1, data.length-1);   // Get rid of leading and trailing quotations
+        var arr = tmp.split(",");
+        for (var i = 0; i < this.blankArray.length; i++) {
+            $(this.blankArray[i]).attr("value", arr[i]);
+            if (this.useRunestoneServices) {
+                this.enableCompareButton();
+            }
+        }
+    } else {
+        console.log("Loading from local storage");
+        // Load from local storage
+        var len = localStorage.length;
+        if (len > 0) {
+            var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
+            if (ex !== null) {
+                var arr = ex.split(";");
+                for (var i = 0; i < this.blankArray.length; i++) {
+                    $(this.blankArray[i]).attr("value", arr[i]);
+                    if (this.useRunestoneServices) {
+                        this.enableCompareButton();
+                    }
+                }
+            }   // end if ex not null
+        }   // end if len > 0
+    }
 };
 
 FITB.prototype.enableCompareButton = function () {
