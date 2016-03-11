@@ -228,7 +228,7 @@ FITB.prototype.checkPreviousFIB = function () {
         data.div_id = this.divid;
         data.course = eBookConfig.course;
         data.event = "fillb";
-        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this));
+        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.repopulateFromStorage("", null, null).bind(this));
     } else {
         this.repopulateFromStorage("", null, null);   // use dummy parameters so we go right to local storage
     }

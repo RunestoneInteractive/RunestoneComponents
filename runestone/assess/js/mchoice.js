@@ -295,7 +295,7 @@ MultipleChoice.prototype.restoreLocalAnswers = function () {         // Handles 
         data.div_id = this.divid;
         data.course = eBookConfig.course;
         data.event = "mChoice";
-        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this));
+        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.restoreMultipleSelect.bind(this));
     } else {
         this.restoreMultipleSelect();   // just go right to local storage
     }
