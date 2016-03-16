@@ -40,9 +40,11 @@ def setup(app):
 
 class ParsonsProblem(Assessment):
     required_arguments = 1
-    optional_arguments = 0
+    optional_arguments = 1
     final_argument_whitespace = False
-    option_spec = {}
+    option_spec = {
+        'maxdist': directives.unchanged
+    }
     has_content = True
 
     def run(self):
@@ -79,14 +81,16 @@ Example:
         """
 
         TEMPLATE = '''
-    <pre data-component="parsons" id="%(divid)s">
+    <pre data-component="parsons" id="%(divid)s" data-maxdist=%(maxdist)s>
         <span data-question>%(qnumber)s: %(instructions)s</span>%(code)s</pre>
     '''
-
         self.options['divid'] = self.arguments[0]
         self.options['qnumber'] = self.getNumber()
         self.options['instructions'] = ""
         self.options['code'] = self.content
+          
+        if 'maxdist' not in self.options:
+            self.options['maxdist'] = '3'
         if '-----' in self.content:
             index = self.content.index('-----')
             self.options['instructions'] = "\n".join(self.content[:index])
