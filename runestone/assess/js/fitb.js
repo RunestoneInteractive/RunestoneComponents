@@ -243,14 +243,11 @@ FITB.prototype.repopulateFromStorage = function (data, status, whatever) {
     if (data !== "") {
         console.log("Loading from server");
         // Load from the server
-        var tmp = data.slice(1, data.length-1);   // Get rid of leading and trailing quotations
-        var arr = tmp.split(",");
+        var arr = eval(data).split(",");
         for (var i = 0; i < this.blankArray.length; i++) {
             $(this.blankArray[i]).attr("value", arr[i]);
-            if (this.useRunestoneServices) {
-                this.enableCompareButton();
-            }
         }
+        this.enableCompareButton();
     } else {
         console.log("Loading from local storage");
         // Load from local storage
@@ -261,9 +258,9 @@ FITB.prototype.repopulateFromStorage = function (data, status, whatever) {
                 var arr = ex.split(";");
                 for (var i = 0; i < this.blankArray.length; i++) {
                     $(this.blankArray[i]).attr("value", arr[i]);
-                    if (this.useRunestoneServices) {
-                        this.enableCompareButton();
-                    }
+                }
+                if (this.useRunestoneServices) {
+                    this.enableCompareButton();
                 }
             }   // end if ex not null
         }   // end if len > 0

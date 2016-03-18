@@ -305,12 +305,12 @@ MultipleChoice.prototype.restoreLocalAnswers = function () {         // Handles 
 MultipleChoice.prototype.repopulateFromStorage = function (data, status, whatever) {
     if (data !== "") {
         console.log("Loading from server");
-        var arr = data.slice(1, data.length-1).split(",");   // remove quotations at either end
+        //var arr = data.slice(1, data.length-1).split(",");   // remove quotations at either end
+        var arr = eval(data).split(",");
         var answers = [];
         for (var i=0; i<arr.length; i++) {
             answers.push(arr[0].charCodeAt(0) - 97);   // Get index for lowercase letter
         }
-        console.log("Answers are: ", answers);
         for (var a = 0; a < answers.length; a++) {
             var index = answers[a];
             for (var b = 0; b < this.optionArray.length; b++) {
@@ -318,10 +318,8 @@ MultipleChoice.prototype.repopulateFromStorage = function (data, status, whateve
                     $(this.optionArray[b].input).attr("checked", "true");
                 }
             }
-            if (this.useRunestoneServices) {
-                this.enableMCComparison();
-            }
         }
+        this.enableMCComparison();
 
     } else {
         console.log("Loading from local storage");
@@ -338,7 +336,6 @@ MultipleChoice.prototype.restoreMultipleSelect = function () {
         var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid);
         if (ex !== null) {
             var arr = ex.split(";");
-            console.log("MA: ", arr);
             var answers = arr[0].split(",");
             for (var a = 0; a < answers.length; a++) {
                 var index = answers[a];
@@ -347,9 +344,9 @@ MultipleChoice.prototype.restoreMultipleSelect = function () {
                         $(this.optionArray[b].input).attr("checked", "true");
                     }
                 }
-                if (this.useRunestoneServices) {
-                    this.enableMCComparison();
-                }
+            }
+            if (this.useRunestoneServices) {
+                this.enableMCComparison();
             }
         }
     }
