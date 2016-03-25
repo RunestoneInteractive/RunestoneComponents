@@ -27,6 +27,7 @@ ClickableArea.prototype.init = function (opts) {
     var orig = opts.orig;    // entire <div> element that will be replaced by new HTML
     this.origElem = orig;
     this.divid = orig.id;
+    this.useRunestoneServices = opts.useRunestoneServices;
 
     this.clickableArray = [];   // holds all clickable elements
     this.correctArray = [];   // holds the IDs of all correct clickable span elements, used for eval
@@ -98,7 +99,8 @@ ClickableArea.prototype.renderNewElements = function () {
     this.newDiv.innerHTML = newContent;
     this.containerDiv.appendChild(this.newDiv);
 
-    this.checkLocalStorage();
+    //this.checkLocalStorage();
+    this.checkServer();
     this.createButtons();
     this.createFeedbackDiv();
 
@@ -106,14 +108,35 @@ ClickableArea.prototype.renderNewElements = function () {
 
 };
 
-ClickableArea.prototype.checkLocalStorage = function () {
-    this.hasStoredAnswers = false;
-    var len = localStorage.length;
-    if (len > 0) {
-        var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
-        if (ex !== null) {
-            this.hasStoredAnswers = true;
-            this.clickedIndexArray = ex.split(";");
+ClickableArea.prototype.checkServer = function () {
+    // Check if the server has stored answer
+    if (this.useRunestoneServices) {
+        var data = {};
+        data.div_id = this.divid;
+        data.course = eBookConfig.course;
+        data.event = "clickableArea";
+        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
+    } else {
+        this.checkLocalStorage();   // just go right to local storage
+    }
+};
+
+ClickableArea.prototype.repopulateFromStorage = function (data, status, whatever) {
+    if (data !== "") {
+        console.log("Loading from server");
+        dataEval = eval(data);
+        this.hasStoredAnswers = true;
+        this.clickedIndexArray = dataEval.split(";");
+    } else {
+        console.log("Loading from local storage");
+        this.hasStoredAnswers = false;
+        var len = localStorage.length;
+        if (len > 0) {
+            var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
+            if (ex !== null) {
+                this.hasStoredAnswers = true;
+                this.clickedIndexArray = ex.split(";");
+            }
         }
     }
     if (this.ccArray === undefined) {
@@ -128,6 +151,10 @@ ClickableArea.prototype.checkLocalStorage = function () {
             this.modifyTableViaCC(this.newDiv.children);
         }
     }
+};
+
+ClickableArea.prototype.checkLocalStorage = function () {
+    this.repopulateFromStorage("", null, null);   // just load from local storage
 };
 
 ClickableArea.prototype.modifyClickables = function (childNodes) {
@@ -287,8 +314,7 @@ ClickableArea.prototype.clickableEval = function () {
             $(this.incorrectArray[i]).removeClass("clickable-incorrect");
         }
     }
-    var answerInfo = "clicked:" + this.givenIndexArray + ";" + (this.correct ? "correct" : "incorrect");
-    this.logBookEvent({"event": "clickableArea", "act": answerInfo, "div_id": this.divid});
+    this.logBookEvent({"event": "clickableArea", "act": this.givenIndexArray.join(";"), "div_id": this.divid, "correct": (this.correct ? "T" : "F")});
     this.renderFeedback();
 };
 
@@ -323,7 +349,7 @@ ClickableArea.prototype.renderFeedback = function () {
 $(document).ready(function () {
     $("[data-component=clickablearea]").each(function (index) {
         if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
-            CAList[this.id] = new ClickableArea({"orig": this});
+            CAList[this.id] = new ClickableArea({"orig": this, "useRunestoneServices":eBookConfig.useRunestoneServices});
         }
     });
 });
