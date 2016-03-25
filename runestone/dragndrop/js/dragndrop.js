@@ -28,7 +28,7 @@ DragNDrop.prototype.init = function (opts) {
     var orig = opts.orig;    // entire <ul> element that will be replaced by new HTML
     this.origElem = orig;
     this.divid = orig.id;
-
+    this.useRunestoneServices = opts.useRunestoneServices;
     this.random = false;
     if ($(this.origElem).is("[data-random]")) {
         this.random = true;
@@ -96,7 +96,10 @@ DragNDrop.prototype.createNewElements = function () {
     this.dragDropWrapDiv.appendChild(this.dropZoneDiv);
 
     this.createButtons();
-    this.checkLocalStorage();
+    this.checkServer();
+};
+
+DragNDrop.prototype.finishSettingUp = function () {
     this.appendReplacementSpans();
     this.renderFeedbackDiv();
 
@@ -110,7 +113,7 @@ DragNDrop.prototype.createNewElements = function () {
     } else {
         this.dragDropWrapDiv.style.minHeight = this.minheight.toString() + "px";
     }
-};
+}
 
 DragNDrop.prototype.addDragDivListeners = function () {
     this.draggableDiv.addEventListener("dragover", function (ev) {  // Can't set these during this.setEventListeners because this.draggableDiv wasn't created yet
@@ -328,8 +331,6 @@ DragNDrop.prototype.dragEval = function () {
     }
     this.correctNum = this.dragNum - this.incorrectNum - this.unansweredNum;
 
-    var answerInfo = "Number-correct:" + this.correctNum + ":number-incorrect:" + this.incorrectNum + ":number-unanswered:" + this.unansweredNum;
-    this.logBookEvent({"event": "dragNdrop", "act": answerInfo, "div_id": this.divid});
     this.setLocalStorage();
     this.renderFeedback();
 };
@@ -359,22 +360,53 @@ DragNDrop.prototype.setLocalStorage = function () {
             this.pregnantIndexArray.push(-1);
         }
     }
-    var tmp = this.pregnantIndexArray.join(";") + "_split_" + this.minheight;
-    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-dragInfo", tmp);
+    var answerInfo = this.pregnantIndexArray.join(";") + "_split_" + this.minheight;
+    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-dragInfo", answerInfo);
+
+    // store it in the server too
+    this.logBookEvent({"event": "dragNdrop", "act": answerInfo, "div_id": this.divid, "correct": this.correct});
 };
 
-DragNDrop.prototype.checkLocalStorage = function () {
-    this.hasStoredDropZones = false;
-    var len = localStorage.length;
-    if (len > 0) {
-        var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-dragInfo");
-        if (ex !== null) {
-            this.hasStoredDropzones = true;
-            this.minheight = ex.split("_split_")[1];
-            this.pregnantIndexArray = ex.split("_split_")[0].split(";");
-        }
-
+DragNDrop.prototype.checkServer = function () {
+    if (this.useRunestoneServices) {
+        var data = {};
+        data.div_id = this.divid;
+        data.course = eBookConfig.course;
+        data.event = "dragNdrop";
+        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.useLocalStorage.bind(this));
+    } else {
+        this.repopulateFromStorage("", null, null);   // just use local storage
     }
+
+};
+
+DragNDrop.prototype.useLocalStorage = function () {   // because we can't use parameters in the error handling part
+    this.repopulateFromStorage("", null, null);
+};
+
+DragNDrop.prototype.repopulateFromStorage = function (data, status, whatever) {
+    if (data !== "") {
+        console.log("Loading from server");
+        var x = eval(data);
+        this.hasStoredDropzones = true;
+        this.minheight = x.split("_split_")[1];
+        this.pregnantIndexArray = x.split("_split_")[0].split(";");
+    } else {
+        console.log("Loading from local storage");
+        this.hasStoredDropzones = false;
+        var len = localStorage.length;
+        if (len > 0) {
+            var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-dragInfo");
+            if (ex !== null) {
+                this.hasStoredDropzones = true;
+                this.minheight = ex.split("_split_")[1];
+                this.pregnantIndexArray = ex.split("_split_")[0].split(";");
+            }
+
+        }
+    }
+    this.finishSettingUp();
+
 };
 /*=================================
 == Find the custom HTML tags and ==
@@ -382,8 +414,9 @@ DragNDrop.prototype.checkLocalStorage = function () {
 =================================*/
 $(document).ready(function () {
     $("[data-component=dragndrop]").each(function (index) {
+        var opts = {"orig": this, 'useRunestoneServices':eBookConfig.useRunestoneServices};
         if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
-            ddList[this.id] = new DragNDrop({"orig": this});
+            ddList[this.id] = new DragNDrop(opts);
         }
     });
 });
