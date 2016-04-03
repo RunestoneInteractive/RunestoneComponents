@@ -591,11 +591,11 @@ Timed.prototype.useLocalStorage = function () {
 
 Timed.prototype.repopulateFromStorage = function (data, status, whatever) {
     if (data !== "") {
-        console.log("Loading from server");
+        //console.log("Loading from server");
         this.taken = 1;
         this.restoreFromStorage(eval(data));
     } else {
-        console.log("Loading from local storage");
+        //console.log("Loading from local storage");
         var len = localStorage.length;
         if (len > 0) {
             if (localStorage.getItem(eBookConfig.email + ":" + this.divid) !== null) {

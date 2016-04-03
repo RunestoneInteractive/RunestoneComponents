@@ -123,12 +123,12 @@ ClickableArea.prototype.checkServer = function () {
 
 ClickableArea.prototype.repopulateFromStorage = function (data, status, whatever) {
     if (data !== "") {
-        console.log("Loading from server");
+        //console.log("Loading from server");
         dataEval = eval(data);
         this.hasStoredAnswers = true;
         this.clickedIndexArray = dataEval.split(";");
     } else {
-        console.log("Loading from local storage");
+        //console.log("Loading from local storage");
         this.hasStoredAnswers = false;
         var len = localStorage.length;
         if (len > 0) {

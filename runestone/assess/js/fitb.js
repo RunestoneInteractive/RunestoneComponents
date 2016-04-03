@@ -241,7 +241,7 @@ FITB.prototype.useLocalStorage = function () {   // This is a little gross, but 
 
 FITB.prototype.repopulateFromStorage = function (data, status, whatever) {
     if (data !== "") {
-        console.log("Loading from server");
+        //console.log("Loading from server");
         // Load from the server
         var arr = eval(data).split(",");
         for (var i = 0; i < this.blankArray.length; i++) {
@@ -249,7 +249,7 @@ FITB.prototype.repopulateFromStorage = function (data, status, whatever) {
         }
         this.enableCompareButton();
     } else {
-        console.log("Loading from local storage");
+        //console.log("Loading from local storage");
         // Load from local storage
         var len = localStorage.length;
         if (len > 0) {

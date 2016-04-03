@@ -304,8 +304,7 @@ MultipleChoice.prototype.restoreLocalAnswers = function () {         // Handles 
 
 MultipleChoice.prototype.repopulateFromStorage = function (data, status, whatever) {
     if (data !== "") {
-        console.log("Loading from server");
-        //var arr = data.slice(1, data.length-1).split(",");   // remove quotations at either end
+        //console.log("Loading from server");
         var arr = eval(data).split(",");
         var answers = [];
         for (var i=0; i<arr.length; i++) {
@@ -322,7 +321,7 @@ MultipleChoice.prototype.repopulateFromStorage = function (data, status, whateve
         this.enableMCComparison();
 
     } else {
-        console.log("Loading from local storage");
+        //console.log("Loading from local storage");
         this.restoreMultipleSelect();
     }
 };

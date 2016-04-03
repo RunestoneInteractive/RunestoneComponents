@@ -386,13 +386,13 @@ DragNDrop.prototype.useLocalStorage = function () {   // because we can't use pa
 
 DragNDrop.prototype.repopulateFromStorage = function (data, status, whatever) {
     if (data !== "") {
-        console.log("Loading from server");
+        //console.log("Loading from server");
         var x = eval(data);
         this.hasStoredDropzones = true;
         this.minheight = x.split("_split_")[1];
         this.pregnantIndexArray = x.split("_split_")[0].split(";");
     } else {
-        console.log("Loading from local storage");
+        //console.log("Loading from local storage");
         this.hasStoredDropzones = false;
         var len = localStorage.length;
         if (len > 0) {
