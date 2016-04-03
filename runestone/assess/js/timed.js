@@ -90,10 +90,12 @@ Timed.prototype.renderTimedAssess = function () {
     this.renderNavControls();
     this.renderSubmitButton();
     this.renderFeedbackContainer();
-	
+
+    this.useRunestoneServices = opts.useRunestoneServices;
+
     // Replace intermediate HTML with rendered HTML
     $(this.origElem).replaceWith(this.assessDiv);
-    
+
     // check if already taken and if so show results
     this.tookTimedExam();
     if (this.taken) {
@@ -177,7 +179,7 @@ Timed.prototype.renderNavControls = function () {
 	this.navDiv.appendChild(this.pagNavList);
     this.break = document.createElement("br");
     this.navDiv.appendChild(this.break);
-    
+
     // render the question number jump buttons
     this.qNumList = document.createElement("ul");
 	$(this.qNumList).attr("id", "pageNums");
@@ -191,18 +193,18 @@ Timed.prototype.renderNavControls = function () {
             $(tmpLi).addClass("active");
         }
         tmpLi.appendChild(tmpA);
-        this.qNumList.appendChild(tmpLi);	
+        this.qNumList.appendChild(tmpLi);
     }
     this.navDiv.appendChild(this.qNumList);
-	this.navBtnListeners();  
-	
+	this.navBtnListeners();
+
 	$(function(){
 		var tenSet = $("ul#pageNums li");
 		for (var i = 0; i < tenSet.length; i += 10) {
 			tenSet.slice(i, i + 10).wrapAll("<ul class=\"pagination\"></ul>");
 		}
 	});
-	
+
 };
 
 Timed.prototype.navBtnListeners = function() {
@@ -210,18 +212,18 @@ Timed.prototype.navBtnListeners = function() {
 	this.pagNavList.addEventListener("click", function (event) {
 		if ($("div#timed_Test form input[name='group1']").is(":checked")) {
 			$("ul#pageNums > ul > li:eq(" + this.currentQuestionIndex +")").addClass("answered");
-		}	
+		}
 		var target = $(event.target).text();
 		if (target.match(/Next/)) {
 			if ($(this.rightContainer).hasClass("disabled")) {
-				return; 
-			} 
+				return;
+			}
 			this.currentQuestionIndex++;
-		} 
+		}
 		else if (target.match(/Prev/)) {
 			if ($(this.leftContainer).hasClass("disabled")) {
 				return;
-			} 
+			}
 			this.currentQuestionIndex--;
 		}
 		this.renderTimedQuestion();
@@ -241,7 +243,7 @@ Timed.prototype.navBtnListeners = function() {
 		}
 		for (var i = 0; i < this.qNumList.childNodes.length; i++) {
 			for (var j = 0; j < this.qNumList.childNodes[i].childNodes.length; j++) {
-				$(this.qNumList.childNodes[i].childNodes[j]).removeClass("active"); 
+				$(this.qNumList.childNodes[i].childNodes[j]).removeClass("active");
 			}
 		}
 		var target = $(event.target).text();
@@ -250,7 +252,7 @@ Timed.prototype.navBtnListeners = function() {
 		this.renderTimedQuestion();
 		this.ensureButtonSafety();
 	}.bind(this), false);
-	
+
 };
 
 Timed.prototype.renderSubmitButton = function () {
@@ -488,18 +490,9 @@ Timed.prototype.tookTimedExam = function () {
         "color": "white"
     });
 
-    var len = localStorage.length;
-    if (len > 0) {
-        if (localStorage.getItem(eBookConfig.email + ":" + this.divid) !== null) {
-            this.taken = 1;
-            this.restoreFromStorage();
 
-        } else {
-            this.taken = 0;
-        }
-    } else {
-        this.taken = 0;
-    }
+    this.checkServer();
+
 };
 
 Timed.prototype.finishAssessment = function () {
@@ -542,12 +535,12 @@ Timed.prototype.checkScore = function () {
         var correct = this.renderedQuestionArray[i].checkCorrectTimed();
         if (correct) {
 		    this.score++;
-			this.correctStr = this.correctStr + (i + 1) + ", ";				
-			
+			this.correctStr = this.correctStr + (i + 1) + ", ";
+
         } else if (correct === null) {
             this.skipped++;
 			this.skippedStr = this.skippedStr + (i + 1) + ", ";
-			
+
         } else {
             this.incorrect++;
 			this.incorrectStr = this.incorrectStr + (i + 1) + ", ";
@@ -580,8 +573,55 @@ Timed.prototype.logScore = function () {
     this.logBookEvent({"event": "timedExam", "act": "finish", "div_id": this.divid, "correct": this.score, "incorrect": this.incorrect, "skipped": this.skipped, "time": this.timeTaken});
 };
 
-Timed.prototype.restoreFromStorage = function () {
-    var tmpArr = localStorage.getItem(eBookConfig.email + ":" + this.divid).split(";");
+Timed.prototype.checkServer = function () {
+    if (this.useRunestoneServices) {
+        var data = {};
+        data.div_id = this.divid;
+        data.course = eBookConfig.course;
+        data.event = "timedExam";
+        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.useLocalStorage.bind(this));
+    } else {
+        this.repopulateFromStorage("", null, null);   // use dummy parameters so we go right to local storage
+    }
+};
+
+Timed.prototype.useLocalStorage = function () {
+    this.repopulateFromStorage("", null, null);
+};
+
+Timed.prototype.repopulateFromStorage = function (data, status, whatever) {
+    if (data !== "") {
+        console.log("Loading from server");
+        this.taken = 1;
+        this.restoreFromStorage(eval(data));
+    } else {
+        console.log("Loading from local storage");
+        var len = localStorage.length;
+        if (len > 0) {
+            if (localStorage.getItem(eBookConfig.email + ":" + this.divid) !== null) {
+                this.taken = 1;
+                this.restoreFromStorage("");
+
+            } else {
+                this.taken = 0;
+            }
+        } else {
+            this.taken = 0;
+        }
+    }
+};
+
+Timed.prototype.restoreFromStorage = function (data) {
+    var tmpArr;
+    if (data === "") {
+        tmpArr = localStorage.getItem(eBookConfig.email + ":" + this.divid).split(";");
+    } else {
+        stringArr = data.split(";");
+        tmpArr = [];
+        for (var i = 0; i < stringArr.length; i++) {
+            tmpArr.push(eval(stringArr[i]));
+        }
+    }
     if (tmpArr.length == 4)
     {
        this.score = tmpArr[0];
@@ -610,10 +650,10 @@ Timed.prototype.restoreFromStorage = function () {
 };
 
 Timed.prototype.displayScore = function () {
- 
+
 	if (this.showResults)
-    {   
-       // If we have the list of 
+    {
+       // If we have the list of
        if (this.correctStr.length > 0 || this.incorrectStr.length > 0 || this.skippedStr.length > 0)
        {
           var scoreString = "Num Correct: " + this.score + ". Questions: " + this.correctStr + "<br>" +
@@ -625,7 +665,7 @@ Timed.prototype.displayScore = function () {
           $(this.scoreDiv).html(scoreString);
           this.scoreDiv.style.display = "block";
       }
-      else 
+      else
       {
           var scoreString = "Num Correct: " + this.score + "<br>" +
           "Num Wrong: " + this.incorrect + "<br>" +
@@ -639,7 +679,7 @@ Timed.prototype.displayScore = function () {
    }
    this.highlightNumberedList();
 };
-										
+
 Timed.prototype.highlightNumberedList = function () {
 	var correctCount = this.correctStr;
 	var	incorrectCount = this.incorrectStr;
@@ -648,24 +688,24 @@ Timed.prototype.highlightNumberedList = function () {
 	correctCount = correctCount.replace(/ /g,'').split(',');
 	incorrectCount = incorrectCount.replace(/ /g,'').split(',');
 	skippedCount = skippedCount.replace(/ /g,'').split(',');
-		
+
 	$(function () {		// This code is wrapped in a function so that it executes only after DOM has loaded
 		var numberedBtns = $("ul#pageNums > ul > li");
 		if (numberedBtns.hasClass("answered")) {
-			numberedBtns.removeClass("answered"); 
-		}	
+			numberedBtns.removeClass("answered");
+		}
 		for (var i = 0; i < correctCount.length; i++) {
-			var test = parseInt(correctCount[i])-1; 
-			numberedBtns.eq(parseInt(correctCount[i])-1).addClass("correctCount");	
+			var test = parseInt(correctCount[i])-1;
+			numberedBtns.eq(parseInt(correctCount[i])-1).addClass("correctCount");
 		}
 		for (var j = 0; j < incorrectCount.length; j++) {
-			numberedBtns.eq(parseInt(incorrectCount[j])-1).addClass("incorrectCount");	
+			numberedBtns.eq(parseInt(incorrectCount[j])-1).addClass("incorrectCount");
 		}
 		for (var k = 0; k < skippedCount.length; k++) {
-			numberedBtns.eq(parseInt(skippedCount[k])-1).addClass("skippedCount");	
-		} 
+			numberedBtns.eq(parseInt(skippedCount[k])-1).addClass("skippedCount");
+		}
 	});
-};	
+};
 
 
 /*=======================================================
@@ -674,6 +714,6 @@ Timed.prototype.highlightNumberedList = function () {
 
 $(document).ready(function () {
     $("[data-component=timedAssessment]").each(function (index) {
-        TimedList[this.id] = new Timed({"orig": this});
+        TimedList[this.id] = new Timed({"orig": this, "useRunestoneServices":eBookConfig.useRunestoneServices});
     });
 });
