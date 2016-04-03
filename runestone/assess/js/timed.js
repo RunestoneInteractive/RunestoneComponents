@@ -352,10 +352,9 @@ Timed.prototype.handlePrevAssessment = function () {
         this.done = 1;
         $(this.timedDiv).show();
         this.submitTimedProblems(false); // do not log these results
-}
+};
 
 Timed.prototype.startAssessment = function () {
-    this.tookTimedExam();
     if (!this.taken) {
         $(this.startBtn).hide();
         $(this.pauseBtn).attr("disabled", false);
@@ -450,15 +449,6 @@ Timed.prototype.increment = function () { // increments the timer
                 }
             }
         }.bind(this), 1000);
-    }
-};
-
-Timed.prototype.checkIfFinished = function () {
-    if (this.tookTimedExam()) {
-        $(this.startBtn).attr("disabled", true);
-        $(this.pauseBtn).attr("disabled", true);
-        $(this.finishButton).attr("disabled", true);
-        this.resetTimedMCMFStorage();
     }
 };
 
@@ -591,11 +581,9 @@ Timed.prototype.useLocalStorage = function () {
 
 Timed.prototype.repopulateFromStorage = function (data, status, whatever) {
     if (data !== "") {
-        //console.log("Loading from server");
         this.taken = 1;
         this.restoreFromStorage(eval(data));
     } else {
-        //console.log("Loading from local storage");
         var len = localStorage.length;
         if (len > 0) {
             if (localStorage.getItem(eBookConfig.email + ":" + this.divid) !== null) {
