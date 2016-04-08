@@ -112,11 +112,25 @@ TimedMC.prototype.checkCorrectTimedMCMA = function () {
     } else if (this.givenArray.length !== 0) {
         this.correct = false;
     }
-    return this.correct;
+    switch (this.correct) {
+        case true:
+            return "T";
+        case false:
+            return "F";
+        default:
+            return null;
+    }
 };
 
 TimedMC.prototype.checkCorrectTimedMCMF = function () {
-    return this.correct;
+    switch (this.correct) {
+        case true:
+            return "T";
+        case false:
+            return "F";
+        default:
+            return null;
+    }
 };
 
 TimedMC.prototype.checkCorrectTimed = function () {

@@ -36,8 +36,14 @@ TimedDragNDrop.prototype.checkCorrectTimed = function () {
     if (this.unansweredNum === this.dragPairArray.length) {
         this.correct = null;
     }
-
-    return this.correct;
+    switch (this.correct) {
+        case true:
+            return "T";
+        case false:
+            return "F";
+        default:
+            return null;
+    }
 };
 
 TimedDragNDrop.prototype.hideFeedback = function () {

@@ -36,7 +36,14 @@ TimedClickableArea.prototype.checkCorrectTimed = function () {
     if (this.correctNum === 0 && this.incorrectNum === 0) {
         this.correct = null;
     }
-    return this.correct;
+    switch (this.correct) {
+        case true:
+            return "T";
+        case false:
+            return "F";
+        default:
+            return null;
+    }
 };
 
 TimedClickableArea.prototype.hideFeedback = function () {
