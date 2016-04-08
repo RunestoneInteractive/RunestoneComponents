@@ -37,9 +37,9 @@ TimedDragNDrop.prototype.checkCorrectTimed = function () {
         this.correct = null;
     }
     switch (this.correct) {
-        case true:
+        case (true):
             return "T";
-        case false:
+        case (false):
             return "F";
         default:
             return null;

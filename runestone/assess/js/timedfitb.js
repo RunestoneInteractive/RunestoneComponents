@@ -36,9 +36,9 @@ TimedFITB.prototype.renderTimedIcon = function (component) {
 TimedFITB.prototype.checkCorrectTimed = function () {
     // Returns if the question was correct.    Used for timed assessment grading.
     switch (this.correct) {
-        case true:
+        case (true):
             return "T";
-        case false:
+        case (false):
             return "F";
         default:
             return null;

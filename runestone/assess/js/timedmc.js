@@ -124,9 +124,9 @@ TimedMC.prototype.checkCorrectTimedMCMA = function () {
 
 TimedMC.prototype.checkCorrectTimedMCMF = function () {
     switch (this.correct) {
-        case true:
+        case (true):
             return "T";
-        case false:
+        case (false):
             return "F";
         default:
             return null;
