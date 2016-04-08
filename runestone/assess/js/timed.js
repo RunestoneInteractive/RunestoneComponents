@@ -311,6 +311,8 @@ Timed.prototype.createRenderedQuestionArray = function () {
             this.renderedQuestionArray.push(new TimedDragNDrop(opts));
         } else if ($(tmpChild).is("[data-component=clickablearea]")) {
             this.renderedQuestionArray.push(new TimedClickableArea(opts));
+        } else if ($(tmpChild).is("[data-component=shortanswer]")) {
+            this.renderedQuestionArray.push(new TimedShortAnswer(opts));
         }
     }
     if (this.random) {
@@ -520,7 +522,10 @@ Timed.prototype.finishAssessment = function () {
 
 Timed.prototype.submitTimedProblems = function (logFlag) {
     for (var i = 0; i < this.renderedQuestionArray.length; i++) {
-        this.renderedQuestionArray[i].processTimedSubmission(logFlag);
+        // Only try to check the answer if it's something automatically graded
+        if (this.renderedQuestionArray[i].ignoredTimedElement === undefined) {
+            this.renderedQuestionArray[i].processTimedSubmission(logFlag);
+        }
     }
     if (!this.showFeedback) {
         this.hideTimedFeedback();
