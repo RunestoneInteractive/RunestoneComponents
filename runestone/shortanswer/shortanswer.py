@@ -41,13 +41,8 @@ class JournalNode(nodes.General, nodes.Element):
 
 def visit_journal_node(self, node):
     div_id = node.journalnode_components['divid']
-    back, subchapter = os.path.split(os.path.splitext(node.source.lower())[0])
-    back, chapter = os.path.split(back)
-    content = ''
     components = dict(node.journalnode_components)
-    components.update({'divid': div_id,
-                       'subchapter': subchapter,
-                       'chapter': chapter})
+    components.update({'divid': div_id})
     res = TEXT % components
     self.body.append(res)
 
