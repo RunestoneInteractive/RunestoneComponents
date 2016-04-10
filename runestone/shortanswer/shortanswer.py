@@ -24,10 +24,9 @@ from runestone.assess import Assessment
 
 def setup(app):
     app.add_directive('shortanswer', JournalDirective)
-
     app.add_node(JournalNode, html=(visit_journal_node, depart_journal_node))
-
     app.add_javascript('shortanswer.js')
+    app.add_javascript('timed_shortanswer.js')
 
 
 TEXT = """

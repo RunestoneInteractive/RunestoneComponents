@@ -522,10 +522,7 @@ Timed.prototype.finishAssessment = function () {
 
 Timed.prototype.submitTimedProblems = function (logFlag) {
     for (var i = 0; i < this.renderedQuestionArray.length; i++) {
-        // Only try to check the answer if it's something automatically graded
-        if (this.renderedQuestionArray[i].ignoredTimedElement === undefined) {
-            this.renderedQuestionArray[i].processTimedSubmission(logFlag);
-        }
+        this.renderedQuestionArray[i].processTimedSubmission(logFlag);
     }
     if (!this.showFeedback) {
         this.hideTimedFeedback();
