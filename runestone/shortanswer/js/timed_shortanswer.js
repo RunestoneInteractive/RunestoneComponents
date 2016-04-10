@@ -7,7 +7,6 @@ TimedShortAnswer.prototype = new ShortAnswer();
 
 TimedShortAnswer.prototype.timedInit = function (opts) {
     this.init(opts);
-    this.ignoredTimedElement = true;
     this.renderTimedIcon(this.containerDiv);
     this.hideButtons();
 };
@@ -34,7 +33,6 @@ TimedShortAnswer.prototype.renderTimedIcon = function (component) {
 };
 
 TimedShortAnswer.prototype.checkCorrectTimed = function () {
-    // Returns if the question was correct.    Used for timed assessment grading.
     return "I";   // we ignore this in the grading
 };
 
