@@ -41,6 +41,7 @@ TimedShortAnswer.prototype.hideFeedback = function () {
 };
 
 TimedShortAnswer.prototype.processTimedSubmission = function () {
+    // Disable input & evaluate component
     this.submitJournal();
     this.jTextArea.disabled = true;
 };

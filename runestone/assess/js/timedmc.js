@@ -113,9 +113,9 @@ TimedMC.prototype.checkCorrectTimedMCMA = function () {
         this.correct = false;
     }
     switch (this.correct) {
-        case true:
+        case (true):
             return "T";
-        case false:
+        case (false):
             return "F";
         default:
             return null;
@@ -123,6 +123,7 @@ TimedMC.prototype.checkCorrectTimedMCMA = function () {
 };
 
 TimedMC.prototype.checkCorrectTimedMCMF = function () {
+    // Returns if the question was correct, incorrect, or skipped (return null in the last case)
     switch (this.correct) {
         case (true):
             return "T";
@@ -148,6 +149,7 @@ TimedMC.prototype.hideFeedback = function () {
 };
 
 TimedMC.prototype.processTimedSubmission = function (logFlag) {
+    // Disable input, then evaluate component
     for (var i = 0; i < this.optionArray.length; i++) {
         this.optionArray[i]["input"].disabled = true;
     }

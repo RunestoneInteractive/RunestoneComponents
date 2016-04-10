@@ -51,6 +51,7 @@ TimedDragNDrop.prototype.hideFeedback = function () {
 };
 
 TimedDragNDrop.prototype.processTimedSubmission = function () {
+    // Disable input & evaluate component
     $(this.resetButton).hide();
     this.dragEval();
     for (var i = 0; i < this.dragPairArray.length; i++) {   // No more dragging
