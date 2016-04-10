@@ -11,26 +11,6 @@
 ===                6/4/15                ===
 ==========================================*/
 
-/*=======================================
-===         Global functions          ===
-=== (used by more than one component) ===
-=======================================*/
-
-var feedBack = function (elem, correct, feedbackText) {        // Displays feedback on page--miscellaneous function that can be used by multple objects
-    // elem is the Element in which to put the feedback
-    if (correct) {
-        $(elem).html("You are Correct!");
-        $(elem).attr("class", "alert alert-success");
-    } else {
-        if (feedbackText === null) {
-            feedbackText = "";
-        }
-        $(elem).html("Incorrect.    " + feedbackText);
-        $(elem).attr("class", "alert alert-danger");
-    }
-};
-
-
 /*==================================================
 == Begin code for the Fill In The Blank component ==
 ==================================================*/
@@ -247,7 +227,7 @@ FITB.prototype.enableCompareButton = function () {
 FITB.prototype.checkFITBStorage = function () {
     this.isCorrectArray = [];
     this.displayFeed = [];
-    // Starts chain of functions which ends with feedBack() displaying feedback to user
+    // Starts chain of functions which ends with displaying feedback to user
     this.evaluateAnswers();
     this.renderFITBFeedback();
     var answerInfo = "answer:" + this.given_arr + ":" + (this.correct ? "correct" : "no");
@@ -278,10 +258,23 @@ FITB.prototype.evaluateAnswers = function () {
     }
     if ($.inArray("", this.isCorrectArray) < 0 && $.inArray(false, this.isCorrectArray) < 0) {
         this.correct = true;
-    } else if ($.inArray(false, this.isCorrectArray) >= 0 && $.inArray("", this.isCorrectArray) < 0) {
+    } else if (this.isCompletelyBlank()) {
+        this.correct = null;
+    } else {
         this.correct = false;
     }
+    console.log(this.correct);
     localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", this.given_arr.join(";"));
+};
+
+FITB.prototype.isCompletelyBlank = function () {
+    // Returns true if the user didn't fill in any of the blanks, else false
+    for (var i = 0; i < this.isCorrectArray.length; i++) {
+        if (this.isCorrectArray[i] !== "") {
+            return false;
+        }
+    }
+    return true;
 };
 
 FITB.prototype.populateDisplayFeed = function (index, given) {
