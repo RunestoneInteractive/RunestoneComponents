@@ -28,7 +28,7 @@ Parsons.prototype.init = function (opts) {
     var orig = opts.orig;     // entire <pre> element that will be replaced by new HTML
     this.origElem = orig;
     this.divid = orig.id;
-    this.maxdist = $(orig).data('maxdist');
+    
     this.children = this.origElem.childNodes;     // this contains all of the child elements of the entire tag...
     this.contentArray = [];
     this.question = null;
@@ -162,7 +162,6 @@ Parsons.prototype.setButtonFunctions = function () {
     $pjQ(this.resetButt).click(function (event) {
         event.preventDefault();
         this.pwidget.shuffleLines();
-
         // set min width and height
         var sortableul = $("#ul-parsons-sortableCode-" + this.counterId);
         var trashul = $("#ul-parsons-sortableTrash-" + this.counterId);
@@ -205,13 +204,28 @@ Parsons.prototype.createParsonsWidget = function () {
         return false;
     });
 
-    this.pwidget = new ParsonsWidget({
+	var options = {
         "sortableId": "parsons-sortableCode-" + this.counterId,
         "trashId": "parsons-sortableTrash-" + this.counterId,
-        "max_wrong_lines": this.maxdist,
         "solution_label": "Drop blocks here",
         "feedback_cb": this.displayErrors.bind(this)
-    });
+    };
+    // add maxdist and order if present
+    var maxdist = $(this.origElem).data('maxdist');
+    var order = $(this.origElem).data('order');
+    if (maxdist !== undefined) {
+	    options["maxdist"] = maxdist;
+	}
+	if (order !== undefined) {
+		// convert order string to array of numbers
+		order = order.match(/\d+/g);
+		for (var i = 0; i < order.length; i++) {
+			order[i] = parseInt(order[i]);
+		}
+		options["order"] = order;
+	}
+    
+    this.pwidget = new ParsonsWidget(options);
 
     this.pwidget.init($pjQ(this.origDiv).text());
     this.pwidget.shuffleLines();
