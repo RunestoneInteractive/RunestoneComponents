@@ -43,6 +43,7 @@ def setup(app):
     app.add_javascript('htmlmixed.js')
     app.add_javascript('python.js')
     app.add_javascript('javascript.js')
+    app.add_javascript('rune_cljs/rune_cljs.js')
     app.add_javascript('activecode.js')
     app.add_javascript('skulpt.min.js')
     app.add_javascript('skulpt-stdlib.js')

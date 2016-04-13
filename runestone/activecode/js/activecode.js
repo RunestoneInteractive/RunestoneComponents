@@ -740,6 +740,71 @@ JSActiveCode.prototype.runProg = function() {
 
 };
 
+//==================
+CljSActiveCode.prototype = new ActiveCode();
+
+function CljSActiveCode(opts) {
+    if (opts) {
+        this.init(opts)
+        }
+    }
+
+CljSActiveCode.prototype.iniit = function(opts) {
+    ActiveCode.prototype.init.apply(this,arguments)
+    }
+
+CljSActiveCode.prototype.buildProg = function() {
+    var prog = this.editor.getValue();
+    return prog;
+}
+
+CljSActiveCode.prototype.addErrorMessage = function(err) {
+    var errHead = $('<h3>').html('Error');
+    this.eContainer = this.outerDiv.appendChild(document.createElement('div'));
+    this.eContainer.className = 'error alert alert-danger';
+    this.eContainer.id = this.divid + '_errinfo';
+    this.eContainer.appendChild(errHead[0]);
+    var errText = this.eContainer.appendChild(document.createElement('pre'));
+    var errString = err.toString();
+    var to = errString.indexOf(":");
+    var errName = errString.substring(0, to);
+    errText.innerHTML = errString;
+    /*
+    $(this.eContainer).append('<h3>Description</h3>');
+    var errDesc = this.eContainer.appendChild(document.createElement('p'));
+    errDesc.innerHTML = errorText[errName];
+    $(this.eContainer).append('<h3>To Fix</h3>');
+    var errFix = this.eContainer.appendChild(document.createElement('p'));
+    errFix.innerHTML = errorText[errName + 'Fix'];
+    var moreInfo = '../ErrorHelp/' + errName.toLowerCase() + '.html';
+    */
+    //console.log("Runtime Error: " + err.toString());
+};
+
+CljSActiveCode.prototype.outputfun = function(a) {
+    $(this.output).css("visibility", "visible");
+    return a;
+};
+
+CljSActiveCode.prototype.runProg = function() {
+    var _this = this;
+    var prog = this.buildProg();
+    $(this.eContainer).remove();
+    $(this.output).text('');
+    $(this.codeDiv).switchClass("col-md-12", "col-md-6", {duration:500,queue:false});
+    $(this.outDiv).show({duration:700,queue:false});
+    
+    var result = rune_cljs.core.compile_evaluate(prog);
+
+    if (result[0] != null) {
+        $(this.output).text(_this.outputfun(result[0]));
+    } else {
+        this.addErrorMessage(result[1])
+    }
+}
+    
+
+// ===============
 HTMLActiveCode.prototype = new ActiveCode();
 
 function HTMLActiveCode (opts) {
@@ -1487,6 +1552,8 @@ ACFactory.createActiveCode = function (orig, lang, addopts) {
     }
     if (lang === "javascript") {
         return new JSActiveCode(opts);
+    } else if (lang === 'clojurescript') {
+        return new CljSActiveCode(opts);
     } else if (lang === 'htmlmixed') {
         return new HTMLActiveCode(opts);
     } else if (['java', 'cpp', 'c', 'python3', 'python2'].indexOf(lang) > -1) {
