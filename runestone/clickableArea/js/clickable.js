@@ -99,7 +99,6 @@ ClickableArea.prototype.renderNewElements = function () {
     this.newDiv.innerHTML = newContent;
     this.containerDiv.appendChild(this.newDiv);
 
-    //this.checkLocalStorage();
     this.checkServer();
     this.createButtons();
     this.createFeedbackDiv();
@@ -124,20 +123,17 @@ ClickableArea.prototype.checkServer = function () {
 ClickableArea.prototype.repopulateFromStorage = function (data, status, whatever) {
     if (data !== "") {
         //console.log("Loading from server");
-        dataEval = eval(data);
+        var dataEval = eval(data);
+        var answerData = dataEval.split("::")[0];
+        var date = dataEval.split("::")[1];
         this.hasStoredAnswers = true;
-        this.clickedIndexArray = dataEval.split(";");
-    } else {
-        //console.log("Loading from local storage");
-        this.hasStoredAnswers = false;
-        var len = localStorage.length;
-        if (len > 0) {
-            var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
-            if (ex !== null) {
-                this.hasStoredAnswers = true;
-                this.clickedIndexArray = ex.split(";");
-            }
+        if (this.serverDateIsNewer(date)) {
+            this.clickedIndexArray = answerData.split(";");
+        } else {
+            this.checkLocalStorage();
         }
+    } else {
+        this.checkLocalStorage();
     }
     if (this.ccArray === undefined) {
         this.modifyClickables(this.newDiv.childNodes);
@@ -153,8 +149,29 @@ ClickableArea.prototype.repopulateFromStorage = function (data, status, whatever
     }
 };
 
-ClickableArea.prototype.checkLocalStorage = function () {
-    this.repopulateFromStorage("", null, null);   // just load from local storage
+ClickableArea.prototype.checkLocalStorage = function () {   // Loads previous answers from local storage
+    this.hasStoredAnswers = false;
+    var len = localStorage.length;
+    if (len > 0) {
+        var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
+        if (ex !== null) {
+            this.hasStoredAnswers = true;
+            this.clickedIndexArray = ex.split(";");
+        }
+    }
+};
+
+ClickableArea.prototype.serverDateIsNewer = function (date) {   // returns true if server data is more recent than local storage
+    if (localStorage.length === 0)
+        return true;
+    var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
+    if (ex === null)
+        return true;
+    var storageDate = new Date(ex.split("::")[1]);
+    var serverDate = new Date(date);
+    if (serverDate < storageDate)
+        return false;
+    return true;
 };
 
 ClickableArea.prototype.modifyClickables = function (childNodes) {
@@ -326,7 +343,9 @@ ClickableArea.prototype.setLocalStorage = function () {
             this.givenIndexArray.push(i);
         }
     }
-    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", this.givenIndexArray.join(";"));
+    // to ensure compatability with old browsers
+    var timeStamp = new Date();
+    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", this.givenIndexArray.join(";") + "::" + timeStamp.toString());
 };
 
 ClickableArea.prototype.renderFeedback = function () {
