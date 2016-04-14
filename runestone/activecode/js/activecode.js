@@ -769,21 +769,49 @@ CljSActiveCode.prototype.addErrorMessage = function(err) {
     this.eContainer.id = this.divid + '_errinfo';
     this.eContainer.appendChild(errHead[0]);
     var errText = this.eContainer.appendChild(document.createElement('pre'));
-    var errString = err.toString();
-    var to = errString.indexOf(":");
-    var errName = errString.substring(0, to);
-    errText.innerHTML = errString;
-    /*
-    $(this.eContainer).append('<h3>Description</h3>');
-    var errDesc = this.eContainer.appendChild(document.createElement('p'));
-    errDesc.innerHTML = errorText[errName];
-    $(this.eContainer).append('<h3>To Fix</h3>');
-    var errFix = this.eContainer.appendChild(document.createElement('p'));
-    errFix.innerHTML = errorText[errName + 'Fix'];
-    var moreInfo = '../ErrorHelp/' + errName.toLowerCase() + '.html';
-    */
+    var errString = err.cause.message;
+    var errName = err.cause.__proto__.name;
+    var description = "";
+    var toFix = "";
+    errText.innerHTML = errName + ": " + errString;
+    var foundMatch = false;
+    for (var index = 0; index < cljsErrorList.length && (! foundMatch); index += 2) {
+        foundMatch = cljsErrorList[index].test(errString);
+        if (foundMatch) {
+            description = cljsErrorList[index + 1][0];
+            toFix = cljsErrorList[index + 1][1];
+        }
+    }
+
+    if (description !== "") {
+        $(this.eContainer).append('<h3>Description</h3>');
+        var errDesc = this.eContainer.appendChild(document.createElement('p'));
+        errDesc.innerHTML = description;
+    }
+    if (toFix !== "") {
+        $(this.eContainer).append('<h3>To Fix</h3>');
+        var errFix = this.eContainer.appendChild(document.createElement('p'));
+        errFix.innerHTML = toFix;
+    }
+    // var moreInfo = '../ErrorHelp/' + errName.toLowerCase() + '.html';
     //console.log("Runtime Error: " + err.toString());
 };
+
+/*
+ * The ClojureScript error list is a array of regex patterns to match
+ * against an error message, followed by a list of description/fix
+ */
+cljsErrorList = [
+    /Unmatched delimiter/, ["This error means you may be missing an opening parenthesis.", ""],
+    /EOF while reading/, ["This error means you may be missing a closing parenthesis.", ""],
+    /identifier starts immediately after numeric literal/,
+        ["This error means that you started with a number rather than a function.",
+        "Remember, the function name has to be the first thing in the parentheses."],
+    /\.call is not a function/,
+        ["This error means the first thing in the parentheses is not the name of a function.", ""],
+    /missing ; before statement/, ["You might have an expression without any parentheses.", ""],
+    /cljs\.core\..* is not a function/, ["You might have an expression without any parentheses.", ""]
+];
 
 CljSActiveCode.prototype.outputfun = function(a) {
     $(this.output).css("visibility", "visible");
