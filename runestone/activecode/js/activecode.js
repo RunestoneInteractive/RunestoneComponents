@@ -756,6 +756,9 @@ CljSActiveCode.prototype.iniit = function(opts) {
 
 CljSActiveCode.prototype.buildProg = function() {
     var prog = this.editor.getValue();
+    if (this.suffix) {
+        prog = prog + this.suffix;
+    }
     return prog;
 }
 
