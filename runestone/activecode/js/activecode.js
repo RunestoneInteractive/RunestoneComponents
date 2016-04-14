@@ -729,6 +729,7 @@ JSActiveCode.prototype.runProg = function() {
             };
 
     $(this.output).text('');
+    $(this.eContainer).remove();
     $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
     $(this.outDiv).show({duration:700,queue:false});
 
