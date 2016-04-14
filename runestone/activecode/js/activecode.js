@@ -741,7 +741,7 @@ JSActiveCode.prototype.runProg = function() {
 
 };
 
-//==================
+
 CljSActiveCode.prototype = new ActiveCode();
 
 function CljSActiveCode(opts) {
@@ -806,7 +806,6 @@ CljSActiveCode.prototype.runProg = function() {
 }
     
 
-// ===============
 HTMLActiveCode.prototype = new ActiveCode();
 
 function HTMLActiveCode (opts) {
