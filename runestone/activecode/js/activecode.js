@@ -798,7 +798,8 @@ CljSActiveCode.prototype.runProg = function() {
 
     if (result[0] != null) {
         $(this.output).text(_this.outputfun(result[0]));
-    } else {
+    }
+    if (result[1] != null) {
         this.addErrorMessage(result[1])
     }
 }
