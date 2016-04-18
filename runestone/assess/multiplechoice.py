@@ -150,7 +150,7 @@ class MChoice(Assessment):
 #backwards compatibility
 class MChoiceMF(MChoice):
     def run(self):
-        print("This directive has been depreciated. Please convert to the new directive 'mchoice'")
+        print("This directive has been deprecated. Please convert to the new directive 'mchoice'")
         mcmfNode = super(MChoiceMF,self).run()[0]
 
         return [mcmfNode]
@@ -158,7 +158,7 @@ class MChoiceMF(MChoice):
 class MChoiceMA(MChoice):
     def run(self):
         self.options['multiple_answers'] = 'multipleAnswers'
-        print("This directive has been depreciated. Please convert to the new directive 'mchoice'")
+        print("This directive has been deprecated. Please convert to the new directive 'mchoice'")
         mchoicemaNode = super(MChoiceMA,self).run()[0]
 
         return [mchoicemaNode]
@@ -166,7 +166,7 @@ class MChoiceMA(MChoice):
 class MChoiceRandomMF(MChoice):
     def run(self):
         self.options['random'] = 'random'
-        print("This directive has been depreciated. Please convert to the new directive 'mchoice'")
+        print("This directive has been deprecated. Please convert to the new directive 'mchoice'")
         mchoicerandommfNode = super(MChoiceRandomMF,self).run()[0]
 
         return[mchoicerandommfNode]
