@@ -759,7 +759,7 @@ CljSActiveCode.prototype.buildProg = function() {
     if (this.suffix) {
         prog = prog + this.suffix;
     }
-    return prog;
+    return "(do " + prog + ")";
 }
 
 CljSActiveCode.prototype.addErrorMessage = function(err) {

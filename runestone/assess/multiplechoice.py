@@ -54,12 +54,14 @@ def depart_mc_node(self,node):
     # Add all of the possible answers
     okeys = list(node.mc_options.keys())
     okeys.sort()
+
     for k in okeys:
         if 'answer_' in k:
             x,label = k.split('_')
             node.mc_options['alabel'] = label
             node.mc_options['atext'] = node.mc_options[k]
             currFeedback = "feedback_" + label
+            
             node.mc_options['feedtext'] = node.mc_options[currFeedback]
             if label in node.mc_options['correct']:
                 node.mc_options["is_correct"] = "data-correct"
@@ -69,7 +71,6 @@ def depart_mc_node(self,node):
 
 
     res += node.template_end % node.mc_options
-
     self.body.append(res)
 
 
@@ -137,9 +138,6 @@ class MChoice(Assessment):
             '''
 
         super(MChoice,self).run()
-
-
-
 
         mcNode = MChoiceNode(self.options)
         mcNode.template_start = TEMPLATE_START
