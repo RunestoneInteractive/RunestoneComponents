@@ -11,30 +11,6 @@
 ===                6/4/15                ===
 ==========================================*/
 
-/*=======================================
-===         Global functions          ===
-=== (used by more than one component) ===
-=======================================*/
-
-var feedBack = function (elem, correct, feedbackText) {        // Displays feedback on page--miscellaneous function that can be used by multple objects
-    // elem is the Element in which to put the feedback
-    if (correct) {
-        $(elem).html("You are Correct!");
-        $(elem).attr("class", "alert alert-success");
-    } else {
-        if (feedbackText === null) {
-            feedbackText = "";
-        }
-        $(elem).html("Incorrect.    " + feedbackText);
-        $(elem).attr("class", "alert alert-danger");
-    }
-};
-
-
-/*==================================================
-== Begin code for the Fill In The Blank component ==
-==================================================*/
-
 var FITBList = {};    // Object containing all instances of FITB that aren't a child of a timed assessment.
 
 // FITB constructor
@@ -64,7 +40,7 @@ FITB.prototype.init = function (opts) {
     this.children = [];   // this contains all of the child elements of the entire tag...
     this.correctAnswerArray = [];   // This array contains the regular expressions of the correct answers
 
-    this.adoptChildren();   // Populates this.children
+    this.adoptChildren();
     this.populateCorrectAnswerArray();
     this.populateQuestionArray();
 
@@ -74,14 +50,16 @@ FITB.prototype.init = function (opts) {
     }
     this.populateFeedbackArray();
     this.createFITBElement();
-    this.checkPreviousFIB();
+    this.checkServer();
 };
 
 /*====================================
-==== Functions parsing variables  ====
+====    Functions parsing data    ====
 ====   out of intermediate HTML   ====
 ====================================*/
+
 FITB.prototype.adoptChildren = function () {
+    // populates this.children
     var children = this.origElem.childNodes;
     for (var i = 0; i < this.origElem.childNodes.length; i++) {
         if ($(this.origElem.childNodes[i]).is("[data-blank]")) {
@@ -99,6 +77,7 @@ FITB.prototype.populateCorrectAnswerArray = function () {
         }
     }
 };
+
 FITB.prototype.populateQuestionArray = function () {
     for (var i = 0; i < this.children.length; i++) {
         for (var j = 0; j < this.children[i].childNodes.length; j++) {
@@ -135,9 +114,7 @@ FITB.prototype.populateFeedbackArray = function () {
                 }
             }
         }
-
         this.feedbackArray.push(tmpContainArr);
-
     }
 };
 
@@ -180,20 +157,21 @@ FITB.prototype.renderFITBInput = function () {
 };
 
 FITB.prototype.renderFITBButtons = function () {
-    this.submitButton = document.createElement("button");    // Check me button
+    // submit button and compare me button
+    this.submitButton = document.createElement("button");
     this.submitButton.textContent = "Check Me";
     $(this.submitButton).attr({
         "class": "btn btn-success",
         "name": "do answer"
     });
     this.submitButton.addEventListener("click", function () {
-        this.checkFITBStorage();
+        this.startEvaluation();
     }.bind(this), false);
     this.containerDiv.appendChild(document.createElement("br"));
     this.containerDiv.appendChild(document.createElement("br"));
     this.containerDiv.appendChild(this.submitButton);
     if (this.useRunestoneServices) {
-        this.compareButton = document.createElement("button");    // Compare me button
+        this.compareButton = document.createElement("button");
         $(this.compareButton).attr({
             "class": "btn btn-default",
             "id": this.origElem.id + "_bcomp",
@@ -217,72 +195,104 @@ FITB.prototype.renderFITBFeedbackDiv = function () {
     this.containerDiv.appendChild(this.feedBackDiv);
 };
 
-/*==============================
-=== Local storage & feedback ===
-===============================*/
+/*===================================
+=== Checking/loading from storage ===
+===================================*/
 
-FITB.prototype.checkPreviousFIB = function () {
+FITB.prototype.checkServer = function () {
     // Check if the server has stored answer
     if (this.useRunestoneServices) {
         var data = {};
         data.div_id = this.divid;
         data.course = eBookConfig.course;
         data.event = "fillb";
-        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.useLocalStorage.bind(this));
+        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
     } else {
-        this.repopulateFromStorage("", null, null);   // use dummy parameters so we go right to local storage
+        this.checkLocalStorage();
     }
 
-};
-
-FITB.prototype.useLocalStorage = function () {   // This is a little gross, but it's because we can't call it with parameters in the error handling part
-    this.repopulateFromStorage("", null, null);
 };
 
 FITB.prototype.repopulateFromStorage = function (data, status, whatever) {
+    // decide whether to use the server's answer (if there is one) or to load from storage
     if (data !== "") {
-        //console.log("Loading from server");
-        // Load from the server
-        var arr = eval(data).split(",");
-        for (var i = 0; i < this.blankArray.length; i++) {
-            $(this.blankArray[i]).attr("value", arr[i]);
+        var dataEval = JSON.parse(data);
+        if (this.shouldUseServer(dataEval)) {
+            var arr = dataEval.answer.split(",");
+            for (var i = 0; i < this.blankArray.length; i++) {
+                $(this.blankArray[i]).attr("value", arr[i]);
+            }
+            this.setLocalStorage();
+        } else {
+            this.checkLocalStorage();
         }
         this.enableCompareButton();
     } else {
-        //console.log("Loading from local storage");
-        // Load from local storage
-        var len = localStorage.length;
-        if (len > 0) {
-            var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
-            if (ex !== null) {
-                var arr = ex.split(";");
-                for (var i = 0; i < this.blankArray.length; i++) {
-                    $(this.blankArray[i]).attr("value", arr[i]);
-                }
-                if (this.useRunestoneServices) {
-                    this.enableCompareButton();
-                }
-            }   // end if ex not null
-        }   // end if len > 0
+        this.checkLocalStorage();
     }
+};
+
+FITB.prototype.checkLocalStorage = function () {
+    // Loads previous answers from local storage if they exist
+    var len = localStorage.length;
+    if (len > 0) {
+        var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
+        if (ex !== null) {
+            var arr = ex.split(";");
+            for (var i = 0; i < this.blankArray.length; i++) {
+                $(this.blankArray[i]).attr("value", arr[i]);
+            }
+            if (this.useRunestoneServices) {
+                this.enableCompareButton();
+            }
+        }
+    }
+};
+
+FITB.prototype.shouldUseServer = function (data) {
+    // returns true if server data is more recent than local storage or if server storage is correct
+    if (data.correct == "T" || localStorage.length === 0)
+        return true;
+    var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
+    if (ex === null)
+        return true;
+    var storageDate = new Date(ex.split("::")[1]);
+    var serverDate = new Date(data.timestamp);
+    if (serverDate < storageDate)
+        return false;
+    return true;
 };
 
 FITB.prototype.enableCompareButton = function () {
     this.compareButton.disabled = false;
 };
 
-FITB.prototype.checkFITBStorage = function () {
+FITB.prototype.setLocalStorage = function () {
+    // logs answer to local storage
+    this.given_arr = [];
+    for (var i = 0; i < this.blankArray.length; i++)
+        this.given_arr.push(this.blankArray[i].value);
+
+    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", this.given_arr.join(";"));
+};
+
+/*==============================
+=== Evaluation of answer and ===
+===     display feedback     ===
+==============================*/
+
+FITB.prototype.startEvaluation = function () {
+    // Start of the evaulation chain
     this.isCorrectArray = [];
     this.displayFeed = [];
-    // Starts chain of functions which ends with feedBack() displaying feedback to user
     this.evaluateAnswers();
     this.renderFITBFeedback();
     var answerInfo = "answer:" + this.given_arr + ":" + (this.correct ? "correct" : "no");
     this.logBookEvent({"event": "fillb", "act": answerInfo, "div_id": this.divid});
     this.enableCompareButton.disabled = false;
 };
+
 FITB.prototype.evaluateAnswers = function () {
-    this.given_arr = [];
     for (var i = 0; i < this.children.length; i++) {
         var given = this.blankArray[i].value;
         var modifiers = "";
@@ -300,15 +310,13 @@ FITB.prototype.evaluateAnswers = function () {
         if (!this.isCorrectArray[i]) {
             this.populateDisplayFeed(i, given);
         }
-        // store the answer in local storage
-        this.given_arr.push(given);
     }
     if ($.inArray("", this.isCorrectArray) < 0 && $.inArray(false, this.isCorrectArray) < 0) {
         this.correct = true;
     } else if ($.inArray(false, this.isCorrectArray) >= 0 && $.inArray("", this.isCorrectArray) < 0) {
         this.correct = false;
     }
-    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", this.given_arr.join(";"));
+    this.setLocalStorage();
 };
 
 FITB.prototype.populateDisplayFeed = function (index, given) {
@@ -355,7 +363,7 @@ FITB.prototype.renderFITBFeedback = function () {
 === Functions for compare button ===
 ==================================*/
 
-FITB.prototype.compareFITBAnswers = function () {             // Called by compare me button--calls compareFITB
+FITB.prototype.compareFITBAnswers = function () {
     var data = {};
     data.div_id = this.divid;
     data.course = eBookConfig.course;

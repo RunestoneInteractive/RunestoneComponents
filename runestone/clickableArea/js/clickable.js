@@ -22,6 +22,7 @@ ClickableArea.prototype = new RunestoneBase();
 /*=============================================
 == Initialize basic ClickableArea attributes ==
 =============================================*/
+
 ClickableArea.prototype.init = function (opts) {
     RunestoneBase.apply(this, arguments);
     var orig = opts.orig;    // entire <div> element that will be replaced by new HTML
@@ -80,13 +81,12 @@ ClickableArea.prototype.getFeedback = function () {
     }
 };
 
-/*============================================
-== Check local storage and replace old HTML ==
-==  with our new elements that don't have   ==
-==  data-correct/data-incorrect attributes  ==
-============================================*/
+/*===========================================
+====   Functions generating final HTML   ====
+===========================================*/
 
 ClickableArea.prototype.renderNewElements = function () {
+    // wrapper function for generating everything
     this.containerDiv = document.createElement("div");
     this.containerDiv.appendChild(this.question);
     $(this.containerDiv).addClass("alert alert-warning");
@@ -104,8 +104,32 @@ ClickableArea.prototype.renderNewElements = function () {
     this.createFeedbackDiv();
 
     $(this.origElem).replaceWith(this.containerDiv);
-
 };
+
+ClickableArea.prototype.createButtons = function () {
+    this.submitButton = document.createElement("button");    // Check me button
+    this.submitButton.textContent = "Check Me";
+    $(this.submitButton).attr({
+        "class": "btn btn-success",
+        "name": "do answer"
+    });
+
+    this.submitButton.onclick = function () {
+        this.clickableEval();
+    }.bind(this);
+
+    this.containerDiv.appendChild(this.submitButton);
+};
+
+ClickableArea.prototype.createFeedbackDiv = function () {
+    this.feedBackDiv = document.createElement("div");
+    this.containerDiv.appendChild(document.createElement("br"));
+    this.containerDiv.appendChild(this.feedBackDiv);
+};
+
+/*===================================
+=== Checking/loading from storage ===
+===================================*/
 
 ClickableArea.prototype.checkServer = function () {
     // Check if the server has stored answer
@@ -121,14 +145,13 @@ ClickableArea.prototype.checkServer = function () {
 };
 
 ClickableArea.prototype.repopulateFromStorage = function (data, status, whatever) {
+    // decide whether to use the server's answer (if there is one) or to load from storage
     if (data !== "") {
-        //console.log("Loading from server");
-        var dataEval = eval(data);
-        var answerData = dataEval.split("::")[0];
-        var date = dataEval.split("::")[1];
+        var dataEval = JSON.parse(data);
         this.hasStoredAnswers = true;
-        if (this.serverDateIsNewer(date)) {
-            this.clickedIndexArray = answerData.split(";");
+        if (this.shouldUseServer(dataEval)) {
+            this.clickedIndexArray = dataEval.answer.split(";");
+            this.setLocalStorage();
         } else {
             this.checkLocalStorage();
         }
@@ -149,32 +172,54 @@ ClickableArea.prototype.repopulateFromStorage = function (data, status, whatever
     }
 };
 
-ClickableArea.prototype.checkLocalStorage = function () {   // Loads previous answers from local storage
+ClickableArea.prototype.checkLocalStorage = function () {
+    // Gets previous answer data from local storage if it exists
     this.hasStoredAnswers = false;
     var len = localStorage.length;
     if (len > 0) {
         var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
         if (ex !== null) {
             this.hasStoredAnswers = true;
-            this.clickedIndexArray = ex.split(";");
+            this.clickedIndexArray = ex.split("::")[0].split(";");
+
+            // Log answer to server
+            //this.logBookEvent({"event": "clickableArea", "act": this.givenIndexArray.join(";"), "div_id": this.divid, "correct": (this.correct ? "T" : "F")});
         }
     }
 };
 
-ClickableArea.prototype.serverDateIsNewer = function (date) {   // returns true if server data is more recent than local storage
-    if (localStorage.length === 0)
+ClickableArea.prototype.shouldUseServer = function (data) {
+    // returns true if server data is more recent than local storage or if server storage is correct
+    if (data.correct == "T" || localStorage.length === 0)
         return true;
     var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
     if (ex === null)
         return true;
     var storageDate = new Date(ex.split("::")[1]);
-    var serverDate = new Date(date);
+    var serverDate = new Date(data.timestamp);
     if (serverDate < storageDate)
         return false;
     return true;
 };
 
+ClickableArea.prototype.setLocalStorage = function () {
+    // Array of the indices of clicked elements is passed to local storage
+    this.givenIndexArray = [];
+    for (var i = 0; i < this.clickableArray.length; i++) {
+        if ($(this.clickableArray[i]).hasClass("clickable-clicked")) {
+            this.givenIndexArray.push(i);
+        }
+    }
+    var timeStamp = new Date();
+    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", this.givenIndexArray.join(";") + "::" + timeStamp.toString());
+};
+
+/*==========================
+=== Auxilliary functions ===
+==========================*/
+
 ClickableArea.prototype.modifyClickables = function (childNodes) {
+    // Strips the data-correct/data-incorrect labels and updates the correct/incorrect arrays
     for (var i = 0; i < childNodes.length; i++) {
         if ($(childNodes[i]).is("[data-correct]") || $(childNodes[i]).is("[data-incorrect]")) {
 
@@ -214,6 +259,7 @@ ClickableArea.prototype.modifyViaCC = function (children) {
 };
 
 ClickableArea.prototype.modifyTableViaCC = function (children) {
+    // table version of modifyViaCC
     var tComponentArr = [];
     for (var i = 0; i < children.length; i++) {
         if (children[i].nodeName === "TABLE") {
@@ -261,6 +307,7 @@ ClickableArea.prototype.modifyTableViaCC = function (children) {
 };
 
 ClickableArea.prototype.manageNewClickable = function (clickable) {
+    // adds the "clickable" functionality
     $(clickable).addClass("clickable");
 
     if (this.hasStoredAnswers) {   // Check if the element we're about to append to the pre was in local storage as clicked via its index
@@ -284,30 +331,9 @@ ClickableArea.prototype.manageNewClickable = function (clickable) {
     this.clickableCounter++;
 };
 
-ClickableArea.prototype.createButtons = function () {
-    this.submitButton = document.createElement("button");    // Check me button
-    this.submitButton.textContent = "Check Me";
-    $(this.submitButton).attr({
-        "class": "btn btn-success",
-        "name": "do answer"
-    });
-
-    this.submitButton.onclick = function () {
-        this.clickableEval();
-    }.bind(this);
-
-    this.containerDiv.appendChild(this.submitButton);
-};
-
-ClickableArea.prototype.createFeedbackDiv = function () {
-    this.feedBackDiv = document.createElement("div");
-    this.containerDiv.appendChild(document.createElement("br"));
-    this.containerDiv.appendChild(this.feedBackDiv);
-};
-
-/*========================================
-== Evaluation and setting local storage ==
-========================================*/
+/*======================================
+== Evaluation and displaying feedback ==
+======================================*/
 
 ClickableArea.prototype.clickableEval = function () {
     // Evaluation is done by iterating over the correct/incorrect arrays and checking by class
@@ -333,19 +359,6 @@ ClickableArea.prototype.clickableEval = function () {
     }
     this.logBookEvent({"event": "clickableArea", "act": this.givenIndexArray.join(";"), "div_id": this.divid, "correct": (this.correct ? "T" : "F")});
     this.renderFeedback();
-};
-
-ClickableArea.prototype.setLocalStorage = function () {
-    // Array of the indices of clicked elements is passed to local storage
-    this.givenIndexArray = [];
-    for (var i = 0; i < this.clickableArray.length; i++) {
-        if ($(this.clickableArray[i]).hasClass("clickable-clicked")) {
-            this.givenIndexArray.push(i);
-        }
-    }
-    // to ensure compatability with old browsers
-    var timeStamp = new Date();
-    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", this.givenIndexArray.join(";") + "::" + timeStamp.toString());
 };
 
 ClickableArea.prototype.renderFeedback = function () {
