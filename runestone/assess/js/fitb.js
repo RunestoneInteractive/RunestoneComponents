@@ -238,11 +238,14 @@ FITB.prototype.checkLocalStorage = function () {
     if (len > 0) {
         var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
         if (ex !== null) {
-            var arr = ex.split(";");
+            var storedData = JSON.parse(ex);
+            var arr = storedData.givenArr;
             for (var i = 0; i < this.blankArray.length; i++) {
                 $(this.blankArray[i]).attr("value", arr[i]);
             }
             if (this.useRunestoneServices) {
+                var answerInfo = "answer:" + storedData.givenArr+ ":" + (storedData.correct ? "correct" : "no");
+                this.logBookEvent({"event": "fillb", "act": answerInfo, "div_id": this.divid});
                 this.enableCompareButton();
             }
         }
@@ -256,7 +259,10 @@ FITB.prototype.shouldUseServer = function (data) {
     var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
     if (ex === null)
         return true;
-    var storageDate = new Date(ex.split("::")[1]);
+    var storedData = JSON.parse(ex);
+    if (data.answer == storedData.givenArr)
+        return true;
+    var storageDate = new Date(storedData.timestamp);
     var serverDate = new Date(data.timestamp);
     if (serverDate < storageDate)
         return false;
@@ -272,8 +278,9 @@ FITB.prototype.setLocalStorage = function () {
     this.given_arr = [];
     for (var i = 0; i < this.blankArray.length; i++)
         this.given_arr.push(this.blankArray[i].value);
-
-    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", this.given_arr.join(";"));
+    var now = new Date();
+    var storageObject = {"givenArr": this.given_arr, "correct": this.correct, "timestamp": now};
+    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", JSON.stringify(storageObject));
 };
 
 /*==============================
@@ -408,7 +415,7 @@ FITB.prototype.compareFITB = function (data, status, whatever) {   // Creates a 
 =================================*/
 $(document).ready(function () {
     $("[data-component=fillintheblank]").each(function (index) {    // FITB
-        var opts = {'orig' : this, 'useRunestoneServices': eBookConfig.useRunestoneServices }
+        var opts = {"orig" : this, "useRunestoneServices": eBookConfig.useRunestoneServices};
         if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
             FITBList[this.id] = new FITB(opts);
         }
