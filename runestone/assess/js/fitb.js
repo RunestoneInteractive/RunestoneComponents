@@ -157,7 +157,7 @@ FITB.prototype.renderFITBInput = function () {
 };
 
 FITB.prototype.renderFITBButtons = function () {
-    // submit button and compare me button
+    // "submit" button and "compare me" button
     this.submitButton = document.createElement("button");
     this.submitButton.textContent = "Check Me";
     $(this.submitButton).attr({
@@ -222,6 +222,7 @@ FITB.prototype.repopulateFromStorage = function (data, status, whatever) {
             for (var i = 0; i < this.blankArray.length; i++) {
                 $(this.blankArray[i]).attr("value", arr[i]);
             }
+            this.correct = dataEval.correct;
             this.setLocalStorage();
         } else {
             this.checkLocalStorage();
