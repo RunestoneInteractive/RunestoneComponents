@@ -43,7 +43,8 @@ class ParsonsProblem(Assessment):
     optional_arguments = 1
     final_argument_whitespace = False
     option_spec = {
-        'maxdist': directives.unchanged
+        'maxdist': directives.unchanged,
+        'order': directives.unchanged
     }
     has_content = True
 
@@ -81,7 +82,12 @@ Example:
         """
 
         TEMPLATE = '''
-    <pre data-component="parsons" id="%(divid)s" data-maxdist=%(maxdist)s>
+    <pre data-component="parsons" id="%(divid)s"'''
+    	if 'maxdist' in self.options:
+    		TEMPLATE = TEMPLATE + " data-maxdist=%(maxdist)s"
+    	if 'order' in self.options:
+    		TEMPLATE = TEMPLATE + ' data-order="%(order)s"'
+    	TEMPLATE = TEMPLATE + '''>
         <span data-question>%(qnumber)s: %(instructions)s</span>%(code)s</pre>
     '''
         self.options['divid'] = self.arguments[0]
@@ -89,8 +95,6 @@ Example:
         self.options['instructions'] = ""
         self.options['code'] = self.content
           
-        if 'maxdist' not in self.options:
-            self.options['maxdist'] = '3'
         if '-----' in self.content:
             index = self.content.index('-----')
             self.options['instructions'] = "\n".join(self.content[:index])

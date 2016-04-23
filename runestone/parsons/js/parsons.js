@@ -789,18 +789,38 @@
       });
    };
 
-  // Create a line object skeleton with only code and indentation from
+  // Create a line object skeleton with the following from
   // a code string of an assignment definition string (see parseCode)
+  //   code: stripped of #paired or #distractor and with real line endings
+  //   indent: how indented is the code based on spaces
+  //   distractor: boolean as to whether it is not part of the solution
+  //   paired: boolean whether this distractor should be paired with last valid line
   var ParsonsCodeline = function(codestring, widget) {
     this.widget = widget;
     this.code = "";
     this.indent = 0;
     this._toggles = [];
     if (codestring) {
+      var code = codestring;
+      if (code.search(/#paired\s*[\\n]?/) >= 0) {
+        // This line is a paired distractor
+        this.distractor = true;
+        this.paired = true;
+        code = code.replace(/#paired\s*/, "");
+      } else if (code.search(/#distractor\s*[\\n]?/) >= 0) {
+        // This line is a regular distractor
+        this.distractor = true;
+        this.paired = false;
+        code = code.replace(/#distractor\s*/, "");
+      } else {
+        // This line is part of the solution
+        this.distractor = false;
+        this.paired = false;
+      }
       // Consecutive lines to be dragged as a single block of code have strings "\\n" to
       // represent newlines => replace them with actual new line characters "\n"
       //codestring = codestring.replace(/\\n\s+/g,"\\n"); // remove leading spaced if more than one line in a code block - added in below to not change the codestring
-      this.code = codestring.replace(/#distractor\s*$/, "").replace(trimRegexp, "$1").replace(/\\n\s+/g,"\\n").replace(/\\n+/g,"\n");
+      this.code = code.replace(trimRegexp, "$1").replace(/\\n\s+/g,"\\n").replace(/\\n+/g,"\n");
       this.indent = codestring.length - codestring.replace(/^\s+/, "").length;
     }
   };
@@ -882,7 +902,6 @@
        'can_indent': true,
        'feedback_cb': false,
        'first_error_only': true,
-       'max_wrong_lines': 10,
        'lang': 'en',
        'toggleSeparator': '::'
      };
@@ -924,88 +943,108 @@
    };
   ParsonsWidget._graders = graders;
       
-   ////Public methods
+	////Public methods
 
-   // Parses an assignment definition given as a string and returns and 
-   // transforms this into an object defining the assignment with line objects.
-   //
-   // lines: A string that defines the solution to the assignment and also 
-   //   any possible distractors
-   // max_distractrors: The number of distractors allowed to be included with
-   //   the lines required in the solution
-   ParsonsWidget.prototype.parseCode = function(lines, max_distractors) {
-     var distractors = [],
-         indented = [],
-         widgetData = [],
-         lineObject,
-         errors = [],
-         that = this;
-     // Create line objects out of each codeline and separate
-     // lines belonging to the solution and distractor lines
-     // Fields in line objects:
-     //   code: a string of the code, may include newline characters and 
-     //     thus in fact represents a block of consecutive lines
-     //   indent: indentation level, -1 for distractors
-     //   distractor: boolean whether this is a distractor
-     //   orig: the original index of the line in the assignment definition string,
-     //     for distractors this is not meaningful but for lines belonging to the 
-     //     solution, this is their expected position
-     $.each(lines, function(index, item) {
-       lineObject = new ParsonsCodeline(item, that);
-       lineObject.orig = index;
-        if (item.search(/#distractor\s*$/) >= 0) {
-          // This line is a distractor
-          lineObject.indent = -1;
-          lineObject.distractor = true;
-          if (lineObject.code.length > 0) {
-            // The line is non-empty, not just whitespace
-            distractors.push(lineObject);
-          }
-        } else {
-          // This line is part of the solution
-          // Initialize line object with code and indentation properties
-          if (lineObject.code.length > 0) {
-            // The line is non-empty, not just whitespace
-            lineObject.distractor = false;
-            indented.push(lineObject);
-          }
-        }
-     });
-     
-     var normalized = this.normalizeIndents(indented);
-     
-     $.each(normalized, function(index, item) {
-              if (item.indent < 0) {
-                // Indentation error
-                errors.push(this.translations.no_matching(normalized.orig));
-              }
-              widgetData.push(item);
-            });
-     
-     // Remove extra distractors if there are more alternative distrators 
-     // than should be shown at a time
-     var permutation = this.getRandomPermutation(distractors.length);
-     var selected_distractors = [];
-     for (var i = 0; i < max_distractors; i++) {
-       selected_distractors.push(distractors[permutation[i]]);
-       widgetData.push(distractors[permutation[i]]);
-     }
-     
-     return {
-       // an array of line objects specifying  the solution
-       solution:  $.extend(true, [], normalized),
-       // an array of line objects specifying the requested number 
-       // of distractors (not all possible alternatives)
-       distractors: $.extend(true, [], selected_distractors),
-       // an array of line objects specifying the initial code arrangement 
-       // given to the user to use in constructing the solution 
-       widgetInitial: $.extend(true, [], widgetData),
-       errors: errors};
-   };
+	// Parses an assignment definition given as a string and returns and 
+	// transforms this into an object defining the assignment with line objects.
+	//
+	// lines: A string that defines the solution to the assignment and also 
+	//   any possible distractors
+	ParsonsWidget.prototype.parseCode = function(lines) {
+		var that = this;
+		// Create line objects out of each codeline and separate
+		// lines belonging to the solution and distractor lines
+		// Fields in line objects:
+		//   code: a string of the code, may include newline characters and 
+		//     thus in fact represents a block of consecutive lines
+		//   indent: indentation level, -1 for distractors
+		//   distractor: boolean whether this is a distractor
+		//   paired: boolean whether this is a paired distractor
+		//   orig: the original index of the line in the assignment definition string,
+		//     for distractors this is not meaningful but for lines belonging to the 
+		//     solution, this is their expected position
+		var lineObject, lineObjects = [], distractorIDs = [];
+		$.each(lines, function(index, item) {
+			lineObject = new ParsonsCodeline(item, that);
+			lineObject.orig = index;
+			if (lineObject.code.length > 0) {
+				// If it is not whitespace, add it to lineObjects
+				if (lineObject.distractor) {
+					distractorIDs.push(index);
+				}
+				lineObjects.push(lineObject);
+			}
+		});
+
+		// Normalize the indents, making distractors use -1
+		var indents = [], indent, i;
+		for (i = 0; i < lineObjects.length; i++) {
+			lineObject = lineObjects[i];
+			if (!lineObject.distractor) {
+				indent = lineObject.indent;
+				if ($.inArray(indent, indents) == -1) {
+					indents.push(indent);
+				}
+			}
+		}
+		indents = indents.sort(function(a, b){return a-b});
+		for (i = 0; i < lineObjects.length; i++) {
+			lineObject = lineObjects[i];
+			if (lineObject.distractor) {
+				lineObject.indent = -1;
+			} else {
+				lineObject.indent = indents.indexOf(lineObject.indent);
+			}
+		}
+
+		// Trim distractors if necessary
+		var selectedDistractorIDs;
+		max_distractors = this.options.maxdist;
+		if (max_distractors === undefined) {
+			selectedDistractorIDs = distractorIDs;
+		} else if (max_distractors < distractorIDs.length) {
+			// Randomly select which distractors are used
+			selectedDistractorIDs = [];
+			var permutation = this.getRandomPermutation(distractorIDs.length);
+			for (var i = 0; i < max_distractors; i++) {
+				selectedDistractorIDs.push(distractorIDs[permutation[i]]);
+			}
+		} else {
+			selectedDistractorIDs = distractorIDs;
+		}
+
+		// Create solution, distractors, initial and errors
+		// and return them
+		var solution = [], distractors = [], initial = [], errors = [];
+		$.each(lineObjects, function(index, item) {
+			// Make a copy (need it but it doesn't seem right)
+			lineObject = jQuery.extend({}, item);
+			if (item.distractor) {
+				if ($.inArray(item.orig, selectedDistractorIDs) > -1) {
+					distractors.push(lineObject);
+					initial.push(lineObject);
+				}
+			} else {
+				solution.push(lineObject);
+				initial.push(lineObject);
+			}
+		});
+		return {
+			// an array of line objects specifying  the solution
+			solution:  $.extend(true, [], solution),
+			// an array of line objects specifying the requested number 
+			// of distractors (not all possible alternatives)
+			distractors: $.extend(true, [], distractors),
+			// an array of line objects specifying the initial code arrangement 
+			// given to the user to use in constructing the solution 
+			widgetInitial: $.extend(true, [], initial),
+			errors: errors
+		};
+	};
 
    ParsonsWidget.prototype.init = function(text) {
   	 // TODO: Error handling, parseCode may return errors in an array in property named errors.
-     var initial_structures = this.parseCode(text.split("\n"), this.options.max_wrong_lines);
+     var initial_structures = this.parseCode(text.split("\n"));
      this.model_solution = initial_structures.solution;
      this.extra_lines = initial_structures.distractors;
      this.modified_lines = initial_structures.widgetInitial;
@@ -1327,19 +1366,60 @@
    };
 
 
-   ParsonsWidget.prototype.shuffleLines = function() {
-       var permutation = (this.options.permutation?this.options.permutation:this.getRandomPermutation)(this.modified_lines.length);
-       var idlist = [];
-       for(var i in permutation) {
-           idlist.push(this.modified_lines[permutation[i]].id);
-       }
-       if (this.options.trashId) {
-           this.createHTMLFromLists([],idlist);
-       } else {
-           this.createHTMLFromLists(idlist,[]);
-       }
-       addToggleableElements(this);
-   };
+	ParsonsWidget.prototype.shuffleLines = function() {
+		// Create the list of IDs that things should be ordered in
+		var idlist = [];
+		if (this.options.order === undefined) {
+			// Create chunks of paired distractors
+			var chunks = [], chunk = [];
+			$.each(this.modified_lines, function(index, item) {
+				if (item.paired) {
+					chunk.push(item);
+				} else {
+					chunk = [];
+					chunk.push(item);
+					chunks.push(chunk);
+				}
+			});
+			// Shuffle the chunks
+			var permutationFunction = this.options.permutation?this.options.permutation:this.getRandomPermutation;
+			var permutation = permutationFunction(chunks.length);
+			var sortedChunks = [];
+			for (var i in permutation) {
+				sortedChunks.push(chunks[permutation[i]]);
+			}
+			// put the chunks into the idlist
+			for (var c = 0; c < chunks.length; c++) {
+				chunk = sortedChunks[c];
+				if (chunk.length > 1) {
+					// shuffle paired distractors
+					permutation = permutationFunction(chunk.length);
+					for (var i in permutation) {
+						idlist.push(chunk[permutation[i]].id);
+					}
+				} else {
+					idlist.push(chunk[0].id);
+				}
+			}
+		} else {
+			// base the idlist on the specified order
+			var order = this.options.order;
+			for (var i = 0; i < order.length; i++) {
+				for (var j = 0; j < this.modified_lines.length; j++) {
+					if (this.modified_lines[j].orig === order[i]) {
+						idlist.push(this.modified_lines[j].id);
+					}
+				}
+			}
+		}
+		// not sure what this does
+		if (this.options.trashId) {
+			this.createHTMLFromLists([],idlist);
+		} else {
+			this.createHTMLFromLists(idlist,[]);
+		}
+		addToggleableElements(this);
+	};
 
    ParsonsWidget.prototype.createHTMLFromHashes = function(solutionHash, trashHash) {
        var solution = this.hashToIDList(solutionHash);
