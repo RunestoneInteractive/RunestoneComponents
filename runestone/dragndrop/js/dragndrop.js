@@ -113,7 +113,7 @@ DragNDrop.prototype.finishSettingUp = function () {
     } else {
         this.dragDropWrapDiv.style.minHeight = this.minheight.toString() + "px";
     }
-}
+};
 
 DragNDrop.prototype.addDragDivListeners = function () {
     this.draggableDiv.addEventListener("dragover", function (ev) {  // Can't set these during this.setEventListeners because this.draggableDiv wasn't created yet
@@ -197,6 +197,7 @@ DragNDrop.prototype.appendReplacementSpans = function () {
 };
 
 DragNDrop.prototype.setEventListeners = function (dgSpan, dpSpan) {
+    // Adds HTML5 "drag and drop" UI functionality
     dgSpan.addEventListener("dragstart", function (ev) {
         ev.dataTransfer.setData("draggableID", ev.target.id);
     });
@@ -251,7 +252,8 @@ DragNDrop.prototype.renderFeedbackDiv = function () {
 /*=======================
 == Auxiliary functions ==
 =======================*/
-DragNDrop.prototype.strangerDanger = function (testSpan) {   // Returns true if the test span doesn't belong to this instance of DragNDrop
+DragNDrop.prototype.strangerDanger = function (testSpan) {
+    // Returns true if the test span doesn't belong to this instance of DragNDrop
     var strangerDanger = true;
     for (var i = 0; i < this.dragPairArray.length; i++) {
         if (testSpan === this.dragPairArray[i][0]) {
@@ -260,7 +262,8 @@ DragNDrop.prototype.strangerDanger = function (testSpan) {   // Returns true if 
     }
     return strangerDanger;
 };
-DragNDrop.prototype.hasNoDragChild = function (parent) {  // Ensures that each dropZoneDiv can have only one draggable child
+DragNDrop.prototype.hasNoDragChild = function (parent) {
+    // Ensures that each dropZoneDiv can have only one draggable child
     var counter = 0;
     for (var i = 0; i < parent.childNodes.length; i++) {
         if ($(parent.childNodes[i]).attr("draggable") === "true") {
@@ -282,6 +285,7 @@ DragNDrop.prototype.createIndexArray = function () {
 };
 
 DragNDrop.prototype.randomizeIndexArray = function () {
+    // Shuffles around indices so the matchable elements aren't in a predictable order
     var currentIndex = this.indexArray.length, temporaryValue, randomIndex;
     // While there remain elements to shuffle...
     while (currentIndex !== 0) {
@@ -333,7 +337,9 @@ DragNDrop.prototype.dragEval = function () {
 
     this.setLocalStorage();
     this.renderFeedback();
+    this.logBookEvent({"event": "dragNdrop", "act": "submitDND", "answer": this.pregnantIndexArray.join(";"), "minHeight": this.minheight, "div_id": this.divid, "correct": this.correct});
 };
+
 DragNDrop.prototype.renderFeedback = function () {
     this.feedBackDiv.style.display = "block";
     if (this.correct) {
@@ -344,9 +350,77 @@ DragNDrop.prototype.renderFeedback = function () {
         $(this.feedBackDiv).attr("class", "alert alert-danger draggable-feedback");
     }
 };
-/*===============================
-== Local storage functionality ==
-===============================*/
+/*===================================
+=== Checking/loading from storage ===
+===================================*/
+
+DragNDrop.prototype.checkServer = function () {
+    if (this.useRunestoneServices) {
+        var data = {};
+        data.div_id = this.divid;
+        data.course = eBookConfig.course;
+        data.event = "dragNdrop";
+        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
+    } else {
+        this.checkLocalStorage();
+    }
+};
+
+DragNDrop.prototype.repopulateFromStorage = function (data, status, whatever) {
+    if (data !== "") {
+        var dataEval = JSON.parse(data);
+        if (this.shouldUseServer(dataEval)) {
+            console.log("Loading from server");
+            this.hasStoredDropzones = true;
+            this.minheight = dataEval.minHeight;
+            this.pregnantIndexArray = dataEval.answer.split(";");
+            this.finishSettingUp();
+        } else {
+            this.checkLocalStorage();
+        }
+    } else {
+        this.checkLocalStorage();
+    }
+
+};
+
+DragNDrop.prototype.checkLocalStorage = function () {
+    console.log("Loading from storage");
+    this.hasStoredDropzones = false;
+    var len = localStorage.length;
+    if (len > 0) {
+        var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-dragInfo");
+        if (ex !== null) {
+            this.hasStoredDropzones = true;
+            var storedObj = JSON.parse(ex);
+            this.minheight = storedObj.minHeight;
+            this.pregnantIndexArray = storedObj.answer.split(";");
+        }
+    }
+    this.finishSettingUp();
+};
+
+DragNDrop.prototype.shouldUseServer = function (data) {
+    // returns true if server data is more recent than local storage or if server storage is correct
+    if (data.correct == "T" || localStorage.length === 0)
+        return true;
+    var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-dragInfo");
+    var x = 0;
+    console.log("FFF");
+    if (ex === null)
+        return true;
+    var storedData = JSON.parse(ex);
+    console.log("GGG");
+    if (data.answer == storedData.answer)
+        return true;
+    var storageDate = new Date(storedData.timestamp);
+    var serverDate = new Date(data.timestamp);
+    console.log("HHH");
+    if (serverDate < storageDate)
+        return false;
+    return true;
+};
+
 DragNDrop.prototype.setLocalStorage = function () {
     this.pregnantIndexArray = [];
     for (var i = 0; i < this.dragPairArray.length; i++) {
@@ -360,63 +434,26 @@ DragNDrop.prototype.setLocalStorage = function () {
             this.pregnantIndexArray.push(-1);
         }
     }
-    var answerInfo = this.pregnantIndexArray.join(";") + "_split_" + this.minheight;
-    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-dragInfo", answerInfo);
-
-    // store it in the server too
-    this.logBookEvent({"event": "dragNdrop", "act": answerInfo, "div_id": this.divid, "correct": this.correct});
-};
-
-DragNDrop.prototype.checkServer = function () {
-    if (this.useRunestoneServices) {
-        var data = {};
-        data.div_id = this.divid;
-        data.course = eBookConfig.course;
-        data.event = "dragNdrop";
-        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.useLocalStorage.bind(this));
-    } else {
-        this.repopulateFromStorage("", null, null);   // just use local storage
-    }
-
-};
-
-DragNDrop.prototype.useLocalStorage = function () {   // because we can't use parameters in the error handling part
-    this.repopulateFromStorage("", null, null);
-};
-
-DragNDrop.prototype.repopulateFromStorage = function (data, status, whatever) {
-    if (data !== "") {
-        //console.log("Loading from server");
-        var x = eval(data);
-        this.hasStoredDropzones = true;
-        this.minheight = x.split("_split_")[1];
-        this.pregnantIndexArray = x.split("_split_")[0].split(";");
-    } else {
-        //console.log("Loading from local storage");
-        this.hasStoredDropzones = false;
-        var len = localStorage.length;
-        if (len > 0) {
-            var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-dragInfo");
-            if (ex !== null) {
-                this.hasStoredDropzones = true;
-                this.minheight = ex.split("_split_")[1];
-                this.pregnantIndexArray = ex.split("_split_")[0].split(";");
-            }
-
-        }
-    }
-    this.finishSettingUp();
-
+    var timeStamp = new Date();
+    var storageObj = {"answer": this.pregnantIndexArray.join(";"), "minHeight": this.minheight, "timestamp": timeStamp};
+    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-dragInfo", JSON.stringify(storageObj));
 };
 /*=================================
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
 =================================*/
-$(document).ready(function () {
-    $("[data-component=dragndrop]").each(function (index) {
-        var opts = {"orig": this, 'useRunestoneServices':eBookConfig.useRunestoneServices};
-        if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
-            ddList[this.id] = new DragNDrop(opts);
-        }
-    });
-});
+$(document).ready(createDragNDrop);
+
+function createDragNDrop() {
+    // We have to wait until eBookConfig variables (most notable, eBookConfig.email) are defined
+    if (eBookConfig.doneWithLogin === true) {
+        $("[data-component=dragndrop]").each(function (index) {
+            var opts = {"orig": this, 'useRunestoneServices':eBookConfig.useRunestoneServices};
+            if ($(this.parentNode).data("component") !== "timedAssessment") {   // If this element exists within a timed component, don't render it here
+                ddList[this.id] = new DragNDrop(opts);
+            }
+        });
+    } else {
+        setTimeout(createDragNDrop, 250);
+    }
+}
