@@ -335,7 +335,7 @@ DragNDrop.prototype.dragEval = function () {
     }
     this.correctNum = this.dragNum - this.incorrectNum - this.unansweredNum;
 
-    this.setLocalStorage();
+    this.setLocalStorage(false, this.correct);
     this.renderFeedback();
     this.logBookEvent({"event": "dragNdrop", "act": "submitDND", "answer": this.pregnantIndexArray.join(";"), "minHeight": this.minheight, "div_id": this.divid, "correct": this.correct});
 };
@@ -374,11 +374,7 @@ DragNDrop.prototype.repopulateFromStorage = function (data, status, whatever) {
             this.hasStoredDropzones = true;
             this.minheight = dataEval.minHeight;
             this.pregnantIndexArray = dataEval.answer.split(";");
-            this.correct = dataEval.correct;
-            console.log(this.minheight);
-            console.log(this.pregnantIndexArray);
-            console.log(this.correct);
-            this.setLocalStorage();
+            this.setLocalStorage(true, dataEval.correct);
             this.finishSettingUp();
         } else {
             this.checkLocalStorage();
@@ -415,36 +411,36 @@ DragNDrop.prototype.shouldUseServer = function (data) {
         return true;
     var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-dragInfo");
     var x = 0;
-    console.log("FFF");
     if (ex === null)
         return true;
     var storedData = JSON.parse(ex);
-    console.log("GGG");
     if (data.answer == storedData.answer)
         return true;
     var storageDate = new Date(storedData.timestamp);
     var serverDate = new Date(data.timestamp);
-    console.log("HHH");
     if (serverDate < storageDate)
         return false;
     return true;
 };
 
-DragNDrop.prototype.setLocalStorage = function () {
-    this.pregnantIndexArray = [];
-    for (var i = 0; i < this.dragPairArray.length; i++) {
-        if (!this.hasNoDragChild(this.dragPairArray[i][1])) {
-            for (var j = 0; j < this.dragPairArray.length; j++) {
-                if ($(this.dragPairArray[i][1]).has(this.dragPairArray[j][0]).length) {
-                    this.pregnantIndexArray.push(j);
+DragNDrop.prototype.setLocalStorage = function (fromServer, correct) {
+    if (!fromServer) {   // If we loaded from the server, then pregnantIndexArray is already defined
+        this.pregnantIndexArray = [];
+        for (var i = 0; i < this.dragPairArray.length; i++) {
+            if (!this.hasNoDragChild(this.dragPairArray[i][1])) {
+                for (var j = 0; j < this.dragPairArray.length; j++) {
+                    if ($(this.dragPairArray[i][1]).has(this.dragPairArray[j][0]).length) {
+                        this.pregnantIndexArray.push(j);
+                    }
                 }
+            } else {
+                this.pregnantIndexArray.push(-1);
             }
-        } else {
-            this.pregnantIndexArray.push(-1);
         }
     }
+
     var timeStamp = new Date();
-    var storageObj = {"answer": this.pregnantIndexArray.join(";"), "minHeight": this.minheight, "timestamp": timeStamp, "correct": this.correct};
+    var storageObj = {"answer": this.pregnantIndexArray.join(";"), "minHeight": this.minheight, "timestamp": timeStamp, "correct": correct};
     localStorage.setItem(eBookConfig.email + ":" + this.divid + "-dragInfo", JSON.stringify(storageObj));
 };
 /*=================================
