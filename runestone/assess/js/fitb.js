@@ -420,7 +420,7 @@ FITB.prototype.compareFITB = function (data, status, whatever) {   // Creates a 
 $(document).ready(createFITB);
 
 function createFITB() {
-    // We have to wait until eBookConfig variables (most notable, eBookConfig.email) are defined
+    // We have to wait until eBookConfig login variables (particularly eBookConfig.email) are defined
     if (eBookConfig.doneWithLogin === true) {
         $("[data-component=fillintheblank]").each(function (index) {
             var opts = {"orig" : this, "useRunestoneServices": eBookConfig.useRunestoneServices};
