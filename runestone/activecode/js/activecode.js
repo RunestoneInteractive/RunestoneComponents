@@ -727,7 +727,8 @@ JSActiveCode.prototype.runProg = function() {
         if (!str) str="";
         _this.output.innerHTML += _this.outputfun(str)+"<br />";
             };
-
+    
+    $(this.eContainer).remove();
     $(this.output).text('');
     $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
     $(this.outDiv).show({duration:700,queue:false});
