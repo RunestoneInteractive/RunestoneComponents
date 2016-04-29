@@ -313,6 +313,8 @@ Timed.prototype.createRenderedQuestionArray = function () {
             this.renderedQuestionArray.push(new TimedClickableArea(opts));
         } else if ($(tmpChild).is("[data-component=shortanswer]")) {
             this.renderedQuestionArray.push(new TimedShortAnswer(opts));
+        } else if ($(tmpChild).is("[data-component=parsons]")) {
+            this.renderedQuestionArray.push(new TimedParsons(opts));
         }
     }
     if (this.random) {
@@ -335,6 +337,8 @@ Timed.prototype.randomizeRQA = function () {
 };
 
 Timed.prototype.renderTimedQuestion = function () {
+    console.log(this.renderedQuestionArray);
+    console.log(this.currentQuestionIndex);
     $(this.switchDiv).replaceWith(this.renderedQuestionArray[this.currentQuestionIndex].containerDiv);
     this.switchDiv = this.renderedQuestionArray[this.currentQuestionIndex].containerDiv;
 };

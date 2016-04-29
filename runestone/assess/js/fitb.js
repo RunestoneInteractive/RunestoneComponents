@@ -263,7 +263,6 @@ FITB.prototype.evaluateAnswers = function () {
     } else {
         this.correct = false;
     }
-    console.log(this.correct);
     localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", this.given_arr.join(";"));
 };
 
