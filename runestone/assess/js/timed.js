@@ -356,7 +356,7 @@ Timed.prototype.handlePrevAssessment = function () {
         this.done = 1;
         $(this.timedDiv).show();
         this.submitTimedProblems(false); // do not log these results
-}
+};
 
 Timed.prototype.startAssessment = function () {
     this.tookTimedExam();

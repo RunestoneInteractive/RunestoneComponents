@@ -40,12 +40,14 @@ TimedParsons.prototype.hideFeedback = function () {
     $(this.messageDiv).hide();
 };
 
-TimedParsons.prototype.processTimedSubmission = function () {
+TimedParsons.prototype.processTimedSubmission = function (logflag) {
     // Disable input & evaluate component
     var hash = this.pwidget.getHash("#ul-parsons-sortableCode-" + this.counterId);
-    localStorage.setItem(this.divid, hash);
+    if (logflag)
+        localStorage.setItem(this.divid, hash);
     hash = this.pwidget.getHash("#ul-parsons-sortableTrash-" + this.counterId);
-    localStorage.setItem(this.divid + "-trash", hash);
+    if (logflag)
+        localStorage.setItem(this.divid + "-trash", hash);
     this.pwidget.getFeedback();
 
     // Gross way to check if it's correct or not, but it's better than modifying the 3rd party parsons code to include a "correct" variable
