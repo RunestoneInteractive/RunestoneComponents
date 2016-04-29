@@ -315,6 +315,8 @@ Timed.prototype.createRenderedQuestionArray = function () {
             this.renderedQuestionArray.push(new TimedShortAnswer(opts));
         } else if ($(tmpChild).is("[data-component=parsons]")) {
             this.renderedQuestionArray.push(new TimedParsons(opts));
+        } else if ($(tmpChild).is("[data-component=activecode]")) {
+            this.renderedQuestionArray.push(new TimedActiveCode(opts));
         }
     }
     if (this.random) {
@@ -337,8 +339,6 @@ Timed.prototype.randomizeRQA = function () {
 };
 
 Timed.prototype.renderTimedQuestion = function () {
-    console.log(this.renderedQuestionArray);
-    console.log(this.currentQuestionIndex);
     $(this.switchDiv).replaceWith(this.renderedQuestionArray[this.currentQuestionIndex].containerDiv);
     this.switchDiv = this.renderedQuestionArray[this.currentQuestionIndex].containerDiv;
 };

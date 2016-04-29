@@ -64,23 +64,23 @@ ActiveCode.prototype.init = function(opts) {
 };
 
 ActiveCode.prototype.createEditor = function (index) {
-    var newdiv = document.createElement('div');
+    this.containerDiv = document.createElement('div');
     var linkdiv = document.createElement('div')
     linkdiv.id = this.divid.replace(/_/g,'-').toLowerCase();  // :ref: changes _ to - so add this as a target
-    $(newdiv).addClass("ac_section alert alert-warning");
+    $(this.containerDiv).addClass("ac_section alert alert-warning");
     var codeDiv = document.createElement("div");
     $(codeDiv).addClass("ac_code_div col-md-12");
     this.codeDiv = codeDiv;
-    newdiv.id = this.divid;
-    newdiv.lang = this.language;
-    this.outerDiv = newdiv;
+    this.containerDiv.id = this.divid;
+    this.containerDiv.lang = this.language;
+    this.outerDiv = this.containerDiv;
 
-    $(this.origElem).replaceWith(newdiv);
+    $(this.origElem).replaceWith(this.containerDiv);
     if (linkdiv.id !== this.divid) {  // Don't want the 'extra' target if they match.
-        newdiv.appendChild(linkdiv);
+        this.containerDiv.appendChild(linkdiv);
     }
-    newdiv.appendChild(codeDiv);
-    var editor = CodeMirror(codeDiv, {value: this.code, lineNumbers: true, mode: newdiv.lang});
+    this.containerDiv.appendChild(codeDiv);
+    var editor = CodeMirror(codeDiv, {value: this.code, lineNumbers: true, mode: this.containerDiv.lang});
 
     // Make the editor resizable
     $(editor.getWrapperElement()).resizable({
@@ -727,7 +727,7 @@ JSActiveCode.prototype.runProg = function() {
         if (!str) str="";
         _this.output.innerHTML += _this.outputfun(str)+"<br />";
             };
-    
+
     $(this.eContainer).remove();
     $(this.output).text('');
     $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
@@ -997,8 +997,8 @@ AudioTour.prototype.tour = function (divid, audio_type, bcount) {
         // str+="<audio id="+akey+" preload='auto'><source src='http://ice-web.cc.gatech.edu/ce21/audio/"+
         // akey+".mp3' type='audio/mpeg'><source src='http://ice-web.cc.gatech.edu/ce21/audio/"+akey+
         // ".ogg' type='audio/ogg'>Your browser does not support the audio tag</audio>";
-        
-        var dir = "http://media.interactivepython.org/" + eBookConfig.basecourse + "/audio/" 
+
+        var dir = "http://media.interactivepython.org/" + eBookConfig.basecourse + "/audio/"
         //var dir = "../_static/audio/"
         str += "<audio id=" + akey + " preload='auto' >";
         str += "<source src='" + dir + akey + ".wav' type='audio/wav'>";
@@ -1591,7 +1591,9 @@ ACFactory.toggleScratchActivecode = function () {
 $(document).ready(function() {
     ACFactory.createScratchActivecode();
     $('[data-component=activecode]').each( function(index ) {
-        edList[this.id] = ACFactory.createActiveCode(this, $(this).data('lang'));
+        if ($(this.parentNode).data("component") !== "timedAssessment") {   // If this element exists within a timed component, don't render it here
+            edList[this.id] = ACFactory.createActiveCode(this, $(this).data('lang'));
+        }
     });
     if (loggedout) {
         for (k in edList) {
