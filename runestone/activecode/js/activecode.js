@@ -199,6 +199,8 @@ ActiveCode.prototype.createControls = function () {
         $(butt).click((function() {new AudioTour(this.divid, this.editor.getValue(), 1, $(this.origElem).data("audio"))}).bind(this));
     }
 
+    console.log("HERE");
+
     $(this.outerDiv).prepend(ctrlDiv);
 
 };

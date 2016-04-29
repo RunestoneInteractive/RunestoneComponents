@@ -13,9 +13,11 @@ TimedActiveCode.prototype.timedInit = function (opts) {
 
 
 TimedActiveCode.prototype.hideButtons = function () {
-    $(this.saveButton).hide();
-    $(this.loadButton).hide();
-
+    var buttonList = [this.saveButton, this.loadButton, this.gradeButton, this.showHideButt, this.clButton, this.coachButton, this.atButton];
+    for (var i = 0; i < buttonList.length; i++) {
+        if (buttonList[i] !== undefined && buttonList[i] !== null)
+            $(buttonList[i]).hide();
+    }
 };
 
 TimedActiveCode.prototype.renderTimedIcon = function (component) {
@@ -43,7 +45,8 @@ TimedActiveCode.prototype.hideFeedback = function () {
 
 TimedActiveCode.prototype.processTimedSubmission = function () {
     // Disable input & evaluate component
-    this.saveEditor();
+    if (this.useRunestoneServies)
+        this.saveEditor();
     this.runButton.disabled = true;
     $(this.codeDiv).addClass("ac-disabled");
 };
