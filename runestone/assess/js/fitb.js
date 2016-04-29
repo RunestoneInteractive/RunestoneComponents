@@ -218,12 +218,12 @@ FITB.prototype.repopulateFromStorage = function (data, status, whatever) {
     if (data !== "") {
         var dataEval = JSON.parse(data);
         if (this.shouldUseServer(dataEval)) {
+            console.log("Using server");
             var arr = dataEval.answer.split(",");
             for (var i = 0; i < this.blankArray.length; i++) {
                 $(this.blankArray[i]).attr("value", arr[i]);
             }
-            this.correct = dataEval.correct;
-            this.setLocalStorage();
+            this.setLocalStorage(dataEval.correct);   // We don't want to set this.correct here because that would interfere with timed grading functionality
         } else {
             this.checkLocalStorage();
         }
@@ -235,6 +235,7 @@ FITB.prototype.repopulateFromStorage = function (data, status, whatever) {
 
 FITB.prototype.checkLocalStorage = function () {
     // Loads previous answers from local storage if they exist
+    console.log("Using storage");
     var len = localStorage.length;
     if (len > 0) {
         var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
@@ -274,13 +275,13 @@ FITB.prototype.enableCompareButton = function () {
     this.compareButton.disabled = false;
 };
 
-FITB.prototype.setLocalStorage = function () {
+FITB.prototype.setLocalStorage = function (correct) {
     // logs answer to local storage
     this.given_arr = [];
     for (var i = 0; i < this.blankArray.length; i++)
         this.given_arr.push(this.blankArray[i].value);
     var now = new Date();
-    var storageObject = {"givenArr": this.given_arr, "correct": this.correct, "timestamp": now};
+    var storageObject = {"givenArr": this.given_arr, "correct": correct, "timestamp": now};
     localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", JSON.stringify(storageObject));
 };
 
@@ -297,7 +298,9 @@ FITB.prototype.startEvaluation = function () {
     this.renderFITBFeedback();
     var answerInfo = "answer:" + this.given_arr + ":" + (this.correct ? "correct" : "no");
     this.logBookEvent({"event": "fillb", "act": answerInfo, "div_id": this.divid});
-    this.enableCompareButton.disabled = false;
+    if (this.useRunestoneServices) {
+        this.enableCompareButton();
+    }
 };
 
 FITB.prototype.evaluateAnswers = function () {
@@ -324,7 +327,7 @@ FITB.prototype.evaluateAnswers = function () {
     } else if ($.inArray(false, this.isCorrectArray) >= 0 && $.inArray("", this.isCorrectArray) < 0) {
         this.correct = false;
     }
-    this.setLocalStorage();
+    this.setLocalStorage(this.correct);
 };
 
 FITB.prototype.populateDisplayFeed = function (index, given) {
@@ -414,11 +417,18 @@ FITB.prototype.compareFITB = function (data, status, whatever) {   // Creates a 
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
 =================================*/
-$(document).ready(function () {
-    $("[data-component=fillintheblank]").each(function (index) {    // FITB
-        var opts = {"orig" : this, "useRunestoneServices": eBookConfig.useRunestoneServices};
-        if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
-            FITBList[this.id] = new FITB(opts);
-        }
-    });
-});
+$(document).ready(createFITB);
+
+function createFITB() {
+    // We have to wait until eBookConfig variables (most notable, eBookConfig.email) are defined
+    if (eBookConfig.doneWithLogin === true) {
+        $("[data-component=fillintheblank]").each(function (index) {
+            var opts = {"orig" : this, "useRunestoneServices": eBookConfig.useRunestoneServices};
+            if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
+                FITBList[this.id] = new FITB(opts);
+            }
+        });
+    } else {
+        setTimeout(createFITB, 250);
+    }
+}
