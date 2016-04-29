@@ -374,6 +374,11 @@ DragNDrop.prototype.repopulateFromStorage = function (data, status, whatever) {
             this.hasStoredDropzones = true;
             this.minheight = dataEval.minHeight;
             this.pregnantIndexArray = dataEval.answer.split(";");
+            this.correct = dataEval.correct;
+            console.log(this.minheight);
+            console.log(this.pregnantIndexArray);
+            console.log(this.correct);
+            this.setLocalStorage();
             this.finishSettingUp();
         } else {
             this.checkLocalStorage();
@@ -395,6 +400,10 @@ DragNDrop.prototype.checkLocalStorage = function () {
             var storedObj = JSON.parse(ex);
             this.minheight = storedObj.minHeight;
             this.pregnantIndexArray = storedObj.answer.split(";");
+            if (this.useRunestoneServices) {
+                // store answer in database
+                this.logBookEvent({"event": "dragNdrop", "act": "submitDND", "answer": this.pregnantIndexArray.join(";"), "minHeight": this.minheight, "div_id": this.divid, "correct": storedObj.correct});
+            }
         }
     }
     this.finishSettingUp();
@@ -435,7 +444,7 @@ DragNDrop.prototype.setLocalStorage = function () {
         }
     }
     var timeStamp = new Date();
-    var storageObj = {"answer": this.pregnantIndexArray.join(";"), "minHeight": this.minheight, "timestamp": timeStamp};
+    var storageObj = {"answer": this.pregnantIndexArray.join(";"), "minHeight": this.minheight, "timestamp": timeStamp, "correct": this.correct};
     localStorage.setItem(eBookConfig.email + ":" + this.divid + "-dragInfo", JSON.stringify(storageObj));
 };
 /*=================================
