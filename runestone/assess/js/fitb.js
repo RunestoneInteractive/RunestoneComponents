@@ -417,18 +417,11 @@ FITB.prototype.compareFITB = function (data, status, whatever) {   // Creates a 
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
 =================================*/
-$(document).ready(createFITB);
-
-function createFITB() {
-    // We have to wait until eBookConfig login variables (particularly eBookConfig.email) are defined
-    if (eBookConfig.doneWithLogin === true) {
-        $("[data-component=fillintheblank]").each(function (index) {
-            var opts = {"orig" : this, "useRunestoneServices": eBookConfig.useRunestoneServices};
-            if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
-                FITBList[this.id] = new FITB(opts);
-            }
-        });
-    } else {
-        setTimeout(createFITB, 250);
-    }
-}
+$(document).bind("runestone:login-complete", function () {
+    $("[data-component=fillintheblank]").each(function (index) {
+        var opts = {"orig" : this, "useRunestoneServices": eBookConfig.useRunestoneServices};
+        if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
+            FITBList[this.id] = new FITB(opts);
+        }
+    });
+});

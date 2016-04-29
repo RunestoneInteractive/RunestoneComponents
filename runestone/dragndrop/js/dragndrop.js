@@ -447,18 +447,11 @@ DragNDrop.prototype.setLocalStorage = function (fromServer, correct) {
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
 =================================*/
-$(document).ready(createDragNDrop);
-
-function createDragNDrop() {
-    // We have to wait until eBookConfig login variables (particularly eBookConfig.email) are defined
-    if (eBookConfig.doneWithLogin === true) {
-        $("[data-component=dragndrop]").each(function (index) {
-            var opts = {"orig": this, 'useRunestoneServices':eBookConfig.useRunestoneServices};
-            if ($(this.parentNode).data("component") !== "timedAssessment") {   // If this element exists within a timed component, don't render it here
-                ddList[this.id] = new DragNDrop(opts);
-            }
-        });
-    } else {
-        setTimeout(createDragNDrop, 250);
-    }
-}
+$(document).bind("runestone:login-complete", function () {
+    $("[data-component=dragndrop]").each(function (index) {
+        var opts = {"orig": this, 'useRunestoneServices':eBookConfig.useRunestoneServices};
+        if ($(this.parentNode).data("component") !== "timedAssessment") {   // If this element exists within a timed component, don't render it here
+            ddList[this.id] = new DragNDrop(opts);
+        }
+    });
+});

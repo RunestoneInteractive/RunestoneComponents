@@ -135,7 +135,7 @@ function gotUser(data, status, whatever) {
         'div_id': window.location.pathname
     })
 	// Let runestone components know they can run their javascript now
-	eBookConfig.doneWithLogin = true;
+	$(document).trigger("runestone:login-complete");
 }
 
 
