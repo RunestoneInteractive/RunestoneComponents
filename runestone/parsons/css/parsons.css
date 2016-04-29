@@ -135,3 +135,7 @@ li.correctPosition, .testcase.pass {
 	margin-right: auto;
 	text-align:center;
 }
+
+.parsons-disabled {
+    pointer-events: none;
+}
