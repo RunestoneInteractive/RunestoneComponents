@@ -80,7 +80,11 @@ ActiveCode.prototype.createEditor = function (index) {
         newdiv.appendChild(linkdiv);
     }
     newdiv.appendChild(codeDiv);
-    var editor = CodeMirror(codeDiv, {value: this.code, lineNumbers: true, mode: newdiv.lang});
+    var editor = CodeMirror(codeDiv, {value: this.code, lineNumbers: true,
+        mode: newdiv.lang, indentUnit: 4,
+        matchBrackets: true, autoMatchParens: true,
+        extraKeys: {"Tab": "indentMore", "Shift-Tab": "indentLess"}
+    });
 
     // Make the editor resizable
     $(editor.getWrapperElement()).resizable({
@@ -727,7 +731,8 @@ JSActiveCode.prototype.runProg = function() {
         if (!str) str="";
         _this.output.innerHTML += _this.outputfun(str)+"<br />";
             };
-
+    
+    $(this.eContainer).remove();
     $(this.output).text('');
     $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
     $(this.outDiv).show({duration:700,queue:false});

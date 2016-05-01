@@ -28,6 +28,7 @@ Parsons.prototype.init = function (opts) {
     var orig = opts.orig;     // entire <pre> element that will be replaced by new HTML
     this.origElem = orig;
     this.divid = orig.id;
+    this.maxdist = $(orig).data('maxdist');
     this.children = this.origElem.childNodes;     // this contains all of the child elements of the entire tag...
     this.contentArray = [];
     this.question = null;
@@ -207,7 +208,7 @@ Parsons.prototype.createParsonsWidget = function () {
     this.pwidget = new ParsonsWidget({
         "sortableId": "parsons-sortableCode-" + this.counterId,
         "trashId": "parsons-sortableTrash-" + this.counterId,
-        "max_wrong_lines": 1,
+        "max_wrong_lines": this.maxdist,
         "solution_label": "Drop blocks here",
         "feedback_cb": this.displayErrors.bind(this)
     });
@@ -268,7 +269,9 @@ Parsons.prototype.tryLocalStorage = function () {
 
 $(document).ready(function () {
     $pjQ("[data-component=parsons]").each(function (index) {
-        prsList[this.id] = new Parsons({"orig": this});
+        if ($(this.parentNode).data("component") != "timedAssessment") {
+           prsList[this.id] = new Parsons({"orig": this});
+        }
     });
 
 });

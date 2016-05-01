@@ -42,6 +42,11 @@ def visit_timed_node(self, node):
         node.timed_options['nofeedback'] = 'data-no-feedback'
     else:
         node.timed_options['nofeedback'] = ''
+        
+    if 'notimer' in node.timed_options:
+        node.timed_options['notimer'] = 'data-no-timer'
+    else:
+        node.timed_options['notimer'] = ''
 
     res = TEMPLATE_START % node.timed_options
     self.body.append(res)
@@ -54,7 +59,7 @@ def depart_timed_node(self,node):
 
 #Templates to be formatted by node options
 TEMPLATE_START = '''
-    <ul data-component="timedAssessment" %(timelimit)s id="%(divid)s" %(noresult)s %(nofeedback)s>
+    <ul data-component="timedAssessment" %(timelimit)s id="%(divid)s" %(noresult)s %(nofeedback)s %(notimer)s>
     '''
 
 TEMPLATE_END = '''</ul>
@@ -66,7 +71,8 @@ class TimedDirective(Directive):
     has_content = True
     option_spec = {"timelimit":directives.positive_int,
                     "noresult":directives.flag,
-                    "nofeedback":directives.flag}
+                    "nofeedback":directives.flag,
+                    "notimer":directives.flag}
 
     def run(self):
         """
@@ -77,6 +83,7 @@ class TimedDirective(Directive):
                 :timelimit: Number of minutes student has to take the timed assessment--if not provided, no time limit
                 :noresult: Boolean, doesn't display score
                 :nofeedback: Boolean, doesn't display feedback
+                :notimer: Boolean, doesn't show timer
             ...
             """
         self.assert_has_content() # make sure timed has something in it
