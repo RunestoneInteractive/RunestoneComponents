@@ -90,7 +90,7 @@ Example:
         self.options['code'] = self.content
           
         if 'maxdist' not in self.options:
-            self.options['maxdist'] = '3'
+            self.options['maxdist'] = '5'
         if '-----' in self.content:
             index = self.content.index('-----')
             self.options['instructions'] = "\n".join(self.content[:index])
