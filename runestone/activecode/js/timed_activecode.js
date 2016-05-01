@@ -43,10 +43,15 @@ TimedActiveCode.prototype.hideFeedback = function () {
     // no feedback to hide
 };
 
-TimedActiveCode.prototype.processTimedSubmission = function () {
+TimedActiveCode.prototype.processTimedSubmission = function (logFlag) {
     // Disable input & evaluate component
-    if (this.useRunestoneServies)
-        this.saveEditor();
+    if (this.useRunestoneServices) {
+        if (logFlag) {
+            this.saveEditor();
+        } else {
+            this.loadEditor().done(this.runProg.bind(this));
+        }
+    }
     this.runButton.disabled = true;
     $(this.codeDiv).addClass("ac-disabled");
 };

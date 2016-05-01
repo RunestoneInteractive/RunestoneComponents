@@ -323,11 +323,9 @@ ActiveCode.prototype.saveEditor = function () {
 };
 
 ActiveCode.prototype.loadEditor = function () {
-
     var loadEditor = (function (data, status, whatever) {
         // function called when contents of database are returned successfully
         var res = eval(data)[0];
-
         if (res.source) {
             this.editor.setValue(res.source);
             setTimeout(function() {
@@ -353,8 +351,12 @@ ActiveCode.prototype.loadEditor = function () {
     if (this.sid !== undefined) {
         data['sid'] = this.sid;
     }
+    // This function needs to be chainable for when we want to do things like run the activecode
+    // immediately after loading the previous input (such as in a timed exam)
+    var dfd = jQuery.Deferred();
     this.logBookEvent({'event': 'activecode', 'act': 'load', 'div_id': this.divid}); // Log the run event
-    jQuery.get(eBookConfig.ajaxURL + 'getprog', data, loadEditor);
+    jQuery.get(eBookConfig.ajaxURL + 'getprog', data, loadEditor).done(function () {dfd.resolve();});
+    return dfd;
 
 };
 
