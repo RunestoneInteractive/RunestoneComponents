@@ -181,6 +181,8 @@ Timed.prototype.renderNavControls = function () {
     // render the question number jump buttons
     this.qNumList = document.createElement("ul");
 	$(this.qNumList).attr("id", "pageNums");
+    this.qNumWrapperList = document.createElement("ul");
+    $(this.qNumWrapperList).addClass("pagination");
 	var tmpLi, tmpA;
     for (var i = 0; i < this.renderedQuestionArray.length; i++) {
 	    tmpLi = document.createElement("li");
@@ -191,18 +193,11 @@ Timed.prototype.renderNavControls = function () {
             $(tmpLi).addClass("active");
         }
         tmpLi.appendChild(tmpA);
-        this.qNumList.appendChild(tmpLi);
+        this.qNumWrapperList.appendChild(tmpLi);
     }
+    this.qNumList.appendChild(this.qNumWrapperList);
     this.navDiv.appendChild(this.qNumList);
 	this.navBtnListeners();
-
-	$(function(){
-		var tenSet = $("ul#pageNums li");
-		for (var i = 0; i < tenSet.length; i += 10) {
-			tenSet.slice(i, i + 10).wrapAll("<ul class=\"pagination\"></ul>");
-		}
-	});
-
 };
 
 Timed.prototype.navBtnListeners = function() {
@@ -493,7 +488,6 @@ Timed.prototype.tookTimedExam = function () {
         "background-color": "black",
         "color": "white"
     });
-
     var len = localStorage.length;
     if (len > 0) {
         if (localStorage.getItem(eBookConfig.email + ":" + this.divid) !== null) {
@@ -679,9 +673,16 @@ Timed.prototype.highlightNumberedList = function () {
 /*=======================================================
 === Function that calls the constructors on page load ===
 =======================================================*/
-
 $(document).ready(function () {
-    $("[data-component=timedAssessment]").each(function (index) {
-        TimedList[this.id] = new Timed({"orig": this});
-    });
-});
+    if (eBookConfig.useRunestoneServices) {
+        $(document).bind("runestone:login-complete", function () {
+            $("[data-component=timedAssessment]").each(function (index) {
+                TimedList[this.id] = new Timed({"orig": this});
+            });
+        });
+    } else {
+        $("[data-component=timedAssessment]").each(function (index) {
+            TimedList[this.id] = new Timed({"orig": this});
+        });
+    }
+})
