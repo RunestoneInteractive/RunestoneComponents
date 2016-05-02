@@ -633,13 +633,8 @@ Timed.prototype.restoreFromStorage = function () {
 Timed.prototype.displayScore = function () {
 
 	if (this.showResults)
-<<<<<<< HEAD
     {
        // if we have some information
-=======
-    {
-       // If we have the list of
->>>>>>> moreTimed
        if (this.correctStr.length > 0 || this.incorrectStr.length > 0 || this.skippedStr.length > 0)
        {
           var scoreString = "Num Correct: " + this.score + ". Questions: " + this.correctStr + "<br>" +
