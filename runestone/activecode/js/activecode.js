@@ -80,7 +80,11 @@ ActiveCode.prototype.createEditor = function (index) {
         newdiv.appendChild(linkdiv);
     }
     newdiv.appendChild(codeDiv);
-    var editor = CodeMirror(codeDiv, {value: this.code, lineNumbers: true, mode: newdiv.lang});
+    var editor = CodeMirror(codeDiv, {value: this.code, lineNumbers: true,
+        mode: newdiv.lang, indentUnit: 4,
+        matchBrackets: true, autoMatchParens: true,
+        extraKeys: {"Tab": "indentMore", "Shift-Tab": "indentLess"}
+    });
 
     // Make the editor resizable
     $(editor.getWrapperElement()).resizable({
