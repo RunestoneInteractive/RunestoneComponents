@@ -899,7 +899,6 @@
      var defaults = {
        'incorrectSound': false,
        'x_indent': 50,
-       'can_indent': true,
        'feedback_cb': false,
        'first_error_only': true,
        'lang': 'en',
@@ -1057,21 +1056,22 @@
      });
    };
 
-   ParsonsWidget.prototype.getHash = function(searchString) {
-     var hash = [],
-         ids = $(searchString).sortable('toArray'),
-         line;
-     for (var i = 0; i < ids.length; i++) {
-       line = this.getLineById(ids[i]);
-       hash.push(line.orig + "_" + line.indent);
-     }
-     //prefix with something to handle empty output situations
-     if (hash.length === 0) {
-       return "-";
-     } else {
-       return hash.join("-");
-     }
-   };
+	// Create a hash that identifies the line order and indentation
+	ParsonsWidget.prototype.getHash = function(searchString) {
+		var hash = [],
+			lines = $(searchString)[0].getElementsByTagName('li'),
+			line;
+		for (var i = 0; i < lines.length; i++) {
+			line = this.getLineById(lines[i].id);
+			hash.push(line.orig + "_" + line.indent);
+		}
+		//prefix with something to handle empty output situations
+		if (hash.length === 0) {
+			return "-";
+		} else {
+			return hash.join("-");
+		}
+	};
    
    ParsonsWidget.prototype.solutionHash = function() {
        return this.getHash("#ul-" + this.options.sortableId);
@@ -1175,27 +1175,24 @@
     * leftDiff horizontal difference from (before and after drag) in px
     ***/
    ParsonsWidget.prototype.updateIndent = function(leftDiff, id) {
-
      var code_line = this.getLineById(id);
-     var new_indent = this.options.can_indent ? code_line.indent + Math.floor(leftDiff / this.options.x_indent) : 0;
+     var new_indent = this.options.noindent ? 0 : code_line.indent + Math.floor(leftDiff / this.options.x_indent);
      new_indent = Math.max(0, new_indent);
      code_line.indent = new_indent;
 
      return new_indent;
    };
 
-   // Get a line object by the full id including id prefix
-   // (see parseCode for description of line objects)
-   ParsonsWidget.prototype.getLineById = function(id) {
-     var index = -1;
-     for (var i = 0; i < this.modified_lines.length; i++) {
-       if (this.modified_lines[i].id == id) {
-         index = i;
-         break;
-       }
-     }
-     return this.modified_lines[index];
-   };
+	// Return a line object by the full id including id prefix
+	// (see parseCode for description of line objects)
+	ParsonsWidget.prototype.getLineById = function(id) {
+		for (var i = 0; i < this.modified_lines.length; i++) {
+			if (this.modified_lines[i].id == id) {
+				return this.modified_lines[i];
+			}
+		}
+		return undefined;
+	};
 
    // Check and normalize code indentation.
    // Does not use the current object (this) ro make changes to 
@@ -1238,22 +1235,17 @@
      return normalized;
    };
 
-   /**
-    * Retrieve the code lines based on what is in the DOM
-    *
-    * TODO(petri) refactor to UI
-    * */
-   ParsonsWidget.prototype.getModifiedCode = function(search_string) {
-     //ids of the the modified code
-     var lines_to_return = [],
-          solution_ids = $(search_string).sortable('toArray'),
-          i, item;
-     for (i = 0; i < solution_ids.length; i++) {
-       item = this.getLineById(solution_ids[i]);
-       lines_to_return.push($.extend(new ParsonsCodeline(), item));
-     }
-     return lines_to_return;
-   };
+	// Retrieve the code lines based on what is in the DOM
+	ParsonsWidget.prototype.getModifiedCode = function(search_string) {
+		var codeLines = [];
+		var that = this;
+		$(search_string + " li").each(function(idx, i) {
+			var domItem = $(i);
+			var lineItem = that.getLineById(domItem[0].id);
+			codeLines.push($.extend(new ParsonsCodeline(), lineItem));	
+		});
+		return codeLines;
+	};
 
    ParsonsWidget.prototype.hashToIDList = function(hash) {
      var lines = [];
@@ -1278,7 +1270,6 @@
    ParsonsWidget.prototype.updateIndentsFromHash = function(hash) {
      var lineValues;
      var h;
-
      if (hash === "-" || hash === "" || hash === null) {
        h = [];
      } else {
@@ -1308,8 +1299,6 @@
    ParsonsWidget.prototype.colorFeedback = function(elemId) {
      return new LineBasedGrader(this).grade(elemId);
    };
-
-
 
 
    /**
@@ -1347,25 +1336,25 @@
      this.feedback_exists = false;
    };
 
+	// A function for shuffling that creates a random permutation of numbers 0..n-1
+	ParsonsWidget.prototype.getRandomPermutation = function(n) {
+		var permutation = [];
+		var i;
+		for (i = 0; i < n; i++) {
+			permutation.push(i);
+		}
+		var swap1, swap2, tmp;
+		for (i = 0; i < n; i++) {
+			swap1 = Math.floor(Math.random() * n);
+			swap2 = Math.floor(Math.random() * n);
+			tmp = permutation[swap1];
+			permutation[swap1] = permutation[swap2];
+			permutation[swap2] = tmp;
+		}
+		return permutation;
+	};
 
-   ParsonsWidget.prototype.getRandomPermutation = function(n) {
-     var permutation = [];
-     var i;
-     for (i = 0; i < n; i++) {
-       permutation.push(i);
-     }
-     var swap1, swap2, tmp;
-     for (i = 0; i < n; i++) {
-       swap1 = Math.floor(Math.random() * n);
-       swap2 = Math.floor(Math.random() * n);
-       tmp = permutation[swap1];
-       permutation[swap1] = permutation[swap2];
-       permutation[swap2] = tmp;
-     }
-     return permutation;
-   };
-
-
+	// Shuffle the model lines
 	ParsonsWidget.prototype.shuffleLines = function() {
 		// Create the list of IDs that things should be ordered in
 		var idlist = [];
@@ -1421,107 +1410,336 @@
 		addToggleableElements(this);
 	};
 
-   ParsonsWidget.prototype.createHTMLFromHashes = function(solutionHash, trashHash) {
-       var solution = this.hashToIDList(solutionHash);
-       var trash = this.hashToIDList(trashHash);
-       this.createHTMLFromLists(solution, trash);
-       this.updateIndentsFromHash(solutionHash);
-   };
+	ParsonsWidget.prototype.createHTMLFromHashes = function(solutionHash, trashHash) {
+		var solution = this.hashToIDList(solutionHash);
+		var trash = this.hashToIDList(trashHash);
+		this.createHTMLFromLists(solution, trash);
+		this.updateIndentsFromHash(solutionHash);
+	};
 
-    ParsonsWidget.prototype.updateHTMLIndent = function(codelineID) {
-        var line = this.getLineById(codelineID);
-        $('#' + codelineID).css("margin-left", this.options.x_indent * line.indent + "px");
-    };
-
-
-    ParsonsWidget.prototype.codeLineToHTML = function(codeline) {
-        return '<li id="' + codeline.id + '" class="prettyprint lang-py">' + codeline.code + '<\/li>';
-    };
-
-    ParsonsWidget.prototype.codeLinesToHTML = function(codelineIDs, destinationID) {
-        var lineHTML = [];
-        for(var id in codelineIDs) {
-            var line = this.getLineById(codelineIDs[id]);
-            lineHTML.push(this.codeLineToHTML(line));
-        }
-        return '<ul id="ul-' + destinationID + '">'+lineHTML.join('')+'</ul>';
-    };
-
-   /** modifies the DOM by inserting exercise elements into it */
-   ParsonsWidget.prototype.createHTMLFromLists = function(solutionIDs, trashIDs) {
-     var html;
-     if (this.options.trashId) {
-       html = (this.options.trash_label?'<p>'+this.options.trash_label+'</p>':'') +
-         this.codeLinesToHTML(trashIDs, this.options.trashId);
-       $("#" + this.options.trashId).html(html);
-       html = (this.options.solution_label?'<p>'+this.options.solution_label+'</p>':'') +
-         this.codeLinesToHTML(solutionIDs, this.options.sortableId);
-       $("#" + this.options.sortableId).html(html);
-     } else {
-       html = this.codeLinesToHTML(solutionIDs, this.options.sortableId);
-       $("#" + this.options.sortableId).html(html);
-     }
-
-     if (window.prettyPrint && (typeof(this.options.prettyPrint) === "undefined" || this.options.prettyPrint)) {
-       prettyPrint();
-     }
-
-     var that = this;
-     var sortable = $("#ul-" + this.options.sortableId).sortable(
-       {
-         start : function() { that.clearFeedback(); },
-         stop : function(event, ui) {
-           if ($(event.target)[0] != ui.item.parent()[0]) {
-             return;
-           }
-           that.updateIndent(ui.position.left - ui.item.parent().position().left,
-                                       ui.item[0].id);
-           that.updateHTMLIndent(ui.item[0].id);
-           that.addLogEntry({type: "moveOutput", target: ui.item[0].id}, true);
-         },
-         receive : function(event, ui) {
-           var ind = that.updateIndent(ui.position.left - ui.item.parent().position().left,
-                                       ui.item[0].id);
-           that.updateHTMLIndent(ui.item[0].id);
-           that.addLogEntry({type: "addOutput", target: ui.item[0].id}, true);
-         },
-         grid : that.options.can_indent ? [that.options.x_indent, 1 ] : false
-       });
-     sortable.addClass("output");
-     if (this.options.trashId) {
-       var trash = $("#ul-" + this.options.trashId).sortable(
-         {
-           connectWith: sortable,
-           start: function() { that.clearFeedback(); },
-           receive: function(event, ui) {
-             that.getLineById(ui.item[0].id).indent = 0;
-             that.updateHTMLIndent(ui.item[0].id);
-             that.addLogEntry({type: "removeOutput", target: ui.item[0].id}, true);
-           },
-           stop: function(event, ui) {
-             if ($(event.target)[0] != ui.item.parent()[0]) {
-               // line moved to output and logged there
-               return;
-             }
-             that.addLogEntry({type: "moveInput", target: ui.item[0].id}, true);
-           }
-         });
-       sortable.sortable('option', 'connectWith', trash);
-     }
-     // Log the original codelines in the exercise in order to be able to
-     // match the input/output hashes to the code later on. We need only a
-     // few properties of the codeline objects
-     var bindings = [];
-     for (var i = 0; i < this.modified_lines.length; i++) {
-       var line = this.modified_lines[i];
-       bindings.push({code: line.code, distractor: line.distractor})
-     }
-     this.addLogEntry({type: 'init', time: new Date(), bindings: bindings});
-   };
+	ParsonsWidget.prototype.updateHTMLIndent = function(codelineID) {
+		// Update the visual indent of this tile based on the model indent
+		var line = this.getLineById(codelineID);
+		//$('#' + codelineID).css("margin-left", this.options.x_indent * line.indent + "px");
+	};
 
 
-   window['ParsonsWidget'] = ParsonsWidget;
- }
+	ParsonsWidget.prototype.codeLineToHTML = function(codeline) {
+		return '<li id="' + codeline.id + '" class="prettyprint lang-py">' + codeline.code + '<\/li>';
+	};
+
+	ParsonsWidget.prototype.codeLinesToHTML = function(codelineIDs, destinationID) {
+		var lineHTML = [];
+		for(var id in codelineIDs) {
+			var line = this.getLineById(codelineIDs[id]);
+			lineHTML.push(this.codeLineToHTML(line));
+		}
+		return '<ul id="ul-' + destinationID + '">'+lineHTML.join('')+'</ul>';
+	};
+	
+	// Based on the movingId, etc., establish the moving state
+	//   rest = not moving
+	//   source = moving inside source area
+	//   answer = moving inside answer area
+	//   moving = moving outside areas
+	ParsonsWidget.prototype.movingState = function() {
+		if (this.movingId == undefined) {
+			return "rest";
+		}
+		var moving = $("#" + this.movingId);
+		var x = this.movingX;
+		var y = this.movingY;
+		// Check if in answer area
+		var left = this.answerArea.offset().left;
+		var right = left + this.answerArea.outerWidth();
+		var top = this.answerArea.offset().top;
+		var bottom = top + this.answerArea.outerHeight();
+		if (x >= left && (x <= right) && (y >= top) && (y <= bottom)) {
+			return "answer";
+		}
+		// Check if in source area
+		left = this.sourceArea.offset().left;
+		right = left + this.sourceArea.outerWidth();
+		top = this.sourceArea.offset().top;
+		bottom = top + this.sourceArea.outerHeight();
+		if (x >= left && (x <= right) && (y >= top) && (y <= bottom)) {
+			return "source";
+		}
+		return "moving";
+	}
+	
+	// Update the ParsonsWidget view
+	ParsonsWidget.prototype.updateView = function() {
+		// Based on the new and the old state, figure out what to update
+		var state = this.state;
+		var newState = this.movingState();
+		var updateSource = true;
+		var updateAnswer = true;
+		var updateMoving = newState == "moving";
+		if (state == newState) {
+			if (newState == "rest") {
+				updateSource = false;
+				updateAnswer = false;
+			} else if (newState == "source") {
+				updateAnswer = false;
+			} else if (newState == "answer") {
+				updateSource = false;
+			} else if (newState == "moving") {
+				updateAnswer = false;
+				updateSource = false;
+			}
+		}
+		var moving = undefined;
+		var movingHeight;
+		if (this.movingId !== undefined) {
+			moving = $("#" + this.movingId);
+			// Must get height here as detached items don't have height
+			movingHeight = moving.outerHeight(true);
+			moving.detach();
+		}
+		
+		var positionTop, width;
+		var that = this;
+		var baseWidth = this.sourceArea.width() - 22;
+		
+		// Update the Source Area
+		if (updateSource) {
+			positionTop = 0;
+			if (newState == "source") {
+				var hasInserted = false;
+				var y = this.movingY - this.sourceArea.offset().top;
+				$("#ul-" + this.options.trashId + " li").each(function(idx, i) {
+					item = $(i);
+					if (item[0].id !== "") {
+						if (!hasInserted) {
+							if (y - positionTop < (movingHeight + item.outerHeight(true)) / 2) {
+								hasInserted = true;
+								moving.insertBefore("#" + item[0].id);
+								moving.css({
+									'left' : 0,
+									'top' : y - movingHeight / 2,
+									'width' : baseWidth,
+									'z-index' : 2 });
+								positionTop = positionTop + movingHeight;
+							}
+						}
+						item.css({
+							'left' : 0,
+							'top' : positionTop,
+							'width' : baseWidth,
+							'z-index' : 1 });
+						positionTop = positionTop + item.outerHeight(true);
+					}
+				});
+				if (!hasInserted) {
+					moving.appendTo("#ul-" + this.options.trashId);
+					moving.css({
+						'left' : 0,
+						'top' : y - moving.outerHeight(true) / 2,
+						'width' : baseWidth,
+						'z-index' : 2 });
+				}
+			} else {
+				$("#ul-" + this.options.trashId + " li").each(function(idx, i) {
+					item = $(i);
+					if (item[0].id !== "") {
+						item.css({
+							'left' : 0,
+							'top' : positionTop,
+							'width' : baseWidth,
+							'z-index' : 1 });
+						positionTop = positionTop + item.outerHeight(true);
+					}
+				});
+			}
+		}
+		
+		// Update the Answer Area
+		if (updateAnswer) {
+			var line, indent;
+			positionTop = 0;
+			width = this.answerArea.width() - 22;
+			var that = this;
+			if (newState == "answer") {
+				var hasInserted = false;
+				var y = this.movingY - this.sourceArea.offset().top;
+				var movingIndent = this.movingX - this.answerArea.offset().left - this.sourceArea.width() / 2 + 11;
+				
+				movingIndent = Math.floor(movingIndent / this.options.x_indent);
+				movingIndent = Math.max(movingIndent, 0);
+				movingIndent = Math.min(movingIndent, this.indent);
+				line = this.getLineById(this.movingId);
+				line.indent = movingIndent;
+				$("#ul-" + this.options.sortableId + " li").each(function(idx, i) {
+					item = $(i);
+					if (item[0].id !== "") {
+						if (!hasInserted) {
+							if (y - positionTop < (movingHeight + item.outerHeight(true)) / 2) {
+								hasInserted = true;
+								moving.insertBefore("#" + item[0].id);
+								indent = movingIndent * that.options.x_indent;
+								moving.css({
+									'left' : indent,
+									'top' : y - movingHeight / 2,
+									'width' : baseWidth,
+									'z-index' : 2 });
+								positionTop = positionTop + movingHeight;
+							}
+						}
+						line = that.getLineById(item[0].id);
+						indent = line.indent * that.options.x_indent;
+						item.css({
+							'left' : indent,
+							'top' : positionTop,
+							'width' : width - indent,
+							'z-index' : 1 });
+						positionTop = positionTop + item.outerHeight(true);
+					}
+				});
+				if (!hasInserted) {				
+					moving.appendTo("#ul-" + this.options.sortableId);
+					indent = movingIndent * that.options.x_indent;
+					moving.css({
+						'left' : indent,
+						'top' : y - moving.outerHeight(true) / 2,
+						'width' : baseWidth,
+						'z-index' : 2 });
+				}
+			} else {
+				$("#ul-" + this.options.sortableId + " li").each(function(idx, i) {
+					item = $(i);
+					if (item[0].id !== "") {
+						line = that.getLineById(item[0].id);
+						indent = line.indent * that.options.x_indent;
+						item.css({
+							'left' : indent,
+							'top' : positionTop,
+							'width' : width - indent,
+							'z-index' : 1 });
+						positionTop = positionTop + item.outerHeight(true);
+					}
+				});
+			}
+		}
+
+		// Update the Moving Area
+		if (updateMoving) {
+			moving.appendTo("#ul-" + this.options.trashId);
+			width = this.sourceArea.width() - 22;
+			moving.css({
+				'left' : this.movingX - this.sourceArea.offset().left - (moving.outerWidth(true) / 2),
+				'top' : this.movingY - this.sourceArea.offset().top - (movingHeight / 2),
+				'width' : width,
+				'z-index' : 2 });
+		}
+		
+		state = newState;
+		this.state = state;
+	};
+
+	// modifies the DOM by inserting exercise elements into it
+	ParsonsWidget.prototype.createHTMLFromLists = function(answerIDs, sourceIDs) {
+		var html;
+		if (this.options.trashId) {
+			html = (this.options.trash_label?'<p>'+this.options.trash_label+'</p>':'') + this.codeLinesToHTML(sourceIDs, this.options.trashId);
+			$("#" + this.options.trashId).html(html);
+			html = (this.options.solution_label?'<p>'+this.options.solution_label+'</p>':'') + this.codeLinesToHTML(answerIDs, this.options.sortableId);
+			$("#" + this.options.sortableId).html(html);
+		} else {
+			html = this.codeLinesToHTML(answerIDs, this.options.sortableId);
+			$("#" + this.options.sortableId).html(html);
+		}
+		
+		if (window.prettyPrint && (typeof(this.options.prettyPrint) === "undefined" || this.options.prettyPrint)) {
+			prettyPrint();
+		}
+		
+		var answerArea = $("#ul-" + this.options.sortableId);
+		answerArea.addClass("output");
+		var sourceArea = $("#ul-" + this.options.trashId);
+		// Establish the width and height of the droppable areas
+		var areaWidth = 0;
+		var areaHeight = 0;
+		var item;
+		var maxFunction = function(idx, i) {
+			item = $(i);
+			areaHeight = areaHeight + item.outerHeight(true);
+			areaWidth = Math.max(areaWidth, item.outerWidth(true));			
+		};
+		$("#ul-" + this.options.sortableId + " li").each(maxFunction);
+		$("#ul-" + this.options.trashId + " li").each(maxFunction);
+		// Determine how much indent should be possible in the answer area
+		var indent;
+		if (this.options.noindent) {
+			indent = 0;
+		} else {
+			// Set the indent so that the solution is possible
+			indent = 1;
+			for (var i = 0; i < this.model_solution.length; i++) {
+				indent = Math.max(indent, this.model_solution[i].indent);
+			}
+		}
+		sourceArea.height(areaHeight);
+		sourceArea.width(areaWidth);
+		answerArea.height(areaHeight);
+		answerArea.width(this.options.x_indent * indent + areaWidth);
+		this.answerArea = answerArea;
+		this.sourceArea = sourceArea;
+		this.indent = indent;
+		var that = this;
+		that.state = undefined; // needs to be here for loading from storage
+		that.updateView();
+		
+		var draggableOptions = {
+			helper : "clone",
+			distance : 0,
+			scope : that.options.sortableId,
+			drag : function(event, ui) {
+				// Update the view
+				that.movingX = event.pageX;
+				that.movingY = event.pageY;
+				that.updateView();
+			},
+			start : function(event, ui) {
+				that.clearFeedback();
+				// Move original; hide clone
+				that.movingId = $(this)[0].id;
+				$(ui.helper).hide();
+				// Update the view
+				that.movingX = event.pageX;
+				that.movingY = event.pageY;
+				that.updateView();
+			},
+			stop : function(event, ui) {
+				// Restore functionality to original
+				$("#" + that.movingId).draggable(draggableOptions);
+				delete that.movingId;
+				delete that.movingX;
+				delete that.movingY;
+				that.updateView();
+			}
+		};
+		
+		// Assign droppable and draggable options to the areas and tiles
+		for (var i = 0; i < sourceIDs.length; i++) {
+			$("#" + sourceIDs[i]).draggable(draggableOptions);
+		}
+		for (var i = 0; i < answerIDs.length; i++) {
+			$("#" + answerIDs[i]).draggable(draggableOptions);
+		}
+		// Log the original codelines in the exercise in order to be able to
+		// match the input/output hashes to the code later on. We need only a
+		// few properties of the codeline objects
+		var bindings = [];
+		for (var i = 0; i < this.modified_lines.length; i++) {
+			var line = this.modified_lines[i];
+			bindings.push({code: line.code, distractor: line.distractor})
+		}
+		this.addLogEntry({type: 'init', time: new Date(), bindings: bindings});
+	};
+	
+	window['ParsonsWidget'] = ParsonsWidget;
+}
 // allows _ and $ to be modified with noconflict without changing the globals
 // that parsons uses
 )($,_);

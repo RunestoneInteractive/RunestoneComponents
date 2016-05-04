@@ -162,19 +162,6 @@ Parsons.prototype.setButtonFunctions = function () {
     $pjQ(this.resetButt).click(function (event) {
         event.preventDefault();
         this.pwidget.shuffleLines();
-        // set min width and height
-        var sortableul = $("#ul-parsons-sortableCode-" + this.counterId);
-        var trashul = $("#ul-parsons-sortableTrash-" + this.counterId);
-        var sortableHeight = sortableul.height();
-        var sortableWidth = sortableul.width();
-        var trashWidth = trashul.width();
-        var trashHeight = trashul.height();
-        var minHeight = Math.max(trashHeight, sortableHeight);
-        var minWidth = Math.max(trashWidth, sortableWidth);
-        trashul.css("min-height", minHeight + "px");
-        sortableul.css("min-height", minHeight + "px");
-        trashul.css("min-width", minWidth + "px");
-        sortableul.css("min-width", minWidth + "px");
         $(this.messageDiv).hide();
     }.bind(this));
     $pjQ(this.checkButt).click(function (event) {
@@ -213,6 +200,7 @@ Parsons.prototype.createParsonsWidget = function () {
     // add maxdist and order if present
     var maxdist = $(this.origElem).data('maxdist');
     var order = $(this.origElem).data('order');
+    var noindent = $(this.origElem).data('noindent');
     if (maxdist !== undefined) {
 	    options["maxdist"] = maxdist;
 	}
@@ -224,6 +212,7 @@ Parsons.prototype.createParsonsWidget = function () {
 		}
 		options["order"] = order;
 	}
+	options["noindent"] = noindent === "true";
     
     this.pwidget = new ParsonsWidget(options);
 
@@ -244,11 +233,6 @@ Parsons.prototype.styleNewHTML = function () {
     var minHeight = Math.max(trashHeight, sortableHeight);
     var minWidth = Math.max(trashWidth, sortableWidth);
     var test = document.getElementById("ul-parsons-sortableTrash-" + this.counterId);
-    trashul.css("min-height", minHeight + "px");
-    sortableul.css("min-height", minHeight + "px");
-    sortableul.height(minHeight);
-    trashul.css("min-width", minWidth + "px");
-    sortableul.css("min-width", minWidth + "px");
     test.minWidth = minWidth + "px";
 };
 

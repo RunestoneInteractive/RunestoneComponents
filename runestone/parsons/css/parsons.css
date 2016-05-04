@@ -11,6 +11,7 @@
 #sortableTrash { width: 38%; }
 #sortable { width: 56%; }
 .sortable-code ul {
+	position: relative;
     font-size: 120%;
     font-family: monospace;
     list-style: none;
@@ -21,7 +22,7 @@
     border: 1px solid #efefff;;
 }
 .sortable-code ul:empty {
-  padding-bottom: 30px;
+  /* padding-bottom: 30px;*/
 }
 .sortable-code li, .sortable-code li:before, .sortable-code li:after {
   box-sizing: content-box;
@@ -30,6 +31,7 @@ ul.output {
     background-color: #FFA;
 }
 .sortable-code li {
+	position: absolute;
     -moz-border-radius:10px;
     -webkit-border-radius:10px;
     border-radius: 10px;

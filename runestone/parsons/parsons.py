@@ -43,8 +43,9 @@ class ParsonsProblem(Assessment):
     optional_arguments = 1
     final_argument_whitespace = False
     option_spec = {
-        'maxdist': directives.unchanged,
-        'order': directives.unchanged
+        'maxdist' : directives.unchanged,
+        'order' : directives.unchanged,
+        'noindent' : directives.flag
     }
     has_content = True
 
@@ -82,18 +83,27 @@ Example:
         """
 
         TEMPLATE = '''
-    <pre data-component="parsons" id="%(divid)s"'''
-    	if 'maxdist' in self.options:
-    		TEMPLATE = TEMPLATE + " data-maxdist=%(maxdist)s"
-    	if 'order' in self.options:
-    		TEMPLATE = TEMPLATE + ' data-order="%(order)s"'
-    	TEMPLATE = TEMPLATE + '''>
+    <pre data-component="parsons" id="%(divid)s"%(maxdist)s%(order)s%(noindent)s>
         <span data-question>%(qnumber)s: %(instructions)s</span>%(code)s</pre>
     '''
         self.options['divid'] = self.arguments[0]
         self.options['qnumber'] = self.getNumber()
         self.options['instructions'] = ""
         self.options['code'] = self.content
+        
+        if 'maxdist' in self.options:
+            self.options['maxdist'] = ' data-maxdist="' + self.options['maxdist'] + '"'
+        else:
+            self.options['maxdist'] = ''
+        if 'order' in self.options:
+            self.options['order'] = ' data-order="' + self.options['order'] + '"'
+        else:
+            self.options['order'] = ''
+        if 'noindent' in self.options:
+            self.options['noindent'] = ' data-noindent="true"'
+        else:
+            self.options['noindent'] = ''
+         
           
         if '-----' in self.content:
             index = self.content.index('-----')
