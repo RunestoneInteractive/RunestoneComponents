@@ -636,7 +636,7 @@
                                (core/let [gmap (gensym "map__")
                                           defaults (:or b)]
                                  (core/loop [ret (core/-> bvec (conj gmap) (conj v)
-                                                   (conj gmap) (conj `(if (implements? ISeq ~gmap) (apply hash-map ~gmap) ~gmap))
+                                                   (conj gmap) (conj `(if (implements? ISeq ~gmap) (apply cljs.core/hash-map ~gmap) ~gmap))
                                                    ((core/fn [ret]
                                                       (if (:as b)
                                                         (conj ret (:as b) gmap)
@@ -654,8 +654,8 @@
                                                 bk (val (first bes))
                                                 has-default (contains? defaults bb)]
                                        (recur (pb ret bb (if has-default
-                                                           (core/list `get gmap bk (defaults bb))
-                                                           (core/list `get gmap bk)))
+                                                           (core/list 'cljs.core/get gmap bk (defaults bb))
+                                                           (core/list 'cljs.core/get gmap bk)))
                                          (next bes)))
                                      ret))))]
                     (core/cond
@@ -755,7 +755,8 @@
           (iterate (core/fn [[p b]]
                      (if (core/== 2147483648 b)
                        [(core/inc p) 1]
-                       [p (core/bit-shift-left b 1)]))
+                       [p #?(:clj  (core/bit-shift-left b 1)
+                             :cljs (core/* 2 b))]))
                    [0 1])))
 
 (def fast-path-protocol-partitions-count
@@ -1391,7 +1392,7 @@
              `(fn ~[this-sym argsym]
                 (this-as ~this-sym
                   (.apply (.-call ~this-sym) ~this-sym
-                    (.concat (array ~this-sym) (aclone ~argsym)))))
+                    (.concat (array ~this-sym) (cljs.core/aclone ~argsym)))))
              (meta form)))]
       (ifn-invoke-methods type type-sym form))))
 
@@ -1714,7 +1715,7 @@
                         `(~'-lookup [this# ~ksym else#]
                            (case ~ksym
                              ~@(mapcat (core/fn [f] [(keyword f) f]) base-fields)
-                             (get ~'__extmap ~ksym else#)))
+                             (cljs.core/get ~'__extmap ~ksym else#)))
                         'ICounted
                         `(~'-count [this#] (+ ~(count base-fields) (count ~'__extmap)))
                         'ICollection
@@ -2366,20 +2367,24 @@
        `(js/Array. ~size))
      assoc :tag 'array))
   ([type size]
-   `(make-array ~size))
+   `(cljs.core/make-array ~size))
   ([type size & more-sizes]
    (vary-meta
      `(let [dims#     (list ~@more-sizes)
-            dimarray# (make-array ~size)]
+            dimarray# (cljs.core/make-array ~size)]
         (dotimes [i# (alength dimarray#)]
-          (aset dimarray# i# (apply make-array nil dims#)))
+          (aset dimarray# i# (apply cljs.core/make-array nil dims#)))
         dimarray#)
      assoc :tag 'array)))
 
 (core/defmacro list
-  ([] '(.-EMPTY cljs.core/List))
+  ([]
+   '(.-EMPTY cljs.core/List))
   ([x & xs]
-    `(-conj (list ~@xs) ~x)))
+   (if (= :constant (:op (cljs.analyzer/analyze &env x)))
+     `(-conj (list ~@xs) ~x)
+     `(let [x# ~x]
+        (-conj (list ~@xs) x#)))))
 
 (core/defmacro vector
   ([] '(.-EMPTY cljs.core/PersistentVector))
@@ -2467,7 +2472,7 @@
   array ret."
   [a idx ret expr]
   `(let [a# ~a
-         ~ret (aclone a#)]
+         ~ret (cljs.core/aclone a#)]
      (loop  [~idx 0]
        (if (< ~idx  (alength a#))
          (do
@@ -2552,7 +2557,7 @@
                prefer-table# (atom {})
                method-cache# (atom {})
                cached-hierarchy# (atom {})
-               hierarchy# (get ~options :hierarchy (cljs.core/get-global-hierarchy))]
+               hierarchy# (cljs.core/get ~options :hierarchy (cljs.core/get-global-hierarchy))]
            (cljs.core/MultiFn. (cljs.core/symbol ~mm-ns ~(name mm-name)) ~dispatch-fn ~default hierarchy#
              method-table# prefer-table# method-cache# cached-hierarchy#))))))
 
