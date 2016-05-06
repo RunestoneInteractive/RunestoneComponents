@@ -8,11 +8,9 @@
 	text-align: left;
 	vertical-align: top;
 }
-#sortableTrash { width: 38%; }
-#sortable { width: 56%; }
 .sortable-code ul {
 	position: relative;
-    font-size: 120%;
+    font-size: 100%;
     font-family: monospace;
     list-style: none;
     background-color: #efefff;
@@ -20,9 +18,6 @@
     padding-left: 0;
     margin-left: 0;
     border: 1px solid #efefff;;
-}
-.sortable-code ul:empty {
-  /* padding-bottom: 30px;*/
 }
 .sortable-code li, .sortable-code li:before, .sortable-code li:after {
   box-sizing: content-box;

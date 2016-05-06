@@ -117,12 +117,12 @@ Parsons.prototype.createParsonsView = function () {         // Create DOM elemen
     this.containingDiv.appendChild(this.sortContainerDiv);
 
     this.sortTrashDiv = document.createElement("div");
-    this.sortTrashDiv.id = "parsons-sortableTrash-" + this.counterId;
+    this.sortTrashDiv.id = "parsons-source-" + this.counterId;
     $(this.sortTrashDiv).addClass("sortable-code");
     this.sortContainerDiv.appendChild(this.sortTrashDiv);
 
     this.sortCodeDiv = document.createElement("div");
-    this.sortCodeDiv.id = "parsons-sortableCode-" + this.counterId;
+    this.sortCodeDiv.id = "parsons-answer-" + this.counterId;
     $(this.sortCodeDiv).addClass("sortable-code");
     this.sortContainerDiv.appendChild(this.sortCodeDiv);
 
@@ -166,10 +166,10 @@ Parsons.prototype.setButtonFunctions = function () {
     }.bind(this));
     $pjQ(this.checkButt).click(function (event) {
         event.preventDefault();
-        var hash = this.pwidget.getHash("#ul-parsons-sortableCode-" + this.counterId);
+        var hash = this.pwidget.getHash("#ul-parsons-answer-" + this.counterId);
         localStorage.setItem(this.divid, hash);
-        hash = this.pwidget.getHash("#ul-parsons-sortableTrash-" + this.counterId);
-        localStorage.setItem(this.divid + "-trash", hash);
+        hash = this.pwidget.getHash("#ul-parsons-source-" + this.counterId);
+        localStorage.setItem(this.divid + "-source", hash);
 
         this.pwidget.getFeedback();
         $(this.messageDiv).fadeIn(100);
@@ -192,9 +192,9 @@ Parsons.prototype.createParsonsWidget = function () {
     });
 
 	var options = {
-        "sortableId": "parsons-sortableCode-" + this.counterId,
-        "trashId": "parsons-sortableTrash-" + this.counterId,
-        "solution_label": "Drop blocks here",
+        "answerId": "parsons-answer-" + this.counterId,
+        "sourceId": "parsons-source-" + this.counterId,
+        "answerLabel": "Drop blocks here",
         "feedback_cb": this.displayErrors.bind(this)
     };
     // add maxdist and order if present
@@ -219,26 +219,11 @@ Parsons.prototype.createParsonsWidget = function () {
     this.pwidget.init($pjQ(this.origDiv).text());
     this.pwidget.shuffleLines();
     this.tryLocalStorage();
-    this.styleNewHTML();
-};
-
-Parsons.prototype.styleNewHTML = function () {
-    // set min width and height
-    var sortableul = $("#ul-parsons-sortableCode-" + this.counterId);
-    var trashul = $("#ul-parsons-sortableTrash-" + this.counterId);
-    var sortableHeight = sortableul.height();
-    var sortableWidth = sortableul.width();
-    var trashWidth = trashul.width();
-    var trashHeight = trashul.height();
-    var minHeight = Math.max(trashHeight, sortableHeight);
-    var minWidth = Math.max(trashWidth, sortableWidth);
-    var test = document.getElementById("ul-parsons-sortableTrash-" + this.counterId);
-    test.minWidth = minWidth + "px";
 };
 
 Parsons.prototype.displayErrors = function (fb) {     // Feedback function
     if (fb.errors.length > 0) {
-        var hash = this.pwidget.getHash("#ul-parsons-sortableCode-" + this.counterId);
+        var hash = this.pwidget.getHash("#ul-parsons-answer-" + this.counterId);
         $(this.messageDiv).fadeIn(500);
         $(this.messageDiv).attr("class", "alert alert-danger");
         $(this.messageDiv).html(fb.errors[0]);
@@ -252,10 +237,10 @@ Parsons.prototype.displayErrors = function (fb) {     // Feedback function
 };
 
 Parsons.prototype.tryLocalStorage = function () {
-    if (localStorage.getItem(this.divid) && localStorage.getItem(this.divid + "-trash")) {
+    if (localStorage.getItem(this.divid) && localStorage.getItem(this.divid + "-source")) {
         try {
             var solution = localStorage.getItem(this.divid);
-            var trash = localStorage.getItem(this.divid + "-trash");
+            var trash = localStorage.getItem(this.divid + "-source");
             this.pwidget.createHTMLFromHashes(solution, trash);
             this.pwidget.getFeedback();
         } catch(err) {
