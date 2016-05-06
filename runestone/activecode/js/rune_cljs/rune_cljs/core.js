@@ -61,10 +61,6 @@ return null;
 rune_cljs.core.redirect_console_print_BANG_();
 cljs.user = {};
 rune_cljs.core.callback = (function rune_cljs$core$callback(resultmap){
-console.log(cljs.core.cst$kw$value.cljs$core$IFn$_invoke$arity$1(resultmap));
-
-console.log(cljs.core.cst$kw$error.cljs$core$IFn$_invoke$arity$1(resultmap));
-
 return [cljs.core.cst$kw$value.cljs$core$IFn$_invoke$arity$1(resultmap),cljs.core.cst$kw$error.cljs$core$IFn$_invoke$arity$1(resultmap),cljs.core.cst$kw$print.cljs$core$IFn$_invoke$arity$1((cljs.core.deref.cljs$core$IFn$_invoke$arity$1 ? cljs.core.deref.cljs$core$IFn$_invoke$arity$1(rune_cljs.core.output) : cljs.core.deref.call(null,rune_cljs.core.output))),cljs.core.cst$kw$error.cljs$core$IFn$_invoke$arity$1((cljs.core.deref.cljs$core$IFn$_invoke$arity$1 ? cljs.core.deref.cljs$core$IFn$_invoke$arity$1(rune_cljs.core.output) : cljs.core.deref.call(null,rune_cljs.core.output)))];
 });
 rune_cljs.core.eval_source = (function rune_cljs$core$eval_source(src){

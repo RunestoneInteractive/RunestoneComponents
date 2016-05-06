@@ -824,7 +824,7 @@ cljsErrorList = [
 ];
 
 CljSActiveCode.prototype.outputfun = function(a) {
-    console.log('Outputfun: ' + a);
+    // console.log('Outputfun: ' + a);
     $(this.output).css("visibility", "visible");
     return a;
 };
@@ -839,6 +839,7 @@ CljSActiveCode.prototype.runProg = function() {
     
     var result = rune_cljs.core.eval_source(prog);
     
+    /*
     console.log("---------run prog-------");
     console.log(prog);
     console.log("0 " + result[0]);
@@ -846,7 +847,7 @@ CljSActiveCode.prototype.runProg = function() {
     console.log("2 " + result[2]);
     console.log("3 " + result[3]);
     console.log("--------end run---------");
-    
+    */
     
     if (result[0] != null || result[2] != null) {
         var msg = result[0];
