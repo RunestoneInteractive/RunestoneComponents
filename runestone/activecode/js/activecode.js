@@ -1367,8 +1367,8 @@ LiveCode.prototype.runProg = function() {
         }
 
         if (this.datafile) {
-            runspec['file_list'] = [[this.div2id[this.datafile],this.datafile]];
             this.pushDataFile(this.datafile);
+            runspec['file_list'] = [[this.div2id[this.datafile],this.datafile]];
         }
         data = JSON.stringify({'run_spec': runspec});
         host = this.JOBE_SERVER + this.resource;
