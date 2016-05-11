@@ -37,6 +37,7 @@ def setup(app):
     app.add_javascript('parsons_setup.js')
     app.add_javascript('parsons.js')
     app.add_javascript('parsons-noconflict.js')
+    app.add_javascript('timedparsons.js')
 
 class ParsonsProblem(Assessment):
     required_arguments = 1
@@ -88,7 +89,7 @@ Example:
         self.options['qnumber'] = self.getNumber()
         self.options['instructions'] = ""
         self.options['code'] = self.content
-          
+
         if 'maxdist' not in self.options:
             self.options['maxdist'] = '5'
         if '-----' in self.content:
