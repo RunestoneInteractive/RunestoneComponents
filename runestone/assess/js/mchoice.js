@@ -11,23 +11,9 @@
 ===                6/4/15                ===
 ==========================================*/
 
-var feedBack = function (elem, correct, feedbackText) {        // Displays feedback on page--miscellaneous function that can be used by multple objects
-    // elem is the Element in which to put the feedback
-    if (correct) {
-        $(elem).html("You are Correct!");
-        $(elem).attr("class", "alert alert-success");
-    } else {
-        if (feedbackText === null) {
-            feedbackText = "";
-        }
-        $(elem).html("Incorrect.    " + feedbackText);
-        $(elem).attr("class", "alert alert-danger");
-    }
-};
-
 var mcList = {};    // Multiple Choice dictionary
 
-// constructor
+// MC constructor
 function MultipleChoice (opts) {
     if (opts) {
         this.init(opts);
@@ -71,7 +57,7 @@ MultipleChoice.prototype.init = function (opts) {
     this.findFeedbacks();
     this.createCorrectList();
     this.createMCForm();
-    this.restoreLocalAnswers();
+    this.checkServer();
 };
 
 /*====================================
@@ -172,6 +158,7 @@ MultipleChoice.prototype.renderMCForm = function () {
 };
 
 MultipleChoice.prototype.renderMCFormOpts = function () {
+    // creates input DOM elements
     this.optionArray = []; // array with an object for each option containing the input and label for that option
     var input_type = "radio";
     if (this.multipleanswers) {
@@ -223,6 +210,7 @@ MultipleChoice.prototype.renderMCFormOpts = function () {
 };
 
 MultipleChoice.prototype.renderMCFormButtons = function () {
+    // submit and compare me buttons
     // Create submit button
     this.submitButton = document.createElement("button");
     this.submitButton.textContent = "Check Me";
@@ -267,6 +255,7 @@ MultipleChoice.prototype.renderMCfeedbackDiv = function () {
 };
 
 MultipleChoice.prototype.randomizeAnswers = function () {
+    // Makes the ordering of the answer choices random
     var currentIndex = this.indexArray.length, temporaryValue, randomIndex;
     // While there remain elements to shuffle...
     while (currentIndex !== 0) {
@@ -284,58 +273,85 @@ MultipleChoice.prototype.randomizeAnswers = function () {
     }
 };
 
-/*====================================
-=== Repopulation from localstorage ===
-====================================*/
+/*===================================
+=== Checking/loading from storage ===
+===================================*/
 
-MultipleChoice.prototype.restoreLocalAnswers = function () {         // Handles local storage
+MultipleChoice.prototype.checkServer = function () {
     // Check if the server has stored answer
     if (this.useRunestoneServices) {
         var data = {};
         data.div_id = this.divid;
         data.course = eBookConfig.course;
         data.event = "mChoice";
-        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.restoreMultipleSelect.bind(this));
+        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
     } else {
-        this.restoreMultipleSelect();   // just go right to local storage
+        this.checkLocalStorage();   // just go right to local storage
     }
 
 };
 
 MultipleChoice.prototype.repopulateFromStorage = function (data, status, whatever) {
     if (data !== "") {
-        //console.log("Loading from server");
-        var arr = eval(data).split(",");
-        var answers = [];
-        for (var i=0; i<arr.length; i++) {
-            answers.push(arr[0].charCodeAt(0) - 97);   // Get index for lowercase letter
-        }
-        for (var a = 0; a < answers.length; a++) {
-            var index = answers[a];
-            for (var b = 0; b < this.optionArray.length; b++) {
-                if (this.optionArray[b].input.value == index) {
-                    $(this.optionArray[b].input).attr("checked", "true");
+        var dataEval = JSON.parse(data);
+        if (this.shouldUseServer(dataEval)) {
+            console.log("Loading from server");
+            var answers;
+            if (this.multipleanswers) {
+                answers = dataEval.answer.split(",");
+            } else {
+                answers = [dataEval.answer.charCodeAt(0) - 97];   // Get index for lowercase letter
+            }
+            for (var a = 0; a < answers.length; a++) {
+                var index = answers[a];
+                for (var b = 0; b < this.optionArray.length; b++) {
+                    if (this.optionArray[b].input.value == index) {
+                        $(this.optionArray[b].input).attr("checked", "true");
+                    }
                 }
             }
+            this.setLocalStorage();
+        } else {
+            this.checkLocalStorage();
         }
         this.enableMCComparison();
-
     } else {
-        //console.log("Loading from local storage");
-        this.restoreMultipleSelect();
+        this.checkLocalStorage();
     }
 };
 
-MultipleChoice.prototype.restoreMultipleSelect = function () {
-    // This function repopulates MCMA questions with a user's previous answers,
+MultipleChoice.prototype.shouldUseServer = function (data) {
+    // returns true if server data is more recent than local storage or if server storage is correct
+    if (data.correct == "T" || localStorage.length === 0)
+        return true;
+    var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid);
+    if (ex === null)
+        return true;
+    var storedData = JSON.parse(ex);
+    if (this.multipleanswers) {
+        if (data.answer == storedData.answer)
+            return true;
+    } else {
+        if ((data.answer.charCodeAt(0) - 97).toString() == storedData.answer[0])
+            return true;
+    }
+    var storageDate = new Date(storedData.timestamp);
+    var serverDate = new Date(data.timestamp);
+    if (serverDate < storageDate)
+        return false;
+    return true;
+};
+
+MultipleChoice.prototype.checkLocalStorage = function () {
+    // Repopulates MCMA questions with a user's previous answers,
     // which were stored into local storage.
+    console.log("Loading from local storage");
     var len = localStorage.length;
     if (len > 0) {
-
         var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid);
         if (ex !== null) {
-            var arr = ex.split(";");
-            var answers = arr[0].split(",");
+            var storedData = JSON.parse(ex);
+            var answers = storedData.answer;
             for (var a = 0; a < answers.length; a++) {
                 var index = answers[a];
                 for (var b = 0; b < this.optionArray.length; b++) {
@@ -346,9 +362,22 @@ MultipleChoice.prototype.restoreMultipleSelect = function () {
             }
             if (this.useRunestoneServices) {
                 this.enableMCComparison();
+                this.getSubmittedOpts();   // to populate givenlog for logging
+                if (this.multipleanswers) {
+                    this.logMCMAsubmission();
+                } else {
+                    this.logMCMFsubmission();
+                }
             }
         }
     }
+};
+
+MultipleChoice.prototype.setLocalStorage = function () {
+    this.getSubmittedOpts();   // make sure this.givenarray is populateDisplayFeed
+    var timeStamp = new Date();
+    var storageObj = {"answer": this.givenArray, "timestamp": timeStamp};
+    localStorage.setItem(eBookConfig.email + ":" + this.divid, JSON.stringify(storageObj));
 };
 
 /*===============================
@@ -357,9 +386,8 @@ MultipleChoice.prototype.restoreMultipleSelect = function () {
 
 MultipleChoice.prototype.processMCMASubmission = function (logFlag) {
     // Called when the submit button is clicked
-    this.getSubmittedOpts();
+    this.setLocalStorage();
     this.scoreMCMASubmission();
-    this.populateMCMALocalStorage();
     if (logFlag) {
        this.logMCMAsubmission();
     }
@@ -405,12 +433,7 @@ MultipleChoice.prototype.scoreMCMASubmission = function () {
     }
 };
 
-MultipleChoice.prototype.populateMCMALocalStorage = function () {
-    var storage_arr = [];
-    storage_arr.push(this.givenArray);
-    storage_arr.push(this.correctIndexList);
-    localStorage.setItem(eBookConfig.email + ":" + this.divid, storage_arr.join(";"));
-};
+
 
 MultipleChoice.prototype.logMCMAsubmission = function () {
     var answerInfo = "answer:" + this.givenlog.substring(0, this.givenlog.length - 1) + ":" + (this.correctCount == this.correctList.length ? "correct" : "no");
@@ -441,8 +464,7 @@ MultipleChoice.prototype.renderMCMAFeedBack = function () {
 
 MultipleChoice.prototype.processMCMFSubmission = function (logFlag) {
     // Called when the submit button is clicked
-    this.getSubmittedOpts();
-    this.populateMCMFLocalStorage();
+    this.setLocalStorage();
     this.scoreMCMFSubmission();
     if (logFlag) {
         this.logMCMFsubmission();
@@ -461,12 +483,7 @@ MultipleChoice.prototype.scoreMCMFSubmission = function () {
     }
 };
 
-MultipleChoice.prototype.populateMCMFLocalStorage = function () {
-    var storage_arr = [];
-    storage_arr.push(this.givenArray[0]);
-    storage_arr.push(this.correctIndexList[0]);
-    localStorage.setItem(eBookConfig.email + ":" + this.divid, storage_arr.join(";"));
-};
+
 
 MultipleChoice.prototype.logMCMFsubmission = function () {
     var answerInfo = "answer:" + this.givenArray[0] + ":" + (this.givenArray[0] == this.correctIndexList[0] ? "correct" : "no");
@@ -565,12 +582,11 @@ MultipleChoice.prototype.compareAnswers = function () {
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
 =================================*/
-$(document).ready(function () {
+$(document).bind("runestone:login-complete", function () {
     $("[data-component=multiplechoice]").each(function (index) {    // MC
         var opts = {"orig": this, 'useRunestoneServices':eBookConfig.useRunestoneServices};
         if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
             mcList[this.id] = new MultipleChoice(opts);
         }
     });
-
 });
