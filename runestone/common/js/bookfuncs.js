@@ -134,8 +134,8 @@ function gotUser(data, status, whatever) {
         'act': 'view',
         'div_id': window.location.pathname
     })
-		// Let runestone components know they can run their javascript now
-		$(document).trigger("runestone:login-complete");
+	// Let runestone components know they can run their javascript now
+	$(document).trigger("runestone:login-complete");
 }
 
 
@@ -175,6 +175,8 @@ function handleLoginLogout() {
         jQuery.get(eBookConfig.ajaxURL + 'getuser', null, gotUser)
     } else {
         $(document).trigger("runestone:logout")
+		// Let runestone components know they can run their javascript now
+		$(document).trigger("runestone:login-complete");
     }
 }
 
@@ -283,6 +285,8 @@ $(document).ready(function() {
         if (typeof eBookConfig === 'undefined') {
             console.log("eBookConfig is not defined.  This page must not be set up for Runestone");
         }
+		// Let runestone components know they can run their javascript now
+		$(document).trigger("runestone:login-complete");
     }
 });
 
