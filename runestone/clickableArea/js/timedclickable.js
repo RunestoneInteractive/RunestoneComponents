@@ -32,11 +32,18 @@ TimedClickableArea.prototype.renderTimedIcon = function (component) {
 };
 
 TimedClickableArea.prototype.checkCorrectTimed = function () {
-    // Returns if the question was correct.    Used for timed assessment grading.
+    // Returns if the question was correct, incorrect, or skipped (return null in the last case)
     if (this.correctNum === 0 && this.incorrectNum === 0) {
         this.correct = null;
     }
-    return this.correct;
+    switch (this.correct) {
+        case (true):
+            return "T";
+        case (false):
+            return "F";
+        default:
+            return null;
+    }
 };
 
 TimedClickableArea.prototype.hideFeedback = function () {
@@ -44,11 +51,12 @@ TimedClickableArea.prototype.hideFeedback = function () {
 };
 
 TimedClickableArea.prototype.processTimedSubmission = function () {
+    // Disable input, then evaluate component
     for (var i = 0; i < this.clickableArray.length; i++) {
         $(this.clickableArray[i]).css("cursor", "initial");
         this.clickableArray[i].onclick = function () {
             return;
-        }
+        };
     }
     this.clickableEval();
 };
