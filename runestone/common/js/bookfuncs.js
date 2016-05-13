@@ -172,7 +172,7 @@ function isLoggedIn() {
 
 function handleLoginLogout() {
     if (shouldLogin()) {
-        jQuery.get(eBookConfig.ajaxURL + 'getuser', null, gotUser)
+        jQuery.get(eBookConfig.ajaxURL + 'getuser', null, gotUser).error(function () { $(document).trigger("runestone:login-complete"); });
     } else {
         $(document).trigger("runestone:logout")
 		// Let runestone components know they can run their javascript now
