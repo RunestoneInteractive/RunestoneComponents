@@ -696,16 +696,9 @@ Timed.prototype.highlightNumberedList = function () {
 /*=======================================================
 === Function that calls the constructors on page load ===
 =======================================================*/
-$(document).ready(function () {
-    if (eBookConfig.useRunestoneServices) {
-        $(document).bind("runestone:login-complete", function () {
-            $("[data-component=timedAssessment]").each(function (index) {
-                TimedList[this.id] = new Timed({"orig": this});
-            });
-        });
-    } else {
-        $("[data-component=timedAssessment]").each(function (index) {
-            TimedList[this.id] = new Timed({"orig": this});
-        });
-    }
-})
+
+$(document).bind("runestone:login-complete", function () {
+    $("[data-component=timedAssessment]").each(function (index) {
+        TimedList[this.id] = new Timed({"orig": this});
+    });
+});
