@@ -330,16 +330,12 @@ Parsons.prototype.checkLocalStorage = function () {
     }
 };
 
-<<<<<<< HEAD
 // Will be implemented later to fix evaluation for parsons
 Parsons.prototype.reInitialize = function () {
     // this.pwidget.reInitialize()
     return null;
 };
 
-$(document).ready(function () {
-    $pjQ("[data-component=parsons]").each(function (index) {
-=======
 Parsons.prototype.setLocalStorage = function() {
     var hash = this.pwidget.getHash("#ul-parsons-sortableCode-" + this.counterId);
     localStorage.setItem(eBookConfig.email + this.divid, hash);
@@ -351,7 +347,6 @@ Parsons.prototype.setLocalStorage = function() {
 
 $(document).bind("runestone:login-complete", function () {
     $("[data-component=parsons]").each(function (index) {
->>>>>>> serverStorage
         if ($(this.parentNode).data("component") != "timedAssessment") {
            prsList[this.id] = new Parsons({"orig": this, "useRunestoneServices": eBookConfig.useRunestoneServices});
         }
