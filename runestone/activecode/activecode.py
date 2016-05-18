@@ -47,6 +47,7 @@ def setup(app):
     app.add_javascript('skulpt.min.js')
     app.add_javascript('skulpt-stdlib.js')
     app.add_javascript('clike.js')
+    app.add_javascript('timed_activecode.js')
 
     app.add_node(ActivcodeNode, html=(visit_ac_node, depart_ac_node))
 

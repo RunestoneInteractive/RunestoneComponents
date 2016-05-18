@@ -95,3 +95,7 @@
 .full_width ol {
 	max-width: 100% !important;
 }
+
+.ac-disabled {
+	pointer-events: none;
+}
