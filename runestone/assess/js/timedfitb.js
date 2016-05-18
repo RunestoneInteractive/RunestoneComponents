@@ -57,5 +57,5 @@ TimedFITB.prototype.processTimedSubmission = function () {
     for (var i = 0; i < this.blankArray.length; i++) {
         this.blankArray[i].disabled = true;
     }
-    this.checkFITBStorage();
+    this.startEvaluation();
 };
