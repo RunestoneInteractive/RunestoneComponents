@@ -95,28 +95,28 @@ Parsons.prototype.formatCode = function () {
 == Creating/appending new HTML tags ==
 ====================================*/
 Parsons.prototype.createParsonsView = function () {         // Create DOM elements
-    this.containingDiv = document.createElement("div");
-    $(this.containingDiv).addClass("parsons alert alert-warning");
-    this.containingDiv.id = "parsons-" + this.counterId;
+    this.containerDiv = document.createElement("div");
+    $(this.containerDiv).addClass("parsons alert alert-warning");
+    this.containerDiv.id = "parsons-" + this.counterId;
 
     this.parsTextDiv = document.createElement("div");
     $(this.parsTextDiv).addClass("parsons-text");
     this.parsTextDiv.innerHTML = this.question.innerHTML;
-    this.containingDiv.appendChild(this.parsTextDiv);
+    this.containerDiv.appendChild(this.parsTextDiv);
 
     this.leftClearDiv = document.createElement("div");
     this.leftClearDiv.style["clear"] = "left";
-    this.containingDiv.appendChild(this.leftClearDiv);
+    this.containerDiv.appendChild(this.leftClearDiv);
 
     this.origDiv = document.createElement("div");
     this.origDiv.id = "parsons-orig-" + this.counterId;
     this.origDiv.style["display"] = "none";
     this.origDiv.innerHTML = this.fmtCode;
-    this.containingDiv.appendChild(this.origDiv);
+    this.containerDiv.appendChild(this.origDiv);
 
     this.sortContainerDiv = document.createElement("div");
     $(this.sortContainerDiv).addClass("sortable-code-container");
-    this.containingDiv.appendChild(this.sortContainerDiv);
+    this.containerDiv.appendChild(this.sortContainerDiv);
 
     this.sortTrashDiv = document.createElement("div");
     this.sortTrashDiv.id = "parsons-sortableTrash-" + this.counterId;
@@ -134,7 +134,7 @@ Parsons.prototype.createParsonsView = function () {         // Create DOM elemen
 
     this.parsonsControlDiv = document.createElement("div");
     $(this.parsonsControlDiv).addClass("parsons-controls");
-    this.containingDiv.appendChild(this.parsonsControlDiv);
+    this.containerDiv.appendChild(this.parsonsControlDiv);
 
     this.checkButt = document.createElement("button");
     $(this.checkButt).attr("class", "btn btn-success");
@@ -155,7 +155,7 @@ Parsons.prototype.createParsonsView = function () {         // Create DOM elemen
     this.parsonsControlDiv.appendChild(this.messageDiv);
     $(this.messageDiv).hide();
 
-    $(this.origElem).replaceWith(this.containingDiv);
+    $(this.origElem).replaceWith(this.containerDiv);
 
     this.createParsonsWidget();
 };
@@ -330,6 +330,16 @@ Parsons.prototype.checkLocalStorage = function () {
     }
 };
 
+<<<<<<< HEAD
+// Will be implemented later to fix evaluation for parsons
+Parsons.prototype.reInitialize = function () {
+    // this.pwidget.reInitialize()
+    return null;
+};
+
+$(document).ready(function () {
+    $pjQ("[data-component=parsons]").each(function (index) {
+=======
 Parsons.prototype.setLocalStorage = function() {
     var hash = this.pwidget.getHash("#ul-parsons-sortableCode-" + this.counterId);
     localStorage.setItem(eBookConfig.email + this.divid, hash);
@@ -341,6 +351,7 @@ Parsons.prototype.setLocalStorage = function() {
 
 $(document).bind("runestone:login-complete", function () {
     $("[data-component=parsons]").each(function (index) {
+>>>>>>> serverStorage
         if ($(this.parentNode).data("component") != "timedAssessment") {
            prsList[this.id] = new Parsons({"orig": this, "useRunestoneServices": eBookConfig.useRunestoneServices});
         }

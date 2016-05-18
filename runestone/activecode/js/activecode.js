@@ -1370,7 +1370,8 @@ LiveCode.prototype.runProg = function() {
         }
 
         if (this.datafile) {
-            runspec['file_list'] = [[this.div2id[datafile],datafile]];
+            this.pushDataFile(this.datafile);
+            runspec['file_list'] = [[this.div2id[this.datafile],this.datafile]];
         }
         data = JSON.stringify({'run_spec': runspec});
         host = this.JOBE_SERVER + this.resource;
@@ -1461,7 +1462,7 @@ LiveCode.prototype.pushDataFile = function (datadiv) {
         var contentsb64 = btoa(contents);
         var data = JSON.stringify({ 'file_contents' : contentsb64 });
         var resource = '/jobe/index.php/restapi/files/' + file_id;
-        var host = JOBE_SERVER + resource;
+        var host = this.JOBE_SERVER + resource;
         var xhr = new XMLHttpRequest();
 
         if (this.div2id[datadiv] === undefined ) {
@@ -1470,7 +1471,7 @@ LiveCode.prototype.pushDataFile = function (datadiv) {
             xhr.open("PUT", host, true);
             xhr.setRequestHeader('Content-type', 'application/json');
             xhr.setRequestHeader('Accept', 'text/plain');
-            xhr.setRequestHeader('X-API-KEY', API_KEY);
+            xhr.setRequestHeader('X-API-KEY', this.API_KEY);
 
             xhr.onload = function () {
                 console.log("successfully sent file " + xhr.responseText);
