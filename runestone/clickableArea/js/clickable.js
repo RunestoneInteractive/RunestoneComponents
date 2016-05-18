@@ -153,23 +153,12 @@ ClickableArea.prototype.repopulateFromStorage = function (data, status, whatever
             console.log("Using server");
             this.clickedIndexArray = dataEval.answer.split(";");
             this.setLocalStorage(true, dataEval.correct);
+            this.finishRestoringAnswers();
         } else {
             this.checkLocalStorage();
         }
     } else {
         this.checkLocalStorage();
-    }
-    if (this.ccArray === undefined) {
-        this.modifyClickables(this.newDiv.childNodes);
-    } else {   // For use with Sphinx-rendered HTML
-        this.ccCounter = 0;
-        this.ccIndex = 0;
-        this.ciIndex = 0;
-        if (!this.isTable) {
-            this.modifyViaCC(this.newDiv.children);
-        } else {
-            this.modifyTableViaCC(this.newDiv.children);
-        }
     }
 };
 
@@ -194,6 +183,23 @@ ClickableArea.prototype.checkLocalStorage = function () {
                 }
                 this.logBookEvent({"event": "clickableArea", "act": this.clickedIndexArray.join(";"), "div_id": this.divid, "correct": (storageObj.correct ? "T" : "F")});
             }
+        }
+    }
+    this.finishRestoringAnswers();
+};
+
+ClickableArea.prototype.finishRestoringAnswers = function () {
+    // this code is used multipe times, so i made it into a function
+    if (this.ccArray === undefined) {
+        this.modifyClickables(this.newDiv.childNodes);
+    } else {   // For use with Sphinx-rendered HTML
+        this.ccCounter = 0;
+        this.ccIndex = 0;
+        this.ciIndex = 0;
+        if (!this.isTable) {
+            this.modifyViaCC(this.newDiv.children);
+        } else {
+            this.modifyTableViaCC(this.newDiv.children);
         }
     }
 };
