@@ -324,10 +324,22 @@ FITB.prototype.evaluateAnswers = function () {
     }
     if ($.inArray("", this.isCorrectArray) < 0 && $.inArray(false, this.isCorrectArray) < 0) {
         this.correct = true;
-    } else if ($.inArray(false, this.isCorrectArray) >= 0 && $.inArray("", this.isCorrectArray) < 0) {
+    } else if (this.isCompletelyBlank()) {
+        this.correct = null;
+    } else {
         this.correct = false;
     }
     this.setLocalStorage(this.correct);
+};
+
+FITB.prototype.isCompletelyBlank = function () {
+    // Returns true if the user didn't fill in any of the blanks, else false
+    for (var i = 0; i < this.isCorrectArray.length; i++) {
+        if (this.isCorrectArray[i] !== "") {
+            return false;
+        }
+    }
+    return true;
 };
 
 FITB.prototype.populateDisplayFeed = function (index, given) {

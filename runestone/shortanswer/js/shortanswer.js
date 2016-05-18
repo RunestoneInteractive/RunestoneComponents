@@ -179,7 +179,9 @@ ShortAnswer.prototype.loadJournal = function () {
 =================================*/
 $(document).ready(function () {
     $("[data-component=shortanswer]").each(function (index) {
-        saList[this.id] = new ShortAnswer({"orig": this, 'useRunestoneServices': eBookConfig.useRunestoneServices});
+        if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
+            saList[this.id] = new ShortAnswer({"orig": this, 'useRunestoneServices': eBookConfig.useRunestoneServices});
+        }
     });
 
 });
