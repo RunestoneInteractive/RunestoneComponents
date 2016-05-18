@@ -52,10 +52,10 @@ TimedFITB.prototype.hideFeedback = function () {
     this.feedBackDiv.style.display = "none";
 };
 
-TimedFITB.prototype.processTimedSubmission = function () {
+TimedFITB.prototype.processTimedSubmission = function (logFlag) {
     // Disable input, then evaluate component
     for (var i = 0; i < this.blankArray.length; i++) {
         this.blankArray[i].disabled = true;
     }
-    this.startEvaluation();
+    this.startEvaluation(logFlag);
 };

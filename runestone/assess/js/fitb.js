@@ -165,7 +165,7 @@ FITB.prototype.renderFITBButtons = function () {
         "name": "do answer"
     });
     this.submitButton.addEventListener("click", function () {
-        this.startEvaluation();
+        this.startEvaluation(true);
     }.bind(this), false);
     this.containerDiv.appendChild(document.createElement("br"));
     this.containerDiv.appendChild(document.createElement("br"));
@@ -290,14 +290,16 @@ FITB.prototype.setLocalStorage = function (correct) {
 ===     display feedback     ===
 ==============================*/
 
-FITB.prototype.startEvaluation = function () {
+FITB.prototype.startEvaluation = function (logFlag) {
     // Start of the evaulation chain
     this.isCorrectArray = [];
     this.displayFeed = [];
     this.evaluateAnswers();
     this.renderFITBFeedback();
-    var answerInfo = "answer:" + this.given_arr + ":" + (this.correct ? "correct" : "no");
-    this.logBookEvent({"event": "fillb", "act": answerInfo, "div_id": this.divid});
+    if (logFlag) {   // Sometimes we don't want to log the answer--for example, when timed exam questions are re-loaded
+        var answerInfo = "answer:" + this.given_arr + ":" + (this.correct ? "correct" : "no");
+        this.logBookEvent({"event": "fillb", "act": answerInfo, "div_id": this.divid});
+    }
     if (this.useRunestoneServices) {
         this.enableCompareButton();
     }

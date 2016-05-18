@@ -153,7 +153,7 @@ DragNDrop.prototype.createButtons = function () {
     });
 
     this.submitButton.onclick = function () {
-        this.dragEval();
+        this.dragEval(true);
     }.bind(this);
 
     this.resetButton = document.createElement("button");    // Check me button
@@ -315,7 +315,7 @@ DragNDrop.prototype.resetDraggables = function () {
 == Evaluation and feedback ==
 ===========================*/
 
-DragNDrop.prototype.dragEval = function () {
+DragNDrop.prototype.dragEval = function (logFlag) {
     this.correct = true;
     this.unansweredNum = 0;
     this.incorrectNum = 0;
@@ -334,10 +334,10 @@ DragNDrop.prototype.dragEval = function () {
         }
     }
     this.correctNum = this.dragNum - this.incorrectNum - this.unansweredNum;
-
     this.setLocalStorage(false, this.correct);
     this.renderFeedback();
-    this.logBookEvent({"event": "dragNdrop", "act": "submitDND", "answer": this.pregnantIndexArray.join(";"), "minHeight": this.minheight, "div_id": this.divid, "correct": this.correct});
+    if (logFlag)   // Sometimes we don't want to log the answers--for example, on re-load of a timed exam
+        this.logBookEvent({"event": "dragNdrop", "act": "submitDND", "answer": this.pregnantIndexArray.join(";"), "minHeight": this.minheight, "div_id": this.divid, "correct": this.correct});
 };
 
 DragNDrop.prototype.renderFeedback = function () {

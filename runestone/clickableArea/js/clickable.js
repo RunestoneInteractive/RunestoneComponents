@@ -115,7 +115,7 @@ ClickableArea.prototype.createButtons = function () {
     });
 
     this.submitButton.onclick = function () {
-        this.clickableEval();
+        this.clickableEval(true);
     }.bind(this);
 
     this.containerDiv.appendChild(this.submitButton);
@@ -357,7 +357,7 @@ ClickableArea.prototype.manageNewClickable = function (clickable) {
 == Evaluation and displaying feedback ==
 ======================================*/
 
-ClickableArea.prototype.clickableEval = function () {
+ClickableArea.prototype.clickableEval = function (logFlag) {
     // Evaluation is done by iterating over the correct/incorrect arrays and checking by class
     this.correct = true;
     this.correctNum = 0;
@@ -379,7 +379,9 @@ ClickableArea.prototype.clickableEval = function () {
         }
     }
     this.setLocalStorage(false, this.correct);
-    this.logBookEvent({"event": "clickableArea", "act": this.givenIndexArray.join(";"), "div_id": this.divid, "correct": (this.correct ? "T" : "F")});
+    if (logFlag) {   // Sometimes we don't want to log the answer; for example, on reload of timed exam questions
+        this.logBookEvent({"event": "clickableArea", "act": this.givenIndexArray.join(";"), "div_id": this.divid, "correct": (this.correct ? "T" : "F")});
+    }
     this.renderFeedback();
 };
 
