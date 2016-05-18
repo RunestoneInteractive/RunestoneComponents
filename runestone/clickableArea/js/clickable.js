@@ -22,11 +22,13 @@ ClickableArea.prototype = new RunestoneBase();
 /*=============================================
 == Initialize basic ClickableArea attributes ==
 =============================================*/
+
 ClickableArea.prototype.init = function (opts) {
     RunestoneBase.apply(this, arguments);
     var orig = opts.orig;    // entire <div> element that will be replaced by new HTML
     this.origElem = orig;
     this.divid = orig.id;
+    this.useRunestoneServices = opts.useRunestoneServices;
 
     this.clickableArray = [];   // holds all clickable elements
     this.correctArray = [];   // holds the IDs of all correct clickable span elements, used for eval
@@ -79,13 +81,12 @@ ClickableArea.prototype.getFeedback = function () {
     }
 };
 
-/*============================================
-== Check local storage and replace old HTML ==
-==  with our new elements that don't have   ==
-==  data-correct/data-incorrect attributes  ==
-============================================*/
+/*===========================================
+====   Functions generating final HTML   ====
+===========================================*/
 
 ClickableArea.prototype.renderNewElements = function () {
+    // wrapper function for generating everything
     this.containerDiv = document.createElement("div");
     this.containerDiv.appendChild(this.question);
     $(this.containerDiv).addClass("alert alert-warning");
@@ -98,23 +99,65 @@ ClickableArea.prototype.renderNewElements = function () {
     this.newDiv.innerHTML = newContent;
     this.containerDiv.appendChild(this.newDiv);
 
-    this.checkLocalStorage();
+    this.checkServer();
     this.createButtons();
     this.createFeedbackDiv();
 
     $(this.origElem).replaceWith(this.containerDiv);
-
 };
 
-ClickableArea.prototype.checkLocalStorage = function () {
-    this.hasStoredAnswers = false;
-    var len = localStorage.length;
-    if (len > 0) {
-        var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
-        if (ex !== null) {
-            this.hasStoredAnswers = true;
-            this.clickedIndexArray = ex.split(";");
+ClickableArea.prototype.createButtons = function () {
+    this.submitButton = document.createElement("button");    // Check me button
+    this.submitButton.textContent = "Check Me";
+    $(this.submitButton).attr({
+        "class": "btn btn-success",
+        "name": "do answer"
+    });
+
+    this.submitButton.onclick = function () {
+        this.clickableEval();
+    }.bind(this);
+
+    this.containerDiv.appendChild(this.submitButton);
+};
+
+ClickableArea.prototype.createFeedbackDiv = function () {
+    this.feedBackDiv = document.createElement("div");
+    this.containerDiv.appendChild(document.createElement("br"));
+    this.containerDiv.appendChild(this.feedBackDiv);
+};
+
+/*===================================
+=== Checking/loading from storage ===
+===================================*/
+
+ClickableArea.prototype.checkServer = function () {
+    // Check if the server has stored answer
+    if (this.useRunestoneServices) {
+        var data = {};
+        data.div_id = this.divid;
+        data.course = eBookConfig.course;
+        data.event = "clickableArea";
+        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
+    } else {
+        this.checkLocalStorage();   // just go right to local storage
+    }
+};
+
+ClickableArea.prototype.repopulateFromStorage = function (data, status, whatever) {
+    // decide whether to use the server's answer (if there is one) or to load from storage
+    if (data !== "") {
+        var dataEval = JSON.parse(data);
+        this.hasStoredAnswers = true;
+        if (this.shouldUseServer(dataEval)) {
+            console.log("Using server");
+            this.clickedIndexArray = dataEval.answer.split(";");
+            this.setLocalStorage(true, dataEval.correct);
+        } else {
+            this.checkLocalStorage();
         }
+    } else {
+        this.checkLocalStorage();
     }
     if (this.ccArray === undefined) {
         this.modifyClickables(this.newDiv.childNodes);
@@ -130,7 +173,75 @@ ClickableArea.prototype.checkLocalStorage = function () {
     }
 };
 
+ClickableArea.prototype.checkLocalStorage = function () {
+    console.log("Using LS");
+    // Gets previous answer data from local storage if it exists
+    this.hasStoredAnswers = false;
+    var len = localStorage.length;
+    if (len > 0) {
+        var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
+        if (ex !== null) {
+            this.hasStoredAnswers = true;
+            var storageObj = JSON.parse(ex);
+            this.clickedIndexArray = storageObj.answer.split(";");
+            if (this.useRunestoneServices) {
+                // log answer to server
+                this.givenIndexArray = [];
+                for (var i = 0; i < this.clickableArray.length; i++) {
+                    if ($(this.clickableArray[i]).hasClass("clickable-clicked")) {
+                        this.givenIndexArray.push(i);
+                    }
+                }
+                this.logBookEvent({"event": "clickableArea", "act": this.clickedIndexArray.join(";"), "div_id": this.divid, "correct": (storageObj.correct ? "T" : "F")});
+            }
+        }
+    }
+};
+
+ClickableArea.prototype.shouldUseServer = function (data) {
+    // returns true if server data is more recent than local storage or if server storage is correct
+    if (data.correct == "T" || localStorage.length === 0)
+        return true;
+    var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
+    if (ex === null)
+        return true;
+    var storedData = JSON.parse(ex);
+    if (data.answer == storedData.answer)
+        return true;
+    var storageDate = new Date(storedData.timestamp);
+    var serverDate = new Date(data.timestamp);
+    if (serverDate < storageDate)
+        return false;
+    return true;
+};
+
+ClickableArea.prototype.setLocalStorage = function (fromServer, correct) {
+    // Array of the indices of clicked elements is passed to local storage
+    var answer;
+    if (fromServer) {
+        answer = this.clickedIndexArray.join(";");
+    } else {
+        this.givenIndexArray = [];
+        for (var i = 0; i < this.clickableArray.length; i++) {
+            if ($(this.clickableArray[i]).hasClass("clickable-clicked")) {
+                this.givenIndexArray.push(i);
+            }
+        }
+        answer = this.givenIndexArray.join(";");
+    }
+
+
+    var timeStamp = new Date();
+    var storageObject = {"answer": answer, "correct": correct, "timestamp": timeStamp};
+    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", JSON.stringify(storageObject));
+};
+
+/*==========================
+=== Auxilliary functions ===
+==========================*/
+
 ClickableArea.prototype.modifyClickables = function (childNodes) {
+    // Strips the data-correct/data-incorrect labels and updates the correct/incorrect arrays
     for (var i = 0; i < childNodes.length; i++) {
         if ($(childNodes[i]).is("[data-correct]") || $(childNodes[i]).is("[data-incorrect]")) {
 
@@ -170,6 +281,7 @@ ClickableArea.prototype.modifyViaCC = function (children) {
 };
 
 ClickableArea.prototype.modifyTableViaCC = function (children) {
+    // table version of modifyViaCC
     var tComponentArr = [];
     for (var i = 0; i < children.length; i++) {
         if (children[i].nodeName === "TABLE") {
@@ -217,6 +329,7 @@ ClickableArea.prototype.modifyTableViaCC = function (children) {
 };
 
 ClickableArea.prototype.manageNewClickable = function (clickable) {
+    // adds the "clickable" functionality
     $(clickable).addClass("clickable");
 
     if (this.hasStoredAnswers) {   // Check if the element we're about to append to the pre was in local storage as clicked via its index
@@ -240,34 +353,12 @@ ClickableArea.prototype.manageNewClickable = function (clickable) {
     this.clickableCounter++;
 };
 
-ClickableArea.prototype.createButtons = function () {
-    this.submitButton = document.createElement("button");    // Check me button
-    this.submitButton.textContent = "Check Me";
-    $(this.submitButton).attr({
-        "class": "btn btn-success",
-        "name": "do answer"
-    });
-
-    this.submitButton.onclick = function () {
-        this.clickableEval();
-    }.bind(this);
-
-    this.containerDiv.appendChild(this.submitButton);
-};
-
-ClickableArea.prototype.createFeedbackDiv = function () {
-    this.feedBackDiv = document.createElement("div");
-    this.containerDiv.appendChild(document.createElement("br"));
-    this.containerDiv.appendChild(this.feedBackDiv);
-};
-
-/*========================================
-== Evaluation and setting local storage ==
-========================================*/
+/*======================================
+== Evaluation and displaying feedback ==
+======================================*/
 
 ClickableArea.prototype.clickableEval = function () {
     // Evaluation is done by iterating over the correct/incorrect arrays and checking by class
-    this.setLocalStorage();
     this.correct = true;
     this.correctNum = 0;
     this.incorrectNum = 0;
@@ -287,20 +378,9 @@ ClickableArea.prototype.clickableEval = function () {
             $(this.incorrectArray[i]).removeClass("clickable-incorrect");
         }
     }
-    var answerInfo = "clicked:" + this.givenIndexArray + ";" + (this.correct ? "correct" : "incorrect");
-    this.logBookEvent({"event": "clickableArea", "act": answerInfo, "div_id": this.divid});
+    this.setLocalStorage(false, this.correct);
+    this.logBookEvent({"event": "clickableArea", "act": this.givenIndexArray.join(";"), "div_id": this.divid, "correct": (this.correct ? "T" : "F")});
     this.renderFeedback();
-};
-
-ClickableArea.prototype.setLocalStorage = function () {
-    // Array of the indices of clicked elements is passed to local storage
-    this.givenIndexArray = [];
-    for (var i = 0; i < this.clickableArray.length; i++) {
-        if ($(this.clickableArray[i]).hasClass("clickable-clicked")) {
-            this.givenIndexArray.push(i);
-        }
-    }
-    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", this.givenIndexArray.join(";"));
 };
 
 ClickableArea.prototype.renderFeedback = function () {
@@ -320,10 +400,10 @@ ClickableArea.prototype.renderFeedback = function () {
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
 =================================*/
-$(document).ready(function () {
+$(document).bind("runestone:login-complete", function () {
     $("[data-component=clickablearea]").each(function (index) {
         if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
-            CAList[this.id] = new ClickableArea({"orig": this});
+            CAList[this.id] = new ClickableArea({"orig": this, "useRunestoneServices":eBookConfig.useRunestoneServices});
         }
     });
 });

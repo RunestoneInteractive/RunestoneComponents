@@ -94,6 +94,7 @@ Timed.prototype.renderTimedAssess = function () {
     this.renderNavControls();
     this.renderSubmitButton();
     this.renderFeedbackContainer();
+    this.useRunestoneServices = opts.useRunestoneServices;
 
     // Replace intermediate HTML with rendered HTML
     $(this.origElem).replaceWith(this.assessDiv);
@@ -362,7 +363,6 @@ Timed.prototype.handlePrevAssessment = function () {
 };
 
 Timed.prototype.startAssessment = function () {
-    this.tookTimedExam();
     if (!this.taken) {
         $(this.startBtn).hide();
         $(this.pauseBtn).attr("disabled", false);
@@ -502,18 +502,9 @@ Timed.prototype.tookTimedExam = function () {
         "background-color": "black",
         "color": "white"
     });
-    var len = localStorage.length;
-    if (len > 0) {
-        if (localStorage.getItem(eBookConfig.email + ":" + this.divid) !== null) {
-            this.taken = 1;
-            this.restoreFromStorage();
 
-        } else {
-            this.taken = 0;
-        }
-    } else {
-        this.taken = 0;
-    }
+    this.checkServer();
+
 };
 
 Timed.prototype.finishAssessment = function () {
@@ -601,8 +592,53 @@ Timed.prototype.logScore = function () {
     this.logBookEvent({"event": "timedExam", "act": "finish", "div_id": this.divid, "correct": this.score, "incorrect": this.incorrect, "skipped": this.skipped, "time": this.timeTaken});
 };
 
-Timed.prototype.restoreFromStorage = function () {
-    var tmpArr = localStorage.getItem(eBookConfig.email + ":" + this.divid).split(";");
+Timed.prototype.checkServer = function () {
+    if (this.useRunestoneServices) {
+        var data = {};
+        data.div_id = this.divid;
+        data.course = eBookConfig.course;
+        data.event = "timedExam";
+        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.useLocalStorage.bind(this));
+    } else {
+        this.repopulateFromStorage("", null, null);   // use dummy parameters so we go right to local storage
+    }
+};
+
+Timed.prototype.useLocalStorage = function () {
+    this.repopulateFromStorage("", null, null);
+};
+
+Timed.prototype.repopulateFromStorage = function (data, status, whatever) {
+    if (data !== "") {
+        this.taken = 1;
+        this.restoreFromStorage(eval(data));
+    } else {
+        var len = localStorage.length;
+        if (len > 0) {
+            if (localStorage.getItem(eBookConfig.email + ":" + this.divid) !== null) {
+                this.taken = 1;
+                this.restoreFromStorage("");
+
+            } else {
+                this.taken = 0;
+            }
+        } else {
+            this.taken = 0;
+        }
+    }
+};
+
+Timed.prototype.restoreFromStorage = function (data) {
+    var tmpArr;
+    if (data === "") {
+        tmpArr = localStorage.getItem(eBookConfig.email + ":" + this.divid).split(";");
+    } else {
+        stringArr = data.split(";");
+        tmpArr = [];
+        for (var i = 0; i < stringArr.length; i++) {
+            tmpArr.push(eval(stringArr[i]));
+        }
+    }
     if (tmpArr.length == 4)
     {
        this.score = tmpArr[0];
@@ -632,8 +668,7 @@ Timed.prototype.restoreFromStorage = function () {
 
 Timed.prototype.displayScore = function () {
 
-	if (this.showResults)
-    {
+	if (this.showResults) {
        // if we have some information
        if (this.correctStr.length > 0 || this.incorrectStr.length > 0 || this.skippedStr.length > 0)
        {
@@ -696,9 +731,8 @@ Timed.prototype.highlightNumberedList = function () {
 /*=======================================================
 === Function that calls the constructors on page load ===
 =======================================================*/
-
-$(document).bind("runestone:login-complete", function () {
+$(document).bind("runestone:login-complete",function () {
     $("[data-component=timedAssessment]").each(function (index) {
-        TimedList[this.id] = new Timed({"orig": this});
+        TimedList[this.id] = new Timed({"orig": this, "useRunestoneServices":eBookConfig.useRunestoneServices});
     });
 });
