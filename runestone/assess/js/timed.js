@@ -371,8 +371,8 @@ Timed.prototype.startAssessment = function () {
             $(this.timedDiv).show();
             this.increment();
             this.logBookEvent({"event": "timedExam", "act": "start", "div_id": this.divid});
-            var resultStr = "0; ;0; ;" + this.renderedQuestionArray.length +"; ;0";
-            localStorage.setItem(eBookConfig.email + ":" + this.divid, resultStr);
+            //var resultStr = "0; ;0; ;" + this.renderedQuestionArray.length +"; ;0";
+            localStorage.setItem(eBookConfig.email + ":" + this.divid, JSON.stringify([0,0,this.renderedQuestionArray.length,0]));
         }
     } else {
        this.handlePrevAssessment();
@@ -585,7 +585,8 @@ Timed.prototype.findTimeTaken = function () {
 Timed.prototype.storeScore = function () {
     var storage_arr = [];
     storage_arr.push(this.score, this.correctStr, this.incorrect, this.incorrectStr, this.skipped, this.skippedStr, this.timeTaken);
-    localStorage.setItem(eBookConfig.email + ":" + this.divid, storage_arr.join(";"));
+    var storageObj = JSON.stringify(storage_arr);
+    localStorage.setItem(eBookConfig.email + ":" + this.divid, storageObj);
 };
 
 Timed.prototype.logScore = function () {
@@ -598,9 +599,9 @@ Timed.prototype.checkServer = function () {
         data.div_id = this.divid;
         data.course = eBookConfig.course;
         data.event = "timedExam";
-        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.useLocalStorage.bind(this));
+        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
     } else {
-        this.repopulateFromStorage("", null, null);   // use dummy parameters so we go right to local storage
+        this.repopulateFromStorage("", null, null);
     }
 };
 
@@ -611,33 +612,61 @@ Timed.prototype.useLocalStorage = function () {
 Timed.prototype.repopulateFromStorage = function (data, status, whatever) {
     if (data !== "") {
         this.taken = 1;
-        this.restoreFromStorage(eval(data));
+        var dataEval = JSON.parse(data);
+        if (this.shouldUseServer(dataEval)) {
+            console.log("Using server");
+            this.restoreFromStorage(dataEval);
+        } else {
+            this.checkLocalStorage();
+        }
     } else {
-        var len = localStorage.length;
-        if (len > 0) {
-            if (localStorage.getItem(eBookConfig.email + ":" + this.divid) !== null) {
-                this.taken = 1;
-                this.restoreFromStorage("");
+        this.checkLocalStorage();
+    }
+};
 
-            } else {
-                this.taken = 0;
-            }
+Timed.prototype.shouldUseServer = function (data) {
+    // returns true if server data is more recent than local storage or if server storage is correct
+    if (localStorage.length === 0)
+        return true;
+    var storageObj = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
+    if (storageObj === null)
+        return true;
+    var storedData = JSON.parse(storageObj)[0];
+    if (storedData.length == 4) {
+        if (data.correct == storedData[0] && data.incorrect == storedData[1] && data.skipped == storedData[2] && data.timeTaken == storedData[3])
+            return true;
+    } else if (storedData.length == 7) {
+        if (data.correct == storedData[0] && data.incorrect == storedData[2] && data.skipped == storedData[4] && data.timeTaken == storedData[6])
+            return true;
+    }
+    var storageDate = new Date(JSON.parse(storageObj[1]).timestamp);
+    var serverDate = new Date(data.timestamp);
+    if (serverDate < storageDate)
+        return false;
+    return true;
+};
+
+Timed.prototype.checkLocalStorage = function () {
+    console.log("Using local storage");
+    var len = localStorage.length;
+    if (len > 0) {
+        if (localStorage.getItem(eBookConfig.email + ":" + this.divid) !== null) {
+            this.taken = 1;
+            this.restoreFromStorage("");
         } else {
             this.taken = 0;
         }
+    } else {
+        this.taken = 0;
     }
 };
 
 Timed.prototype.restoreFromStorage = function (data) {
     var tmpArr;
     if (data === "") {
-        tmpArr = localStorage.getItem(eBookConfig.email + ":" + this.divid).split(";");
+        tmpArr = JSON.parse(localStorage.getItem(eBookConfig.email + ":" + this.divid));
     } else {
-        stringArr = data.split(";");
-        tmpArr = [];
-        for (var i = 0; i < stringArr.length; i++) {
-            tmpArr.push(eval(stringArr[i]));
-        }
+        tmpArr = [parseInt(data.correct), parseInt(data.incorrect), parseInt(data.skipped), parseInt(data.timeTaken)];
     }
     if (tmpArr.length == 4)
     {
@@ -686,7 +715,7 @@ Timed.prototype.displayScore = function () {
           var scoreString = "Num Correct: " + this.score + "<br>" +
           "Num Wrong: " + this.incorrect + "<br>" +
           "Num Skipped: " + this.skipped + "<br>";
-          var numQuestions = this.score + this.incorrect + this.skipped
+          var numQuestions = this.score + this.incorrect + this.skipped;
           var percentCorrect = (this.score / numQuestions) * 100;
           scoreString += "Percent Correct: " + percentCorrect + "%";
           $(this.scoreDiv).html(scoreString);
