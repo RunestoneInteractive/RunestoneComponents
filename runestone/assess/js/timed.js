@@ -368,8 +368,9 @@ Timed.prototype.startAssessment = function () {
             $(this.timedDiv).show();
             this.increment();
             this.logBookEvent({"event": "timedExam", "act": "start", "div_id": this.divid});
-            //var resultStr = "0; ;0; ;" + this.renderedQuestionArray.length +"; ;0";
-            localStorage.setItem(eBookConfig.email + ":" + this.divid, JSON.stringify([0,0,this.renderedQuestionArray.length,0]));
+            var timeStamp = new Date();
+            var storageObj = {"answerData": [0,0,this.renderedQuestionArray.length,0], "timestamp": timeStamp};
+            localStorage.setItem(eBookConfig.email + ":" + this.divid, JSON.stringify(storageObj));
         }
     } else {
        this.handlePrevAssessment();
@@ -582,7 +583,8 @@ Timed.prototype.findTimeTaken = function () {
 Timed.prototype.storeScore = function () {
     var storage_arr = [];
     storage_arr.push(this.score, this.correctStr, this.incorrect, this.incorrectStr, this.skipped, this.skippedStr, this.timeTaken);
-    var storageObj = JSON.stringify(storage_arr);
+    var timeStamp = new Date();
+    var storageObj = JSON.stringify({"answerData": storage_arr, "timestamp": timeStamp});
     localStorage.setItem(eBookConfig.email + ":" + this.divid, storageObj);
 };
 
@@ -596,7 +598,7 @@ Timed.prototype.checkServer = function () {
         data.div_id = this.divid;
         data.course = eBookConfig.course;
         data.event = "timedExam";
-        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
+        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.useLocalStorage.bind(this));
     } else {
         this.repopulateFromStorage("", null, null);
     }
@@ -629,16 +631,16 @@ Timed.prototype.shouldUseServer = function (data) {
     // returns true if server data is more recent than local storage or if server storage is correct
     if (localStorage.length === 0)
         return true;
-    var storageObj = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
+    var storageObj = localStorage.getItem(eBookConfig.email + ":" + this.divid);
     if (storageObj === null)
         return true;
-    var storedData = JSON.parse(storageObj)[0];
+    var storedData = JSON.parse(storageObj).answerData;
     if (storedData.length == 4) {
         if (data.correct == storedData[0] && data.incorrect == storedData[1] && data.skipped == storedData[2] && data.timeTaken == storedData[3])
             return true;
     } else if (storedData.length == 7) {
         if (data.correct == storedData[0] && data.incorrect == storedData[2] && data.skipped == storedData[4] && data.timeTaken == storedData[6])
-            return true;
+            return false;   // In this case, because local storage has more info, we want to use that if it's consistent
     }
     var storageDate = new Date(JSON.parse(storageObj[1]).timestamp);
     var serverDate = new Date(data.timestamp);
@@ -654,6 +656,8 @@ Timed.prototype.checkLocalStorage = function () {
         if (localStorage.getItem(eBookConfig.email + ":" + this.divid) !== null) {
             this.taken = 1;
             this.restoreFromStorage("");
+            if (this.useRunestoneServices)
+                this.logScore();
         } else {
             this.taken = 0;
         }
@@ -665,9 +669,10 @@ Timed.prototype.checkLocalStorage = function () {
 Timed.prototype.restoreFromStorage = function (data) {
     var tmpArr;
     if (data === "") {
-        tmpArr = JSON.parse(localStorage.getItem(eBookConfig.email + ":" + this.divid));
+        tmpArr = JSON.parse(localStorage.getItem(eBookConfig.email + ":" + this.divid)).answerData;
     } else {
         tmpArr = [parseInt(data.correct), parseInt(data.incorrect), parseInt(data.skipped), parseInt(data.timeTaken)];
+        this.setLocalStorageFromServer(tmpArr);
     }
     if (tmpArr.length == 4)
     {
@@ -694,6 +699,10 @@ Timed.prototype.restoreFromStorage = function (data) {
     }
     this.displayScore();
 	this.showTime();
+};
+
+Timed.prototype.setLocalStorageFromServer = function (serverArr) {
+    // If the server array is more recent
 };
 
 Timed.prototype.displayScore = function () {
