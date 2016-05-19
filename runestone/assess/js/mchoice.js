@@ -295,7 +295,6 @@ MultipleChoice.prototype.repopulateFromStorage = function (data, status, whateve
     if (data !== "") {
         var dataEval = JSON.parse(data);
         if (this.shouldUseServer(dataEval)) {
-            console.log("Loading from server");
             var answers;
             if (this.multipleanswers) {
                 answers = dataEval.answer.split(",");
@@ -345,7 +344,6 @@ MultipleChoice.prototype.shouldUseServer = function (data) {
 MultipleChoice.prototype.checkLocalStorage = function () {
     // Repopulates MCMA questions with a user's previous answers,
     // which were stored into local storage.
-    console.log("Loading from local storage");
     var len = localStorage.length;
     if (len > 0) {
         var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid);

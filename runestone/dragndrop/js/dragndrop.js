@@ -370,7 +370,6 @@ DragNDrop.prototype.repopulateFromStorage = function (data, status, whatever) {
     if (data !== "") {
         var dataEval = JSON.parse(data);
         if (this.shouldUseServer(dataEval)) {
-            console.log("Loading from server");
             this.hasStoredDropzones = true;
             this.minheight = dataEval.minHeight;
             this.pregnantIndexArray = dataEval.answer.split(";");
@@ -386,7 +385,6 @@ DragNDrop.prototype.repopulateFromStorage = function (data, status, whatever) {
 };
 
 DragNDrop.prototype.checkLocalStorage = function () {
-    console.log("Loading from storage");
     this.hasStoredDropzones = false;
     var len = localStorage.length;
     if (len > 0) {

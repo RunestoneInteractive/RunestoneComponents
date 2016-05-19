@@ -278,7 +278,6 @@ Parsons.prototype.repopulateFromStorage = function (data, status, whatever) {
     if (data !== "") {
         var dataEval = JSON.parse(data);
         if (this.shouldUseServer(dataEval)) {
-            console.log("Loading from server");
             var solution = dataEval.answer;
             var trash = dataEval.trash;
             this.pwidget.createHTMLFromHashes(solution, trash);
@@ -312,7 +311,6 @@ Parsons.prototype.shouldUseServer = function (data) {
     return true;
 };
 Parsons.prototype.checkLocalStorage = function () {
-    console.log("Using local storage");
     if (localStorage.getItem(eBookConfig.email + this.divid) && localStorage.getItem(eBookConfig.email + this.divid + "-trash")) {
         try {
             var solution = localStorage.getItem(eBookConfig.email + this.divid);

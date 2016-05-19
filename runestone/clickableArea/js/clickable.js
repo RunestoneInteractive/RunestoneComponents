@@ -150,7 +150,6 @@ ClickableArea.prototype.repopulateFromStorage = function (data, status, whatever
         var dataEval = JSON.parse(data);
         this.hasStoredAnswers = true;
         if (this.shouldUseServer(dataEval)) {
-            console.log("Using server");
             this.clickedIndexArray = dataEval.answer.split(";");
             this.setLocalStorage(true, dataEval.correct);
             this.finishRestoringAnswers();
@@ -163,7 +162,6 @@ ClickableArea.prototype.repopulateFromStorage = function (data, status, whatever
 };
 
 ClickableArea.prototype.checkLocalStorage = function () {
-    console.log("Using LS");
     // Gets previous answer data from local storage if it exists
     this.hasStoredAnswers = false;
     var len = localStorage.length;

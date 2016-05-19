@@ -613,7 +613,6 @@ Timed.prototype.repopulateFromStorage = function (data, status, whatever) {
         this.taken = 1;
         var dataEval = JSON.parse(data);
         if (this.shouldUseServer(dataEval)) {
-            console.log("Using server");
             this.restoreFromStorage(dataEval);
         } else {
             this.checkLocalStorage();
@@ -650,7 +649,6 @@ Timed.prototype.shouldUseServer = function (data) {
 };
 
 Timed.prototype.checkLocalStorage = function () {
-    console.log("Using local storage");
     var len = localStorage.length;
     if (len > 0) {
         if (localStorage.getItem(eBookConfig.email + ":" + this.divid) !== null) {

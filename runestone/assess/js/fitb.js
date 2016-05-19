@@ -218,7 +218,6 @@ FITB.prototype.repopulateFromStorage = function (data, status, whatever) {
     if (data !== "") {
         var dataEval = JSON.parse(data);
         if (this.shouldUseServer(dataEval)) {
-            console.log("Using server");
             var arr = dataEval.answer.split(",");
             for (var i = 0; i < this.blankArray.length; i++) {
                 $(this.blankArray[i]).attr("value", arr[i]);
@@ -235,7 +234,6 @@ FITB.prototype.repopulateFromStorage = function (data, status, whatever) {
 
 FITB.prototype.checkLocalStorage = function () {
     // Loads previous answers from local storage if they exist
-    console.log("Using storage");
     var len = localStorage.length;
     if (len > 0) {
         var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
