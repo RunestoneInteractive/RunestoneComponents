@@ -101,9 +101,6 @@ Timed.prototype.renderTimedAssess = function () {
 
     // check if already taken and if so show results
     this.tookTimedExam();
-    if (this.taken) {
-       this.handlePrevAssessment();
-    }
 };
 
 Timed.prototype.renderContainer = function () {
@@ -621,6 +618,10 @@ Timed.prototype.repopulateFromStorage = function (data, status, whatever) {
         }
     } else {
         this.checkLocalStorage();
+    }
+
+    if (this.taken) {
+       this.handlePrevAssessment();
     }
 };
 
