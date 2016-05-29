@@ -31,6 +31,7 @@ def runestone_extensions():
     basedir = os.path.dirname(__file__)
     module_paths = [ x for x in os.listdir(basedir) if os.path.isdir(os.path.join(basedir,x))]
     modules = [ 'runestone.{}'.format(x) for x in module_paths if os.path.exists('{}/__init__.py'.format(os.path.join(basedir,x)))]
+    modules.remove('runestone.server')
     return modules
 
 from paver.easy import task, cmdopts, sh
