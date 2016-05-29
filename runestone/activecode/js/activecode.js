@@ -222,6 +222,10 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
         scrubber.type = "range";
         scrubber.min = 0;
         scrubber.max = this.history.length-1;
+        stitle = document.createElement('p');
+        stitle.innerHTML = "History";
+        $(stitle).css("font-size","xx-small");
+        scrubberDiv.appendChild(stitle);
         scrubberDiv.appendChild(scrubber);
         this.scrubberTime = document.createElement("p");
         this.scrubberTime.innerHTML = "Original";
