@@ -54,6 +54,11 @@ def addChapterInfoToDB(subChapD, chapTitles, course_id):
         dbname = 'bnmnetp_courselib'
 
     dburl = 'postgresql://{}@localhost/{}'.format(uname,dbname)
+
+
+    if all(name in os.environ for name in ['DBHOST', 'DBPASS', 'DBUSER', 'DBNAME']):
+        dburl = 'postgresql://{DBUSER}:{DBPASS}@{DBHOST}/{DBNAME}'.format(**os.environ)
+
     engine = create_engine(dburl)
     meta = MetaData()
     chapters = Table('chapters', meta, autoload=True, autoload_with=engine)
