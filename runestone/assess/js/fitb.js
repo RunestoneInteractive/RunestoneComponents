@@ -206,7 +206,7 @@ FITB.prototype.checkServer = function () {
         data.div_id = this.divid;
         data.course = eBookConfig.course;
         data.event = "fillb";
-        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
+        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
     } else {
         this.checkLocalStorage();
     }
@@ -215,14 +215,13 @@ FITB.prototype.checkServer = function () {
 
 FITB.prototype.repopulateFromStorage = function (data, status, whatever) {
     // decide whether to use the server's answer (if there is one) or to load from storage
-    if (data !== "") {
-        var dataEval = JSON.parse(data);
-        if (this.shouldUseServer(dataEval)) {
-            var arr = dataEval.answer.split(",");
+    if (data !== null) {
+        if (this.shouldUseServer(data)) {
+            var arr = data.answer.split(",");
             for (var i = 0; i < this.blankArray.length; i++) {
                 $(this.blankArray[i]).attr("value", arr[i]);
             }
-            this.setLocalStorage(dataEval.correct);   // We don't want to set this.correct here because that would interfere with timed grading functionality
+            this.setLocalStorage(data.correct);   // We don't want to set this.correct here because that would interfere with timed grading functionality
         } else {
             this.checkLocalStorage();
         }

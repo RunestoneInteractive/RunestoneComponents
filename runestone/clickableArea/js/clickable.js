@@ -138,7 +138,7 @@ ClickableArea.prototype.checkServer = function () {
         data.div_id = this.divid;
         data.course = eBookConfig.course;
         data.event = "clickableArea";
-        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
+        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
     } else {
         this.checkLocalStorage();   // just go right to local storage
     }
@@ -146,12 +146,11 @@ ClickableArea.prototype.checkServer = function () {
 
 ClickableArea.prototype.repopulateFromStorage = function (data, status, whatever) {
     // decide whether to use the server's answer (if there is one) or to load from storage
-    if (data !== "") {
-        var dataEval = JSON.parse(data);
+    if (data !== null) {
         this.hasStoredAnswers = true;
-        if (this.shouldUseServer(dataEval)) {
-            this.clickedIndexArray = dataEval.answer.split(";");
-            this.setLocalStorage(true, dataEval.correct);
+        if (this.shouldUseServer(data)) {
+            this.clickedIndexArray = data.answer.split(";");
+            this.setLocalStorage(true, data.correct);
             this.finishRestoringAnswers();
         } else {
             this.checkLocalStorage();

@@ -598,22 +598,21 @@ Timed.prototype.checkServer = function () {
         data.div_id = this.divid;
         data.course = eBookConfig.course;
         data.event = "timedExam";
-        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.useLocalStorage.bind(this));
+        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.useLocalStorage.bind(this));
     } else {
-        this.repopulateFromStorage("", null, null);
+        this.repopulateFromStorage(null, null, null);
     }
 };
 
 Timed.prototype.useLocalStorage = function () {
-    this.repopulateFromStorage("", null, null);
+    this.repopulateFromStorage(null, null, null);
 };
 
 Timed.prototype.repopulateFromStorage = function (data, status, whatever) {
-    if (data !== "") {
+    if (data !== null) {
         this.taken = 1;
-        var dataEval = JSON.parse(data);
-        if (this.shouldUseServer(dataEval)) {
-            this.restoreFromStorage(dataEval);
+        if (this.shouldUseServer(data)) {
+            this.restoreFromStorage(data);
         } else {
             this.checkLocalStorage();
         }

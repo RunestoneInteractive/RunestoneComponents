@@ -284,7 +284,7 @@ MultipleChoice.prototype.checkServer = function () {
         data.div_id = this.divid;
         data.course = eBookConfig.course;
         data.event = "mChoice";
-        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
+        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
     } else {
         this.checkLocalStorage();   // just go right to local storage
     }
@@ -292,14 +292,13 @@ MultipleChoice.prototype.checkServer = function () {
 };
 
 MultipleChoice.prototype.repopulateFromStorage = function (data, status, whatever) {
-    if (data !== "") {
-        var dataEval = JSON.parse(data);
-        if (this.shouldUseServer(dataEval)) {
+    if (data !== null) {
+        if (this.shouldUseServer(data)) {
             var answers;
             if (this.multipleanswers) {
-                answers = dataEval.answer.split(",");
+                answers = data.answer.split(",");
             } else {
-                answers = [dataEval.answer.charCodeAt(0) - 97];   // Get index for lowercase letter
+                answers = [data.answer.charCodeAt(0) - 97];   // Get index for lowercase letter
             }
             for (var a = 0; a < answers.length; a++) {
                 var index = answers[a];

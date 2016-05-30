@@ -360,20 +360,19 @@ DragNDrop.prototype.checkServer = function () {
         data.div_id = this.divid;
         data.course = eBookConfig.course;
         data.event = "dragNdrop";
-        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
+        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
     } else {
         this.checkLocalStorage();
     }
 };
 
 DragNDrop.prototype.repopulateFromStorage = function (data, status, whatever) {
-    if (data !== "") {
-        var dataEval = JSON.parse(data);
-        if (this.shouldUseServer(dataEval)) {
+    if (data !== null) {
+        if (this.shouldUseServer(data)) {
             this.hasStoredDropzones = true;
-            this.minheight = dataEval.minHeight;
-            this.pregnantIndexArray = dataEval.answer.split(";");
-            this.setLocalStorage(true, dataEval.correct);
+            this.minheight = data.minHeight;
+            this.pregnantIndexArray = data.answer.split(";");
+            this.setLocalStorage(true, data.correct);
             this.finishSettingUp();
         } else {
             this.checkLocalStorage();

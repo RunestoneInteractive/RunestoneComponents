@@ -266,7 +266,7 @@ Parsons.prototype.checkServer = function () {
         data.div_id = this.divid;
         data.course = eBookConfig.course;
         data.event = "parsons";
-        jQuery.get(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this)).done(this.styleNewHTML.bind(this));
+        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this)).done(this.styleNewHTML.bind(this));
     } else {
         this.checkLocalStorage();
         this.styleNewHTML();
@@ -275,11 +275,10 @@ Parsons.prototype.checkServer = function () {
 
 Parsons.prototype.repopulateFromStorage = function (data, status, whatever) {
     // decide whether to use the server's answer (if there is one) or to load from storage
-    if (data !== "") {
-        var dataEval = JSON.parse(data);
-        if (this.shouldUseServer(dataEval)) {
-            var solution = dataEval.answer;
-            var trash = dataEval.trash;
+    if (data !== null) {
+        if (this.shouldUseServer(data)) {
+            var solution = data.answer;
+            var trash = data.trash;
             this.pwidget.createHTMLFromHashes(solution, trash);
             this.pwidget.getFeedback();
             this.setLocalStorage();
