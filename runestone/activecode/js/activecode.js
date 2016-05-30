@@ -119,7 +119,7 @@ ActiveCode.prototype.createControls = function () {
 
     // Run
     var butt = document.createElement("button");
-    $(butt).text("Run");
+    $(butt).text("Run/Save");
     $(butt).addClass("btn btn-success");
     ctrlDiv.appendChild(butt);
     this.runButton = butt;
