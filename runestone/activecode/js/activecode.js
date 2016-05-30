@@ -217,25 +217,32 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
 
         var scrubberDiv = document.createElement("div");
         $(scrubberDiv).css("display","inline-block");
+        $(scrubberDiv).css("margin-left","10px");
+        $(scrubberDiv).css("margin-right","10px");
         $(scrubberDiv).width("180px");
-        scrubber = document.createElement("input");
-        scrubber.type = "range";
-        scrubber.min = 0;
-        scrubber.max = this.history.length-1;
-        stitle = document.createElement('p');
-        stitle.innerHTML = "History";
-        $(stitle).css("font-size","xx-small");
-        scrubberDiv.appendChild(stitle);
+        scrubber = document.createElement("div");
+        var slideit = function() {
+            this.editor.setValue(this.history[$(scrubber).slider("value")]);
+            var curVal = this.timestamps[$(scrubber).slider("value")];
+            //this.scrubberTime.innerHTML = curVal;
+            var tooltip = '<div class="sltooltip"><div class="sltooltip-inner">' +
+                curVal + '</div><div class="sltooltip-arrow"></div></div>';
+            $(scrubber).find(".ui-slider-handle").html(tooltip);
+            setTimeout(function () {
+                $(scrubber).find(".sltooltip").fadeOut()
+            }, 4000);
+        }.bind(this);
+        $(scrubber).slider({
+            max: this.history.length-1,
+            value: this.history.length-1,
+            slide: slideit,
+            change: slideit
+        });
         scrubberDiv.appendChild(scrubber);
-        this.scrubberTime = document.createElement("p");
-        this.scrubberTime.innerHTML = "Original";
-        $(this.scrubberTime).css("font-size","xx-small");
-        scrubberDiv.appendChild(this.scrubberTime);
 
         if (pos_last) {
-            scrubber.value = scrubber.max
+            scrubber.value = this.history.length-1
             this.editor.setValue(this.history[scrubber.value]);
-            this.scrubberTime.innerHTML = this.timestamps[scrubber.value]
         } else {
             scrubber.value = 0;
         }
@@ -244,18 +251,6 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
         this.histButton = null;
         this.historyScrubber = scrubber;
         $(scrubberDiv).insertAfter(this.runButton)
-
-        scrubber.onmousemove = function() {
-            if (isMouseDown) {
-                this.editor.setValue(this.history[scrubber.value]);
-                this.scrubberTime.innerHTML = this.timestamps[scrubber.value]
-            }
-        }.bind(this);
-
-        scrubber.onclick = function() {
-                this.editor.setValue(this.history[scrubber.value]);
-                this.scrubberTime.innerHTML = this.timestamps[scrubber.value]
-        }.bind(this);
 
     }.bind(this));
 }
