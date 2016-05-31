@@ -50,7 +50,7 @@ TimedClickableArea.prototype.hideFeedback = function () {
     $(this.feedBackDiv).hide();
 };
 
-TimedClickableArea.prototype.processTimedSubmission = function () {
+TimedClickableArea.prototype.processTimedSubmission = function (logFlag) {
     // Disable input, then evaluate component
     for (var i = 0; i < this.clickableArray.length; i++) {
         $(this.clickableArray[i]).css("cursor", "initial");
@@ -58,5 +58,5 @@ TimedClickableArea.prototype.processTimedSubmission = function () {
             return;
         };
     }
-    this.clickableEval();
+    this.clickableEval(logFlag);
 };

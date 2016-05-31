@@ -134,8 +134,7 @@ function gotUser(data, status, whatever) {
         'act': 'view',
         'div_id': window.location.pathname
     })
-	// Let runestone components know they can run their javascript now
-	$(document).trigger("runestone:login-complete");
+	notifyRunestoneComponents();
 }
 
 
@@ -172,11 +171,11 @@ function isLoggedIn() {
 
 function handleLoginLogout() {
     if (shouldLogin()) {
-        jQuery.get(eBookConfig.ajaxURL + 'getuser', null, gotUser).error(function () { $(document).trigger("runestone:login-complete"); });
+        jQuery.get(eBookConfig.ajaxURL + 'getuser', null, gotUser).error(notifyRunestoneComponents);
     } else {
         $(document).trigger("runestone:logout")
 		// Let runestone components know they can run their javascript now
-		$(document).trigger("runestone:login-complete");
+		notifyRunestoneComponents();
     }
 }
 
@@ -232,6 +231,12 @@ function setNumUsers(data) {
     $("#totalusers").html(d.numusers);
 }
 
+function notifyRunestoneComponents() {
+	// Runestone components wait until login process is over to load components because of storage issues
+	$(document).trigger("runestone:login-complete");
+	if (typeof $pjQ !== 'undefined')
+		$pjQ(document).trigger("runestone:login-complete");   // for parsons components which are using a different version of jQuery
+}
 
 //
 // Nice interface for localstore  -- Thanks acbart
@@ -285,8 +290,7 @@ $(document).ready(function() {
         if (typeof eBookConfig === 'undefined') {
             console.log("eBookConfig is not defined.  This page must not be set up for Runestone");
         }
-		// Let runestone components know they can run their javascript now
-		$(document).trigger("runestone:login-complete");
+		notifyRunestoneComponents();
     }
 });
 

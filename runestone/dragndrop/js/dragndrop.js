@@ -28,7 +28,7 @@ DragNDrop.prototype.init = function (opts) {
     var orig = opts.orig;    // entire <ul> element that will be replaced by new HTML
     this.origElem = orig;
     this.divid = orig.id;
-
+    this.useRunestoneServices = opts.useRunestoneServices;
     this.random = false;
     if ($(this.origElem).is("[data-random]")) {
         this.random = true;
@@ -96,7 +96,10 @@ DragNDrop.prototype.createNewElements = function () {
     this.dragDropWrapDiv.appendChild(this.dropZoneDiv);
 
     this.createButtons();
-    this.checkLocalStorage();
+    this.checkServer();
+};
+
+DragNDrop.prototype.finishSettingUp = function () {
     this.appendReplacementSpans();
     this.renderFeedbackDiv();
 
@@ -150,7 +153,7 @@ DragNDrop.prototype.createButtons = function () {
     });
 
     this.submitButton.onclick = function () {
-        this.dragEval();
+        this.dragEval(true);
     }.bind(this);
 
     this.resetButton = document.createElement("button");    // Check me button
@@ -194,6 +197,7 @@ DragNDrop.prototype.appendReplacementSpans = function () {
 };
 
 DragNDrop.prototype.setEventListeners = function (dgSpan, dpSpan) {
+    // Adds HTML5 "drag and drop" UI functionality
     dgSpan.addEventListener("dragstart", function (ev) {
         ev.dataTransfer.setData("draggableID", ev.target.id);
     });
@@ -248,7 +252,8 @@ DragNDrop.prototype.renderFeedbackDiv = function () {
 /*=======================
 == Auxiliary functions ==
 =======================*/
-DragNDrop.prototype.strangerDanger = function (testSpan) {   // Returns true if the test span doesn't belong to this instance of DragNDrop
+DragNDrop.prototype.strangerDanger = function (testSpan) {
+    // Returns true if the test span doesn't belong to this instance of DragNDrop
     var strangerDanger = true;
     for (var i = 0; i < this.dragPairArray.length; i++) {
         if (testSpan === this.dragPairArray[i][0]) {
@@ -257,7 +262,8 @@ DragNDrop.prototype.strangerDanger = function (testSpan) {   // Returns true if 
     }
     return strangerDanger;
 };
-DragNDrop.prototype.hasNoDragChild = function (parent) {  // Ensures that each dropZoneDiv can have only one draggable child
+DragNDrop.prototype.hasNoDragChild = function (parent) {
+    // Ensures that each dropZoneDiv can have only one draggable child
     var counter = 0;
     for (var i = 0; i < parent.childNodes.length; i++) {
         if ($(parent.childNodes[i]).attr("draggable") === "true") {
@@ -279,6 +285,7 @@ DragNDrop.prototype.createIndexArray = function () {
 };
 
 DragNDrop.prototype.randomizeIndexArray = function () {
+    // Shuffles around indices so the matchable elements aren't in a predictable order
     var currentIndex = this.indexArray.length, temporaryValue, randomIndex;
     // While there remain elements to shuffle...
     while (currentIndex !== 0) {
@@ -308,7 +315,7 @@ DragNDrop.prototype.resetDraggables = function () {
 == Evaluation and feedback ==
 ===========================*/
 
-DragNDrop.prototype.dragEval = function () {
+DragNDrop.prototype.dragEval = function (logFlag) {
     this.correct = true;
     this.unansweredNum = 0;
     this.incorrectNum = 0;
@@ -327,12 +334,12 @@ DragNDrop.prototype.dragEval = function () {
         }
     }
     this.correctNum = this.dragNum - this.incorrectNum - this.unansweredNum;
-
-    var answerInfo = "Number-correct:" + this.correctNum + ":number-incorrect:" + this.incorrectNum + ":number-unanswered:" + this.unansweredNum;
-    this.logBookEvent({"event": "dragNdrop", "act": answerInfo, "div_id": this.divid});
-    this.setLocalStorage();
+    this.setLocalStorage(false, this.correct);
     this.renderFeedback();
+    if (logFlag)   // Sometimes we don't want to log the answers--for example, on re-load of a timed exam
+        this.logBookEvent({"event": "dragNdrop", "act": "submitDND", "answer": this.pregnantIndexArray.join(";"), "minHeight": this.minheight, "div_id": this.divid, "correct": this.correct});
 };
+
 DragNDrop.prototype.renderFeedback = function () {
     this.feedBackDiv.style.display = "block";
     if (this.correct) {
@@ -343,47 +350,105 @@ DragNDrop.prototype.renderFeedback = function () {
         $(this.feedBackDiv).attr("class", "alert alert-danger draggable-feedback");
     }
 };
-/*===============================
-== Local storage functionality ==
-===============================*/
-DragNDrop.prototype.setLocalStorage = function () {
-    this.pregnantIndexArray = [];
-    for (var i = 0; i < this.dragPairArray.length; i++) {
-        if (!this.hasNoDragChild(this.dragPairArray[i][1])) {
-            for (var j = 0; j < this.dragPairArray.length; j++) {
-                if ($(this.dragPairArray[i][1]).has(this.dragPairArray[j][0]).length) {
-                    this.pregnantIndexArray.push(j);
-                }
-            }
-        } else {
-            this.pregnantIndexArray.push(-1);
-        }
+/*===================================
+=== Checking/loading from storage ===
+===================================*/
+
+DragNDrop.prototype.checkServer = function () {
+    if (this.useRunestoneServices) {
+        var data = {};
+        data.div_id = this.divid;
+        data.course = eBookConfig.course;
+        data.event = "dragNdrop";
+        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
+    } else {
+        this.checkLocalStorage();
     }
-    var tmp = this.pregnantIndexArray.join(";") + "_split_" + this.minheight;
-    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-dragInfo", tmp);
+};
+
+DragNDrop.prototype.repopulateFromStorage = function (data, status, whatever) {
+    if (data !== null) {
+        if (this.shouldUseServer(data)) {
+            this.hasStoredDropzones = true;
+            this.minheight = data.minHeight;
+            this.pregnantIndexArray = data.answer.split(";");
+            this.setLocalStorage(true, data.correct);
+            this.finishSettingUp();
+        } else {
+            this.checkLocalStorage();
+        }
+    } else {
+        this.checkLocalStorage();
+    }
+
 };
 
 DragNDrop.prototype.checkLocalStorage = function () {
-    this.hasStoredDropZones = false;
+    this.hasStoredDropzones = false;
     var len = localStorage.length;
     if (len > 0) {
         var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-dragInfo");
         if (ex !== null) {
             this.hasStoredDropzones = true;
-            this.minheight = ex.split("_split_")[1];
-            this.pregnantIndexArray = ex.split("_split_")[0].split(";");
+            var storedObj = JSON.parse(ex);
+            this.minheight = storedObj.minHeight;
+            this.pregnantIndexArray = storedObj.answer.split(";");
+            if (this.useRunestoneServices) {
+                // store answer in database
+                this.logBookEvent({"event": "dragNdrop", "act": "submitDND", "answer": this.pregnantIndexArray.join(";"), "minHeight": this.minheight, "div_id": this.divid, "correct": storedObj.correct});
+            }
         }
-
     }
+    this.finishSettingUp();
+};
+
+DragNDrop.prototype.shouldUseServer = function (data) {
+    // returns true if server data is more recent than local storage or if server storage is correct
+    if (data.correct == "T" || localStorage.length === 0)
+        return true;
+    var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-dragInfo");
+    var x = 0;
+    if (ex === null)
+        return true;
+    var storedData = JSON.parse(ex);
+    if (data.answer == storedData.answer)
+        return true;
+    var storageDate = new Date(storedData.timestamp);
+    var serverDate = new Date(data.timestamp);
+    if (serverDate < storageDate)
+        return false;
+    return true;
+};
+
+DragNDrop.prototype.setLocalStorage = function (fromServer, correct) {
+    if (!fromServer) {   // If we loaded from the server, then pregnantIndexArray is already defined
+        this.pregnantIndexArray = [];
+        for (var i = 0; i < this.dragPairArray.length; i++) {
+            if (!this.hasNoDragChild(this.dragPairArray[i][1])) {
+                for (var j = 0; j < this.dragPairArray.length; j++) {
+                    if ($(this.dragPairArray[i][1]).has(this.dragPairArray[j][0]).length) {
+                        this.pregnantIndexArray.push(j);
+                    }
+                }
+            } else {
+                this.pregnantIndexArray.push(-1);
+            }
+        }
+    }
+
+    var timeStamp = new Date();
+    var storageObj = {"answer": this.pregnantIndexArray.join(";"), "minHeight": this.minheight, "timestamp": timeStamp, "correct": correct};
+    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-dragInfo", JSON.stringify(storageObj));
 };
 /*=================================
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
 =================================*/
-$(document).ready(function () {
+$(document).bind("runestone:login-complete", function () {
     $("[data-component=dragndrop]").each(function (index) {
-        if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
-            ddList[this.id] = new DragNDrop({"orig": this});
+        var opts = {"orig": this, 'useRunestoneServices':eBookConfig.useRunestoneServices};
+        if ($(this.parentNode).data("component") !== "timedAssessment") {   // If this element exists within a timed component, don't render it here
+            ddList[this.id] = new DragNDrop(opts);
         }
     });
 });

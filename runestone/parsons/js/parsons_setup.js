@@ -27,6 +27,7 @@ Parsons.prototype.init = function (opts) {
     RunestoneBase.apply(this, arguments);
     var orig = opts.orig;     // entire <pre> element that will be replaced by new HTML
     this.origElem = orig;
+    this.useRunestoneServices = opts.useRunestoneServices;
     this.divid = orig.id;
     this.maxdist = $(orig).data('maxdist');
     this.children = this.origElem.childNodes;     // this contains all of the child elements of the entire tag...
@@ -34,6 +35,7 @@ Parsons.prototype.init = function (opts) {
     this.question = null;
     Parsons.counter++;     //    Unique identifier
     this.counterId = Parsons.counter;
+    this.loadingFromStorage = true;   // See displayErrors() for use
 
     this.getQuestion();
     this.formatCode();
@@ -180,10 +182,7 @@ Parsons.prototype.setButtonFunctions = function () {
     }.bind(this));
     $pjQ(this.checkButt).click(function (event) {
         event.preventDefault();
-        var hash = this.pwidget.getHash("#ul-parsons-sortableCode-" + this.counterId);
-        localStorage.setItem(this.divid, hash);
-        hash = this.pwidget.getHash("#ul-parsons-sortableTrash-" + this.counterId);
-        localStorage.setItem(this.divid + "-trash", hash);
+        this.setLocalStorage();
 
         this.pwidget.getFeedback();
         $(this.messageDiv).fadeIn(100);
@@ -215,8 +214,7 @@ Parsons.prototype.createParsonsWidget = function () {
 
     this.pwidget.init($pjQ(this.origDiv).text());
     this.pwidget.shuffleLines();
-    this.tryLocalStorage();
-    this.styleNewHTML();
+    this.checkServer();
 };
 
 Parsons.prototype.styleNewHTML = function () {
@@ -239,31 +237,93 @@ Parsons.prototype.styleNewHTML = function () {
 };
 
 Parsons.prototype.displayErrors = function (fb) {     // Feedback function
+    var correct;
     if (fb.errors.length > 0) {
-        var hash = this.pwidget.getHash("#ul-parsons-sortableCode-" + this.counterId);
+        correct = "F";
         $(this.messageDiv).fadeIn(500);
         $(this.messageDiv).attr("class", "alert alert-danger");
         $(this.messageDiv).html(fb.errors[0]);
-        this.logBookEvent({"event": "parsons", "act": hash, "div_id": this.divid});
     } else {
-        this.logBookEvent({"event": "parsons", "act": "yes", "div_id": this.divid});
+        correct = "T";
         $(this.messageDiv).fadeIn(100);
         $(this.messageDiv).attr("class", "alert alert-success");
         $(this.messageDiv).html("Perfect!");
     }
+    // Don't automatically log event on page load
+    if (!this.loadingFromStorage) {
+        var answer = this.pwidget.getHash("#ul-parsons-sortableCode-" + this.counterId);
+        var trash = this.pwidget.getHash("#ul-parsons-sortableTrash-" + this.counterId);
+        this.logBookEvent({"event": "parsons", "act": "yes", "correct":correct,"answer": answer, "trash": trash, "div_id": this.divid});
+
+    }
+    this.loadingFromStorage = false;
 };
 
-Parsons.prototype.tryLocalStorage = function () {
-    if (localStorage.getItem(this.divid) && localStorage.getItem(this.divid + "-trash")) {
-        try {
-            var solution = localStorage.getItem(this.divid);
-            var trash = localStorage.getItem(this.divid + "-trash");
+Parsons.prototype.checkServer = function () {
+    // Check if the server has stored answer
+    if (this.useRunestoneServices) {
+        var data = {};
+        data.div_id = this.divid;
+        data.course = eBookConfig.course;
+        data.event = "parsons";
+        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this)).done(this.styleNewHTML.bind(this));
+    } else {
+        this.checkLocalStorage();
+        this.styleNewHTML();
+    }
+};
+
+Parsons.prototype.repopulateFromStorage = function (data, status, whatever) {
+    // decide whether to use the server's answer (if there is one) or to load from storage
+    if (data !== null) {
+        if (this.shouldUseServer(data)) {
+            var solution = data.answer;
+            var trash = data.trash;
             this.pwidget.createHTMLFromHashes(solution, trash);
+            this.pwidget.getFeedback();
+            this.setLocalStorage();
+        } else {
+            this.checkLocalStorage();
+        }
+    } else {
+        this.checkLocalStorage();
+    }
+};
+
+Parsons.prototype.shouldUseServer = function (data) {
+    // returns true if server data is more recent than local storage or if server storage is correct
+    if (data.correct == "T" || localStorage.length === 0)
+        return true;
+    var storedAnswer = localStorage.getItem(eBookConfig.email + this.divid);
+    var storedTrash = localStorage.getItem(eBookConfig.email + this.divid + "-trash");
+    var storedDate = localStorage.getItem(eBookConfig.email + this.divid + "-date");
+
+    if (storedAnswer === null || storedTrash === null || storedDate === null)
+        return true;
+    if (data.answer == storedAnswer && data.trash == storedTrash)
+        return true;
+    var timeStamp = JSON.parse(storedDate);
+    var storageDate = new Date(timeStamp);
+    var serverDate = new Date(data.timestamp);
+    if (serverDate < storageDate)
+        return false;
+    return true;
+};
+Parsons.prototype.checkLocalStorage = function () {
+    if (localStorage.getItem(eBookConfig.email + this.divid) && localStorage.getItem(eBookConfig.email + this.divid + "-trash")) {
+        try {
+            var solution = localStorage.getItem(eBookConfig.email + this.divid);
+            var trash = localStorage.getItem(eBookConfig.email + this.divid + "-trash");
+            this.pwidget.createHTMLFromHashes(solution, trash);
+            if (this.useRunestoneServices)
+                this.loadingFromStorage = false;   // Admittedly a non-straightforward way to log, but it works well
             this.pwidget.getFeedback();
         } catch(err) {
             var text = "An error occured restoring old " + this.divid + " state.    Error: ";
             console.log(text + err.message);
         }
+    } else {
+        this.loadingFromStorage = false;
     }
 };
 
@@ -273,11 +333,19 @@ Parsons.prototype.reInitialize = function () {
     return null;
 };
 
-$(document).ready(function () {
-    $pjQ("[data-component=parsons]").each(function (index) {
+Parsons.prototype.setLocalStorage = function() {
+    var hash = this.pwidget.getHash("#ul-parsons-sortableCode-" + this.counterId);
+    localStorage.setItem(eBookConfig.email + this.divid, hash);
+    hash = this.pwidget.getHash("#ul-parsons-sortableTrash-" + this.counterId);
+    localStorage.setItem(eBookConfig.email + this.divid + "-trash", hash);
+    var timeStamp = new Date();
+    localStorage.setItem(eBookConfig.email + this.divid + "-date", JSON.stringify(timeStamp));
+};
+
+$(document).bind("runestone:login-complete", function () {
+    $("[data-component=parsons]").each(function (index) {
         if ($(this.parentNode).data("component") != "timedAssessment") {
            prsList[this.id] = new Parsons({"orig": this, "useRunestoneServices": eBookConfig.useRunestoneServices});
         }
     });
-
 });
