@@ -820,8 +820,12 @@
       // Consecutive lines to be dragged as a single block of code have strings "\\n" to
       // represent newlines => replace them with actual new line characters "\n"
       //codestring = codestring.replace(/\\n\s+/g,"\\n"); // remove leading spaced if more than one line in a code block - added in below to not change the codestring
-      this.code = code.replace(trimRegexp, "$1").replace(/\\n\s+/g,"\\n").replace(/\\n+/g,"\n");
+      this.code = code.replace(trimRegexp, "$1").replace(/\\n+/g,"\n");
       this.indent = codestring.length - codestring.replace(/^\s+/, "").length;
+      alert("Code");
+      alert(this.code);
+      alert("Codestring");
+      alert(codestring);
     }
   };
   ParsonsCodeline.prototype.elem = function() {
