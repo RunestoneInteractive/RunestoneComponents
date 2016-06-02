@@ -120,8 +120,8 @@ ActiveCode.prototype.createControls = function () {
     $(ctrlDiv).addClass("col-md-12");
     // Run
     var butt = document.createElement("button");
-    $(butt).text("Save & Run");
-    $(butt).addClass("btn btn-success");
+    $(butt).text("Run");
+    $(butt).addClass("btn btn-success run-button");
     ctrlDiv.appendChild(butt);
     this.runButton = butt;
     $(butt).click(this.runProg.bind(this));
@@ -1673,6 +1673,10 @@ $(document).ready(function() {
         }
     }
 
+});
+
+$(document).bind("runestone:login", function() {
+    $(".run-button").text("Save & Run");
 });
 
 // This seems a bit hacky and possibly brittle, but its hard to know how long it will take to
