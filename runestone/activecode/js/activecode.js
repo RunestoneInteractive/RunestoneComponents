@@ -44,6 +44,7 @@ ActiveCode.prototype.init = function(opts) {
     this.historyScrubber = null;
     this.history = [this.code]
     this.timestamps = ["Original"]
+    this.autorun = $(orig).data('autorun');
 
     if(this.includes !== undefined) {
         this.includes = this.includes.split(/\s+/);
@@ -65,7 +66,7 @@ ActiveCode.prototype.init = function(opts) {
     }
     this.addCaption();
 
-    if ($(orig).data('autorun')) {
+    if (this.autorun) {
         $(document).ready(this.runProg.bind(this));
     }
 };
@@ -116,21 +117,23 @@ ActiveCode.prototype.createEditor = function (index) {
 ActiveCode.prototype.createControls = function () {
     var ctrlDiv = document.createElement("div");
     $(ctrlDiv).addClass("ac_actions");
-
+    $(ctrlDiv).addClass("col-md-12");
     // Run
     var butt = document.createElement("button");
-    $(butt).text("Run/Save");
+    $(butt).text("Save & Run");
     $(butt).addClass("btn btn-success");
     ctrlDiv.appendChild(butt);
     this.runButton = butt;
     $(butt).click(this.runProg.bind(this));
 
-    var butt = document.createElement("button");
-    $(butt).text("Load History");
-    $(butt).addClass("btn btn-default");
-    ctrlDiv.appendChild(butt);
-    this.histButton = butt;
-    $(butt).click(this.addHistoryScrubber.bind(this));
+    if (! this.hidecode) {
+        var butt = document.createElement("button");
+        $(butt).text("Load History");
+        $(butt).addClass("btn btn-default");
+        ctrlDiv.appendChild(butt);
+        this.histButton = butt;
+        $(butt).click(this.addHistoryScrubber.bind(this));
+    }
 
 
     if ($(this.origElem).data('gradebutton')) {
@@ -715,11 +718,11 @@ ActiveCode.prototype.runProg = function() {
             return Sk.importMainWithBody("<stdin>", false, prog, true);
         });
 
-        if (this.historyScrubber === null) {
+        if (this.historyScrubber === null && !this.autorun) {
             this.addHistoryScrubber();
         }
 
-        if (this.historyScrubber === null || (this.history[this.historyScrubber.value] == this.editor.getValue())) {
+        if (this.historyScrubber === null || (this.history[$(this.historyScrubber).slider("value")] == this.editor.getValue())) {
             saveCode = "False"
         } else {
             saveCode = "True"
@@ -736,12 +739,11 @@ ActiveCode.prototype.runProg = function() {
                 }).bind(this));
 
 
-        if (this.historyScrubber && (this.history[this.historyScrubber.value] != this.editor.getValue())) {
+        if (this.historyScrubber && (this.history[$(this.historyScrubber).slider("value")] != this.editor.getValue())) {
             this.history.push(this.editor.getValue());
             this.timestamps.push((new Date()).toLocaleString());
-            this.historyScrubber.max = this.history.length - 1;
-            this.historyScrubber.value = this.historyScrubber.max;
-            this.scrubberTime.innerHTML = this.timestamps[this.historyScrubber.value]
+            $(this.historyScrubber).slider("option", "max", this.history.length - 1)
+            $(this.historyScrubber).slider("option", "value", this.history.length - 1)
         }
 
         if (typeof(allVisualizers) != "undefined") {
