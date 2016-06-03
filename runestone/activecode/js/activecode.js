@@ -2,6 +2,9 @@
  * Created by bmiller on 3/19/15.
  */
 
+var isMouseDown = false;
+document.onmousedown = function() { isMouseDown = true };
+document.onmouseup   = function() { isMouseDown = false };
 
 var edList = {};
 
@@ -37,6 +40,11 @@ ActiveCode.prototype.init = function(opts) {
     this.graphics = null; // create div for turtle graphics
     this.codecoach = null;
     this.codelens = null;
+    this.controlDiv = null;
+    this.historyScrubber = null;
+    this.history = [this.code]
+    this.timestamps = ["Original"]
+    this.autorun = $(orig).data('autorun');
 
     if(this.includes !== undefined) {
         this.includes = this.includes.split(/\s+/);
@@ -58,7 +66,7 @@ ActiveCode.prototype.init = function(opts) {
     }
     this.addCaption();
 
-    if ($(orig).data('autorun')) {
+    if (this.autorun) {
         $(document).ready(this.runProg.bind(this));
     }
 };
@@ -113,41 +121,25 @@ ActiveCode.prototype.createEditor = function (index) {
 ActiveCode.prototype.createControls = function () {
     var ctrlDiv = document.createElement("div");
     $(ctrlDiv).addClass("ac_actions");
-
+    $(ctrlDiv).addClass("col-md-12");
     // Run
     var butt = document.createElement("button");
     $(butt).text("Run");
-    $(butt).addClass("btn btn-success");
+    $(butt).addClass("btn btn-success run-button");
     ctrlDiv.appendChild(butt);
     this.runButton = butt;
     $(butt).click(this.runProg.bind(this));
 
-    // Save
-    if (this.useRunestoneServices) {
-        butt = document.createElement("button");
-        $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Save");
-        $(butt).css("margin-left", "10px");
-        this.saveButton = butt;
-        this.saveButton.onclick = this.saveEditor.bind(this);
+    if (! this.hidecode) {
+        var butt = document.createElement("button");
+        $(butt).text("Load History");
+        $(butt).addClass("btn btn-default");
         ctrlDiv.appendChild(butt);
-        if (this.hidecode) {
-            $(butt).css("display", "none")
-        }
+        this.histButton = butt;
+        $(butt).click(this.addHistoryScrubber.bind(this));
     }
-    // Load
-    if (this.useRunestoneServices) {
-        butt = document.createElement("button");
-        $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Load");
-        $(butt).css("margin-left", "10px");
-        this.loadButton = butt;
-        this.loadButton.onclick = this.loadEditor.bind(this);
-        ctrlDiv.appendChild(butt);
-        if (this.hidecode) {
-            $(butt).css("display", "none")
-        }
-    }
+
+
     if ($(this.origElem).data('gradebutton')) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
@@ -166,8 +158,11 @@ ActiveCode.prototype.createControls = function () {
         this.showHideButt = butt;
         ctrlDiv.appendChild(butt);
         $(butt).click( (function() { $(this.codeDiv).toggle();
-        $(this.loadButton).toggle();
-        $(this.saveButton).toggle();
+            if (this.historyScrubber == null) {
+                this.addHistoryScrubber(true);
+            } else {
+                $(this.historyScrubber.parentElement).toggle();
+            }
         }).bind(this));
     }
 
@@ -205,8 +200,69 @@ ActiveCode.prototype.createControls = function () {
 
 
     $(this.outerDiv).prepend(ctrlDiv);
+    this.controlDiv = ctrlDiv;
 
 };
+
+// Activecode -- If the code has not changed wrt the scrubber position value then don't save the code or reposition the scrubber
+//  -- still call runlog, but add a parameter to not save the code
+// add an initial load history button
+// if there is no edit then there is no append   to_save (True/False)
+
+ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
+
+    var data = {acid: this.divid};
+    if (this.sid !== undefined) {
+        data['sid'] = this.sid;
+    }
+    jQuery.getJSON(eBookConfig.ajaxURL + 'gethist.json', data, function(data, status, whatever) {
+        if (data.history !== undefined) {
+            this.history = this.history.concat(data.history);
+            for (t in data.timestamps) {
+                this.timestamps.push( (new Date(data.timestamps[t])).toLocaleString() )
+            }
+        }
+
+        var scrubberDiv = document.createElement("div");
+        $(scrubberDiv).css("display","inline-block");
+        $(scrubberDiv).css("margin-left","10px");
+        $(scrubberDiv).css("margin-right","10px");
+        $(scrubberDiv).width("180px");
+        scrubber = document.createElement("div");
+        var slideit = function() {
+            this.editor.setValue(this.history[$(scrubber).slider("value")]);
+            var curVal = this.timestamps[$(scrubber).slider("value")];
+            //this.scrubberTime.innerHTML = curVal;
+            var tooltip = '<div class="sltooltip"><div class="sltooltip-inner">' +
+                curVal + '</div><div class="sltooltip-arrow"></div></div>';
+            $(scrubber).find(".ui-slider-handle").html(tooltip);
+            setTimeout(function () {
+                $(scrubber).find(".sltooltip").fadeOut()
+            }, 4000);
+        }.bind(this);
+        $(scrubber).slider({
+            max: this.history.length-1,
+            value: this.history.length-1,
+            slide: slideit,
+            change: slideit
+        });
+        scrubberDiv.appendChild(scrubber);
+
+        if (pos_last) {
+            scrubber.value = this.history.length-1
+            this.editor.setValue(this.history[scrubber.value]);
+        } else {
+            scrubber.value = 0;
+        }
+
+        $(this.histButton).remove();
+        this.histButton = null;
+        this.historyScrubber = scrubber;
+        $(scrubberDiv).insertAfter(this.runButton)
+
+    }.bind(this));
+}
+
 
 ActiveCode.prototype.createOutput = function () {
     // Create a parent div with two elements:  pre for standard output and a div
@@ -647,6 +703,7 @@ ActiveCode.prototype.buildProg = function() {
 
 ActiveCode.prototype.runProg = function() {
         var prog = this.buildProg();
+        var saveCode;
 
         $(this.output).text('');
 
@@ -668,15 +725,33 @@ ActiveCode.prototype.runProg = function() {
             return Sk.importMainWithBody("<stdin>", false, prog, true);
         });
 
+        if (this.historyScrubber === null && !this.autorun) {
+            this.addHistoryScrubber();
+        }
+
+        if (this.historyScrubber === null || (this.history[$(this.historyScrubber).slider("value")] == this.editor.getValue())) {
+            saveCode = "False"
+        } else {
+            saveCode = "True"
+        }
+
         myPromise.then((function(mod) { // success
             $(this.runButton).removeAttr('disabled');
-            this.logRunEvent({'div_id': this.divid, 'code': prog, 'errinfo': 'success'}); // Log the run event
+            this.logRunEvent({'div_id': this.divid, 'code': prog, 'errinfo': 'success', 'to_save':saveCode}); // Log the run event
         }).bind(this),
             (function(err) {  // fail
             $(this.runButton).removeAttr('disabled');
-            this.logRunEvent({'div_id': this.divid, 'code': prog, 'errinfo': err.toString()}); // Log the run event
+            this.logRunEvent({'div_id': this.divid, 'code': prog, 'errinfo': err.toString(), 'to_save':saveCode}); // Log the run event
             this.addErrorMessage(err)
                 }).bind(this));
+
+
+        if (this.historyScrubber && (this.history[$(this.historyScrubber).slider("value")] != this.editor.getValue())) {
+            this.history.push(this.editor.getValue());
+            this.timestamps.push((new Date()).toLocaleString());
+            $(this.historyScrubber).slider("option", "max", this.history.length - 1)
+            $(this.historyScrubber).slider("option", "value", this.history.length - 1)
+        }
 
         if (typeof(allVisualizers) != "undefined") {
             $.each(allVisualizers, function (i, e) {
@@ -1609,6 +1684,10 @@ $(document).ready(function() {
         }
     }
 
+});
+
+$(document).bind("runestone:login", function() {
+    $(".run-button").text("Save & Run");
 });
 
 // This seems a bit hacky and possibly brittle, but its hard to know how long it will take to
