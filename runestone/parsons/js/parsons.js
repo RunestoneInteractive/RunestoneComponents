@@ -821,7 +821,6 @@
       // represent newlines => replace them with actual new line characters "\n"
       //codestring = codestring.replace(/\\n\s+/g,"\\n"); // remove leading spaced if more than one line in a code block - added in below to not change the codestring
       this.indent = codestring.length - codestring.replace(/^\s+/, "").length;
-
       var linelist = [];
       var line = "";
 
@@ -854,8 +853,16 @@
       }
 
       if (indentFlag) {
-        //Only strip leading white space on the first line of the code block
+        if (this.indent > 0) {
+          code = "";
+          for (lineindex in linelist) {
+            code = code + linelist[lineindex].slice(this.indent);
+          }
+        }
+
         this.code = code.replace(trimRegexp, "$1").replace(/\\n+/g,"\n");
+
+
       } else {
         //strip all leading white space on each line of the code block
         this.code = code.replace(trimRegexp, "$1").replace(/\\n\s+/g,"\\n").replace(/\\n+/g,"\n");
