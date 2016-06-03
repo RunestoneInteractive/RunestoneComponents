@@ -820,8 +820,53 @@
       // Consecutive lines to be dragged as a single block of code have strings "\\n" to
       // represent newlines => replace them with actual new line characters "\n"
       //codestring = codestring.replace(/\\n\s+/g,"\\n"); // remove leading spaced if more than one line in a code block - added in below to not change the codestring
-      this.code = code.replace(trimRegexp, "$1").replace(/\\n\s+/g,"\\n").replace(/\\n+/g,"\n");
       this.indent = codestring.length - codestring.replace(/^\s+/, "").length;
+      var linelist = [];
+      var line = "";
+
+      for (i=0; i<code.length; i++) {
+
+        if (code.charAt(i) == 'n') {
+          if (code.charAt(i-1) == '\\') {
+            line = line + 'n';
+            linelist.push(line);
+            line = "";
+          } else {
+
+            line = line + code.charAt(i);
+          }
+
+         } else {
+
+          line = line + code.charAt(i);
+        }
+      }
+      linelist.push(line);
+
+      var indentFlag = false;
+      for (i=0;i<linelist.length;i++) {
+        var line = linelist[i];
+        var numSpaces = line.length - line.replace(/^\s+/, "").length;
+        if (numSpaces != this.indent)  {
+          indentFlag = true;
+        }
+      }
+
+      if (indentFlag) {
+        if (this.indent > 0) {
+          code = "";
+          for (i=0;i<linelist.length;i++) {
+            code = code + linelist[i].slice(this.indent);
+          }
+        }
+
+        this.code = code.replace(trimRegexp, "$1").replace(/\\n+/g,"\n");
+
+
+      } else {
+        //strip all leading white space on each line of the code block
+        this.code = code.replace(trimRegexp, "$1").replace(/\\n\s+/g,"\\n").replace(/\\n+/g,"\n");
+      }
     }
   };
   ParsonsCodeline.prototype.elem = function() {
