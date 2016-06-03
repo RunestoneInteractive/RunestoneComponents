@@ -824,28 +824,28 @@
       var linelist = [];
       var line = "";
 
-      for (char in code) {
+      for (i=0; i<code.length; i++) {
 
-        if (code[char] == 'n') {
-          if (code[char-1] == '\\') {
+        if (code.charAt(i) == 'n') {
+          if (code.charAt(i-1) == '\\') {
             line = line + 'n';
             linelist.push(line);
             line = "";
           } else {
 
-            line = line + code[char];
+            line = line + code.charAt(i);
           }
 
          } else {
 
-          line = line + code[char];
+          line = line + code.charAt(i);
         }
       }
       linelist.push(line);
 
       var indentFlag = false;
-      for (lineindex in linelist) {
-        var line = linelist[lineindex];
+      for (i=0;i<linelist.length;i++) {
+        var line = linelist[i];
         var numSpaces = line.length - line.replace(/^\s+/, "").length;
         if (numSpaces != this.indent)  {
           indentFlag = true;
@@ -855,8 +855,8 @@
       if (indentFlag) {
         if (this.indent > 0) {
           code = "";
-          for (lineindex in linelist) {
-            code = code + linelist[lineindex].slice(this.indent);
+          for (i=0;i<linelist.length;i++) {
+            code = code + linelist[i].slice(this.indent);
           }
         }
 
