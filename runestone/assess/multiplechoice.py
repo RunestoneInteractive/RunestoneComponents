@@ -58,7 +58,7 @@ def depart_mc_node(self,node):
         if 'answer_' in k:
             x,label = k.split('_')
             node.mc_options['alabel'] = label
-            node.mc_options['atext'] = node.mc_options[k]
+            node.mc_options['atext'] = "(" +k[-1].upper() + ") " + node.mc_options[k]
             currFeedback = "feedback_" + label
             node.mc_options['feedtext'] = node.mc_options[currFeedback]
             if label in node.mc_options['correct']:
@@ -122,6 +122,7 @@ class MChoice(Assessment):
             Question text
             ...
             """
+
         TEMPLATE_START = '''
             <ul data-component="multiplechoice" data-multipleanswers="%(multipleAnswers)s" %(random)s id="%(divid)s">
             '''
