@@ -37,14 +37,15 @@ def setup(app):
     app.add_javascript('parsons_setup.js')
     app.add_javascript('parsons.js')
     app.add_javascript('parsons-noconflict.js')
-    app.add_javascript('timedparsons.js')
 
 class ParsonsProblem(Assessment):
     required_arguments = 1
     optional_arguments = 1
     final_argument_whitespace = False
     option_spec = {
-        'maxdist': directives.unchanged
+        'maxdist' : directives.unchanged,
+        'order' : directives.unchanged,
+        'noindent' : directives.flag
     }
     has_content = True
 
@@ -82,16 +83,28 @@ Example:
         """
 
         TEMPLATE = '''
-    <pre data-component="parsons" id="%(divid)s" data-maxdist=%(maxdist)s>
+    <pre data-component="parsons" id="%(divid)s"%(maxdist)s%(order)s%(noindent)s>
         <span data-question>%(qnumber)s: %(instructions)s</span>%(code)s</pre>
     '''
         self.options['divid'] = self.arguments[0]
         self.options['qnumber'] = self.getNumber()
         self.options['instructions'] = ""
         self.options['code'] = self.content
-
-        if 'maxdist' not in self.options:
-            self.options['maxdist'] = '5'
+        
+        if 'maxdist' in self.options:
+            self.options['maxdist'] = ' data-maxdist="' + self.options['maxdist'] + '"'
+        else:
+            self.options['maxdist'] = ''
+        if 'order' in self.options:
+            self.options['order'] = ' data-order="' + self.options['order'] + '"'
+        else:
+            self.options['order'] = ''
+        if 'noindent' in self.options:
+            self.options['noindent'] = ' data-noindent="true"'
+        else:
+            self.options['noindent'] = ''
+         
+          
         if '-----' in self.content:
             index = self.content.index('-----')
             self.options['instructions'] = "\n".join(self.content[:index])
