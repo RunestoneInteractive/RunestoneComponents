@@ -62,7 +62,6 @@ def visit_ua_node(self,node):
             s += '</ul>'
             s += '</div>'
     except:
-            # course_name = "pip2" # TODO is this a good exception?
         s = ""
 
     # is this needed??
