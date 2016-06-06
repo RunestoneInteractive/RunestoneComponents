@@ -50,7 +50,7 @@ Timed.prototype.init = function (opts) {
     if ($(this.origElem).is("[data-random]")) {
         this.random = true;
     }
-    this.showTimer = true; 
+    this.showTimer = true;
     if ($(this.origElem).is("[data-no-timer]")) {
         this.showTimer = false;
     }
@@ -94,15 +94,13 @@ Timed.prototype.renderTimedAssess = function () {
     this.renderNavControls();
     this.renderSubmitButton();
     this.renderFeedbackContainer();
-	
+    this.useRunestoneServices = opts.useRunestoneServices;
+
     // Replace intermediate HTML with rendered HTML
     $(this.origElem).replaceWith(this.assessDiv);
-    
+
     // check if already taken and if so show results
     this.tookTimedExam();
-    if (this.taken) {
-       this.handlePrevAssessment();
-    }
 };
 
 Timed.prototype.renderContainer = function () {
@@ -121,7 +119,7 @@ Timed.prototype.renderContainer = function () {
 };
 
 Timed.prototype.renderTimer = function () {
-    this.wrapperDiv = document.createElement("div"); 
+    this.wrapperDiv = document.createElement("div");
     this.timerContainer = document.createElement("P");
     this.wrapperDiv.id = "startWrapper";
     this.timerContainer.id = "output";
@@ -181,10 +179,12 @@ Timed.prototype.renderNavControls = function () {
 	this.navDiv.appendChild(this.pagNavList);
     this.break = document.createElement("br");
     this.navDiv.appendChild(this.break);
-    
+
     // render the question number jump buttons
     this.qNumList = document.createElement("ul");
 	$(this.qNumList).attr("id", "pageNums");
+    this.qNumWrapperList = document.createElement("ul");
+    $(this.qNumWrapperList).addClass("pagination");
 	var tmpLi, tmpA;
     for (var i = 0; i < this.renderedQuestionArray.length; i++) {
 	    tmpLi = document.createElement("li");
@@ -195,18 +195,11 @@ Timed.prototype.renderNavControls = function () {
             $(tmpLi).addClass("active");
         }
         tmpLi.appendChild(tmpA);
-        this.qNumList.appendChild(tmpLi);	
+        this.qNumWrapperList.appendChild(tmpLi);
     }
+    this.qNumList.appendChild(this.qNumWrapperList);
     this.navDiv.appendChild(this.qNumList);
-	this.navBtnListeners();  
-	
-	$(function(){
-		var tenSet = $("ul#pageNums li");
-		for (var i = 0; i < tenSet.length; i += 10) {
-			tenSet.slice(i, i + 10).wrapAll("<ul class=\"pagination\"></ul>");
-		}
-	});
-	
+	this.navBtnListeners();
 };
 
 Timed.prototype.navBtnListeners = function() {
@@ -214,18 +207,18 @@ Timed.prototype.navBtnListeners = function() {
 	this.pagNavList.addEventListener("click", function (event) {
 		if ($("div#timed_Test form input[name='group1']").is(":checked")) {
 			$("ul#pageNums > ul > li:eq(" + this.currentQuestionIndex +")").addClass("answered");
-		}	
+		}
 		var target = $(event.target).text();
 		if (target.match(/Next/)) {
 			if ($(this.rightContainer).hasClass("disabled")) {
-				return; 
-			} 
+				return;
+			}
 			this.currentQuestionIndex++;
-		} 
+		}
 		else if (target.match(/Prev/)) {
 			if ($(this.leftContainer).hasClass("disabled")) {
 				return;
-			} 
+			}
 			this.currentQuestionIndex--;
 		}
 		this.renderTimedQuestion();
@@ -245,7 +238,7 @@ Timed.prototype.navBtnListeners = function() {
 		}
 		for (var i = 0; i < this.qNumList.childNodes.length; i++) {
 			for (var j = 0; j < this.qNumList.childNodes[i].childNodes.length; j++) {
-				$(this.qNumList.childNodes[i].childNodes[j]).removeClass("active"); 
+				$(this.qNumList.childNodes[i].childNodes[j]).removeClass("active");
 			}
 		}
 		var target = $(event.target).text();
@@ -254,7 +247,7 @@ Timed.prototype.navBtnListeners = function() {
 		this.renderTimedQuestion();
 		this.ensureButtonSafety();
 	}.bind(this), false);
-	
+
 };
 
 Timed.prototype.renderSubmitButton = function () {
@@ -315,6 +308,12 @@ Timed.prototype.createRenderedQuestionArray = function () {
             this.renderedQuestionArray.push(new TimedDragNDrop(opts));
         } else if ($(tmpChild).is("[data-component=clickablearea]")) {
             this.renderedQuestionArray.push(new TimedClickableArea(opts));
+        } else if ($(tmpChild).is("[data-component=shortanswer]")) {
+            this.renderedQuestionArray.push(new TimedShortAnswer(opts));
+        } else if ($(tmpChild).is("[data-component=parsons]")) {
+            this.renderedQuestionArray.push(new TimedParsons(opts));
+        } else if ($(tmpChild).is("[data-component=activecode]")) {
+            this.renderedQuestionArray.push(new TimedActiveCode(opts));
         }
     }
     if (this.random) {
@@ -358,10 +357,9 @@ Timed.prototype.handlePrevAssessment = function () {
         } else {
            $(this.pauseBtn).hide();
         }
-}
+};
 
 Timed.prototype.startAssessment = function () {
-    this.tookTimedExam();
     if (!this.taken) {
         $(this.startBtn).hide();
         $(this.pauseBtn).attr("disabled", false);
@@ -370,8 +368,9 @@ Timed.prototype.startAssessment = function () {
             $(this.timedDiv).show();
             this.increment();
             this.logBookEvent({"event": "timedExam", "act": "start", "div_id": this.divid});
-            var resultStr = "0; ;0; ;" + this.renderedQuestionArray.length +"; ;0";
-            localStorage.setItem(eBookConfig.email + ":" + this.divid, resultStr);
+            var timeStamp = new Date();
+            var storageObj = {"answerData": [0,0,this.renderedQuestionArray.length,0], "timestamp": timeStamp};
+            localStorage.setItem(eBookConfig.email + ":" + this.divid, JSON.stringify(storageObj));
         }
     } else {
        this.handlePrevAssessment();
@@ -502,18 +501,8 @@ Timed.prototype.tookTimedExam = function () {
         "color": "white"
     });
 
-    var len = localStorage.length;
-    if (len > 0) {
-        if (localStorage.getItem(eBookConfig.email + ":" + this.divid) !== null) {
-            this.taken = 1;
-            this.restoreFromStorage();
+    this.checkServer();
 
-        } else {
-            this.taken = 0;
-        }
-    } else {
-        this.taken = 0;
-    }
 };
 
 Timed.prototype.finishAssessment = function () {
@@ -529,7 +518,7 @@ Timed.prototype.finishAssessment = function () {
         this.logScore();
         $(this.pauseBtn).attr("disabled", true);
         this.finishButton.disabled = true;
-        
+
         if (!this.showResults) {
            $(this.timedDiv).hide();
            $(this.pauseBtn).hide();
@@ -557,19 +546,21 @@ Timed.prototype.checkScore = function () {
     this.skippedStr = "";
     this.incorrectStr = "";
     // Gets the score of each problem
+
     for (var i = 0; i < this.renderedQuestionArray.length; i++) {
         var correct = this.renderedQuestionArray[i].checkCorrectTimed();
-        if (correct) {
-		    this.score++;
-			this.correctStr = this.correctStr + (i + 1) + ", ";				
-			
+        if (correct == "T") {
+            this.score++;
+            this.correctStr = this.correctStr + (i + 1) + ", ";
+
+        } else if (correct == "F") {
+            this.incorrect++;
+            this.incorrectStr = this.incorrectStr + (i + 1) + ", ";
         } else if (correct === null) {
             this.skipped++;
-			this.skippedStr = this.skippedStr + (i + 1) + ", ";
-			
+            this.skippedStr = this.skippedStr + (i + 1) + ", ";
         } else {
-            this.incorrect++;
-			this.incorrectStr = this.incorrectStr + (i + 1) + ", ";
+            // ignored question; just do nothing
         }
     }
 	// remove extra comma and space at end if any
@@ -592,15 +583,94 @@ Timed.prototype.findTimeTaken = function () {
 Timed.prototype.storeScore = function () {
     var storage_arr = [];
     storage_arr.push(this.score, this.correctStr, this.incorrect, this.incorrectStr, this.skipped, this.skippedStr, this.timeTaken);
-    localStorage.setItem(eBookConfig.email + ":" + this.divid, storage_arr.join(";"));
+    var timeStamp = new Date();
+    var storageObj = JSON.stringify({"answerData": storage_arr, "timestamp": timeStamp});
+    localStorage.setItem(eBookConfig.email + ":" + this.divid, storageObj);
 };
 
 Timed.prototype.logScore = function () {
     this.logBookEvent({"event": "timedExam", "act": "finish", "div_id": this.divid, "correct": this.score, "incorrect": this.incorrect, "skipped": this.skipped, "time": this.timeTaken});
 };
 
-Timed.prototype.restoreFromStorage = function () {
-    var tmpArr = localStorage.getItem(eBookConfig.email + ":" + this.divid).split(";");
+Timed.prototype.checkServer = function () {
+    if (this.useRunestoneServices) {
+        var data = {};
+        data.div_id = this.divid;
+        data.course = eBookConfig.course;
+        data.event = "timedExam";
+        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.useLocalStorage.bind(this));
+    } else {
+        this.repopulateFromStorage(null, null, null);
+    }
+};
+
+Timed.prototype.useLocalStorage = function () {
+    this.repopulateFromStorage(null, null, null);
+};
+
+Timed.prototype.repopulateFromStorage = function (data, status, whatever) {
+    if (data !== null) {
+        this.taken = 1;
+        if (this.shouldUseServer(data)) {
+            this.restoreFromStorage(data);
+        } else {
+            this.checkLocalStorage();
+        }
+    } else {
+        this.checkLocalStorage();
+    }
+
+    if (this.taken) {
+       this.handlePrevAssessment();
+    }
+};
+
+Timed.prototype.shouldUseServer = function (data) {
+    // returns true if server data is more recent than local storage or if server storage is correct
+    if (localStorage.length === 0)
+        return true;
+    var storageObj = localStorage.getItem(eBookConfig.email + ":" + this.divid);
+    if (storageObj === null)
+        return true;
+    var storedData = JSON.parse(storageObj).answerData;
+    if (storedData.length == 4) {
+        if (data.correct == storedData[0] && data.incorrect == storedData[1] && data.skipped == storedData[2] && data.timeTaken == storedData[3])
+            return true;
+    } else if (storedData.length == 7) {
+        if (data.correct == storedData[0] && data.incorrect == storedData[2] && data.skipped == storedData[4] && data.timeTaken == storedData[6])
+            return false;   // In this case, because local storage has more info, we want to use that if it's consistent
+    }
+    var storageDate = new Date(JSON.parse(storageObj[1]).timestamp);
+    var serverDate = new Date(data.timestamp);
+    if (serverDate < storageDate)
+        return false;
+    return true;
+};
+
+Timed.prototype.checkLocalStorage = function () {
+    var len = localStorage.length;
+    if (len > 0) {
+        if (localStorage.getItem(eBookConfig.email + ":" + this.divid) !== null) {
+            this.taken = 1;
+            this.restoreFromStorage("");
+            if (this.useRunestoneServices)
+                this.logScore();
+        } else {
+            this.taken = 0;
+        }
+    } else {
+        this.taken = 0;
+    }
+};
+
+Timed.prototype.restoreFromStorage = function (data) {
+    var tmpArr;
+    if (data === "") {
+        tmpArr = JSON.parse(localStorage.getItem(eBookConfig.email + ":" + this.divid)).answerData;
+    } else {
+        tmpArr = [parseInt(data.correct), parseInt(data.incorrect), parseInt(data.skipped), parseInt(data.timeTaken)];
+        this.setLocalStorageFromServer(tmpArr);
+    }
     if (tmpArr.length == 4)
     {
        this.score = tmpArr[0];
@@ -628,28 +698,31 @@ Timed.prototype.restoreFromStorage = function () {
 	this.showTime();
 };
 
+Timed.prototype.setLocalStorageFromServer = function (serverArr) {
+    // If the server array is more recent
+};
+
 Timed.prototype.displayScore = function () {
- 
-	if (this.showResults)
-    {   
+
+	if (this.showResults) {
        // if we have some information
        if (this.correctStr.length > 0 || this.incorrectStr.length > 0 || this.skippedStr.length > 0)
        {
           var scoreString = "Num Correct: " + this.score + ". Questions: " + this.correctStr + "<br>" +
           "Num Wrong: " + this.incorrect + ". Questions: " + this.incorrectStr + "<br>" +
           "Num Skipped: " + this.skipped + ". Questions: " + this.skippedStr + "<br>";
-          var numQuestions = this.renderedQuestionArray.length;
+          var numQuestions = this.score + this.incorrect + this.skipped;
           var percentCorrect = (this.score / numQuestions) * 100;
           scoreString += "Percent Correct: " + percentCorrect + "%";
           $(this.scoreDiv).html(scoreString);
           this.scoreDiv.style.display = "block";
       }
-      else 
+      else
       {
           var scoreString = "Num Correct: " + this.score + "<br>" +
           "Num Wrong: " + this.incorrect + "<br>" +
           "Num Skipped: " + this.skipped + "<br>";
-          var numQuestions = this.renderedQuestionArray.length;
+          var numQuestions = this.score + this.incorrect + this.skipped;
           var percentCorrect = (this.score / numQuestions) * 100;
           scoreString += "Percent Correct: " + percentCorrect + "%";
           $(this.scoreDiv).html(scoreString);
@@ -662,7 +735,7 @@ Timed.prototype.displayScore = function () {
       this.scoreDiv.style.display = "block";
    }
 };
-										
+
 Timed.prototype.highlightNumberedList = function () {
 	var correctCount = this.correctStr;
 	var	incorrectCount = this.incorrectStr;
@@ -671,32 +744,31 @@ Timed.prototype.highlightNumberedList = function () {
 	correctCount = correctCount.replace(/ /g,'').split(',');
 	incorrectCount = incorrectCount.replace(/ /g,'').split(',');
 	skippedCount = skippedCount.replace(/ /g,'').split(',');
-		
+
 	$(function () {		// This code is wrapped in a function so that it executes only after DOM has loaded
 		var numberedBtns = $("ul#pageNums > ul > li");
 		if (numberedBtns.hasClass("answered")) {
-			numberedBtns.removeClass("answered"); 
-		}	
+			numberedBtns.removeClass("answered");
+		}
 		for (var i = 0; i < correctCount.length; i++) {
-			var test = parseInt(correctCount[i])-1; 
-			numberedBtns.eq(parseInt(correctCount[i])-1).addClass("correctCount");	
+			var test = parseInt(correctCount[i])-1;
+			numberedBtns.eq(parseInt(correctCount[i])-1).addClass("correctCount");
 		}
 		for (var j = 0; j < incorrectCount.length; j++) {
-			numberedBtns.eq(parseInt(incorrectCount[j])-1).addClass("incorrectCount");	
+			numberedBtns.eq(parseInt(incorrectCount[j])-1).addClass("incorrectCount");
 		}
 		for (var k = 0; k < skippedCount.length; k++) {
-			numberedBtns.eq(parseInt(skippedCount[k])-1).addClass("skippedCount");	
-		} 
+			numberedBtns.eq(parseInt(skippedCount[k])-1).addClass("skippedCount");
+		}
 	});
-};	
+};
 
 
 /*=======================================================
 === Function that calls the constructors on page load ===
 =======================================================*/
-
-$(document).ready(function () {
+$(document).bind("runestone:login-complete",function () {
     $("[data-component=timedAssessment]").each(function (index) {
-        TimedList[this.id] = new Timed({"orig": this});
+        TimedList[this.id] = new Timed({"orig": this, "useRunestoneServices":eBookConfig.useRunestoneServices});
     });
 });
