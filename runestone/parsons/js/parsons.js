@@ -51,9 +51,6 @@
 				var incorrectIndention = [];
 				for (i = 0; i < solutionLines.length; i++) {
 					if (answerLines[i].viewIndent() !== solutionLines[i].modelIndent()) {
-						console.log(answerLines[i]);
-						console.log(answerLines[i].viewIndent());
-						console.log(solutionLines[i].modelIndent());
 						incorrectIndention.push(answerLines[i]);
 					}
 				}
@@ -353,11 +350,13 @@
 		// Create the initial blocks
 		var aBlock, blocks = [];
 		$.each(text.split("\n"), function(index, item) {
-			aBlock = new ParsonsCodeblock(item, that);
-			aBlock.index = index;
-			aBlock.id = id_prefix + index;
-			aBlock.viewIndent = 0;
-			blocks.push(aBlock);
+			if (/\S/.test(item)) {
+				aBlock = new ParsonsCodeblock(item, that);
+				aBlock.index = index;
+				aBlock.id = id_prefix + index;
+				aBlock.viewIndent = 0;
+				blocks.push(aBlock);
+			}
 		});
 		// Normalize the indents
 		var indents = [];

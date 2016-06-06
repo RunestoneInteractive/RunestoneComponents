@@ -29,6 +29,13 @@ Parsons.prototype.init = function (opts) {
     this.origElem = orig;
     this.useRunestoneServices = opts.useRunestoneServices;
     this.divid = orig.id;
+    var storageId = eBookConfig.email;
+    if (storageId == undefined) {
+    	storageId = this.divid;
+    } else {
+        storageId += this.divid;
+    }
+	this.storageId = storageId;
     this.maxdist = $(orig).data('maxdist');
     this.children = this.origElem.childNodes;     // this contains all of the child elements of the entire tag...
     this.contentArray = [];
@@ -169,9 +176,9 @@ Parsons.prototype.setButtonFunctions = function () {
     $pjQ(this.checkButt).click(function (event) {
         event.preventDefault();
         var hash = this.pwidget.answerHash();
-        localStorage.setItem(this.divid, hash);
+        localStorage.setItem(this.storageId, hash);
         hash = this.pwidget.sourceHash();
-        localStorage.setItem(this.divid + "-source", hash);
+        localStorage.setItem(this.storageId + "-source", hash);
         this.pwidget.getFeedback();
     }.bind(this));
 };
@@ -229,7 +236,9 @@ Parsons.prototype.checkServer = function () {
         data.div_id = this.divid;
         data.course = eBookConfig.course;
         data.event = "parsons";
-        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this)).done(this.pwidget.resetView.bind(this));
+        
+//        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this)).done(this.pwidget.resetView.bind(this));
+        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this)).done(this.checkLocalStorage.bind(this));
     } else {
         this.checkLocalStorage();
         this.pwidget.resetView();
@@ -242,7 +251,7 @@ Parsons.prototype.repopulateFromStorage = function (data, status, whatever) {
         if (this.shouldUseServer(data)) {
             var solution = data.answer;
             var trash = data.trash;
-            this.pwidget.createHTMLFromHashes(solution, trash);
+            this.pwidget.createHTMLFromHashes(trash, solution);
             this.pwidget.getFeedback();
             this.setLocalStorage();
         } else {
@@ -257,9 +266,9 @@ Parsons.prototype.shouldUseServer = function (data) {
     // returns true if server data is more recent than local storage or if server storage is correct
     if (data.correct == "T" || localStorage.length === 0)
         return true;
-    var storedAnswer = localStorage.getItem(eBookConfig.email + this.divid);
-    var storedTrash = localStorage.getItem(eBookConfig.email + this.divid + "-trash");
-    var storedDate = localStorage.getItem(eBookConfig.email + this.divid + "-date");
+    var storedAnswer = localStorage.getItem(this.storageId);
+    var storedTrash = localStorage.getItem(this.storageId + "-source");
+    var storedDate = localStorage.getItem(this.storageId + "-date");
 
     if (storedAnswer === null || storedTrash === null || storedDate === null)
         return true;
@@ -273,11 +282,11 @@ Parsons.prototype.shouldUseServer = function (data) {
     return true;
 };
 Parsons.prototype.checkLocalStorage = function () {
-    if (localStorage.getItem(eBookConfig.email + this.divid) && localStorage.getItem(eBookConfig.email + this.divid + "-trash")) {
+    if (localStorage.getItem(this.storageId) && localStorage.getItem(this.storageId + "-source")) {
         try {
-            var solution = localStorage.getItem(eBookConfig.email + this.divid);
-            var trash = localStorage.getItem(eBookConfig.email + this.divid + "-trash");
-            this.pwidget.createHTMLFromHashes(solution, trash);
+            var solution = localStorage.getItem(this.storageId);
+            var trash = localStorage.getItem(this.storageId + "-source");
+            this.pwidget.createHTMLFromHashes(trash, solution);
             if (this.useRunestoneServices)
                 this.loadingFromStorage = false;   // Admittedly a non-straightforward way to log, but it works well
             this.pwidget.getFeedback();
@@ -298,11 +307,11 @@ Parsons.prototype.reInitialize = function () {
 
 Parsons.prototype.setLocalStorage = function() {
     var hash = this.pwidget.getAnswerHash();
-    localStorage.setItem(eBookConfig.email + this.divid, hash);
+    localStorage.setItem(this.storageId, hash);
     hash = this.pwidget.getSourceHash();
-    localStorage.setItem(eBookConfig.email + this.divid + "-trash", hash);
+    localStorage.setItem(this.storageId + "-source", hash);
     var timeStamp = new Date();
-    localStorage.setItem(eBookConfig.email + this.divid + "-date", JSON.stringify(timeStamp));
+    localStorage.setItem(this.storageId + "-date", JSON.stringify(timeStamp));
 };
 
 $(document).bind("runestone:login-complete", function () {
