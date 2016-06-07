@@ -171,6 +171,7 @@ Parsons.prototype.setButtonFunctions = function () {
     $pjQ(this.resetButt).click(function (event) {
         event.preventDefault();
         this.pwidget.resetView();
+        this.pwidget.log("reset");
         $(this.messageDiv).hide();
   }.bind(this));
     $pjQ(this.checkButt).click(function (event) {
@@ -188,14 +189,6 @@ Parsons.prototype.setButtonFunctions = function () {
 ================================*/
 
 Parsons.prototype.createParsonsWidget = function () {
-    // First do animation stuff
-    $("#parsons-" + this.counterId).not(".sortable-code").not(".parsons-controls").on("click", function () {
-        $("html, body").animate({
-            scrollTop: ($("#parsons-" + this.counterId).offset().top - 50)
-        }, 700);
-    }).find(".sortable-code, .parsons-controls").click(function (e) {
-        return false;
-    });
 
 	var options = {
         "answerId" : "parsons-answer-" + this.counterId,
@@ -237,9 +230,8 @@ Parsons.prototype.checkServer = function () {
         data.course = eBookConfig.course;
         data.event = "parsons";
         
-//        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this)).done(this.pwidget.resetView.bind(this));
-        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this)).done(this.checkLocalStorage.bind(this));
-    } else {
+        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this)).done(this.pwidget.resetView.bind(this));
+     } else {
         this.checkLocalStorage();
         this.pwidget.resetView();
     }

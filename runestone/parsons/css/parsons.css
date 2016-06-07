@@ -1,4 +1,4 @@
-.sortable-code {
+.parsons .sortable-code {
     position: static;
     padding-left: 0px;
     margin: 0px 15px;
@@ -6,7 +6,7 @@
 	text-align: left;
 	vertical-align: top;
 }
-.source, .answer, .answer1, .answer2, .answer3, .answer4 {
+.parsons .source, .parsons .answer, .parsons .answer1, .parsons .answer2, .parsons .answer3, .parsons .answer4 {
 	position: relative;
     font-size: 100%;
     font-family: monospace;
@@ -17,41 +17,41 @@
     margin-left: 0;
     border: 1px solid #efefff;
 }
-.source {
+.parsons .source {
 	background-color: #efefff;
 }
-.answer {
+.parsons .answer {
 	background-color: #ffa;
 }
-.answer1 {
+.parsons .answer1 {
 	background: linear-gradient(#ff7, #ff7) no-repeat border-box;
 	background-size: 30px 100%;
 	background-position: 0 0;
 	background-origin: padding-box;
 	background-color: #ffa;
 }
-.answer2 {
+.parsons .answer2 {
 	background: linear-gradient(#ff7, #ff7) no-repeat border-box;
 	background-size: 30px 100%;
 	background-position: 30px 0;
 	background-origin: padding-box;
 	background-color: #ffa;
 }
-.answer3 {
+.parsons .answer3 {
 	background: linear-gradient(#ff7, #ff7) no-repeat border-box, linear-gradient(#ff7, #ff7) no-repeat border-box;
 	background-size: 30px 100%, 30px 100%;
 	background-position: 0 0, 60px 0;
 	background-origin: padding-box, padding-box;
 	background-color: #ffa;
 }
-.answer4 {
+.parsons .answer4 {
 	background: linear-gradient(#ff7, #ff7) no-repeat border-box, linear-gradient(#ff7, #ff7) no-repeat border-box;
 	background-size: 30px 100%, 30px 100%;
 	background-position: 30px 0, 90px 0;
 	background-origin: padding-box, padding-box;
 	background-color: #ffa;
 }
-.block {
+.parsons .block {
 	position: absolute;
     -moz-border-radius:10px;
     -webkit-border-radius:10px;
@@ -64,77 +64,69 @@
     overflow: hidden;
     cursor: move;
 }
-.block code {
+.parsons .block code {
 	display: block;
 	clear: both;
 	float: left;
 	background-color: transparent;
 }
-.block, .block:before, .block:after {
+.parsons .block, .parsons .block:before, .parsons .block:after {
   box-sizing: content-box;
 }
-code.indent1 {
+.parsons .indent1 {
 	margin-left: 30px;
 }
-code.indent2 {
+.parsons .indent2 {
 	margin-left: 60px;
 }
-code.indent3 {
+.parsons .indent3 {
 	margin-left: 90px;
 }
-code.indent4 {
+.parsons .indent4 {
 	margin-left: 120px;
 }
-.incorrect {
+.parsons .incorrect {
     border: 1px solid red;
     background: none;
     background-color: #ffefef;
 }
-
-.correct {
+.parsons .correct {
     background: none;
     background-color: #efffef;
     background-color: #DFF2BF;
 }
-
-.incorrectIndent {
+.parsons .incorrectIndent {
     border: 1px solid red;
     border-left: 10px solid red;
     padding-left: 1px;
 }
-
-.correctIndent {
+.parsons .correctIndent {
     border: 1px solid green;
     border-left: 10px solid green;
 }
-
-.incorrectPosition {
+.parsons .incorrectPosition {
     background-color: #FFBABA;
     border:1px solid red;
 }
-
-.correctPosition {
+.parsons .correctPosition {
     background-color: #DFF2BF;
     border:1px solid green;
 }
-.parsons{
-	/*background-color: #fbfcfd;
-	border-color: #e6e6e6;
-	box-shadow: inset 0px 0px 6px -1px rgba(50, 50, 50, 0.75);*/
+.parsons {
 	border-left:0;
 	border-right:0;
 	border-radius:0;
 	margin: 10px 0;
 }
-.parsons-text {
+.parsons .parsons-text {
 	max-width: 500pt;
 	margin-left: auto;
 	margin-right: auto;
 }
-.sortable-code-container{
+.parsons .sortable-code-container{
 	text-align:center;
 }
-.parsons-controls{
+.parsons .parsons-controls{
 	max-width: 500pt;
 	margin-left: auto;
 	margin-right: auto;

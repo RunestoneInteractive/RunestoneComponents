@@ -22,7 +22,7 @@
 	// grade that element
 	LineBasedGrader.prototype.grade = function() {
 		var widget = this.widget;
-		var logAct = widget.answerHash();
+		var correct = false;
 		var answerArea = $("#" + widget.options.answerId);
 		var feedbackArea = $("#" + widget.options.feedbackId);
 		var solutionLines = widget.solutionLines();
@@ -60,7 +60,7 @@
 					feedbackArea.fadeIn(100);
 					feedbackArea.attr("class", "alert alert-success");
 					feedbackArea.html("Perfect!");
-					logAct = "yes";
+					correct = true;
 				} else {
 					// Incorrect Indention
 					var incorrectBlocks = [];
@@ -109,14 +109,26 @@
 				feedbackArea.html("Highlighted blocks in your program are wrong or are in the wrong order. This can be fixed by moving, removing, or replacing highlighted blocks.");
 			}
 		}
-		// log it
+		// Log It
+		// this extended format, with correct, answer and trash, is used for grading
+		var answerHash = widget.answerHash();
+		var sourceHash = widget.sourceHash();
+		var act = sourceHash + "|" + answerHash;
+		if (correct) {
+			act = "correct|" + act;
+			correct = "yes";
+		} else {
+			act ="incorrect|" + act;
+			correct = "no";
+		}
+		var divid = widget.problem.divid;
 		widget.problem.logBookEvent({
         	"event" : "parsons", 
-        	"act" : "yes", 
-        	"correct" : logAct,
-        	"answer" : widget.answerHash(),
-        	"trash" : widget.sourceHash(),
-        	"div_id" : this.divid
+        	"act" : act,
+        	"div_id" : divid, 
+        	"correct" : correct,
+        	"answer" : answerHash,
+        	"trash" : sourceHash
         });
 	};
 
@@ -380,6 +392,7 @@
 		this.blocks = blocks;
 		this.solution = solution;
 		this.resetView();
+		this.log("set");
 	};
 
 	// Create a hash that identifies the block order and indention
@@ -443,6 +456,17 @@
 		var answerBlocks = this.blocksFromHash(answerHash);
 		this.createView(sourceBlocks, answerBlocks);
 	};
+
+	// Log the activity to the server
+	ParsonsWidget.prototype.log = function(activity) {
+		var act = activity + "|" + this.sourceHash + "|" + this.answerHash();
+		var divid = this.problem.divid;
+		this.problem.logBookEvent({
+        	"event" : "parsons", 
+        	"act" : act,
+        	"div_id" : divid
+        });
+	}
 
    ParsonsWidget.prototype.whatWeDidPreviously = function() {
      var hash = this.answerHash();
@@ -950,6 +974,7 @@
 				delete that.movingX;
 				delete that.movingY;
 				that.updateView();
+				that.log("drop");
 			}
 		};
 		
