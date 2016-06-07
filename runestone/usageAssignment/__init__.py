@@ -48,9 +48,14 @@ class usageAssignmentNode(nodes.General, nodes.Element):
 def visit_ua_node(self,node):
     try:
         course_name = node.ua_content['course_name']
+        chapter_data = node.ua_content['chapter_data']
+    except:
+        course_name = None
+        chapter_data = None
 
-        s = ""
-        for d in node.ua_content['chapter_data']:
+    s = ""
+    if chapter_data and course_name:
+        for d in chapter_data:
             ch_name, sub_chs = d['ch'], d['sub_chs']
             s += '<div class="panel-heading">'
             s += ch_name
@@ -61,8 +66,6 @@ def visit_ua_node(self,node):
                 s += '</li>'
             s += '</ul>'
             s += '</div>'
-    except:
-        s = ""
 
     # is this needed??
     s = s.replace("u'","'")  # hack:  there must be a better way to include the list and avoid unicode strings
