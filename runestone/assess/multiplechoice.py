@@ -60,7 +60,7 @@ def depart_mc_node(self,node):
             node.mc_options['alabel'] = label
             node.mc_options['atext'] = node.mc_options[k]
             currFeedback = "feedback_" + label
-            node.mc_options['feedtext'] = node.mc_options[currFeedback]
+            node.mc_options['feedtext'] = node.mc_options.get(currFeedback,"") #node.mc_options[currFeedback]
             if label in node.mc_options['correct']:
                 node.mc_options["is_correct"] = "data-correct"
             else:
