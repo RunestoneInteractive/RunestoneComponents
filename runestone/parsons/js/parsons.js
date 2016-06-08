@@ -393,8 +393,6 @@
 			divs = $(searchString)[0].getElementsByTagName('div'),
 			block;
 		for (var i = 0; i < divs.length; i++) {
-			console.log(divs[i]);
-			console.log(divs[i].id);
 			block = this.getBlockById(divs[i].id);
 			if (block !== undefined) {
 				hash.push(block.hash());
@@ -882,19 +880,7 @@
 		if (window.prettyPrint && (typeof(this.options.prettyPrint) === "undefined" || this.options.prettyPrint)) {
 			prettyPrint();
 		}
-		var answerArea = $("#" + this.options.answerId);
-		var sourceArea = $("#" + this.options.sourceId);
-		// Establish the width and height of the droppable areas
-		var areaWidth = 0;
-		var areaHeight = 6;
-		var item;
-		var maxFunction = function(idx, i) {
-			item = $(i);
-			areaHeight = areaHeight + item.outerHeight(true);
-			areaWidth = Math.max(areaWidth, item.outerWidth(true));			
-		};
-		$("#" + this.options.answerId + " div").each(maxFunction);
-		$("#" + this.options.sourceId + " div").each(maxFunction);
+		
 		// Determine how much indent should be possible in the answer area
 		var indent;
 		if (this.options.noindent) {
@@ -906,18 +892,45 @@
 				indent = Math.max(indent, this.solution[i].indent);
 			}
 		}
+
+		var answerArea = $("#" + this.options.answerId);
+		var sourceArea = $("#" + this.options.sourceId);
+		// Set the size of the areas, but do it only
+		// otherwise timedparsons will be wrong on reload
+		var areaWidth, areaHeight;
+		if (this.areaWidth == undefined) {
+			// Establish the width and height of the droppable areas
+			areaWidth = 0;
+			areaHeight = 6;
+			var item;
+			var maxFunction = function(idx, i) {
+				item = $(i);
+				areaHeight = areaHeight + item.outerHeight(true);
+				areaWidth = Math.max(areaWidth, item.outerWidth(true));			
+			};
+			this.areaWidth = areaWidth;
+			this.areaHeight = areaHeight;
+			$("#" + this.options.answerId + " div").each(maxFunction);
+			$("#" + this.options.sourceId + " div").each(maxFunction);
+			this.answerArea = answerArea;
+			this.sourceArea = sourceArea;
+			this.areaWidth = areaWidth;
+			this.areaHeight = areaHeight;
+			this.indent = indent;
+		} else {
+			areaWidth = this.areaWidth;
+			areaHeight = this.areaHeight;
+		}
 		sourceArea.height(areaHeight);
 		sourceArea.width(areaWidth);
 		answerArea.height(areaHeight);
 		answerArea.width(this.options.x_indent * indent + areaWidth);
-		this.answerArea = answerArea;
-		this.sourceArea = sourceArea;
-		this.indent = indent;
 		if (indent > 0 && indent <= 4) {
 			answerArea.addClass("answer" + indent);
 		} else {
 			answerArea.addClass("answer");
 		}
+		
 		var that = this;
 		that.state = undefined; // needs to be here for loading from storage
 		that.updateView();

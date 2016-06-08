@@ -233,7 +233,6 @@ Parsons.prototype.createParsonsWidget = function () {
     this.pwidget = new ParsonsWidget(this, options);
 
     this.pwidget.init($pjQ(this.origDiv).text());
-    this.pwidget.resetView();
     this.checkServer();
 };
 
