@@ -1505,7 +1505,7 @@ ExecutionVisualizer.prototype.updateOutputFull = function(smoothTransition) {
   if (curEntry.question) {
       //alert(curEntry.question.text);
       
-      $('#'+curEntry.question.div).modal({position:["25%","50%"]});
+      $('#'+curEntry.question.div).modal({position:["25%","50%"]}).draggable();
   }
 
   if (myViz.params.debugMode) {
