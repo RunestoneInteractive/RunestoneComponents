@@ -363,6 +363,8 @@ Timed.prototype.handlePrevAssessment = function () {
 
 Timed.prototype.startAssessment = function () {
     if (!this.taken) {
+        $("#relations-next").hide(); // hide the next page button for now
+        $("#relations-prev").hide(); // hide the previous button for now
         $(this.startBtn).hide();
         $(this.pauseBtn).attr("disabled", false);
         if (this.running === 0 && this.paused === 0) {
@@ -525,6 +527,8 @@ Timed.prototype.finishAssessment = function () {
            $(this.timedDiv).hide();
            $(this.pauseBtn).hide();
         }
+        $("#relations-next").show(); // show the next page button for now
+        $("#relations-prev").show(); // show the previous button for now
 };
 
 Timed.prototype.submitTimedProblems = function (logFlag) {
