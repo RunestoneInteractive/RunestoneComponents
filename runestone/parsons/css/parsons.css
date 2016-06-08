@@ -1,141 +1,134 @@
-/** Stylesheet for the puzzles */
-
-.sortable-code {
+.parsons .sortable-code {
     position: static;
     padding-left: 0px;
-    margin-left: 2%;
-    display:inline-block;
+    margin: 0px 15px;
+    display: inline-block;
 	text-align: left;
 	vertical-align: top;
 }
-#sortableTrash { width: 38%; }
-#sortable { width: 56%; }
-.sortable-code ul {
-    font-size: 120%;
+.parsons .source, .parsons .answer, .parsons .answer1, .parsons .answer2, .parsons .answer3, .parsons .answer4 {
+	position: relative;
+    font-size: 100%;
     font-family: monospace;
     list-style: none;
     background-color: #efefff;
     padding-bottom: 10px;
     padding-left: 0;
     margin-left: 0;
-    border: 1px solid #efefff;;
+    border: 1px solid #efefff;
 }
-.sortable-code ul:empty {
-  padding-bottom: 30px;
+.parsons .source {
+	background-color: #efefff;
 }
-.sortable-code li, .sortable-code li:before, .sortable-code li:after {
-  box-sizing: content-box;
+.parsons .answer {
+	background-color: #ffa;
 }
-ul.output {
-    background-color: #FFA;
+.parsons .answer1 {
+	background: linear-gradient(#ff7, #ff7) no-repeat border-box;
+	background-size: 30px 100%;
+	background-position: 0 0;
+	background-origin: padding-box;
+	background-color: #ffa;
 }
-.sortable-code li {
+.parsons .answer2 {
+	background: linear-gradient(#ff7, #ff7) no-repeat border-box;
+	background-size: 30px 100%;
+	background-position: 30px 0;
+	background-origin: padding-box;
+	background-color: #ffa;
+}
+.parsons .answer3 {
+	background: linear-gradient(#ff7, #ff7) no-repeat border-box, linear-gradient(#ff7, #ff7) no-repeat border-box;
+	background-size: 30px 100%, 30px 100%;
+	background-position: 0 0, 60px 0;
+	background-origin: padding-box, padding-box;
+	background-color: #ffa;
+}
+.parsons .answer4 {
+	background: linear-gradient(#ff7, #ff7) no-repeat border-box, linear-gradient(#ff7, #ff7) no-repeat border-box;
+	background-size: 30px 100%, 30px 100%;
+	background-position: 30px 0, 90px 0;
+	background-origin: padding-box, padding-box;
+	background-color: #ffa;
+}
+.parsons .block {
+	position: absolute;
     -moz-border-radius:10px;
     -webkit-border-radius:10px;
     border-radius: 10px;
-    background-color:#EFEFEF;
-    border:1px solid lightgray;
+    background-color: #EFEFEF;
+    border: 1px solid lightgray;
     padding:10px;
     margin-top: 5px;
     white-space: nowrap;
     overflow: hidden;
     cursor: move;
 }
-.sortable-code li:hover {
-    overflow: visible;
+.parsons .block code {
+	display: block;
+	clear: both;
+	float: left;
+	background-color: transparent;
 }
-
-ul.incorrect {
+.parsons .block, .parsons .block:before, .parsons .block:after {
+  box-sizing: content-box;
+}
+.parsons .indent1 {
+	margin-left: 30px;
+}
+.parsons .indent2 {
+	margin-left: 60px;
+}
+.parsons .indent3 {
+	margin-left: 90px;
+}
+.parsons .indent4 {
+	margin-left: 120px;
+}
+.parsons .incorrect {
     border: 1px solid red;
+    background: none;
     background-color: #ffefef;
 }
-
-ul.correct {
+.parsons .correct {
+    background: none;
     background-color: #efffef;
     background-color: #DFF2BF;
 }
-
-li.incorrectIndent {
+.parsons .incorrectIndent {
     border: 1px solid red;
     border-left: 10px solid red;
+    padding-left: 1px;
 }
-
-li.correctIndent {
+.parsons .correctIndent {
     border: 1px solid green;
     border-left: 10px solid green;
 }
-
-li.incorrectPosition, .testcase.fail, .testcase.error {
+.parsons .incorrectPosition {
     background-color: #FFBABA;
     border:1px solid red;
 }
-
-li.correctPosition, .testcase.pass {
+.parsons .correctPosition {
     background-color: #DFF2BF;
     border:1px solid green;
 }
-
-.testcase { padding: 10px; margin-bottom: 10px;}
-.testcase .msg { font-weight: bold; }
-.testcase .error { color: red;}
-.testcase .feedback { font-weight: bolder;}
-.testcase .fail .expected, .testcase .fail .actual {
-    color: red;
-    font-weight: bolder;
-}
-.testcase .output {
-    display: block;
-    white-space: pre;
-    background-color: #555555;
-    color: white;
-    font-size: 12px;
-    line-height: 15px;
-    margin: 5px;
-    padding: 5px;
-}
-/** For styling the toggleable elements */
-.jsparson-toggle {
-    padding: 0 15px;
-    display: inline-block;
-    border: 1px dashed black;
-    z-index: 500;
-    cursor: pointer;
-    min-width: 10px;
-    min-height: 15px;
-}
-.jsparson-toggle:empty {
-    border-color: red;
-}
-.jsparson-toggle:empty:before {
-    content: "??";
-    display: block;
-    color: red;
-}
-
-.parsons{
-	/*background-color: #fbfcfd;
-	border-color: #e6e6e6;
-	box-shadow: inset 0px 0px 6px -1px rgba(50, 50, 50, 0.75);*/
+.parsons {
 	border-left:0;
 	border-right:0;
 	border-radius:0;
 	margin: 10px 0;
 }
-.parsons-text {
+.parsons .parsons-text {
 	max-width: 500pt;
 	margin-left: auto;
 	margin-right: auto;
 }
-.sortable-code-container{
+.parsons .sortable-code-container{
 	text-align:center;
 }
-.parsons-controls{
+.parsons .parsons-controls{
 	max-width: 500pt;
 	margin-left: auto;
 	margin-right: auto;
 	text-align:center;
-}
-
-.parsons-disabled {
-    pointer-events: none;
 }

@@ -29,6 +29,13 @@ Parsons.prototype.init = function (opts) {
     this.origElem = orig;
     this.useRunestoneServices = opts.useRunestoneServices;
     this.divid = orig.id;
+    var storageId = eBookConfig.email;
+    if (storageId == undefined) {
+    	storageId = this.divid;
+    } else {
+        storageId += this.divid;
+    }
+	this.storageId = storageId;
     this.maxdist = $(orig).data('maxdist');
     this.children = this.origElem.childNodes;     // this contains all of the child elements of the entire tag...
     this.contentArray = [];
@@ -119,12 +126,12 @@ Parsons.prototype.createParsonsView = function () {         // Create DOM elemen
     this.containerDiv.appendChild(this.sortContainerDiv);
 
     this.sortTrashDiv = document.createElement("div");
-    this.sortTrashDiv.id = "parsons-sortableTrash-" + this.counterId;
+    this.sortTrashDiv.id = "parsons-sourceRegion-" + this.counterId;
     $(this.sortTrashDiv).addClass("sortable-code");
     this.sortContainerDiv.appendChild(this.sortTrashDiv);
 
     this.sortCodeDiv = document.createElement("div");
-    this.sortCodeDiv.id = "parsons-sortableCode-" + this.counterId;
+    this.sortCodeDiv.id = "parsons-answerRegion-" + this.counterId;
     $(this.sortCodeDiv).addClass("sortable-code");
     this.sortContainerDiv.appendChild(this.sortCodeDiv);
 
@@ -163,30 +170,17 @@ Parsons.prototype.createParsonsView = function () {         // Create DOM elemen
 Parsons.prototype.setButtonFunctions = function () {
     $pjQ(this.resetButt).click(function (event) {
         event.preventDefault();
-        this.pwidget.shuffleLines();
-
-        // set min width and height
-        var sortableul = $("#ul-parsons-sortableCode-" + this.counterId);
-        var trashul = $("#ul-parsons-sortableTrash-" + this.counterId);
-        var sortableHeight = sortableul.height();
-        var sortableWidth = sortableul.width();
-        var trashWidth = trashul.width();
-        var trashHeight = trashul.height();
-        var minHeight = Math.max(trashHeight, sortableHeight);
-        var minWidth = Math.max(trashWidth, sortableWidth);
-        trashul.css("min-height", minHeight + "px");
-        sortableul.css("min-height", minHeight + "px");
-        trashul.css("min-width", minWidth + "px");
-        sortableul.css("min-width", minWidth + "px");
+        this.pwidget.resetView();
+        this.pwidget.log("reset");
         $(this.messageDiv).hide();
-    }.bind(this));
+  }.bind(this));
     $pjQ(this.checkButt).click(function (event) {
         event.preventDefault();
-        this.setLocalStorage();
-
+        var hash = this.pwidget.answerHash();
+        localStorage.setItem(this.storageId, hash);
+        hash = this.pwidget.sourceHash();
+        localStorage.setItem(this.storageId + "-source", hash);
         this.pwidget.getFeedback();
-        $(this.messageDiv).fadeIn(100);
-
     }.bind(this));
 };
 
@@ -195,68 +189,52 @@ Parsons.prototype.setButtonFunctions = function () {
 ================================*/
 
 Parsons.prototype.createParsonsWidget = function () {
-    // First do animation stuff
-    $("#parsons-" + this.counterId).not(".sortable-code").not(".parsons-controls").on("click", function () {
-        $("html, body").animate({
-            scrollTop: ($("#parsons-" + this.counterId).offset().top - 50)
-        }, 700);
-    }).find(".sortable-code, .parsons-controls").click(function (e) {
-        return false;
-    });
 
-    this.pwidget = new ParsonsWidget({
-        "sortableId": "parsons-sortableCode-" + this.counterId,
-        "trashId": "parsons-sortableTrash-" + this.counterId,
-        "max_wrong_lines": this.maxdist,
-        "solution_label": "Drop blocks here",
-        "feedback_cb": this.displayErrors.bind(this)
-    });
+	var options = {
+		"x_indent" : 30,
+        "answerId" : "parsons-answer-" + this.counterId,
+        "answerRegionId" : "parsons-answerRegion-" + this.counterId,
+        "sourceId" : "parsons-source-" + this.counterId,
+        "sourceRegionId" : "parsons-sourceRegion-" + this.counterId,
+        "codelineId" : "parsons-codeline-" + this.counterId + "-",
+        "feedbackId" : "parsons-message-" + this.counterId,
+        "answerLabel" : "Drop blocks here"
+    };
+    // add maxdist and order if present
+    var maxdist = $(this.origElem).data('maxdist');
+    var order = $(this.origElem).data('order');
+    var noindent = $(this.origElem).data('noindent');
+    if (maxdist !== undefined) {
+	    options["maxdist"] = maxdist;
+	}
+	if (order !== undefined) {
+		// convert order string to array of numbers
+		order = order.match(/\d+/g);
+		for (var i = 0; i < order.length; i++) {
+			order[i] = parseInt(order[i]);
+		}
+		options["order"] = order;
+	}
+	options["noindent"] = noindent == "true";
+	// add locale and language
+	var locale = eBookConfig.locale;
+	if (locale == undefined) {
+		locale = "en";
+	}
+	options["locale"] = locale;
+	var language = $(this.origElem).data('language');
+	if (language == undefined) {
+		language = eBookConfig.language;
+		if (language == undefined) {
+			language = "python";
+		}
+	}
+	options["language"] = language;
+    this.pwidget = new ParsonsWidget(this, options);
 
     this.pwidget.init($pjQ(this.origDiv).text());
-    this.pwidget.shuffleLines();
+    this.pwidget.resetView();
     this.checkServer();
-};
-
-Parsons.prototype.styleNewHTML = function () {
-    // set min width and height
-    var sortableul = $("#ul-parsons-sortableCode-" + this.counterId);
-    var trashul = $("#ul-parsons-sortableTrash-" + this.counterId);
-    var sortableHeight = sortableul.height();
-    var sortableWidth = sortableul.width();
-    var trashWidth = trashul.width();
-    var trashHeight = trashul.height();
-    var minHeight = Math.max(trashHeight, sortableHeight);
-    var minWidth = Math.max(trashWidth, sortableWidth);
-    var test = document.getElementById("ul-parsons-sortableTrash-" + this.counterId);
-    trashul.css("min-height", minHeight + "px");
-    sortableul.css("min-height", minHeight + "px");
-    sortableul.height(minHeight);
-    trashul.css("min-width", minWidth + "px");
-    sortableul.css("min-width", minWidth + "px");
-    test.minWidth = minWidth + "px";
-};
-
-Parsons.prototype.displayErrors = function (fb) {     // Feedback function
-    var correct;
-    if (fb.errors.length > 0) {
-        correct = "F";
-        $(this.messageDiv).fadeIn(500);
-        $(this.messageDiv).attr("class", "alert alert-danger");
-        $(this.messageDiv).html(fb.errors[0]);
-    } else {
-        correct = "T";
-        $(this.messageDiv).fadeIn(100);
-        $(this.messageDiv).attr("class", "alert alert-success");
-        $(this.messageDiv).html("Perfect!");
-    }
-    // Don't automatically log event on page load
-    if (!this.loadingFromStorage) {
-        var answer = this.pwidget.getHash("#ul-parsons-sortableCode-" + this.counterId);
-        var trash = this.pwidget.getHash("#ul-parsons-sortableTrash-" + this.counterId);
-        this.logBookEvent({"event": "parsons", "act": "yes", "correct":correct,"answer": answer, "trash": trash, "div_id": this.divid});
-
-    }
-    this.loadingFromStorage = false;
 };
 
 Parsons.prototype.checkServer = function () {
@@ -266,10 +244,11 @@ Parsons.prototype.checkServer = function () {
         data.div_id = this.divid;
         data.course = eBookConfig.course;
         data.event = "parsons";
-        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this)).done(this.styleNewHTML.bind(this));
-    } else {
+        
+        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this)).done(this.pwidget.resetView.bind(this));
+     } else {
         this.checkLocalStorage();
-        this.styleNewHTML();
+        this.pwidget.resetView();
     }
 };
 
@@ -279,7 +258,7 @@ Parsons.prototype.repopulateFromStorage = function (data, status, whatever) {
         if (this.shouldUseServer(data)) {
             var solution = data.answer;
             var trash = data.trash;
-            this.pwidget.createHTMLFromHashes(solution, trash);
+            this.pwidget.createHTMLFromHashes(trash, solution);
             this.pwidget.getFeedback();
             this.setLocalStorage();
         } else {
@@ -294,9 +273,9 @@ Parsons.prototype.shouldUseServer = function (data) {
     // returns true if server data is more recent than local storage or if server storage is correct
     if (data.correct == "T" || localStorage.length === 0)
         return true;
-    var storedAnswer = localStorage.getItem(eBookConfig.email + this.divid);
-    var storedTrash = localStorage.getItem(eBookConfig.email + this.divid + "-trash");
-    var storedDate = localStorage.getItem(eBookConfig.email + this.divid + "-date");
+    var storedAnswer = localStorage.getItem(this.storageId);
+    var storedTrash = localStorage.getItem(this.storageId + "-source");
+    var storedDate = localStorage.getItem(this.storageId + "-date");
 
     if (storedAnswer === null || storedTrash === null || storedDate === null)
         return true;
@@ -310,11 +289,11 @@ Parsons.prototype.shouldUseServer = function (data) {
     return true;
 };
 Parsons.prototype.checkLocalStorage = function () {
-    if (localStorage.getItem(eBookConfig.email + this.divid) && localStorage.getItem(eBookConfig.email + this.divid + "-trash")) {
+    if (localStorage.getItem(this.storageId) && localStorage.getItem(this.storageId + "-source")) {
         try {
-            var solution = localStorage.getItem(eBookConfig.email + this.divid);
-            var trash = localStorage.getItem(eBookConfig.email + this.divid + "-trash");
-            this.pwidget.createHTMLFromHashes(solution, trash);
+            var solution = localStorage.getItem(this.storageId);
+            var trash = localStorage.getItem(this.storageId + "-source");
+            this.pwidget.createHTMLFromHashes(trash, solution);
             if (this.useRunestoneServices)
                 this.loadingFromStorage = false;   // Admittedly a non-straightforward way to log, but it works well
             this.pwidget.getFeedback();
@@ -334,12 +313,12 @@ Parsons.prototype.reInitialize = function () {
 };
 
 Parsons.prototype.setLocalStorage = function() {
-    var hash = this.pwidget.getHash("#ul-parsons-sortableCode-" + this.counterId);
-    localStorage.setItem(eBookConfig.email + this.divid, hash);
-    hash = this.pwidget.getHash("#ul-parsons-sortableTrash-" + this.counterId);
-    localStorage.setItem(eBookConfig.email + this.divid + "-trash", hash);
+    var hash = this.pwidget.answerHash();
+    localStorage.setItem(this.storageId, hash);
+    hash = this.pwidget.sourceHash();
+    localStorage.setItem(this.storageId + "-source", hash);
     var timeStamp = new Date();
-    localStorage.setItem(eBookConfig.email + this.divid + "-date", JSON.stringify(timeStamp));
+    localStorage.setItem(this.storageId + "-date", JSON.stringify(timeStamp));
 };
 
 $(document).bind("runestone:login-complete", function () {
