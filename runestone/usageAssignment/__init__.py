@@ -46,19 +46,26 @@ class usageAssignmentNode(nodes.General, nodes.Element):
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
 def visit_ua_node(self,node):
-    course_name = node.ua_content['course_name']
+    try:
+        course_name = node.ua_content['course_name']
+        chapter_data = node.ua_content['chapter_data']
+    except:
+        course_name = None
+        chapter_data = None
+
     s = ""
-    for d in node.ua_content['chapter_data']:
-        ch_name, sub_chs = d['ch'], d['sub_chs']
-        s += '<div class="panel-heading">'
-        s += ch_name
-        s += '<ul class="list-group">'
-        for sub_ch_name in sub_chs:
-            s += '<li class="simple">'
-            s += '<a href = "/runestone/static/%s/%s/%s.html">%s</a>' % (course_name, ch_name, sub_ch_name, sub_ch_name)
-            s += '</li>'
-        s += '</ul>'
-        s += '</div>'
+    if chapter_data and course_name:
+        for d in chapter_data:
+            ch_name, sub_chs = d['ch'], d['sub_chs']
+            s += '<div class="panel-heading">'
+            s += ch_name
+            s += '<ul class="list-group">'
+            for sub_ch_name in sub_chs:
+                s += '<li class="simple">'
+                s += '<a href = "/runestone/static/%s/%s/%s.html">%s</a>' % (course_name, ch_name, sub_ch_name, sub_ch_name)
+                s += '</li>'
+            s += '</ul>'
+            s += '</div>'
 
     # is this needed??
     s = s.replace("u'","'")  # hack:  there must be a better way to include the list and avoid unicode strings
@@ -158,6 +165,7 @@ class usageAssignment(Directive):
             print("  2. unable to connect to the database using dburl")
             print()
             print("This should only affect the grading interface. Everything else should be fine.")
+            return [usageAssignmentNode(self.options)]
 
 
         # create a Session
