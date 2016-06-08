@@ -86,6 +86,9 @@ ShortAnswer.prototype.renderHTML = function() {
     this.jTextArea.rows = 4;
     this.jTextArea.cols = 50;
     this.jLabel.appendChild(this.jTextArea);
+    this.jTextArea.oninput = function () {
+       this.feedbackDiv.innerHTML = "Your answer has not been saved yet!";
+    }.bind(this);
 
     this.fieldSet.appendChild(document.createElement("br"));
 
@@ -93,7 +96,7 @@ ShortAnswer.prototype.renderHTML = function() {
     this.fieldSet.appendChild(this.buttonDiv);
 
     this.submitButton = document.createElement("button");
-    $(this.submitButton).addClass("btn btn-default");
+    $(this.submitButton).addClass("btn btn-success");
     this.submitButton.type = "button";
     this.submitButton.textContent = "Save";
     this.submitButton.onclick = function () {
@@ -134,6 +137,7 @@ ShortAnswer.prototype.submitJournal = function () {
                         console.log(data.message);
                       });  */
     this.logBookEvent({'event': 'shortanswer', 'act': JSON.stringify(value), 'div_id': this.divid});
+    this.feedbackDiv.innerHTML = "Your answer has been saved, but the instructor has not had a chance to provide a comment yet.";
 };
 
 ShortAnswer.prototype.loadJournal = function () {
