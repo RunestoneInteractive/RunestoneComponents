@@ -13,11 +13,10 @@
 
 // wrap in anonymous function to not show some helper variables
 (function($, _) {
-	var graders = {};
+	// An object to grade the Parsons code
 	var LineBasedGrader = function(widget) {
 		this.widget = widget;
 	};
-	graders.LineBasedGrader = LineBasedGrader;
 	
 	// grade that element
 	LineBasedGrader.prototype.grade = function() {
@@ -161,7 +160,7 @@
 
 	// Answer an HTML representation of this codeline
 	ParsonsCodeline.prototype.asHTML = function() {
-		var html = '<code class="prettyprint lang-py';
+		var html = '<code class="' + this.block.widget.prettifyLanguage;
 		var indent = this.indent;
 		if (this.block.widget.options.noindent) {
 			indent += this.block.indent;
@@ -307,17 +306,17 @@
 	
 	// Mark the view for this codeblock as correct position
 	ParsonsCodeblock.prototype.markCorrect = function() {
-		this.elem().addClass(this.widget.FEEDBACK_STYLES.correctPosition);
+		this.elem().addClass("correctPosition");
 	};
 	
 	// Mark the view for this codeblock as incorrect position
 	ParsonsCodeblock.prototype.markIncorrectPosition = function() {
-		this.elem().addClass(this.widget.FEEDBACK_STYLES.incorrectPosition);
+		this.elem().addClass("incorrectPosition");
 	};
 	
 	// Mark the view for this codeblock as the incorrect indent
 	ParsonsCodeblock.prototype.markIncorrectIndent = function() {
-		this.elem().addClass(this.widget.FEEDBACK_STYLES.incorrectIndent);
+		this.elem().addClass("incorrectIndent");
 	};
 	
 	// expose the type for testing, extending etc
@@ -325,32 +324,25 @@
 
 	// Creates a parsons widget. Init must be called after creating an object.
 	var ParsonsWidget = function(problem, options) {
-	 this.problem = problem;
-     //To collect statistics, feedback should not be based on this
-     this.user_actions = [];
-     
-     //State history for feedback purposes
-     this.state_path = [];
-     this.states = {};
-     
-     var defaults = {
-       'x_indent': 30,
-       'first_error_only': true,
-       'lang': 'en'
-     };
-     
-     this.options = jQuery.extend({}, defaults, options);
-     this.feedback_exists = false;
-     this.id_prefix = options['codelineId'];
-
-     this.FEEDBACK_STYLES = { 'correctPosition' : 'correctPosition',
-                              'incorrectPosition' : 'incorrectPosition',
-                              'correctIndent' : 'correctIndent',
-                              'incorrectIndent' : 'incorrectIndent'};
-
-    this.grader = new LineBasedGrader(this);
-   };
-  ParsonsWidget._graders = graders;
+		this.problem = problem;
+		this.options = options;
+		this.feedback_exists = false;
+		this.id_prefix = options['codelineId'];
+		this.grader = new LineBasedGrader(this);
+		
+		this.prettifyLanguage = {
+			"python" : "prettyprint lang-py",
+			"java" : "prettyprint lang-java",
+			"javascript" : "prettyprint lang-js",
+			"html" : "prettyprint lang-html",
+			"c" : "prettyprint lang-c",
+			"c++" : "prettyprint lang-cpp",
+			"ruby" : "prettyprint lang-rb"
+		}[options["language"]];
+		if (this.prettifyLanguage == undefined) {
+			this.prettifyLanguage = "";
+		}
+	};
 
 	// Initialize the ParsonsWidget object with the following properties
 	//   blocks: an array of codeblocks as they are specified in the HTML text
@@ -401,8 +393,12 @@
 			divs = $(searchString)[0].getElementsByTagName('div'),
 			block;
 		for (var i = 0; i < divs.length; i++) {
+			console.log(divs[i]);
+			console.log(divs[i].id);
 			block = this.getBlockById(divs[i].id);
-			hash.push(block.hash());
+			if (block !== undefined) {
+				hash.push(block.hash());
+			}
 		}
 		//prefix with something to handle empty output situations
 		if (hash.length === 0) {
@@ -459,33 +455,14 @@
 
 	// Log the activity to the server
 	ParsonsWidget.prototype.log = function(activity) {
-		var act = activity + "|" + this.sourceHash + "|" + this.answerHash();
+		var act = activity + "|" + this.sourceHash() + "|" + this.answerHash();
 		var divid = this.problem.divid;
 		this.problem.logBookEvent({
-        	"event" : "parsons", 
-        	"act" : act,
-        	"div_id" : divid
-        });
-	}
-
-   ParsonsWidget.prototype.whatWeDidPreviously = function() {
-     var hash = this.answerHash();
-     var previously = this.states[hash];
-     if (!previously) { return undefined; }
-     var visits = _.filter(this.state_path, function(state) {
-                             return state == hash;
-                           }).length - 1;
-     var i, stepsToLast = 0, s,
-        outputStepTypes = ['removeOutput', 'addOutput', 'moveOutput'];
-     for (i = this.state_path.length - 2; i > 0; i--) {
-       s = this.states[this.state_path[i]];
-       if (s && outputStepTypes.indexOf(s.type) != -1) {
-         stepsToLast++;
-       }
-       if (hash === this.state_path[i]) { break; }
-     }
-     return $.extend(false, {'visits': visits, stepsToLast: stepsToLast}, previously);
-   };
+			"event" : "parsons",
+			"act" : act,
+			"div_id" : divid
+		});
+ 	}
 
 	// Return a block object by the full id including id prefix
 	ParsonsWidget.prototype.getBlockById = function(id) {
@@ -557,9 +534,7 @@
 		if (this.feedback_exists) {
 			$("#" + this.options.answerId).removeClass("incorrect correct");
 			var blocks = $("#" + this.options.answerId + " div");
-			$.each(this.FEEDBACK_STYLES, function(index, value) {
-				blocks.removeClass(value);
-			});
+			blocks.removeClass("correctPosition incorrectPosition incorrectIndent");
 			$("#" + this.options.feedbackId).hide();
 		}
 		this.feedback_exists = false;
@@ -985,6 +960,23 @@
 		for (var i = 0; i < answerBlocks.length; i++) {
 			$("#" + answerBlocks[i].id).draggable(draggableOptions);
 		}
+	};
+
+	// Disable the interface
+	ParsonsWidget.prototype.disable = function() {
+		// Disable dragging
+		var item;
+		$("#" + this.options.sourceId + " div").each(function(idx, i) {
+			item = $(i);
+			item.draggable("destroy");
+		});
+		$("#" + this.options.answerId + " div").each(function(idx, i) {
+			item = $(i);
+			item.draggable("destroy");
+		});
+		// Hide buttons
+		$("#" + this.problem.checkButt.id).hide();
+		$("#" + this.problem.resetButt.id).hide();
 	};
 	
 	window['ParsonsWidget'] = ParsonsWidget;

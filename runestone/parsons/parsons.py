@@ -37,6 +37,7 @@ def setup(app):
     app.add_javascript('parsons_setup.js')
     app.add_javascript('parsons.js')
     app.add_javascript('parsons-noconflict.js')
+    app.add_javascript('timedparsons.js')
 
 class ParsonsProblem(Assessment):
     required_arguments = 1
@@ -45,6 +46,7 @@ class ParsonsProblem(Assessment):
     option_spec = {
         'maxdist' : directives.unchanged,
         'order' : directives.unchanged,
+        'language' : directives.unchanged,
         'noindent' : directives.flag
     }
     has_content = True
@@ -83,7 +85,7 @@ Example:
         """
 
         TEMPLATE = '''
-    <pre data-component="parsons" id="%(divid)s"%(maxdist)s%(order)s%(noindent)s>
+    <pre data-component="parsons" id="%(divid)s"%(maxdist)s%(order)s%(noindent)s%(language)s>
         <span data-question>%(qnumber)s: %(instructions)s</span>%(code)s</pre>
     '''
         self.options['divid'] = self.arguments[0]
@@ -103,6 +105,10 @@ Example:
             self.options['noindent'] = ' data-noindent="true"'
         else:
             self.options['noindent'] = ''
+        if 'language' in self.options:
+            self.options['language'] = ' data-language="' + self.options['language'] + '"'
+        else:
+            self.options['language'] = ''
          
           
         if '-----' in self.content:

@@ -191,6 +191,7 @@ Parsons.prototype.setButtonFunctions = function () {
 Parsons.prototype.createParsonsWidget = function () {
 
 	var options = {
+		"x_indent" : 30,
         "answerId" : "parsons-answer-" + this.counterId,
         "answerRegionId" : "parsons-answerRegion-" + this.counterId,
         "sourceId" : "parsons-source-" + this.counterId,
@@ -214,7 +215,21 @@ Parsons.prototype.createParsonsWidget = function () {
 		}
 		options["order"] = order;
 	}
-	options["noindent"] = noindent;
+	options["noindent"] = noindent == "true";
+	// add locale and language
+	var locale = eBookConfig.locale;
+	if (locale == undefined) {
+		locale = "en";
+	}
+	options["locale"] = locale;
+	var language = $(this.origElem).data('language');
+	if (language == undefined) {
+		language = eBookConfig.language;
+		if (language == undefined) {
+			language = "python";
+		}
+	}
+	options["language"] = language;
     this.pwidget = new ParsonsWidget(this, options);
 
     this.pwidget.init($pjQ(this.origDiv).text());
@@ -298,9 +313,9 @@ Parsons.prototype.reInitialize = function () {
 };
 
 Parsons.prototype.setLocalStorage = function() {
-    var hash = this.pwidget.getAnswerHash();
+    var hash = this.pwidget.answerHash();
     localStorage.setItem(this.storageId, hash);
-    hash = this.pwidget.getSourceHash();
+    hash = this.pwidget.sourceHash();
     localStorage.setItem(this.storageId + "-source", hash);
     var timeStamp = new Date();
     localStorage.setItem(this.storageId + "-date", JSON.stringify(timeStamp));

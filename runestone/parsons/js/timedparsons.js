@@ -8,46 +8,21 @@ TimedParsons.prototype = new Parsons();
 
 TimedParsons.prototype.timedInit = function (opts) {
     this.init(opts);
-    this.renderTimedIcon(this.containerDiv);
-    this.hideButtons();
-};
-
-
-TimedParsons.prototype.hideButtons = function () {
-    $(this.checkButt).hide();
-};
-
-TimedParsons.prototype.renderTimedIcon = function (component) {
-    // renders the clock icon on timed components.    The component parameter
-    // is the element that the icon should be appended to.
-    var timeIconDiv = document.createElement("div");
-    var timeIcon = document.createElement("img");
-    $(timeIcon).attr({
-        "src": "../_static/clock.png",
-        "style": "width:15px;height:15px"
-    });
-    timeIconDiv.className = "timeTip";
-    timeIconDiv.title = "";
-    timeIconDiv.appendChild(timeIcon);
-    $(component).prepend(timeIconDiv);
 };
 
 TimedParsons.prototype.checkCorrectTimed = function () {
     return this.correct ? "T" : "F";
 };
 
-TimedParsons.prototype.hideFeedback = function () {
-    $(this.messageDiv).hide();
-};
-
 TimedParsons.prototype.processTimedSubmission = function (logFlag) {
     // Disable input & evaluate component
-    this.reInitialize();
     if (logFlag) {
-        var hash = this.pwidget.getHash("#ul-parsons-sortableCode-" + this.counterId);
-        localStorage.setItem(this.divid, hash);
-        hash = this.pwidget.getHash("#ul-parsons-sortableTrash-" + this.counterId);
-        localStorage.setItem(this.divid + "-trash", hash);
+    	var hash = this.pwidget.answerHash();
+    	localStorage.setItem(this.storageId, hash);
+    	hash = this.pwidget.sourceHash();
+    	localStorage.setItem(this.storageId + "-source", hash);
+    	var timeStamp = new Date();
+    	localStorage.setItem(this.storageId + "-date", JSON.stringify(timeStamp));
     } else {
         this.loadingFromStorage = true;
     }
@@ -59,8 +34,5 @@ TimedParsons.prototype.processTimedSubmission = function (logFlag) {
     } else {
         this.correct = false;
     }
-
-    this.resetButt.disabled = true;
-    $(this.sortContainerDiv).addClass("parsons-disabled");
-
+    this.pwidget.disable();
 };
