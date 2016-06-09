@@ -1,0 +1,99 @@
+
+<html>
+<head>
+    <script src='blockly_compressed.js' type="text/javascript"> </script>
+    <script src='blocks_compressed.js' type="text/javascript"> </script>
+    <script src='javascript_compressed.js' type="text/javascript"> </script>
+    <script src='python_compressed.js' type="text/javascript"> </script>
+    <script src='msg/js/en.js' type="text/javascript"> </script>
+    <link rel="stylesheet" href="bootstrap-3.0.0/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="video.css" type="text/css" />
+    <script type="text/javascript">
+    // Get the objects we need to do logging from the parent frame.
+    // This seems better than reloading all of jQuery and bookfuncs into the frame. But
+    // Makes this a bit more dependent on the Runestone Environment.
+    eBookConfig = parent.eBookConfig
+    logBookEvent = parent.logBookEvent
+    jQuery = parent.jQuery
+    </script>
+    <style>
+      html, body {
+        background-color: #fff;
+        margin: 0;
+        padding: 0;
+      }
+      .blocklySvg {
+        height: 100%;
+        width: 100%;
+      }
+      .active_out {
+        margin-top: 5px;
+        margin-left: 10px;
+        margin-right: 5px;
+      }
+    </style>
+</head>
+<body>
+<p>
+    <button class="btn btn-default" onclick="showCode()">Show Python</button>
+    <button class="btn btn-success" onclick="runCode()">Run</button>
+</p>
+<div id="blockly1" style="height: 480px; width: 600px;"></div>
+<xml id="toolbox" style="display: none"><category name="controls"><block type="controls_if"></block>
+<block type="controls_repeat_ext"></block>
+</category><category name="logic"><block type="logic_compare"></block>
+</category><category name="math"><block type="math_number"></block>
+<block type="math_arithmetic"></block>
+</category><category name="text"><block type="text"></block>
+<block type="text_print"></block>
+</category><category name="Variables" custom="VARIABLE"></category></xml>
+<script>
+    Blockly.inject(document.getElementById('blockly1'),
+        {path: './', toolbox: document.getElementById('toolbox')});
+
+    function showCode() {
+      // Generate JavaScript code and display it.
+      Blockly.Python.INFINITE_LOOP_TRAP = null;
+      var code = Blockly.Python.workspaceToCode();
+      alert(code);
+    }
+
+    function runCode() {
+      // Generate JavaScript code and run it.
+      window.LoopTrap = 1000;
+      Blockly.JavaScript.INFINITE_LOOP_TRAP = 'if (--window.LoopTrap == 0) throw "Infinite loop.";\n';
+      var code = Blockly.JavaScript.workspaceToCode();
+      Blockly.JavaScript.INFINITE_LOOP_TRAP = null;
+      if(logBookEvent) {
+          logBookEvent({'event': 'blockly', 'act': 'run', 'div_id': 'blockly1'});
+      } else {
+          console.log('logBookEvent is not defined.  This should be defined in the parent frame')
+      }
+      try {
+        eval(code);
+      } catch (e) {
+        alert(e);
+      }
+    }
+
+    Blockly.JavaScript['text_print'] = function(block) { 
+      // Print statement override. 
+      var argument0 = Blockly.JavaScript.valueToCode(block, 'TEXT', 
+          Blockly.JavaScript.ORDER_NONE) || '\'\''; 
+      return 'my_custom_print(' + argument0 + ', "blockly1" );\n'; 
+    }; 
+
+    function my_custom_print(text,divid) { 
+      var p = document.getElementById(divid+"_pre");
+      p.innerHTML += text + "\n"
+      }
+
+    var xmlText = '<xml>    <block type="variables_set" id="1" inline="true" x="25" y="9">       <field name="VAR">X</field>       <value name="VALUE">          <block type="math_number" id="2">             <field name="NUM">10</field>          </block>       </value>    </block> </xml>';
+    var xmlDom = Blockly.Xml.textToDom(xmlText);
+    Blockly.Xml.domToWorkspace(Blockly.mainWorkspace, xmlDom);
+
+  </script>
+  
+  <pre class="active_out" id="blockly1_pre"></pre>
+  </body>
+  </html>
