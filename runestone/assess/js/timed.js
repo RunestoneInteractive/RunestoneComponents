@@ -260,7 +260,9 @@ Timed.prototype.renderSubmitButton = function () {
     });
     this.finishButton.textContent = "Finish Exam";
     this.finishButton.addEventListener("click", function () {
-        this.finishAssessment();
+       if (window.confirm("Clicking OK means you are ready to submit your answers and are finished with this assessment.")) {
+          this.finishAssessment();
+       }
     }.bind(this), false);
 
     this.buttonContainer.appendChild(this.finishButton);
@@ -361,6 +363,8 @@ Timed.prototype.handlePrevAssessment = function () {
 
 Timed.prototype.startAssessment = function () {
     if (!this.taken) {
+        $("#relations-next").hide(); // hide the next page button for now
+        $("#relations-prev").hide(); // hide the previous button for now
         $(this.startBtn).hide();
         $(this.pauseBtn).attr("disabled", false);
         if (this.running === 0 && this.paused === 0) {
@@ -455,6 +459,7 @@ Timed.prototype.increment = function () { // increments the timer
                 this.done = 1;
                 if (this.taken === 0) {
                     this.taken = 1;
+                    window.alert("Sorry, but you ran out of time.  Your current answers have been saved");
                     this.finishAssessment();
                 }
             }
@@ -506,7 +511,6 @@ Timed.prototype.tookTimedExam = function () {
 };
 
 Timed.prototype.finishAssessment = function () {
-    if (window.confirm("Clicking OK means you are ready to submit your answers and are finished with this assessment.")) {
         this.findTimeTaken();
         this.running = 0;
         this.done = 1;
@@ -523,7 +527,8 @@ Timed.prototype.finishAssessment = function () {
            $(this.timedDiv).hide();
            $(this.pauseBtn).hide();
         }
-    }
+        $("#relations-next").show(); // show the next page button for now
+        $("#relations-prev").show(); // show the previous button for now
 };
 
 Timed.prototype.submitTimedProblems = function (logFlag) {
