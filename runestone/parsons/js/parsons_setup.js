@@ -215,7 +215,10 @@ Parsons.prototype.createParsonsWidget = function () {
 		}
 		options["order"] = order;
 	}
-	options["noindent"] = noindent == "true";
+	if (noindent == undefined) {
+		noindent = false;
+	}
+	options["noindent"] = noindent;
 	// add locale and language
 	var locale = eBookConfig.locale;
 	if (locale == undefined) {
