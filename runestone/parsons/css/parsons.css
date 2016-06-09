@@ -9,7 +9,6 @@
 .parsons .source, .parsons .answer, .parsons .answer1, .parsons .answer2, .parsons .answer3, .parsons .answer4 {
 	position: relative;
     font-size: 100%;
-    font-family: monospace;
     list-style: none;
     background-color: #efefff;
     padding-bottom: 10px;
@@ -24,31 +23,31 @@
 	background-color: #ffa;
 }
 .parsons .answer1 {
-	background: linear-gradient(#ff7, #ff7) no-repeat border-box;
-	background-size: 30px 100%;
-	background-position: 0 0;
-	background-origin: padding-box;
-	background-color: #ffa;
-}
-.parsons .answer2 {
-	background: linear-gradient(#ff7, #ff7) no-repeat border-box;
-	background-size: 30px 100%;
+	background: linear-gradient(#ee0, #ee0) no-repeat border-box;
+	background-size: 1px 100%;
 	background-position: 30px 0;
 	background-origin: padding-box;
 	background-color: #ffa;
 }
-.parsons .answer3 {
-	background: linear-gradient(#ff7, #ff7) no-repeat border-box, linear-gradient(#ff7, #ff7) no-repeat border-box;
-	background-size: 30px 100%, 30px 100%;
-	background-position: 0 0, 60px 0;
+.parsons .answer2 {
+	background: linear-gradient(#ee0, #ee0) no-repeat border-box, linear-gradient(#ee0, #ee0) no-repeat border-box;
+	background-size: 1px 100%, 1px 100%;
+	background-position: 30px 0, 60px 0;
 	background-origin: padding-box, padding-box;
 	background-color: #ffa;
 }
+.parsons .answer3 {
+	background: linear-gradient(#ee0, #ee0) no-repeat border-box, linear-gradient(#ee0, #ee0) no-repeat border-box, linear-gradient(#ee0, #ee0) no-repeat border-box;
+	background-size: 1px 100%, 1px 100%, 1px 100%;
+	background-position: 30px 0, 60px 0, 90px 0;
+	background-origin: padding-box, padding-box, padding-box;
+	background-color: #ffa;
+}
 .parsons .answer4 {
-	background: linear-gradient(#ff7, #ff7) no-repeat border-box, linear-gradient(#ff7, #ff7) no-repeat border-box;
-	background-size: 30px 100%, 30px 100%;
-	background-position: 30px 0, 90px 0;
-	background-origin: padding-box, padding-box;
+	background: linear-gradient(#ee0, #ee0) no-repeat border-box, linear-gradient(#ee0, #ee0) no-repeat border-box, linear-gradient(#ee0, #ee0) no-repeat border-box, linear-gradient(#ee0, #ee0) no-repeat border-box;
+	background-size: 1px 100%, 1px 100%, 1px 100%, 1px 100%;
+	background-position: 30px 0, 60px 0, 90px 0, 120px 0;
+	background-origin: padding-box, padding-box, padding-box, padding-box;
 	background-color: #ffa;
 }
 .parsons .block {
@@ -60,7 +59,6 @@
     border: 1px solid lightgray;
     padding:10px;
     margin-top: 5px;
-    white-space: nowrap;
     overflow: hidden;
     cursor: move;
 }
@@ -69,6 +67,9 @@
 	clear: both;
 	float: left;
 	background-color: transparent;
+}
+.parsons .block p {
+	margin: 0;
 }
 .parsons .block, .parsons .block:before, .parsons .block:after {
   box-sizing: content-box;
