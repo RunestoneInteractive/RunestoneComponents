@@ -160,7 +160,14 @@
 
 	// Answer an HTML representation of this codeline
 	ParsonsCodeline.prototype.asHTML = function() {
-		var html = '<code class="' + this.block.widget.prettifyLanguage;
+		var html, end;
+		if (this.block.widget.options.language == "natural") {
+			html = '<p class="';
+			end = '<\/p>';
+		} else {
+			html = '<code class="' + this.block.widget.prettifyLanguage;
+			end = '<\/code>';
+		}
 		var indent = this.indent;
 		if (this.block.widget.options.noindent) {
 			indent += this.block.indent;
@@ -168,7 +175,7 @@
 		if (indent > 0) {
 			html += ' indent' + indent;
 		}
-		html += '">' + this.text + '<\/code>';
+		html += '">' + this.text + end;
 		return html;
 	};
 	
@@ -620,7 +627,7 @@
 		
 		var positionTop, width;
 		var that = this;
-		var baseWidth = this.sourceArea.width() - 22;
+		var baseWidth = this.areaWidth - 22;
 		
 		// Update the Source Area
 		if (updateSource) {
@@ -683,7 +690,7 @@
 		if (updateAnswer) {
 			var block, indent;
 			positionTop = 0;
-			width = this.answerArea.width() - 22;
+			width = this.areaWidth + this.indent * this.options.x_indent - 22;
 			var that = this;
 			if (newState == "answer") {
 				var hasInserted = false;
@@ -756,11 +763,10 @@
 		// Update the Moving Area
 		if (updateMoving) {
 			moving.appendTo("#" + this.options.sourceId);
-			width = this.sourceArea.width() - 22;
 			moving.css({
 				'left' : this.movingX - this.sourceArea.offset().left - (moving.outerWidth(true) / 2),
 				'top' : this.movingY - this.sourceArea.offset().top - (movingHeight / 2),
-				'width' : width,
+				'width' : baseWidth,
 				'z-index' : 2
 			});
 		}
@@ -877,54 +883,62 @@
 			$("#" + this.options.answerRegionId).html(html);
 		}
 		
-		if (window.prettyPrint && (typeof(this.options.prettyPrint) === "undefined" || this.options.prettyPrint)) {
+		if (this.prettifyLanguage !== "") {
 			prettyPrint();
 		}
 		
 		// Determine how much indent should be possible in the answer area
-		var indent;
-		if (this.options.noindent) {
-			indent = 0;
-		} else {
+		var indent = 0;
+		if (!this.options.noindent) {
 			// Set the indent so that the solution is possible
-			indent = 1;
+			if (this.options.language !== "natural") {
+				// Even if no indent is required, have a minimum of 1 indent
+				indent = 1;
+			}
 			for (var i = 0; i < this.solution.length; i++) {
 				indent = Math.max(indent, this.solution[i].indent);
 			}
 		}
+		this.indent = indent;
 
 		var answerArea = $("#" + this.options.answerId);
 		var sourceArea = $("#" + this.options.sourceId);
+		this.answerArea = answerArea;
+		this.sourceArea = sourceArea;
 		// Set the size of the areas, but do it only
 		// otherwise timedparsons will be wrong on reload
 		var areaWidth, areaHeight;
 		if (this.areaWidth == undefined) {
 			// Establish the width and height of the droppable areas
-			areaWidth = 0;
+			var item, maxFunction;
 			areaHeight = 6;
-			var item;
-			var maxFunction = function(idx, i) {
-				item = $(i);
-				areaHeight = areaHeight + item.outerHeight(true);
-				areaWidth = Math.max(areaWidth, item.outerWidth(true));			
-			};
-			this.areaWidth = areaWidth;
-			this.areaHeight = areaHeight;
+			if (this.options.language == "natural") {
+				areaWidth = 300;
+				maxFunction = function(idx, i) {
+					item = $(i);
+					item.width(areaWidth - 22);
+					areaHeight += item.outerHeight(true);
+				};
+			} else {
+				areaWidth = 0;
+				maxFunction = function(idx, i) {
+					item = $(i);
+					areaHeight += item.outerHeight(true);
+					areaWidth = Math.max(areaWidth, item.outerWidth(true));			
+				};
+			}
 			$("#" + this.options.answerId + " div").each(maxFunction);
 			$("#" + this.options.sourceId + " div").each(maxFunction);
-			this.answerArea = answerArea;
-			this.sourceArea = sourceArea;
 			this.areaWidth = areaWidth;
 			this.areaHeight = areaHeight;
-			this.indent = indent;
 		} else {
 			areaWidth = this.areaWidth;
 			areaHeight = this.areaHeight;
 		}
 		sourceArea.height(areaHeight);
-		sourceArea.width(areaWidth);
+		sourceArea.width(areaWidth + 2);
 		answerArea.height(areaHeight);
-		answerArea.width(this.options.x_indent * indent + areaWidth);
+		answerArea.width(this.options.x_indent * indent + areaWidth + 2);
 		if (indent > 0 && indent <= 4) {
 			answerArea.addClass("answer" + indent);
 		} else {
