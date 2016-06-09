@@ -12,6 +12,9 @@ RunestoneBase.prototype.logBookEvent = function (eventInfo) {
 
 RunestoneBase.prototype.logRunEvent = function (eventInfo) {
     eventInfo.course = eBookConfig.course;
+    if (! 'to_save' in eventInfo) {
+        eventInfo.save_code = "True"
+    }
     if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
         jQuery.post(eBookConfig.ajaxURL + 'runlog', eventInfo); // Log the run event
     }
