@@ -26,9 +26,8 @@ If you are completely new to pip and github text editors, I have written a more 
  tutorial `on my blog <http://reputablejournal.com/how-to-make-a-lab-in-three-easy-steps.html>`_
  Otherwise, you can install everything you need with one simple command! (Although I recommend that you first create a virtual environment for your work.)
  
- Install and make a Python virtualenv
- ````````````````````````````````````
-
+ **Install and make a Python virtualenv**
+ 
 * Documentation here:  https://virtualenv.pypa.io/en/stable/
 * Video here:  https://www.youtube.com/watch?v=IX-v6yvGYFg
 * For the impatient:
