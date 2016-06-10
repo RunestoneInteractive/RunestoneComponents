@@ -86,6 +86,11 @@ ShortAnswer.prototype.renderHTML = function() {
     this.jTextArea.rows = 4;
     this.jTextArea.cols = 50;
     this.jLabel.appendChild(this.jTextArea);
+    this.jTextArea.oninput = function () {
+       this.feedbackDiv.innerHTML = "Your answer has not been saved yet!";
+       $(this.feedbackDiv).removeClass("alert-success");
+       $(this.feedbackDiv).addClass("alert alert-danger");
+    }.bind(this);
 
     this.fieldSet.appendChild(document.createElement("br"));
 
@@ -93,31 +98,36 @@ ShortAnswer.prototype.renderHTML = function() {
     this.fieldSet.appendChild(this.buttonDiv);
 
     this.submitButton = document.createElement("button");
-    $(this.submitButton).addClass("btn btn-default");
+    $(this.submitButton).addClass("btn btn-success");
     this.submitButton.type = "button";
     this.submitButton.textContent = "Save";
     this.submitButton.onclick = function () {
         this.submitJournal();
     }.bind(this);
     this.buttonDiv.appendChild(this.submitButton);
-
-    this.randomSpan = document.createElement("span");
+  
+    // barb - removed since we aren't really giving instructor feedback here
+    /* this.randomSpan = document.createElement("span");
     this.randomSpan.innerHTML = "Instructor's Feedback";
-    this.fieldSet.appendChild(this.randomSpan);
+    this.fieldSet.appendChild(this.randomSpan); */
 
-    this.otherOptionsDiv = document.createElement("div");
+    /* this.otherOptionsDiv = document.createElement("div");
     $(this.otherOptionsDiv).css("padding-left:20px");
     $(this.otherOptionsDiv).addClass("journal-options");
-    this.fieldSet.appendChild(this.otherOptionsDiv);
+    this.fieldSet.appendChild(this.otherOptionsDiv); */
 
+    // add a feedback div to give user feedback
     this.feedbackDiv = document.createElement("div");
-    $(this.feedbackDiv).addClass("bg-info form-control");
-    $(this.feedbackDiv).css("width:530px, background-color:#eee, font-style:italic");
+    //$(this.feedbackDiv).addClass("bg-info form-control");
+    //$(this.feedbackDiv).css("width:530px, background-color:#eee, font-style:italic");
+    $(this.feedbackDiv).css("width:530px, font-style:italic");
     this.feedbackDiv.id = this.divid + "_feedback";
-    this.feedbackDiv.innerHTML = "There is no feedback yet.";
-    this.otherOptionsDiv.appendChild(this.feedbackDiv);
+    this.feedbackDiv.innerHTML = "You have not answered this question yet.";
+    $(this.feedbackDiv).addClass("alert alert-danger");
+    //this.otherOptionsDiv.appendChild(this.feedbackDiv);
+    this.fieldSet.appendChild(this.feedbackDiv);
 
-    this.fieldSet.appendChild(document.createElement("br"));
+    //this.fieldSet.appendChild(document.createElement("br"));
 
     $(this.origElem).replaceWith(this.containerDiv);
 };
@@ -134,10 +144,24 @@ ShortAnswer.prototype.submitJournal = function () {
                         console.log(data.message);
                       });  */
     this.logBookEvent({'event': 'shortanswer', 'act': JSON.stringify(value), 'div_id': this.divid});
+    this.feedbackDiv.innerHTML = "Your answer has been saved.";
+    $(this.feedbackDiv).removeClass("alert-danger");
+    $(this.feedbackDiv).addClass("alert alert-success");
 };
 
 ShortAnswer.prototype.loadJournal = function () {
 
+    // check if the item has been saved to local storage
+    value = localStorage.getItem(this.divid);
+    if (value != null) {
+       var solution = $("#" + this.divid + "_solution");
+       solution.text(value);
+       this.feedbackDiv.innerHTML = "Your current saved answer is shown above.";
+       $(this.feedbackDiv).removeClass("alert-danger");
+       $(this.feedbackDiv).addClass("alert alert-success");
+    }
+
+    /* this doesn't seem to be doing anything since we aren't currently saving to the server
     // Ask the server to send the latest
     var loadAnswer = function(data,status,whatever) {
         var len = localStorage.length;
@@ -165,11 +189,12 @@ ShortAnswer.prototype.loadJournal = function () {
         }
     }.bind(this);
     var data = {'div_id' : this.divid};
-    if (this.useRunestoneServies) {
+    if (this.useRunestoneServices) {
         jQuery.get(eBookConfig.ajaxURL + 'getlastanswer', data, loadAnswer);
     } else {
         loadAnswer({},null,null);
     }
+    */
 };
 
 
@@ -179,7 +204,9 @@ ShortAnswer.prototype.loadJournal = function () {
 =================================*/
 $(document).ready(function () {
     $("[data-component=shortanswer]").each(function (index) {
-        saList[this.id] = new ShortAnswer({"orig": this, 'useRunestoneServices': eBookConfig.useRunestoneServices});
+        if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
+            saList[this.id] = new ShortAnswer({"orig": this, 'useRunestoneServices': eBookConfig.useRunestoneServices});
+        }
     });
 
 });

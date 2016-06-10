@@ -16,6 +16,14 @@ span.clickable-clicked {
     box-shadow: initial;
 }
 
+table {
+    border-collapse: collapse;
+}
+
+th.clickable, td.clickable {
+    border: 1px solid black;
+}
+
 td.clickable-clicked{
     background-color: #dad6c1;
     box-shadow: initial;

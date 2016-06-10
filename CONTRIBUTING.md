@@ -15,12 +15,12 @@ Coding Standards
 
 * All components must remain Python 3/2 compatible.   The ``six`` module is already 
 in the requirements.txt file, so feel free to use that.
-* No Tabs
+* No Tabs for Python files (4 spaces = 1 indention)
 * Avoid profliferation of jQuery versions.  Make your stuff compatible with the version
 of jQuery in the common folder.
 * Avoid proliferation of additional third party javascript modules.  We are already out of 
 control in this regard and it would be nice to rein it in.
-
+* When creating a new directive, assign a unique class name to the outermost HTML division. That will allow you to easily confine your CSS declarations to apply only within your directive. Since there are many directives, chances for CSS namespace conflicts are high without that.
 
 Provide an example
 ------------------
