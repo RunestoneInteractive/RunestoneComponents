@@ -12,6 +12,7 @@ from .poll import *
 from .reveal import *
 from .tabbedStuff import *
 from .video import *
+from .server.chapternames import populateChapterInfo
 
 import os, sys
 
@@ -30,6 +31,7 @@ def runestone_extensions():
     basedir = os.path.dirname(__file__)
     module_paths = [ x for x in os.listdir(basedir) if os.path.isdir(os.path.join(basedir,x))]
     modules = [ 'runestone.{}'.format(x) for x in module_paths if os.path.exists('{}/__init__.py'.format(os.path.join(basedir,x)))]
+    modules.remove('runestone.server')
     return modules
 
 from paver.easy import task, cmdopts, sh
@@ -73,12 +75,11 @@ def build(options):
 
 
     try:
-        sys.path.insert(0,os.path.join('..','..','modules'))
         if os.path.exists(os.path.join(options.build.sourcedir,'toc.rst')):
             idxfile = os.path.join(options.build.sourcedir,'toc.rst')
         else:
             idxfile = os.path.join(options.build.sourcedir,'index.rst')
-        from chapternames import populateChapterInfo
+
         populateChapterInfo(options.build.project_name, idxfile)
         print('Creating Chapter Information')
     except ImportError as e:

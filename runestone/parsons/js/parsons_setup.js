@@ -27,12 +27,22 @@ Parsons.prototype.init = function (opts) {
     RunestoneBase.apply(this, arguments);
     var orig = opts.orig;     // entire <pre> element that will be replaced by new HTML
     this.origElem = orig;
+    this.useRunestoneServices = opts.useRunestoneServices;
     this.divid = orig.id;
+    var storageId = eBookConfig.email;
+    if (storageId == undefined) {
+    	storageId = this.divid;
+    } else {
+        storageId += this.divid;
+    }
+	this.storageId = storageId;
+    this.maxdist = $(orig).data('maxdist');
     this.children = this.origElem.childNodes;     // this contains all of the child elements of the entire tag...
     this.contentArray = [];
     this.question = null;
     Parsons.counter++;     //    Unique identifier
     this.counterId = Parsons.counter;
+    this.loadingFromStorage = true;   // See displayErrors() for use
 
     this.getQuestion();
     this.formatCode();
@@ -92,36 +102,36 @@ Parsons.prototype.formatCode = function () {
 == Creating/appending new HTML tags ==
 ====================================*/
 Parsons.prototype.createParsonsView = function () {         // Create DOM elements
-    this.containingDiv = document.createElement("div");
-    $(this.containingDiv).addClass("parsons alert alert-warning");
-    this.containingDiv.id = "parsons-" + this.counterId;
+    this.containerDiv = document.createElement("div");
+    $(this.containerDiv).addClass("parsons alert alert-warning");
+    this.containerDiv.id = "parsons-" + this.counterId;
 
     this.parsTextDiv = document.createElement("div");
     $(this.parsTextDiv).addClass("parsons-text");
     this.parsTextDiv.innerHTML = this.question.innerHTML;
-    this.containingDiv.appendChild(this.parsTextDiv);
+    this.containerDiv.appendChild(this.parsTextDiv);
 
     this.leftClearDiv = document.createElement("div");
     this.leftClearDiv.style["clear"] = "left";
-    this.containingDiv.appendChild(this.leftClearDiv);
+    this.containerDiv.appendChild(this.leftClearDiv);
 
     this.origDiv = document.createElement("div");
     this.origDiv.id = "parsons-orig-" + this.counterId;
     this.origDiv.style["display"] = "none";
     this.origDiv.innerHTML = this.fmtCode;
-    this.containingDiv.appendChild(this.origDiv);
+    this.containerDiv.appendChild(this.origDiv);
 
     this.sortContainerDiv = document.createElement("div");
     $(this.sortContainerDiv).addClass("sortable-code-container");
-    this.containingDiv.appendChild(this.sortContainerDiv);
+    this.containerDiv.appendChild(this.sortContainerDiv);
 
     this.sortTrashDiv = document.createElement("div");
-    this.sortTrashDiv.id = "parsons-sortableTrash-" + this.counterId;
+    this.sortTrashDiv.id = "parsons-sourceRegion-" + this.counterId;
     $(this.sortTrashDiv).addClass("sortable-code");
     this.sortContainerDiv.appendChild(this.sortTrashDiv);
 
     this.sortCodeDiv = document.createElement("div");
-    this.sortCodeDiv.id = "parsons-sortableCode-" + this.counterId;
+    this.sortCodeDiv.id = "parsons-answerRegion-" + this.counterId;
     $(this.sortCodeDiv).addClass("sortable-code");
     this.sortContainerDiv.appendChild(this.sortCodeDiv);
 
@@ -131,7 +141,7 @@ Parsons.prototype.createParsonsView = function () {         // Create DOM elemen
 
     this.parsonsControlDiv = document.createElement("div");
     $(this.parsonsControlDiv).addClass("parsons-controls");
-    this.containingDiv.appendChild(this.parsonsControlDiv);
+    this.containerDiv.appendChild(this.parsonsControlDiv);
 
     this.checkButt = document.createElement("button");
     $(this.checkButt).attr("class", "btn btn-success");
@@ -152,7 +162,7 @@ Parsons.prototype.createParsonsView = function () {         // Create DOM elemen
     this.parsonsControlDiv.appendChild(this.messageDiv);
     $(this.messageDiv).hide();
 
-    $(this.origElem).replaceWith(this.containingDiv);
+    $(this.origElem).replaceWith(this.containerDiv);
 
     this.createParsonsWidget();
 };
@@ -160,33 +170,17 @@ Parsons.prototype.createParsonsView = function () {         // Create DOM elemen
 Parsons.prototype.setButtonFunctions = function () {
     $pjQ(this.resetButt).click(function (event) {
         event.preventDefault();
-        this.pwidget.shuffleLines();
-
-        // set min width and height
-        var sortableul = $("#ul-parsons-sortableCode-" + this.counterId);
-        var trashul = $("#ul-parsons-sortableTrash-" + this.counterId);
-        var sortableHeight = sortableul.height();
-        var sortableWidth = sortableul.width();
-        var trashWidth = trashul.width();
-        var trashHeight = trashul.height();
-        var minHeight = Math.max(trashHeight, sortableHeight);
-        var minWidth = Math.max(trashWidth, sortableWidth);
-        trashul.css("min-height", minHeight + "px");
-        sortableul.css("min-height", minHeight + "px");
-        trashul.css("min-width", minWidth + "px");
-        sortableul.css("min-width", minWidth + "px");
+        this.pwidget.resetView();
+        this.pwidget.log("reset");
         $(this.messageDiv).hide();
-    }.bind(this));
+  }.bind(this));
     $pjQ(this.checkButt).click(function (event) {
         event.preventDefault();
-        var hash = this.pwidget.getHash("#ul-parsons-sortableCode-" + this.counterId);
-        localStorage.setItem(this.divid, hash);
-        hash = this.pwidget.getHash("#ul-parsons-sortableTrash-" + this.counterId);
-        localStorage.setItem(this.divid + "-trash", hash);
-
+        var hash = this.pwidget.answerHash();
+        localStorage.setItem(this.storageId, hash);
+        hash = this.pwidget.sourceHash();
+        localStorage.setItem(this.storageId + "-source", hash);
         this.pwidget.getFeedback();
-        $(this.messageDiv).fadeIn(100);
-
     }.bind(this));
 };
 
@@ -195,80 +189,144 @@ Parsons.prototype.setButtonFunctions = function () {
 ================================*/
 
 Parsons.prototype.createParsonsWidget = function () {
-    // First do animation stuff
-    $("#parsons-" + this.counterId).not(".sortable-code").not(".parsons-controls").on("click", function () {
-        $("html, body").animate({
-            scrollTop: ($("#parsons-" + this.counterId).offset().top - 50)
-        }, 700);
-    }).find(".sortable-code, .parsons-controls").click(function (e) {
-        return false;
-    });
 
-    this.pwidget = new ParsonsWidget({
-        "sortableId": "parsons-sortableCode-" + this.counterId,
-        "trashId": "parsons-sortableTrash-" + this.counterId,
-        "max_wrong_lines": 1,
-        "solution_label": "Drop blocks here",
-        "feedback_cb": this.displayErrors.bind(this)
-    });
+	var options = {
+		"x_indent" : 30,
+        "answerId" : "parsons-answer-" + this.counterId,
+        "answerRegionId" : "parsons-answerRegion-" + this.counterId,
+        "sourceId" : "parsons-source-" + this.counterId,
+        "sourceRegionId" : "parsons-sourceRegion-" + this.counterId,
+        "codelineId" : "parsons-codeline-" + this.counterId + "-",
+        "feedbackId" : "parsons-message-" + this.counterId,
+        "answerLabel" : "Drop blocks here"
+    };
+    // add maxdist and order if present
+    var maxdist = $(this.origElem).data('maxdist');
+    var order = $(this.origElem).data('order');
+    var noindent = $(this.origElem).data('noindent');
+    if (maxdist !== undefined) {
+	    options["maxdist"] = maxdist;
+	}
+	if (order !== undefined) {
+		// convert order string to array of numbers
+		order = order.match(/\d+/g);
+		for (var i = 0; i < order.length; i++) {
+			order[i] = parseInt(order[i]);
+		}
+		options["order"] = order;
+	}
+	if (noindent == undefined) {
+		noindent = false;
+	}
+	options["noindent"] = noindent;
+	// add locale and language
+	var locale = eBookConfig.locale;
+	if (locale == undefined) {
+		locale = "en";
+	}
+	options["locale"] = locale;
+	var language = $(this.origElem).data('language');
+	if (language == undefined) {
+		language = eBookConfig.language;
+		if (language == undefined) {
+			language = "python";
+		}
+	}
+	options["language"] = language;
+    this.pwidget = new ParsonsWidget(this, options);
 
     this.pwidget.init($pjQ(this.origDiv).text());
-    this.pwidget.shuffleLines();
-    this.tryLocalStorage();
-    this.styleNewHTML();
+    this.checkServer();
 };
 
-Parsons.prototype.styleNewHTML = function () {
-    // set min width and height
-    var sortableul = $("#ul-parsons-sortableCode-" + this.counterId);
-    var trashul = $("#ul-parsons-sortableTrash-" + this.counterId);
-    var sortableHeight = sortableul.height();
-    var sortableWidth = sortableul.width();
-    var trashWidth = trashul.width();
-    var trashHeight = trashul.height();
-    var minHeight = Math.max(trashHeight, sortableHeight);
-    var minWidth = Math.max(trashWidth, sortableWidth);
-    var test = document.getElementById("ul-parsons-sortableTrash-" + this.counterId);
-    trashul.css("min-height", minHeight + "px");
-    sortableul.css("min-height", minHeight + "px");
-    sortableul.height(minHeight);
-    trashul.css("min-width", minWidth + "px");
-    sortableul.css("min-width", minWidth + "px");
-    test.minWidth = minWidth + "px";
-};
-
-Parsons.prototype.displayErrors = function (fb) {     // Feedback function
-    if (fb.errors.length > 0) {
-        var hash = this.pwidget.getHash("#ul-parsons-sortableCode-" + this.counterId);
-        $(this.messageDiv).fadeIn(500);
-        $(this.messageDiv).attr("class", "alert alert-danger");
-        $(this.messageDiv).html(fb.errors[0]);
-        this.logBookEvent({"event": "parsons", "act": hash, "div_id": this.divid});
-    } else {
-        this.logBookEvent({"event": "parsons", "act": "yes", "div_id": this.divid});
-        $(this.messageDiv).fadeIn(100);
-        $(this.messageDiv).attr("class", "alert alert-success");
-        $(this.messageDiv).html("Perfect!");
+Parsons.prototype.checkServer = function () {
+    // Check if the server has stored answer
+    if (this.useRunestoneServices) {
+        var data = {};
+        data.div_id = this.divid;
+        data.course = eBookConfig.course;
+        data.event = "parsons";
+        
+        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this)).done(this.pwidget.resetView.bind(this));
+     } else {
+        this.checkLocalStorage();
+        this.pwidget.resetView();
     }
 };
 
-Parsons.prototype.tryLocalStorage = function () {
-    if (localStorage.getItem(this.divid) && localStorage.getItem(this.divid + "-trash")) {
+Parsons.prototype.repopulateFromStorage = function (data, status, whatever) {
+    // decide whether to use the server's answer (if there is one) or to load from storage
+    if (data !== null) {
+        if (this.shouldUseServer(data)) {
+            var solution = data.answer;
+            var trash = data.trash;
+            this.pwidget.createHTMLFromHashes(trash, solution);
+            this.pwidget.getFeedback();
+            this.setLocalStorage();
+        } else {
+            this.checkLocalStorage();
+        }
+    } else {
+        this.checkLocalStorage();
+    }
+};
+
+Parsons.prototype.shouldUseServer = function (data) {
+    // returns true if server data is more recent than local storage or if server storage is correct
+    if (data.correct == "T" || localStorage.length === 0)
+        return true;
+    var storedAnswer = localStorage.getItem(this.storageId);
+    var storedTrash = localStorage.getItem(this.storageId + "-source");
+    var storedDate = localStorage.getItem(this.storageId + "-date");
+
+    if (storedAnswer === null || storedTrash === null || storedDate === null)
+        return true;
+    if (data.answer == storedAnswer && data.trash == storedTrash)
+        return true;
+    var timeStamp = JSON.parse(storedDate);
+    var storageDate = new Date(timeStamp);
+    var serverDate = new Date(data.timestamp);
+    if (serverDate < storageDate)
+        return false;
+    return true;
+};
+Parsons.prototype.checkLocalStorage = function () {
+    if (localStorage.getItem(this.storageId) && localStorage.getItem(this.storageId + "-source")) {
         try {
-            var solution = localStorage.getItem(this.divid);
-            var trash = localStorage.getItem(this.divid + "-trash");
-            this.pwidget.createHTMLFromHashes(solution, trash);
+            var solution = localStorage.getItem(this.storageId);
+            var trash = localStorage.getItem(this.storageId + "-source");
+            this.pwidget.createHTMLFromHashes(trash, solution);
+            if (this.useRunestoneServices)
+                this.loadingFromStorage = false;   // Admittedly a non-straightforward way to log, but it works well
             this.pwidget.getFeedback();
         } catch(err) {
             var text = "An error occured restoring old " + this.divid + " state.    Error: ";
             console.log(text + err.message);
         }
+    } else {
+        this.loadingFromStorage = false;
     }
 };
 
-$(document).ready(function () {
-    $pjQ("[data-component=parsons]").each(function (index) {
-        prsList[this.id] = new Parsons({"orig": this});
-    });
+// Will be implemented later to fix evaluation for parsons
+Parsons.prototype.reInitialize = function () {
+    // this.pwidget.reInitialize()
+    return null;
+};
 
+Parsons.prototype.setLocalStorage = function() {
+    var hash = this.pwidget.answerHash();
+    localStorage.setItem(this.storageId, hash);
+    hash = this.pwidget.sourceHash();
+    localStorage.setItem(this.storageId + "-source", hash);
+    var timeStamp = new Date();
+    localStorage.setItem(this.storageId + "-date", JSON.stringify(timeStamp));
+};
+
+$(document).bind("runestone:login-complete", function () {
+    $("[data-component=parsons]").each(function (index) {
+        if ($(this.parentNode).data("component") != "timedAssessment") {
+           prsList[this.id] = new Parsons({"orig": this, "useRunestoneServices": eBookConfig.useRunestoneServices});
+        }
+    });
 });

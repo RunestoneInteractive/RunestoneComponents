@@ -2,6 +2,9 @@
  * Created by bmiller on 3/19/15.
  */
 
+var isMouseDown = false;
+document.onmousedown = function() { isMouseDown = true };
+document.onmouseup   = function() { isMouseDown = false };
 
 var edList = {};
 
@@ -37,6 +40,11 @@ ActiveCode.prototype.init = function(opts) {
     this.graphics = null; // create div for turtle graphics
     this.codecoach = null;
     this.codelens = null;
+    this.controlDiv = null;
+    this.historyScrubber = null;
+    this.history = [this.code]
+    this.timestamps = ["Original"]
+    this.autorun = $(orig).data('autorun');
 
     if(this.includes !== undefined) {
         this.includes = this.includes.split(/\s+/);
@@ -58,29 +66,33 @@ ActiveCode.prototype.init = function(opts) {
     }
     this.addCaption();
 
-    if ($(orig).data('autorun')) {
+    if (this.autorun) {
         $(document).ready(this.runProg.bind(this));
     }
 };
 
 ActiveCode.prototype.createEditor = function (index) {
-    var newdiv = document.createElement('div');
+    this.containerDiv = document.createElement('div');
     var linkdiv = document.createElement('div')
     linkdiv.id = this.divid.replace(/_/g,'-').toLowerCase();  // :ref: changes _ to - so add this as a target
-    $(newdiv).addClass("ac_section alert alert-warning");
+    $(this.containerDiv).addClass("ac_section alert alert-warning");
     var codeDiv = document.createElement("div");
     $(codeDiv).addClass("ac_code_div col-md-12");
     this.codeDiv = codeDiv;
-    newdiv.id = this.divid;
-    newdiv.lang = this.language;
-    this.outerDiv = newdiv;
+    this.containerDiv.id = this.divid;
+    this.containerDiv.lang = this.language;
+    this.outerDiv = this.containerDiv;
 
-    $(this.origElem).replaceWith(newdiv);
+    $(this.origElem).replaceWith(this.containerDiv);
     if (linkdiv.id !== this.divid) {  // Don't want the 'extra' target if they match.
-        newdiv.appendChild(linkdiv);
+        this.containerDiv.appendChild(linkdiv);
     }
-    newdiv.appendChild(codeDiv);
-    var editor = CodeMirror(codeDiv, {value: this.code, lineNumbers: true, mode: newdiv.lang});
+    this.containerDiv.appendChild(codeDiv);
+    var editor = CodeMirror(codeDiv, {value: this.code, lineNumbers: true,
+        mode: this.containerDiv.lang, indentUnit: 4,
+        matchBrackets: true, autoMatchParens: true,
+        extraKeys: {"Tab": "indentMore", "Shift-Tab": "indentLess"}
+    });
 
     // Make the editor resizable
     $(editor.getWrapperElement()).resizable({
@@ -109,41 +121,25 @@ ActiveCode.prototype.createEditor = function (index) {
 ActiveCode.prototype.createControls = function () {
     var ctrlDiv = document.createElement("div");
     $(ctrlDiv).addClass("ac_actions");
-
+    $(ctrlDiv).addClass("col-md-12");
     // Run
     var butt = document.createElement("button");
     $(butt).text("Run");
-    $(butt).addClass("btn btn-success");
+    $(butt).addClass("btn btn-success run-button");
     ctrlDiv.appendChild(butt);
     this.runButton = butt;
     $(butt).click(this.runProg.bind(this));
 
-    // Save
-    if (this.useRunestoneServices) {
-        butt = document.createElement("button");
-        $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Save");
-        $(butt).css("margin-left", "10px");
-        this.saveButton = butt;
-        this.saveButton.onclick = this.saveEditor.bind(this);
+    if (! this.hidecode) {
+        var butt = document.createElement("button");
+        $(butt).text("Load History");
+        $(butt).addClass("btn btn-default");
         ctrlDiv.appendChild(butt);
-        if (this.hidecode) {
-            $(butt).css("display", "none")
-        }
+        this.histButton = butt;
+        $(butt).click(this.addHistoryScrubber.bind(this));
     }
-    // Load
-    if (this.useRunestoneServices) {
-        butt = document.createElement("button");
-        $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Load");
-        $(butt).css("margin-left", "10px");
-        this.loadButton = butt;
-        this.loadButton.onclick = this.loadEditor.bind(this);
-        ctrlDiv.appendChild(butt);
-        if (this.hidecode) {
-            $(butt).css("display", "none")
-        }
-    }
+
+
     if ($(this.origElem).data('gradebutton')) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
@@ -162,8 +158,11 @@ ActiveCode.prototype.createControls = function () {
         this.showHideButt = butt;
         ctrlDiv.appendChild(butt);
         $(butt).click( (function() { $(this.codeDiv).toggle();
-        $(this.loadButton).toggle();
-        $(this.saveButton).toggle();
+            if (this.historyScrubber == null) {
+                this.addHistoryScrubber(true);
+            } else {
+                $(this.historyScrubber.parentElement).toggle();
+            }
         }).bind(this));
     }
 
@@ -199,9 +198,71 @@ ActiveCode.prototype.createControls = function () {
         $(butt).click((function() {new AudioTour(this.divid, this.editor.getValue(), 1, $(this.origElem).data("audio"))}).bind(this));
     }
 
+
     $(this.outerDiv).prepend(ctrlDiv);
+    this.controlDiv = ctrlDiv;
 
 };
+
+// Activecode -- If the code has not changed wrt the scrubber position value then don't save the code or reposition the scrubber
+//  -- still call runlog, but add a parameter to not save the code
+// add an initial load history button
+// if there is no edit then there is no append   to_save (True/False)
+
+ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
+
+    var data = {acid: this.divid};
+    if (this.sid !== undefined) {
+        data['sid'] = this.sid;
+    }
+    jQuery.getJSON(eBookConfig.ajaxURL + 'gethist.json', data, function(data, status, whatever) {
+        if (data.history !== undefined) {
+            this.history = this.history.concat(data.history);
+            for (t in data.timestamps) {
+                this.timestamps.push( (new Date(data.timestamps[t])).toLocaleString() )
+            }
+        }
+
+        var scrubberDiv = document.createElement("div");
+        $(scrubberDiv).css("display","inline-block");
+        $(scrubberDiv).css("margin-left","10px");
+        $(scrubberDiv).css("margin-right","10px");
+        $(scrubberDiv).width("180px");
+        scrubber = document.createElement("div");
+        var slideit = function() {
+            this.editor.setValue(this.history[$(scrubber).slider("value")]);
+            var curVal = this.timestamps[$(scrubber).slider("value")];
+            //this.scrubberTime.innerHTML = curVal;
+            var tooltip = '<div class="sltooltip"><div class="sltooltip-inner">' +
+                curVal + '</div><div class="sltooltip-arrow"></div></div>';
+            $(scrubber).find(".ui-slider-handle").html(tooltip);
+            setTimeout(function () {
+                $(scrubber).find(".sltooltip").fadeOut()
+            }, 4000);
+        }.bind(this);
+        $(scrubber).slider({
+            max: this.history.length-1,
+            value: this.history.length-1,
+            slide: slideit,
+            change: slideit
+        });
+        scrubberDiv.appendChild(scrubber);
+
+        if (pos_last) {
+            scrubber.value = this.history.length-1
+            this.editor.setValue(this.history[scrubber.value]);
+        } else {
+            scrubber.value = 0;
+        }
+
+        $(this.histButton).remove();
+        this.histButton = null;
+        this.historyScrubber = scrubber;
+        $(scrubberDiv).insertAfter(this.runButton)
+
+    }.bind(this));
+}
+
 
 ActiveCode.prototype.createOutput = function () {
     // Create a parent div with two elements:  pre for standard output and a div
@@ -322,11 +383,9 @@ ActiveCode.prototype.saveEditor = function () {
 };
 
 ActiveCode.prototype.loadEditor = function () {
-
     var loadEditor = (function (data, status, whatever) {
         // function called when contents of database are returned successfully
         var res = eval(data)[0];
-
         if (res.source) {
             this.editor.setValue(res.source);
             setTimeout(function() {
@@ -352,8 +411,12 @@ ActiveCode.prototype.loadEditor = function () {
     if (this.sid !== undefined) {
         data['sid'] = this.sid;
     }
+    // This function needs to be chainable for when we want to do things like run the activecode
+    // immediately after loading the previous input (such as in a timed exam)
+    var dfd = jQuery.Deferred();
     this.logBookEvent({'event': 'activecode', 'act': 'load', 'div_id': this.divid}); // Log the run event
-    jQuery.get(eBookConfig.ajaxURL + 'getprog', data, loadEditor);
+    jQuery.get(eBookConfig.ajaxURL + 'getprog', data, loadEditor).done(function () {dfd.resolve();});
+    return dfd;
 
 };
 
@@ -640,6 +703,7 @@ ActiveCode.prototype.buildProg = function() {
 
 ActiveCode.prototype.runProg = function() {
         var prog = this.buildProg();
+        var saveCode;
 
         $(this.output).text('');
 
@@ -661,15 +725,33 @@ ActiveCode.prototype.runProg = function() {
             return Sk.importMainWithBody("<stdin>", false, prog, true);
         });
 
+        if (this.historyScrubber === null && !this.autorun) {
+            this.addHistoryScrubber();
+        }
+
+        if (this.historyScrubber === null || (this.history[$(this.historyScrubber).slider("value")] == this.editor.getValue())) {
+            saveCode = "False"
+        } else {
+            saveCode = "True"
+        }
+
         myPromise.then((function(mod) { // success
             $(this.runButton).removeAttr('disabled');
-            this.logRunEvent({'div_id': this.divid, 'code': prog, 'errinfo': 'success'}); // Log the run event
+            this.logRunEvent({'div_id': this.divid, 'code': prog, 'errinfo': 'success', 'to_save':saveCode}); // Log the run event
         }).bind(this),
             (function(err) {  // fail
             $(this.runButton).removeAttr('disabled');
-            this.logRunEvent({'div_id': this.divid, 'code': prog, 'errinfo': err.toString()}); // Log the run event
+            this.logRunEvent({'div_id': this.divid, 'code': prog, 'errinfo': err.toString(), 'to_save':saveCode}); // Log the run event
             this.addErrorMessage(err)
                 }).bind(this));
+
+
+        if (this.historyScrubber && (this.history[$(this.historyScrubber).slider("value")] != this.editor.getValue())) {
+            this.history.push(this.editor.getValue());
+            this.timestamps.push((new Date()).toLocaleString());
+            $(this.historyScrubber).slider("option", "max", this.history.length - 1)
+            $(this.historyScrubber).slider("option", "value", this.history.length - 1)
+        }
 
         if (typeof(allVisualizers) != "undefined") {
             $.each(allVisualizers, function (i, e) {
@@ -728,6 +810,7 @@ JSActiveCode.prototype.runProg = function() {
         _this.output.innerHTML += _this.outputfun(str)+"<br />";
             };
 
+    $(this.eContainer).remove();
     $(this.output).text('');
     $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
     $(this.outDiv).show({duration:700,queue:false});
@@ -996,8 +1079,8 @@ AudioTour.prototype.tour = function (divid, audio_type, bcount) {
         // str+="<audio id="+akey+" preload='auto'><source src='http://ice-web.cc.gatech.edu/ce21/audio/"+
         // akey+".mp3' type='audio/mpeg'><source src='http://ice-web.cc.gatech.edu/ce21/audio/"+akey+
         // ".ogg' type='audio/ogg'>Your browser does not support the audio tag</audio>";
-        
-        var dir = "http://media.interactivepython.org/" + eBookConfig.basecourse + "/audio/" 
+
+        var dir = "http://media.interactivepython.org/" + eBookConfig.basecourse + "/audio/"
         //var dir = "../_static/audio/"
         str += "<audio id=" + akey + " preload='auto' >";
         str += "<source src='" + dir + akey + ".wav' type='audio/wav'>";
@@ -1362,7 +1445,8 @@ LiveCode.prototype.runProg = function() {
         }
 
         if (this.datafile) {
-            runspec['file_list'] = [[this.div2id[datafile],datafile]];
+            this.pushDataFile(this.datafile);
+            runspec['file_list'] = [[this.div2id[this.datafile],this.datafile]];
         }
         data = JSON.stringify({'run_spec': runspec});
         host = this.JOBE_SERVER + this.resource;
@@ -1453,7 +1537,7 @@ LiveCode.prototype.pushDataFile = function (datadiv) {
         var contentsb64 = btoa(contents);
         var data = JSON.stringify({ 'file_contents' : contentsb64 });
         var resource = '/jobe/index.php/restapi/files/' + file_id;
-        var host = JOBE_SERVER + resource;
+        var host = this.JOBE_SERVER + resource;
         var xhr = new XMLHttpRequest();
 
         if (this.div2id[datadiv] === undefined ) {
@@ -1462,7 +1546,7 @@ LiveCode.prototype.pushDataFile = function (datadiv) {
             xhr.open("PUT", host, true);
             xhr.setRequestHeader('Content-type', 'application/json');
             xhr.setRequestHeader('Accept', 'text/plain');
-            xhr.setRequestHeader('X-API-KEY', API_KEY);
+            xhr.setRequestHeader('X-API-KEY', this.API_KEY);
 
             xhr.onload = function () {
                 console.log("successfully sent file " + xhr.responseText);
@@ -1590,7 +1674,9 @@ ACFactory.toggleScratchActivecode = function () {
 $(document).ready(function() {
     ACFactory.createScratchActivecode();
     $('[data-component=activecode]').each( function(index ) {
-        edList[this.id] = ACFactory.createActiveCode(this, $(this).data('lang'));
+        if ($(this.parentNode).data("component") !== "timedAssessment") {   // If this element exists within a timed component, don't render it here
+            edList[this.id] = ACFactory.createActiveCode(this, $(this).data('lang'));
+        }
     });
     if (loggedout) {
         for (k in edList) {
@@ -1598,6 +1684,10 @@ $(document).ready(function() {
         }
     }
 
+});
+
+$(document).bind("runestone:login", function() {
+    $(".run-button").text("Save & Run");
 });
 
 // This seems a bit hacky and possibly brittle, but its hard to know how long it will take to

@@ -27,12 +27,12 @@
 
 //
 // Chevron functions - Must correspond with width in runestone-custom-sphinx-bootstrap.css
-// 
+//
 $(function () {
 	var resizeWindow = false;
     var	resizeWidth = 600;
 	$(window).on('resize', function (event){
-		if ($(window).width() <= resizeWidth && resizeWindow == false){ 
+		if ($(window).width() <= resizeWidth && resizeWindow == false){
 			resizeWindow = true;
 			var topPrev = $("#relations-prev").clone().attr("id", "top-relations-prev");
 			var topNext = $("#relations-next").clone().attr("id", "top-relations-next");
@@ -44,15 +44,15 @@ $(function () {
 			$("div#main-content > div").append(bottomPrev, bottomNext);
 			$("#bottom-relations-prev, #bottom-relations-next").wrapAll("<ul id=\"bottom-relations-console\"></ul>");
 		}
-		if ($(window).width() >= resizeWidth + 1 && resizeWindow == true){ 
+		if ($(window).width() >= resizeWidth + 1 && resizeWindow == true){
 			resizeWindow = false;
 			$("#top-relations-console, #bottom-relations-console").remove();
 			$("#relations-prev, #relations-next").show();
 		}
 	}).resize();
-});	
- 
- 
+});
+
+
 //
 // Logging functions
 //
@@ -134,6 +134,7 @@ function gotUser(data, status, whatever) {
         'act': 'view',
         'div_id': window.location.pathname
     })
+	notifyRunestoneComponents();
 }
 
 
@@ -170,9 +171,11 @@ function isLoggedIn() {
 
 function handleLoginLogout() {
     if (shouldLogin()) {
-        jQuery.get(eBookConfig.ajaxURL + 'getuser', null, gotUser)
+        jQuery.get(eBookConfig.ajaxURL + 'getuser', null, gotUser).error(notifyRunestoneComponents);
     } else {
         $(document).trigger("runestone:logout")
+		// Let runestone components know they can run their javascript now
+		notifyRunestoneComponents();
     }
 }
 
@@ -228,6 +231,12 @@ function setNumUsers(data) {
     $("#totalusers").html(d.numusers);
 }
 
+function notifyRunestoneComponents() {
+	// Runestone components wait until login process is over to load components because of storage issues
+	$(document).trigger("runestone:login-complete");
+	if (typeof $pjQ !== 'undefined')
+		$pjQ(document).trigger("runestone:login-complete");   // for parsons components which are using a different version of jQuery
+}
 
 //
 // Nice interface for localstore  -- Thanks acbart
@@ -281,6 +290,7 @@ $(document).ready(function() {
         if (typeof eBookConfig === 'undefined') {
             console.log("eBookConfig is not defined.  This page must not be set up for Runestone");
         }
+		notifyRunestoneComponents();
     }
 });
 
