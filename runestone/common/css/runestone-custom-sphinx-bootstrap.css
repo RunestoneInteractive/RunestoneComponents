@@ -48,11 +48,20 @@ div.section {
 	padding-left:0;
 	padding-right:0;
 }
- .container  .section >*:not(.section) {
-	/*max-width: 500pt;*/
-	width: 60%;
+.container  .section >*:not(.section) {
+	max-width: 500pt;
 	margin-left: auto;
 	margin-right: auto;
+}
+
+/* This rule is meant to override the behavior of the
+   previous rule since it is not possible to exclude
+   more than one section in the not() part of the rule
+*/
+.container .section div.full-width.container {
+	margin-left: auto;
+	margin-right: auto;
+    max-width: 90%;
 }
 
 .container .section>img {
