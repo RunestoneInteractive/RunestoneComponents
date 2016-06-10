@@ -340,6 +340,11 @@ Timed.prototype.randomizeRQA = function () {
 Timed.prototype.renderTimedQuestion = function () {
     $(this.switchDiv).replaceWith(this.renderedQuestionArray[this.currentQuestionIndex].containerDiv);
     this.switchDiv = this.renderedQuestionArray[this.currentQuestionIndex].containerDiv;
+    // If the timed component has listeners, those need to be reinitialized
+    // This flag will only be set in the elements that need it--it will be undefined in the others and thus evaluate to false
+    if (this.renderedQuestionArray[this.currentQuestionIndex].needsReinitialization) {
+        this.renderedQuestionArray[this.currentQuestionIndex].reinitializeListeners();
+    }
 };
 
 
