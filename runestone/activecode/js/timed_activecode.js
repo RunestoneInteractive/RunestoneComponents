@@ -60,4 +60,5 @@ TimedActiveCode.prototype.processTimedSubmission = function (logFlag) {
 TimedActiveCode.prototype.reinitializeListeners = function () {
     // re-attach the run button listener
     $(this.runButton).click(this.runProg.bind(this));
+    $(this.histButton).click(this.addHistoryScrubber.bind(this));
 };
