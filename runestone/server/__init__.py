@@ -17,6 +17,9 @@ def get_dburl(outer={}):
     if all([x in environ for x in ['DBUSER', 'DBHOST', 'DBNAME']]):
         return 'postgresql://{DBUSER}:{DBPASS}@{DBHOST}/{DBNAME}'.format(**environ)
 
+    if 'options' in outer:
+        return outer['options'].build.template_args['dburl']
+
     if 'env' in outer:
         return outer['env'].config.html_context['dburl']
 
