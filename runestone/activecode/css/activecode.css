@@ -103,3 +103,7 @@
 .ac-disabled {
 	pointer-events: none;
 }
+
+.ac-feedback {
+	border: 1px solid black;
+}
