@@ -96,7 +96,7 @@ DragNDrop.prototype.createNewElements = function () {
     this.dragDropWrapDiv.appendChild(this.dropZoneDiv);
 
     this.createButtons();
-    this.checkServer();
+    this.checkServer("dragNdrop");
 };
 
 DragNDrop.prototype.finishSettingUp = function () {
@@ -334,7 +334,7 @@ DragNDrop.prototype.dragEval = function (logFlag) {
         }
     }
     this.correctNum = this.dragNum - this.incorrectNum - this.unansweredNum;
-    this.setLocalStorage(false, this.correct);
+    this.setLocalStorage({"correct": (this.correct ? "T" : "F")});
     this.renderFeedback();
     if (logFlag)   // Sometimes we don't want to log the answers--for example, on re-load of a timed exam
         this.logBookEvent({"event": "dragNdrop", "act": "submitDND", "answer": this.pregnantIndexArray.join(";"), "minHeight": this.minheight, "div_id": this.divid, "correct": this.correct});
@@ -351,43 +351,22 @@ DragNDrop.prototype.renderFeedback = function () {
     }
 };
 /*===================================
-=== Checking/loading from storage ===
+=== Checking/restoring from storage ===
 ===================================*/
 
-DragNDrop.prototype.checkServer = function () {
-    if (this.useRunestoneServices) {
-        var data = {};
-        data.div_id = this.divid;
-        data.course = eBookConfig.course;
-        data.event = "dragNdrop";
-        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
-    } else {
-        this.checkLocalStorage();
-    }
-};
-
-DragNDrop.prototype.repopulateFromStorage = function (data, status, whatever) {
-    if (data !== null) {
-        if (this.shouldUseServer(data)) {
-            this.hasStoredDropzones = true;
-            this.minheight = data.minHeight;
-            this.pregnantIndexArray = data.answer.split(";");
-            this.setLocalStorage(true, data.correct);
-            this.finishSettingUp();
-        } else {
-            this.checkLocalStorage();
-        }
-    } else {
-        this.checkLocalStorage();
-    }
-
+DragNDrop.prototype.restoreAnswers = function (data) {
+    // Restore answers from storage retrieval done in RunestoneBase
+    this.hasStoredDropzones = true;
+    this.minheight = data.minHeight;
+    this.pregnantIndexArray = data.answer.split(";");
+    this.finishSettingUp();
 };
 
 DragNDrop.prototype.checkLocalStorage = function () {
     this.hasStoredDropzones = false;
     var len = localStorage.length;
     if (len > 0) {
-        var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-dragInfo");
+        var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
         if (ex !== null) {
             this.hasStoredDropzones = true;
             var storedObj = JSON.parse(ex);
@@ -402,26 +381,8 @@ DragNDrop.prototype.checkLocalStorage = function () {
     this.finishSettingUp();
 };
 
-DragNDrop.prototype.shouldUseServer = function (data) {
-    // returns true if server data is more recent than local storage or if server storage is correct
-    if (data.correct == "T" || localStorage.length === 0)
-        return true;
-    var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-dragInfo");
-    var x = 0;
-    if (ex === null)
-        return true;
-    var storedData = JSON.parse(ex);
-    if (data.answer == storedData.answer)
-        return true;
-    var storageDate = new Date(storedData.timestamp);
-    var serverDate = new Date(data.timestamp);
-    if (serverDate < storageDate)
-        return false;
-    return true;
-};
-
-DragNDrop.prototype.setLocalStorage = function (fromServer, correct) {
-    if (!fromServer) {   // If we loaded from the server, then pregnantIndexArray is already defined
+DragNDrop.prototype.setLocalStorage = function (data) {
+    if (data.answer === undefined) {   // If we didn't load from the server, we must generate the data
         this.pregnantIndexArray = [];
         for (var i = 0; i < this.dragPairArray.length; i++) {
             if (!this.hasNoDragChild(this.dragPairArray[i][1])) {
@@ -437,8 +398,9 @@ DragNDrop.prototype.setLocalStorage = function (fromServer, correct) {
     }
 
     var timeStamp = new Date();
+    var correct = data.correct;
     var storageObj = {"answer": this.pregnantIndexArray.join(";"), "minHeight": this.minheight, "timestamp": timeStamp, "correct": correct};
-    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-dragInfo", JSON.stringify(storageObj));
+    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", JSON.stringify(storageObj));
 };
 /*=================================
 == Find the custom HTML tags and ==
