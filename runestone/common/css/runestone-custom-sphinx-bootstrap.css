@@ -673,3 +673,17 @@ border-color: #000000;
             border-radius: 4px;
 }
 
+ul.dropdown-menu.globaltoc {
+    max-height: 700px;
+    overflow: auto;
+}
+
+span.caption-text {
+    display: none;
+}
+
+.globaltoc span.caption-text {
+    display: inline-block;
+    font-weight: bold;
+    font-size: large;
+}
