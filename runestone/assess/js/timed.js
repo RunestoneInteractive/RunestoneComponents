@@ -91,7 +91,6 @@ Timed.prototype.renderTimedAssess = function () {
     this.renderControlButtons();
     this.assessDiv.appendChild(this.timedDiv);    // This can't be appended in renderContainer because then it renders above the timer and control buttons.
     this.createRenderedQuestionArray();
-    this.renderTimedQuestion();
     this.renderNavControls();
     this.renderSubmitButton();
     this.renderFeedbackContainer();
@@ -142,6 +141,7 @@ Timed.prototype.renderControlButtons = function () {
     });
     this.startBtn.textContent = "Start";
     this.startBtn.addEventListener("click", function () {
+        this.renderTimedQuestion();
         this.startAssessment();
     }.bind(this), false);
     $(this.pauseBtn).attr({
@@ -709,6 +709,7 @@ Timed.prototype.restoreFromStorage = function (data) {
        this.skipped = this.renderedQuestionArray.length;
        this.timeTaken = 0;
     }
+    this.renderTimedQuestion();
     this.displayScore();
 	this.showTime();
 };
