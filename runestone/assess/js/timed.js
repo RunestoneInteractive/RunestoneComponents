@@ -65,6 +65,7 @@ Timed.prototype.init = function (opts) {
     this.incorrectStr = "";
     this.skippedStr = "";
     this.skipped = 0;
+    this.hasRenderedFirstQuestion = false;
 
     this.currentQuestionIndex = 0;   // Which question is currently displaying on the page
     this.renderedQuestionArray = []; // list of all problems
@@ -90,7 +91,6 @@ Timed.prototype.renderTimedAssess = function () {
     this.renderControlButtons();
     this.assessDiv.appendChild(this.timedDiv);    // This can't be appended in renderContainer because then it renders above the timer and control buttons.
     this.createRenderedQuestionArray();
-    this.renderTimedQuestion();
     this.renderNavControls();
     this.renderSubmitButton();
     this.renderFeedbackContainer();
@@ -141,6 +141,7 @@ Timed.prototype.renderControlButtons = function () {
     });
     this.startBtn.textContent = "Start";
     this.startBtn.addEventListener("click", function () {
+        this.renderTimedQuestion();
         this.startAssessment();
     }.bind(this), false);
     $(this.pauseBtn).attr({
@@ -340,11 +341,15 @@ Timed.prototype.randomizeRQA = function () {
 Timed.prototype.renderTimedQuestion = function () {
     $(this.switchDiv).replaceWith(this.renderedQuestionArray[this.currentQuestionIndex].containerDiv);
     this.switchDiv = this.renderedQuestionArray[this.currentQuestionIndex].containerDiv;
-    // If the timed component has listeners, those need to be reinitialized
+    // If the timed component has listeners, those might need to be reinitialized
     // This flag will only be set in the elements that need it--it will be undefined in the others and thus evaluate to false
     if (this.renderedQuestionArray[this.currentQuestionIndex].needsReinitialization) {
-        this.renderedQuestionArray[this.currentQuestionIndex].reinitializeListeners();
+        // if this is the first time we're rendering the first question, nothing should be reinitialized
+        if (this.currentQuestionIndex !== 0 || this.hasRenderedFirstQuestion) {
+            this.renderedQuestionArray[this.currentQuestionIndex].reinitializeListeners();
+        }
     }
+    this.hasRenderedFirstQuestion = true;
 };
 
 
@@ -678,6 +683,7 @@ Timed.prototype.restoreAnswers = function (data) {
        this.skipped = this.renderedQuestionArray.length;
        this.timeTaken = 0;
     }
+    this.renderTimedQuestion();
     this.displayScore();
 	this.showTime();
 };

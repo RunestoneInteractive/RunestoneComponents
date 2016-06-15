@@ -61,4 +61,12 @@ TimedActiveCode.prototype.reinitializeListeners = function () {
     // re-attach the run button listener
     $(this.runButton).click(this.runProg.bind(this));
     $(this.histButton).click(this.addHistoryScrubber.bind(this));
+    if (this.historyScrubber !== null) {
+        $(this.historyScrubber).slider({
+            max: this.history.length-1,
+            value: this.history.length-1,
+            slide: this.slideit.bind(this),
+            change: this.slideit.bind(this)
+        });
+    }
 };
