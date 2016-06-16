@@ -30,7 +30,6 @@ def setup(app):
 
     app.add_javascript('lib/prettify.js')
     app.add_javascript('lib/hammer.min.js')
-    app.add_javascript('lib/lis.js')
     app.add_javascript('parsons_setup.js')
     app.add_javascript('parsons.js')
     app.add_javascript('timedparsons.js')

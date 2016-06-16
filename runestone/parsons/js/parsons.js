@@ -16,6 +16,51 @@ var LineBasedGrader = function(widget) {
 	this.widget = widget;
 };
 
+// Use a LIS (Longest Increasing Subsequence) algorithm to return the indexes
+// that are not part of that subsequence.
+LineBasedGrader.prototype.inverseLISIndices = function(arr) {
+	// Get all subsequences
+	var allSubsequences = [];
+	for (var i = 0; i < arr.length; i++){
+		var subsequenceForCurrent = [arr[i]],
+			current = arr[i],
+			lastElementAdded = -1;
+		for (var j = i; j < arr.length; j++) {
+			var subsequent = arr[j];
+			if ((subsequent > current) && (lastElementAdded < subsequent)) {
+				subsequenceForCurrent.push(subsequent);
+				lastElementAdded = subsequent;
+			}
+		}
+		allSubsequences.push(subsequenceForCurrent);
+	}
+	// Figure out the longest one
+	var longestSubsequenceLength = -1;
+	var longestSubsequence;
+    for (var i in allSubsequences) {
+    	var subs = allSubsequences[i];
+    	if (subs.length > longestSubsequenceLength) {
+    		longestSubsequenceLength = subs.length;
+            longestSubsequence = subs;
+        }
+    }
+    // Create the inverse indexes
+    var indexes = [];
+    var lIndex = 0;
+    for (var i = 0; i < arr.length; i++) {
+    	if (lIndex > longestSubsequence.length) {
+    		indexes.push(i);
+    	} else {
+    		if (arr[i] == longestSubsequence[lIndex]) {
+    			lIndex += 1;
+    		} else {
+    			indexes.push(i);
+    		}
+    	}
+    }
+    return indexes;
+};
+
 // grade that element
 LineBasedGrader.prototype.grade = function() {
 	var widget = this.widget;
@@ -93,7 +138,7 @@ LineBasedGrader.prototype.grade = function() {
 					inSolutionIndexes.push(index);
 				}
 			}
-			var lisIndexes = LIS.best_lise_inverse_indices(inSolutionIndexes);
+			var lisIndexes = this.inverseLISIndices(inSolutionIndexes);
 			for (i = 0; i < lisIndexes.length; i++) {
 				notInSolution.push(inSolution[lisIndexes[i]]);
 			}
@@ -113,10 +158,10 @@ LineBasedGrader.prototype.grade = function() {
 	var act = sourceHash + "|" + answerHash;
 	if (correct) {
 		act = "correct|" + act;
-		correct = "yes";
+		correct = "T";
 	} else {
 		act ="incorrect|" + act;
-		correct = "no";
+		correct = "F";
 	}
 	var divid = widget.problem.divid;
 	widget.problem.logBookEvent({

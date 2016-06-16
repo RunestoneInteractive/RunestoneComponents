@@ -230,27 +230,13 @@ Parsons.prototype.createParsonsWidget = function () {
 		}
 	}
 	options["language"] = language;
+	this.checkServer("parsons");
     this.pwidget = new ParsonsWidget(this, options);
 
     this.pwidget.init($(this.origDiv).text());
-    this.checkServer();
 };
 
-Parsons.prototype.checkServer = function () {
-    // Check if the server has stored answer
-    if (this.useRunestoneServices) {
-        var data = {};
-        data.div_id = this.divid;
-        data.course = eBookConfig.course;
-        data.event = "parsons";
-
-        
-        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this)).done();
-     } else {
-        this.checkLocalStorage();
-        this.pwidget.resetView();
-    }
-};
+/*
 
 Parsons.prototype.repopulateFromStorage = function (data, status, whatever) {
     // decide whether to use the server's answer (if there is one) or to load from storage
@@ -267,27 +253,31 @@ Parsons.prototype.repopulateFromStorage = function (data, status, whatever) {
     } else {
         this.checkLocalStorage();
     }
+}; */
+
+// Will be implemented later to fix evaluation for parsons
+Parsons.prototype.reInitialize = function () {
+    // this.pwidget.reInitialize()
+    return null;
 };
 
-Parsons.prototype.shouldUseServer = function (data) {
-    // returns true if server data is more recent than local storage or if server storage is correct
-    if (data.correct == "T" || localStorage.length === 0)
-        return true;
-    var storedAnswer = localStorage.getItem(this.storageId);
-    var storedTrash = localStorage.getItem(this.storageId + "-source");
-    var storedDate = localStorage.getItem(this.storageId + "-date");
-
-    if (storedAnswer === null || storedTrash === null || storedDate === null)
-        return true;
-    if (data.answer == storedAnswer && data.trash == storedTrash)
-        return true;
-    var timeStamp = JSON.parse(storedDate);
-    var storageDate = new Date(timeStamp);
-    var serverDate = new Date(data.timestamp);
-    if (serverDate < storageDate)
-        return false;
-    return true;
+// Sent when the server has data
+Parsons.prototype.restoreAnswers = function(data) {
+	console.log(data);
 };
+
+// Set the state of the problem in local storage
+Parsons.prototype.setLocalStorage = function(data) {
+console.log(data);
+    var hash = this.pwidget.answerHash();
+    localStorage.setItem(this.storageId, hash);
+    hash = this.pwidget.sourceHash();
+    localStorage.setItem(this.storageId + "-source", hash);
+    var timeStamp = new Date();
+    localStorage.setItem(this.storageId + "-date", JSON.stringify(timeStamp));
+};
+
+// Both check what is in local storage and load it
 Parsons.prototype.checkLocalStorage = function () {
     if (localStorage.getItem(this.storageId) && localStorage.getItem(this.storageId + "-source")) {
         try {
@@ -304,21 +294,6 @@ Parsons.prototype.checkLocalStorage = function () {
     } else {
         this.loadingFromStorage = false;
     }
-};
-
-// Will be implemented later to fix evaluation for parsons
-Parsons.prototype.reInitialize = function () {
-    // this.pwidget.reInitialize()
-    return null;
-};
-
-Parsons.prototype.setLocalStorage = function() {
-    var hash = this.pwidget.answerHash();
-    localStorage.setItem(this.storageId, hash);
-    hash = this.pwidget.sourceHash();
-    localStorage.setItem(this.storageId + "-source", hash);
-    var timeStamp = new Date();
-    localStorage.setItem(this.storageId + "-date", JSON.stringify(timeStamp));
 };
 
 $(document).bind("runestone:login-complete", function () {
