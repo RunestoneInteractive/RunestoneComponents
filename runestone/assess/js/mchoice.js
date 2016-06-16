@@ -57,7 +57,7 @@ MultipleChoice.prototype.init = function (opts) {
     this.findFeedbacks();
     this.createCorrectList();
     this.createMCForm();
-    this.checkServer();
+    this.checkServer("mChoice");
 };
 
 /*====================================
@@ -277,67 +277,17 @@ MultipleChoice.prototype.randomizeAnswers = function () {
 === Checking/loading from storage ===
 ===================================*/
 
-MultipleChoice.prototype.checkServer = function () {
-    // Check if the server has stored answer
-    if (this.useRunestoneServices) {
-        var data = {};
-        data.div_id = this.divid;
-        data.course = eBookConfig.course;
-        data.event = "mChoice";
-        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
-    } else {
-        this.checkLocalStorage();   // just go right to local storage
-    }
-
-};
-
-MultipleChoice.prototype.repopulateFromStorage = function (data, status, whatever) {
-    if (data !== null) {
-        if (this.shouldUseServer(data)) {
-            var answers;
-            if (this.multipleanswers) {
-                answers = data.answer.split(",");
-            } else {
-                answers = [data.answer.charCodeAt(0) - 97];   // Get index for lowercase letter
+MultipleChoice.prototype.restoreAnswers = function (data) {
+    // Restore answers from storage retrieval done in RunestoneBase
+    var answers = data.answer.split(",");
+    for (var a = 0; a < answers.length; a++) {
+        var index = answers[a];
+        for (var b = 0; b < this.optionArray.length; b++) {
+            if (this.optionArray[b].input.value == index) {
+                $(this.optionArray[b].input).attr("checked", "true");
             }
-            for (var a = 0; a < answers.length; a++) {
-                var index = answers[a];
-                for (var b = 0; b < this.optionArray.length; b++) {
-                    if (this.optionArray[b].input.value == index) {
-                        $(this.optionArray[b].input).attr("checked", "true");
-                    }
-                }
-            }
-            this.setLocalStorage();
-        } else {
-            this.checkLocalStorage();
         }
-        this.enableMCComparison();
-    } else {
-        this.checkLocalStorage();
     }
-};
-
-MultipleChoice.prototype.shouldUseServer = function (data) {
-    // returns true if server data is more recent than local storage or if server storage is correct
-    if (data.correct == "T" || localStorage.length === 0)
-        return true;
-    var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid);
-    if (ex === null)
-        return true;
-    var storedData = JSON.parse(ex);
-    if (this.multipleanswers) {
-        if (data.answer == storedData.answer)
-            return true;
-    } else {
-        if ((data.answer.charCodeAt(0) - 97).toString() == storedData.answer[0])
-            return true;
-    }
-    var storageDate = new Date(storedData.timestamp);
-    var serverDate = new Date(data.timestamp);
-    if (serverDate < storageDate)
-        return false;
-    return true;
 };
 
 MultipleChoice.prototype.checkLocalStorage = function () {
@@ -345,10 +295,10 @@ MultipleChoice.prototype.checkLocalStorage = function () {
     // which were stored into local storage.
     var len = localStorage.length;
     if (len > 0) {
-        var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid);
+        var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
         if (ex !== null) {
             var storedData = JSON.parse(ex);
-            var answers = storedData.answer;
+            var answers = storedData.answer.split(",");
             for (var a = 0; a < answers.length; a++) {
                 var index = answers[a];
                 for (var b = 0; b < this.optionArray.length; b++) {
@@ -361,20 +311,19 @@ MultipleChoice.prototype.checkLocalStorage = function () {
                 this.enableMCComparison();
                 this.getSubmittedOpts();   // to populate givenlog for logging
                 if (this.multipleanswers) {
-                    this.logMCMAsubmission();
+                    this.logMCMAsubmission(storedData);
                 } else {
-                    this.logMCMFsubmission();
+                    this.logMCMFsubmission(storedData);
                 }
             }
         }
     }
 };
 
-MultipleChoice.prototype.setLocalStorage = function () {
-    this.getSubmittedOpts();   // make sure this.givenarray is populateDisplayFeed
+MultipleChoice.prototype.setLocalStorage = function (data) {
     var timeStamp = new Date();
-    var storageObj = {"answer": this.givenArray, "timestamp": timeStamp};
-    localStorage.setItem(eBookConfig.email + ":" + this.divid, JSON.stringify(storageObj));
+    var storageObj = {"answer": data.answer, "timestamp": timeStamp, "correct": data.correct};
+    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", JSON.stringify(storageObj));
 };
 
 /*===============================
@@ -383,10 +332,12 @@ MultipleChoice.prototype.setLocalStorage = function () {
 
 MultipleChoice.prototype.processMCMASubmission = function (logFlag) {
     // Called when the submit button is clicked
-    this.setLocalStorage();
+    this.getSubmittedOpts();   // make sure this.givenArray is populated
     this.scoreMCMASubmission();
+    this.setLocalStorage({"correct": (this.correct ? "T" : "F"), "answer": this.givenArray.join(",")});
     if (logFlag) {
-       this.logMCMAsubmission();
+        var answer = this.givenArray.join(",");
+        this.logMCMAsubmission({"answer": answer, "correct": this.correct});
     }
     this.renderMCMAFeedBack();
     if (this.useRunestoneServices) {
@@ -428,13 +379,15 @@ MultipleChoice.prototype.scoreMCMASubmission = function () {
             correctIndex++;
         }
     }
+    this.correct = (this.correctCount == this.correctList.length);
 };
 
 
 
-MultipleChoice.prototype.logMCMAsubmission = function () {
-    var answerInfo = "answer:" + this.givenlog.substring(0, this.givenlog.length - 1) + ":" + (this.correctCount == this.correctList.length ? "correct" : "no");
-    this.logBookEvent({"event": "mChoice", "act": answerInfo, "div_id": this.divid});
+MultipleChoice.prototype.logMCMAsubmission = function (data) {
+    var answer = data.answer;
+    var correct = data.correct;
+    this.logBookEvent({"event": "mChoice", "act": "submitMC", "answer": answer, "correct": correct, "div_id": this.divid});
 };
 
 
@@ -461,8 +414,9 @@ MultipleChoice.prototype.renderMCMAFeedBack = function () {
 
 MultipleChoice.prototype.processMCMFSubmission = function (logFlag) {
     // Called when the submit button is clicked
-    this.setLocalStorage();
+    this.getSubmittedOpts();   // make sure this.givenArray is populated
     this.scoreMCMFSubmission();
+    this.setLocalStorage({"correct": (this.correct ? "T" : "F"), "answer": this.givenArray.join(",")});
     if (logFlag) {
         this.logMCMFsubmission();
     }
@@ -483,8 +437,9 @@ MultipleChoice.prototype.scoreMCMFSubmission = function () {
 
 
 MultipleChoice.prototype.logMCMFsubmission = function () {
-    var answerInfo = "answer:" + this.givenArray[0] + ":" + (this.givenArray[0] == this.correctIndexList[0] ? "correct" : "no");
-    this.logBookEvent({"event": "mChoice", "act": answerInfo, "div_id": this.divid});
+    var answer = this.givenArray[0];
+    var correct = (this.givenArray[0] == this.correctIndexList[0] ? "T" : "F");
+    this.logBookEvent({"event": "mChoice", "act": "submitMC", "answer": answer, "correct": correct, "div_id": this.divid});
 };
 
 MultipleChoice.prototype.renderMCMFFeedback = function (correct, feedbackText) {
