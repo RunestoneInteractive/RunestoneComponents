@@ -61,7 +61,7 @@ LineBasedGrader.prototype.inverseLISIndices = function(arr) {
     return indexes;
 };
 
-// grade that element
+// grade that element, returning the state
 LineBasedGrader.prototype.grade = function() {
 	var problem = this.problem;
 	var correct = false;
@@ -70,8 +70,10 @@ LineBasedGrader.prototype.grade = function() {
 	var solutionLines = problem.solutionLines();
 	var answerLines = problem.answerLines();
 	var i;
+	var state;
 	
 	if (answerLines.length < solutionLines.length) {
+		state = "incorrectTooShort";
 		// too little code
 		answerArea.addClass("incorrect");
 		feedbackArea.fadeIn(500);
@@ -98,6 +100,7 @@ LineBasedGrader.prototype.grade = function() {
 			}
 			if (incorrectIndention.length == 0) {
 				// Perfect
+				state = "correct";
 				answerArea.addClass("correct");
 				feedbackArea.fadeIn(100);
 				feedbackArea.attr("class", "alert alert-success");
@@ -105,6 +108,7 @@ LineBasedGrader.prototype.grade = function() {
 				correct = true;
 			} else {
 				// Incorrect Indention
+				state = "incorrectIndentation";
 				var incorrectBlocks = [];
 				for (i = 0; i < incorrectIndention.length; i++) {
 					block = incorrectIndention[i].block;
@@ -124,6 +128,7 @@ LineBasedGrader.prototype.grade = function() {
 			}
 		} else {
 			// Incorrect: indicate which blocks to move
+			state = "incorrectMoveBlocks";
 			var answerBlocks = problem.answerBlocks();
 			var inSolution = [];
 			var inSolutionIndexes = [];
@@ -151,36 +156,16 @@ LineBasedGrader.prototype.grade = function() {
 			feedbackArea.html("Highlighted blocks in your program are wrong or are in the wrong order. This can be fixed by moving, removing, or replacing highlighted blocks.");
 		}
 	}
-	// Log It
-	// this extended format, with correct, answer and source, is used for grading
-	var answerHash = problem.answerHash();
-	var sourceHash = problem.sourceHash();
-	var act = sourceHash + "|" + answerHash;
-	if (correct) {
-		act = "correct|" + act;
-		correct = "T";
-	} else {
-		act ="incorrect|" + act;
-		correct = "F";
-	}
-	var divid = problem.divid;
-	problem.logBookEvent({
-		"event" : "parsons", 
-		"act" : act,
-		"div_id" : divid, 
-		"correct" : correct,
-		"answer" : answerHash,
-		"source" : sourceHash
-	});
+	return state;
 };
 
 // Create a line object with the following
-//   block = the block that this line is in
-//   text = the text of the code line
-//   indent = the indent level
-//   index = the index of the line
-//   id = the unique id
-//   problem = the Parsons problem
+//   problem: the Parsons problem
+//   block: the block that this line is in
+//   text: the text of the code line
+//   indent: the indent level
+//   index: the index of the line
+//   id: the unique id
 var ParsonsLine = function(codestring, block) {
 	this.block = block;
 	this.problem = block.problem;
@@ -352,7 +337,6 @@ ParsonsBlock.prototype.markIncorrectIndent = function() {
 // expose the type for testing, extending etc
 window.ParsonsBlock = ParsonsBlock;
 
-
 var prsList = {};    // Parsons dictionary
 
 // <pre> constructor
@@ -459,6 +443,7 @@ Parsons.prototype.createOptions = function() {
 	this.options = options;
 };
 
+// Based on what is specified in the original HTML, create HTML
 Parsons.prototype.createHTML = function () {
 	var html = '\
 <div id="' + this.counterId + '" class="parsons alert alert-warning">\
@@ -493,12 +478,8 @@ Parsons.prototype.createHTML = function () {
 	}.bind(this));
 	$('#' + this.counterId + '-check').click(function (event) {
 		event.preventDefault();
-		this.getFeedback();
-		this.setLocalStorage({
-			"source" : this.sourceHash(),
-			"answer" : this.answerHash(),
-			"timestamp" : new Date()
-		});
+		this.logAnswer(this.grader.grade());
+		this.setLocalStorage();
 	}.bind(this));	
 };
 
@@ -548,10 +529,9 @@ Parsons.prototype.loadData = function(data) {
 	if ((sourceHash == undefined) || (answerHash == undefined)) {
 		// first time loading
 		this.resetView();
-		this.log("set");
 	} else {
-		this.createHTMLFromHashes(sourceHash, answerHash);
-		this.getFeedback();
+		this.createView(this.blocksFromHash(sourceHash), this.blocksFromHash(answerHash));
+		this.grader.grade();
 	}
 };
 
@@ -578,7 +558,17 @@ Parsons.prototype.checkLocalStorage = function () {
 
 // RunestoneBase: Set the state of the problem in local storage
 Parsons.prototype.setLocalStorage = function(data) {
-	localStorage.setItem(this.storageId, JSON.stringify(data));
+	var toStore;
+	if (data == undefined) {
+		toStore = {
+			"source" : this.sourceHash(),
+			"answer" : this.answerHash(),
+			"timestamp" : new Date()
+		};
+	} else {
+		toStore = data;
+	}
+	localStorage.setItem(this.storageId, JSON.stringify(toStore));
 };
 
 // Initialize Parsons problem with the following properties
@@ -707,15 +697,10 @@ Parsons.prototype.blocksFromHash = function(hash) {
 	return blocks;
 };
 
-// Update the HTML based on hashes
-// Called from local storage
-Parsons.prototype.createHTMLFromHashes = function(sourceHash, answerHash) {
-	var sourceBlocks = this.blocksFromHash(sourceHash);
-	var answerBlocks = this.blocksFromHash(answerHash);
-	this.createView(sourceBlocks, answerBlocks);
-};
-
-// Log the activity to the server
+// Log the activity to the server:
+//   start: the user started interacting with this problem
+//   move: the user moved a block
+//   reset: the reset button was pressed
 Parsons.prototype.log = function(activity) {
 	var act = activity + "|" + this.sourceHash() + "|" + this.answerHash();
 	var divid = this.divid;
@@ -724,7 +709,32 @@ Parsons.prototype.log = function(activity) {
 		"act" : act,
 		"div_id" : divid
 	});
-}
+};
+
+// Log the activity based on the answer
+//   correct: The answer given matches the solution
+//   incorrect*: The answer is wrong for various reasons
+Parsons.prototype.logAnswer = function(answer) {
+	var answerHash = this.answerHash();
+	var sourceHash = this.sourceHash();
+	var act = sourceHash + "|" + answerHash;
+	var correct;
+	if (answer == "correct") {
+		act = "correct|" + act;
+		correct = "T";
+	} else {
+		act ="incorrect|" + act;
+		correct = "F";
+	}
+	this.logBookEvent({
+		"event" : "parsons", 
+		"act" : act,
+		"div_id" : this.divid, 
+		"correct" : correct,
+		"answer" : answerHash,
+		"source" : sourceHash
+	});
+};
 
 // Return a block object by the full id including id prefix
 Parsons.prototype.getBlockById = function(id) {
@@ -785,21 +795,12 @@ Parsons.prototype.solutionLines = function() {
 	return solutionLines;
 };
 
-// Grade the answer compared to the solution
-Parsons.prototype.getFeedback = function() {
-	this.grader.grade();
-	this.feedback_exists = true;
-};
-
 // Clear any feedback from the answer area
 Parsons.prototype.clearFeedback = function() {
-	if (this.feedback_exists) {
-		$("#" + this.counterId + "-answer").removeClass("incorrect correct");
-		var blocks = $("#" + this.counterId + "-answer div");
-		blocks.removeClass("correctPosition incorrectPosition incorrectIndent");
-		$("#" + this.counterId + "-message").hide();
-	}
-	this.feedback_exists = false;
+	$("#" + this.counterId + "-answer").removeClass("incorrect correct");
+	var blocks = $("#" + this.counterId + "-answer div");
+	blocks.removeClass("correctPosition incorrectPosition incorrectIndent");
+	$("#" + this.counterId + "-message").hide();
 };
 
 // A function for returning a shuffled version of an array
@@ -821,10 +822,10 @@ Parsons.prototype.shuffled = function(array) {
 };
 
 // Based on the movingId, etc., establish the moving state
-//   rest = not moving
-//   source = moving inside source area
-//   answer = moving inside answer area
-//   moving = moving outside areas
+//   rest: not moving
+//   source: moving inside source area
+//   answer: moving inside answer area
+//   moving: moving outside areas
 Parsons.prototype.movingState = function() {
 	if (this.movingId == undefined) {
 		return "rest";
@@ -852,7 +853,7 @@ Parsons.prototype.movingState = function() {
 }
 
 // Update the Parsons view
-// This occurs when dragging the moving tile
+// This gets called when dragging a block
 Parsons.prototype.updateView = function() {
 	// Based on the new and the old state, figure out what to update
 	var state = this.state;
@@ -1033,10 +1034,10 @@ Parsons.prototype.updateView = function() {
 };
 
 // Reset the view based on this.blocks accounting for
-//     * shorten to the distractors to maxdist size
-//     * if an order is specified, then use that
-//     * else shuffle the blocks randomly, accounting for paired distractors
-//     * call createView with the shuffled blocks in the source field
+//   * shorten to the distractors to maxdist size
+//   * if an order is specified, then use that
+//   * else shuffle the blocks randomly, accounting for paired distractors
+//   * call createView with the shuffled blocks in the source field
 Parsons.prototype.resetView = function() {
 	var blocks = [], i, aBlock;
 	for (i = 0; i < this.blocks.length; i++) {
@@ -1211,9 +1212,15 @@ Parsons.prototype.createView = function(sourceBlocks, answerBlocks) {
 	for (var i = 0; i < answerBlocks.length; i++) {
 		elements.push(document.getElementById(answerBlocks[i].id));
 	}
-	
+
+	// Add interactivity	
 	var panStart = function(event) {
 		that.clearFeedback();
+		if (that.started == undefined) {
+			// log the first time that something gets moved
+			that.started = true;
+			that.log("start");
+		}
 		that.movingId = that.getBlockIdFor(event.target);
 		// Update the view
 		that.movingX = event.srcEvent.pageX;
@@ -1225,7 +1232,7 @@ Parsons.prototype.createView = function(sourceBlocks, answerBlocks) {
 		delete that.movingX;
 		delete that.movingY;
 		that.updateView();
-		that.log("drop");
+		that.log("move");
 	};
 	var panMove = function(event) {
 		// Update the view
@@ -1233,16 +1240,9 @@ Parsons.prototype.createView = function(sourceBlocks, answerBlocks) {
 		that.movingY = event.srcEvent.pageY;
 		that.updateView();
 	};
+	this.destroyHammers();
+	var hammers = [];
 	var mc;
-	// destroy existing hammer functionality
-	var hammers = this.hammers;
-	if (hammers !== undefined) {
-		for (var i = 0; i < hammers.length; i++) {
-			hammers[i].destroy();
-		}
-	}
-	// add new hammer functionality
-	hammers = [];
 	for (var i = 0; i < elements.length; i++) {
 		var mc = new Hammer.Manager(elements[i], {
 			"recognizers" : [
@@ -1261,15 +1261,19 @@ Parsons.prototype.createView = function(sourceBlocks, answerBlocks) {
 	this.hammers = hammers;
 };
 
-// Disable the interface
-Parsons.prototype.disable = function() {
-	// Disable hammers
+// Destroy hammers to disable interaction
+Parsons.prototype.destroyHammers = function() {
 	var hammers = this.hammers;
 	if (hammers !== undefined) {
 		for (var i = 0; i < hammers.length; i++) {
 			hammers[i].destroy();
 		}
 	}
+};
+
+// Disable the interface
+Parsons.prototype.disable = function() {
+	this.destroyHammers();
 	// Hide buttons
 	$("#" + this.counterId + "-check").hide();
 	$("#" + this.counterId + "-reset").hide();
