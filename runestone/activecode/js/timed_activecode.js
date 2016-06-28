@@ -9,6 +9,7 @@ TimedActiveCode.prototype.timedInit = function (opts) {
     this.init(opts);
     this.renderTimedIcon(this.containerDiv);
     this.hideButtons();
+    this.needsReinitialization = true;   // the run button click listener needs to be reinitialized
 };
 
 
@@ -54,4 +55,18 @@ TimedActiveCode.prototype.processTimedSubmission = function (logFlag) {
     }
     this.runButton.disabled = true;
     $(this.codeDiv).addClass("ac-disabled");
+};
+
+TimedActiveCode.prototype.reinitializeListeners = function () {
+    // re-attach the run button listener
+    $(this.runButton).click(this.runProg.bind(this));
+    $(this.histButton).click(this.addHistoryScrubber.bind(this));
+    if (this.historyScrubber !== null) {
+        $(this.historyScrubber).slider({
+            max: this.history.length-1,
+            value: this.history.length-1,
+            slide: this.slideit.bind(this),
+            change: this.slideit.bind(this)
+        });
+    }
 };

@@ -23,8 +23,24 @@ Quick Start
 -----------
 
 If you are completely new to pip and github text editors, I have written a more thorough getting started
- tutorial `on my blog <http://reputablejournal.com/posts/2015/05/how-to-make-a-lab-in-three-easy-steps.html>`_
+ tutorial `on my blog <http://reputablejournal.com/how-to-make-a-lab-in-three-easy-steps.html>`_
  Otherwise, you can install everything you need with one simple command! (Although I recommend that you first create a virtual environment for your work.)
+ 
+ **Install and make a Python virtualenv**
+ 
+* Documentation here:  https://virtualenv.pypa.io/en/stable/
+* Video here:  https://www.youtube.com/watch?v=IX-v6yvGYFg
+* For the impatient:
+
+::
+   
+    $ sudo pip install virtualenv
+    $ virtualenv /path/to/home/MyEnv
+    $ source /path/to/home/MyEnv/bin/activate
+     
+* You will need to do the last command every time you want to work on RunestoneServer.  If you have not used Python virtual environments before I strongly recommend reading the docs or watching the video
+ 
+With the virtual environment installed and configured you can continue.
 
 ::
 

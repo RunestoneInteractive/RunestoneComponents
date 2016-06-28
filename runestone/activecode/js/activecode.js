@@ -229,7 +229,7 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
         $(scrubberDiv).css("margin-right","10px");
         $(scrubberDiv).width("180px");
         scrubber = document.createElement("div");
-        var slideit = function() {
+        this.slideit = function() {
             this.editor.setValue(this.history[$(scrubber).slider("value")]);
             var curVal = this.timestamps[$(scrubber).slider("value")];
             //this.scrubberTime.innerHTML = curVal;
@@ -239,12 +239,12 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
             setTimeout(function () {
                 $(scrubber).find(".sltooltip").fadeOut()
             }, 4000);
-        }.bind(this);
+        };
         $(scrubber).slider({
             max: this.history.length-1,
             value: this.history.length-1,
-            slide: slideit,
-            change: slideit
+            slide: this.slideit.bind(this),
+            change: this.slideit.bind(this)
         });
         scrubberDiv.appendChild(scrubber);
 
