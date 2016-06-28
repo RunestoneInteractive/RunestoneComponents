@@ -1,4 +1,5 @@
 function TimedParsons (opts) {
+	console.log(opts);
 	if (opts) {
 		this.timedInit(opts);
 	}
