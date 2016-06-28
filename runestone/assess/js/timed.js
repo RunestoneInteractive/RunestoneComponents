@@ -54,6 +54,10 @@ Timed.prototype.init = function (opts) {
     if ($(this.origElem).is("[data-no-timer]")) {
         this.showTimer = false;
     }
+    this.fullwidth = false;
+    if ($(this.origElem).is("[data-fullwidth]")) {
+        this.fullwidth = true;
+    }
 
     this.running = 0;
     this.paused = 0;
@@ -105,6 +109,13 @@ Timed.prototype.renderTimedAssess = function () {
 
 Timed.prototype.renderContainer = function () {
     this.assessDiv = document.createElement("div"); // container for the entire Timed Component
+    
+    if (this.fullwidth) {
+       // allow the container to fill the width - barb
+       $(this.assessDiv).attr({
+           "style": "max-width:none"
+       });
+    }
     this.assessDiv.id = this.divid;
     this.timedDiv = document.createElement("div"); // div that will hold the questions for the timed assessment
     this.navDiv = document.createElement("div"); // For navigation control
