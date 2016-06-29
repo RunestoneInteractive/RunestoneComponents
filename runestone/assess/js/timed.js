@@ -65,6 +65,7 @@ Timed.prototype.init = function (opts) {
     this.incorrectStr = "";
     this.skippedStr = "";
     this.skipped = 0;
+    this.hasRenderedFirstQuestion = false;
 
     this.currentQuestionIndex = 0;   // Which question is currently displaying on the page
     this.renderedQuestionArray = []; // list of all problems
@@ -90,7 +91,6 @@ Timed.prototype.renderTimedAssess = function () {
     this.renderControlButtons();
     this.assessDiv.appendChild(this.timedDiv);    // This can't be appended in renderContainer because then it renders above the timer and control buttons.
     this.createRenderedQuestionArray();
-    this.renderTimedQuestion();
     this.renderNavControls();
     this.renderSubmitButton();
     this.renderFeedbackContainer();
@@ -141,6 +141,7 @@ Timed.prototype.renderControlButtons = function () {
     });
     this.startBtn.textContent = "Start";
     this.startBtn.addEventListener("click", function () {
+        this.renderTimedQuestion();
         this.startAssessment();
     }.bind(this), false);
     $(this.pauseBtn).attr({
@@ -340,11 +341,15 @@ Timed.prototype.randomizeRQA = function () {
 Timed.prototype.renderTimedQuestion = function () {
     $(this.switchDiv).replaceWith(this.renderedQuestionArray[this.currentQuestionIndex].containerDiv);
     this.switchDiv = this.renderedQuestionArray[this.currentQuestionIndex].containerDiv;
-    // If the timed component has listeners, those need to be reinitialized
+    // If the timed component has listeners, those might need to be reinitialized
     // This flag will only be set in the elements that need it--it will be undefined in the others and thus evaluate to false
     if (this.renderedQuestionArray[this.currentQuestionIndex].needsReinitialization) {
-        this.renderedQuestionArray[this.currentQuestionIndex].reinitializeListeners();
+        // if this is the first time we're rendering the first question, nothing should be reinitialized
+        if (this.currentQuestionIndex !== 0 || this.hasRenderedFirstQuestion) {
+            this.renderedQuestionArray[this.currentQuestionIndex].reinitializeListeners();
+        }
     }
+    this.hasRenderedFirstQuestion = true;
 };
 
 
@@ -378,8 +383,8 @@ Timed.prototype.startAssessment = function () {
             this.increment();
             this.logBookEvent({"event": "timedExam", "act": "start", "div_id": this.divid});
             var timeStamp = new Date();
-            var storageObj = {"answerData": [0,0,this.renderedQuestionArray.length,0], "timestamp": timeStamp};
-            localStorage.setItem(eBookConfig.email + ":" + this.divid, JSON.stringify(storageObj));
+            var storageObj = {"answer": [0,0,this.renderedQuestionArray.length,0], "timestamp": timeStamp};
+            localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", JSON.stringify(storageObj));
         }
     } else {
        this.handlePrevAssessment();
@@ -511,7 +516,7 @@ Timed.prototype.tookTimedExam = function () {
         "color": "white"
     });
 
-    this.checkServer();
+    this.checkServer("timedExam");
 
 };
 
@@ -594,77 +599,47 @@ Timed.prototype.storeScore = function () {
     var storage_arr = [];
     storage_arr.push(this.score, this.correctStr, this.incorrect, this.incorrectStr, this.skipped, this.skippedStr, this.timeTaken);
     var timeStamp = new Date();
-    var storageObj = JSON.stringify({"answerData": storage_arr, "timestamp": timeStamp});
-    localStorage.setItem(eBookConfig.email + ":" + this.divid, storageObj);
+    var storageObj = JSON.stringify({"answer": storage_arr, "timestamp": timeStamp});
+    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", storageObj);
 };
 
 Timed.prototype.logScore = function () {
     this.logBookEvent({"event": "timedExam", "act": "finish", "div_id": this.divid, "correct": this.score, "incorrect": this.incorrect, "skipped": this.skipped, "time": this.timeTaken});
 };
 
-Timed.prototype.checkServer = function () {
-    if (this.useRunestoneServices) {
-        var data = {};
-        data.div_id = this.divid;
-        data.course = eBookConfig.course;
-        data.event = "timedExam";
-        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.useLocalStorage.bind(this));
-    } else {
-        this.repopulateFromStorage(null, null, null);
-    }
-};
-
-Timed.prototype.useLocalStorage = function () {
-    this.repopulateFromStorage(null, null, null);
-};
-
-Timed.prototype.repopulateFromStorage = function (data, status, whatever) {
-    if (data !== null) {
-        this.taken = 1;
-        if (this.shouldUseServer(data)) {
-            this.restoreFromStorage(data);
-        } else {
-            this.checkLocalStorage();
-        }
-    } else {
-        this.checkLocalStorage();
-    }
-
-    if (this.taken) {
-       this.handlePrevAssessment();
-    }
-};
-
 Timed.prototype.shouldUseServer = function (data) {
-    // returns true if server data is more recent than local storage or if server storage is correct
+    // We override the RunestoneBase version because there is no "correct" attribute, and there are 2 possible localStorage schemas
+    // --we also want to default to local storage because it contains more information
     if (localStorage.length === 0)
         return true;
-    var storageObj = localStorage.getItem(eBookConfig.email + ":" + this.divid);
+    var storageObj = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
     if (storageObj === null)
         return true;
-    var storedData = JSON.parse(storageObj).answerData;
+    var storedData = JSON.parse(storageObj).answer;
     if (storedData.length == 4) {
         if (data.correct == storedData[0] && data.incorrect == storedData[1] && data.skipped == storedData[2] && data.timeTaken == storedData[3])
             return true;
     } else if (storedData.length == 7) {
-        if (data.correct == storedData[0] && data.incorrect == storedData[2] && data.skipped == storedData[4] && data.timeTaken == storedData[6])
+        if (data.correct == storedData[0] && data.incorrect == storedData[2] && data.skipped == storedData[4] && data.timeTaken == storedData[6]) {
+            this.logScore();
             return false;   // In this case, because local storage has more info, we want to use that if it's consistent
+        }
     }
     var storageDate = new Date(JSON.parse(storageObj[1]).timestamp);
     var serverDate = new Date(data.timestamp);
-    if (serverDate < storageDate)
+    if (serverDate < storageDate) {
+        this.logScore();
         return false;
+    }
     return true;
 };
 
 Timed.prototype.checkLocalStorage = function () {
     var len = localStorage.length;
     if (len > 0) {
-        if (localStorage.getItem(eBookConfig.email + ":" + this.divid) !== null) {
+        if (localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given") !== null) {
             this.taken = 1;
-            this.restoreFromStorage("");
-            if (this.useRunestoneServices)
-                this.logScore();
+            this.restoreAnswers("");
         } else {
             this.taken = 0;
         }
@@ -673,13 +648,17 @@ Timed.prototype.checkLocalStorage = function () {
     }
 };
 
-Timed.prototype.restoreFromStorage = function (data) {
+Timed.prototype.restoreAnswers = function (data) {
+    this.taken = 1;
+    if (this.taken) {
+       this.handlePrevAssessment();
+    }
     var tmpArr;
     if (data === "") {
-        tmpArr = JSON.parse(localStorage.getItem(eBookConfig.email + ":" + this.divid)).answerData;
+        tmpArr = JSON.parse(localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given")).answer;
     } else {
         tmpArr = [parseInt(data.correct), parseInt(data.incorrect), parseInt(data.skipped), parseInt(data.timeTaken)];
-        this.setLocalStorageFromServer(tmpArr);
+        this.setLocalStorage(data);
     }
     if (tmpArr.length == 4)
     {
@@ -704,12 +683,16 @@ Timed.prototype.restoreFromStorage = function (data) {
        this.skipped = this.renderedQuestionArray.length;
        this.timeTaken = 0;
     }
+    this.renderTimedQuestion();
     this.displayScore();
 	this.showTime();
 };
 
-Timed.prototype.setLocalStorageFromServer = function (serverArr) {
-    // If the server array is more recent
+Timed.prototype.setLocalStorage = function (data) {
+    var timeStamp = new Date();
+    var answer = [parseInt(data.correct), parseInt(data.incorrect), parseInt(data.skipped), parseInt(data.timeTaken)];
+    var storageObj = {"answer": answer, "timestamp": timeStamp};
+    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", JSON.stringify(storageObj));
 };
 
 Timed.prototype.displayScore = function () {

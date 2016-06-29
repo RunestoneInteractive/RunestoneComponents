@@ -99,7 +99,7 @@ ClickableArea.prototype.renderNewElements = function () {
     this.newDiv.innerHTML = newContent;
     this.containerDiv.appendChild(this.newDiv);
 
-    this.checkServer();
+    this.checkServer("clickableArea");
     this.createButtons();
     this.createFeedbackDiv();
 
@@ -128,37 +128,30 @@ ClickableArea.prototype.createFeedbackDiv = function () {
 };
 
 /*===================================
-=== Checking/loading from storage ===
+=== Checking/restoring from storage ===
 ===================================*/
 
-ClickableArea.prototype.checkServer = function () {
-    // Check if the server has stored answer
-    if (this.useRunestoneServices) {
-        var data = {};
-        data.div_id = this.divid;
-        data.course = eBookConfig.course;
-        data.event = "clickableArea";
-        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
-    } else {
-        this.checkLocalStorage();   // just go right to local storage
+ClickableArea.prototype.restoreAnswers = function (data) {
+    // Restore answers from storage retrieval done in RunestoneBase or from local storage
+    if (data.answer !== undefined) {   // if we got data from the server
+        this.hasStoredAnswers = true;
+        this.clickedIndexArray = data.answer.split(";");
+    }
+
+    if (this.ccArray === undefined) {
+        this.modifyClickables(this.newDiv.childNodes);
+    } else {   // For use with Sphinx-rendered HTML
+        this.ccCounter = 0;
+        this.ccIndex = 0;
+        this.ciIndex = 0;
+        if (!this.isTable) {
+            this.modifyViaCC(this.newDiv.children);
+        } else {
+            this.modifyTableViaCC(this.newDiv.children);
+        }
     }
 };
 
-ClickableArea.prototype.repopulateFromStorage = function (data, status, whatever) {
-    // decide whether to use the server's answer (if there is one) or to load from storage
-    if (data !== null) {
-        this.hasStoredAnswers = true;
-        if (this.shouldUseServer(data)) {
-            this.clickedIndexArray = data.answer.split(";");
-            this.setLocalStorage(true, data.correct);
-            this.finishRestoringAnswers();
-        } else {
-            this.checkLocalStorage();
-        }
-    } else {
-        this.checkLocalStorage();
-    }
-};
 
 ClickableArea.prototype.checkLocalStorage = function () {
     // Gets previous answer data from local storage if it exists
@@ -178,50 +171,18 @@ ClickableArea.prototype.checkLocalStorage = function () {
                         this.givenIndexArray.push(i);
                     }
                 }
-                this.logBookEvent({"event": "clickableArea", "act": this.clickedIndexArray.join(";"), "div_id": this.divid, "correct": (storageObj.correct ? "T" : "F")});
+                this.logBookEvent({"event": "clickableArea", "act": this.clickedIndexArray.join(";"), "div_id": this.divid, "correct": storageObj.correct});
             }
         }
     }
-    this.finishRestoringAnswers();
+    this.restoreAnswers({});   // pass empty object
 };
 
-ClickableArea.prototype.finishRestoringAnswers = function () {
-    // this code is used multipe times, so i made it into a function
-    if (this.ccArray === undefined) {
-        this.modifyClickables(this.newDiv.childNodes);
-    } else {   // For use with Sphinx-rendered HTML
-        this.ccCounter = 0;
-        this.ccIndex = 0;
-        this.ciIndex = 0;
-        if (!this.isTable) {
-            this.modifyViaCC(this.newDiv.children);
-        } else {
-            this.modifyTableViaCC(this.newDiv.children);
-        }
-    }
-};
 
-ClickableArea.prototype.shouldUseServer = function (data) {
-    // returns true if server data is more recent than local storage or if server storage is correct
-    if (data.correct == "T" || localStorage.length === 0)
-        return true;
-    var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
-    if (ex === null)
-        return true;
-    var storedData = JSON.parse(ex);
-    if (data.answer == storedData.answer)
-        return true;
-    var storageDate = new Date(storedData.timestamp);
-    var serverDate = new Date(data.timestamp);
-    if (serverDate < storageDate)
-        return false;
-    return true;
-};
-
-ClickableArea.prototype.setLocalStorage = function (fromServer, correct) {
+ClickableArea.prototype.setLocalStorage = function (data) {
     // Array of the indices of clicked elements is passed to local storage
     var answer;
-    if (fromServer) {
+    if (data.answer !== undefined) {   // If we got data from the server, we can just use that
         answer = this.clickedIndexArray.join(";");
     } else {
         this.givenIndexArray = [];
@@ -235,6 +196,7 @@ ClickableArea.prototype.setLocalStorage = function (fromServer, correct) {
 
 
     var timeStamp = new Date();
+    var correct = data.correct;
     var storageObject = {"answer": answer, "correct": correct, "timestamp": timeStamp};
     localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", JSON.stringify(storageObject));
 };
@@ -381,7 +343,7 @@ ClickableArea.prototype.clickableEval = function (logFlag) {
             $(this.incorrectArray[i]).removeClass("clickable-incorrect");
         }
     }
-    this.setLocalStorage(false, this.correct);
+    this.setLocalStorage({"correct": (this.correct ? "T" : "F")});
     if (logFlag) {   // Sometimes we don't want to log the answer; for example, on reload of timed exam questions
         this.logBookEvent({"event": "clickableArea", "act": this.givenIndexArray.join(";"), "div_id": this.divid, "correct": (this.correct ? "T" : "F")});
     }
