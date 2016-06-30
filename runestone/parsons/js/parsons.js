@@ -638,7 +638,7 @@ Parsons.prototype.sourceHash = function() {
 // Return an array of code blocks based on what is specified in the problem
 Parsons.prototype.blocksFromSource = function() {
 	var unorderedBlocks = [];
-	var blocks;
+	var blocks = [];
 	var lines = [];
 	var block, line, i;
 	for (i = 0; i < this.lines.length; i++) {
