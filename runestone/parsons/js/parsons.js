@@ -1,17 +1,26 @@
-/* parsons.js
-=== This file contains the JS for the Runestone Parsons component
-=== Contributors:
-===== Isaiah Mayerchak
-===== Barbara Ericson
-===== Jeff Rick
-=== Adapted from the original JS Parsons by
-===== Ville Karavirta
-===== Petri Ihantola
-===== Juha Helminen
-===== Mike Hewner
-*/
+/* =====================================================================
+==== Parsons Runestone Directive Javascript ============================
+======== Renders a Parsons problem based on the HTML created by the
+======== parsons.py script and the RST file.
+==== CONTRIBUTORS ======================================================
+======== Isaiah Mayerchak
+======== Barbara Ericson
+======== Jeff Rick
+==== Adapted form the original JS Parsons by ===========================
+======== Ville Karavirta
+======== Petri Ihantola
+======== Juha Helminen
+======== Mike Hewner
+===================================================================== */
 
-// An object to grade the Parsons code
+/* =====================================================================
+==== LineBasedGrader Object ============================================
+======== Used for grading a Parsons problem.
+==== PROPERTIES ========================================================
+======== problem: the Parsons problem
+===================================================================== */
+
+// Initialize
 var LineBasedGrader = function(problem) {
 	this.problem = problem;
 };
@@ -64,6 +73,7 @@ LineBasedGrader.prototype.inverseLISIndices = function(arr) {
 // grade that element, returning the state
 LineBasedGrader.prototype.grade = function() {
 	var problem = this.problem;
+	problem.clearFeedback();
 	var correct = false;
 	var answerArea = $(problem.answerArea);
 	var feedbackArea = $(problem.messageDiv);
@@ -159,15 +169,24 @@ LineBasedGrader.prototype.grade = function() {
 	return state;
 };
 
-// Create a line object with the following
-//   problem: the Parsons problem
-//   index: the index of the line in the problem
-//   text: the text of the code line
-//   indent: the indent level
-//   view: an element for viewing this object
-//   distractor: whether it is a distractor
-//   paired: whether it is a paired distractor
-//   groupWithNext: whether it is grouped with the following line in the initial grouping
+/* =====================================================================
+==== ParsonsLine Object ================================================
+======== The model and view of a line of code.
+======== Based on what is specified in the problem.
+======== ParsonBlock objects have one or more of these.
+==== PROPERTIES ========================================================
+======== problem: the Parsons problem
+======== index: the index of the line in the problem
+======== text: the text of the code line
+======== indent: the indent level
+======== view: an element for viewing this object
+======== distractor: whether it is a distractor
+======== paired: whether it is a paired distractor
+======== groupWithNext: whether it is grouped with the following line
+============ in the initial grouping
+===================================================================== */
+
+// Initialize from codestring
 var ParsonsLine = function(problem, codestring) {
 	this.problem = problem;
 	this.index = problem.lines.length;
@@ -211,12 +230,18 @@ ParsonsLine.prototype.viewIndent = function() {
 	}
 };
 
-// Create a code block object
-//   problem: the Parsons problem
-//   lines: an array of ParsonsLine
-//   indent: indent based on movement
-//   view: an element for viewing this object
-//   hammer: interactivity
+/* =====================================================================
+==== ParsonsBlock Object ===============================================
+======== The model and view of a code block.
+==== PROPERTIES ========================================================
+======== problem: the Parsons problem
+======== lines: an array of ParsonsLine in this block
+======== indent: indent based on movement
+======== view: an element for viewing this object
+======== hammer: the controller based on hammer.js
+===================================================================== */
+
+// Initialize based on the problem and the lines
 var ParsonsBlock = function(problem, lines) {
 	this.problem = problem;
 	this.lines = lines;
@@ -228,7 +253,7 @@ var ParsonsBlock = function(problem, lines) {
 	$(view).addClass("block");
 	var sharedIndent = 0;
 	for (var i = 0; i < lines.length; i++) {
-		sharedIndent = Math.min(sharedIndent, lines[i].indent);
+		sharedIndent = Math.max(sharedIndent, lines[i].indent);
 	}
 	for (i = 0; i < lines.length; i++) {
 		var line = lines[i];
@@ -261,13 +286,31 @@ ParsonsBlock.prototype.hash = function() {
 ParsonsBlock.prototype.solutionIndent = function() {
 	var sharedIndent = 0;
 	for (var i = 0; i < this.lines.length; i++) {
-		sharedIndent = Math.min(sharedIndent, this.lines[i].indent);
+		sharedIndent = Math.max(sharedIndent, this.lines[i].indent);
 	}
 	return sharedIndent;
 };
-var prsList = {};    // Parsons dictionary
 
-// <pre> constructor
+/* =====================================================================
+==== Parsons Object ====================================================
+======== The model and view of a Parsons problem based on what is
+======== specified in the HTML, which is based on what is specified
+======== in the RST file
+==== PROPERTIES ========================================================
+======== options: options largely specified from the HTML
+======== grader: a LineGrader for grading the problem
+======== lines: an array of all ParsonsLine as specified in the problem
+======== solution: an array of ParsonsLine in the solution
+======== blocks: the current blocks
+======== sourceArea: the element that contains the source blocks
+======== answerArea: the element that contains the answer blocks
+===================================================================== */
+
+/* =====================================================================
+==== INITIALIZATION ====================================================
+===================================================================== */
+
+var prsList = {};    // Parsons dictionary
 function Parsons (opts) {
 	if (opts) {
 	    this.init(opts);
@@ -276,6 +319,7 @@ function Parsons (opts) {
 Parsons.prototype = new RunestoneBase();
 Parsons.counter = 0;
 
+// Initialize based on what is specified in the HTML file
 Parsons.prototype.init = function (opts) {
 	RunestoneBase.apply(this, arguments);
 	var orig = opts.orig;     // entire <pre> element that will be replaced by new HTML
@@ -460,90 +504,7 @@ Parsons.prototype.initializeView = function () {
 	$(this.origElem).replaceWith(this.containerDiv);
 };
 
-// Return a date from a timestamp (either mySQL or JS format)
-Parsons.prototype.dateFromTimestamp = function(timestamp) {
-	var date = new Date(timestamp);
-	if (isNaN(date.getTime())) {
-		var t = timestamp.split(/[- :]/);
-		date = new Date(t[0], t[1]-1, t[2], t[3], t[4], t[5]);
-	}
-	return date;
-};
-
-// Return the argument that is newer based on the timestamp
-Parsons.prototype.newerData = function(dataA, dataB) {
-	var dateA = dataA.timestamp;
-	var dateB = dataB.timestamp;
-	if (dateA == undefined) {
-		return dateB;
-	}
-	if (dateB == undefined) {
-		return dateA;
-	}
-	dateA = this.dateFromTimestamp(dateA);
-	dateB = this.dateFromTimestamp(dateB);
-	if (dateA > dateB) {
-		return dataA;
-	} else {
-		return dataB;
-	}
-};
-
-// Based on the data, load
-Parsons.prototype.loadData = function(data) {
-	var sourceHash = data.source;
-	if (sourceHash == undefined) {
-		// maintain backwards compatibility
-		sourceHash = data.trash;
-	}
-	var answerHash = data.answer;
-	if ((sourceHash == undefined) || (answerHash == undefined)) {
-		this.initializeAreas(this.blocksFromSource(), []);
-	} else {
-		this.initializeAreas(this.blocksFromHash(sourceHash), this.blocksFromHash(answerHash));
-		this.grader.grade();
-	}
-};
-
-// Return what is stored in local storage
-Parsons.prototype.localData = function() {
-	var data = localStorage.getItem(this.storageId);
-	if (data !== null) {
-		data = JSON.parse(data);
-	} else {
-		data = {};
-	}
-	return data;
-};
-
-// RunestoneBase: Sent when the server has data
-Parsons.prototype.restoreAnswers = function(serverData) {
-	this.loadData(this.newerData(this.localData(), serverData));
-};
-
-// RunestoneBase: Load what is in local storage
-Parsons.prototype.checkLocalStorage = function () {
-	this.loadData(this.localData());
-};
-
-// RunestoneBase: Set the state of the problem in local storage
-Parsons.prototype.setLocalStorage = function(data) {
-	var toStore;
-	if (data == undefined) {
-		toStore = {
-			"source" : this.sourceHash(),
-			"answer" : this.answerHash(),
-			"timestamp" : new Date()
-		};
-	} else {
-		toStore = data;
-	}
-	localStorage.setItem(this.storageId, JSON.stringify(toStore));
-};
-
-// Initialize the following properties
-//   lines: an array of all the code lines in the problem
-//   solution: an array of the lines in the solution
+// Initialize lines and solution properties
 Parsons.prototype.initializeLines = function(text) {
 	this.lines = [];
 	// Create the initial blocks
@@ -606,6 +567,269 @@ Parsons.prototype.initializeLines = function(text) {
 	}	
 	this.solution = solution;
 };
+
+// Based on the blocks, create the source and answer areas
+Parsons.prototype.initializeAreas = function(sourceBlocks, answerBlocks) {
+	// Create blocks property as the sum of the two
+	var blocks = [];
+	var i, block;
+	for (i = 0; i < sourceBlocks.length; i++) {
+		block = sourceBlocks[i];
+		blocks.push(block);
+		this.sourceArea.appendChild(block.view);
+	}
+	for (i = 0; i < answerBlocks.length; i++) {
+		block = answerBlocks[i];
+		blocks.push(block);
+		this.answerArea.appendChild(block.view);
+	}
+	this.blocks = blocks;
+	
+	// Determine how much indent should be possible in the answer area
+	var indent = 0;
+	if (!this.options.noindent) {
+		// Set the indent so that the solution is possible
+		if (this.options.language !== "natural") {
+			// Even if no indent is required, have a minimum of 1 indent
+			indent = 1;
+		}
+		for (i = 0; i < blocks.length; i++) {
+			block = blocks[i];
+			indent = Math.max(indent, block.solutionIndent());
+		}
+	}
+	this.indent = indent;
+	
+	// For rendering, place in an onscreen position
+	var isHidden = this.containerDiv.offsetParent == null;
+	var replaceElement;
+	if (isHidden) {
+		replaceElement = document.createElement("div");
+		$(this.containerDiv).replaceWith(replaceElement);
+		document.body.appendChild(this.containerDiv);
+	}
+		
+	if (this.options.prettifyLanguage !== "") {
+		prettyPrint();
+	}
+	
+	// Layout the areas
+	var areaWidth, areaHeight;
+	// Establish the width and height of the droppable areas
+	var item, maxFunction;
+	areaHeight = 6;
+	if (this.options.language == "natural") {
+		areaWidth = 300;
+		maxFunction = function(item) {
+			item.width(areaWidth - 22);
+			areaHeight += item.outerHeight(true);
+		};
+	} else {
+		areaWidth = 0;
+		maxFunction = function(item) {
+			areaHeight += item.outerHeight(true);
+			areaWidth = Math.max(areaWidth, item.outerWidth(true));			
+		};
+	}
+	for (i = 0; i < blocks.length; i++) {
+		maxFunction($(blocks[i].view));
+	}
+	this.areaWidth = areaWidth;
+	this.areaHeight = areaHeight;
+	$(this.sourceArea).css({
+		'width' : areaWidth + 2,
+		'height' : areaHeight
+	});
+	$(this.answerArea).css({
+		'width' : this.options.pixelsPerIndent * indent + areaWidth + 2,
+		'height' : areaHeight
+	});
+	if (indent > 0 && indent <= 4) {
+		$(this.answerArea).addClass("answer" + indent);
+	} else {
+		$(this.answerArea).addClass("answer");
+	}
+	this.state = undefined; // needs to be here for loading from storage
+	this.updateView();
+
+	// Put back into the offscreen position
+	if (isHidden) {
+		$(replaceElement).replaceWith(this.containerDiv);
+	}
+};
+
+// Initialize the ability to move blocks around
+Parsons.prototype.initializeInteractivity = function () {
+	// Add interactivity	
+	var that = this;
+	this.panStart = function(event) {
+		that.clearFeedback();
+		if (that.started == undefined) {
+			// log the first time that something gets moved
+			that.started = true;
+			that.logMove("start");
+		}
+		that.moving = that.getBlockFor(event.target);
+		// Update the view
+		that.movingX = event.srcEvent.pageX;
+		that.movingY = event.srcEvent.pageY;
+		that.updateView();
+	};
+	this.panEnd = function(event) {
+		delete that.moving;
+		delete that.movingX;
+		delete that.movingY;
+		that.updateView();
+		that.logMove("move");
+	};
+	this.panMove = function(event) {
+		// Update the view
+		that.movingX = event.srcEvent.pageX;
+		that.movingY = event.srcEvent.pageY;
+		that.updateView();
+	};
+	for (i = 0; i < this.blocks.length; i++) {
+		block = this.blocks[i];
+		block.hammer = new Hammer.Manager(block.view, {
+			"recognizers" : [
+				[Hammer.Pan, {
+					"direction" : Hammer.DIRECTION_ALL,
+					"threshold" : 0,
+					"pointers" : 1
+				}]
+			]
+		});
+		block.hammer.on("panstart", this.panStart);
+		block.hammer.on("panend", this.panEnd);
+		block.hammer.on("panmove", this.panMove);
+	}
+};
+
+/* =====================================================================
+==== SERVER COMMUNICATION ==============================================
+===================================================================== */
+
+// Return the argument that is newer based on the timestamp
+Parsons.prototype.newerData = function(dataA, dataB) {
+	var dateA = dataA.timestamp;
+	var dateB = dataB.timestamp;
+	if (dateA == undefined) {
+		return dataB;
+	}
+	if (dateB == undefined) {
+		return dataA;
+	}
+	dateA = this.dateFromTimestamp(dateA);
+	dateB = this.dateFromTimestamp(dateB);
+	if (dateA > dateB) {
+		return dataA;
+	} else {
+		return dataB;
+	}
+};
+
+// Based on the data, load
+Parsons.prototype.loadData = function(data) {
+	var sourceHash = data.source;
+	if (sourceHash == undefined) {
+		// maintain backwards compatibility
+		sourceHash = data.trash;
+	}
+	var answerHash = data.answer;
+	if ((sourceHash == undefined) || (answerHash == undefined)) {
+		this.initializeAreas(this.blocksFromSource(), []);
+	} else {
+		this.initializeAreas(this.blocksFromHash(sourceHash), this.blocksFromHash(answerHash));
+		this.grader.grade();
+	}
+	if ($(this.checkButton).css("display") !== "none") {
+		// Check necessary for timedparsons
+		this.initializeInteractivity();
+	}
+};
+
+// Return what is stored in local storage
+Parsons.prototype.localData = function() {
+	var data = localStorage.getItem(this.storageId);
+	if (data !== null) {
+		data = JSON.parse(data);
+	} else {
+		data = {};
+	}
+	return data;
+};
+
+// RunestoneBase: Sent when the server has data
+Parsons.prototype.restoreAnswers = function(serverData) {
+	this.loadData(this.newerData(this.localData(), serverData));
+};
+
+// RunestoneBase: Load what is in local storage
+Parsons.prototype.checkLocalStorage = function () {
+	this.loadData(this.localData());
+};
+
+// RunestoneBase: Set the state of the problem in local storage
+Parsons.prototype.setLocalStorage = function(data) {
+	var toStore;
+	if (data == undefined) {
+		toStore = {
+			"source" : this.sourceHash(),
+			"answer" : this.answerHash(),
+			"timestamp" : new Date()
+		};
+	} else {
+		toStore = data;
+	}
+	localStorage.setItem(this.storageId, JSON.stringify(toStore));
+};
+
+/* =====================================================================
+==== LOGGING ===========================================================
+===================================================================== */
+
+// Log the interaction with the problem to the server:
+//   start: the user started interacting with this problem
+//   move: the user moved a block to a new position
+//   reset: the reset button was pressed
+Parsons.prototype.logMove = function(activity) {
+	var act = activity + "|" + this.sourceHash() + "|" + this.answerHash();
+	var divid = this.divid;
+	this.logBookEvent({
+		"event" : "parsonsMove",
+		"act" : act,
+		"div_id" : divid
+	});
+};
+
+// Log the answer to the problem
+//   correct: The answer given matches the solution
+//   incorrect*: The answer is wrong for various reasons
+Parsons.prototype.logAnswer = function(answer) {
+	var answerHash = this.answerHash();
+	var sourceHash = this.sourceHash();
+	var act = sourceHash + "|" + answerHash;
+	var correct;
+	if (answer == "correct") {
+		act = "correct|" + act;
+		correct = "T";
+	} else {
+		act ="incorrect|" + act;
+		correct = "F";
+	}
+	this.logBookEvent({
+		"event" : "parsons", 
+		"act" : act,
+		"div_id" : this.divid, 
+		"correct" : correct,
+		"answer" : answerHash,
+		"source" : sourceHash
+	});
+};
+
+/* =====================================================================
+==== ACCESSING =========================================================
+===================================================================== */
 
 // Create a hash that identifies the block order and indention
 Parsons.prototype.getHash = function(element) {
@@ -744,45 +968,6 @@ Parsons.prototype.blocksFromHash = function(hash) {
 	return blocks;
 };
 
-// Log the interaction with the problem to the server:
-//   start: the user started interacting with this problem
-//   move: the user moved a block to a new position
-//   reset: the reset button was pressed
-Parsons.prototype.logMove = function(activity) {
-	var act = activity + "|" + this.sourceHash() + "|" + this.answerHash();
-	var divid = this.divid;
-	this.logBookEvent({
-		"event" : "parsonsMove",
-		"act" : act,
-		"div_id" : divid
-	});
-};
-
-// Log the answer to the problem
-//   correct: The answer given matches the solution
-//   incorrect*: The answer is wrong for various reasons
-Parsons.prototype.logAnswer = function(answer) {
-	var answerHash = this.answerHash();
-	var sourceHash = this.sourceHash();
-	var act = sourceHash + "|" + answerHash;
-	var correct;
-	if (answer == "correct") {
-		act = "correct|" + act;
-		correct = "T";
-	} else {
-		act ="incorrect|" + act;
-		correct = "F";
-	}
-	this.logBookEvent({
-		"event" : "parsons", 
-		"act" : act,
-		"div_id" : this.divid, 
-		"correct" : correct,
-		"answer" : answerHash,
-		"source" : sourceHash
-	});
-};
-
 // Return a block object by the full id including id prefix
 Parsons.prototype.getBlockById = function(id) {
 	for (var i = 0; i < this.blocks.length; i++) {
@@ -820,14 +1005,27 @@ Parsons.prototype.answerLines = function() {
 	return answerLines;
 };
 
-// Clear any feedback from the answer area
-Parsons.prototype.clearFeedback = function() {
-	$(this.answerArea).removeClass("incorrect correct");
-	var children = this.answerArea.childNodes;
-	for (var i = 0; i < children.length; i++) {
-		$(children[i]).removeClass("correctPosition incorrectPosition incorrectIndent");
+// Go up the hierarchy until you get to a block; return that block element
+Parsons.prototype.getBlockFor = function(element) {
+	var check = element;
+	while (!check.classList.contains("block")) {
+		check = check.parentElement;
 	}
-	$(this.messageDiv).hide();
+	return check;
+};
+
+/* =====================================================================
+==== UTILITY ===========================================================
+===================================================================== */
+
+// Return a date from a timestamp (either mySQL or JS format)
+Parsons.prototype.dateFromTimestamp = function(timestamp) {
+	var date = new Date(timestamp);
+	if (isNaN(date.getTime())) {
+		var t = timestamp.split(/[- :]/);
+		date = new Date(t[0], t[1]-1, t[2], t[3], t[4], t[5]);
+	}
+	return date;
 };
 
 // A function for returning a shuffled version of an array
@@ -846,6 +1044,37 @@ Parsons.prototype.shuffled = function(array) {
 		returnArray[randomIndex] = temporaryValue;
 	}
 	return returnArray;
+};
+
+/* =====================================================================
+==== VIEW ==============================================================
+===================================================================== */
+
+// Clear any feedback from the answer area
+Parsons.prototype.clearFeedback = function() {
+	$(this.answerArea).removeClass("incorrect correct");
+	var children = this.answerArea.childNodes;
+	for (var i = 0; i < children.length; i++) {
+		$(children[i]).removeClass("correctPosition incorrectPosition incorrectIndent");
+	}
+	$(this.messageDiv).hide();
+};
+
+// Disable the interface
+Parsons.prototype.disable = function () {
+	// Stop interaction
+	if (this.blocks !== undefined) {
+		for (var i = 0; i < this.blocks.length; i++) {
+			var block = this.blocks[i];
+			if (block.hammer !== undefined) {
+				block.hammer.destroy();
+				delete block.hammer;
+			}
+		}
+	}
+	// Hide buttons
+	$(this.checkButton).hide();
+	$(this.resetButton).hide();
 };
 
 // Based on the moving element, etc., establish the moving state
@@ -1114,164 +1343,6 @@ Parsons.prototype.resetView = function() {
 	}
 	this.state = undefined;
 	this.updateView();
-};
-
-// Go up the hierarchy until you get to a block; return the id
-Parsons.prototype.getBlockFor = function(element) {
-	var check = element;
-	while (!check.classList.contains("block")) {
-		check = check.parentElement;
-	}
-	return check;
-};
-
-// Based on the blocks, create the source and answer areas
-Parsons.prototype.initializeAreas = function(sourceBlocks, answerBlocks) {
-	// Create blocks property as the sum of the two
-	var blocks = [];
-	var i, block;
-	for (i = 0; i < sourceBlocks.length; i++) {
-		block = sourceBlocks[i];
-		blocks.push(block);
-		this.sourceArea.appendChild(block.view);
-	}
-	for (i = 0; i < answerBlocks.length; i++) {
-		block = answerBlocks[i];
-		blocks.push(block);
-		this.answerArea.appendChild(block.view);
-	}
-	this.blocks = blocks;
-	
-	// Determine how much indent should be possible in the answer area
-	var indent = 0;
-	if (!this.options.noindent) {
-		// Set the indent so that the solution is possible
-		if (this.options.language !== "natural") {
-			// Even if no indent is required, have a minimum of 1 indent
-			indent = 1;
-		}
-		for (i = 0; i < blocks.length; i++) {
-			block = blocks[i];
-			indent = Math.max(indent, block.solutionIndent());
-		}
-	}
-	this.indent = indent;
-	
-	// For rendering, place in an onscreen position
-	var isHidden = this.containerDiv.offsetParent == null;
-	var replaceElement;
-	if (isHidden) {
-		replaceElement = document.createElement("div");
-		$(this.containerDiv).replaceWith(replaceElement);
-		document.body.appendChild(this.containerDiv);
-	}
-		
-	if (this.options.prettifyLanguage !== "") {
-		prettyPrint();
-	}
-	
-	// Layout the areas
-	var areaWidth, areaHeight;
-	// Establish the width and height of the droppable areas
-	var item, maxFunction;
-	areaHeight = 6;
-	if (this.options.language == "natural") {
-		areaWidth = 300;
-		maxFunction = function(item) {
-			item.width(areaWidth - 22);
-			areaHeight += item.outerHeight(true);
-		};
-	} else {
-		areaWidth = 0;
-		maxFunction = function(item) {
-			areaHeight += item.outerHeight(true);
-			areaWidth = Math.max(areaWidth, item.outerWidth(true));			
-		};
-	}
-	for (i = 0; i < blocks.length; i++) {
-		maxFunction($(blocks[i].view));
-	}
-	this.areaWidth = areaWidth;
-	this.areaHeight = areaHeight;
-	$(this.sourceArea).css({
-		'width' : areaWidth + 2,
-		'height' : areaHeight
-	});
-	$(this.answerArea).css({
-		'width' : this.options.pixelsPerIndent * indent + areaWidth + 2,
-		'height' : areaHeight
-	});
-	if (indent > 0 && indent <= 4) {
-		$(this.answerArea).addClass("answer" + indent);
-	} else {
-		$(this.answerArea).addClass("answer");
-	}
-	this.state = undefined; // needs to be here for loading from storage
-	this.updateView();
-
-	// Put back into the offscreen position
-	if (isHidden) {
-		$(replaceElement).replaceWith(this.containerDiv);
-	}
-
-	// Add interactivity	
-	var that = this;
-	this.panStart = function(event) {
-		that.clearFeedback();
-		if (that.started == undefined) {
-			// log the first time that something gets moved
-			that.started = true;
-			that.logMove("start");
-		}
-		that.moving = that.getBlockFor(event.target);
-		// Update the view
-		that.movingX = event.srcEvent.pageX;
-		that.movingY = event.srcEvent.pageY;
-		that.updateView();
-	};
-	this.panEnd = function(event) {
-		delete that.moving;
-		delete that.movingX;
-		delete that.movingY;
-		that.updateView();
-		that.logMove("move");
-	};
-	this.panMove = function(event) {
-		// Update the view
-		that.movingX = event.srcEvent.pageX;
-		that.movingY = event.srcEvent.pageY;
-		that.updateView();
-	};
-	for (i = 0; i < blocks.length; i++) {
-		block = blocks[i];
-		block.hammer = new Hammer.Manager(block.view, {
-			"recognizers" : [
-				[Hammer.Pan, {
-					"direction" : Hammer.DIRECTION_ALL,
-					"threshold" : 0,
-					"pointers" : 1
-				}]
-			]
-		});
-		block.hammer.on("panstart", this.panStart);
-		block.hammer.on("panend", this.panEnd);
-		block.hammer.on("panmove", this.panMove);
-	}
-};
-
-// Disable the interface
-Parsons.prototype.disable = function() {
-	// Stop interaction
-	for (var i = 0; i < this.blocks.length; i++) {
-		var block = this.blocks[i];
-		if (block.hammer !== undefined) {
-			block.hammer.destroy();
-			delete block.hammer;
-		}
-	}
-	// Hide buttons
-	$(this.checkButton).hide();
-	$(this.resetButton).hide();
 };
 
 $(document).bind("runestone:login-complete", function () {
