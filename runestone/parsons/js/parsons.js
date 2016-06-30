@@ -251,9 +251,9 @@ var ParsonsBlock = function(problem, lines) {
 	view.id = problem.counterId + "-block-" + problem.blockIndex;
 	problem.blockIndex += 1;
 	$(view).addClass("block");
-	var sharedIndent = 0;
-	for (var i = 0; i < lines.length; i++) {
-		sharedIndent = Math.max(sharedIndent, lines[i].indent);
+	var sharedIndent = lines[0].indent;
+	for (var i = 1; i < lines.length; i++) {
+		sharedIndent = Math.min(sharedIndent, lines[i].indent);
 	}
 	for (i = 0; i < lines.length; i++) {
 		var line = lines[i];
@@ -284,9 +284,9 @@ ParsonsBlock.prototype.hash = function() {
 
 // Answer what the indent should be for the solution
 ParsonsBlock.prototype.solutionIndent = function() {
-	var sharedIndent = 0;
-	for (var i = 0; i < this.lines.length; i++) {
-		sharedIndent = Math.max(sharedIndent, this.lines[i].indent);
+	var sharedIndent = this.lines[0].indent;
+	for (var i = 1; i < this.lines.length; i++) {
+		sharedIndent = Math.min(sharedIndent, this.lines[i].indent);
 	}
 	return sharedIndent;
 };
@@ -494,6 +494,7 @@ Parsons.prototype.initializeView = function () {
 		that.clearFeedback();
 		that.resetView();
 		that.logMove("reset");
+		that.setLocalStorage();
 	});
 
 	this.messageDiv = document.createElement("div");
@@ -885,7 +886,7 @@ Parsons.prototype.blocksFromSource = function() {
 			}
 			if (this.options.maxdist < distractors.length) {
 				distractors = this.shuffled(distractors);
-				distractors = distractors.slice(0, this.options.maxdist - 1);
+				distractors = distractors.slice(0, this.options.maxdist);
 				for (i = 0; i < unorderedBlocks.length; i++) {
 					block = unorderedBlocks[i];
 					if (block.lines[0].distractor) {
