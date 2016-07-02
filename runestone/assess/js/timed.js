@@ -132,8 +132,8 @@ Timed.prototype.renderContainer = function () {
 Timed.prototype.renderTimer = function () {
     this.wrapperDiv = document.createElement("div");
     this.timerContainer = document.createElement("P");
-    this.wrapperDiv.id = "startWrapper";
-    this.timerContainer.id = "output";
+    this.wrapperDiv.id = this.divid + "-startWrapper";
+    this.timerContainer.id = this.divid + "-output";
     this.wrapperDiv.appendChild(this.timerContainer);
     this.showTime();
 };
@@ -501,8 +501,7 @@ Timed.prototype.checkIfFinished = function () {
 
 Timed.prototype.tookTimedExam = function () {
     // Checks if this exam has been taken before
-
-    $("#output").css({
+    $(this.timerContainer).css({
         "width": "50%",
         "margin": "0 auto",
         "background-color": "#DFF0D8",
