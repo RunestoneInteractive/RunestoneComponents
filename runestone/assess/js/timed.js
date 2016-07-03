@@ -531,6 +531,8 @@ Timed.prototype.tookTimedExam = function () {
 };
 
 Timed.prototype.finishAssessment = function () {
+        $("#relations-next").show(); // show the next page button for now
+        $("#relations-prev").show(); // show the previous button for now
         this.findTimeTaken();
         this.running = 0;
         this.done = 1;
@@ -547,8 +549,6 @@ Timed.prototype.finishAssessment = function () {
            $(this.timedDiv).hide();
            $(this.pauseBtn).hide();
         }
-        $("#relations-next").show(); // show the next page button for now
-        $("#relations-prev").show(); // show the previous button for now
 };
 
 Timed.prototype.submitTimedProblems = function (logFlag) {
