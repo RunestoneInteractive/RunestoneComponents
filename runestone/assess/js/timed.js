@@ -69,7 +69,6 @@ Timed.prototype.init = function (opts) {
     this.incorrectStr = "";
     this.skippedStr = "";
     this.skipped = 0;
-    this.hasRenderedFirstQuestion = false;
 
     this.currentQuestionIndex = 0;   // Which question is currently displaying on the page
     this.renderedQuestionArray = []; // list of all problems
@@ -355,12 +354,8 @@ Timed.prototype.renderTimedQuestion = function () {
     // If the timed component has listeners, those might need to be reinitialized
     // This flag will only be set in the elements that need it--it will be undefined in the others and thus evaluate to false
     if (this.renderedQuestionArray[this.currentQuestionIndex].needsReinitialization) {
-        // if this is the first time we're rendering the first question, nothing should be reinitialized
-        if (this.currentQuestionIndex !== 0 || this.hasRenderedFirstQuestion) {
-            this.renderedQuestionArray[this.currentQuestionIndex].reinitializeListeners();
-        }
+        this.renderedQuestionArray[this.currentQuestionIndex].reinitializeListeners();
     }
-    this.hasRenderedFirstQuestion = true;
 };
 
 
