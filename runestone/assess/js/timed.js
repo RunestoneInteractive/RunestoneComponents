@@ -69,7 +69,6 @@ Timed.prototype.init = function (opts) {
     this.incorrectStr = "";
     this.skippedStr = "";
     this.skipped = 0;
-    this.hasRenderedFirstQuestion = false;
 
     this.currentQuestionIndex = 0;   // Which question is currently displaying on the page
     this.renderedQuestionArray = []; // list of all problems
@@ -356,11 +355,8 @@ Timed.prototype.renderTimedQuestion = function () {
     // This flag will only be set in the elements that need it--it will be undefined in the others and thus evaluate to false
     if (this.renderedQuestionArray[this.currentQuestionIndex].needsReinitialization) {
         // if this is the first time we're rendering the first question, nothing should be reinitialized
-        if (this.currentQuestionIndex !== 0 || this.hasRenderedFirstQuestion) {
             this.renderedQuestionArray[this.currentQuestionIndex].reinitializeListeners();
-        }
     }
-    this.hasRenderedFirstQuestion = true;
 };
 
 
@@ -379,6 +375,7 @@ Timed.prototype.handlePrevAssessment = function () {
            this.submitTimedProblems(false); // do not log these results
         } else {
            $(this.pauseBtn).hide();
+           $(this.timerContainer).hide();
         }
 };
 
@@ -533,6 +530,11 @@ Timed.prototype.tookTimedExam = function () {
 Timed.prototype.finishAssessment = function () {
         $("#relations-next").show(); // show the next page button for now
         $("#relations-prev").show(); // show the previous button for now
+        if (!this.showResults) {
+           $(this.timedDiv).hide();
+           $(this.pauseBtn).hide();
+           $(this.timerContainer).hide();
+        }
         this.findTimeTaken();
         this.running = 0;
         this.done = 1;
@@ -543,12 +545,7 @@ Timed.prototype.finishAssessment = function () {
         this.storeScore();
         this.logScore();
         $(this.pauseBtn).attr("disabled", true);
-        this.finishButton.disabled = true;
-
-        if (!this.showResults) {
-           $(this.timedDiv).hide();
-           $(this.pauseBtn).hide();
-        }
+        this.finishButton.disabled = true;  
 };
 
 Timed.prototype.submitTimedProblems = function (logFlag) {
