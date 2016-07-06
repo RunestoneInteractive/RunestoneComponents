@@ -219,7 +219,8 @@ FITB.prototype.checkLocalStorage = function () {
                 $(this.blankArray[i]).attr("value", arr[i]);
             }
             if (this.useRunestoneServices) {
-                this.logBookEvent({"event": "fillb", "act": storedData.answer.join(","), "correct": storedData.correct, "div_id": this.divid});
+                var answer = storedData.answer.join(",")
+                this.logBookEvent({"event": "fillb", "act": answer, "answer": answer, "correct": storedData.correct, "div_id": this.divid});
                 this.enableCompareButton();
             }
         }
@@ -250,7 +251,8 @@ FITB.prototype.startEvaluation = function (logFlag) {
     this.evaluateAnswers();
     this.renderFITBFeedback();
     if (logFlag) {   // Sometimes we don't want to log the answer--for example, when timed exam questions are re-loaded
-        this.logBookEvent({"event": "fillb", "act": this.given_arr.join(","), "correct": (this.correct ? "T" : "F"), "div_id": this.divid});
+        var answer = this.given_arr.join(",");
+        this.logBookEvent({"event": "fillb", "act": answer, "answer":answer, "correct": (this.correct ? "T" : "F"), "div_id": this.divid});
     }
     if (this.useRunestoneServices) {
         this.enableCompareButton();

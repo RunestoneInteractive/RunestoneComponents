@@ -387,7 +387,8 @@ MultipleChoice.prototype.scoreMCMASubmission = function () {
 MultipleChoice.prototype.logMCMAsubmission = function (data) {
     var answer = data.answer;
     var correct = data.correct;
-    this.logBookEvent({"event": "mChoice", "act": answer, "correct": correct, "div_id": this.divid});
+    var logAnswer = "answer:" + answer + ":" + (correct == "T" ? "correct" : "no");
+    this.logBookEvent({"event": "mChoice", "act": logAnswer, "answer":answer, "correct": correct, "div_id": this.divid});
 };
 
 
@@ -439,7 +440,8 @@ MultipleChoice.prototype.scoreMCMFSubmission = function () {
 MultipleChoice.prototype.logMCMFsubmission = function () {
     var answer = this.givenArray[0];
     var correct = (this.givenArray[0] == this.correctIndexList[0] ? "T" : "F");
-    this.logBookEvent({"event": "mChoice", "act": answer "correct": correct, "div_id": this.divid});
+    var logAnswer = "answer:" + answer + ":" + (correct == "T" ? "correct" : "no");  // backward compatible
+    this.logBookEvent({"event": "mChoice", "act": logAnswer, "answer": answer, "correct": correct, "div_id": this.divid});
 };
 
 MultipleChoice.prototype.renderMCMFFeedback = function (correct, feedbackText) {
