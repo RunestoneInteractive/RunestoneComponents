@@ -54,6 +54,10 @@ Timed.prototype.init = function (opts) {
     if ($(this.origElem).is("[data-no-timer]")) {
         this.showTimer = false;
     }
+    this.fullwidth = false;
+    if ($(this.origElem).is("[data-fullwidth]")) {
+        this.fullwidth = true;
+    }
 
     this.running = 0;
     this.paused = 0;
@@ -65,7 +69,6 @@ Timed.prototype.init = function (opts) {
     this.incorrectStr = "";
     this.skippedStr = "";
     this.skipped = 0;
-    this.hasRenderedFirstQuestion = false;
 
     this.currentQuestionIndex = 0;   // Which question is currently displaying on the page
     this.renderedQuestionArray = []; // list of all problems
@@ -105,6 +108,13 @@ Timed.prototype.renderTimedAssess = function () {
 
 Timed.prototype.renderContainer = function () {
     this.assessDiv = document.createElement("div"); // container for the entire Timed Component
+    
+    if (this.fullwidth) {
+       // allow the container to fill the width - barb
+       $(this.assessDiv).attr({
+           "style": "max-width:none"
+       });
+    }
     this.assessDiv.id = this.divid;
     this.timedDiv = document.createElement("div"); // div that will hold the questions for the timed assessment
     this.navDiv = document.createElement("div"); // For navigation control
@@ -121,8 +131,8 @@ Timed.prototype.renderContainer = function () {
 Timed.prototype.renderTimer = function () {
     this.wrapperDiv = document.createElement("div");
     this.timerContainer = document.createElement("P");
-    this.wrapperDiv.id = "startWrapper";
-    this.timerContainer.id = "output";
+    this.wrapperDiv.id = this.divid + "-startWrapper";
+    this.timerContainer.id = this.divid + "-output";
     this.wrapperDiv.appendChild(this.timerContainer);
     this.showTime();
 };
@@ -344,12 +354,8 @@ Timed.prototype.renderTimedQuestion = function () {
     // If the timed component has listeners, those might need to be reinitialized
     // This flag will only be set in the elements that need it--it will be undefined in the others and thus evaluate to false
     if (this.renderedQuestionArray[this.currentQuestionIndex].needsReinitialization) {
-        // if this is the first time we're rendering the first question, nothing should be reinitialized
-        if (this.currentQuestionIndex !== 0 || this.hasRenderedFirstQuestion) {
-            this.renderedQuestionArray[this.currentQuestionIndex].reinitializeListeners();
-        }
+        this.renderedQuestionArray[this.currentQuestionIndex].reinitializeListeners();
     }
-    this.hasRenderedFirstQuestion = true;
 };
 
 
@@ -368,6 +374,7 @@ Timed.prototype.handlePrevAssessment = function () {
            this.submitTimedProblems(false); // do not log these results
         } else {
            $(this.pauseBtn).hide();
+           $(this.timerContainer).hide();
         }
 };
 
@@ -490,8 +497,7 @@ Timed.prototype.checkIfFinished = function () {
 
 Timed.prototype.tookTimedExam = function () {
     // Checks if this exam has been taken before
-
-    $("#output").css({
+    $(this.timerContainer).css({
         "width": "50%",
         "margin": "0 auto",
         "background-color": "#DFF0D8",
@@ -521,6 +527,13 @@ Timed.prototype.tookTimedExam = function () {
 };
 
 Timed.prototype.finishAssessment = function () {
+        $("#relations-next").show(); // show the next page button for now
+        $("#relations-prev").show(); // show the previous button for now
+        if (!this.showResults) {
+           $(this.timedDiv).hide();
+           $(this.pauseBtn).hide();
+           $(this.timerContainer).hide();
+        }
         this.findTimeTaken();
         this.running = 0;
         this.done = 1;
@@ -531,14 +544,7 @@ Timed.prototype.finishAssessment = function () {
         this.storeScore();
         this.logScore();
         $(this.pauseBtn).attr("disabled", true);
-        this.finishButton.disabled = true;
-
-        if (!this.showResults) {
-           $(this.timedDiv).hide();
-           $(this.pauseBtn).hide();
-        }
-        $("#relations-next").show(); // show the next page button for now
-        $("#relations-prev").show(); // show the previous button for now
+        this.finishButton.disabled = true;  
 };
 
 Timed.prototype.submitTimedProblems = function (logFlag) {

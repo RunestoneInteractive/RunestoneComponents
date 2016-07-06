@@ -371,7 +371,8 @@ ActiveCode.prototype.saveEditor = function () {
         }
     }
     $(document).ajaxError(function (e, jqhxr, settings, exception) {
-        alert("Request Failed for" + settings.url)
+        //alert("Request Failed for" + settings.url)
+        console.log("Request Failed for" + settings.url);
     });
     jQuery.post(eBookConfig.ajaxURL + 'saveprog', data, saveSuccess);
     if (this.editor.acEditEvent) {
