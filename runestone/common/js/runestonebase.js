@@ -7,7 +7,7 @@ RunestoneBase.prototype.logBookEvent = function (eventInfo) {
     if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
         jQuery.get(eBookConfig.ajaxURL + 'hsblog', eventInfo); // Log the run event
     }
-    console.log("logging event " + eventInfo);
+    console.log("logging event " + JSON.stringify(eventInfo));
 };
 
 RunestoneBase.prototype.logRunEvent = function (eventInfo) {
@@ -18,7 +18,7 @@ RunestoneBase.prototype.logRunEvent = function (eventInfo) {
     if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
         jQuery.post(eBookConfig.ajaxURL + 'runlog', eventInfo); // Log the run event
     }
-    console.log("running " + eventInfo);
+    console.log("running " + JSON.stringify(eventInfo));
 };
 
 /* Checking/loading from storage */

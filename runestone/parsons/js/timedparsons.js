@@ -14,6 +14,10 @@ TimedParsons.prototype.checkCorrectTimed = function () {
 	return this.correct ? "T" : "F";
 };
 
+TimedParsons.prototype.hideFeedback = function () {
+	$(this.messageDiv).hide();
+};
+
 TimedParsons.prototype.processTimedSubmission = function (logFlag) {
 	if (logFlag) {
 		this.setLocalStorage();

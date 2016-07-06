@@ -374,6 +374,7 @@ Timed.prototype.handlePrevAssessment = function () {
            this.submitTimedProblems(false); // do not log these results
         } else {
            $(this.pauseBtn).hide();
+           $(this.timerContainer).hide();
         }
 };
 
@@ -528,6 +529,11 @@ Timed.prototype.tookTimedExam = function () {
 Timed.prototype.finishAssessment = function () {
         $("#relations-next").show(); // show the next page button for now
         $("#relations-prev").show(); // show the previous button for now
+        if (!this.showResults) {
+           $(this.timedDiv).hide();
+           $(this.pauseBtn).hide();
+           $(this.timerContainer).hide();
+        }
         this.findTimeTaken();
         this.running = 0;
         this.done = 1;
@@ -538,12 +544,7 @@ Timed.prototype.finishAssessment = function () {
         this.storeScore();
         this.logScore();
         $(this.pauseBtn).attr("disabled", true);
-        this.finishButton.disabled = true;
-
-        if (!this.showResults) {
-           $(this.timedDiv).hide();
-           $(this.pauseBtn).hide();
-        }
+        this.finishButton.disabled = true;  
 };
 
 Timed.prototype.submitTimedProblems = function (logFlag) {
