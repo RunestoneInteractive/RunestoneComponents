@@ -337,7 +337,7 @@ DragNDrop.prototype.dragEval = function (logFlag) {
     this.setLocalStorage({"correct": (this.correct ? "T" : "F")});
     this.renderFeedback();
     if (logFlag)   // Sometimes we don't want to log the answers--for example, on re-load of a timed exam
-        this.logBookEvent({"event": "dragNdrop", "act": "submitDND", "answer": this.pregnantIndexArray.join(";"), "minHeight": this.minheight, "div_id": this.divid, "correct": this.correct});
+        this.logBookEvent({"event": "dragNdrop", "act": this.pregnantIndexArray.join(";"), "minHeight": this.minheight, "div_id": this.divid, "correct": this.correct});
 };
 
 DragNDrop.prototype.renderFeedback = function () {
@@ -374,7 +374,7 @@ DragNDrop.prototype.checkLocalStorage = function () {
             this.pregnantIndexArray = storedObj.answer.split(";");
             if (this.useRunestoneServices) {
                 // store answer in database
-                this.logBookEvent({"event": "dragNdrop", "act": "submitDND", "answer": this.pregnantIndexArray.join(";"), "minHeight": this.minheight, "div_id": this.divid, "correct": storedObj.correct});
+                this.logBookEvent({"event": "dragNdrop", "act": this.pregnantIndexArray.join(";"), "minHeight": this.minheight, "div_id": this.divid, "correct": storedObj.correct});
             }
         }
     }
