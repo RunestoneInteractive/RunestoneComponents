@@ -24,19 +24,11 @@ from runestone.assess import Assessment
 
 def setup(app):
     app.add_directive('parsonsprob', ParsonsProblem)
-
     app.add_stylesheet('parsons.css')
     app.add_stylesheet('lib/prettify.css')
-
-    app.add_javascript('lib/jquery.min.js')
-    app.add_javascript('lib/jquery-ui.min.js')
-    app.add_javascript('lib/jquery.ui.touch-punch.min.js')
     app.add_javascript('lib/prettify.js')
-    app.add_javascript('lib/underscore-min.js')
-    app.add_javascript('lib/lis.js')
-    app.add_javascript('parsons_setup.js')
+    app.add_javascript('lib/hammer.min.js')
     app.add_javascript('parsons.js')
-    app.add_javascript('parsons-noconflict.js')
     app.add_javascript('timedparsons.js')
 
 class ParsonsProblem(Assessment):
