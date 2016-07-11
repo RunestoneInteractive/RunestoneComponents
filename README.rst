@@ -13,6 +13,7 @@ RunestoneComponents
    :target: https://pypi.python.org/pypi/Runestone
    :alt: PyPI Monthly downloads
 
+.. image:: http://bnmnetp.me:8088/buildStatus/icon?job=RunestoneComponents&build=9
 
 Packaging of the Runestone components for publishing educational materials using Sphinx and restructuredText. Check out the `Overview <http://interactivepython.org/runestone/static/overview/overview.html>`_ To see all of the extensions in action.
 **NOTE** -- If you have used an older version of this repo, please know this is a total restart.  I think much better, and it WILL stay up to date as this is now the master copy of the components not just a copy.
