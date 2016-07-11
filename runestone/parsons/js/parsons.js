@@ -479,7 +479,7 @@ Parsons.prototype.initializeView = function () {
 	this.checkButton.textContent = "Check Me";
 	this.checkButton.id = this.counterId + "-check";
 	this.parsonsControlDiv.appendChild(this.checkButton);
-	this.checkButton.addEventListener('click', function() {
+	this.checkButton.addEventListener('click', function(event) {
 		event.preventDefault();
 		that.logAnswer(that.grader.grade());
 		that.setLocalStorage();
@@ -489,7 +489,7 @@ Parsons.prototype.initializeView = function () {
 	this.resetButton.textContent = "Reset";
 	this.resetButton.id = this.counterId + "-reset";
 	this.parsonsControlDiv.appendChild(this.resetButton);
-	this.resetButton.addEventListener('click', function() {
+	this.resetButton.addEventListener('click', function(event) {
 		event.preventDefault();
 		that.clearFeedback();
 		that.resetView();
