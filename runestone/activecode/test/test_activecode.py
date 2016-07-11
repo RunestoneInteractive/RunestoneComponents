@@ -6,8 +6,8 @@ import unittest
 
 class ActiveCodeTests(unittest.TestCase):
     def setUp(self):
-        self.driver = webdriver.Firefox()  # good for development
-        #self.driver = webdriver.PhantomJS() # use this for Jenkins auto testing
+        #self.driver = webdriver.Firefox()  # good for development
+        self.driver = webdriver.PhantomJS() # use this for Jenkins auto testing
         self.host = 'http://127.0.0.1:8081'
 
     def test_hello(self):
