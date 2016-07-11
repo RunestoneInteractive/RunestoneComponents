@@ -17,3 +17,4 @@ Sphinx>=1.4.2
 sphinx-rtd-theme==0.1.8
 sphinxcontrib-paverutils==1.7
 SQLAlchemy>=1.0.13
+selenium>=2.53.6
