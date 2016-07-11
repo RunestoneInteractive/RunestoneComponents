@@ -6,8 +6,9 @@ import unittest
 
 class ActiveCodeTests(unittest.TestCase):
     def setUp(self):
-        self.driver = webdriver.Firefox()
-        self.host = 'http://127.0.0.1:8080'
+        #self.driver = webdriver.Firefox()  # good for development
+        self.driver = webdriver.PhantomJS() # use this for Jenkins auto testing
+        self.host = 'http://127.0.0.1:8081'
 
     def test_hello(self):
         '''
@@ -56,6 +57,10 @@ class ActiveCodeTests(unittest.TestCase):
         output = t1.find_element_by_class_name("ac_output")
         self.assertEqual(output.text.strip(), "Hello World")
 
-#    def tearDown(self):
-#        self.driver.quit()
+    def tearDown(self):
+        self.driver.quit()
 
+
+
+if __name__ == '__main__':
+    unittest.main()
