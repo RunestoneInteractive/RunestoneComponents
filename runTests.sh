@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+set -e
 testhome=`pwd`
 cd runestone/activecode/test
 runestone build --all
