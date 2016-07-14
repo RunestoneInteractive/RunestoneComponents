@@ -76,6 +76,15 @@ def depart_ca_node(self,node):
 
 
 class ClickableArea(Directive):
+    """
+.. clickablearea:: uniqueid
+   "question":directives.unchanged,
+   "feedback":directives.unchanged,
+   "iscode":directives.flag,
+   "correct":directives.unchanged,
+   "incorrect":directives.unchanged,
+   "table":directives.flag
+    """
     required_arguments = 1
     optional_arguments = 0
     has_content = True

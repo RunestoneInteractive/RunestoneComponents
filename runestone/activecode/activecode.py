@@ -107,6 +107,30 @@ def purge_activecodes(app, env, docname):
 
 
 class ActiveCode(Directive):
+    """
+.. activecode:: uniqueid   'nocanvas': directives.flag,
+   :nopre: do not create an output component
+   :above: put the canvas above the code
+   :autorun: run this activecode as soon as the page is loaded
+   :caption: caption under the active code
+   :include: invisibly include code from another activecode
+   :hidecode: Don:t show the editor initially
+   :language: python, html, javascript, java, python2, python3
+   :tour_1: audio tour track
+   :tour_2: audio tour track
+   :tour_3: audio tour track
+   :tour_4: audio tour track
+   :tour_5: audio tour track
+   :nocodelens: Do not show the codelens button
+   :coach: Show the codecoach button
+   :timelimit: set the time limit for this program
+   :stdin: : A file to simulate stdin (java, python2, python3)
+   :datafile: : A datafile for the program to read (java, python2, python3)
+   :sourcefile: : source files (java, python2, python3)
+   :available_files: : other additional files (java, python2, python3)
+
+    print("hello world")
+    """
     required_arguments = 1
     optional_arguments = 1
     has_content = True
