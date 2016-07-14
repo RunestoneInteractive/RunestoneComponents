@@ -70,6 +70,15 @@ TEMPLATE_START = '''
 TEMPLATE_END = '''</ul>
     '''
 class TimedDirective(Directive):
+    """
+.. timed:: identifier
+    :timelimit: Number of minutes student has to take the timed assessment--if not provided, no time limit
+    :noresult: Boolean, doesn't display score
+    :nofeedback: Boolean, doesn't display feedback
+    :notimer: Boolean, doesn't show timer
+    :fullwidth: Boolean, allows the items in the timed assessment to take the full width of the screen...
+
+    """
     required_arguments = 1
     optional_arguments = 0
     final_argument_whitespace = True
