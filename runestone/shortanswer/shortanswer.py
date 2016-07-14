@@ -50,6 +50,12 @@ def depart_journal_node(self,node):
 
 
 class JournalDirective(Assessment):
+    """
+.. shortanswer:: uniqueid
+   :optional:
+
+   text of the question goes here
+    """
     required_arguments = 1  # the div id
     optional_arguments = 0
     final_argument_whitespace = True

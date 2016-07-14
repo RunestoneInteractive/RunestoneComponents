@@ -3,14 +3,18 @@ from .animation import *
 from .assess import *
 from .blockly import *
 from .codelens import *
+from .clickableArea import *
 from .datafile import *
 from .disqus import *
+from .dragndrop import *
 from .livecode import *
 from .meta import *
 from .parsons import *
 from .poll import *
 from .reveal import *
+from shortanswer import *
 from .tabbedStuff import *
+from .usageAssignment import *
 from .video import *
 from .server.chapternames import populateChapterInfo
 

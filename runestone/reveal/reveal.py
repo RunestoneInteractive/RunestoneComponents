@@ -64,6 +64,16 @@ TEMPLATE_END = '''
     </div>
     '''
 class RevealDirective(Directive):
+    """
+.. reveal:: identifier
+   :showtitle: Text on the 'show' button--default is "Show"
+   :hidetitle: Text on the 'hide' button--default is "Hide"
+   :modal: Boolean--if included, revealed display will be a modal
+   :modaltitle: Title of modal dialog window--default is "Message from the author"
+
+   Content  everything here will be hidden until revealed
+   Content  It can be a lot...
+    """
     required_arguments = 1
     optional_arguments = 0
     final_argument_whitespace = True

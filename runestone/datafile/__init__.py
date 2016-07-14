@@ -80,6 +80,13 @@ def purge_datafiles(app,env,docname):
 
 
 class DataFile(Directive):
+    """
+.. datafile:: identifier
+   :edit: Option that makes the datafile editable
+   :cols: If editable, number of columns--default is 20
+   :rows: If editable, number of rows--default is 40
+   :hide: Flag that sets a non-editable datafile to be hidden
+   """
     required_arguments = 1
     optional_arguments = 0
     has_content = True

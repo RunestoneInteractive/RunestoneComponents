@@ -87,7 +87,16 @@ class AddButton(Directive):
 
 
 class QuestionNumber(Directive):
-    """Set Parameters for Question Numbering"""
+    """Set Parameters for Question Numbering
+.. qnum::
+   'prefix': character prefix before the number
+   'suffix': character prefix after the number
+   'start': start numbering with this value
+
+.. qnum::
+   :prefix: turtle-
+   :start: 10
+    """
     required_arguments = 0
     optional_arguments = 3
     has_content = False

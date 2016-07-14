@@ -1,4 +1,4 @@
-
+from __future__ import print_function
 import sys
 import os
 import shutil
@@ -118,6 +118,52 @@ def deploy(dest):
 
     click.echo('Deploying from ' + pavement.serving_dir + ' to ' + dest)
     sh("rsync -rav --delete {} {}".format(pavement.serving_dir,dest))
+
+
+from runestone import *
+
+@cli.command()
+@click.argument('command', nargs=-1)
+def help(command=None):
+    if not command:
+        print("""Available Commands:
+build  [--all]   * build the current project
+deploy           * deploy the current proejct using rsync
+serve [--port]   * start a simple webserver for the current project
+list             * list all runestone directives
+or type help <directive> for doc on a runestone directive""")
+    else:
+        cmap = {'activecode': ActiveCode,
+                'mchoice': MChoice,
+                'fillintheblank': FillInTheBlank,
+                'blank':Blank,
+                'timed':TimedDirective,
+                'qnum':QuestionNumber,
+                'codelens':Codelens,
+                'clickablearea': ClickableArea,
+                'datafile':DataFile,
+                'disqus':DisqusDirective,
+                'dragndrop': DragNDrop,
+                'parsonsprob': ParsonsProblem,
+                'poll':Poll,
+                'reveal':RevealDirective,
+                'shortanswer': JournalDirective,
+                'tabbed':TabbedStuffDirective,
+                'tab':TabDirective,
+                'video':Video,
+                'youtube':Youtube,
+                'vimeo': Vimeo,
+                'usageassignment': usageAssignment
+        }
+        command = command[0]
+        if command in cmap:
+            print(cmap[command].__doc__)
+        elif command == 'list':
+            print("Runestone Directives List")
+            print("  ", "\n   ".join(sorted(cmap.keys())))
+        else:
+            print("""Unknown Directive.  Possible values are""")
+            print("  ", "\n   ".join(sorted(cmap.keys())))
 
 def main(args=None):
     if not args:
