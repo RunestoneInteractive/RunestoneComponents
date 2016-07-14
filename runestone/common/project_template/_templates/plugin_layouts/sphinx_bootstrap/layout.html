@@ -146,8 +146,6 @@
             <li class="divider"></li>
             <li><a href='/{{appname}}/default/courses'>Change Course</a></li>
             <li class="divider"></li>
-            <li><a href='/{{=request.application}}/default/courses'>Change Course</a></li>
-            <li class="divider"></li>
             <li><a href='{{course_url}}/{{appname}}/mygroup/initiateGroup' id="joinGroupLink">Join a Study Group</a></li>
             <li><a href='{{course_url}}/{{appname}}/mygroup/schedule' id="groupScheduleLink">Group Schedule</a></li>
             <li><a href='{{course_url}}/{{appname}}/mygroup/newschedule' id="newChapterLink">Schedule New Chapter</a></li>
@@ -176,7 +174,7 @@
             <li><a href='/{{appname}}/static/overview/instructor.html'>Help for Instructors</a></li>
             <li class="divider"></li>
             <li><a href='http://runestoneinteractive.org'>About Runestone</a></li>
-            <li><a href='/{{ appname }}/static/help/bugreports.html'>Report A Problem</a></li>
+            <li><a href='/{{ appname }}/default/reportabug?course={{ course_id }}&page={{ pathto(pagename,1) }}'>Report A Problem</a></li>
           </ul>
         </li>
         <!-- end help menu dropdown -->

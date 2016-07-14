@@ -124,13 +124,14 @@
 	margin-left: auto;
 	margin-right: auto;
 }
-.parsons .sortable-code-container{
+.parsons .sortable-code-container {
 	text-align:center;
+}
+.parsons .sortable-code-container:not(.block) {
 	/* Remove text highlighting in widget */
 	-webkit-user-select: none;
-	-khtml-user-select: none;
 	-moz-user-select: -moz-none;
-	-o-user-select: none;
+	-ms-user-select: none;
 	user-select: none;
 }
 .parsons .parsons-controls{

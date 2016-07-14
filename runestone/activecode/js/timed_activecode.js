@@ -7,7 +7,7 @@ TimedActiveCode.prototype = new ActiveCode();
 
 TimedActiveCode.prototype.timedInit = function (opts) {
     this.init(opts);
-    this.renderTimedIcon(this.containerDiv);
+    //this.renderTimedIcon(this.containerDiv); - bje not needed anymore
     this.hideButtons();
     this.needsReinitialization = true;   // the run button click listener needs to be reinitialized
 };
@@ -21,6 +21,7 @@ TimedActiveCode.prototype.hideButtons = function () {
     }
 };
 
+// bje - not needed anymore
 TimedActiveCode.prototype.renderTimedIcon = function (component) {
     // renders the clock icon on timed components.    The component parameter
     // is the element that the icon should be appended to.
@@ -41,7 +42,7 @@ TimedActiveCode.prototype.checkCorrectTimed = function () {
 };
 
 TimedActiveCode.prototype.hideFeedback = function () {
-    // no feedback to hide
+    $(this.output).css("visibility","hidden");
 };
 
 TimedActiveCode.prototype.processTimedSubmission = function (logFlag) {
@@ -61,4 +62,12 @@ TimedActiveCode.prototype.reinitializeListeners = function () {
     // re-attach the run button listener
     $(this.runButton).click(this.runProg.bind(this));
     $(this.histButton).click(this.addHistoryScrubber.bind(this));
+    if (this.historyScrubber !== null) {
+        $(this.historyScrubber).slider({
+            max: this.history.length-1,
+            value: this.history.length-1,
+            slide: this.slideit.bind(this),
+            change: this.slideit.bind(this)
+        });
+    }
 };

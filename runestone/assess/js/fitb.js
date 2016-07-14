@@ -50,7 +50,7 @@ FITB.prototype.init = function (opts) {
     }
     this.populateFeedbackArray();
     this.createFITBElement();
-    this.checkServer();
+    this.checkServer("fillb");
 };
 
 /*====================================
@@ -199,35 +199,11 @@ FITB.prototype.renderFITBFeedbackDiv = function () {
 === Checking/loading from storage ===
 ===================================*/
 
-FITB.prototype.checkServer = function () {
-    // Check if the server has stored answer
-    if (this.useRunestoneServices) {
-        var data = {};
-        data.div_id = this.divid;
-        data.course = eBookConfig.course;
-        data.event = "fillb";
-        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
-    } else {
-        this.checkLocalStorage();
-    }
-
-};
-
-FITB.prototype.repopulateFromStorage = function (data, status, whatever) {
-    // decide whether to use the server's answer (if there is one) or to load from storage
-    if (data !== null) {
-        if (this.shouldUseServer(data)) {
-            var arr = data.answer.split(",");
-            for (var i = 0; i < this.blankArray.length; i++) {
-                $(this.blankArray[i]).attr("value", arr[i]);
-            }
-            this.setLocalStorage(data.correct);   // We don't want to set this.correct here because that would interfere with timed grading functionality
-        } else {
-            this.checkLocalStorage();
-        }
-        this.enableCompareButton();
-    } else {
-        this.checkLocalStorage();
+FITB.prototype.restoreAnswers = function (data) {
+    // Restore answers from storage retrieval done in RunestoneBase
+    var arr = data.answer.split(",");
+    for (var i = 0; i < this.blankArray.length; i++) {
+        $(this.blankArray[i]).attr("value", arr[i]);
     }
 };
 
@@ -238,47 +214,28 @@ FITB.prototype.checkLocalStorage = function () {
         var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
         if (ex !== null) {
             var storedData = JSON.parse(ex);
-            var arr = storedData.givenArr;
+            var arr = storedData.answer;
             for (var i = 0; i < this.blankArray.length; i++) {
                 $(this.blankArray[i]).attr("value", arr[i]);
             }
             if (this.useRunestoneServices) {
-                var answerInfo = "answer:" + storedData.givenArr+ ":" + (storedData.correct ? "correct" : "no");
-                this.logBookEvent({"event": "fillb", "act": answerInfo, "div_id": this.divid});
+                var answer = storedData.answer.join(",")
+                this.logBookEvent({"event": "fillb", "act": answer, "answer": answer, "correct": storedData.correct, "div_id": this.divid});
                 this.enableCompareButton();
             }
         }
     }
 };
 
-FITB.prototype.shouldUseServer = function (data) {
-    // returns true if server data is more recent than local storage or if server storage is correct
-    if (data.correct == "T" || localStorage.length === 0)
-        return true;
-    var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
-    if (ex === null)
-        return true;
-    var storedData = JSON.parse(ex);
-    if (data.answer == storedData.givenArr)
-        return true;
-    var storageDate = new Date(storedData.timestamp);
-    var serverDate = new Date(data.timestamp);
-    if (serverDate < storageDate)
-        return false;
-    return true;
-};
-
-FITB.prototype.enableCompareButton = function () {
-    this.compareButton.disabled = false;
-};
-
-FITB.prototype.setLocalStorage = function (correct) {
+FITB.prototype.setLocalStorage = function (data) {
     // logs answer to local storage
     this.given_arr = [];
     for (var i = 0; i < this.blankArray.length; i++)
         this.given_arr.push(this.blankArray[i].value);
+
     var now = new Date();
-    var storageObject = {"givenArr": this.given_arr, "correct": correct, "timestamp": now};
+    var correct = data.correct;
+    var storageObject = {"answer": this.given_arr, "correct": correct, "timestamp": now};
     localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", JSON.stringify(storageObject));
 };
 
@@ -294,8 +251,8 @@ FITB.prototype.startEvaluation = function (logFlag) {
     this.evaluateAnswers();
     this.renderFITBFeedback();
     if (logFlag) {   // Sometimes we don't want to log the answer--for example, when timed exam questions are re-loaded
-        var answerInfo = "answer:" + this.given_arr + ":" + (this.correct ? "correct" : "no");
-        this.logBookEvent({"event": "fillb", "act": answerInfo, "div_id": this.divid});
+        var answer = this.given_arr.join(",");
+        this.logBookEvent({"event": "fillb", "act": answer, "answer":answer, "correct": (this.correct ? "T" : "F"), "div_id": this.divid});
     }
     if (this.useRunestoneServices) {
         this.enableCompareButton();
@@ -328,7 +285,7 @@ FITB.prototype.evaluateAnswers = function () {
     } else {
         this.correct = false;
     }
-    this.setLocalStorage(this.correct);
+    this.setLocalStorage({"correct": (this.correct ? "T" : "F")});
 };
 
 FITB.prototype.isCompletelyBlank = function () {
@@ -384,6 +341,10 @@ FITB.prototype.renderFITBFeedback = function () {
 /*==================================
 === Functions for compare button ===
 ==================================*/
+
+FITB.prototype.enableCompareButton = function () {
+    this.compareButton.disabled = false;
+};
 
 FITB.prototype.compareFITBAnswers = function () {
     var data = {};
