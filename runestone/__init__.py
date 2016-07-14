@@ -12,7 +12,7 @@ from .meta import *
 from .parsons import *
 from .poll import *
 from .reveal import *
-from shortanswer import *
+from .shortanswer import *
 from .tabbedStuff import *
 from .usageAssignment import *
 from .video import *
