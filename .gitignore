@@ -37,5 +37,6 @@ nosetests.xml
 .idea
 bower_componenets/
 test/
+.venv
 
 runestone/build_info
