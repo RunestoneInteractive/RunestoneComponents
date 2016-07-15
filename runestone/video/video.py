@@ -18,7 +18,7 @@ __author__ = 'bmiller'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
-
+from runestone.server.componentdb import addQuestionToDB
 
 def setup(app):
     app.add_directive('video',Video)
@@ -101,6 +101,8 @@ class Video(Directive):
         :param self:
         :return:
         """
+        addQuestionToDB(self)
+
         mimeMap = {'mov':'mp4','webm':'webm', 'm4v':'m4v'}
 
         sources = [SOURCE % (directives.uri(line),mimeMap[line[line.rindex(".")+1:]]) for line in self.content]

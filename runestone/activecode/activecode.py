@@ -22,6 +22,7 @@ from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from .textfield import *
 from sqlalchemy import create_engine, Table, MetaData, select, delete
+from runestone.server.componentdb import addQuestionToDB
 
 try:
     from html import escape  # py3
@@ -158,6 +159,9 @@ class ActiveCode(Directive):
     }
 
     def run(self):
+
+        addQuestionToDB(self)
+
         env = self.state.document.settings.env
         # keep track of how many activecodes we have.... could be used to automatically make a unique id for them.
         if not hasattr(env, 'activecodecounter'):

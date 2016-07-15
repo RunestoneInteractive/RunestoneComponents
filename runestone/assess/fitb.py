@@ -21,6 +21,7 @@ from docutils.parsers.rst import Directive
 from .assessbase import *
 import json
 import random
+from runestone.server.componentdb import addQuestionToDB
 
 
 
@@ -100,6 +101,7 @@ class FillInTheBlank(Directive):
         </p>
             '''
 
+        addQuestionToDB(self)
 
         self.options['divid'] = self.arguments[0]
 

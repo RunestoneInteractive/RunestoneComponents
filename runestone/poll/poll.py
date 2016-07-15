@@ -19,6 +19,8 @@ __author__ = 'isaiahmayerchak'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
+from runestone.server.componentdb import addQuestionToDB
+
 
 
 def setup(app):
@@ -118,6 +120,7 @@ class Poll(Directive):
                 :option_3: Option 3
                 ...etc...(Up to 10 options in mode 2)
         """
+        addQuestionToDB(self)
 
         self.options['divid'] = self.arguments[0]
         if self.content:
