@@ -297,8 +297,15 @@ MultipleChoice.prototype.checkLocalStorage = function () {
     if (len > 0) {
         var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
         if (ex !== null) {
-            var storedData = JSON.parse(ex);
-            var answers = storedData.answer.split(",");
+            try {
+                var storedData = JSON.parse(ex);
+                var answers = storedData.answer.split(",");
+            } catch (err) {
+                // error while parsing; likely due to bad value stored in storage
+                console.log(err.message);
+                localStorage.removeItem(eBookConfig.email + ":" + this.divid + "-given");
+                return;
+            }
             for (var a = 0; a < answers.length; a++) {
                 var index = answers[a];
                 for (var b = 0; b < this.optionArray.length; b++) {
