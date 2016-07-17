@@ -53,7 +53,16 @@ RunestoneBase.prototype.shouldUseServer = function (data) {
     var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
     if (ex === null)
         return true;
-    var storedData = JSON.parse(ex);
+    var storedData;
+    try {
+        storedData = JSON.parse(ex);
+    } catch (err){
+        // error while parsing; likely due to bad value stored in storage
+        console.log(err.message);
+        localStorage.removeItem(eBookConfig.email + ":" + this.divid + "-given");
+        // definitely don't want to use local storage here
+        return true;
+    }
     if (data.answer == storedData.answer)
         return true;
     var storageDate = new Date(storedData.timestamp);
