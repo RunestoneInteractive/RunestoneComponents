@@ -127,7 +127,6 @@ LineBasedGrader.prototype.grade = function() {
 						$(block.view).addClass("incorrectIndent");
 					}
 				}
-				answerArea.addClass("incorrect");
 				feedbackArea.fadeIn(500);
 				feedbackArea.attr("class", "alert alert-danger");
 				if (incorrectBlocks.length == 1) {
@@ -753,7 +752,11 @@ Parsons.prototype.loadData = function(data) {
 Parsons.prototype.localData = function() {
 	var data = localStorage.getItem(this.storageId);
 	if (data !== null) {
-		data = JSON.parse(data);
+		if (data.charAt(0) == "{") {
+			data = JSON.parse(data);
+		} else {
+			data = {};
+		}
 	} else {
 		data = {};
 	}
