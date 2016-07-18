@@ -127,7 +127,6 @@ LineBasedGrader.prototype.grade = function() {
 						$(block.view).addClass("incorrectIndent");
 					}
 				}
-				answerArea.addClass("incorrect");
 				feedbackArea.fadeIn(500);
 				feedbackArea.attr("class", "alert alert-danger");
 				if (incorrectBlocks.length == 1) {
@@ -359,7 +358,11 @@ Parsons.prototype.init = function (opts) {
 	this.initializeLines(content);
 	this.initializeView();
 	// Check the server for an answer to complete things
-	this.checkServer("parsons");
+	if (this.useRunestoneServices) {
+		this.checkServer("parsons");
+	} else {
+		this.checkLocalStorage();
+	}
 };
 
 // Based on the data-fields in the original HTML, initialize options
@@ -753,7 +756,11 @@ Parsons.prototype.loadData = function(data) {
 Parsons.prototype.localData = function() {
 	var data = localStorage.getItem(this.storageId);
 	if (data !== null) {
-		data = JSON.parse(data);
+		if (data.charAt(0) == "{") {
+			data = JSON.parse(data);
+		} else {
+			data = {};
+		}
 	} else {
 		data = {};
 	}
@@ -794,6 +801,9 @@ Parsons.prototype.setLocalStorage = function(data) {
 //   move: the user moved a block to a new position
 //   reset: the reset button was pressed
 Parsons.prototype.logMove = function(activity) {
+	if (!this.useRunestoneServices) {
+		return this;
+	}
 	var act = activity + "|" + this.sourceHash() + "|" + this.answerHash();
 	var divid = this.divid;
 	this.logBookEvent({
@@ -807,6 +817,9 @@ Parsons.prototype.logMove = function(activity) {
 //   correct: The answer given matches the solution
 //   incorrect*: The answer is wrong for various reasons
 Parsons.prototype.logAnswer = function(answer) {
+	if (!this.useRunestoneServices) {
+		return this;
+	}
 	var answerHash = this.answerHash();
 	var sourceHash = this.sourceHash();
 	var act = sourceHash + "|" + answerHash;
