@@ -8,3 +8,4 @@ runestone serve --port 8081 &
 python test_activecode.py
 cd $testhome
 kill %1
+exit 0
