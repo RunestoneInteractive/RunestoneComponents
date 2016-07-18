@@ -64,6 +64,12 @@ def init():
 def build(all):
     from paver.tasks import main as paver_main
     os.chdir(findProjectRoot())
+    sys.path.insert(0, os.getcwd())
+
+    import pavement
+
+    if not os.path.exists(pavement.options.build.builddir):
+        os.makedirs(pavement.options.build.builddir)
 
     myargs = ['build']
     if all:
