@@ -95,9 +95,12 @@ def serve(port,listen):
         import http.server
         import socketserver
         Handler = http.server.SimpleHTTPRequestHandler
-        httpd = socketserver.TCPServer((listen, port), Handler)
+        httpd = socketserver.TCPServer((listen, port), Handler, bind_and_activate=False)
 
     print("serving at port", port)
+    httpd.allow_reuse_address = True
+    httpd.server_bind()
+    httpd.server_activate()
     httpd.serve_forever()
 
 @cli.command()
