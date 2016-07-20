@@ -21,7 +21,7 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from sqlalchemy import create_engine, Table, MetaData, select, delete
-
+from runestone.server import get_dburl
 
 def setup(app):
     app.add_directive('datafile',DataFile)
@@ -146,7 +146,7 @@ class DataFile(Directive):
             self.options['edit'] = "false"
 
         try:
-            engine = create_engine(env.config.html_context['dburl'])
+            engine = create_engine(get_dburl(locals()))
             meta = MetaData()
             Source_code = Table('source_code', meta, autoload=True, autoload_with=engine)
             course_name = env.config.html_context['course_id']
