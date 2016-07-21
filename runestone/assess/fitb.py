@@ -57,6 +57,21 @@ def depart_fitb_node(self,node):
 
 
 class FillInTheBlank(Directive):
+    """
+    .. fillintheblank:: fill1412
+
+        .. blank:: blank1345
+            :correct: \\bred\\b
+            :feedback1: (".*", "Try 'red'")
+
+            Fill in the blanks to make the following sentence: "The red car drove away" The [blank here]
+
+        .. blank:: blank52532
+            :correct: \\baway\\b
+            :feedback1: (".*", "Try 'away'")
+
+            car drove [blank here]
+    """
     required_arguments = 1
     optional_arguments = 0
     final_argument_whitespace = True
@@ -148,6 +163,14 @@ def depart_blank_node(self,node):
 
 
 class Blank(Directive):
+    """
+.. blank:: blank52532
+    :correct: \\baway\\b
+    :feedback1: (".*", "Try 'away'")
+
+    car drove  [the blank will be here]
+
+    """
     required_arguments = 1
     optional_arguments = 0
     final_argument_whitespace = True

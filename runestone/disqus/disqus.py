@@ -95,6 +95,11 @@ def purge_disqus_nodes(app, env, docname):
 
 
 class DisqusDirective(Directive):
+    """
+.. disqus::
+   :shortname: Your registered disqus id
+   :identifier: unique id for this discussion
+    """
     required_arguments = 0
     optional_arguments = 0
     final_argument_whitespace = True

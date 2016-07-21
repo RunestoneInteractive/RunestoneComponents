@@ -337,7 +337,8 @@ DragNDrop.prototype.dragEval = function (logFlag) {
     this.setLocalStorage({"correct": (this.correct ? "T" : "F")});
     this.renderFeedback();
     if (logFlag)   // Sometimes we don't want to log the answers--for example, on re-load of a timed exam
-        this.logBookEvent({"event": "dragNdrop", "act": "submitDND", "answer": this.pregnantIndexArray.join(";"), "minHeight": this.minheight, "div_id": this.divid, "correct": this.correct});
+        var answer = this.pregnantIndexArray.join(";");
+        this.logBookEvent({"event": "dragNdrop", "act": answer, "answer":answer, "minHeight": this.minheight, "div_id": this.divid, "correct": this.correct});
 };
 
 DragNDrop.prototype.renderFeedback = function () {
@@ -369,12 +370,22 @@ DragNDrop.prototype.checkLocalStorage = function () {
         var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
         if (ex !== null) {
             this.hasStoredDropzones = true;
-            var storedObj = JSON.parse(ex);
-            this.minheight = storedObj.minHeight;
+            try {
+                var storedObj = JSON.parse(ex);
+                this.minheight = storedObj.minHeight;
+            } catch (err) {
+                // error while parsing; likely due to bad value stored in storage
+                console.log(err.message);
+                localStorage.removeItem(eBookConfig.email + ":" + this.divid + "-given");
+                this.hasStoredDropzones = false;
+                this.finishSettingUp();
+                return;
+            }
             this.pregnantIndexArray = storedObj.answer.split(";");
             if (this.useRunestoneServices) {
                 // store answer in database
-                this.logBookEvent({"event": "dragNdrop", "act": "submitDND", "answer": this.pregnantIndexArray.join(";"), "minHeight": this.minheight, "div_id": this.divid, "correct": storedObj.correct});
+                var answer = this.pregnantIndexArray.join(";");
+                this.logBookEvent({"event": "dragNdrop", "act": answer, "answer":answer, "minHeight": this.minheight, "div_id": this.divid, "correct": storedObj.correct});
             }
         }
     }

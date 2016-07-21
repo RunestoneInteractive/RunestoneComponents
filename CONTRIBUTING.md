@@ -21,6 +21,12 @@ of jQuery in the common folder.
 * Avoid proliferation of additional third party javascript modules.  We are already out of 
 control in this regard and it would be nice to rein it in.
 * When creating a new directive, assign a unique class name to the outermost HTML division. That will allow you to easily confine your CSS declarations to apply only within your directive. Since there are many directives, chances for CSS namespace conflicts are high without that.
+* When making any changes, make sure the docstring for the class that implements the Sphinx directive is up to date.  These docstrings are used in several places for templates and quick help.
+
+Unit Testing
+------------
+
+We are using selenium to create unit tests for each of the components.  Look at poll or activecode for some examples.
 
 Provide an example
 ------------------

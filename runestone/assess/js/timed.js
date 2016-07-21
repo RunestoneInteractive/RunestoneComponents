@@ -108,7 +108,7 @@ Timed.prototype.renderTimedAssess = function () {
 
 Timed.prototype.renderContainer = function () {
     this.assessDiv = document.createElement("div"); // container for the entire Timed Component
-    
+
     if (this.fullwidth) {
        // allow the container to fill the width - barb
        $(this.assessDiv).attr({
@@ -544,7 +544,7 @@ Timed.prototype.finishAssessment = function () {
         this.storeScore();
         this.logScore();
         $(this.pauseBtn).attr("disabled", true);
-        this.finishButton.disabled = true;  
+        this.finishButton.disabled = true;
 };
 
 Timed.prototype.submitTimedProblems = function (logFlag) {
@@ -621,17 +621,24 @@ Timed.prototype.shouldUseServer = function (data) {
     var storageObj = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
     if (storageObj === null)
         return true;
-    var storedData = JSON.parse(storageObj).answer;
-    if (storedData.length == 4) {
-        if (data.correct == storedData[0] && data.incorrect == storedData[1] && data.skipped == storedData[2] && data.timeTaken == storedData[3])
-            return true;
-    } else if (storedData.length == 7) {
-        if (data.correct == storedData[0] && data.incorrect == storedData[2] && data.skipped == storedData[4] && data.timeTaken == storedData[6]) {
-            this.logScore();
-            return false;   // In this case, because local storage has more info, we want to use that if it's consistent
+    try {
+        var storedData = JSON.parse(storageObj).answer;
+        if (storedData.length == 4) {
+            if (data.correct == storedData[0] && data.incorrect == storedData[1] && data.skipped == storedData[2] && data.timeTaken == storedData[3])
+                return true;
+        } else if (storedData.length == 7) {
+            if (data.correct == storedData[0] && data.incorrect == storedData[2] && data.skipped == storedData[4] && data.timeTaken == storedData[6]) {
+                this.logScore();
+                return false;   // In this case, because local storage has more info, we want to use that if it's consistent
+            }
         }
+        var storageDate = new Date(JSON.parse(storageObj[1]).timestamp);
+    } catch (err) {
+        // error while parsing; likely due to bad value stored in storage
+        console.log(err.message);
+        localStorage.removeItem(eBookConfig.email + ":" + this.divid + "-given");
+        return;
     }
-    var storageDate = new Date(JSON.parse(storageObj[1]).timestamp);
     var serverDate = new Date(data.timestamp);
     if (serverDate < storageDate) {
         this.logScore();
@@ -656,12 +663,17 @@ Timed.prototype.checkLocalStorage = function () {
 
 Timed.prototype.restoreAnswers = function (data) {
     this.taken = 1;
-    if (this.taken) {
-       this.handlePrevAssessment();
-    }
     var tmpArr;
     if (data === "") {
-        tmpArr = JSON.parse(localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given")).answer;
+        try {
+            tmpArr = JSON.parse(localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given")).answer;
+        } catch (err) {
+            // error while parsing; likely due to bad value stored in storage
+            console.log(err.message);
+            localStorage.removeItem(eBookConfig.email + ":" + this.divid + "-given");
+            this.taken = 0;
+            return;
+        }
     } else {
         tmpArr = [parseInt(data.correct), parseInt(data.incorrect), parseInt(data.skipped), parseInt(data.timeTaken)];
         this.setLocalStorage(data);
@@ -688,6 +700,9 @@ Timed.prototype.restoreAnswers = function (data) {
        this.incorrect = 0;
        this.skipped = this.renderedQuestionArray.length;
        this.timeTaken = 0;
+    }
+    if (this.taken) {
+       this.handlePrevAssessment();
     }
     this.renderTimedQuestion();
     this.displayScore();

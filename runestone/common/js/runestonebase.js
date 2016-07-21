@@ -7,7 +7,7 @@ RunestoneBase.prototype.logBookEvent = function (eventInfo) {
     if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
         jQuery.get(eBookConfig.ajaxURL + 'hsblog', eventInfo); // Log the run event
     }
-    console.log("logging event " + eventInfo);
+    console.log("logging event " + JSON.stringify(eventInfo));
 };
 
 RunestoneBase.prototype.logRunEvent = function (eventInfo) {
@@ -18,7 +18,7 @@ RunestoneBase.prototype.logRunEvent = function (eventInfo) {
     if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
         jQuery.post(eBookConfig.ajaxURL + 'runlog', eventInfo); // Log the run event
     }
-    console.log("running " + eventInfo);
+    console.log("running " + JSON.stringify(eventInfo));
 };
 
 /* Checking/loading from storage */
@@ -53,7 +53,16 @@ RunestoneBase.prototype.shouldUseServer = function (data) {
     var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
     if (ex === null)
         return true;
-    var storedData = JSON.parse(ex);
+    var storedData;
+    try {
+        storedData = JSON.parse(ex);
+    } catch (err){
+        // error while parsing; likely due to bad value stored in storage
+        console.log(err.message);
+        localStorage.removeItem(eBookConfig.email + ":" + this.divid + "-given");
+        // definitely don't want to use local storage here
+        return true;
+    }
     if (data.answer == storedData.answer)
         return true;
     var storageDate = new Date(storedData.timestamp);

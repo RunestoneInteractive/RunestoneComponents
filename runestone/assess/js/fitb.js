@@ -213,13 +213,22 @@ FITB.prototype.checkLocalStorage = function () {
     if (len > 0) {
         var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
         if (ex !== null) {
-            var storedData = JSON.parse(ex);
-            var arr = storedData.answer;
+            try {
+                var storedData = JSON.parse(ex);
+                var arr = storedData.answer;
+            } catch (err) {
+                // error while parsing; likely due to bad value stored in storage
+                console.log(err.message);
+                localStorage.removeItem(eBookConfig.email + ":" + this.divid + "-given");
+                return;
+            }
+
             for (var i = 0; i < this.blankArray.length; i++) {
                 $(this.blankArray[i]).attr("value", arr[i]);
             }
             if (this.useRunestoneServices) {
-                this.logBookEvent({"event": "fillb", "act": "submitFITB", "answer": storedData.answer.join(","), "correct": storedData.correct, "div_id": this.divid});
+                var answer = storedData.answer.join(",")
+                this.logBookEvent({"event": "fillb", "act": answer, "answer": answer, "correct": storedData.correct, "div_id": this.divid});
                 this.enableCompareButton();
             }
         }
@@ -250,7 +259,8 @@ FITB.prototype.startEvaluation = function (logFlag) {
     this.evaluateAnswers();
     this.renderFITBFeedback();
     if (logFlag) {   // Sometimes we don't want to log the answer--for example, when timed exam questions are re-loaded
-        this.logBookEvent({"event": "fillb", "act": "submitFITB", "answer": this.given_arr.join(","), "correct": (this.correct ? "T" : "F"), "div_id": this.divid});
+        var answer = this.given_arr.join(",");
+        this.logBookEvent({"event": "fillb", "act": answer, "answer":answer, "correct": (this.correct ? "T" : "F"), "div_id": this.divid});
     }
     if (this.useRunestoneServices) {
         this.enableCompareButton();

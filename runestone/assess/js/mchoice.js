@@ -297,8 +297,15 @@ MultipleChoice.prototype.checkLocalStorage = function () {
     if (len > 0) {
         var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
         if (ex !== null) {
-            var storedData = JSON.parse(ex);
-            var answers = storedData.answer.split(",");
+            try {
+                var storedData = JSON.parse(ex);
+                var answers = storedData.answer.split(",");
+            } catch (err) {
+                // error while parsing; likely due to bad value stored in storage
+                console.log(err.message);
+                localStorage.removeItem(eBookConfig.email + ":" + this.divid + "-given");
+                return;
+            }
             for (var a = 0; a < answers.length; a++) {
                 var index = answers[a];
                 for (var b = 0; b < this.optionArray.length; b++) {
@@ -387,7 +394,8 @@ MultipleChoice.prototype.scoreMCMASubmission = function () {
 MultipleChoice.prototype.logMCMAsubmission = function (data) {
     var answer = data.answer;
     var correct = data.correct;
-    this.logBookEvent({"event": "mChoice", "act": "submitMC", "answer": answer, "correct": correct, "div_id": this.divid});
+    var logAnswer = "answer:" + answer + ":" + (correct == "T" ? "correct" : "no");
+    this.logBookEvent({"event": "mChoice", "act": logAnswer, "answer":answer, "correct": correct, "div_id": this.divid});
 };
 
 
@@ -439,7 +447,8 @@ MultipleChoice.prototype.scoreMCMFSubmission = function () {
 MultipleChoice.prototype.logMCMFsubmission = function () {
     var answer = this.givenArray[0];
     var correct = (this.givenArray[0] == this.correctIndexList[0] ? "T" : "F");
-    this.logBookEvent({"event": "mChoice", "act": "submitMC", "answer": answer, "correct": correct, "div_id": this.divid});
+    var logAnswer = "answer:" + answer + ":" + (correct == "T" ? "correct" : "no");  // backward compatible
+    this.logBookEvent({"event": "mChoice", "act": logAnswer, "answer": answer, "correct": correct, "div_id": this.divid});
 };
 
 MultipleChoice.prototype.renderMCMFFeedback = function (correct, feedbackText) {

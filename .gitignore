@@ -1,4 +1,6 @@
 *.py[cod]
+*.log
+.venv
 
 # C extensions
 *.so
@@ -36,6 +38,5 @@ nosetests.xml
 .pydevproject
 .idea
 bower_componenets/
-test/
 
 runestone/build_info

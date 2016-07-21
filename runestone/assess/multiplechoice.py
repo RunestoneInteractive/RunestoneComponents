@@ -81,6 +81,24 @@ def depart_mc_node(self,node):
 # author - Barb Ericson
 # author - Anusha
 class MChoice(Assessment):
+    """
+.. mchoice:: uniqueid
+   :multiple_answers: boolean  [optional]
+   :random: boolean [optional]
+   :answer_a: possible answer  -- what follows _ is label
+   :answer_b: possible answer
+   ...
+   :answer_e: possible answer
+   :correct: letter of correct answer or list of correct answer letters (in case of multiple answers)
+   :feedback_a: displayed if a is picked
+   :feedback_b: displayed if b is picked
+   :feedback_c: displayed if c is picked
+   :feedback_d: displayed if d is picked
+   :feedback_e: displayed if e is picked
+
+   Question text   ...
+
+    """
     required_arguments = 1
     optional_arguments = 1
     final_argument_whitespace = True
