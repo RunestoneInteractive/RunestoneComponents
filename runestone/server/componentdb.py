@@ -57,6 +57,19 @@ def addQuestionToDB(self):
         engine = create_engine(dburl)
         meta = MetaData()
         questions = Table('questions', meta, autoload=True, autoload_with=engine)
+        if 'difficulty' in self.options:
+            difficulty = self.options['difficulty']
+        else:
+            difficulty = 3
+
+        if 'author' in self.options:
+            author = self.options['author']
+        else:
+            author = os.environ.get('USER','Brad Miller')
+
+        srcpath, line = self.state_machine.get_source_and_line()
+        subchapter = os.path.basename(srcpath).replace('.rst','')
+        chapter = srcpath.split('/')[-2]
 
         sel = select([questions]).where(questions.c.name == self.arguments[0])
         res = engine.execute(sel).first()
@@ -66,8 +79,9 @@ def addQuestionToDB(self):
                 engine.execute(stmt)
         else:
             ins = questions.insert().values(base_course=basecourse, name=self.arguments[0],
-                                            question=sl, timestamp=last_changed,
-                                            question_type=self.name)
+                                            question=sl, timestamp=last_changed, is_private='F',
+                                            question_type=self.name, subchapter=subchapter,
+                                            author=author,difficulty=difficulty,chapter=chapter)
             engine.execute(ins)
 
 
