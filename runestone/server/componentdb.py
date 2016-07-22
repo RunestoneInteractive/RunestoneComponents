@@ -65,7 +65,9 @@ def addQuestionToDB(self):
                 stmt = questions.update().where(questions.c.id == res['id']).values(question = sl, timestamp=last_changed)
                 engine.execute(stmt)
         else:
-            ins = questions.insert().values(base_course=basecourse, name=self.arguments[0],question=sl, timestamp=last_changed)
+            ins = questions.insert().values(base_course=basecourse, name=self.arguments[0],
+                                            question=sl, timestamp=last_changed,
+                                            question_type=self.name)
             engine.execute(ins)
 
 
