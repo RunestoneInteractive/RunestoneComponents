@@ -38,5 +38,6 @@ nosetests.xml
 .pydevproject
 .idea
 bower_componenets/
+.venv
 
 runestone/build_info

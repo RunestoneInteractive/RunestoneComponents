@@ -21,6 +21,7 @@ from docutils.parsers.rst import Directive
 from .assessbase import *
 import json
 import random
+from runestone.server.componentdb import addQuestionToDB
 
 
 class MChoiceNode(nodes.General, nodes.Element):
@@ -154,7 +155,7 @@ class MChoice(Assessment):
 
             </ul>
             '''
-
+        addQuestionToDB(self)
         super(MChoice,self).run()
 
 

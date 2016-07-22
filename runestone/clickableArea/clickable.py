@@ -19,6 +19,7 @@ __author__ = 'isaiahmayerchak'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
+from runestone.server.componentdb import addQuestionToDB
 
 def setup(app):
     app.add_directive('clickablearea',ClickableArea)
@@ -115,6 +116,8 @@ class ClickableArea(Directive):
                 :incorrect: An array of the indices of the incorrect elements--same format as the correct elements.
                 --Content--
         """
+        addQuestionToDB(self)
+
         self.assert_has_content()
         self.options['divid'] = self.arguments[0]
         if "iscode" in self.options:

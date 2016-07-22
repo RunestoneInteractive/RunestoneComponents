@@ -19,6 +19,7 @@ __author__ = 'isaiahmayerchak'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
+from runestone.server.componentdb import addQuestionToDB
 
 def setup(app):
     app.add_directive('dragndrop',DragNDrop)
@@ -135,6 +136,8 @@ class DragNDrop(Directive):
 
                 The question goes here.
         """
+        addQuestionToDB(self)
+
         self.options['divid'] = self.arguments[0]
 
         if self.content:

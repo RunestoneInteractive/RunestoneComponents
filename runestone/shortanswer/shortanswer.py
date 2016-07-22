@@ -21,6 +21,7 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from runestone.assess import Assessment
+from runestone.server.componentdb import addQuestionToDB
 
 def setup(app):
     app.add_directive('shortanswer', JournalDirective)
@@ -66,6 +67,8 @@ class JournalDirective(Assessment):
 
     def run(self):
         # Raise an error if the directive does not have contents.
+
+        addQuestionToDB(self)
 
         self.assert_has_content()
 
