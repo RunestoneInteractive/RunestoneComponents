@@ -20,7 +20,7 @@ from datetime import datetime
 __author__ = 'bmiller'
 
 import os
-from sqlalchemy import create_engine, Table, MetaData, select, delete, update
+from sqlalchemy import create_engine, Table, MetaData, select, delete, update, and_
 
 
 def logSource(self):
@@ -71,7 +71,8 @@ def addQuestionToDB(self):
         subchapter = os.path.basename(srcpath).replace('.rst','')
         chapter = srcpath.split('/')[-2]
 
-        sel = select([questions]).where(questions.c.name == self.arguments[0])
+        sel = select([questions]).where(and_(questions.c.name == self.arguments[0],
+                                              questions.c.base_course == basecourse))
         res = engine.execute(sel).first()
         if res:
             if res['question'] != sl:
