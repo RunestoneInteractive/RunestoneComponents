@@ -20,6 +20,7 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from runestone.assess import Assessment
+from runestone.server.componentdb import addQuestionToDB
 
 
 def setup(app):
@@ -101,6 +102,8 @@ Example:
 
 
         """
+
+        addQuestionToDB(self)
 
         TEMPLATE = '''
     <pre data-component="parsons" id="%(divid)s"%(maxdist)s%(order)s%(noindent)s%(language)s>

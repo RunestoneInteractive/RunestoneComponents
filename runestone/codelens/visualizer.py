@@ -22,7 +22,7 @@ from docutils.parsers.rst import Directive
 from .pg_logger import exec_script_str_local
 import json
 import six
-
+from runestone.server.componentdb import addQuestionToDB
 
 def setup(app):
     app.add_directive('codelens', Codelens)
@@ -179,6 +179,8 @@ class Codelens(Directive):
     has_content = True
 
     def run(self):
+
+        addQuestionToDB(self)
 
         self.JS_VARNAME = ""
         self.JS_VARVAL = ""
