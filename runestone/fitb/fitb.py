@@ -18,12 +18,20 @@ __author__ = 'isaiahmayerchak'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
-from .assessbase import *
+#from runestone.assess.assessbase import *
 import json
 import random
 from runestone.server.componentdb import addQuestionToDB
 
 
+def setup(app):
+    app.add_directive('fillintheblank', FillInTheBlank)
+    app.add_directive('blank', Blank)
+    app.add_stylesheet('fitb.css')
+    app.add_javascript('fitb.js')
+    app.add_javascript('timedfitb.js')
+    app.add_node(FITBNode, html=(visit_fitb_node, depart_fitb_node))
+    app.add_node(BlankNode, html=(visit_blank_node, depart_blank_node))
 
 
 class FITBNode(nodes.General, nodes.Element):
