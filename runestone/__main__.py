@@ -100,7 +100,7 @@ def serve(port,listen):
         import SimpleHTTPServer
         import SocketServer
         Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
-        httpd = SocketServer.TCPServer((listen, port), Handler)
+        httpd = SocketServer.TCPServer((listen, port), Handler, bind_and_activate=False)
     else:
         import http.server
         import socketserver
