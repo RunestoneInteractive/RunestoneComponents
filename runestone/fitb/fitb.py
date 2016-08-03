@@ -103,7 +103,7 @@ class FillInTheBlank(RunestoneDirective):
             :casei: Case insensitive boolean
             ...
             """
-        print("option spec = ", self.option_spec)
+
         TEMPLATE_START = '''
         <p data-component="fillintheblank" data-casei="%(casei)s" id="%(divid)s">
             '''
