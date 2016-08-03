@@ -22,6 +22,7 @@ from docutils.parsers.rst import Directive
 import json
 import random
 from runestone.server.componentdb import addQuestionToDB
+from runestone.common import RunestoneDirective
 
 
 def setup(app):
@@ -65,7 +66,7 @@ def depart_fitb_node(self,node):
     self.body.append(res)
 
 
-class FillInTheBlank(Directive):
+class FillInTheBlank(RunestoneDirective):
     """
     .. fillintheblank:: fill1412
 
@@ -122,6 +123,7 @@ class FillInTheBlank(Directive):
         return [fitbNode]
 
 
+FillInTheBlank.option_spec.update(RunestoneDirective.option_spec)
 
 
 
