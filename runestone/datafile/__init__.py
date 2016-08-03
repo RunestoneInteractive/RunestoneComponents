@@ -22,6 +22,7 @@ from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from sqlalchemy import create_engine, Table, MetaData, select, delete
 from runestone.server import get_dburl
+from runestone.common.runestonedirective import RunestoneDirective
 
 def setup(app):
     app.add_directive('datafile',DataFile)
@@ -79,7 +80,7 @@ def purge_datafiles(app,env,docname):
     pass
 
 
-class DataFile(Directive):
+class DataFile(RunestoneDirective):
     """
 .. datafile:: identifier
    :edit: Option that makes the datafile editable
@@ -90,12 +91,13 @@ class DataFile(Directive):
     required_arguments = 1
     optional_arguments = 0
     has_content = True
-    option_spec = {
+    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec.update({
         'hide':directives.flag,
         'edit':directives.flag,
         'rows':directives.positive_int,
         'cols':directives.positive_int
-    }
+    })
 
     def run(self):
         """

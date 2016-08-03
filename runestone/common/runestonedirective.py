@@ -26,10 +26,10 @@ class RunestoneDirective(Directive):
                    'difficulty': directives.positive_int
                    }
 
-
-    def __init__(self):
-        super(RunestoneDirective,self).__init__()
-        self.option_spec.update({'author': directives.unchanged,
-                   'tags': directives.unchanged,
-                   'difficulty': directives.positive_int
-                   })
+    # def __init__(self, *args, **kwargs):
+    #     super(RunestoneDirective,self).__init__(*args, **kwargs)
+    #     print("updating option spec")
+    #     self.option_spec.update({'author': directives.unchanged,
+    #                'tags': directives.unchanged,
+    #                'difficulty': directives.positive_int
+    #                })

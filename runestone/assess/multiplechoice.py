@@ -104,7 +104,8 @@ class MChoice(Assessment):
     optional_arguments = 1
     final_argument_whitespace = True
     has_content = True
-    option_spec = {'answer_a':directives.unchanged,
+    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec.update({'answer_a':directives.unchanged,
         'answer_b':directives.unchanged,
         'answer_c':directives.unchanged,
         'answer_d':directives.unchanged,
@@ -117,7 +118,7 @@ class MChoice(Assessment):
         'feedback_e':directives.unchanged,
         'random':directives.flag,
         'multiple_answers':directives.flag,
-    }
+    })
 
     def run(self):
         """

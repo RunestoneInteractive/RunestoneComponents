@@ -18,7 +18,7 @@ __author__ = 'bmiller'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
-
+from runestone.common.runestonedirective import RunestoneDirective
 
 _base_js_escapes = (
     ('\\', r'\u005C'),
@@ -51,7 +51,7 @@ def escapejs(value):
     return value
 
 
-class Assessment(Directive):
+class Assessment(RunestoneDirective):
     """Base Class for assessments"""
 
     def getNumber(self):

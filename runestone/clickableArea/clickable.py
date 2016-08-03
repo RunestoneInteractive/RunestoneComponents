@@ -20,6 +20,7 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from runestone.server.componentdb import addQuestionToDB
+from runestone.common.runestonedirective import RunestoneDirective
 
 def setup(app):
     app.add_directive('clickablearea',ClickableArea)
@@ -76,7 +77,7 @@ def depart_ca_node(self,node):
     self.body.append(res)
 
 
-class ClickableArea(Directive):
+class ClickableArea(RunestoneDirective):
     """
 .. clickablearea:: identifier
     :question: Question text
@@ -93,13 +94,14 @@ class ClickableArea(Directive):
     optional_arguments = 0
     has_content = True
     final_argument_whitespace = True
-    option_spec = {"question":directives.unchanged,
+    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec.update({"question":directives.unchanged,
         "feedback":directives.unchanged,
         "iscode":directives.flag,
         "correct":directives.unchanged,
         "incorrect":directives.unchanged,
         "table":directives.flag
-    }
+    })
 
     def run(self):
         """

@@ -86,10 +86,12 @@ class FillInTheBlank(RunestoneDirective):
     optional_arguments = 0
     final_argument_whitespace = True
     has_content = True
-    option_spec = {'blankid':directives.unchanged,
+    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec.update(
+       {'blankid':directives.unchanged,
         'iscode':directives.flag,
         'casei':directives.flag  # case insensitive matching
-    }
+    })
 
     def run(self):
         """
@@ -101,7 +103,7 @@ class FillInTheBlank(RunestoneDirective):
             :casei: Case insensitive boolean
             ...
             """
-
+        print("option spec = ", self.option_spec)
         TEMPLATE_START = '''
         <p data-component="fillintheblank" data-casei="%(casei)s" id="%(divid)s">
             '''
@@ -121,10 +123,6 @@ class FillInTheBlank(RunestoneDirective):
         self.state.nested_parse(self.content, self.content_offset, fitbNode)
 
         return [fitbNode]
-
-
-FillInTheBlank.option_spec.update(RunestoneDirective.option_spec)
-
 
 
 
@@ -174,7 +172,7 @@ def depart_blank_node(self,node):
 
 
 
-class Blank(Directive):
+class Blank(RunestoneDirective):
     """
 .. blank:: blank52532
     :correct: \\baway\\b
