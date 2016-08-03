@@ -19,6 +19,7 @@ __author__ = 'isaiahmayerchak'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
+from runestone.server.componentdb import addQuestionToDB
 
 def setup(app):
     app.add_directive('clickablearea',ClickableArea)
@@ -76,6 +77,18 @@ def depart_ca_node(self,node):
 
 
 class ClickableArea(Directive):
+    """
+.. clickablearea:: identifier
+    :question: Question text
+    :feedback: Optional feedback for incorrect answer
+    :iscode: Boolean that if present will put the content into a <pre>
+    :table: Boolean that indicates that the content is a table.
+    :correct: An array of the indices of the correct elements, separated by semicolons--if this is a table, each item in the array is a tuple
+    with the first number being the row and the second number being the column--use a column number of 0 to make the whole row correct (ex: 1,2;3,0 makes the 2nd data cell in the first row correct as well as the entire 3rd row)
+    :incorrect: An array of the indices of the incorrect elements--same format as the correct elements.
+
+    --Content--
+    """
     required_arguments = 1
     optional_arguments = 0
     has_content = True
@@ -103,6 +116,8 @@ class ClickableArea(Directive):
                 :incorrect: An array of the indices of the incorrect elements--same format as the correct elements.
                 --Content--
         """
+        addQuestionToDB(self)
+
         self.assert_has_content()
         self.options['divid'] = self.arguments[0]
         if "iscode" in self.options:

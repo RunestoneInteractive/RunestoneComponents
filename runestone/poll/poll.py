@@ -19,6 +19,8 @@ __author__ = 'isaiahmayerchak'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
+from runestone.server.componentdb import addQuestionToDB
+
 
 
 def setup(app):
@@ -79,6 +81,14 @@ def depart_poll_node(self,node):
 
 
 class Poll(Directive):
+    """
+.. poll:: identifier
+    :scale: Mode 1--Implements the "On a scale of 1 to x" type method of poll--x is provided by author
+    :allowcomment: Boolean--provides comment box
+    :option_1: Mode 2--Implements the "Choose one of these options" type method of poll.
+    :option_2: Option 2
+    :option_3: Option 3    ...etc...(Up to 10 options in mode 2)
+    """
     required_arguments = 1
     optional_arguments = 0
     has_content = True
@@ -110,6 +120,7 @@ class Poll(Directive):
                 :option_3: Option 3
                 ...etc...(Up to 10 options in mode 2)
         """
+        addQuestionToDB(self)
 
         self.options['divid'] = self.arguments[0]
         if self.content:

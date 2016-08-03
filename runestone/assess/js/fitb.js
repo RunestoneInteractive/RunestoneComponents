@@ -213,8 +213,16 @@ FITB.prototype.checkLocalStorage = function () {
     if (len > 0) {
         var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
         if (ex !== null) {
-            var storedData = JSON.parse(ex);
-            var arr = storedData.answer;
+            try {
+                var storedData = JSON.parse(ex);
+                var arr = storedData.answer;
+            } catch (err) {
+                // error while parsing; likely due to bad value stored in storage
+                console.log(err.message);
+                localStorage.removeItem(eBookConfig.email + ":" + this.divid + "-given");
+                return;
+            }
+
             for (var i = 0; i < this.blankArray.length; i++) {
                 $(this.blankArray[i]).attr("value", arr[i]);
             }

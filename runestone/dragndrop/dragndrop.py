@@ -19,6 +19,7 @@ __author__ = 'isaiahmayerchak'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
+from runestone.server.componentdb import addQuestionToDB
 
 def setup(app):
     app.add_directive('dragndrop',DragNDrop)
@@ -84,6 +85,16 @@ def depart_dnd_node(self,node):
 
 
 class DragNDrop(Directive):
+    """
+.. dragndrop:: identifier
+    :feedback: Feedback that is displayed if things are incorrectly matched--is optional
+    :match_1: Draggable element text|||Dropzone to be matched with text
+    :match_2: Drag to Answer B|||Answer B
+    :match_3: Draggable text|||Text of dropzone
+    ...etc...(up to 20 matches)
+
+    The question goes here.
+    """
     required_arguments = 1
     optional_arguments = 0
     has_content = True
@@ -125,6 +136,8 @@ class DragNDrop(Directive):
 
                 The question goes here.
         """
+        addQuestionToDB(self)
+
         self.options['divid'] = self.arguments[0]
 
         if self.content:

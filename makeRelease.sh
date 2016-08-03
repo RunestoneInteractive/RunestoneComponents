@@ -16,12 +16,11 @@ read -p "Did you update/commit the version in setup.py" yn
 done
 
 rm dist/*
-source ~/Environments/rune2/bin/activate
-python setup.py sdist bdist_wheel
-deactivate
 
-source ~/Environments/rune3/bin/activate
-python setup.py bdist_wheel
+source ~/.virtualenvs/runedev/bin/activate
+python setup.py sdist
+pip wheel --no-index --no-deps --global-option bdist_wheel  --wheel-dir dist dist/*.tar.gz
+pip3 wheel --no-index --no-deps --global-option bdist_wheel  --wheel-dir dist dist/*.tar.gz
 
 python setup.py register -r pypi
 twine upload dist/*
