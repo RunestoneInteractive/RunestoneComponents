@@ -21,6 +21,14 @@ from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 import os
 
+# Notes
+# env = self.state.document.settings.env
+# env.config.html_context['course_id']
+#if not hasattr(env, 'activecodecounter'):
+#    env.activecodecounter = 0
+#env.activecodecounter += 1
+# similar trick for assessments using getNumber()
+
 class RunestoneDirective(Directive):
     option_spec = {'author': directives.unchanged,
                    'tags': directives.unchanged,
