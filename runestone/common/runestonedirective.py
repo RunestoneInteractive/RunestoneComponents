@@ -19,6 +19,7 @@ __author__ = 'bmiller'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
+import os
 
 class RunestoneDirective(Directive):
     option_spec = {'author': directives.unchanged,
@@ -26,10 +27,9 @@ class RunestoneDirective(Directive):
                    'difficulty': directives.positive_int
                    }
 
-    # def __init__(self, *args, **kwargs):
-    #     super(RunestoneDirective,self).__init__(*args, **kwargs)
-    #     print("updating option spec")
-    #     self.option_spec.update({'author': directives.unchanged,
-    #                'tags': directives.unchanged,
-    #                'difficulty': directives.positive_int
-    #                })
+    def __init__(self, *args, **kwargs):
+        super(RunestoneDirective,self).__init__(*args, **kwargs)
+        srcpath, self.line = self.state_machine.get_source_and_line()
+        self.subchapter = os.path.basename(srcpath).replace('.rst','')
+        self.chapter = srcpath.split('/')[-2]
+        self.srcpath = srcpath
