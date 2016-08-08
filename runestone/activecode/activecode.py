@@ -24,6 +24,7 @@ from .textfield import *
 from sqlalchemy import create_engine, Table, MetaData, select, delete
 from runestone.server import get_dburl
 from runestone.server.componentdb import addQuestionToDB
+from runestone.common.runestonedirective import RunestoneDirective
 
 try:
     from html import escape  # py3
@@ -108,7 +109,7 @@ def purge_activecodes(app, env, docname):
     pass
 
 
-class ActiveCode(Directive):
+class ActiveCode(RunestoneDirective):
     """
 .. activecode:: uniqueid   'nocanvas': directives.flag,
    :nopre: do not create an output component
@@ -136,7 +137,8 @@ class ActiveCode(Directive):
     required_arguments = 1
     optional_arguments = 1
     has_content = True
-    option_spec = {
+    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec.update({
         'nocanvas': directives.flag,
         'nopre': directives.flag,
         'above': directives.flag,  # put the canvas above the code
@@ -157,7 +159,7 @@ class ActiveCode(Directive):
         'datafile' : directives.unchanged,
         'sourcefile' : directives.unchanged,
         'available_files' : directives.unchanged
-    }
+    })
 
     def run(self):
 
