@@ -43,14 +43,6 @@ def addQuestionToDB(self):
         dburl = None
 
     if dburl:
-        sl = ""
-        sl += ".. {}:: {}\n".format(self.name, " ".join(self.arguments))
-        for k, v in self.options.items():
-            sl += "   :{}: {}\n".format(k, v)
-        sl += "   \n"
-        sl += "   " + "   \n".join(self.content)
-        sl += "\n"
-
         basecourse = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
         last_changed = datetime.now()
 
@@ -75,12 +67,12 @@ def addQuestionToDB(self):
                                               questions.c.base_course == basecourse))
         res = engine.execute(sel).first()
         if res:
-            if res['question'] != sl:
-                stmt = questions.update().where(questions.c.id == res['id']).values(question = sl, timestamp=last_changed)
+            if res['question'] != self.block_text:
+                stmt = questions.update().where(questions.c.id == res['id']).values(question = self.block_text.encode('ascii'), timestamp=last_changed)
                 engine.execute(stmt)
         else:
             ins = questions.insert().values(base_course=basecourse, name=self.arguments[0],
-                                            question=sl, timestamp=last_changed, is_private='F',
+                                            question=self.block_text.encode('ascii'), timestamp=last_changed, is_private='F',
                                             question_type=self.name, subchapter=subchapter,
                                             author=author,difficulty=difficulty,chapter=chapter)
             engine.execute(ins)
