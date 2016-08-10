@@ -17,7 +17,7 @@
 from docutils import nodes
 from docutils.parsers.rst import directives
 from runestone.common.runestonedirective import RunestoneDirective
-from runestone.server.componentdb import addQuestionToDB
+from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 
 __author__ = 'bmiller'
 
@@ -46,7 +46,7 @@ def visit_question_node(self, node):
         env.questioncounter += 1
 
     node.question_options['number'] = 'start={}'.format(env.questioncounter)
-
+    self.body.append("_start__{}_".format(node.question_options['divid']))
     res = TEMPLATE_START % node.question_options
     self.body.append(res)
 
@@ -54,9 +54,15 @@ def visit_question_node(self, node):
 def depart_question_node(self, node):
     # Set options and format templates accordingly
     res = TEMPLATE_END % node.question_options
+    delimiter = "_start__{}_".format(node.question_options['divid'])
 
     self.body.append(res)
 
+    addHTMLToDB(node.question_options['divid'],
+                node.question_options['basecourse'],
+                "".join(self.body[self.body.index(delimiter):]))
+
+    self.body.remove(delimiter)
 
 # Templates to be formatted by node options
 TEMPLATE_START = '''
@@ -88,6 +94,7 @@ class QuestionDirective(RunestoneDirective):
     def run(self):
         self.assert_has_content()  # make sure question has something in it
         self.options['divid'] = self.arguments[0]
+        self.options['basecourse'] = basecourse = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
 
         addQuestionToDB(self)
 

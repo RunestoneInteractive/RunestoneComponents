@@ -78,6 +78,27 @@ def addQuestionToDB(self):
                                                 author=author,difficulty=difficulty,chapter=chapter)
                 engine.execute(ins)
         except UnicodeEncodeError:
-            print("Bad character in directive {} in {}/{}".format(self.arguments[0],self.chapter, self.subchapter))
+            print("Bad character in directive {} in {}/{}".format(self.arguments[0], self.chapter, self.subchapter))
 
+def addHTMLToDB(divid, basecourse, htmlsrc):
+    if all(name in os.environ for name in ['DBHOST', 'DBPASS', 'DBUSER', 'DBNAME']):
+        dburl = 'postgresql://{DBUSER}:{DBPASS}@{DBHOST}/{DBNAME}'.format(**os.environ)
+    else:
+        dburl = None
+
+    if dburl:
+        last_changed = datetime.now()
+        engine = create_engine(dburl)
+        meta = MetaData()
+        questions = Table('questions', meta, autoload=True, autoload_with=engine)
+        sel = select([questions]).where(and_(questions.c.name == divid,
+                                              questions.c.base_course == basecourse))
+        res = engine.execute(sel).first()
+        try:
+            if res:
+                if res['htmlsrc'] != htmlsrc:
+                    stmt = questions.update().where(questions.c.id == res['id']).values(htmlsrc = htmlsrc.encode('ascii'), timestamp=last_changed)
+                    engine.execute(stmt)
+        except UnicodeEncodeError:
+            print("Bad character in directive {}".format(divid))
 
