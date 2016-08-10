@@ -61,7 +61,7 @@ def addQuestionToDB(self):
 
         srcpath, line = self.state_machine.get_source_and_line()
         subchapter = os.path.basename(srcpath).replace('.rst','')
-        chapter = srcpath.split('/')[-2]
+        chapter = srcpath.split(os.path.sep)[-2]
 
         sel = select([questions]).where(and_(questions.c.name == self.arguments[0],
                                               questions.c.base_course == basecourse))

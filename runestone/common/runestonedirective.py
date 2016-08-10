@@ -39,5 +39,5 @@ class RunestoneDirective(Directive):
         super(RunestoneDirective,self).__init__(*args, **kwargs)
         srcpath, self.line = self.state_machine.get_source_and_line()
         self.subchapter = os.path.basename(srcpath).replace('.rst','')
-        self.chapter = srcpath.split('/')[-2]
+        self.chapter = srcpath.split(os.path.sep)[-2]
         self.srcpath = srcpath
