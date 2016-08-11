@@ -96,9 +96,12 @@ class QuestionDirective(RunestoneDirective):
         self.options['divid'] = self.arguments[0]
         self.options['basecourse'] = basecourse = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
 
+        self.options['name'] = self.arguments[0].strip()
+
         addQuestionToDB(self)
 
         question_node = QuestionNode(self.options)
+        self.add_name(question_node)
 
         self.state.nested_parse(self.content, self.content_offset, question_node)
 
