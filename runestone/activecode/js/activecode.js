@@ -42,7 +42,6 @@ ActiveCode.prototype.init = function(opts) {
     this.codelens = null;
     this.controlDiv = null;
     this.historyScrubber = null;
-    this.history = [this.code]
     this.timestamps = ["Original"]
     this.autorun = $(orig).data('autorun');
 
@@ -56,6 +55,7 @@ ActiveCode.prototype.init = function(opts) {
         this.code = this.code.substring(0,suffStart);
     }
 
+    this.history = [this.code]
     this.createEditor();
     this.createOutput();
     this.createControls();
@@ -212,6 +212,8 @@ ActiveCode.prototype.createControls = function () {
 ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
 
     var data = {acid: this.divid};
+    var deferred = jQuery.Deferred();
+
     if (this.sid !== undefined) {
         data['sid'] = this.sid;
     }
@@ -222,45 +224,47 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
                 this.timestamps.push( (new Date(data.timestamps[t])).toLocaleString() )
             }
         }
+    }.bind(this))
+        .always(function() {
+            var scrubberDiv = document.createElement("div");
+            $(scrubberDiv).css("display","inline-block");
+            $(scrubberDiv).css("margin-left","10px");
+            $(scrubberDiv).css("margin-right","10px");
+            $(scrubberDiv).width("180px");
+            scrubber = document.createElement("div");
+            this.slideit = function() {
+                this.editor.setValue(this.history[$(scrubber).slider("value")]);
+                var curVal = this.timestamps[$(scrubber).slider("value")];
+                //this.scrubberTime.innerHTML = curVal;
+                var tooltip = '<div class="sltooltip"><div class="sltooltip-inner">' +
+                    curVal + '</div><div class="sltooltip-arrow"></div></div>';
+                $(scrubber).find(".ui-slider-handle").html(tooltip);
+                setTimeout(function () {
+                    $(scrubber).find(".sltooltip").fadeOut()
+                }, 4000);
+            };
+            $(scrubber).slider({
+                max: this.history.length-1,
+                value: this.history.length-1,
+                slide: this.slideit.bind(this),
+                change: this.slideit.bind(this)
+            });
+            scrubberDiv.appendChild(scrubber);
 
-        var scrubberDiv = document.createElement("div");
-        $(scrubberDiv).css("display","inline-block");
-        $(scrubberDiv).css("margin-left","10px");
-        $(scrubberDiv).css("margin-right","10px");
-        $(scrubberDiv).width("180px");
-        scrubber = document.createElement("div");
-        var slideit = function() {
-            this.editor.setValue(this.history[$(scrubber).slider("value")]);
-            var curVal = this.timestamps[$(scrubber).slider("value")];
-            //this.scrubberTime.innerHTML = curVal;
-            var tooltip = '<div class="sltooltip"><div class="sltooltip-inner">' +
-                curVal + '</div><div class="sltooltip-arrow"></div></div>';
-            $(scrubber).find(".ui-slider-handle").html(tooltip);
-            setTimeout(function () {
-                $(scrubber).find(".sltooltip").fadeOut()
-            }, 4000);
-        }.bind(this);
-        $(scrubber).slider({
-            max: this.history.length-1,
-            value: this.history.length-1,
-            slide: slideit,
-            change: slideit
-        });
-        scrubberDiv.appendChild(scrubber);
+            if (pos_last) {
+                scrubber.value = this.history.length-1
+                this.editor.setValue(this.history[scrubber.value]);
+            } else {
+                scrubber.value = 0;
+            }
 
-        if (pos_last) {
-            scrubber.value = this.history.length-1
-            this.editor.setValue(this.history[scrubber.value]);
-        } else {
-            scrubber.value = 0;
-        }
-
-        $(this.histButton).remove();
-        this.histButton = null;
-        this.historyScrubber = scrubber;
-        $(scrubberDiv).insertAfter(this.runButton)
-
-    }.bind(this));
+            $(this.histButton).remove();
+            this.histButton = null;
+            this.historyScrubber = scrubber;
+            $(scrubberDiv).insertAfter(this.runButton)
+            deferred.resolve();
+        }.bind(this));
+    return deferred;
 }
 
 
@@ -371,7 +375,8 @@ ActiveCode.prototype.saveEditor = function () {
         }
     }
     $(document).ajaxError(function (e, jqhxr, settings, exception) {
-        alert("Request Failed for" + settings.url)
+        //alert("Request Failed for" + settings.url)
+        console.log("Request Failed for" + settings.url);
     });
     jQuery.post(eBookConfig.ajaxURL + 'saveprog', data, saveSuccess);
     if (this.editor.acEditEvent) {
@@ -685,12 +690,14 @@ ActiveCode.prototype.buildProg = function() {
     // assemble code from prefix, suffix, and editor for running.
     var pretext;
     var prog = this.editor.getValue();
+    this.pretext = "";
     if (this.includes !== undefined) {
         // iterate over the includes, in-order prepending to prog
         pretext = "";
         for (var x=0; x < this.includes.length; x++) {
             pretext = pretext + edList[this.includes[x]].editor.getValue();
             }
+        this.pretext = pretext;
         prog = pretext + prog
     }
 
@@ -703,7 +710,7 @@ ActiveCode.prototype.buildProg = function() {
 
 ActiveCode.prototype.runProg = function() {
         var prog = this.buildProg();
-        var saveCode;
+        var saveCode = true;
 
         $(this.output).text('');
 
@@ -720,38 +727,49 @@ ActiveCode.prototype.runProg = function() {
         $(this.runButton).attr('disabled', 'disabled');
         $(this.codeDiv).switchClass("col-md-12","col-md-7",{duration:500,queue:false});
         $(this.outDiv).show({duration:700,queue:false});
+
+        if (this.historyScrubber === null && !this.autorun) {
+            dfd = this.addHistoryScrubber();
+        } else {
+            dfd = jQuery.Deferred();
+            dfd.resolve();
+        }
+
+        hresolver = jQuery.Deferred();
+        dfd.done((function() {
+                if (this.historyScrubber && (this.history[$(this.historyScrubber).slider("value")] != this.editor.getValue())) {
+                    this.history.push(this.editor.getValue());
+                    this.timestamps.push((new Date()).toLocaleString());
+                    $(this.historyScrubber).slider("option", "max", this.history.length - 1)
+                    $(this.historyScrubber).slider("option", "value", this.history.length - 1)
+                }
+
+                if ((this.historyScrubber == null || this.history[$(this.historyScrubber).slider("value")] == this.editor.getValue())) {
+                    saveCode = "False";
+                } else {
+                    saveCode = "True"
+                }
+                hresolver.resolve();
+            }).bind(this));
+
+
         var myPromise = Sk.misceval.asyncToPromise(function() {
 
             return Sk.importMainWithBody("<stdin>", false, prog, true);
         });
 
-        if (this.historyScrubber === null && !this.autorun) {
-            this.addHistoryScrubber();
-        }
-
-        if (this.historyScrubber === null || (this.history[$(this.historyScrubber).slider("value")] == this.editor.getValue())) {
-            saveCode = "False"
-        } else {
-            saveCode = "True"
-        }
-
-        myPromise.then((function(mod) { // success
+        // Make sure that the history scrubber is fully initialized AND the code has been run
+        // before we start logging stuff.
+        Promise.all([myPromise,hresolver]).then((function(mod) { // success
             $(this.runButton).removeAttr('disabled');
-            this.logRunEvent({'div_id': this.divid, 'code': prog, 'errinfo': 'success', 'to_save':saveCode}); // Log the run event
+            this.logRunEvent({'div_id': this.divid, 'code': this.editor.getValue(), 'errinfo': 'success', 'to_save':saveCode, 'prefix': this.pretext, 'suffix':this.suffix}); // Log the run event
         }).bind(this),
             (function(err) {  // fail
             $(this.runButton).removeAttr('disabled');
-            this.logRunEvent({'div_id': this.divid, 'code': prog, 'errinfo': err.toString(), 'to_save':saveCode}); // Log the run event
+            this.logRunEvent({'div_id': this.divid, 'code': this.editor.getValue(), 'errinfo': err.toString(), 'to_save':saveCode, 'prefix': this.pretext, 'suffix':this.suffix}); // Log the run event
             this.addErrorMessage(err)
                 }).bind(this));
 
-
-        if (this.historyScrubber && (this.history[$(this.historyScrubber).slider("value")] != this.editor.getValue())) {
-            this.history.push(this.editor.getValue());
-            this.timestamps.push((new Date()).toLocaleString());
-            $(this.historyScrubber).slider("option", "max", this.history.length - 1)
-            $(this.historyScrubber).slider("option", "value", this.history.length - 1)
-        }
 
         if (typeof(allVisualizers) != "undefined") {
             $.each(allVisualizers, function (i, e) {

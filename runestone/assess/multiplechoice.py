@@ -21,6 +21,7 @@ from docutils.parsers.rst import Directive
 from .assessbase import *
 import json
 import random
+from runestone.server.componentdb import addQuestionToDB
 
 
 class MChoiceNode(nodes.General, nodes.Element):
@@ -81,11 +82,30 @@ def depart_mc_node(self,node):
 # author - Barb Ericson
 # author - Anusha
 class MChoice(Assessment):
+    """
+.. mchoice:: uniqueid
+   :multiple_answers: boolean  [optional]
+   :random: boolean [optional]
+   :answer_a: possible answer  -- what follows _ is label
+   :answer_b: possible answer
+   ...
+   :answer_e: possible answer
+   :correct: letter of correct answer or list of correct answer letters (in case of multiple answers)
+   :feedback_a: displayed if a is picked
+   :feedback_b: displayed if b is picked
+   :feedback_c: displayed if c is picked
+   :feedback_d: displayed if d is picked
+   :feedback_e: displayed if e is picked
+
+   Question text   ...
+
+    """
     required_arguments = 1
     optional_arguments = 1
     final_argument_whitespace = True
     has_content = True
-    option_spec = {'answer_a':directives.unchanged,
+    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec.update({'answer_a':directives.unchanged,
         'answer_b':directives.unchanged,
         'answer_c':directives.unchanged,
         'answer_d':directives.unchanged,
@@ -98,7 +118,7 @@ class MChoice(Assessment):
         'feedback_e':directives.unchanged,
         'random':directives.flag,
         'multiple_answers':directives.flag,
-    }
+    })
 
     def run(self):
         """
@@ -136,7 +156,7 @@ class MChoice(Assessment):
 
             </ul>
             '''
-
+        addQuestionToDB(self)
         super(MChoice,self).run()
 
 
