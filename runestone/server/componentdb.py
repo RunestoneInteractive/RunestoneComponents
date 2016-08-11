@@ -78,7 +78,7 @@ def addQuestionToDB(self):
                                                 author=author,difficulty=difficulty,chapter=chapter)
                 engine.execute(ins)
         except UnicodeEncodeError:
-            print("Bad character in directive {} in {}/{}".format(self.arguments[0], self.chapter, self.subchapter))
+            raise self.severe("Bad character in directive {} in {}/{} this will not be saved to the DB".format(self.arguments[0], self.chapter, self.subchapter))
 
 def addHTMLToDB(divid, basecourse, htmlsrc):
     if all(name in os.environ for name in ['DBHOST', 'DBPASS', 'DBUSER', 'DBNAME']):
