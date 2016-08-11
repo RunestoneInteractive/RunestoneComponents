@@ -18,7 +18,7 @@ __author__ = 'bmiller'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
-
+from runestone.server.componentdb import addQuestionToDB
 
 def setup(app):
     app.add_directive('video',Video)
@@ -74,6 +74,17 @@ SOURCE = """<source src="%s" type="video/%s"></source>"""
 
 
 class Video(Directive):
+    """
+.. video:: id
+   :controls:  Show the controls or not
+   :loop: loop the video
+   :thumb: url to thumbnail image
+   :preload: set the video to preload in the bg
+
+   url to video format 1
+   url to video format 2
+   ...
+    """
     required_arguments = 1
     optional_arguments = 1
     final_argument_whitespace = True
@@ -90,6 +101,8 @@ class Video(Directive):
         :param self:
         :return:
         """
+        addQuestionToDB(self)
+
         mimeMap = {'mov':'mp4','webm':'webm', 'm4v':'m4v'}
 
         sources = [SOURCE % (directives.uri(line),mimeMap[line[line.rindex(".")+1:]]) for line in self.content]
@@ -165,6 +178,12 @@ class IframeVideo(Directive):
 
 
 class Youtube(IframeVideo):
+    """
+.. youtube:: YouTubeID
+   :height: 315
+   :width: 560
+   :align: left
+    """
     html = '<iframe src="http://www.youtube.com/embed/%(video_id)s" \
     width="%(width)u" height="%(height)u" frameborder="0" \
     webkitAllowFullScreen mozallowfullscreen allowfullscreen \
@@ -172,6 +191,12 @@ class Youtube(IframeVideo):
 
 
 class Vimeo(IframeVideo):
+    """
+.. vimeo:: vimeoID
+   :height: 315
+   :width: 560
+   :align: left
+    """
     html = '<iframe src="http://player.vimeo.com/video/%(video_id)s" \
     width="%(width)u" height="%(height)u" frameborder="0" \
     webkitAllowFullScreen mozallowfullscreen allowFullScreen \

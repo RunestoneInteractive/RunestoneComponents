@@ -47,6 +47,7 @@
 
 .draggable-feedback {
     text-align: left !important;
+    clear: both;
 }
 
 .draggable-drop {

@@ -47,6 +47,11 @@ def visit_timed_node(self, node):
         node.timed_options['notimer'] = 'data-no-timer'
     else:
         node.timed_options['notimer'] = ''
+        
+    if 'fullwidth' in node.timed_options:
+        node.timed_options['fullwidth'] = 'data-fullwidth'
+    else:
+        node.timed_options['fullwidth'] = ''
 
     res = TEMPLATE_START % node.timed_options
     self.body.append(res)
@@ -59,12 +64,21 @@ def depart_timed_node(self,node):
 
 #Templates to be formatted by node options
 TEMPLATE_START = '''
-    <ul data-component="timedAssessment" %(timelimit)s id="%(divid)s" %(noresult)s %(nofeedback)s %(notimer)s>
+    <ul data-component="timedAssessment" %(timelimit)s id="%(divid)s" %(noresult)s %(nofeedback)s %(notimer)s %(fullwidth)s>
     '''
 
 TEMPLATE_END = '''</ul>
     '''
 class TimedDirective(Directive):
+    """
+.. timed:: identifier
+    :timelimit: Number of minutes student has to take the timed assessment--if not provided, no time limit
+    :noresult: Boolean, doesn't display score
+    :nofeedback: Boolean, doesn't display feedback
+    :notimer: Boolean, doesn't show timer
+    :fullwidth: Boolean, allows the items in the timed assessment to take the full width of the screen...
+
+    """
     required_arguments = 1
     optional_arguments = 0
     final_argument_whitespace = True
@@ -72,6 +86,7 @@ class TimedDirective(Directive):
     option_spec = {"timelimit":directives.positive_int,
                     "noresult":directives.flag,
                     "nofeedback":directives.flag,
+                    "fullwidth":directives.flag,
                     "notimer":directives.flag}
 
     def run(self):
@@ -84,6 +99,7 @@ class TimedDirective(Directive):
                 :noresult: Boolean, doesn't display score
                 :nofeedback: Boolean, doesn't display feedback
                 :notimer: Boolean, doesn't show timer
+                :fullwidth: Boolean, allows the items in the timed assessment to take the full width of the screen
             ...
             """
         self.assert_has_content() # make sure timed has something in it

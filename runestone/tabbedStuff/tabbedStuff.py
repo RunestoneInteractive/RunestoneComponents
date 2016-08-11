@@ -102,6 +102,13 @@ def depart_tabbedstuff_node(self,node):
 
 
 class TabDirective(Directive):
+    """
+.. tab:: identifier
+   :active: Optional flag that specifies this tab to be opened when page is loaded (default is first tab)--overridden by :inactive: flag on tabbedStuff
+
+   Content
+   ...
+    """
     required_arguments = 1  # the name of the tab
     optional_arguments = 0
     final_argument_whitespace = True
@@ -133,6 +140,13 @@ class TabDirective(Directive):
         return [tab_node]
 
 class TabbedStuffDirective(Directive):
+    """
+.. tabbed:: identifier
+   :inactive: Optional flag that calls for no tabs to be open on page load
+
+   Content (put tabs here)
+   ...
+    """
     required_arguments = 1  # the div to put the tabbed exhibit in
     optional_arguments = 0
     final_argument_whitespace = True

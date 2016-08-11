@@ -22,6 +22,9 @@ from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from .textfield import *
 from sqlalchemy import create_engine, Table, MetaData, select, delete
+from runestone.server import get_dburl
+from runestone.server.componentdb import addQuestionToDB
+from runestone.common.runestonedirective import RunestoneDirective
 
 try:
     from html import escape  # py3
@@ -106,11 +109,36 @@ def purge_activecodes(app, env, docname):
     pass
 
 
-class ActiveCode(Directive):
+class ActiveCode(RunestoneDirective):
+    """
+.. activecode:: uniqueid   'nocanvas': directives.flag,
+   :nopre: do not create an output component
+   :above: put the canvas above the code
+   :autorun: run this activecode as soon as the page is loaded
+   :caption: caption under the active code
+   :include: invisibly include code from another activecode
+   :hidecode: Don:t show the editor initially
+   :language: python, html, javascript, java, python2, python3
+   :tour_1: audio tour track
+   :tour_2: audio tour track
+   :tour_3: audio tour track
+   :tour_4: audio tour track
+   :tour_5: audio tour track
+   :nocodelens: Do not show the codelens button
+   :coach: Show the codecoach button
+   :timelimit: set the time limit for this program
+   :stdin: : A file to simulate stdin (java, python2, python3)
+   :datafile: : A datafile for the program to read (java, python2, python3)
+   :sourcefile: : source files (java, python2, python3)
+   :available_files: : other additional files (java, python2, python3)
+
+    print("hello world")
+    """
     required_arguments = 1
     optional_arguments = 1
     has_content = True
-    option_spec = {
+    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec.update({
         'nocanvas': directives.flag,
         'nopre': directives.flag,
         'above': directives.flag,  # put the canvas above the code
@@ -131,9 +159,12 @@ class ActiveCode(Directive):
         'datafile' : directives.unchanged,
         'sourcefile' : directives.unchanged,
         'available_files' : directives.unchanged
-    }
+    })
 
     def run(self):
+
+        addQuestionToDB(self)
+
         env = self.state.document.settings.env
         # keep track of how many activecodes we have.... could be used to automatically make a unique id for them.
         if not hasattr(env, 'activecodecounter'):
@@ -246,7 +277,7 @@ class ActiveCode(Directive):
             source = '\n'
             suffix = '\n'
         try:
-            engine = create_engine(env.config.html_context['dburl'])
+            engine = create_engine(get_dburl(locals()))
             meta = MetaData()
             course_name = env.config.html_context['course_id']
             Source_code = Table('source_code', meta, autoload=True, autoload_with=engine)
@@ -281,7 +312,9 @@ class ActiveCode(Directive):
 
 
         except Exception as e:
+            import traceback
             print("The exception is ", e)
+            traceback.print_exc()
             print(env.config.html_context['course_id'])
             print("Unable to save to source_code table in activecode.py. Possible problems:")
             print("  1. dburl or course_id are not set in conf.py for your book")

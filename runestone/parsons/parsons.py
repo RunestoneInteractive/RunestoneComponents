@@ -20,35 +20,55 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from runestone.assess import Assessment
-
+from runestone.server.componentdb import addQuestionToDB
+from runestone.common.runestonedirective import RunestoneDirective
 
 def setup(app):
     app.add_directive('parsonsprob', ParsonsProblem)
-
     app.add_stylesheet('parsons.css')
     app.add_stylesheet('lib/prettify.css')
-
-    app.add_javascript('lib/jquery.min.js')
-    app.add_javascript('lib/jquery-ui.min.js')
-    app.add_javascript('lib/jquery.ui.touch-punch.min.js')
     app.add_javascript('lib/prettify.js')
-    app.add_javascript('lib/underscore-min.js')
-    app.add_javascript('lib/lis.js')
-    app.add_javascript('parsons_setup.js')
+    app.add_javascript('lib/hammer.min.js')
     app.add_javascript('parsons.js')
-    app.add_javascript('parsons-noconflict.js')
     app.add_javascript('timedparsons.js')
 
 class ParsonsProblem(Assessment):
+    """
+.. parsonsprob:: unqiue_problem_id_here
+   :maxdist:
+   :order:
+   :language:
+   :noindent:
+
+   Solve my really cool parsons problem...if you can.
+   -----
+   def findmax(alist):
+   =====
+      if len(alist) == 0:
+         return None
+   =====
+      curmax = alist[0]
+      for item in alist:
+   =====
+         if item &gt; curmax:
+   =====
+            curmax = item
+   =====
+      return curmax
+
+
+
+    """
     required_arguments = 1
     optional_arguments = 1
     final_argument_whitespace = False
-    option_spec = {
+    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec.update({
         'maxdist' : directives.unchanged,
         'order' : directives.unchanged,
         'language' : directives.unchanged,
         'noindent' : directives.flag
-    }
+    })
     has_content = True
 
     def run(self):
@@ -83,6 +103,8 @@ Example:
 
 
         """
+
+        addQuestionToDB(self)
 
         TEMPLATE = '''
     <pre data-component="parsons" id="%(divid)s"%(maxdist)s%(order)s%(noindent)s%(language)s>

@@ -111,6 +111,8 @@ TimedMC.prototype.checkCorrectTimedMCMA = function () {
         this.correct = true;
     } else if (this.givenArray.length !== 0) {
         this.correct = false;
+    } else {   // question was skipped
+        this.correct = null;
     }
     switch (this.correct) {
         case (true):
