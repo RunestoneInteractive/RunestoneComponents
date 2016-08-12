@@ -94,7 +94,7 @@ class QuestionDirective(RunestoneDirective):
     def run(self):
         self.assert_has_content()  # make sure question has something in it
         self.options['divid'] = self.arguments[0]
-        self.options['basecourse'] = basecourse = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
+        self.options['basecourse'] = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
 
         self.options['name'] = self.arguments[0].strip()
 
