@@ -44,6 +44,10 @@ def addQuestionToDB(self):
 
     if dburl:
         basecourse = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
+        if basecourse == "unknown":
+            raise self.severe("Cannot update database because basecourse is unknown")
+            return
+
         last_changed = datetime.now()
 
         engine = create_engine(dburl)
