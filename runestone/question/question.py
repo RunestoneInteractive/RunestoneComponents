@@ -60,7 +60,7 @@ def depart_question_node(self, node):
 
     addHTMLToDB(node.question_options['divid'],
                 node.question_options['basecourse'],
-                "".join(self.body[self.body.index(delimiter):]))
+                "".join(self.body[self.body.index(delimiter)+1:]))
 
     self.body.remove(delimiter)
 
