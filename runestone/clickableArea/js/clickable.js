@@ -161,8 +161,17 @@ ClickableArea.prototype.checkLocalStorage = function () {
         var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
         if (ex !== null) {
             this.hasStoredAnswers = true;
-            var storageObj = JSON.parse(ex);
-            this.clickedIndexArray = storageObj.answer.split(";");
+            try {
+                var storageObj = JSON.parse(ex);
+                this.clickedIndexArray = storageObj.answer.split(";");
+            } catch (err) {
+                // error while parsing; likely due to bad value stored in storage
+                console.log(err.message);
+                localStorage.removeItem(eBookConfig.email + ":" + this.divid + "-given");
+                this.hasStoredAnswers = false;
+                this.restoreAnswers({});
+                return;
+            }
             if (this.useRunestoneServices) {
                 // log answer to server
                 this.givenIndexArray = [];

@@ -18,6 +18,7 @@ __author__ = 'isaiahmayerchak'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
+from runestone.common.runestonedirective import RunestoneDirective
 
 #add directives/javascript/css
 def setup(app):
@@ -63,7 +64,7 @@ TEMPLATE_START = '''
 TEMPLATE_END = '''
     </div>
     '''
-class RevealDirective(Directive):
+class RevealDirective(RunestoneDirective):
     """
 .. reveal:: identifier
    :showtitle: Text on the 'show' button--default is "Show"
@@ -78,10 +79,11 @@ class RevealDirective(Directive):
     optional_arguments = 0
     final_argument_whitespace = True
     has_content = True
-    option_spec = {"showtitle":directives.unchanged,
+    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec.update({"showtitle":directives.unchanged,
                    "hidetitle":directives.unchanged,
                    "modal":directives.flag,
-                   "modaltitle":directives.unchanged}
+                   "modaltitle":directives.unchanged})
 
     def run(self):
         """

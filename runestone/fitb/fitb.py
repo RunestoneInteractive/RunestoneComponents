@@ -18,11 +18,21 @@ __author__ = 'isaiahmayerchak'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
-from .assessbase import *
+#from runestone.assess.assessbase import *
 import json
 import random
+from runestone.server.componentdb import addQuestionToDB
+from runestone.common import RunestoneDirective
 
 
+def setup(app):
+    app.add_directive('fillintheblank', FillInTheBlank)
+    app.add_directive('blank', Blank)
+    app.add_stylesheet('fitb.css')
+    app.add_javascript('fitb.js')
+    app.add_javascript('timedfitb.js')
+    app.add_node(FITBNode, html=(visit_fitb_node, depart_fitb_node))
+    app.add_node(BlankNode, html=(visit_blank_node, depart_blank_node))
 
 
 class FITBNode(nodes.General, nodes.Element):
@@ -56,7 +66,7 @@ def depart_fitb_node(self,node):
     self.body.append(res)
 
 
-class FillInTheBlank(Directive):
+class FillInTheBlank(RunestoneDirective):
     """
     .. fillintheblank:: fill1412
 
@@ -76,10 +86,12 @@ class FillInTheBlank(Directive):
     optional_arguments = 0
     final_argument_whitespace = True
     has_content = True
-    option_spec = {'blankid':directives.unchanged,
+    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec.update(
+       {'blankid':directives.unchanged,
         'iscode':directives.flag,
         'casei':directives.flag  # case insensitive matching
-    }
+    })
 
     def run(self):
         """
@@ -100,6 +112,7 @@ class FillInTheBlank(Directive):
         </p>
             '''
 
+        addQuestionToDB(self)
 
         self.options['divid'] = self.arguments[0]
 
@@ -110,9 +123,6 @@ class FillInTheBlank(Directive):
         self.state.nested_parse(self.content, self.content_offset, fitbNode)
 
         return [fitbNode]
-
-
-
 
 
 
@@ -162,7 +172,7 @@ def depart_blank_node(self,node):
 
 
 
-class Blank(Directive):
+class Blank(RunestoneDirective):
     """
 .. blank:: blank52532
     :correct: \\baway\\b

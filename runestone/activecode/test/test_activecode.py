@@ -2,13 +2,15 @@ from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.common.exceptions import WebDriverException
 import unittest
+import sys
 
+PORT = '8081'
 
 class ActiveCodeTests(unittest.TestCase):
     def setUp(self):
         #self.driver = webdriver.Firefox()  # good for development
         self.driver = webdriver.PhantomJS() # use this for Jenkins auto testing
-        self.host = 'http://127.0.0.1:8081'
+        self.host = 'http://127.0.0.1:' + PORT
 
     def test_hello(self):
         '''
@@ -63,4 +65,6 @@ class ActiveCodeTests(unittest.TestCase):
 
 
 if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        PORT = sys.argv.pop()
     unittest.main()

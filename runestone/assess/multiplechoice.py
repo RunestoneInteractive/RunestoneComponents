@@ -21,6 +21,7 @@ from docutils.parsers.rst import Directive
 from .assessbase import *
 import json
 import random
+from runestone.server.componentdb import addQuestionToDB
 
 
 class MChoiceNode(nodes.General, nodes.Element):
@@ -103,7 +104,8 @@ class MChoice(Assessment):
     optional_arguments = 1
     final_argument_whitespace = True
     has_content = True
-    option_spec = {'answer_a':directives.unchanged,
+    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec.update({'answer_a':directives.unchanged,
         'answer_b':directives.unchanged,
         'answer_c':directives.unchanged,
         'answer_d':directives.unchanged,
@@ -116,7 +118,7 @@ class MChoice(Assessment):
         'feedback_e':directives.unchanged,
         'random':directives.flag,
         'multiple_answers':directives.flag,
-    }
+    })
 
     def run(self):
         """
@@ -154,7 +156,7 @@ class MChoice(Assessment):
 
             </ul>
             '''
-
+        addQuestionToDB(self)
         super(MChoice,self).run()
 
 
@@ -171,7 +173,7 @@ class MChoice(Assessment):
 #backwards compatibility
 class MChoiceMF(MChoice):
     def run(self):
-        print("This directive has been depreciated. Please convert to the new directive 'mchoice'")
+        raise self.error("This directive has been depreciated. Please convert to the new directive 'mchoice'")
         mcmfNode = super(MChoiceMF,self).run()[0]
 
         return [mcmfNode]
@@ -179,7 +181,7 @@ class MChoiceMF(MChoice):
 class MChoiceMA(MChoice):
     def run(self):
         self.options['multiple_answers'] = 'multipleAnswers'
-        print("This directive has been depreciated. Please convert to the new directive 'mchoice'")
+        raise self.error("This directive has been depreciated. Please convert to the new directive 'mchoice'")
         mchoicemaNode = super(MChoiceMA,self).run()[0]
 
         return [mchoicemaNode]
@@ -187,7 +189,7 @@ class MChoiceMA(MChoice):
 class MChoiceRandomMF(MChoice):
     def run(self):
         self.options['random'] = 'random'
-        print("This directive has been depreciated. Please convert to the new directive 'mchoice'")
+        raise self.error("This directive has been depreciated. Please convert to the new directive 'mchoice'")
         mchoicerandommfNode = super(MChoiceRandomMF,self).run()[0]
 
         return[mchoicerandommfNode]

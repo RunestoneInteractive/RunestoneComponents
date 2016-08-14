@@ -20,7 +20,8 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from runestone.assess import Assessment
-
+from runestone.server.componentdb import addQuestionToDB
+from runestone.common.runestonedirective import RunestoneDirective
 
 def setup(app):
     app.add_directive('parsonsprob', ParsonsProblem)
@@ -61,12 +62,13 @@ class ParsonsProblem(Assessment):
     required_arguments = 1
     optional_arguments = 1
     final_argument_whitespace = False
-    option_spec = {
+    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec.update({
         'maxdist' : directives.unchanged,
         'order' : directives.unchanged,
         'language' : directives.unchanged,
         'noindent' : directives.flag
-    }
+    })
     has_content = True
 
     def run(self):
@@ -101,6 +103,8 @@ Example:
 
 
         """
+
+        addQuestionToDB(self)
 
         TEMPLATE = '''
     <pre data-component="parsons" id="%(divid)s"%(maxdist)s%(order)s%(noindent)s%(language)s>
