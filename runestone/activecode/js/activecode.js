@@ -32,6 +32,7 @@ ActiveCode.prototype.init = function(opts) {
     this.timelimit = $(orig).data('timelimit');
     this.includes = $(orig).data('include');
     this.hidecode = $(orig).data('hidecode');
+    this.sid = opts.sid;
     this.runButton = null;
     this.saveButton = null;
     this.loadButton = null;

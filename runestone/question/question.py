@@ -60,7 +60,7 @@ def depart_question_node(self, node):
 
     addHTMLToDB(node.question_options['divid'],
                 node.question_options['basecourse'],
-                "".join(self.body[self.body.index(delimiter):]))
+                "".join(self.body[self.body.index(delimiter)+1:]))
 
     self.body.remove(delimiter)
 
@@ -94,11 +94,14 @@ class QuestionDirective(RunestoneDirective):
     def run(self):
         self.assert_has_content()  # make sure question has something in it
         self.options['divid'] = self.arguments[0]
-        self.options['basecourse'] = basecourse = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
+        self.options['basecourse'] = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
+
+        self.options['name'] = self.arguments[0].strip()
 
         addQuestionToDB(self)
 
         question_node = QuestionNode(self.options)
+        self.add_name(question_node)
 
         self.state.nested_parse(self.content, self.content_offset, question_node)
 
