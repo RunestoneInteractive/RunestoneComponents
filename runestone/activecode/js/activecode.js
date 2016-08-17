@@ -739,16 +739,17 @@ ActiveCode.prototype.runProg = function() {
         hresolver = jQuery.Deferred();
         dfd.done((function() {
                 if (this.historyScrubber && (this.history[$(this.historyScrubber).slider("value")] != this.editor.getValue())) {
+                    saveCode = "True";
                     this.history.push(this.editor.getValue());
                     this.timestamps.push((new Date()).toLocaleString());
                     $(this.historyScrubber).slider("option", "max", this.history.length - 1)
                     $(this.historyScrubber).slider("option", "value", this.history.length - 1)
+                } else {
+                    saveCode = "False";
                 }
 
-                if ((this.historyScrubber == null || this.history[$(this.historyScrubber).slider("value")] == this.editor.getValue())) {
+                if (this.historyScrubber == null) {
                     saveCode = "False";
-                } else {
-                    saveCode = "True"
                 }
                 hresolver.resolve();
             }).bind(this));
