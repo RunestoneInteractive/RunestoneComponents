@@ -33,6 +33,7 @@ ActiveCode.prototype.init = function(opts) {
     this.includes = $(orig).data('include');
     this.hidecode = $(orig).data('hidecode');
     this.sid = opts.sid;
+    this.graderactive = opts.graderactive;
     this.runButton = null;
     this.saveButton = null;
     this.loadButton = null;
@@ -45,6 +46,10 @@ ActiveCode.prototype.init = function(opts) {
     this.historyScrubber = null;
     this.timestamps = ["Original"]
     this.autorun = $(orig).data('autorun');
+
+    if(this.graderactive) {
+        this.hidecode = false;
+    }
 
     if(this.includes !== undefined) {
         this.includes = this.includes.split(/\s+/);
@@ -138,10 +143,13 @@ ActiveCode.prototype.createControls = function () {
         ctrlDiv.appendChild(butt);
         this.histButton = butt;
         $(butt).click(this.addHistoryScrubber.bind(this));
+        if (this.graderactive) {
+            this.addHistoryScrubber(true);
+        }
     }
 
 
-    if ($(this.origElem).data('gradebutton')) {
+    if ($(this.origElem).data('gradebutton') && ! this.graderactive) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
         $(butt).text("Show Feedback");
@@ -168,7 +176,7 @@ ActiveCode.prototype.createControls = function () {
     }
 
     // CodeLens
-    if ($(this.origElem).data("codelens")) {
+    if ($(this.origElem).data("codelens") && ! this.graderactive) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
         $(butt).text("Show CodeLens");
