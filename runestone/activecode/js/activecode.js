@@ -727,7 +727,8 @@ ActiveCode.prototype.runProg = function() {
         Sk.configure({output : this.outputfun.bind(this),
               read   : this.builtinRead,
               python3: this.python3,
-              imageProxy : 'http://image.runestone.academy:8080/320x'
+              imageProxy : 'http://image.runestone.academy:8080/320x',
+              inputfunTakesPrompt: true,
         });
         Sk.divid = this.divid;
         this.setTimeLimit();
