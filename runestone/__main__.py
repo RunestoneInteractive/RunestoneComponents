@@ -133,7 +133,7 @@ def deploy(dest):
     sh("rsync -rav --delete {} {}".format(pavement.serving_dir,dest))
 
 
-from runestone import *
+from runestone import cmap
 
 @cli.command(short_help="type runestone help for help")
 @click.argument('command', nargs=-1)
@@ -148,28 +148,6 @@ update           * Get a new copy of the _templates folder
 
 or type help <directive> for doc on a runestone directive""")
     else:
-        cmap = {'activecode': ActiveCode,
-                'mchoice': MChoice,
-                'fillintheblank': FillInTheBlank,
-                'blank':Blank,
-                'timed':TimedDirective,
-                'qnum':QuestionNumber,
-                'codelens':Codelens,
-                'clickablearea': ClickableArea,
-                'datafile':DataFile,
-                'disqus':DisqusDirective,
-                'dragndrop': DragNDrop,
-                'parsonsprob': ParsonsProblem,
-                'poll':Poll,
-                'reveal':RevealDirective,
-                'shortanswer': JournalDirective,
-                'tabbed':TabbedStuffDirective,
-                'tab':TabDirective,
-                'video':Video,
-                'youtube':Youtube,
-                'vimeo': Vimeo,
-                'usageassignment': usageAssignment
-        }
         command = command[0]
         if command in cmap:
             print(cmap[command].__doc__)
