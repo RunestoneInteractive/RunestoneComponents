@@ -401,11 +401,13 @@ Timed.prototype.startAssessment = function () {
 Timed.prototype.pauseAssessment = function () {
     if (this.done === 0) {
         if (this.running === 1) {
+            this.logBookEvent({"event": "timedExam", "act": "pause", "div_id": this.divid});
             this.running = 0;
             this.paused = 1;
             this.pauseBtn.innerHTML = "Resume";
             $(this.timedDiv).hide();
         } else {
+            this.logBookEvent({"event": "timedExam", "act": "resume", "div_id": this.divid});
             this.running = 1;
             this.paused = 0;
             this.increment();

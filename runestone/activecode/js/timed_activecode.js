@@ -51,6 +51,7 @@ TimedActiveCode.prototype.processTimedSubmission = function (logFlag) {
     if (this.useRunestoneServices) {
         if (logFlag) {
             this.saveEditor();
+            this.runProg();
         } else {
             this.loadEditor().done(this.runProg.bind(this));
         }
