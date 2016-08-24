@@ -285,6 +285,7 @@ ActiveCode.prototype.createOutput = function () {
     $(outDiv).addClass("ac_output col-md-5");
     this.outDiv = outDiv;
     this.output = document.createElement('pre');
+    this.output.id = this.divid+'_stdout';
     $(this.output).css("visibility","hidden");
 
     this.graphics = document.createElement('div');
