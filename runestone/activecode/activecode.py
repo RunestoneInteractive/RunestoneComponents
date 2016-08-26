@@ -88,7 +88,6 @@ def visit_ac_node(self, node):
     # todo:  handle if 'gradebutton' in node.ac_components: res += GRADES
 
     res = res % node.ac_components
-    res = res.replace("u'", "'")  # hack:  there must be a better way to include the list and avoid unicode strings
 
     self.body.append(res)
 
