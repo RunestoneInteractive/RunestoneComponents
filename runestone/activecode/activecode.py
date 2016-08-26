@@ -153,6 +153,7 @@ class ActiveCode(RunestoneDirective):
         'tour_5': directives.unchanged,
         'nocodelens': directives.flag,
         'coach': directives.flag,
+        'gradebutton': directives.flag,
         'timelimit': directives.unchanged,
         'stdin' : directives.unchanged,
         'datafile' : directives.unchanged,
@@ -263,6 +264,8 @@ class ActiveCode(RunestoneDirective):
 
         if 'gradebutton' not in self.options:
             self.options['gradebutton'] = ''
+        else:
+            self.options['gradebutton'] = "data-gradebutton=true"
 
         if self.content:
             if '====' in self.content:
