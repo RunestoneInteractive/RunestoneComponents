@@ -66,20 +66,22 @@ def addQuestionToDB(self):
         srcpath, line = self.state_machine.get_source_and_line()
         subchapter = os.path.basename(srcpath).replace('.rst','')
         chapter = srcpath.split(os.path.sep)[-2]
+        gradeable_div = self.options.get('gradeable_div', None)
 
         sel = select([questions]).where(and_(questions.c.name == self.arguments[0],
                                               questions.c.base_course == basecourse))
         res = engine.execute(sel).first()
         try:
             if res:
-                if res['question'] != self.block_text:
-                    stmt = questions.update().where(questions.c.id == res['id']).values(question = self.block_text.encode('utf8'), timestamp=last_changed)
-                    engine.execute(stmt)
+                stmt = questions.update().where(questions.c.id == res['id']).values(question = self.block_text.encode('utf8'), timestamp=last_changed, is_private='F',
+question_type=self.name, subchapter=subchapter,
+                                                author=author,difficulty=difficulty,chapter=chapter, gradeable_div=gradeable_div)
+                engine.execute(stmt)
             else:
                 ins = questions.insert().values(base_course=basecourse, name=self.arguments[0],
                                                 question=self.block_text.encode('utf8'), timestamp=last_changed, is_private='F',
                                                 question_type=self.name, subchapter=subchapter,
-                                                author=author,difficulty=difficulty,chapter=chapter)
+                                                author=author,difficulty=difficulty,chapter=chapter, gradeable_div=gradeable_div)
                 engine.execute(ins)
         except UnicodeEncodeError:
             raise self.severe("Bad character in directive {} in {}/{} this will not be saved to the DB".format(self.arguments[0], self.chapter, self.subchapter))
