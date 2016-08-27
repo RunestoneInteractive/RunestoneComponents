@@ -89,8 +89,7 @@ class QuestionDirective(RunestoneDirective):
     final_argument_whitespace = True
     has_content = True
     option_spec = RunestoneDirective.option_spec.copy()
-    option_spec.update({'number': directives.positive_int,
-                        'gradeable_div': directives.unchanged})
+    option_spec.update({'number': directives.positive_int})
 
     def run(self):
         self.assert_has_content()  # make sure question has something in it
