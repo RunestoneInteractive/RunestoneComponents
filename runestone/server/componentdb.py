@@ -66,6 +66,8 @@ def addQuestionToDB(self):
         srcpath, line = self.state_machine.get_source_and_line()
         subchapter = os.path.basename(srcpath).replace('.rst','')
         chapter = srcpath.split(os.path.sep)[-2]
+        grading_type = self.options.get('autograde', None)
+        print (self.arguments[0], grading_type)
 
         sel = select([questions]).where(and_(questions.c.name == self.arguments[0],
                                               questions.c.base_course == basecourse))
@@ -73,14 +75,10 @@ def addQuestionToDB(self):
         try:
             if res:
                 stmt = questions.update().where(questions.c.id == res['id']).values(question = self.block_text.encode('utf8'), timestamp=last_changed, is_private='F',
-question_type=self.name, subchapter=subchapter,
-                                                author=author,difficulty=difficulty,chapter=chapter)
+question_type=self.name, subchapter=subchapter, grading_type = grading_type, author=author,difficulty=difficulty,chapter=chapter)
                 engine.execute(stmt)
             else:
-                ins = questions.insert().values(base_course=basecourse, name=self.arguments[0],
-                                                question=self.block_text.encode('utf8'), timestamp=last_changed, is_private='F',
-                                                question_type=self.name, subchapter=subchapter,
-                                                author=author,difficulty=difficulty,chapter=chapter)
+                ins = questions.insert().values(base_course=basecourse, name=self.arguments[0], question=self.block_text.encode('utf8'), timestamp=last_changed, is_private='F', question_type=self.name, subchapter=subchapter, grading_type = grading_type, author=author,difficulty=difficulty,chapter=chapter)
                 engine.execute(ins)
         except UnicodeEncodeError:
             raise self.severe("Bad character in directive {} in {}/{} this will not be saved to the DB".format(self.arguments[0], self.chapter, self.subchapter))
