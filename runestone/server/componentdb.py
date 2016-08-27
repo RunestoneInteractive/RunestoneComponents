@@ -74,8 +74,7 @@ def addQuestionToDB(self):
         try:
             if res:
                 stmt = questions.update().where(questions.c.id == res['id']).values(question = self.block_text.encode('utf8'), timestamp=last_changed, is_private='F',
-question_type=self.name, subchapter=subchapter,
-                                                author=author,difficulty=difficulty,chapter=chapter, gradeable_div=gradeable_div)
+question_type=self.name, subchapter=subchapter, author=author,difficulty=difficulty,chapter=chapter)
                 engine.execute(stmt)
             else:
                 ins = questions.insert().values(base_course=basecourse, name=self.arguments[0],
