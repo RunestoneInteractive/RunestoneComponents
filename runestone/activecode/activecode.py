@@ -23,7 +23,7 @@ from docutils.parsers.rst import Directive
 from .textfield import *
 from sqlalchemy import create_engine, Table, MetaData, select, delete
 from runestone.server import get_dburl
-from runestone.server.componentdb import addQuestionToDB
+from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 from runestone.common.runestonedirective import RunestoneDirective
 
 try:
@@ -58,11 +58,15 @@ def setup(app):
     app.connect('env-purge-doc', purge_activecodes)
 
 
+TEMPLATE_START = """
+<div class="explainer ac_section alert alert-warning">
+"""
 
-TEMPLATE = """
+TEMPLATE_END = """
 <textarea data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(gradebutton)s %(caption)s>
 %(initialcode)s
 </textarea>
+</div>
 """
 
 class ActivcodeNode(nodes.General, nodes.Element):
@@ -82,13 +86,16 @@ class ActivcodeNode(nodes.General, nodes.Element):
 # The node that is passed as a parameter is an instance of our node class.
 def visit_ac_node(self, node):
     # print self.settings.env.activecodecounter
-    res = TEMPLATE
+
     #todo:  handle above in node.ac_components
     #todo handle  'hidecode' not in node.ac_components:
     # todo:  handle if 'gradebutton' in node.ac_components: res += GRADES
 
-    res = res % node.ac_components
+    node.delimiter = "_start__{}_".format(node.ac_components['divid'])
 
+    self.body.append(node.delimiter)
+
+    res = TEMPLATE_START % node.ac_components
     self.body.append(res)
 
 
@@ -97,7 +104,15 @@ def depart_ac_node(self, node):
         etc and did not want to do all of the processing in visit_ac_node any finishing touches could be
         added here.
     '''
-    pass
+    res = TEMPLATE_END % node.ac_components
+    self.body.append(res)
+
+
+    addHTMLToDB(node.ac_components['divid'],
+                node.ac_components['basecourse'],
+                "".join(self.body[self.body.index(node.delimiter) + 1:]))
+
+    self.body.remove(node.delimiter)
 
 
 def process_activcode_nodes(app, env, docname):
@@ -131,7 +146,13 @@ class ActiveCode(RunestoneDirective):
    :sourcefile: : source files (java, python2, python3)
    :available_files: : other additional files (java, python2, python3)
 
+    If this is a homework problem instead of an example in the text
+    then the assignment text should go here.  The assignment text ends with
+    the line containing four tilde ~
+    ~~~~
     print("hello world")
+    ====
+    print("Hidden code, such as unit tests come after the four = signs")
     """
     required_arguments = 1
     optional_arguments = 1
@@ -164,6 +185,7 @@ class ActiveCode(RunestoneDirective):
 
         addQuestionToDB(self)
 
+        self.options['basecourse'] = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
         env = self.state.document.settings.env
         # keep track of how many activecodes we have.... could be used to automatically make a unique id for them.
         if not hasattr(env, 'activecodecounter'):
@@ -175,7 +197,12 @@ class ActiveCode(RunestoneDirective):
         if not self.options['divid']:
             raise Exception("No divid for ..activecode or ..actex in activecode.py")
 
+        explain_text = None
         if self.content:
+            if '~~~~' in self.content:
+                idx = self.content.index('~~~~')
+                explain_text = self.content[:idx]
+                self.content = self.content[idx+1:]
             source = "\n".join(self.content)
         else:
             source = '\n'
@@ -324,6 +351,10 @@ class ActiveCode(RunestoneDirective):
 
         acnode = ActivcodeNode(self.options)
         self.add_name(acnode)    # make this divid available as a target for :ref:
+
+        if explain_text:
+            self.state.nested_parse(explain_text, self.content_offset, acnode)
+
         return [acnode]
 
 
@@ -336,6 +367,7 @@ class ActiveExercise(ActiveCode):
         self.options['hidecode'] = "data-hidecode=true"
         self.options['gradebutton'] = "data-gradebutton=true"
         self.options['coach'] = "data-coach=true"
+        self.options['basecourse'] = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
         return super(ActiveExercise, self).run()
 
 
