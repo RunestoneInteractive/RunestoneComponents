@@ -185,7 +185,6 @@ class ActiveCode(RunestoneDirective):
 
         addQuestionToDB(self)
 
-        self.options['basecourse'] = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
         env = self.state.document.settings.env
         # keep track of how many activecodes we have.... could be used to automatically make a unique id for them.
         if not hasattr(env, 'activecodecounter'):
@@ -367,7 +366,6 @@ class ActiveExercise(ActiveCode):
         self.options['hidecode'] = "data-hidecode=true"
         self.options['gradebutton'] = "data-gradebutton=true"
         self.options['coach'] = "data-coach=true"
-        self.options['basecourse'] = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
         return super(ActiveExercise, self).run()
 
 
