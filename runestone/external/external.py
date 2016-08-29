@@ -57,7 +57,7 @@ def depart_external_node(self,node):
     pass
 
 
-class ExternalDirective(Assessment):
+class ExternalDirective(RunestoneDirective):
     """
 .. external:: uniqueid
 
