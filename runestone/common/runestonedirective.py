@@ -43,3 +43,6 @@ class RunestoneDirective(Directive):
         self.srcpath = srcpath
         self.basecourse = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
         self.options['basecourse'] = self.basecourse
+        self.options['chapter'] = self.chapter
+        self.options['subchapter'] = self.subchapter
+
