@@ -1619,28 +1619,32 @@ ACFactory.addActiveCodeToDiv = function(outerdivid, acdivid, sid, initialcode, l
     $(acdiv).empty();
     thepre = document.createElement("textarea");
     thepre['data-component'] = "activecode";
-    thepre.id = acdiv;
+    thepre.id = outerdivid;
     $(thepre).data('lang', language);
     $(acdiv).append(thepre);
     var opts = {'orig' : thepre, 'useRunestoneServices': true };
-    addopts = {}
+    addopts = {'sid': sid, 'graderactive':true};
     if(language === 'htmlmixed') {
-        var addopts = {'vertical': true};
+        addopts['vertical'] = true;
     }
     newac = ACFactory.createActiveCode(thepre,language,addopts);
     savediv = newac.divid;
-    newac.divid = outerdivid;
-    newac.sid = sid;
-    if (! initialcode ) {
-        newac.loadEditor();
-    } else {
-        newac.editor.setValue(initialcode);
-        setTimeout(function() {
-                newac.editor.refresh();
-            },500);
-    }
+    //newac.divid = outerdivid;
+    //newac.sid = sid;
+    // if (! initialcode ) {
+    //     newac.loadEditor();
+    // } else {
+    //     newac.editor.setValue(initialcode);
+    //     setTimeout(function() {
+    //             newac.editor.refresh();
+    //         },500);
+    // }
     newac.divid = savediv;
     newac.editor.setSize(500,300);
+    setTimeout(function() {
+            newac.editor.refresh();
+        },500);
+
 };
 
 ACFactory.createScratchActivecode = function() {
