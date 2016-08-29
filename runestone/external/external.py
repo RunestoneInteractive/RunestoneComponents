@@ -57,7 +57,7 @@ def depart_external_node(self,node):
     pass
 
 
-class ExternalDirective(Assessment): # RunestoneDirective or Assessment inheritance?
+class ExternalDirective(Assessment):
     """
 .. external:: uniqueid
 
@@ -72,7 +72,7 @@ class ExternalDirective(Assessment): # RunestoneDirective or Assessment inherita
 
     node_class = ExternalNode
 
-    # This run method is also meant to be the basis for a class to be inherited from. We can build up from here, and also remove all unnecessary things.
+    # This run method is also meant to be the basis for a class to be inherited from. We can build up from here, and continue to remove all unnecessary things.
     def run(self):
         # Raise an error if the directive does not have contents.
         self.assert_has_content()
