@@ -20,6 +20,7 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from runestone.server.componentdb import addQuestionToDB
+from runestone.common.runestonedirective import RunestoneDirective
 
 def setup(app):
     app.add_directive('dragndrop',DragNDrop)
@@ -84,7 +85,7 @@ def depart_dnd_node(self,node):
     self.body.append(res)
 
 
-class DragNDrop(Directive):
+class DragNDrop(RunestoneDirective):
     """
 .. dragndrop:: identifier
     :feedback: Feedback that is displayed if things are incorrectly matched--is optional
@@ -98,7 +99,8 @@ class DragNDrop(Directive):
     required_arguments = 1
     optional_arguments = 0
     has_content = True
-    option_spec = {"feedback":directives.unchanged,
+    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec.update({"feedback":directives.unchanged,
         "match_1":directives.unchanged,
         "match_2":directives.unchanged,
         "match_3":directives.unchanged,
@@ -120,7 +122,7 @@ class DragNDrop(Directive):
         "match_19":directives.unchanged,
         "match_20":directives.unchanged,
 
-    }
+    })
 
     def run(self):
         """

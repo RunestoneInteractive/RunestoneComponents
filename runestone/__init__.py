@@ -7,6 +7,7 @@ from .clickableArea import *
 from .datafile import *
 from .disqus import *
 from .dragndrop import *
+from .fitb import *
 from .livecode import *
 from .meta import *
 from .parsons import *
@@ -36,6 +37,7 @@ def runestone_extensions():
     module_paths = [ x for x in os.listdir(basedir) if os.path.isdir(os.path.join(basedir,x))]
     modules = [ 'runestone.{}'.format(x) for x in module_paths if os.path.exists('{}/__init__.py'.format(os.path.join(basedir,x)))]
     modules.remove('runestone.server')
+    modules.remove('runestone.common')
     return modules
 
 from paver.easy import task, cmdopts, sh
@@ -96,3 +98,26 @@ def build(options):
     else:
         print("Error in building {}".format(options.build.project_name) )
 
+
+cmap = {'activecode': ActiveCode,
+        'mchoice': MChoice,
+        'fillintheblank': FillInTheBlank,
+        'blank': Blank,
+        'timed': TimedDirective,
+        'qnum': QuestionNumber,
+        'codelens': Codelens,
+        'clickablearea': ClickableArea,
+        'datafile': DataFile,
+        'disqus': DisqusDirective,
+        'dragndrop': DragNDrop,
+        'parsonsprob': ParsonsProblem,
+        'poll': Poll,
+        'reveal': RevealDirective,
+        'shortanswer': JournalDirective,
+        'tabbed': TabbedStuffDirective,
+        'tab': TabDirective,
+        'video': Video,
+        'youtube': Youtube,
+        'vimeo': Vimeo,
+        'usageassignment': usageAssignment
+        }

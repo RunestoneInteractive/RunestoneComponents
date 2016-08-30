@@ -3,7 +3,7 @@
 set -e
 testhome=`pwd`
 port=8081
-for t in 'activecode' 'poll'; do
+for t in 'activecode' 'poll' 'question'; do
     cd runestone/$t/test
     runestone build --all
     runestone serve --port $port &

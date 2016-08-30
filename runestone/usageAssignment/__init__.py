@@ -22,7 +22,7 @@ from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from sqlalchemy import create_engine, Table, MetaData, select, delete
 from sqlalchemy.orm import sessionmaker
-
+from runestone.common.runestonedirective import RunestoneDirective
 
 def setup(app):
     app.add_directive('usageassignment',usageAssignment)
@@ -103,7 +103,8 @@ class usageAssignment(Directive):
     required_arguments = 1  # requires an id for the directive
     optional_arguments = 0
     has_content = False
-    option_spec = {
+    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec.update({
         'assignment_type': directives.positive_int,
         'sections':directives.unchanged,
         'chapters':directives.unchanged,
@@ -112,7 +113,7 @@ class usageAssignment(Directive):
         'deadline':directives.unchanged,
         'pct_required':directives.positive_int,
         'points':directives.positive_int
-    }
+    })
 
     def get_or_make_assignment_type(self, engine, session, AssignmentType):
         # There will normally be only one "usage" type of assignment; we'll take that, or create it if it doesn't exist

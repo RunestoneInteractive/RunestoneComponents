@@ -21,7 +21,8 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from runestone.assess import Assessment
-from runestone.server.componentdb import addQuestionToDB
+from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
+from runestone.common.runestonedirective import RunestoneDirective
 
 def setup(app):
     app.add_directive('shortanswer', JournalDirective)
@@ -44,6 +45,8 @@ def visit_journal_node(self, node):
     components = dict(node.journalnode_components)
     components.update({'divid': div_id})
     res = TEXT % components
+    addHTMLToDB(div_id, components['basecourse'], res)
+
     self.body.append(res)
 
 def depart_journal_node(self,node):
@@ -61,7 +64,8 @@ class JournalDirective(Assessment):
     optional_arguments = 0
     final_argument_whitespace = True
     has_content = True
-    option_spec = {'optional': directives.flag}
+    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec.update({'optional': directives.flag})
 
     node_class = JournalNode
 
