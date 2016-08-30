@@ -17,7 +17,6 @@
 from docutils import nodes
 from docutils.parsers.rst import directives
 from runestone.common.runestonedirective import RunestoneDirective
-from runestone.server.componentdb import addQuestionToDB
 
 __author__ = 'bmiller'
 
@@ -54,6 +53,7 @@ def visit_question_node(self, node):
 def depart_question_node(self, node):
     # Set options and format templates accordingly
     res = TEMPLATE_END % node.question_options
+    delimiter = "_start__{}_".format(node.question_options['divid'])
 
     self.body.append(res)
 
@@ -88,10 +88,12 @@ class QuestionDirective(RunestoneDirective):
     def run(self):
         self.assert_has_content()  # make sure question has something in it
         self.options['divid'] = self.arguments[0]
+        self.options['basecourse'] = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
 
-        addQuestionToDB(self)
+        self.options['name'] = self.arguments[0].strip()
 
         question_node = QuestionNode(self.options)
+        self.add_name(question_node)
 
         self.state.nested_parse(self.content, self.content_offset, question_node)
 

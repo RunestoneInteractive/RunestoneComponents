@@ -1,5 +1,7 @@
 from __future__ import print_function
 import os
+import re
+
 from sqlalchemy import create_engine, Table, MetaData, select, delete
 from collections import OrderedDict
 import sys
@@ -23,6 +25,9 @@ def unCamel(x):
 
 def findChaptersSubChapters(tocfile):
     ftext = open(tocfile, 'r').readlines()
+    if '.. toc_version: 2\n' in ftext:
+        return findV2ChaptersSubChapters(tocfile)
+
     toclines = [x for x in range(len(ftext)) if 'toctree' in ftext[x]]
     chdict = OrderedDict()
     chtitles = {}
@@ -33,8 +38,8 @@ def findChaptersSubChapters(tocfile):
         else:
             stop = toclines[i + 1]
         for j in range(start, stop):
-            if ".rst" in ftext[j] and "/" in ftext[j]:
-                chapter, subchapter = ftext[j].strip()[:-4].split('/')
+            if ".rst" in ftext[j] and os.path.sep in ftext[j]:
+                chapter, subchapter = ftext[j].strip()[:-4].split(os.path.sep)
                 chapter = chapter.strip()
                 subchapter = subchapter.strip()
                 if chapter not in chdict:
@@ -44,6 +49,41 @@ def findChaptersSubChapters(tocfile):
                 chdict[chapter].append(subchapter)
 
     return chdict, chtitles
+
+def findV2ChaptersSubChapters(tocfile):
+    ftext = open(tocfile, 'r').readlines()
+    # Find the the toctree directive
+    # then make a list of all of the sub entries in the toctree
+    # If the line has a  / in it then it is a chapter we can deal with
+    # The part before the / is the chapter
+    # The part after should be toctree.rst - read it!
+    # the first line of the toctree.rst file will be the full chapter name
+    # the subchapter names will be all of the entries in the embedded toctree directive
+    toclines = getTOCEntries(ftext)
+    chdict = OrderedDict()
+    chtitles = {}
+    toclines = [x for x in toclines if os.path.sep in x]
+    basepath = os.path.dirname(tocfile)
+    for subchapter in toclines:
+        chapter = subchapter.split(os.path.sep)[0]
+        with open(os.path.join(basepath,subchapter),'r') as scfile:
+            ft = scfile.readline().strip()
+            chtitles[chapter] = ft
+            scfile.readline()
+            subchapters = getTOCEntries(scfile.readlines())
+        chdict[chapter] = [x.replace('.rst','') for x in subchapters]
+    return chdict, chtitles
+
+def getTOCEntries(ftext):
+    tocstart = [x for x in range(len(ftext)) if 'toctree::' in ftext[x]][0] + 1
+    toclines = []
+    while re.match(r'\s+:\w+:.*$', ftext[tocstart]):  # eat up the parameters
+        tocstart += 1
+    tocstart += 1 # get rid of blank line
+    while tocstart < len(ftext) and ftext[tocstart] != "\n" :
+        toclines.append(ftext[tocstart])
+        tocstart += 1
+    return [x.strip() for x in toclines]
 
 
 def addChapterInfoToDB(subChapD, chapTitles, course_id):
@@ -126,4 +166,5 @@ def populateChapterInfo(project_name, index_file):
 
 if __name__ == '__main__':
     # todo:  get file, and course_id from environment
-    populateChapterInfo('pythonds', 'index.rst')
+    #populateChapterInfo('pythonds', 'index.rst')
+    print(findChaptersSubChapters("/Users/bmiller/Runestone/pythonds/_sources/index.rst"))

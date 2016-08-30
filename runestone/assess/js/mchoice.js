@@ -279,6 +279,10 @@ MultipleChoice.prototype.randomizeAnswers = function () {
 
 MultipleChoice.prototype.restoreAnswers = function (data) {
     // Restore answers from storage retrieval done in RunestoneBase
+    // sometimes data.answer can be null
+    if (!data.answer) {
+        data.answer = "";
+    }
     var answers = data.answer.split(",");
     for (var a = 0; a < answers.length; a++) {
         var index = answers[a];
