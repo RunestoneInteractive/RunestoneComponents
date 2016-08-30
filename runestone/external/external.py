@@ -54,7 +54,19 @@ def visit_external_node(self, node):
     self.body.append(res)
 
 def depart_external_node(self,node):
-    pass
+    # From activecode:
+    ''' This is called at the start of processing an activecode node.  If activecode had recursive nodes
+        etc and did not want to do all of the processing in visit_ac_node any finishing touches could be
+        added here.
+    '''
+    res = TEXT % node.ac_components
+    self.body.append(res)
+
+    addHTMLToDB(node.ac_components['divid'],
+                node.ac_components['basecourse'],
+                "".join(self.body[self.body.index(node.delimiter) + 1:]))
+
+    self.body.remove(node.delimiter)
 
 
 class ExternalDirective(RunestoneDirective):
@@ -83,5 +95,6 @@ class ExternalDirective(RunestoneDirective):
         self.options['content'] = "<p>".join(self.content)
     
         external_node = ExternalNode(self.options)
+
 
         return [external_node]
