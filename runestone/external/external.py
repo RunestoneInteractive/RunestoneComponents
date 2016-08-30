@@ -69,7 +69,7 @@ def depart_external_node(self, node):
 
 # Templates to be formatted by node options
 TEMPLATE_START = '''
-    <div data-component="question" class="full-width container question" id="%(divid)s" >
+    <div data-component="external" class="full-width container external" id="%(divid)s" >
     <li class="alert alert-warning">
 
     '''
