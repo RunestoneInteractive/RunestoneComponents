@@ -22,6 +22,14 @@ __author__ = 'bmiller'
 import os
 from sqlalchemy import create_engine, Table, MetaData, select, delete, update, and_
 
+# create a global DB query engine to share for the rest of the file
+if all(name in os.environ for name in ['DBHOST', 'DBPASS', 'DBUSER', 'DBNAME']):
+    dburl = 'postgresql://{DBUSER}:{DBPASS}@{DBHOST}/{DBNAME}'.format(**os.environ)
+    engine = create_engine(dburl)
+else:
+    dburl = None
+    engine = None
+    print("Skipping all DB operations because environment variables not set up")
 
 def logSource(self):
     sourcelog = self.state.document.settings.env.config.html_context.get('dsource', None)
@@ -84,31 +92,28 @@ question_type=self.name, subchapter=subchapter, autograde = autograde, author=au
         except UnicodeEncodeError:
             raise self.severe("Bad character in directive {} in {}/{} this will not be saved to the DB".format(self.arguments[0], self.chapter, self.subchapter))
 
-def getOrCreateAssignmentType(assignment_type_name):
-    if all(name in os.environ for name in ['DBHOST', 'DBPASS', 'DBUSER', 'DBNAME']):
-        dburl = 'postgresql://{DBUSER}:{DBPASS}@{DBHOST}/{DBNAME}'.format(**os.environ)
-    else:
-        dburl = None
-    engine = create_engine(dburl)
+def getOrCreateAssignmentType(assignment_type_name, grade_type = None, points_possible = None, assignments_count = None, assignments_dropped = None):
+
     meta = MetaData()
     assignment_types = Table('assignment_types', meta, autoload=True, autoload_with=engine)
 
+    # search for it in the DB
+    sel = select([assignment_types]).where(assignment_types.c.name == assignment_type_name)
     res = engine.execute(sel).first()
     if res:
         return res['id']
     else:
         # create the assignment type
         ins = assignment_types.insert().values(
-            name=assignment_type_name)
-        return engine.execute(ins).inserted_primary_key()
+            name=assignment_type_name,
+            grade_type = grade_type,
+            points_possible = points_possible,
+            assignments_count = assignments_count,
+            assignments_dropped = assignments_dropped)
+        res = engine.execute(ins)
+        return res.inserted_primary_key[0]
 
-def addAssignmentQuestionToDB(basecourse, assignment_id, question_name, points, timed):
-    if all(name in os.environ for name in ['DBHOST', 'DBPASS', 'DBUSER', 'DBNAME']):
-        dburl = 'postgresql://{DBUSER}:{DBPASS}@{DBHOST}/{DBNAME}'.format(**os.environ)
-    else:
-        dburl = None
-
-    engine = create_engine(dburl)
+def addAssignmentQuestionToDB(basecourse, assignment_id, question_name, points, timed=None):
     meta = MetaData()
     questions = Table('questions', meta, autoload=True, autoload_with=engine)
     assignment_questions = Table('assignment_questions', meta, autoload=True, autoload_with=engine)
@@ -124,67 +129,62 @@ def addAssignmentQuestionToDB(basecourse, assignment_id, question_name, points, 
                                           assignment_questions.c.question_id == question_id))
     res = engine.execute(sel).first()
     if res:
-        #insert
-        pass
-    else:
         #update
-        pass
-
-def addAssignmentToDB(self):
-    if all(name in os.environ for name in ['DBHOST', 'DBPASS', 'DBUSER', 'DBNAME']):
-        dburl = 'postgresql://{DBUSER}:{DBPASS}@{DBHOST}/{DBNAME}'.format(**os.environ)
-    else:
-        dburl = None
-
-    if dburl:
-        basecourse = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
-        if basecourse == "unknown":
-            raise self.severe("Cannot update database because basecourse is unknown")
-            return
-
-        last_changed = datetime.now()
-
-        engine = create_engine(dburl)
-        meta = MetaData()
-        assignments = Table('assignments', meta, autoload=True, autoload_with=engine)
-        assignment_questions = Table('assignment_questions', meta, autoload=True, autoload_with=engine)
-
-        """
-            .. assignment:
-                :name: Problem Set 1
-                :assignment_type: formative
-                :questions: (divid_1 50), (divid_2 100), ...
-                :deadline: 23-09-2016 15:30
-                :points: integer
-        """
-        assignment_type_name = self.options.get('assignment_type_name', 'Problem Set')
-        assignment_type_id = getOrCreateAssignmentType(assignment_type_name)
-
-        name = self.options.get('name') # required; error if missing
-        if 'name' in self.options:
-            deadline = datetime.strptime(self.options['name'], '%d-%m-%Y %H:%M')
-        else:
-            deadline = None
-        points = self.options.get('points', None)
-
-        sel = select([assignments]).where(and_(assignments.c.name == assignment_name,
-                                              assignments.c.base_course == basecourse))
-        res = engine.execute(sel).first()
-        if res:
-            stmt = assignments.update().where(assignments.c.id == res['id']).values(
-                assignment_type = assignment_type,
-                deadline = deadline,
-                points = points
+        stmt = assignment_questions.update().where(assignment_questions.c.id == res['id']).values( \
+            assignment_id = assignment_id,
+            question_id = question_id,
+            points = points,
+            timed=timed
             )
-            engine.execute(stmt)
-        else:
-            ins = assignments.insert().values(
-                base_course=basecourse,
-                name=name,
-                assignment_type = assignment_type,
-                deadline = deadline,
-                points = points)
-            engine.execute(ins)
+        engine.execute(stmt)
+    else:
+        #insert
+        ins = assignment_questions.insert().values(
+            assignment_id = assignment_id,
+            question_id = question_id,
+            points = points,
+            timed=timed
+            )
+        engine.execute(ins)
+
+def getCourseID(coursename):
+    meta = MetaData()
+    courses = Table('courses', meta, autoload=True, autoload_with=engine)
+
+    sel = select([courses]).where(courses.c.course_name == coursename)
+    res = engine.execute(sel).first()
+    return res['id']
+
+def addAssignmentToDB(name = None, course_id = None, assignment_type_id = None, deadline = None, points = None, threshold = None):
+
+    last_changed = datetime.now()
+
+    meta = MetaData()
+    assignments = Table('assignments', meta, autoload=True, autoload_with=engine)
+    assignment_questions = Table('assignment_questions', meta, autoload=True, autoload_with=engine)
+
+    sel = select([assignments]).where(and_(assignments.c.name == name,
+                                          assignments.c.course == course_id))
+    res = engine.execute(sel).first()
+    if res:
+        stmt = assignments.update().where(assignments.c.id == res['id']).values(
+            assignment_type = assignment_type_id,
+            duedate = deadline,
+            points = points,
+            threshold = threshold
+        )
+        engine.execute(stmt)
+        return res['id']
+    else:
+        ins = assignments.insert().values(
+            course=course_id,
+            name=name,
+            assignment_type = assignment_type_id,
+            duedate = deadline,
+            points = points,
+            threshold = threshold)
+        res = engine.execute(ins)
+        return res.inserted_primary_key[0]
 
 
 def addHTMLToDB(divid, basecourse, htmlsrc):
