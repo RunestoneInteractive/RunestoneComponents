@@ -62,10 +62,10 @@ def findV2ChaptersSubChapters(tocfile):
     toclines = getTOCEntries(ftext)
     chdict = OrderedDict()
     chtitles = {}
-    toclines = [x for x in toclines if os.path.sep in x]
+    toclines = [x for x in toclines if '/' in x]
     basepath = os.path.dirname(tocfile)
     for subchapter in toclines:
-        chapter = subchapter.split(os.path.sep)[0]
+        chapter = subchapter.split('/')[0]
         with open(os.path.join(basepath,subchapter),'r') as scfile:
             ft = scfile.readline().strip()
             chtitles[chapter] = ft
