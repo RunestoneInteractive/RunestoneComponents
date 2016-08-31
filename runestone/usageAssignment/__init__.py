@@ -191,8 +191,8 @@ class usageAssignment(Directive):
                     if not subch:
                         print("problem with: %s" % nm)
                     self.options['chapter_data'].append({'ch': ch_dir, 'sub_chs': [subch_name]})
-        except:
-            print("Subchapters requested not found: %s" % (self.options.get('subchapters')))
+            except:
+                print("Subchapters requested not found: %s" % (self.options.get('subchapters')))
 
         # Accumulate all the ActiveCodes that are to be run and URL paths to be visited
         divs = []
