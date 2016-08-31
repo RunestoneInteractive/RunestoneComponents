@@ -23,7 +23,7 @@ from docutils.parsers.rst import Directive
 from sqlalchemy import create_engine, Table, MetaData, select, delete
 from sqlalchemy.orm import sessionmaker
 from runestone.common.runestonedirective import RunestoneDirective
-from runestone.server.componentdb import addAssignmentToDB, getOrCreateAssignmentType, getCourseID
+from runestone.server.componentdb import addAssignmentToDB, getOrCreateAssignmentType, getCourseID, addAssignmentQuestionToDB, getOrInsertQuestionForPage
 from datetime import datetime
 import os
 
@@ -141,6 +141,7 @@ class usageAssignment(Directive):
         meta = MetaData()
         # create a configured "Session" class
         Session = sessionmaker(bind=engine)
+        session = Session()
 
         Chapter = Table('chapters', meta, autoload=True, autoload_with=engine)
         SubChapter = Table('sub_chapters', meta, autoload=True, autoload_with=engine)
@@ -176,6 +177,7 @@ class usageAssignment(Directive):
                     sub_chs += results
                     chapter_data = {'ch': nm, 'sub_chs': [r.sub_chapter_label for r in results]}
                     self.options['chapter_data'].append(chapter_data)
+
             except:
                 print("Chapters requested not found: %s" % (self.options.get('chapters')))
         # Add any explicit subchapters
@@ -189,8 +191,8 @@ class usageAssignment(Directive):
                     if not subch:
                         print("problem with: %s" % nm)
                     self.options['chapter_data'].append({'ch': ch_dir, 'sub_chs': [subch_name]})
-            except:
-                print("Subchapters requested not found: %s" % (self.options.get('subchapters')))
+        except:
+            print("Subchapters requested not found: %s" % (self.options.get('subchapters')))
 
         # Accumulate all the ActiveCodes that are to be run and URL paths to be visited
         divs = []
@@ -225,7 +227,7 @@ class usageAssignment(Directive):
                           threshold = min_activities)
 
         for acid in paths + active_codes:
-            print( "adding {} to assignment {}".format(acid, assignment_id))
-            addAssignmentQuestionToDB(base_course_name, assignment_id, acid, 1)
+            q_id = getOrInsertQuestionForPage(base_course=basecourse_name, name=acid, is_private='F', question_type="page", autograde = "visited", difficulty=1,chapter=None)
+            addAssignmentQuestionToDB(q_id, assignment_id, 1)
 
         return [usageAssignmentNode(self.options)]

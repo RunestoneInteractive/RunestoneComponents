@@ -73,7 +73,7 @@ def addQuestionToDB(self):
 
         srcpath, line = self.state_machine.get_source_and_line()
         subchapter = os.path.basename(srcpath).replace('.rst','')
-        chapter = srcpath.split('/')[-2]
+        chapter = srcpath.split(os.path.sep)[-2]
 
         autograde = self.options.get('autograde', None)
 
@@ -91,6 +91,56 @@ question_type=self.name, subchapter=subchapter, autograde = autograde, author=au
                 engine.execute(ins)
         except UnicodeEncodeError:
             raise self.severe("Bad character in directive {} in {}/{} this will not be saved to the DB".format(self.arguments[0], self.chapter, self.subchapter))
+
+def getQuestionID(base_course, name):
+    meta = MetaData()
+    questions = Table('questions', meta, autoload=True, autoload_with=engine)
+
+
+    sel = select([questions]).where(and_(questions.c.name == name,
+                                          questions.c.base_course == base_course))
+    res = engine.execute(sel).first()
+    if res:
+        return res['id']
+    else:
+        return None
+
+def getOrInsertQuestionForPage(base_course=None, name=None, is_private='F', question_type="page", autograde = "visited", author=None, difficulty=1,chapter=None):
+    last_changed = datetime.now()
+
+    meta = MetaData()
+    questions = Table('questions', meta, autoload=True, autoload_with=engine)
+
+
+    sel = select([questions]).where(and_(questions.c.name == name,
+                                          questions.c.base_course == base_course))
+    res = engine.execute(sel).first()
+
+    if res:
+        id = res['id']
+        stmt = questions.update().where(questions.c.id == id).values(
+            timestamp=last_changed,
+            is_private= is_private,
+            question_type=question_type,
+            autograde = autograde,
+            author=author,
+            difficulty=difficulty,
+            chapter=chapter)
+        res = engine.execute(stmt)
+        return id
+    else:
+        ins = questions.insert().values(
+            base_course= base_course,
+            name= name,
+            timestamp=last_changed,
+            is_private= is_private,
+            question_type=question_type,
+            autograde = autograde,
+            author=author,
+            difficulty=difficulty,
+            chapter=chapter)
+        res = engine.execute(ins)
+        return res.inserted_primary_key[0]
 
 def getOrCreateAssignmentType(assignment_type_name, grade_type = None, points_possible = None, assignments_count = None, assignments_dropped = None):
 
@@ -113,16 +163,10 @@ def getOrCreateAssignmentType(assignment_type_name, grade_type = None, points_po
         res = engine.execute(ins)
         return res.inserted_primary_key[0]
 
-def addAssignmentQuestionToDB(basecourse, assignment_id, question_name, points, timed=None):
+def addAssignmentQuestionToDB(question_id, assignment_id, points, timed=None):
     meta = MetaData()
     questions = Table('questions', meta, autoload=True, autoload_with=engine)
     assignment_questions = Table('assignment_questions', meta, autoload=True, autoload_with=engine)
-
-    # first get the question_id associated with question_name
-    sel = select([questions]).where(and_(questions.c.name == question_name,
-                                          questions.c.base_course == basecourse))
-    res = engine.execute(sel).first()
-    question_id = res['id']
 
     # now insert or update the assignment_questions row
     sel = select([assignment_questions]).where(and_(assignment_questions.c.assignment_id == assignment_id,
@@ -134,7 +178,7 @@ def addAssignmentQuestionToDB(basecourse, assignment_id, question_name, points, 
             assignment_id = assignment_id,
             question_id = question_id,
             points = points,
-            timed=timed
+            timed= timed
             )
         engine.execute(stmt)
     else:
