@@ -331,7 +331,7 @@ Timed.prototype.createRenderedQuestionArray = function () {
             // this is for when a directive has a wrapper element that isn't actually part of the javascript object
             // for example, activecode has a wrapper div that contains the question for the element
             var child = $("#" + $(tmpChild).data("childcomponent"));
-            if ($(child).is("[data-component=activecode]")) {
+            if ($(child[0]).is("[data-component=activecode]")) {
                 // create & insert new JS object back into wrapper div-- we're simulating the parsing that would happen outside of a timed exam
                 opts.orig = child[0];
                 var newAC = new TimedActiveCode(opts);
