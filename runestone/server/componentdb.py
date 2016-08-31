@@ -100,7 +100,7 @@ def getOrCreateAssignmentType(assignment_type_name):
             name=assignment_type_name)
         return engine.execute(ins).inserted_primary_key()
 
-def addAssignmentQuestionToDB(self, basecourse, assignment_id, question_name, points, timed):
+def addAssignmentQuestionToDB(basecourse, assignment_id, question_name, points, timed):
     if all(name in os.environ for name in ['DBHOST', 'DBPASS', 'DBUSER', 'DBNAME']):
         dburl = 'postgresql://{DBUSER}:{DBPASS}@{DBHOST}/{DBNAME}'.format(**os.environ)
     else:
@@ -152,7 +152,7 @@ def addAssignmentToDB(self):
                 :name: Problem Set 1
                 :assignment_type: formative
                 :questions: (divid_1 50), (divid_2 100), ...
-                :deadline: <some datetime>
+                :deadline: 23-09-2016 15:30
                 :points: integer
         """
         assignment_type_name = self.options.get('assignment_type_name', 'Problem Set')
@@ -160,7 +160,7 @@ def addAssignmentToDB(self):
 
         name = self.options.get('name') # required; error if missing
         if 'name' in self.options:
-            deadline = datetime.strptime(self.options['name'], '%m/%d/%Y %H:%M')
+            deadline = datetime.strptime(self.options['name'], '%d-%m-%Y %H:%M')
         else:
             deadline = None
         points = self.options.get('points', None)
