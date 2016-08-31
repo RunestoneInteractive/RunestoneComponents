@@ -38,8 +38,8 @@ def findChaptersSubChapters(tocfile):
         else:
             stop = toclines[i + 1]
         for j in range(start, stop):
-            if ".rst" in ftext[j] and os.path.sep in ftext[j]:
-                chapter, subchapter = ftext[j].strip()[:-4].split(os.path.sep)
+            if ".rst" in ftext[j] and "/" in ftext[j]:
+                chapter, subchapter = ftext[j].strip()[:-4].split('/')
                 chapter = chapter.strip()
                 subchapter = subchapter.strip()
                 if chapter not in chdict:

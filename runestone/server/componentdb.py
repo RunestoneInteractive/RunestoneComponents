@@ -73,7 +73,7 @@ def addQuestionToDB(self):
 
         srcpath, line = self.state_machine.get_source_and_line()
         subchapter = os.path.basename(srcpath).replace('.rst','')
-        chapter = srcpath.split(os.path.sep)[-2]
+        chapter = srcpath.split('/')[-2]
 
         autograde = self.options.get('autograde', None)
 
