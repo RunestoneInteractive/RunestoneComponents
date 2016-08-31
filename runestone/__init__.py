@@ -87,7 +87,7 @@ def build(options):
             idxfile = os.path.join(options.build.sourcedir,'index.rst')
 
         populateChapterInfo(options.build.project_name, idxfile)
-        print('Creating Chapter Information')
+        print('Creating Chapter Information for {}'.format(idxfile))
     except ImportError as e:
         print('Chapter information database population skipped, This is OK for a standalone build.',e)
     except Exception as e:
