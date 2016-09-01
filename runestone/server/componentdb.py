@@ -163,7 +163,7 @@ def getOrCreateAssignmentType(assignment_type_name, grade_type = None, points_po
         res = engine.execute(ins)
         return res.inserted_primary_key[0]
 
-def addAssignmentQuestionToDB(question_id, assignment_id, points, timed=None):
+def addAssignmentQuestionToDB(question_id, assignment_id, points, assessment_type = None, timed=None):
     meta = MetaData()
     questions = Table('questions', meta, autoload=True, autoload_with=engine)
     assignment_questions = Table('assignment_questions', meta, autoload=True, autoload_with=engine)
@@ -178,7 +178,8 @@ def addAssignmentQuestionToDB(question_id, assignment_id, points, timed=None):
             assignment_id = assignment_id,
             question_id = question_id,
             points = points,
-            timed= timed
+            timed= timed,
+            assessment_type = assessment_type
             )
         engine.execute(stmt)
     else:
@@ -187,7 +188,8 @@ def addAssignmentQuestionToDB(question_id, assignment_id, points, timed=None):
             assignment_id = assignment_id,
             question_id = question_id,
             points = points,
-            timed=timed
+            timed=timed,
+            assessment_type = assessment_type
             )
         engine.execute(ins)
 

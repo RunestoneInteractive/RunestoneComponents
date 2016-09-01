@@ -92,6 +92,7 @@ class Assignment(RunestoneDirective):
 
         unparsed = self.options.get('questions', None)
         if unparsed:
+            summative_type_id = getOrCreateAssignmentType("summative")
             q_strings = unparsed.split(',')
             for q in q_strings:
                 (question_name, points) = q.strip().split()
@@ -99,7 +100,7 @@ class Assignment(RunestoneDirective):
                 # first get the question_id associated with question_name
                 question_id = getQuestionID(basecourse_name, question_name)
                 if question_id:
-                    addAssignmentQuestionToDB(question_id, assignment_id, points)
+                    addAssignmentQuestionToDB(question_id, assignment_id, points, assessment_type = summative_type_id)
                 else:
                     raise self.warn("Question {} is not in the database for basecourse {}".format(question_name, basecourse_name))
         else:
