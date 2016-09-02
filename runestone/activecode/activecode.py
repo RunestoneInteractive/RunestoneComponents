@@ -59,7 +59,7 @@ def setup(app):
 
 
 TEMPLATE_START = """
-<div class="explainer ac_section alert alert-warning">
+<div data-childcomponent="%(divid)s" class="explainer ac_section alert alert-warning">
 """
 
 TEMPLATE_END = """
@@ -180,7 +180,6 @@ class ActiveCode(RunestoneDirective):
         'datafile' : directives.unchanged,
         'sourcefile' : directives.unchanged,
         'available_files' : directives.unchanged,
-        'autograde': directives.unchanged
     })
 
     def run(self):

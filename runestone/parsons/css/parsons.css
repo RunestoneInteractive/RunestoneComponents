@@ -112,17 +112,19 @@
     background-color: #dff0d8;
 }
 .parsons .indentLeft, .parsons .indentRight {
-    border: 1px solid #ffcc00;
+    border: 2px solid #ffcc00;
+    padding: 4px 9px;
+    background-color: #fff0b3;
 }
 .parsons .indentLeft {
-    background-image: url('parsons-left.svg');
-    background-repeat: no-repeat;
-    background-position: left center;
+    background-image: url('parsons-ll.svg'), url('parsons-rl.svg');
+    background-repeat: no-repeat, no-repeat;
+    background-position: left center, right center;
 }
 .parsons .indentRight {
-    background-image: url('parsons-right.svg');
-    background-repeat: no-repeat;
-    background-position: right center;
+    background-image: url('parsons-lr.svg'), url('parsons-rr.svg');
+    background-repeat: no-repeat, no-repeat;
+    background-position: left center, right center;
 }
 .parsons .incorrectPosition {
     background-color: #ffbaba;

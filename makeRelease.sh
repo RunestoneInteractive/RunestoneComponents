@@ -28,4 +28,4 @@ twine upload dist/*
 echo "tagging this release and pushing to github"
 
 /usr/local/bin/git tag -a $1 -m 'tag new version'
-/usr/local/bin/git push --tags
+/usr/local/bin/git push --follow-tags

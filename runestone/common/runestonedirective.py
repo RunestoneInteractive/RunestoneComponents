@@ -32,7 +32,8 @@ import os
 class RunestoneDirective(Directive):
     option_spec = {'author': directives.unchanged,
                    'tags': directives.unchanged,
-                   'difficulty': directives.positive_int
+                   'difficulty': directives.positive_int,
+                   'autograde': directives.unchanged,
                    }
 
     def __init__(self, *args, **kwargs):
@@ -45,4 +46,3 @@ class RunestoneDirective(Directive):
         self.options['basecourse'] = self.basecourse
         self.options['chapter'] = self.chapter
         self.options['subchapter'] = self.subchapter
-
