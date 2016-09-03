@@ -135,7 +135,7 @@ class usageAssignment(Directive):
             dburl = 'postgresql://{DBUSER}:{DBPASS}@{DBHOST}/{DBNAME}'.format(**os.environ)
         else:
             dburl = None
-            raise self.warn("Environment variables not set for DB access; can't save usageassignment to DB")
+            self.state.document.settings.env.warn("Environment variables not set for DB access; can't save usageassignment to DB")
             return [usageAssignmentNode(self.options)]
         engine = create_engine(dburl)
         meta = MetaData()
@@ -213,10 +213,17 @@ class usageAssignment(Directive):
 
         min_activities = (len(paths) + len(active_codes)) * self.options.get('pct_required', 0) / 100
 
+        deadline = None
         if 'deadline' in self.options:
-            deadline = datetime.strptime(self.options['deadline'], '%Y-%m-%d %H:%M')
-        else:
-            deadline = None
+            try:
+                deadline = datetime.strptime(self.options['deadline'], '%Y-%m-%d %H:%M')
+            except:
+                print("deadline not in preferred format %Y-%m-%d %H:%M")
+            try:
+                deadline = datetime.strptime(self.options['deadline'], '%Y-%m-%d %H:%M:%S')
+            except:
+                print("deadline also not in alternate format %Y-%m-%d %H:%M:%S\n Omitting deadline")
+
         points = self.options.get('points', 0)
 
         assignment_id = addAssignmentToDB(name = self.options.get('assignment_name', 'dummy_assignment'),
