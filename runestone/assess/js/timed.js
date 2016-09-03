@@ -313,20 +313,33 @@ Timed.prototype.createRenderedQuestionArray = function () {
         var tmpChild = this.newChildren[i];
         opts = {'orig':tmpChild, 'useRunestoneServices':eBookConfig.useRunestoneServices}
         if ($(tmpChild).is("[data-component=multiplechoice]")) {
-            this.renderedQuestionArray.push(new TimedMC(opts));
+            this.renderedQuestionArray.push({"question": new TimedMC(opts)});
         } else if ($(tmpChild).is("[data-component=fillintheblank]")) {
             var newFITB = new TimedFITB(opts);
-            this.renderedQuestionArray.push(newFITB);
+            this.renderedQuestionArray.push({"question": newFITB});
         } else if ($(tmpChild).is("[data-component=dragndrop]")) {
-            this.renderedQuestionArray.push(new TimedDragNDrop(opts));
+            this.renderedQuestionArray.push({"question": new TimedDragNDrop(opts)});
         } else if ($(tmpChild).is("[data-component=clickablearea]")) {
-            this.renderedQuestionArray.push(new TimedClickableArea(opts));
+            this.renderedQuestionArray.push({"question": new TimedClickableArea(opts)});
         } else if ($(tmpChild).is("[data-component=shortanswer]")) {
-            this.renderedQuestionArray.push(new TimedShortAnswer(opts));
+            this.renderedQuestionArray.push({"question": new TimedShortAnswer(opts)});
         } else if ($(tmpChild).is("[data-component=parsons]")) {
-            this.renderedQuestionArray.push(new TimedParsons(opts));
+            this.renderedQuestionArray.push({"question": new TimedParsons(opts)});
         } else if ($(tmpChild).is("[data-component=activecode]")) {
-            this.renderedQuestionArray.push(new TimedActiveCode(opts));
+            this.renderedQuestionArray.push({"question": new TimedActiveCode(opts)});
+        } else if ($(tmpChild).is("[data-childcomponent]")) {
+            // this is for when a directive has a wrapper element that isn't actually part of the javascript object
+            // for example, activecode has a wrapper div that contains the question for the element
+            var child = $("#" + $(tmpChild).data("childcomponent"));
+            if ($(child[0]).is("[data-component=activecode]")) {
+                // create & insert new JS object back into wrapper div-- we're simulating the parsing that would happen outside of a timed exam
+                opts.orig = child[0];
+                var newAC = new TimedActiveCode(opts);
+                $(child[0]).remove();
+                var tmp = tmpChild.childNodes[0];
+                $(tmp).after(newAC.containerDiv);
+                this.renderedQuestionArray.push({"wrapper": tmpChild, "question": newAC});
+            }
         }
     }
     if (this.random) {
@@ -349,12 +362,20 @@ Timed.prototype.randomizeRQA = function () {
 };
 
 Timed.prototype.renderTimedQuestion = function () {
-    $(this.switchDiv).replaceWith(this.renderedQuestionArray[this.currentQuestionIndex].containerDiv);
-    this.switchDiv = this.renderedQuestionArray[this.currentQuestionIndex].containerDiv;
+    var currentWrapper = this.renderedQuestionArray[this.currentQuestionIndex].wrapper;
+    var currentQuestion = this.renderedQuestionArray[this.currentQuestionIndex].question;
+    // if the question is actually inside a wrapper (for example, activecode), then we want to display the wrapper, but evaluate the actual question object
+    if (currentWrapper) {
+        $(this.switchDiv).replaceWith(currentWrapper);
+        this.switchDiv = currentWrapper;
+    } else {
+        $(this.switchDiv).replaceWith(currentQuestion.containerDiv);
+        this.switchDiv = currentQuestion.containerDiv;
+    }
     // If the timed component has listeners, those might need to be reinitialized
     // This flag will only be set in the elements that need it--it will be undefined in the others and thus evaluate to false
-    if (this.renderedQuestionArray[this.currentQuestionIndex].needsReinitialization) {
-        this.renderedQuestionArray[this.currentQuestionIndex].reinitializeListeners();
+    if (currentQuestion.needsReinitialization) {
+        currentQuestion.reinitializeListeners();
     }
 };
 
@@ -551,7 +572,8 @@ Timed.prototype.finishAssessment = function () {
 
 Timed.prototype.submitTimedProblems = function (logFlag) {
     for (var i = 0; i < this.renderedQuestionArray.length; i++) {
-        this.renderedQuestionArray[i].processTimedSubmission(logFlag);
+        var currentQuestion = this.renderedQuestionArray[i].question;
+        currentQuestion.processTimedSubmission(logFlag);
     }
     if (!this.showFeedback) {
         this.hideTimedFeedback();
@@ -560,7 +582,8 @@ Timed.prototype.submitTimedProblems = function (logFlag) {
 
 Timed.prototype.hideTimedFeedback = function () {
     for (var i = 0; i < this.renderedQuestionArray.length; i++) {
-        this.renderedQuestionArray[i].hideFeedback();   // Defined in each timed class
+        var currentQuestion = this.renderedQuestionArray[i].question;
+        currentQuestion.hideFeedback();
     }
 };
 
@@ -571,7 +594,7 @@ Timed.prototype.checkScore = function () {
     // Gets the score of each problem
 
     for (var i = 0; i < this.renderedQuestionArray.length; i++) {
-        var correct = this.renderedQuestionArray[i].checkCorrectTimed();
+        var correct = this.renderedQuestionArray[i].question.checkCorrectTimed();
         if (correct == "T") {
             this.score++;
             this.correctStr = this.correctStr + (i + 1) + ", ";
