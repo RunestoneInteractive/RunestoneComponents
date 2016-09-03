@@ -83,11 +83,11 @@ class Assignment(RunestoneDirective):
             try:
                 deadline = datetime.strptime(self.options['deadline'], '%Y-%m-%d %H:%M')
             except:
-                print("deadline not in preferred format %Y-%m-%d %H:%M")
+                self.state.document.settings.env.warn(self.state.document.settings.env.docname("deadline not in preferred format %Y-%m-%d %H:%M")
             try:
                 deadline = datetime.strptime(self.options['deadline'], '%Y-%m-%d %H:%M:%S')
             except:
-                print("deadline also not in alternate format %Y-%m-%d %H:%M:%S\n Omitting deadline")
+                self.state.document.settings.env.warn(self.state.document.settings.env.docname("deadline also not in alternate format %Y-%m-%d %H:%M:%S\n Omitting deadline")
 
         points = self.options.get('points', 0)
 

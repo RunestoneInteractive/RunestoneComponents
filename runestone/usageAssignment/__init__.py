@@ -179,7 +179,7 @@ class usageAssignment(Directive):
                     self.options['chapter_data'].append(chapter_data)
 
             except:
-                print("Chapters requested not found: %s" % (self.options.get('chapters')))
+                self.state.document.settings.env.warn(self.state.document.settings.env.docname("Chapters requested not found: %s" % (self.options.get('chapters')))
         # Add any explicit subchapters
         if 'subchapters' in self.options:
             try:
@@ -189,10 +189,10 @@ class usageAssignment(Directive):
                     subch = session.query(SubChapter).filter(SubChapter.c.chapter_id == ch_id, SubChapter.c.sub_chapter_label == subch_name).first()
                     sub_chs.append(subch)
                     if not subch:
-                        print("problem with: %s" % nm)
+                        self.state.document.settings.env.warn(self.state.document.settings.env.docname("problem with: %s" % nm)
                     self.options['chapter_data'].append({'ch': ch_dir, 'sub_chs': [subch_name]})
             except:
-                print("Subchapters requested not found: %s" % (self.options.get('subchapters')))
+                self.state.document.settings.env.warn(self.state.document.settings.env.docname("Subchapters requested not found: %s" % (self.options.get('subchapters')))
 
         # Accumulate all the ActiveCodes that are to be run and URL paths to be visited
         divs = []
@@ -205,7 +205,7 @@ class usageAssignment(Directive):
                                                   Div.c.subchapter == subch.sub_chapter_label).all()
                 paths.append('/runestone/static/%s/%s/%s.html' % (course_name, ch_name, subch.sub_chapter_label))
             except:
-                print ("Subchapter not found: %s" % (subch))
+                self.state.document.settings.env.warn(self.state.document.settings.env.docname("Subchapter not found: %s" % (subch))
         tracked_div_types = ['activecode', 'actex']
         active_codes = [d.div_id for d in divs if d.div_type in tracked_div_types]
 
@@ -218,11 +218,11 @@ class usageAssignment(Directive):
             try:
                 deadline = datetime.strptime(self.options['deadline'], '%Y-%m-%d %H:%M')
             except:
-                print("deadline not in preferred format %Y-%m-%d %H:%M")
+                self.state.document.settings.env.warn(self.state.document.settings.env.docname("deadline not in preferred format %Y-%m-%d %H:%M")
             try:
                 deadline = datetime.strptime(self.options['deadline'], '%Y-%m-%d %H:%M:%S')
             except:
-                print("deadline also not in alternate format %Y-%m-%d %H:%M:%S\n Omitting deadline")
+                self.state.document.settings.env.warn(self.state.document.settings.env.docname("deadline also not in alternate format %Y-%m-%d %H:%M:%S\n Omitting deadline")
 
         points = self.options.get('points', 0)
 
