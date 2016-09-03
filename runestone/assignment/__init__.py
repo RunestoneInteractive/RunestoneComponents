@@ -78,10 +78,17 @@ class Assignment(RunestoneDirective):
         assignment_type_name = self.options.get('assignment_type')
         assignment_type_id = getOrCreateAssignmentType(assignment_type_name)
 
+        deadline = None
         if 'deadline' in self.options:
-            deadline = datetime.strptime(self.options['deadline'], '%Y-%m-%d %H:%M')
-        else:
-            deadline = None
+            try:
+                deadline = datetime.strptime(self.options['deadline'], '%Y-%m-%d %H:%M')
+            except:
+                print("deadline not in preferred format %Y-%m-%d %H:%M")
+            try:
+                deadline = datetime.strptime(self.options['deadline'], '%Y-%m-%d %H:%M:%S')
+            except:
+                print("deadline also not in alternate format %Y-%m-%d %H:%M:%S\n Omitting deadline")
+
         points = self.options.get('points', 0)
 
         assignment_id = addAssignmentToDB(name = name,
@@ -102,8 +109,8 @@ class Assignment(RunestoneDirective):
                 if question_id:
                     addAssignmentQuestionToDB(question_id, assignment_id, points, assessment_type = summative_type_id)
                 else:
-                    raise self.warn("Question {} is not in the database for basecourse {}".format(question_name, basecourse_name))
+                    self.state.document.settings.env.warn(self.state.document.settings.env.docname, "Question {} is not in the database for basecourse {}".format(question_name, basecourse_name))
         else:
-            raise self.warn("No questions for assignment {}".format(name))
+            self.state.document.settings.env.warn(self.state.document.settings.env.docname, "No questions for assignment {}".format(name))
 
         return []
