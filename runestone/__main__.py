@@ -6,7 +6,7 @@ import getpass
 import six
 import click
 from paver.easy import sh
-from pkg_resources import resource_string, resource_filename
+from pkg_resources import resource_string, resource_filename, require
 
 @click.group(chain=True)
 def cli():
@@ -69,6 +69,8 @@ def build(all):
     from paver.tasks import main as paver_main
     os.chdir(findProjectRoot())
     sys.path.insert(0, os.getcwd())
+    version = require("runestone")[0].version
+    print("Building with Runestone {}".format(version))
 
     import pavement
 
