@@ -79,15 +79,16 @@ class Assignment(RunestoneDirective):
         assignment_type_id = getOrCreateAssignmentType(assignment_type_name)
 
         deadline = None
+
         if 'deadline' in self.options:
             try:
                 deadline = datetime.strptime(self.options['deadline'], '%Y-%m-%d %H:%M')
             except:
-                self.state.document.settings.env.warn(self.state.document.settings.env.docname("deadline not in preferred format %Y-%m-%d %H:%M")
-            try:
-                deadline = datetime.strptime(self.options['deadline'], '%Y-%m-%d %H:%M:%S')
-            except:
-                self.state.document.settings.env.warn(self.state.document.settings.env.docname("deadline also not in alternate format %Y-%m-%d %H:%M:%S\n Omitting deadline")
+                try:
+                    deadline = datetime.strptime(self.options['deadline'], '%Y-%m-%d %H:%M:%S')
+                    self.state.document.settings.env.warn(self.state.document.settings.env.docname, "deadline not in preferred format %Y-%m-%d %H:%M but accepting alternate format with seconds")
+                except:
+                    self.state.document.settings.env.warn(self.state.document.settings.env.docname, "deadline missing or incorrectly formatted; Omitting deadline")
 
         points = self.options.get('points', 0)
 
