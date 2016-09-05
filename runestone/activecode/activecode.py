@@ -180,7 +180,6 @@ class ActiveCode(RunestoneDirective):
         'datafile' : directives.unchanged,
         'sourcefile' : directives.unchanged,
         'available_files' : directives.unchanged,
-        'autograde': directives.unchanged
     })
 
     def run(self):
