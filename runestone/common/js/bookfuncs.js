@@ -120,8 +120,7 @@ function gotUser(data, status, whatever) {
         }
     } else {
         if (!caughtErr) {
-            // mess = "username: " + d.nick;
-            mess = "user: " + d.email;
+            mess = "username: " + d.nick;
             eBookConfig.email = d.email;
             eBookConfig.isLoggedIn = true;
             eBookConfig.cohortId = d.cohortId;
