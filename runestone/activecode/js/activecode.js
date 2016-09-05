@@ -699,7 +699,7 @@ ActiveCode.prototype.outputfun = function(text) {
 ActiveCode.prototype.buildProg = function() {
     // assemble code from prefix, suffix, and editor for running.
     var pretext;
-    var prog = this.editor.getValue();
+    var prog = this.editor.getValue() + "\n"
     this.pretext = "";
     if (this.includes !== undefined) {
         // iterate over the includes, in-order prepending to prog
