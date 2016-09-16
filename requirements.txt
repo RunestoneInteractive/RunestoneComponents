@@ -3,5 +3,6 @@ Paver==1.2.4
 six==1.10.0
 Sphinx>=1.4.5
 sphinxcontrib-paverutils>=1.13
+cogapp>=2.5
 SQLAlchemy>=1.0.13
 selenium>=2.53.6
