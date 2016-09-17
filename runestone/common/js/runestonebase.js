@@ -12,12 +12,14 @@ RunestoneBase.prototype.logBookEvent = function (eventInfo) {
 
 RunestoneBase.prototype.logRunEvent = function (eventInfo) {
     eventInfo.course = eBookConfig.course;
-    if (! 'to_save' in eventInfo) {
+    if ( this.forceSave || (! 'to_save' in eventInfo) ) {
         eventInfo.save_code = "True"
     }
     if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
         jQuery.post(eBookConfig.ajaxURL + 'runlog', eventInfo) // Log the run event
-            .error(function() {alert("Failed to save this run.")})
+            .done((function() {this.forceSave = false; }).bind(this))
+            .fail((function() {alert("WARNING:  Your code was not saved!  Please Try again.");
+                this.forceSave = true; }).bind(this))
     }
     console.log("running " + JSON.stringify(eventInfo));
 };
