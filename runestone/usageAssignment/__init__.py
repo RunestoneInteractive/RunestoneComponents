@@ -25,6 +25,7 @@ from sqlalchemy.orm import sessionmaker
 from runestone.common.runestonedirective import RunestoneDirective
 from runestone.server.componentdb import addAssignmentToDB, getOrCreateAssignmentType, getCourseID, addAssignmentQuestionToDB, getOrInsertQuestionForPage
 from datetime import datetime
+from collections import OrderedDict
 import os
 
 def setup(app):
@@ -57,13 +58,14 @@ def visit_ua_node(self,node):
         chapter_data = None
 
     s = ""
-    chapters_and_subchapters = {}
+    chapters_and_subchapters = OrderedDict()
     if chapter_data and course_name:
         for d in chapter_data: # Set up Chapter-Subchs dictionary
             ch_name, sub_chs = d['ch'], d['sub_chs']
             if d['ch'] not in chapters_and_subchapters:
-                chapters_and_subchapters[d['ch']] = [x for x in d['sub_chs']]
+                chapters_and_subchapters[d['ch']] = d['sub_chs']
             else:
+                # The order matters with respect to the list wherein they're added to the dictionary. 
                 for subch in d['sub_chs']:
                     chapters_and_subchapters[d['ch']].append(subch)
 
