@@ -245,6 +245,6 @@ class usageAssignment(Directive):
 
         for acid in paths + active_codes:
             q_id = getOrInsertQuestionForPage(base_course=basecourse_name, name=acid, is_private='F', question_type="page", autograde = "visited", difficulty=1,chapter=None)
-            addAssignmentQuestionToDB(q_id, assignment_id, 1)
+            addAssignmentQuestionToDB(q_id, assignment_id, 1, autograde="visited")
 
         return [usageAssignmentNode(self.options)]
