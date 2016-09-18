@@ -443,11 +443,19 @@ ActiveCode.prototype.createGradeSummary = function () {
         var report = eval(data)[0];
         // check for report['message']
         if (report) {
-            body = "<h4>Grade Report</h4>" +
-                   "<p>This assignment: " + report['grade'] + "</p>" +
-                   "<p>" + report['comment'] + "</p>" +
-                   "<p>Number of graded assignments: " + report['count'] + "</p>" +
-                   "<p>Average score: " +  report['avg'] + "</p>"
+            if (report['version'] == 2){
+                // new version; would be better to embed this in HTML for the activecode
+                body = "<h4>Grade Report</h4>" +
+                       "<p>This question: " + report['grade'] + " out of " + report['max'] + "</p>" +
+                       "<p>" + report['comment'] + "</p>"
+            }
+            else{
+                body = "<h4>Grade Report</h4>" +
+                       "<p>This assignment: " + report['grade'] + "</p>" +
+                       "<p>" + report['comment'] + "</p>" +
+                       "<p>Number of graded assignments: " + report['count'] + "</p>" +
+                       "<p>Average score: " +  report['avg'] + "</p>"
+            }
 
         } else {
             body = "<h4>The server did not return any grade information</h4>";

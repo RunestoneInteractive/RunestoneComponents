@@ -78,6 +78,7 @@ class Assessment(RunestoneDirective):
         self.options['qnumber'] = self.getNumber()
         
         self.options['divid'] = self.arguments[0]
+        self.options['basecourse'] = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
 
         if self.content[0][:2] == '..':  # first line is a directive
             self.content[0] = self.options['qnumber'] + ': \n\n' + self.content[0]

@@ -20,15 +20,42 @@ __author__ = 'Paul Resnick'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
-from runestone.server.componentdb import addAssignmentToDB, addAssignmentQuestionToDB, getCourseID, getOrCreateAssignmentType, getQuestionID
+from runestone.server.componentdb import addAssignmentToDB, addAssignmentQuestionToDB, getCourseID, getOrCreateAssignmentType, getQuestionID, get_HTML_from_DB
 from runestone.common.runestonedirective import RunestoneDirective
 from datetime import datetime
 
 def setup(app):
     app.add_directive('assignment',Assignment)
+    app.add_node(AssignmentNode, html=(visit_a_node, depart_a_node))
 
     app.connect('doctree-resolved',process_nodes)
     app.connect('env-purge-doc', purge)
+
+class AssignmentNode(nodes.General, nodes.Element):
+    def __init__(self, content):
+        """
+
+        Arguments:
+        - `self`:
+        - `content`:
+        """
+        super(AssignmentNode, self).__init__(name=content['name'])
+        self.a_components = content
+
+
+def visit_a_node(self, node):
+    pass
+
+def depart_a_node(self, node):
+    question_ids = node.a_components['question_ids']
+    basecourse = node.a_components['basecourse']
+    for q_id in question_ids:
+        src = get_HTML_from_DB(q_id, basecourse)
+        if src:
+            self.body.append(src)
+        else:
+            self.body.append("<p>Missing HTML source for {}</p>".format(q_id))
+            print("No HTML source saved for {}; can't include that kind of question until code writing to HTML is implemented for that directive".format(q_id))
 
 def process_nodes(app,env,docname):
     pass
@@ -36,6 +63,7 @@ def process_nodes(app,env,docname):
 
 def purge(app,env,docname):
     pass
+
 
 
 class Assignment(RunestoneDirective):
@@ -56,7 +84,10 @@ class Assignment(RunestoneDirective):
         'assignment_type': directives.unchanged,
         'questions': directives.unchanged,
         'deadline':directives.unchanged,
-        'points':directives.positive_int
+        'points':directives.positive_int,
+        'threshold': directives.positive_int,
+        'autograde': directives.unchanged,
+        'generate_html': directives.flag
     })
 
     def run(self):
@@ -67,12 +98,16 @@ class Assignment(RunestoneDirective):
                 :questions: (divid_1 50), (divid_2 100), ...
                 :deadline: 23-09-2016 15:30
                 :points: integer
+                :threshold: integer
+                :autograde: visited
+                :generate_html:
         """
 
         course_name = self.state.document.settings.env.config.html_context['course_id']
         self.options['course_name'] = course_name
         course_id = getCourseID(course_name)
         basecourse_name = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
+        self.options['basecourse'] = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
 
         name = self.options.get('name') # required; error if missing
         assignment_type_name = self.options.get('assignment_type')
@@ -91,27 +126,37 @@ class Assignment(RunestoneDirective):
                     self.state.document.settings.env.warn(self.state.document.settings.env.docname, "deadline missing or incorrectly formatted; Omitting deadline")
 
         points = self.options.get('points', 0)
+        threshold = self.options.get('threshold', None)
+        if threshold:
+            threshold = int(threshold)
+        autograde = self.options.get('autograde', None)
 
         assignment_id = addAssignmentToDB(name = name,
                           course_id = course_id,
                           assignment_type_id = assignment_type_id,
                           deadline = deadline,
-                          points = points)
+                          points = points,
+                          threshold = threshold)
 
         unparsed = self.options.get('questions', None)
+        question_names = []
         if unparsed:
             summative_type_id = getOrCreateAssignmentType("summative")
             q_strings = unparsed.split(',')
             for q in q_strings:
                 (question_name, points) = q.strip().split()
-
+                question_names.append(question_name)
                 # first get the question_id associated with question_name
                 question_id = getQuestionID(basecourse_name, question_name)
                 if question_id:
-                    addAssignmentQuestionToDB(question_id, assignment_id, points, assessment_type = summative_type_id)
+                    addAssignmentQuestionToDB(question_id, assignment_id, points, assessment_type = summative_type_id, autograde = autograde)
                 else:
                     self.state.document.settings.env.warn(self.state.document.settings.env.docname, "Question {} is not in the database for basecourse {}".format(question_name, basecourse_name))
         else:
             self.state.document.settings.env.warn(self.state.document.settings.env.docname, "No questions for assignment {}".format(name))
+        self.options['question_ids'] = question_names
 
-        return []
+        if 'generate_html' in self.options:
+            return [AssignmentNode(self.options)]
+        else:
+            return []

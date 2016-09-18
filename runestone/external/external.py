@@ -49,23 +49,25 @@ def visit_external_node(self, node):
     # Set options and format templates accordingly
     # env = node.document.settings.env
 
+    node.delimiter = "_start__{}_".format(node.ac_components['divid'])
+
+    self.body.append(node.delimiter)
+
     res = TEMPLATE_START % node.external_options
+    self.body.append(res)
+
+
+def depart_external_node(self, node):
+    # Set options and format templates accordingly
+    res = TEMPLATE_END % node.external_options
+
     self.body.append(res)
 
     addHTMLToDB(node.external_options['divid'],
                 node.external_options['basecourse'],
                 "".join(""))
 
-    # self.body.remove(node.delimiter)
-
-
-def depart_external_node(self, node):
-    # Set options and format templates accordingly
-    res = TEMPLATE_END % node.external_options
-    delimiter = "_start__{}_".format(node.external_options['divid'])
-
-    self.body.append(res)
-
+    self.body.remove(node.delimiter)
 
 # Templates to be formatted by node options
 TEMPLATE_START = '''

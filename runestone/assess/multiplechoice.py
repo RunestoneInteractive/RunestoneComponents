@@ -21,7 +21,7 @@ from docutils.parsers.rst import Directive
 from .assessbase import *
 import json
 import random
-from runestone.server.componentdb import addQuestionToDB
+from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 
 
 class MChoiceNode(nodes.General, nodes.Element):
@@ -36,6 +36,10 @@ class MChoiceNode(nodes.General, nodes.Element):
         self.mc_options = content
 
 def visit_mc_node(self,node):
+
+    node.delimiter = "_start__{}_".format(node.mc_options['divid'])
+    self.body.append(node.delimiter)
+
     res = ""
     if 'random' in node.mc_options:
         node.mc_options['random'] = 'data-random'
@@ -70,8 +74,14 @@ def depart_mc_node(self,node):
 
 
     res += node.template_end % node.mc_options
-
     self.body.append(res)
+
+    addHTMLToDB(node.mc_options['divid'],
+                node.mc_options['basecourse'],
+                "".join(self.body[self.body.index(node.delimiter) + 1:]))
+
+    self.body.remove(node.delimiter)
+
 
 
 
