@@ -49,7 +49,7 @@ def visit_external_node(self, node):
     # Set options and format templates accordingly
     # env = node.document.settings.env
 
-    node.delimiter = "_start__{}_".format(node.ac_components['divid'])
+    node.delimiter = "_start__{}_".format(node.external_options['divid'])
 
     self.body.append(node.delimiter)
 
