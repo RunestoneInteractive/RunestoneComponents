@@ -720,7 +720,7 @@ ActiveCode.prototype.buildProg = function() {
 
 ActiveCode.prototype.runProg = function() {
         var prog = this.buildProg();
-        var saveCode = true;
+        var saveCode = "True";
 
         $(this.output).text('');
 
@@ -762,7 +762,11 @@ ActiveCode.prototype.runProg = function() {
                     saveCode = "False";
                 }
                 hresolver.resolve();
-            }).bind(this));
+            }).bind(this))
+            .fail( function() {
+                console.log("Scrubber deferred failed - this should not happen");
+                hresolver.resolve();
+            });
 
 
         var myPromise = Sk.misceval.asyncToPromise(function() {
