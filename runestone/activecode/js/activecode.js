@@ -720,7 +720,7 @@ ActiveCode.prototype.buildProg = function() {
 
 ActiveCode.prototype.runProg = function() {
         var prog = this.buildProg();
-        var saveCode = true;
+        var saveCode = "True";
 
         $(this.output).text('');
 
@@ -762,7 +762,11 @@ ActiveCode.prototype.runProg = function() {
                     saveCode = "False";
                 }
                 hresolver.resolve();
-            }).bind(this));
+            }).bind(this))
+            .fail( function() {
+                console.log("Scrubber deferred failed - this should not happen");
+                hresolver.resolve();
+            });
 
 
         var myPromise = Sk.misceval.asyncToPromise(function() {
@@ -772,16 +776,18 @@ ActiveCode.prototype.runProg = function() {
 
         // Make sure that the history scrubber is fully initialized AND the code has been run
         // before we start logging stuff.
+        var self = this;
+
         Promise.all([myPromise,hresolver]).then((function(mod) { // success
             $(this.runButton).removeAttr('disabled');
             this.logRunEvent({'div_id': this.divid, 'code': this.editor.getValue(), 'errinfo': 'success', 'to_save':saveCode, 'prefix': this.pretext, 'suffix':this.suffix}); // Log the run event
         }).bind(this),
             (function(err) {  // fail
-            $(this.runButton).removeAttr('disabled');
-            this.logRunEvent({'div_id': this.divid, 'code': this.editor.getValue(), 'errinfo': err.toString(), 'to_save':saveCode, 'prefix': this.pretext, 'suffix':this.suffix}); // Log the run event
-            this.addErrorMessage(err)
-                }).bind(this));
-
+                hresolver.done(function() {
+                    $(self.runButton).removeAttr('disabled');
+                    self.logRunEvent({'div_id': self.divid, 'code': self.editor.getValue(), 'errinfo': err.toString(), 'to_save':saveCode, 'prefix': self.pretext, 'suffix':self.suffix}); // Log the run event
+                    self.addErrorMessage(err) }).bind(this);
+                }));
 
         if (typeof(allVisualizers) != "undefined") {
             $.each(allVisualizers, function (i, e) {
