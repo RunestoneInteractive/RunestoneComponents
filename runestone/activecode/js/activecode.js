@@ -160,17 +160,24 @@ ActiveCode.prototype.createControls = function () {
     }
     // Show/Hide Code
     if (this.hidecode) {
+        $(this.runButton).attr('disabled', 'disabled');
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
         $(butt).text("Show/Hide Code");
         $(butt).css("margin-left", "10px");
         this.showHideButt = butt;
         ctrlDiv.appendChild(butt);
-        $(butt).click( (function() { $(this.codeDiv).toggle();
+        $(butt).click( (function() {
+            $(this.codeDiv).toggle();
             if (this.historyScrubber == null) {
                 this.addHistoryScrubber(true);
             } else {
                 $(this.historyScrubber.parentElement).toggle();
+            }
+            if ($(this.runButton).attr('disabled')) {
+                $(this.runButton).removeAttr('disabled');
+            } else {
+                $(this.runButton).attr('disabled', 'disabled');
             }
         }).bind(this));
     }
@@ -763,8 +770,6 @@ ActiveCode.prototype.runProg = function() {
                     $(this.historyScrubber).slider("option", "max", this.history.length - 1);
                     $(this.historyScrubber).slider("option", "value", this.history.length - 1);
                     this.slideit();
-                    $(this.historyScrubber).on("slidechange",this.slideit.bind(this));
-                    $(this.historyScrubber).slider("enable");
                     console.log("finished scrubber update")
                 } else {
                     saveCode = "False";
@@ -792,11 +797,15 @@ ActiveCode.prototype.runProg = function() {
 
         Promise.all([myPromise,hresolver]).then((function(mod) { // success
             $(this.runButton).removeAttr('disabled');
+            $(this.historyScrubber).on("slidechange",this.slideit.bind(this));
+            $(this.historyScrubber).slider("enable");
             this.logRunEvent({'div_id': this.divid, 'code': this.editor.getValue(), 'errinfo': 'success', 'to_save':saveCode, 'prefix': this.pretext, 'suffix':this.suffix}); // Log the run event
         }).bind(this),
             (function(err) {  // fail
                 hresolver.done(function() {
                     $(self.runButton).removeAttr('disabled');
+                    $(self.historyScrubber).on("slidechange",this.slideit.bind(self));
+                    $(self.historyScrubber).slider("enable");
                     self.logRunEvent({'div_id': self.divid, 'code': self.editor.getValue(), 'errinfo': err.toString(), 'to_save':saveCode, 'prefix': self.pretext, 'suffix':self.suffix}); // Log the run event
                     self.addErrorMessage(err) }).bind(this);
                 }));
