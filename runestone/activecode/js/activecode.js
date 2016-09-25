@@ -244,7 +244,6 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
             this.slideit = function() {
                 this.editor.setValue(this.history[$(scrubber).slider("value")]);
                 var curVal = this.timestamps[$(scrubber).slider("value")];
-                //this.scrubberTime.innerHTML = curVal;
                 var tooltip = '<div class="sltooltip"><div class="sltooltip-inner">' +
                     curVal + '</div><div class="sltooltip-arrow"></div></div>';
                 $(scrubber).find(".ui-slider-handle").html(tooltip);
@@ -255,9 +254,9 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
             $(scrubber).slider({
                 max: this.history.length-1,
                 value: this.history.length-1,
-                slide: this.slideit.bind(this),
-                change: this.slideit.bind(this)
             });
+            $(scrubber).on("slide",this.slideit.bind(this));
+            $(scrubber).on("slidechange",this.slideit.bind(this));
             scrubberDiv.appendChild(scrubber);
 
             if (pos_last) {
@@ -736,6 +735,8 @@ ActiveCode.prototype.runProg = function() {
         (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = this.graphics;
         Sk.canvas = this.graphics.id; //todo: get rid of this here and in image
         $(this.runButton).attr('disabled', 'disabled');
+        $(this.historyScrubber).off("slidechange");
+        $(this.historyScrubber).slider("disable");
         $(this.codeDiv).switchClass("col-md-12","col-md-7",{duration:500,queue:false});
         $(this.outDiv).show({duration:700,queue:false});
 
@@ -752,8 +753,11 @@ ActiveCode.prototype.runProg = function() {
                     saveCode = "True";
                     this.history.push(this.editor.getValue());
                     this.timestamps.push((new Date()).toLocaleString());
-                    $(this.historyScrubber).slider("option", "max", this.history.length - 1)
-                    $(this.historyScrubber).slider("option", "value", this.history.length - 1)
+                    $(this.historyScrubber).slider("option", "max", this.history.length - 1);
+                    $(this.historyScrubber).slider("option", "value", this.history.length - 1);
+                    this.slideit();
+                    $(this.historyScrubber).on("slidechange",this.slideit.bind(this));
+                    $(this.historyScrubber).slider("enable");
                 } else {
                     saveCode = "False";
                 }
