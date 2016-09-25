@@ -163,7 +163,7 @@ ActiveCode.prototype.createControls = function () {
         $(this.runButton).attr('disabled', 'disabled');
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Show/Hide Code");
+        $(butt).text("Show Code");
         $(butt).css("margin-left", "10px");
         this.showHideButt = butt;
         ctrlDiv.appendChild(butt);
@@ -173,6 +173,11 @@ ActiveCode.prototype.createControls = function () {
                 this.addHistoryScrubber(true);
             } else {
                 $(this.historyScrubber.parentElement).toggle();
+            }
+            if ($(this.showHideButt).text() == "Show Code") {
+                $(this.showHideButt).text("Hide Code");
+            } else {
+                $(this.showHideButt).text("Show Code");
             }
             if ($(this.runButton).attr('disabled')) {
                 $(this.runButton).removeAttr('disabled');
@@ -804,7 +809,7 @@ ActiveCode.prototype.runProg = function() {
             (function(err) {  // fail
                 hresolver.done(function() {
                     $(self.runButton).removeAttr('disabled');
-                    $(self.historyScrubber).on("slidechange",this.slideit.bind(self));
+                    $(self.historyScrubber).on("slidechange",self.slideit.bind(self));
                     $(self.historyScrubber).slider("enable");
                     self.logRunEvent({'div_id': self.divid, 'code': self.editor.getValue(), 'errinfo': err.toString(), 'to_save':saveCode, 'prefix': self.pretext, 'suffix':self.suffix}); // Log the run event
                     self.addErrorMessage(err) }).bind(this);
