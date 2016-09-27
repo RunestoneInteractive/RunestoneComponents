@@ -765,7 +765,7 @@ ActiveCode.prototype.runProg = function() {
             dfd.resolve();
         }
 
-        hresolver = jQuery.Deferred();
+        var hresolver = jQuery.Deferred();
         dfd.done((function() {
                 if (this.historyScrubber && (this.history[$(this.historyScrubber).slider("value")] != this.editor.getValue())) {
                     console.log("updating scrubber with changed code")
@@ -812,7 +812,7 @@ ActiveCode.prototype.runProg = function() {
                     $(self.historyScrubber).on("slidechange",self.slideit.bind(self));
                     $(self.historyScrubber).slider("enable");
                     self.logRunEvent({'div_id': self.divid, 'code': self.editor.getValue(), 'errinfo': err.toString(), 'to_save':saveCode, 'prefix': self.pretext, 'suffix':self.suffix}); // Log the run event
-                    self.addErrorMessage(err) }).bind(this);
+                    self.addErrorMessage(err) });
                 }));
 
         if (typeof(allVisualizers) != "undefined") {
