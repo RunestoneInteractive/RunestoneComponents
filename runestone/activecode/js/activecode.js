@@ -255,7 +255,7 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
             $(scrubberDiv).css("margin-left","10px");
             $(scrubberDiv).css("margin-right","10px");
             $(scrubberDiv).width("180px");
-            scrubber = document.createElement("div");
+            var scrubber = document.createElement("div");
             this.slideit = function() {
                 console.log("slideit was called")
                 this.editor.setValue(this.history[$(scrubber).slider("value")]);
