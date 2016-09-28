@@ -737,7 +737,8 @@ ActiveCode.prototype.buildProg = function() {
 ActiveCode.prototype.runProg = function() {
         var prog = this.buildProg();
         var saveCode = "True";
-
+        var scrubber_dfd, history_dfd, skulpt_run_dfd;
+        console.log("starting a new run of " + this.divid)
         $(this.output).text('');
 
         $(this.eContainer).remove();
@@ -759,14 +760,14 @@ ActiveCode.prototype.runProg = function() {
 
         if (this.historyScrubber === null && !this.autorun) {
             console.log("Need a new scrubber")
-            dfd = this.addHistoryScrubber();
+            scrubber_dfd = this.addHistoryScrubber();
         } else {
-            dfd = jQuery.Deferred();
-            dfd.resolve();
+            scrubber_dfd = jQuery.Deferred();
+            scrubber_dfd.resolve();
         }
 
-        hresolver = jQuery.Deferred();
-        dfd.done((function() {
+        history_dfd = jQuery.Deferred();
+        scrubber_dfd.done((function() {
                 if (this.historyScrubber && (this.history[$(this.historyScrubber).slider("value")] != this.editor.getValue())) {
                     console.log("updating scrubber with changed code")
                     saveCode = "True";
@@ -783,15 +784,15 @@ ActiveCode.prototype.runProg = function() {
                 if (this.historyScrubber == null) {
                     saveCode = "False";
                 }
-                hresolver.resolve();
+                history_dfd.resolve();
             }).bind(this))
             .fail( function() {
                 console.log("Scrubber deferred failed - this should not happen");
-                hresolver.resolve();
+                history_dfd.resolve();
             });
 
 
-        var myPromise = Sk.misceval.asyncToPromise(function() {
+        skulpt_run_dfd = Sk.misceval.asyncToPromise(function() {
 
             return Sk.importMainWithBody("<stdin>", false, prog, true);
         });
@@ -800,19 +801,19 @@ ActiveCode.prototype.runProg = function() {
         // before we start logging stuff.
         var self = this;
 
-        Promise.all([myPromise,hresolver]).then((function(mod) { // success
+        Promise.all([skulpt_run_dfd,history_dfd]).then((function(mod) { // success
             $(this.runButton).removeAttr('disabled');
             $(this.historyScrubber).on("slidechange",this.slideit.bind(this));
             $(this.historyScrubber).slider("enable");
             this.logRunEvent({'div_id': this.divid, 'code': this.editor.getValue(), 'errinfo': 'success', 'to_save':saveCode, 'prefix': this.pretext, 'suffix':this.suffix}); // Log the run event
         }).bind(this),
             (function(err) {  // fail
-                hresolver.done(function() {
+                history_dfd.done(function() {
                     $(self.runButton).removeAttr('disabled');
                     $(self.historyScrubber).on("slidechange",self.slideit.bind(self));
                     $(self.historyScrubber).slider("enable");
                     self.logRunEvent({'div_id': self.divid, 'code': self.editor.getValue(), 'errinfo': err.toString(), 'to_save':saveCode, 'prefix': self.pretext, 'suffix':self.suffix}); // Log the run event
-                    self.addErrorMessage(err) }).bind(this);
+                    self.addErrorMessage(err) });
                 }));
 
         if (typeof(allVisualizers) != "undefined") {
