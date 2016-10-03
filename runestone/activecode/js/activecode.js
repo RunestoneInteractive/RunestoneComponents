@@ -160,17 +160,29 @@ ActiveCode.prototype.createControls = function () {
     }
     // Show/Hide Code
     if (this.hidecode) {
+        $(this.runButton).attr('disabled', 'disabled');
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Show/Hide Code");
+        $(butt).text("Show Code");
         $(butt).css("margin-left", "10px");
         this.showHideButt = butt;
         ctrlDiv.appendChild(butt);
-        $(butt).click( (function() { $(this.codeDiv).toggle();
+        $(butt).click( (function() {
+            $(this.codeDiv).toggle();
             if (this.historyScrubber == null) {
                 this.addHistoryScrubber(true);
             } else {
                 $(this.historyScrubber.parentElement).toggle();
+            }
+            if ($(this.showHideButt).text() == "Show Code") {
+                $(this.showHideButt).text("Hide Code");
+            } else {
+                $(this.showHideButt).text("Show Code");
+            }
+            if ($(this.runButton).attr('disabled')) {
+                $(this.runButton).removeAttr('disabled');
+            } else {
+                $(this.runButton).attr('disabled', 'disabled');
             }
         }).bind(this));
     }
@@ -226,25 +238,28 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
     if (this.sid !== undefined) {
         data['sid'] = this.sid;
     }
+    console.log("before get hist")
     jQuery.getJSON(eBookConfig.ajaxURL + 'gethist.json', data, function(data, status, whatever) {
         if (data.history !== undefined) {
             this.history = this.history.concat(data.history);
             for (t in data.timestamps) {
                 this.timestamps.push( (new Date(data.timestamps[t])).toLocaleString() )
             }
+            console.log("gethist successful history updated")
         }
     }.bind(this))
         .always(function() {
+            console.log("making a new scrubber")
             var scrubberDiv = document.createElement("div");
             $(scrubberDiv).css("display","inline-block");
             $(scrubberDiv).css("margin-left","10px");
             $(scrubberDiv).css("margin-right","10px");
             $(scrubberDiv).width("180px");
-            scrubber = document.createElement("div");
+            var scrubber = document.createElement("div");
             this.slideit = function() {
+                console.log("slideit was called")
                 this.editor.setValue(this.history[$(scrubber).slider("value")]);
                 var curVal = this.timestamps[$(scrubber).slider("value")];
-                //this.scrubberTime.innerHTML = curVal;
                 var tooltip = '<div class="sltooltip"><div class="sltooltip-inner">' +
                     curVal + '</div><div class="sltooltip-arrow"></div></div>';
                 $(scrubber).find(".ui-slider-handle").html(tooltip);
@@ -255,9 +270,9 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
             $(scrubber).slider({
                 max: this.history.length-1,
                 value: this.history.length-1,
-                slide: this.slideit.bind(this),
-                change: this.slideit.bind(this)
             });
+            $(scrubber).on("slide",this.slideit.bind(this));
+            $(scrubber).on("slidechange",this.slideit.bind(this));
             scrubberDiv.appendChild(scrubber);
 
             if (pos_last) {
@@ -271,6 +286,7 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
             this.histButton = null;
             this.historyScrubber = scrubber;
             $(scrubberDiv).insertAfter(this.runButton)
+            console.log("resoving deferred in addHistoryScrubber")
             deferred.resolve();
         }.bind(this));
     return deferred;
@@ -699,7 +715,7 @@ ActiveCode.prototype.outputfun = function(text) {
 ActiveCode.prototype.buildProg = function() {
     // assemble code from prefix, suffix, and editor for running.
     var pretext;
-    var prog = this.editor.getValue();
+    var prog = this.editor.getValue() + "\n"
     this.pretext = "";
     if (this.includes !== undefined) {
         // iterate over the includes, in-order prepending to prog
@@ -720,8 +736,9 @@ ActiveCode.prototype.buildProg = function() {
 
 ActiveCode.prototype.runProg = function() {
         var prog = this.buildProg();
-        var saveCode = true;
-
+        var saveCode = "True";
+        var scrubber_dfd, history_dfd, skulpt_run_dfd;
+        console.log("starting a new run of " + this.divid)
         $(this.output).text('');
 
         $(this.eContainer).remove();
@@ -736,24 +753,30 @@ ActiveCode.prototype.runProg = function() {
         (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = this.graphics;
         Sk.canvas = this.graphics.id; //todo: get rid of this here and in image
         $(this.runButton).attr('disabled', 'disabled');
+        $(this.historyScrubber).off("slidechange");
+        $(this.historyScrubber).slider("disable");
         $(this.codeDiv).switchClass("col-md-12","col-md-7",{duration:500,queue:false});
         $(this.outDiv).show({duration:700,queue:false});
 
         if (this.historyScrubber === null && !this.autorun) {
-            dfd = this.addHistoryScrubber();
+            console.log("Need a new scrubber")
+            scrubber_dfd = this.addHistoryScrubber();
         } else {
-            dfd = jQuery.Deferred();
-            dfd.resolve();
+            scrubber_dfd = jQuery.Deferred();
+            scrubber_dfd.resolve();
         }
 
-        hresolver = jQuery.Deferred();
-        dfd.done((function() {
+        history_dfd = jQuery.Deferred();
+        scrubber_dfd.done((function() {
                 if (this.historyScrubber && (this.history[$(this.historyScrubber).slider("value")] != this.editor.getValue())) {
+                    console.log("updating scrubber with changed code")
                     saveCode = "True";
                     this.history.push(this.editor.getValue());
                     this.timestamps.push((new Date()).toLocaleString());
-                    $(this.historyScrubber).slider("option", "max", this.history.length - 1)
-                    $(this.historyScrubber).slider("option", "value", this.history.length - 1)
+                    $(this.historyScrubber).slider("option", "max", this.history.length - 1);
+                    $(this.historyScrubber).slider("option", "value", this.history.length - 1);
+                    this.slideit();
+                    console.log("finished scrubber update")
                 } else {
                     saveCode = "False";
                 }
@@ -761,27 +784,37 @@ ActiveCode.prototype.runProg = function() {
                 if (this.historyScrubber == null) {
                     saveCode = "False";
                 }
-                hresolver.resolve();
-            }).bind(this));
+                history_dfd.resolve();
+            }).bind(this))
+            .fail( function() {
+                console.log("Scrubber deferred failed - this should not happen");
+                history_dfd.resolve();
+            });
 
 
-        var myPromise = Sk.misceval.asyncToPromise(function() {
+        skulpt_run_dfd = Sk.misceval.asyncToPromise(function() {
 
             return Sk.importMainWithBody("<stdin>", false, prog, true);
         });
 
         // Make sure that the history scrubber is fully initialized AND the code has been run
         // before we start logging stuff.
-        Promise.all([myPromise,hresolver]).then((function(mod) { // success
+        var self = this;
+
+        Promise.all([skulpt_run_dfd,history_dfd]).then((function(mod) { // success
             $(this.runButton).removeAttr('disabled');
+            $(this.historyScrubber).on("slidechange",this.slideit.bind(this));
+            $(this.historyScrubber).slider("enable");
             this.logRunEvent({'div_id': this.divid, 'code': this.editor.getValue(), 'errinfo': 'success', 'to_save':saveCode, 'prefix': this.pretext, 'suffix':this.suffix}); // Log the run event
         }).bind(this),
             (function(err) {  // fail
-            $(this.runButton).removeAttr('disabled');
-            this.logRunEvent({'div_id': this.divid, 'code': this.editor.getValue(), 'errinfo': err.toString(), 'to_save':saveCode, 'prefix': this.pretext, 'suffix':this.suffix}); // Log the run event
-            this.addErrorMessage(err)
-                }).bind(this));
-
+                history_dfd.done(function() {
+                    $(self.runButton).removeAttr('disabled');
+                    $(self.historyScrubber).on("slidechange",self.slideit.bind(self));
+                    $(self.historyScrubber).slider("enable");
+                    self.logRunEvent({'div_id': self.divid, 'code': self.editor.getValue(), 'errinfo': err.toString(), 'to_save':saveCode, 'prefix': self.pretext, 'suffix':self.suffix}); // Log the run event
+                    self.addErrorMessage(err) });
+                }));
 
         if (typeof(allVisualizers) != "undefined") {
             $.each(allVisualizers, function (i, e) {
@@ -1708,7 +1741,7 @@ ACFactory.toggleScratchActivecode = function () {
 $(document).ready(function() {
     ACFactory.createScratchActivecode();
     $('[data-component=activecode]').each( function(index ) {
-        if ($(this.parentNode).data("component") !== "timedAssessment") {   // If this element exists within a timed component, don't render it here
+        if ($(this.parentNode).data("component") !== "timedAssessment" && $(this.parentNode.parentNode).data("component") !== "timedAssessment") {   // If this element exists within a timed component, don't render it here
             edList[this.id] = ACFactory.createActiveCode(this, $(this).data('lang'));
         }
     });
