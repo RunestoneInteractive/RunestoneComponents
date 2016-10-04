@@ -221,7 +221,12 @@ def addAssignmentToDB(name = None, course_id = None, assignment_type_id = None, 
             threshold = threshold
         )
         engine.execute(stmt)
-        return res['id']
+        a_id = res['id']
+        # delete all existing AssignmentQuestions, so that you don't have any leftovers
+        # this is safe because grades and comments are associated with div_ids and course_names, not assignment_questions rows.
+        stmt2 = assignment_questions.delete().where(assignment_questions.c.assignment_id == a_id)
+        engine.execute(stmt2)
+
     else:
         ins = assignments.insert().values(
             course=course_id,
@@ -231,8 +236,9 @@ def addAssignmentToDB(name = None, course_id = None, assignment_type_id = None, 
             points = points,
             threshold = threshold)
         res = engine.execute(ins)
-        return res.inserted_primary_key[0]
+        a_id = res.inserted_primary_key[0]
 
+    return a_id
 
 def addHTMLToDB(divid, basecourse, htmlsrc):
     if all(name in os.environ for name in ['DBHOST', 'DBPASS', 'DBUSER', 'DBNAME']):
