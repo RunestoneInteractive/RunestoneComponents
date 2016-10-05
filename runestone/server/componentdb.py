@@ -190,7 +190,8 @@ def addAssignmentQuestionToDB(question_id, assignment_id, points, assessment_typ
             question_id = question_id,
             points = points,
             timed=timed,
-            assessment_type = assessment_type
+            assessment_type = assessment_type,
+            autograde = autograde
             )
         engine.execute(ins)
 
