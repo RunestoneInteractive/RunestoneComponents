@@ -1490,11 +1490,40 @@ LiveCode.prototype.createErrorOutput = function () {
 LiveCode.prototype.runProg = function() {
         var xhr, stdin;
         var runspec = {};
+        var scrubber_dfd;
         var data, host, source, editor;
+        var saveCode = "True";
         var sfilemap = {java: '', cpp: 'test.cpp', c: 'test.c', python3: 'test.py', python2: 'test.py'};
 
         xhr = new XMLHttpRequest();
         source = this.editor.getValue();
+
+        if (this.historyScrubber === null) {
+            console.log("Need a new scrubber");
+            scrubber_dfd = this.addHistoryScrubber();
+        } else {
+            scrubber_dfd = jQuery.Deferred();
+            scrubber_dfd.resolve();
+        }
+
+        scrubber_dfd.done((function() {
+            if (this.historyScrubber && (this.history[$(this.historyScrubber).slider("value")] != this.editor.getValue())) {
+                console.log("updating scrubber with changed code");
+                saveCode = "True";
+                this.history.push(this.editor.getValue());
+                this.timestamps.push((new Date()).toLocaleString());
+                $(this.historyScrubber).slider("option", "max", this.history.length - 1);
+                $(this.historyScrubber).slider("option", "value", this.history.length - 1);
+                this.slideit();
+                console.log("finished scrubber update")
+            } else {
+                saveCode = "False";
+            }
+
+            if (this.historyScrubber == null) {
+                saveCode = "False";
+            }
+            }).bind(this))
 
         if (this.stdin) {
             stdin = $(this.stdin_el).val();
@@ -1549,7 +1578,7 @@ LiveCode.prototype.runProg = function() {
             } else {
                 logresult = result.outcome;
             }
-            this.logRunEvent({'div_id': this.divid, 'code': source, 'errinfo': logresult, 'event':'livecode'});
+            this.logRunEvent({'div_id': this.divid, 'code': source, 'errinfo': logresult, 'to_save':saveCode, 'event':'livecode'});
             switch (result.outcome) {
                 case 15:
                     $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
