@@ -742,95 +742,119 @@ ActiveCode.prototype.buildProg = function() {
     return prog;
 };
 
-ActiveCode.prototype.runProg = function() {
-        var prog = this.buildProg();
-        var saveCode = "True";
-        var scrubber_dfd, history_dfd, skulpt_run_dfd;
-        console.log("starting a new run of " + this.divid);
-        $(this.output).text('');
+ActiveCode.prototype.manage_scrubber = function (scrubber_dfd, history_dfd, saveCode) {
+    if (this.historyScrubber === null && !this.autorun) {
+        console.log("Need a new scrubber");
+        scrubber_dfd = this.addHistoryScrubber();
+    } else {
+        scrubber_dfd = jQuery.Deferred();
+        scrubber_dfd.resolve();
+    }
 
-        $(this.eContainer).remove();
-        Sk.configure({output : this.outputfun.bind(this),
-              read   : this.builtinRead,
-              python3: this.python3,
-              imageProxy : 'http://image.runestone.academy:8080/320x',
-              inputfunTakesPrompt: true,
-        });
-        Sk.divid = this.divid;
-        this.setTimeLimit();
-        (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = this.graphics;
-        Sk.canvas = this.graphics.id; //todo: get rid of this here and in image
-        $(this.runButton).attr('disabled', 'disabled');
-        $(this.historyScrubber).off("slidechange");
-        $(this.historyScrubber).slider("disable");
-        $(this.codeDiv).switchClass("col-md-12","col-md-7",{duration:500,queue:false});
-        $(this.outDiv).show({duration:700,queue:false});
-
-        if (this.historyScrubber === null && !this.autorun) {
-            console.log("Need a new scrubber");
-            scrubber_dfd = this.addHistoryScrubber();
+    history_dfd = jQuery.Deferred();
+    scrubber_dfd.done((function () {
+        if (this.historyScrubber && (this.history[$(this.historyScrubber).slider("value")] != this.editor.getValue())) {
+            console.log("updating scrubber with changed code");
+            saveCode = "True";
+            this.history.push(this.editor.getValue());
+            this.timestamps.push((new Date()).toLocaleString());
+            $(this.historyScrubber).slider("option", "max", this.history.length - 1);
+            $(this.historyScrubber).slider("option", "value", this.history.length - 1);
+            this.slideit();
+            console.log("finished scrubber update")
         } else {
-            scrubber_dfd = jQuery.Deferred();
-            scrubber_dfd.resolve();
+            saveCode = "False";
         }
 
-        history_dfd = jQuery.Deferred();
-        scrubber_dfd.done((function() {
-                if (this.historyScrubber && (this.history[$(this.historyScrubber).slider("value")] != this.editor.getValue())) {
-                    console.log("updating scrubber with changed code");
-                    saveCode = "True";
-                    this.history.push(this.editor.getValue());
-                    this.timestamps.push((new Date()).toLocaleString());
-                    $(this.historyScrubber).slider("option", "max", this.history.length - 1);
-                    $(this.historyScrubber).slider("option", "value", this.history.length - 1);
-                    this.slideit();
-                    console.log("finished scrubber update")
-                } else {
-                    saveCode = "False";
-                }
-
-                if (this.historyScrubber == null) {
-                    saveCode = "False";
-                }
-                history_dfd.resolve();
-            }).bind(this))
-            .fail( function() {
-                console.log("Scrubber deferred failed - this should not happen");
-                history_dfd.resolve();
-            });
-
-
-        skulpt_run_dfd = Sk.misceval.asyncToPromise(function() {
-
-            return Sk.importMainWithBody("<stdin>", false, prog, true);
+        if (this.historyScrubber == null) {
+            saveCode = "False";
+        }
+        history_dfd.resolve();
+    }).bind(this))
+        .fail(function () {
+            console.log("Scrubber deferred failed - this should not happen");
+            history_dfd.resolve();
         });
+    return {history_dfd: history_dfd, saveCode: saveCode};
+};
 
-        // Make sure that the history scrubber is fully initialized AND the code has been run
-        // before we start logging stuff.
-        var self = this;
 
-        Promise.all([skulpt_run_dfd,history_dfd]).then((function(mod) { // success
+ActiveCode.prototype.runProg = function () {
+    var prog = this.buildProg();
+    var saveCode = "True";
+    var scrubber_dfd, history_dfd, skulpt_run_dfd;
+    console.log("starting a new run of " + this.divid);
+    $(this.output).text('');
+
+    $(this.eContainer).remove();
+    Sk.configure({
+        output: this.outputfun.bind(this),
+        read: this.builtinRead,
+        python3: this.python3,
+        imageProxy: 'http://image.runestone.academy:8080/320x',
+        inputfunTakesPrompt: true,
+    });
+    Sk.divid = this.divid;
+    this.setTimeLimit();
+    (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = this.graphics;
+    Sk.canvas = this.graphics.id; //todo: get rid of this here and in image
+    $(this.runButton).attr('disabled', 'disabled');
+    $(this.historyScrubber).off("slidechange");
+    $(this.historyScrubber).slider("disable");
+    $(this.codeDiv).switchClass("col-md-12", "col-md-7", {duration: 500, queue: false});
+    $(this.outDiv).show({duration: 700, queue: false});
+
+    var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
+    history_dfd = __ret.history_dfd;
+    saveCode = __ret.saveCode;
+
+
+    skulpt_run_dfd = Sk.misceval.asyncToPromise(function () {
+
+        return Sk.importMainWithBody("<stdin>", false, prog, true);
+    });
+
+    // Make sure that the history scrubber is fully initialized AND the code has been run
+    // before we start logging stuff.
+    var self = this;
+
+    Promise.all([skulpt_run_dfd, history_dfd]).then((function (mod) { // success
             $(this.runButton).removeAttr('disabled');
-            $(this.historyScrubber).on("slidechange",this.slideit.bind(this));
+            $(this.historyScrubber).on("slidechange", this.slideit.bind(this));
             $(this.historyScrubber).slider("enable");
-            this.logRunEvent({'div_id': this.divid, 'code': this.editor.getValue(), 'errinfo': 'success', 'to_save':saveCode, 'prefix': this.pretext, 'suffix':this.suffix}); // Log the run event
+            this.logRunEvent({
+                'div_id': this.divid,
+                'code': this.editor.getValue(),
+                'errinfo': 'success',
+                'to_save': saveCode,
+                'prefix': this.pretext,
+                'suffix': this.suffix
+            }); // Log the run event
         }).bind(this),
-            (function(err) {  // fail
-                history_dfd.done(function() {
-                    $(self.runButton).removeAttr('disabled');
-                    $(self.historyScrubber).on("slidechange",self.slideit.bind(self));
-                    $(self.historyScrubber).slider("enable");
-                    self.logRunEvent({'div_id': self.divid, 'code': self.editor.getValue(), 'errinfo': err.toString(), 'to_save':saveCode, 'prefix': self.pretext, 'suffix':self.suffix}); // Log the run event
-                    self.addErrorMessage(err) });
-                }));
+        (function (err) {  // fail
+            history_dfd.done(function () {
+                $(self.runButton).removeAttr('disabled');
+                $(self.historyScrubber).on("slidechange", self.slideit.bind(self));
+                $(self.historyScrubber).slider("enable");
+                self.logRunEvent({
+                    'div_id': self.divid,
+                    'code': self.editor.getValue(),
+                    'errinfo': err.toString(),
+                    'to_save': saveCode,
+                    'prefix': self.pretext,
+                    'suffix': self.suffix
+                }); // Log the run event
+                self.addErrorMessage(err)
+            });
+        }));
 
-        if (typeof(allVisualizers) != "undefined") {
-            $.each(allVisualizers, function (i, e) {
-                e.redrawConnectors();
-                });
-            }
+    if (typeof(allVisualizers) != "undefined") {
+        $.each(allVisualizers, function (i, e) {
+            e.redrawConnectors();
+        });
+    }
 
-    };
+};
 
 
 
@@ -871,6 +895,7 @@ JSActiveCode.prototype.outputfun = function (a) {
 JSActiveCode.prototype.runProg = function() {
     var _this = this;
     var prog = this.buildProg();
+    var einfo;
 
     var write = function(str) {
         _this.output.innerHTML += _this.outputfun(str);
@@ -881,6 +906,10 @@ JSActiveCode.prototype.runProg = function() {
         _this.output.innerHTML += _this.outputfun(str)+"<br />";
             };
 
+    var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
+    history_dfd = __ret.history_dfd;
+    saveCode = __ret.saveCode;
+
     $(this.eContainer).remove();
     $(this.output).text('');
     $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
@@ -888,9 +917,21 @@ JSActiveCode.prototype.runProg = function() {
 
     try {
         eval(prog)
+        einfo = "success";
     } catch(e) {
         this.addErrorMessage(e);
+        einfo = e;
     }
+
+    this.logRunEvent({
+    'div_id': this.divid,
+    'code': this.editor.getValue(),
+    'errinfo': einfo,
+    'to_save': saveCode,
+    'prefix': this.pretext,
+    'suffix': this.suffix
+    }); // Log the run event
+
 
 };
 
@@ -904,6 +945,11 @@ function HTMLActiveCode (opts) {
 
 HTMLActiveCode.prototype.runProg = function () {
     var prog = this.buildProg();
+    var scrubber_dfd, history_dfd, saveCode;
+
+    var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
+    history_dfd = __ret.history_dfd;
+    saveCode = __ret.saveCode;
 
 //    $('#'+myDiv+'_iframe').remove();
 //    $('#'+myDiv+'_htmlout').show();
@@ -916,6 +962,16 @@ HTMLActiveCode.prototype.runProg = function () {
     $(this.outDiv).show({duration:700,queue:false});
     prog = "<script type=text/javascript>window.onerror = function(msg,url,line) {alert(msg+' on line: '+line);};</script>" + prog;
     this.output.srcdoc = prog;
+
+    this.logRunEvent({
+    'div_id': this.divid,
+    'code': this.editor.getValue(),
+    'errinfo': 'success',
+    'to_save': saveCode,
+    'prefix': this.pretext,
+    'suffix': this.suffix
+    }); // Log the run event
+
 
 };
 
@@ -1490,7 +1546,7 @@ LiveCode.prototype.createErrorOutput = function () {
 LiveCode.prototype.runProg = function() {
         var xhr, stdin;
         var runspec = {};
-        var scrubber_dfd;
+        var scrubber_dfd, history_dfd;
         var data, host, source, editor;
         var saveCode = "True";
         var sfilemap = {java: '', cpp: 'test.cpp', c: 'test.c', python3: 'test.py', python2: 'test.py'};
@@ -1498,32 +1554,9 @@ LiveCode.prototype.runProg = function() {
         xhr = new XMLHttpRequest();
         source = this.editor.getValue();
 
-        if (this.historyScrubber === null) {
-            console.log("Need a new scrubber");
-            scrubber_dfd = this.addHistoryScrubber();
-        } else {
-            scrubber_dfd = jQuery.Deferred();
-            scrubber_dfd.resolve();
-        }
-
-        scrubber_dfd.done((function() {
-            if (this.historyScrubber && (this.history[$(this.historyScrubber).slider("value")] != this.editor.getValue())) {
-                console.log("updating scrubber with changed code");
-                saveCode = "True";
-                this.history.push(this.editor.getValue());
-                this.timestamps.push((new Date()).toLocaleString());
-                $(this.historyScrubber).slider("option", "max", this.history.length - 1);
-                $(this.historyScrubber).slider("option", "value", this.history.length - 1);
-                this.slideit();
-                console.log("finished scrubber update")
-            } else {
-                saveCode = "False";
-            }
-
-            if (this.historyScrubber == null) {
-                saveCode = "False";
-            }
-            }).bind(this))
+        var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
+        history_dfd = __ret.history_dfd;
+        saveCode = __ret.saveCode;
 
         if (this.stdin) {
             stdin = $(this.stdin_el).val();
