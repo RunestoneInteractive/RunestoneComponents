@@ -896,6 +896,9 @@ JSActiveCode.prototype.runProg = function() {
     var _this = this;
     var prog = this.buildProg();
     var einfo;
+    var scrubber_dfd, history_dfd;
+    var saveCode = "True";
+
 
     var write = function(str) {
         _this.output.innerHTML += _this.outputfun(str);
