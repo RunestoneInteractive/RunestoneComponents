@@ -38,8 +38,8 @@ def findChaptersSubChapters(tocfile):
         else:
             stop = toclines[i + 1]
         for j in range(start, stop):
-            if ".rst" in ftext[j] and os.path.sep in ftext[j]:
-                chapter, subchapter = ftext[j].strip()[:-4].split(os.path.sep)
+            if ".rst" in ftext[j] and "/" in ftext[j]:
+                chapter, subchapter = ftext[j].strip()[:-4].split('/')
                 chapter = chapter.strip()
                 subchapter = subchapter.strip()
                 if chapter not in chdict:
@@ -62,10 +62,10 @@ def findV2ChaptersSubChapters(tocfile):
     toclines = getTOCEntries(ftext)
     chdict = OrderedDict()
     chtitles = {}
-    toclines = [x for x in toclines if os.path.sep in x]
+    toclines = [x for x in toclines if '/' in x]
     basepath = os.path.dirname(tocfile)
     for subchapter in toclines:
-        chapter = subchapter.split(os.path.sep)[0]
+        chapter = subchapter.split('/')[0]
         with open(os.path.join(basepath,subchapter),'r') as scfile:
             ft = scfile.readline().strip()
             chtitles[chapter] = ft

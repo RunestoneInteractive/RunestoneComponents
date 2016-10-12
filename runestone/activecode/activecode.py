@@ -192,8 +192,8 @@ class ActiveCode(RunestoneDirective):
             env.activecodecounter = 0
         env.activecodecounter += 1
         self.options['name'] = self.arguments[0].strip()
-
         self.options['divid'] = self.arguments[0]
+
         if not self.options['divid']:
             raise Exception("No divid for ..activecode or ..actex in activecode.py")
 

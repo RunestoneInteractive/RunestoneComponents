@@ -1193,6 +1193,17 @@ Parsons.prototype.disable = function () {
 	$(this.resetButton).hide();
 };
 
+// Return the pairedBin index of that div
+Parsons.prototype.pairedBinFor = function(div) {
+	var lineIndex = this.getBlockById(div.id).lines[0].index;
+	for (var i = 0; i < this.pairedBins.length; i++) {
+		if (this.pairedBins[i].includes(lineIndex)) {
+			return i;
+		}
+	}
+	return -1;
+};
+
 // Based on the moving element, etc., establish the moving state
 //   rest: not moving
 //   source: moving inside source area
@@ -1262,12 +1273,51 @@ Parsons.prototype.updateView = function() {
 		}
 		if (newState == "source") {
 			var hasInserted = false;
+			var movingBin = this.pairedBinFor(this.moving);
+			var binForBlock = [];
+			for (i = 0; i < blocks.length; i++) {
+				binForBlock.push(this.pairedBinFor(blocks[i]));
+			}
+			if (!binForBlock.includes(movingBin)) {
+				movingBin = -1;
+			}
+			var insertPositions = [];
+			if (binForBlock.length == 0) {
+				insertPositions.push(0);
+			} else {
+				if (movingBin == -1) {
+					insertPositions.push(0);
+				} else if (binForBlock[0] == movingBin) {
+					insertPositions.push(0);
+				}
+				for (i = 1; i < blocks.length; i++) {
+					if (binForBlock[i - 1] == movingBin) {
+						insertPositions.push(i);
+					} else if (binForBlock[i] == movingBin) {
+						insertPositions.push(i);
+					} else if (movingBin == -1 && (binForBlock[i - 1] != binForBlock[i])) {
+						insertPositions.push(i);
+					}
+				}
+				if (movingBin == -1) {
+					insertPositions.push(binForBlock.length);
+				} else if (binForBlock[binForBlock.length - 1] == movingBin) {
+					insertPositions.push(binForBlock.length);
+				}
+			}			
 			var x = this.movingX - this.sourceArea.getBoundingClientRect().left - window.pageXOffset - baseWidth / 2 - 11;
 			var y = this.movingY - this.sourceArea.getBoundingClientRect().top - window.pageYOffset;
 			for (i = 0; i < blocks.length; i++) {
 				item = blocks[i];
-				if (!hasInserted) {
-					if (y - positionTop < (movingHeight + $(item).outerHeight(true)) / 2) {
+				if (!hasInserted && insertPositions.includes(i)) {
+					var testHeight = $(item).outerHeight(true);
+					for (j = i + 1; j < blocks.length; j++) {
+						if (insertPositions.includes(j)) {
+							break;
+						}
+						testHeight += $(blocks[j]).outerHeight(true);
+					}
+					if ((y - positionTop < (movingHeight + testHeight / 2)) || (i == insertPositions[insertPositions.length - 1])) {
 						hasInserted = true;
 						this.sourceArea.insertBefore(this.moving, item);
 						$(this.moving).css({
@@ -1332,9 +1382,9 @@ Parsons.prototype.updateView = function() {
 				height -= parseInt($(matching[0]).css("top"));
 				height += $(matching[matching.length - 1]).outerHeight(true);
 				$(div).css({
-					'left' : -10,
+					'left' : -6,
 					'top' : $(matching[0]).css("top"),
-					'width' : baseWidth + 42,
+					'width' : baseWidth + 34,
 					'height' : height,
 					'z-index' : 1
 				});
@@ -1420,7 +1470,33 @@ Parsons.prototype.updateView = function() {
 
 	// Update the Moving Area
 	if (updateMoving) {
-		$(this.moving).appendTo("#" + this.counterId + "-source");
+		// Add it to the lowest place in the source area
+		movingBin = this.pairedBinFor(this.moving);
+		if (movingBin == -1) {
+			$(this.moving).appendTo("#" + this.counterId + "-source");
+		} else {
+			var before;
+			children = this.sourceArea.childNodes;
+			blocks = [];
+			for (i = 0; i < children.length; i++) {
+				item = children[i];
+				if ($(item).hasClass("block")) {
+					blocks.push(item);
+				}
+			}
+			for (i = 0; i < blocks.length; i++) {
+				item = blocks[i];
+				if (this.pairedBinFor(item) == movingBin) {
+						before = i + 1;
+				}
+			}
+			if (before == undefined || before == blocks.length) {
+				$(this.moving).appendTo("#" + this.counterId + "-source");
+			} else {
+				this.sourceArea.insertBefore(this.moving, blocks[before]);
+			}
+		}
+		// Place in the middle of the mouse cursor
 		$(this.moving).css({
 			'left' : this.movingX - this.sourceArea.getBoundingClientRect().left - window.pageXOffset - ($(this.moving).outerWidth(true) / 2),
 			'top' : this.movingY - this.sourceArea.getBoundingClientRect().top - window.pageYOffset - (movingHeight / 2),
