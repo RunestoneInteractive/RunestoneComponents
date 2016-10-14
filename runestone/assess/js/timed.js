@@ -94,7 +94,8 @@ Timed.prototype.renderTimedAssess = function () {
     this.renderControlButtons();
     this.assessDiv.appendChild(this.timedDiv);    // This can't be appended in renderContainer because then it renders above the timer and control buttons.
     this.createRenderedQuestionArray();
-    this.renderNavControls();
+    if (this.renderedQuestionArray.length > 1)
+        this.renderNavControls();
     this.renderSubmitButton();
     this.renderFeedbackContainer();
     this.useRunestoneServices = opts.useRunestoneServices;
