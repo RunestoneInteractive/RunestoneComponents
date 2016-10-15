@@ -14,6 +14,43 @@
 ===================================================================== */
 
 /* =====================================================================
+==== AdaptiveParsons Object ============================================
+======== Used for adapting problems based on previous performance
+==== PROPERTIES ========================================================
+======== problem: the Parsons problem
+======== store: the object as it is stored in localStorage
+===================================================================== */
+
+// Initialize
+var AdaptiveParsons = function(problem) {
+	this.problem = problem;
+	store = localStorage.getItem("adaptiveParsons");
+	if (store == undefined) {
+		store = {};
+	} else {
+		store = JSON.parse(store);
+	}
+	this.store = store;
+};
+
+// Save the current value to localStorage
+AdaptiveParsons.prototype.save = function() {
+	localStorage.setItem("adaptiveParsons", JSON.stringify(this.store));
+};
+
+// When a check is done, note it
+AdaptiveParsons.prototype.check = function() {
+	this.store["latest"] = this.problem.divid;
+	var count = this.store[this.problem.divid];
+	if (count == undefined) {
+		count = 0;
+	}
+	count++;
+	this.store[this.problem.divid] = count;
+	this.save();
+};
+
+/* =====================================================================
 ==== LineBasedGrader Object ============================================
 ======== Used for grading a Parsons problem.
 ==== PROPERTIES ========================================================
@@ -384,6 +421,7 @@ Parsons.prototype.initializeOptions = function() {
 	var maxdist = $(this.origElem).data('maxdist');
 	var order = $(this.origElem).data('order');
 	var noindent = $(this.origElem).data('noindent');
+	var adaptive = $(this.origElem).data('adaptive');
 	if (maxdist !== undefined) {
 	    options["maxdist"] = maxdist;
 	}
@@ -399,6 +437,10 @@ Parsons.prototype.initializeOptions = function() {
 		noindent = false;
 	}
 	options["noindent"] = noindent;
+	if (adaptive == undefined) {
+		adaptive = false;
+	}
+	options["adaptive"] = adaptive;
 	// add locale and language
 	var locale = eBookConfig.locale;
 	if (locale == undefined) {
@@ -465,7 +507,6 @@ Parsons.prototype.initializeView = function () {
 	this.sourceArea.id = this.counterId + "-source";
 	$(this.sourceArea).addClass("source");
 	this.sourceRegionDiv.appendChild(this.sourceArea);
-
 
 	this.answerRegionDiv = document.createElement("div");
 	this.answerRegionDiv.id = this.counterId + "-answerRegion";
@@ -578,7 +619,7 @@ Parsons.prototype.initializeLines = function(text) {
 	for (i = 0; i < this.lines.length; i++) {
 		line = this.lines[i];
 		line.indent = indents.indexOf(line.indent);
-	}	
+	}
 	this.solution = solution;
 };
 
@@ -663,6 +704,49 @@ Parsons.prototype.initializeAreas = function(sourceBlocks, answerBlocks) {
 	} else {
 		$(this.answerArea).addClass("answer");
 	}
+	
+	// Initialize paired distractor decoration
+	var bins = [];
+	var bin = [];
+	for (i = 0; i < this.lines.length; i++) {
+		var line = this.lines[i];
+		bin.push(line);
+		if (!line.groupWithNext) {
+			bins.push(bin);
+			bin = [];
+		}
+	}
+	var pairedBins = [];
+	var lineNumbers = [];
+	for (i = bins.length - 1; i > -1; i--) {
+		bin = bins[i];
+		if (bin[0].paired) {
+			// Add all in bin to line numbers
+			for (j = bin.length - 1; j > -1; j--) {
+				lineNumbers.unshift(bin[j].index);
+			}
+		} else {
+			if (lineNumbers.length > 0) {
+				// Add all in bin to line numbers
+				for (j = bin.length - 1; j > -1; j--) {
+					lineNumbers.unshift(bin[j].index);
+				}
+				pairedBins.unshift(lineNumbers);
+				lineNumbers = [];
+			}
+		}
+	}
+	var pairedDivs = [];
+	for (i = 0; i < pairedBins.length; i++) {
+		var pairedDiv = document.createElement("div");
+		$(pairedDiv).addClass("paired");
+		pairedDivs.push(pairedDiv);
+		this.sourceArea.appendChild(pairedDiv);
+	}
+	this.pairedBins = pairedBins;
+	this.pairedDivs = pairedDivs;
+	
+	// Update the view
 	this.state = undefined; // needs to be here for loading from storage
 	this.updateView();
 
@@ -883,8 +967,16 @@ Parsons.prototype.sourceHash = function() {
    return this.getHash(this.sourceArea);
 };
 
+// Return an array of code blocks adapted to performance on previous problems
+Parsons.prototype.adaptiveBlocks = function() {
+
+};
+
 // Return an array of code blocks based on what is specified in the problem
 Parsons.prototype.blocksFromSource = function() {
+	if (this.options.adaptive) {
+		return this.adaptiveBlocks();
+	}
 	var unorderedBlocks = [];
 	var blocks = [];
 	var lines = [];
@@ -1101,6 +1193,17 @@ Parsons.prototype.disable = function () {
 	$(this.resetButton).hide();
 };
 
+// Return the pairedBin index of that div
+Parsons.prototype.pairedBinFor = function(div) {
+	var lineIndex = this.getBlockById(div.id).lines[0].index;
+	for (var i = 0; i < this.pairedBins.length; i++) {
+		if (this.pairedBins[i].includes(lineIndex)) {
+			return i;
+		}
+	}
+	return -1;
+};
+
 // Based on the moving element, etc., establish the moving state
 //   rest: not moving
 //   source: moving inside source area
@@ -1160,27 +1263,68 @@ Parsons.prototype.updateView = function() {
 	// Update the Source Area
 	if (updateSource) {
 		positionTop = 0;
+		var children = this.sourceArea.childNodes;
+		var blocks = [];
+		for (i = 0; i < children.length; i++) {
+			item = children[i];
+			if ($(item).hasClass("block")) {
+				blocks.push(item);
+			}
+		}
 		if (newState == "source") {
 			var hasInserted = false;
+			var movingBin = this.pairedBinFor(this.moving);
+			var binForBlock = [];
+			for (i = 0; i < blocks.length; i++) {
+				binForBlock.push(this.pairedBinFor(blocks[i]));
+			}
+			if (!binForBlock.includes(movingBin)) {
+				movingBin = -1;
+			}
+			var insertPositions = [];
+			if (binForBlock.length == 0) {
+				insertPositions.push(0);
+			} else {
+				if (movingBin == -1) {
+					insertPositions.push(0);
+				} else if (binForBlock[0] == movingBin) {
+					insertPositions.push(0);
+				}
+				for (i = 1; i < blocks.length; i++) {
+					if (binForBlock[i - 1] == movingBin) {
+						insertPositions.push(i);
+					} else if (binForBlock[i] == movingBin) {
+						insertPositions.push(i);
+					} else if (movingBin == -1 && (binForBlock[i - 1] != binForBlock[i])) {
+						insertPositions.push(i);
+					}
+				}
+				if (movingBin == -1) {
+					insertPositions.push(binForBlock.length);
+				} else if (binForBlock[binForBlock.length - 1] == movingBin) {
+					insertPositions.push(binForBlock.length);
+				}
+			}			
 			var x = this.movingX - this.sourceArea.getBoundingClientRect().left - window.pageXOffset - baseWidth / 2 - 11;
 			var y = this.movingY - this.sourceArea.getBoundingClientRect().top - window.pageYOffset;
-			var children = this.sourceArea.childNodes;
-			var childrenCopy = [];
-			for (i = 0; i < children.length; i++) {
-				childrenCopy.push(children[i]);
-			}
-			children = childrenCopy;
-			for (i = 0; i < children.length; i++) {
-				item = children[i];
-				if (!hasInserted) {
-					if (y - positionTop < (movingHeight + $(item).outerHeight(true)) / 2) {
+			for (i = 0; i < blocks.length; i++) {
+				item = blocks[i];
+				if (!hasInserted && insertPositions.includes(i)) {
+					var testHeight = $(item).outerHeight(true);
+					for (j = i + 1; j < blocks.length; j++) {
+						if (insertPositions.includes(j)) {
+							break;
+						}
+						testHeight += $(blocks[j]).outerHeight(true);
+					}
+					if ((y - positionTop < (movingHeight + testHeight / 2)) || (i == insertPositions[insertPositions.length - 1])) {
 						hasInserted = true;
 						this.sourceArea.insertBefore(this.moving, item);
 						$(this.moving).css({
 							'left' : x,
 							'top' : y - movingHeight / 2,
 							'width' : baseWidth,
-							'z-index' : 2
+							'z-index' : 3
 						});
 						positionTop = positionTop + movingHeight;
 					}
@@ -1189,7 +1333,7 @@ Parsons.prototype.updateView = function() {
 					'left' : 0,
 					'top' : positionTop,
 					'width' : baseWidth,
-					'z-index' : 1
+					'z-index' : 2
 				});
 				positionTop = positionTop + $(item).outerHeight(true);
 			}
@@ -1199,20 +1343,51 @@ Parsons.prototype.updateView = function() {
 					'left' : x,
 					'top' : y - $(this.moving).outerHeight(true) / 2,
 					'width' : baseWidth,
-					'z-index' : 2
+					'z-index' : 3
 				});
 			}
 		} else {
-			var children = this.sourceArea.childNodes;
-			for (var i = 0; i < children.length; i++) {
-				item = children[i];
+			for (var i = 0; i < blocks.length; i++) {
+				item =  blocks[i];
 				$(item).css({
 					'left' : 0,
 					'top' : positionTop,
 					'width' : baseWidth,
-					'z-index' : 1
+					'z-index' : 2
 				});
 				positionTop = positionTop + $(item).outerHeight(true);
+			}
+		}
+		// Update the Paired Distractor Indicators
+		for (i = 0; i < this.pairedBins.length; i++) {
+			var bin = this.pairedBins[i];
+			var matching = [];
+			for (j = 0; j < blocks.length; j++) {
+				block = blocks[j];
+				if (bin.includes(this.getBlockById(block.id).lines[0].index)) {
+					matching.push(block);
+				} else {
+					if (matching.length == 1) {
+						matching = [];
+					}
+				}
+			}
+			var div = this.pairedDivs[i];
+			if (matching.length < 2) {
+				$(div).hide();
+			} else {
+				$(div).show();
+				var height = -5;
+				height += parseInt($(matching[matching.length - 1]).css("top"));
+				height -= parseInt($(matching[0]).css("top"));
+				height += $(matching[matching.length - 1]).outerHeight(true);
+				$(div).css({
+					'left' : -6,
+					'top' : $(matching[0]).css("top"),
+					'width' : baseWidth + 34,
+					'height' : height,
+					'z-index' : 1
+				});
 			}
 		}
 	}
@@ -1252,7 +1427,7 @@ Parsons.prototype.updateView = function() {
 							'left' : x,
 							'top' : y - movingHeight / 2,
 							'width' : baseWidth,
-							'z-index' : 2
+							'z-index' : 3
 						});
 						positionTop = positionTop + movingHeight;
 					}
@@ -1263,7 +1438,7 @@ Parsons.prototype.updateView = function() {
 					'left' : indent,
 					'top' : positionTop,
 					'width' : width - indent,
-					'z-index' : 1
+					'z-index' : 2
 				});
 				positionTop = positionTop + $(item).outerHeight(true);
 			}
@@ -1273,7 +1448,7 @@ Parsons.prototype.updateView = function() {
 					'left' : x,
 					'top' : y - $(this.moving).outerHeight(true) / 2,
 					'width' : baseWidth,
-					'z-index' : 2
+					'z-index' : 3
 				});
 			}
 		} else {
@@ -1286,7 +1461,7 @@ Parsons.prototype.updateView = function() {
 					'left' : indent,
 					'top' : positionTop,
 					'width' : width - indent,
-					'z-index' : 1
+					'z-index' : 2
 				});
 				positionTop = positionTop + $(item).outerHeight(true);
 			}
@@ -1295,12 +1470,38 @@ Parsons.prototype.updateView = function() {
 
 	// Update the Moving Area
 	if (updateMoving) {
-		$(this.moving).appendTo("#" + this.counterId + "-source");
+		// Add it to the lowest place in the source area
+		movingBin = this.pairedBinFor(this.moving);
+		if (movingBin == -1) {
+			$(this.moving).appendTo("#" + this.counterId + "-source");
+		} else {
+			var before;
+			children = this.sourceArea.childNodes;
+			blocks = [];
+			for (i = 0; i < children.length; i++) {
+				item = children[i];
+				if ($(item).hasClass("block")) {
+					blocks.push(item);
+				}
+			}
+			for (i = 0; i < blocks.length; i++) {
+				item = blocks[i];
+				if (this.pairedBinFor(item) == movingBin) {
+						before = i + 1;
+				}
+			}
+			if (before == undefined || before == blocks.length) {
+				$(this.moving).appendTo("#" + this.counterId + "-source");
+			} else {
+				this.sourceArea.insertBefore(this.moving, blocks[before]);
+			}
+		}
+		// Place in the middle of the mouse cursor
 		$(this.moving).css({
 			'left' : this.movingX - this.sourceArea.getBoundingClientRect().left - window.pageXOffset - ($(this.moving).outerWidth(true) / 2),
 			'top' : this.movingY - this.sourceArea.getBoundingClientRect().top - window.pageYOffset - (movingHeight / 2),
 			'width' : baseWidth,
-			'z-index' : 2
+			'z-index' : 3
 		});
 	}
 	

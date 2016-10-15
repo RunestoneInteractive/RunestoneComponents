@@ -46,4 +46,3 @@ class RunestoneDirective(Directive):
         self.options['basecourse'] = self.basecourse
         self.options['chapter'] = self.chapter
         self.options['subchapter'] = self.subchapter
-
