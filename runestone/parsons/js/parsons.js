@@ -297,6 +297,7 @@ var ParsonsBlock = function(problem, lines) {
 	view.id = problem.counterId + "-block-" + problem.blockIndex;
 	problem.blockIndex += 1;
 	$(view).addClass("block");
+	$(view).attr("tabindex", "-1");
 	var sharedIndent = lines[0].indent;
 	for (var i = 1; i < lines.length; i++) {
 		sharedIndent = Math.min(sharedIndent, lines[i].indent);
@@ -316,6 +317,464 @@ var ParsonsBlock = function(problem, lines) {
 		view.appendChild(line.view);
 	}
 	this.view = view;
+};
+
+// Return a boolean as to whether it this block is in the source area
+ParsonsBlock.prototype.inSourceArea = function() {
+	var children = this.problem.sourceArea.childNodes;
+	for (i = 0; i < children.length; i++) {
+		var item = children[i];
+		if (item.id == this.view.id) {
+			return true;
+		}
+	}
+	return false;
+};
+
+// Return which paired bin it is in (-1) if not
+ParsonsBlock.prototype.pairedBin = function() {
+	var lineIndex = this.lines[0].index;
+	for (var i = 0; i < this.problem.pairedBins.length; i++) {
+		if (this.problem.pairedBins[i].includes(lineIndex)) {
+			return i;
+		}
+	}
+	return -1;
+};
+
+// Return a list of indexes where this block could be inserted before
+ParsonsBlock.prototype.validSourceIndexes = function() {
+	var blocks = this.problem.sourceBlocks();
+	var indexes = [];
+	var pairedBin = this.pairedBin();
+	var i;
+	if (pairedBin >= 0) {
+		var lastBin = undefined;
+		for (i = 0; i < blocks.length; i++) {
+			var block = blocks[i];
+			if (block.view.id != this.view.id) {
+				var blockBin = block.pairedBin();
+				if (blockBin == pairedBin) {
+					indexes.push(i);
+				} else if (lastBin == pairedBin) {
+					indexes.push(i);
+				}
+				lastBin = blockBin;
+			}
+		}
+		if (lastBin == pairedBin) {
+			indexes.push(blocks.length);
+		}
+		if (indexes.length > 0) {
+			return indexes;
+		}
+	}
+	lastBin = undefined;
+	for (i = 0; i < blocks.length; i++) {
+		block = blocks[i];
+		if (block.view.id != this.view.id) {
+			blockBin = block.pairedBin();
+			if (blockBin != lastBin) {
+				indexes.push(i);
+			} else if (blockBin == -1) {
+				indexes.push(i);
+			}
+			lastBin = blockBin;
+		}
+	}
+	indexes.push(blocks.length);
+	return indexes;
+};
+
+// A measure of how far the middle of this block is vertically positioned
+ParsonsBlock.prototype.verticalOffset = function() {
+	var verticalOffset;
+	if (this.inSourceArea()) {
+		verticalOffset = this.problem.sourceArea.getBoundingClientRect().top;
+	} else {
+		verticalOffset = this.problem.answerArea.getBoundingClientRect().top;
+	}
+	verticalOffset = this.view.getBoundingClientRect().top + this.view.getBoundingClientRect().bottom - verticalOffset * 2;
+	return verticalOffset;
+};
+
+// This block just gained textual focus
+ParsonsBlock.prototype.newFocus = function() {
+	if (this.problem.textFocus == undefined) {
+		this.problem.enterKeyboardMode();
+		this.problem.textFocus = this;
+		this.problem.textMove = false;
+		$(this.view).addClass("down");
+	} else if (this.problem.textFocus == this) {
+		if (this.problem.textMove) {
+			$(this.view).addClass("up");
+		} else {
+			$(this.view).addClass("down");
+		}
+	} else {
+		// already in keyboard mode
+		this.problem.textFocus = this;
+		this.problem.textMove = false;
+		$(this.view).addClass("down");
+	}
+	this.problem.textMoving = false;
+};
+
+// This block just lost textual focus
+ParsonsBlock.prototype.releaseFocus = function() {
+	$(this.view).removeClass("down up");
+	if (this.problem.textFocus == this) {
+		if (!this.problem.textMoving) {
+			// exit out of problem but stay way into problem
+			this.problem.textFocus = undefined;
+			if (this.problem.textMove) {
+				this.problem.logMove("kmove");
+				this.problem.textMove = false;
+			}
+			this.problem.exitKeyboardMode();
+		}
+	} else {
+		// become selectable, but not active
+		$(this.view).attr("tabindex", "-1");
+		$(this.view).unbind("focus");
+		$(this.view).unbind("blur");
+		$(this.view).unbind("keydown");
+	}
+};
+
+// Make this block into the keyboard entry point
+ParsonsBlock.prototype.makeTabIndex = function() {
+	$(this.view).attr("tabindex", "0");
+	var that = this;
+	$(this.view).focus(function() {
+		that.newFocus();
+	});
+	$(this.view).blur(function() {
+		that.releaseFocus();
+	});
+	$(this.view).keydown(function(event) {
+		that.keyDown(event);
+	});
+};
+
+// Handle a keypress event when in focus
+ParsonsBlock.prototype.keyDown = function(event) {
+	if (this.problem.started == undefined) {
+		// log the first time that something gets moved
+		this.problem.started = true;
+		this.problem.logMove("kstart");
+	}
+	switch(event.keyCode) {
+		case 37: // left
+			if (this.problem.textMove) {
+				this.moveLeft();
+			} else {
+				this.selectLeft();
+			}
+			event.preventDefault();
+			break;
+		case 38: // up
+			if (this.problem.textMove) {
+				this.moveUp();
+			} else {
+				this.selectUp();
+			}
+			event.preventDefault();
+			break;
+		case 39: // right
+			if (this.problem.textMove) {
+				this.moveRight();
+			} else {
+				this.selectRight();
+			}
+			event.preventDefault();
+			break;
+		case 40: // down
+			if (this.problem.textMove) {
+				this.moveDown();
+			} else {
+				this.selectDown();
+			}
+			event.preventDefault();
+			break;
+		case 32: // space
+			this.toggleMove();
+			event.preventDefault();
+			break;
+		case 13: // enter
+			this.toggleMove();
+			event.preventDefault();
+			break;
+	}
+};
+
+// Move block left
+ParsonsBlock.prototype.moveLeft = function() {
+	if (!this.inSourceArea()) {
+		if (this.indent == 0) {
+			// move to source area
+			var blocks = this.problem.sourceBlocks();
+			var offset = this.verticalOffset();
+			var validSourceIndexes = this.validSourceIndexes();
+			for (var i = 0; i < validSourceIndexes.length; i++) {
+				index = validSourceIndexes[i];
+				if (index == blocks.length) {
+					this.problem.textMoving = true;
+					this.problem.sourceArea.appendChild(this.view);
+					$(this.view).focus();
+					this.problem.state = undefined;
+					this.problem.updateView();
+					return this;
+				} else {
+					var block = blocks[index];
+					if (block.verticalOffset() >= offset) {
+						break;
+					}
+				}
+			}
+			this.problem.textMoving = true;
+			this.problem.sourceArea.insertBefore(this.view, block.view);
+			$(this.view).focus();
+		} else {
+			// reduce indent
+			this.indent = this.indent - 1;
+		}
+		this.problem.state = undefined;
+		this.problem.updateView();
+	}
+};
+
+// Move block up
+ParsonsBlock.prototype.moveUp = function() {
+	if (this.inSourceArea()) {
+		var blocks = this.problem.sourceBlocks();
+		var offset = this.verticalOffset();
+		var validSourceIndexes = this.validSourceIndexes();
+		for (var i = 0; i < validSourceIndexes.length; i++) {
+			var index = validSourceIndexes[validSourceIndexes.length - 1 - i];
+			if (index < blocks.length) {
+				var block = blocks[index];
+				if (block.verticalOffset() < offset) {
+					this.problem.textMoving = true;
+					this.problem.sourceArea.insertBefore(this.view, block.view);
+					$(this.view).focus();
+					this.problem.state = undefined;
+					this.problem.updateView();
+					return this;
+				}
+			}
+		}
+	} else {
+		var insert = false;
+		var blocks = this.problem.answerBlocks();
+		for (var i = 0; i < blocks.length; i++) {
+			if (blocks[i].view.id == this.view.id) {
+				if (i == 0) {
+					return this;
+				}
+				this.problem.textMoving = true;
+				this.problem.answerArea.insertBefore(this.view, blocks[i - 1].view);
+				$(this.view).focus();
+				this.problem.state = undefined;
+				this.problem.updateView();
+			}
+		}
+	}
+};
+
+// Move block right
+ParsonsBlock.prototype.moveRight = function() {
+	if (this.inSourceArea()) {
+		// move to answer area
+		this.indent = 0;
+		var offset = this.verticalOffset();
+		var answerBlocks = this.problem.answerBlocks();
+		for (var i = 0; i < answerBlocks.length; i++) {
+			var item = answerBlocks[i];
+			var itemOffset = item.verticalOffset();
+			if (itemOffset >= offset) {
+				this.problem.textMoving = true;
+				this.problem.answerArea.insertBefore(this.view, item.view);
+				$(this.view).focus();
+				this.problem.state = undefined;
+				this.problem.updateView();
+				return this;
+			}
+		}
+		this.problem.textMoving = true;
+		this.problem.answerArea.appendChild(this.view);
+		$(this.view).focus();
+		this.problem.state = undefined;
+		this.problem.updateView();
+	} else {
+		// in answer area: increase the indent
+		if (this.indent != this.problem.indent) {
+			this.indent = this.indent + 1;
+			this.problem.state = undefined;
+			this.problem.updateView();
+		}
+	}
+};
+
+// Move block down
+ParsonsBlock.prototype.moveDown = function() {
+	if (this.inSourceArea()) {
+		var blocks = this.problem.sourceBlocks();
+		var offset = this.verticalOffset();
+		var validSourceIndexes = this.validSourceIndexes();
+		for (var i = 0; i < blocks.length; i++) {
+			if (blocks[i].view.id == this.view.id) {
+				var myIndex = i;
+			}
+		}
+		for (var i = 0; i < validSourceIndexes.length; i++) {
+			var index = validSourceIndexes[i];
+			if (index == blocks.length) {
+				this.problem.textMoving = true;
+				this.problem.sourceArea.appendChild(this.view);
+				$(this.view).focus();
+				this.problem.state = undefined;
+				this.problem.updateView();
+				return this;
+			} else if (index - myIndex > 1) {
+				this.problem.textMoving = true;
+				this.problem.sourceArea.insertBefore(this.view, blocks[index].view);
+				$(this.view).focus();
+				this.problem.state = undefined;
+				this.problem.updateView();
+				return this;
+			}
+		}
+	} else {
+		var insert = false;
+		var blocks = this.problem.answerBlocks();
+		for (var i = 0; i < blocks.length; i++) {
+			if (blocks[i].view.id == this.view.id) {
+				if (i == blocks.length - 1) {
+					return this;
+				} else if (i == blocks.length - 2) {
+					this.problem.textMoving = true;
+					this.problem.answerArea.appendChild(this.view);
+				} else {
+					this.problem.textMoving = true;
+					this.problem.answerArea.insertBefore(this.view, blocks[i + 2].view);
+				}
+				$(this.view).focus();
+				this.problem.state = undefined;
+				this.problem.updateView();
+			}
+		}
+	}
+};
+
+// Move selection left
+ParsonsBlock.prototype.selectLeft = function() {
+	if (!this.inSourceArea()) {
+		var offset = this.verticalOffset();
+		var sourceBlocks = this.problem.sourceBlocks();
+		if (sourceBlocks.length == 0) {
+			return this;
+		}
+		var chooseNext = sourceBlocks[0];
+		var chooseOffset = chooseNext.verticalOffset() - offset;
+		for (var i = 1; i < sourceBlocks.length; i++) {
+			var item = sourceBlocks[i];
+			var itemOffset = item.verticalOffset() - offset;
+			if (Math.abs(itemOffset) < Math.abs(chooseOffset)) {
+				chooseNext = item;
+				chooseOffset = itemOffset;
+			}
+		}
+		this.problem.textFocus = chooseNext;
+		chooseNext.makeTabIndex();
+		$(chooseNext.view).focus();
+	}
+};
+
+// Move selection up
+ParsonsBlock.prototype.selectUp = function() {
+	var chooseNext = false;
+	var blocks;
+	if (this.inSourceArea()) {
+		blocks = this.problem.sourceBlocks();
+	} else {
+		blocks = this.problem.answerBlocks();
+	}
+	for (var i = blocks.length - 1; i >= 0; i--) {
+		var item = blocks[i];
+		if (chooseNext) {
+			this.problem.textFocus = item;
+			item.makeTabIndex();
+			$(item.view).focus();
+			return this;
+		} else {
+			if (item.view.id == this.view.id) {
+				chooseNext = true;
+			}
+		}
+	}
+};
+
+// Move selection right
+ParsonsBlock.prototype.selectRight = function() {
+	if (this.inSourceArea()) {
+		var offset = this.verticalOffset();
+		var blocks = this.problem.answerBlocks();
+		if (blocks.length == 0) {
+			return this;
+		}
+		var chooseNext = blocks[0];
+		var chooseOffset = chooseNext.verticalOffset() - offset;
+		for (var i = 1; i < blocks.length; i++) {
+			var item = blocks[i];
+			var itemOffset = item.verticalOffset() - offset;
+			if (Math.abs(itemOffset) < Math.abs(chooseOffset)) {
+				chooseNext = item;
+				chooseOffset = itemOffset;
+			}
+		}
+		this.problem.textFocus = chooseNext;
+		chooseNext.makeTabIndex();
+		$(chooseNext.view).focus();
+	}
+};
+
+// Move selection down
+ParsonsBlock.prototype.selectDown = function() {
+	var chooseNext = false;
+	var blocks;
+	if (this.inSourceArea()) {
+		blocks = this.problem.sourceBlocks();
+	} else {
+		blocks = this.problem.answerBlocks();
+	}
+	for (var i = 0; i < blocks.length; i++) {
+		var item = blocks[i];
+		if (chooseNext) {
+			this.problem.textFocus = item;
+			item.makeTabIndex();
+			$(item.view).focus();
+			return this;
+		} else {
+			if (item.view.id == this.view.id) {
+				chooseNext = true;
+			}
+		}
+	}
+};
+
+// Toggle whether to move this block
+ParsonsBlock.prototype.toggleMove = function() {
+	if (this.problem.textMove) {
+		$(this.view).removeClass("up");
+		$(this.view).addClass("down");
+		this.problem.textMove = false;
+		this.problem.logMove("kmove");
+	} else {
+		$(this.view).removeClass("down");
+		$(this.view).addClass("up");
+		this.problem.textMove = true;
+	}
 };
 
 // Answer a string that represents this codeblock for saving
@@ -481,26 +940,25 @@ Parsons.prototype.initializeView = function () {
 	$(this.parsTextDiv).addClass("parsons-text");
 	this.parsTextDiv.innerHTML = this.question.innerHTML;
 	this.containerDiv.appendChild(this.parsTextDiv);
-	var clearLeft = document.createElement("div");
-	clearLeft.style["clear"] = "left";
-	this.containerDiv.appendChild(clearLeft);
 
-	this.origDiv = document.createElement("div");
-	this.origDiv.id = this.counterId + "-orig";
-	this.origDiv.style["display"] = "none";
-	this.origDiv.innerHTML = this.fmtCode;
-	this.containerDiv.appendChild(this.origDiv);
+	this.keyboardTip = document.createElement("div");
+	$(this.keyboardTip).attr("role", "tooltip");
+	this.keyboardTip.id = this.counterId + "-tip";
+	this.keyboardTip.innerHTML = "Arrow keys to navigate. Space to select / deselect block to move.";
+	this.containerDiv.appendChild(this.keyboardTip);
 
 	this.sortContainerDiv = document.createElement("div");
 	$(this.sortContainerDiv).addClass("sortable-code-container");
+	$(this.sortContainerDiv).attr("aria-describedby", this.counterId + "-tip");
 	this.containerDiv.appendChild(this.sortContainerDiv);
 
 	this.sourceRegionDiv = document.createElement("div");
 	this.sourceRegionDiv.id = this.counterId + "-sourceRegion";
 	$(this.sourceRegionDiv).addClass("sortable-code");
-	var label = document.createElement("p");
-	label.innerHTML = "Drag from here";
-	this.sourceRegionDiv.appendChild(label);
+	this.sourceLabel = document.createElement("p");
+	//this.sourceLabel.id = this.counterId + "-sourceLabel";
+	this.sourceLabel.innerHTML = "Drag from here";
+	this.sourceRegionDiv.appendChild(this.sourceLabel);
 	this.sortContainerDiv.appendChild(this.sourceRegionDiv);
 
 	this.sourceArea = document.createElement("div");
@@ -511,17 +969,15 @@ Parsons.prototype.initializeView = function () {
 	this.answerRegionDiv = document.createElement("div");
 	this.answerRegionDiv.id = this.counterId + "-answerRegion";
 	$(this.answerRegionDiv).addClass("sortable-code");
-	label = document.createElement("p");
-	label.innerHTML = "Drop blocks here";
-	this.answerRegionDiv.appendChild(label);
+	this.answerLabel = document.createElement("p");
+	//this.answerLabel.id = this.counterId + "-answerLabel";
+	this.answerLabel.innerHTML = "Drop blocks here";
+	this.answerRegionDiv.appendChild(this.answerLabel);
 	this.sortContainerDiv.appendChild(this.answerRegionDiv);
 
 	this.answerArea = document.createElement("div");
 	this.answerArea.id = this.counterId + "-answer";
 	this.answerRegionDiv.appendChild(this.answerArea);
-	clearLeft = document.createElement("div");
-	clearLeft.style["clear"] = "left";
-	this.sortContainerDiv.appendChild(clearLeft);
 
 	this.parsonsControlDiv = document.createElement("div");
 	$(this.parsonsControlDiv).addClass("parsons-controls");
@@ -639,6 +1095,9 @@ Parsons.prototype.initializeAreas = function(sourceBlocks, answerBlocks) {
 		this.answerArea.appendChild(block.view);
 	}
 	this.blocks = blocks;
+	
+	// Establish a tab index
+	blocks[0].makeTabIndex();
 	
 	// Determine how much indent should be possible in the answer area
 	var indent = 0;
@@ -766,6 +1225,10 @@ Parsons.prototype.initializeInteractivity = function () {
 			// log the first time that something gets moved
 			that.started = true;
 			that.logMove("start");
+		}
+		if (that.textFocus != undefined) {
+			// stop text focus when dragging
+			that.textFocus.releaseFocus();
 		}
 		that.moving = that.getBlockFor(event.target);
 		// Update the view
@@ -1095,6 +1558,19 @@ Parsons.prototype.getBlockById = function(id) {
 	return undefined;
 };
 
+// Return array of codeblocks based on what is in the source field
+Parsons.prototype.sourceBlocks = function() {
+	var sourceBlocks = [];
+	var children = this.sourceArea.childNodes;
+	for (var i = 0; i < children.length; i++) {
+		var child = children[i];
+		if ($(child).hasClass("block")) {
+			sourceBlocks.push(this.getBlockById(child.id));
+		}
+	}
+	return sourceBlocks;
+};
+
 // Return array of codeblocks based on what is in the answer field
 Parsons.prototype.answerBlocks = function() {
 	var answerBlocks = [];
@@ -1160,6 +1636,25 @@ Parsons.prototype.shuffled = function(array) {
 		returnArray[randomIndex] = temporaryValue;
 	}
 	return returnArray;
+};
+
+/* =====================================================================
+==== KEYBOARD INTERACTION ==============================================
+===================================================================== */
+
+// When the user has entered the Parsons problem via keyboard mode
+Parsons.prototype.enterKeyboardMode = function() {
+	$(this.keyboardTip).show();
+	$(this.sourceLabel).hide();
+	$(this.answerLabel).hide();
+	this.clearFeedback();
+};
+
+// When the user leaves the Parsons problem via keyboard mode
+Parsons.prototype.exitKeyboardMode = function() {
+	$(this.keyboardTip).hide();
+	$(this.sourceLabel).show();
+	$(this.answerLabel).show();
 };
 
 /* =====================================================================
@@ -1366,14 +1861,10 @@ Parsons.prototype.updateView = function() {
 				block = blocks[j];
 				if (bin.includes(this.getBlockById(block.id).lines[0].index)) {
 					matching.push(block);
-				} else {
-					if (matching.length == 1) {
-						matching = [];
-					}
 				}
 			}
 			var div = this.pairedDivs[i];
-			if (matching.length < 2) {
+			if (matching.length < 1) {
 				$(div).hide();
 			} else {
 				$(div).show();
