@@ -97,7 +97,9 @@ ActiveCode.prototype.createEditor = function (index) {
     var editor = CodeMirror(codeDiv, {value: this.code, lineNumbers: true,
         mode: this.containerDiv.lang, indentUnit: 4,
         matchBrackets: true, autoMatchParens: true,
-        extraKeys: {"Tab": "indentMore", "Shift-Tab": "indentLess"}
+        extraKeys: {"Tab": "indentMore", "Shift-Tab": "indentLess", "Shift-Ctrl": function(cm) {
+            this.previousSibling.focus(); // Gain focus of the previous sibling to get out of keyboard trap
+        }}
     });
 
     // Make the editor resizable
