@@ -5,7 +5,6 @@
 var isMouseDown = false;
 document.onmousedown = function() { isMouseDown = true };
 document.onmouseup   = function() { isMouseDown = false };
-
 var edList = {};
 
 ActiveCode.prototype = new RunestoneBase();
@@ -97,9 +96,7 @@ ActiveCode.prototype.createEditor = function (index) {
     var editor = CodeMirror(codeDiv, {value: this.code, lineNumbers: true,
         mode: this.containerDiv.lang, indentUnit: 4,
         matchBrackets: true, autoMatchParens: true,
-        extraKeys: {"Tab": "indentMore", "Shift-Tab": "indentLess", "Shift-Ctrl": function(cm) {
-            this.previousSibling.focus(); // Gain focus of the previous sibling to get out of keyboard trap
-        }}
+        extraKeys: {"Tab": "indentMore", "Shift-Tab": "indentLess"}
     });
 
     // Make the editor resizable
@@ -116,9 +113,24 @@ ActiveCode.prototype.createEditor = function (index) {
             $(editor.getWrapperElement()).css('border-top', '2px solid #b43232');
             $(editor.getWrapperElement()).css('border-bottom', '2px solid #b43232');
             this.logBookEvent({'event': 'activecode', 'act': 'edit', 'div_id': this.divid});
-    }
+        }
         editor.acEditEvent = true;
-        }).bind(this));  // use bind to preserve *this* inside the on handler.
+    }).bind(this));  // use bind to preserve *this* inside the on handler.
+
+    //If user tabs into ActiveCode, change CodeMirror's extraKeys to cancel Tab/Shift-Tab indentation behavior and let user tab out the textarea
+    $(window).keyup(function (e) {
+        var code = (e.keyCode ? e.keyCode : e.which);
+        if (code == 9 && $('.CodeMirror-code:focus').length) {
+            editor.setOption("extraKeys", {
+                "Tab": function(cm) {
+                    editor.closest('.ac_actions').focus();
+                },
+                "Shift-Tab": function(cm) {
+                    editor.closest('.ac_caption').focus();
+                }
+            });
+        }
+    });
 
     this.editor = editor;
     if (this.hidecode) {
