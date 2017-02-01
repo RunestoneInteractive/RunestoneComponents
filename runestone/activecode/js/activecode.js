@@ -2,6 +2,7 @@
  * Created by bmiller on 3/19/15.
  */
 
+
 var isMouseDown = false;
 document.onmousedown = function() { isMouseDown = true };
 document.onmouseup   = function() { isMouseDown = false };
@@ -1549,6 +1550,10 @@ LiveCode.prototype.createErrorOutput = function () {
 };
 
 LiveCode.prototype.runProg = function() {
+
+        //console.log("***runProg***");
+        //console.log(this);
+
         var xhr, stdin;
         var runspec = {};
         var scrubber_dfd, history_dfd;
@@ -1582,11 +1587,24 @@ LiveCode.prototype.runProg = function() {
             runspec.input = stdin
         }
 
+        //var classfile = "public class Person2\n{\n   private String name;\n\n   public Person2(String theName)\n   {\n      this.name = theName;\n   }\n\n   public String getName()\n   {\n      return name;\n   }\n\n   public boolean setName(String theNewName)\n   {\n      if (theNewName != null)\n      {\n         this.name = theNewName;\n         return true;\n      }\n      return false;\n   }\n}\n";
+        //var testName = "Person2.java";
+
+        if (classfile) {
+
+            this.putClassFile(classfile, testName);
+            runspec['file_list'] = [["runestone" + new String(testName).hashCode(), testName]];
+        }
+
+        //not happening for the Inheritance and constructor part
         if (this.datafile) {
+
             this.pushDataFile(this.datafile);
+
             runspec['file_list'] = [[this.div2id[this.datafile],this.datafile]];
         }
         data = JSON.stringify({'run_spec': runspec});
+
         host = this.JOBE_SERVER + this.resource;
 
         var odiv = this.output;
@@ -1655,6 +1673,9 @@ LiveCode.prototype.runProg = function() {
         };
 
         xhr.send(data);
+        //}
+
+
     };
 LiveCode.prototype.addJobeErrorMessage = function (err) {
         var errHead = $('<h3>').html('Error');
@@ -1667,6 +1688,107 @@ LiveCode.prototype.addJobeErrorMessage = function (err) {
         errText.innerHTML = err;
     };
 
+//returns false if file is not on jobe server or if bad request
+LiveCode.prototype.checkFile = function(testName) {
+    var file_id = "runestone" + new String(testName).hashCode();
+    var resource = '/jobe/index.php/restapi/files/' + file_id;
+    var host = this.JOBE_SERVER + resource;
+    var xhr = new XMLHttpRequest();
+    xhr.open("HEAD", host, true);
+    xhr.setRequestHeader('Content-type', 'application/json');
+    xhr.setRequestHeader('Accept', 'text/plain');
+    xhr.setRequestHeader('X-API-KEY', this.API_KEY);
+
+    xhr.onload = function () {
+        console.log("successfully sent file " + xhr.responseText);
+    };
+
+    xhr.onerror = function () {
+        console.log("error sending file" + xhr.responseText);
+    };
+
+    xhr.onload = (function () {
+        switch(xhr.status) {
+            case 404:
+                console.log("File not on Server");
+                return false;
+                //break;
+            case 400:
+                console.log("Bad Request");
+                return false;
+                //break;
+            case 204:
+                console.log("File already on Server");
+                return true;
+                //break;
+            default:
+                console.log("This case should never happen");
+                return false;
+            }
+    }).bind(this);
+
+    xhr.send();//data
+
+};
+LiveCode.prototype.putClassFile = function (classdiv, testName) {
+
+    var onServer = this.checkFile(testName);
+    if(!onServer) {
+        var file_id = "runestone" + new String(testName).hashCode();
+
+        //var contents = $(document.getElementById(classdiv)).text();
+        var contents = classdiv;
+        var contentsb64 = btoa(contents);
+        var data = JSON.stringify({ 'file_contents' : contentsb64 });
+
+        var xhr = new XMLHttpRequest();
+
+        var resource = '/jobe/index.php/restapi/files/' + file_id;
+        var host = this.JOBE_SERVER + resource;
+
+        if (this.div2id[testName] === undefined ) {
+            this.div2id[testName] = file_id;
+
+            xhr.open("PUT", host, true);
+            xhr.setRequestHeader('Content-type', 'application/json');
+            xhr.setRequestHeader('Accept', 'text/plain');
+            xhr.setRequestHeader('X-API-KEY', this.API_KEY);
+
+            xhr.onload = function () {
+                console.log("successfully sent file " + xhr.responseText);
+                console.log("File placed on server");
+            };
+
+            xhr.onerror = function () {
+                console.log("error sending file" + xhr.responseText);
+            };
+
+            xhr.send(data);
+        }
+    }
+
+
+
+};
+
+/**
+ * @see http://stackoverflow.com/q/7616461/940217
+ * @return {number}
+ */
+String.prototype.hashCode = function(){
+    //if (Array.prototype.reduce){
+    //    return this.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);
+    //}
+    var hash = 0;
+    if (this.length === 0) return hash;
+    for (var i = 0; i < this.length; i++) {
+        var character  = this.charCodeAt(i);
+        hash  = ((hash<<5)-hash)+character;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+
+    return (hash*hash);
+}
 
 LiveCode.prototype.pushDataFile = function (datadiv) {
 
