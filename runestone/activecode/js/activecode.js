@@ -118,15 +118,16 @@ ActiveCode.prototype.createEditor = function (index) {
     }).bind(this));  // use bind to preserve *this* inside the on handler.
 
     //If user tabs into ActiveCode, change CodeMirror's extraKeys to cancel Tab/Shift-Tab indentation behavior and let user tab out the textarea
-    $(window).keyup(function (e) {
+    $(window).keydown(function (e) {
         var code = (e.keyCode ? e.keyCode : e.which);
-        if (code == 9 && $('.CodeMirror-code:focus').length) {
+        if (code == 9 && $('textarea:focus').length === 0) {
             editor.setOption("extraKeys", {
                 "Tab": function(cm) {
-                    editor.closest('.ac_actions').focus();
+                    console.log($(document.activeElement).closest('.tab-content').nextSibling);
+                    $(document.activeElement).closest('.tab-content').nextSibling.focus();//working unexpectedly
                 },
                 "Shift-Tab": function(cm) {
-                    editor.closest('.ac_caption').focus();
+                    $(document.activeElement).closest('.tab-content').previousSibling.focus();
                 }
             });
         }
