@@ -1551,8 +1551,6 @@ LiveCode.prototype.createErrorOutput = function () {
 
 LiveCode.prototype.runProg = function() {
 
-        //console.log("***runProg***");
-        //console.log(this);
 
         var xhr, stdin;
         var runspec = {};
@@ -1576,6 +1574,13 @@ LiveCode.prototype.runProg = function() {
             this.sourcefile = sfilemap[this.language];
         }
 
+        //parses java classes and chooses last one as main class, all others are sublemental
+        var classes = [];
+        if(this.language === "java") {
+            classes = this.parseJavaClasses(source);
+            source = classes[classes.length - 1].content;
+        }
+
         runspec = {
             language_id: this.language,
             sourcecode: source,
@@ -1587,16 +1592,14 @@ LiveCode.prototype.runProg = function() {
             runspec.input = stdin
         }
 
-        //var classfile = "public class Person2\n{\n   private String name;\n\n   public Person2(String theName)\n   {\n      this.name = theName;\n   }\n\n   public String getName()\n   {\n      return name;\n   }\n\n   public boolean setName(String theNewName)\n   {\n      if (theNewName != null)\n      {\n         this.name = theNewName;\n         return true;\n      }\n      return false;\n   }\n}\n";
-        //var testName = "Person2.java";
-
-        if (classfile) {
-
-            this.putClassFile(classfile, testName);
-            runspec['file_list'] = [["runestone" + new String(testName).hashCode(), testName]];
+        //adds sublemental java class files to job
+        runspec['file_list'] = [];
+        for(var i = 0; i < classes.length - 1; i++) {
+            var fileName = classes[i].name;
+            this.putClassFile(classes[i].content, classes[i].name);
+            runspec['file_list'].push(["runestone" + new String(classes[i].name).hashCode(), classes[i].name]);
         }
 
-        //not happening for the Inheritance and constructor part
         if (this.datafile) {
 
             this.pushDataFile(this.datafile);
@@ -1673,7 +1676,7 @@ LiveCode.prototype.runProg = function() {
         };
 
         xhr.send(data);
-        //}
+        
 
 
     };
@@ -1727,9 +1730,14 @@ LiveCode.prototype.checkFile = function(testName) {
             }
     }).bind(this);
 
-    xhr.send();//data
+    xhr.send();
 
 };
+/**
+ * Places a file on a server if it isn't already there
+ * @param  {string} classdiv contents of file
+ * @param  {string} testName name of file
+ */
 LiveCode.prototype.putClassFile = function (classdiv, testName) {
 
     var onServer = this.checkFile(testName);
@@ -1787,7 +1795,90 @@ String.prototype.hashCode = function(){
         hash = hash & hash; // Convert to 32bit integer
     }
 
-    return (hash*hash);
+    return Math.abs(hash);
+}
+
+/**
+ * Seperates test into multiple .java files
+ * @param  {String} text String with muliplt java classes needed to be seperated
+ * @return {array of objects}  .name gives the name of the java file with .java extension
+ *                   .content gives the contents of the file
+ */
+LiveCode.prototype.parseJavaClasses = function(text) {
+
+    text = text.trim();
+    var pre = true;
+    var found = false;
+    var stack = 0;
+    var startIndex = 0;
+    var classes = [];
+    var count = 0;
+    for(var i = 0; i < text.length; i++) {
+    	count++;
+    var char = text.charAt(i);
+    if(char === '/') {
+        i++;
+        if(text.charAt(i) === '/') {
+            i++;
+            while(text.charAt(i) !== '\n' && i < text.length) {
+                i++;
+            }
+        } else if(text.charAt(i) == '*') {
+            i++;
+            while((text.charAt(i) !== '*' || text.charAt(i+1) !== '/') && i + 1 < text.length) {
+                i++;
+            }
+        }
+
+        } else if(char === '"') {
+
+            i++;
+            while(text.charAt(i) !== '"' && i < text.length) {
+                i++;
+            }
+        } else if(char === '\'') {
+            while(text.charAt(i) !== '\'' && i < text.length) {
+                i++;
+            }
+        }
+
+        if(!found && i + 12 <= text.length && text.substring(i, i + 12) == "public class") {
+            startIndex = i;
+            found = true;
+            stack = 0;
+            pre = true;
+        } else if(found) {
+            if(text.charAt(i) === '{') {
+                pre = false;
+                stack++;
+            }
+            if(text.charAt(i) === '}') {
+                stack--;
+            }
+        }
+        if(!pre && stack === 0) {
+            endIndex = i;
+
+            var nameFound = false;
+            var j = startIndex + 12;
+            var searching = false;
+            while (!nameFound) {
+                if(!searching && text.charAt(j) !== ' ') {
+                    searching = true;
+                } else if(searching && (text.charAt(j) === ' ' || text.charAt(j) === '\n')) {
+                    nameFound = true;
+                }
+                j++;
+            }
+            var className = text.substring(startIndex + 12, j-1).trim() + ".java";
+
+            classes.push({name: className, content: text.substring(startIndex, i+1)});
+            found = false;
+            pre = true;
+        }
+
+    }
+    return classes;
 }
 
 LiveCode.prototype.pushDataFile = function (datadiv) {
