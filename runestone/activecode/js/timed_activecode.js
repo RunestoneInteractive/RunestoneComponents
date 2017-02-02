@@ -8,6 +8,10 @@ TimedActiveCode.prototype = new ActiveCode();
 TimedActiveCode.prototype.timedInit = function (opts) {
     this.init(opts);
     //this.renderTimedIcon(this.containerDiv); - bje not needed anymore
+    if (this.language == 'javascript') {
+        TimedActiveCode.prototype.runProg = JSActiveCode.prototype.runProg;
+        TimedActiveCode.prototype.outputfun = JSActiveCode.prototype.outputfun;
+    }
     this.hideButtons();
     this.addHistoryScrubber();
     this.needsReinitialization = true;   // the run button click listener needs to be reinitialized
