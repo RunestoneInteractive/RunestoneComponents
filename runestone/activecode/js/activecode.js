@@ -1676,7 +1676,7 @@ LiveCode.prototype.runProg = function() {
         };
 
         xhr.send(data);
-        
+
 
 
     };
@@ -1807,28 +1807,29 @@ String.prototype.hashCode = function(){
 LiveCode.prototype.parseJavaClasses = function(text) {
 
     text = text.trim();
-    var pre = true;
+    var header = true;
     var found = false;
     var stack = 0;
     var startIndex = 0;
     var classes = [];
-    var count = 0;
+    var importIndex = 0;
+
     for(var i = 0; i < text.length; i++) {
-    	count++;
-    var char = text.charAt(i);
-    if(char === '/') {
-        i++;
-        if(text.charAt(i) === '/') {
+
+        var char = text.charAt(i);
+        if(char === '/') {
             i++;
-            while(text.charAt(i) !== '\n' && i < text.length) {
+            if(text.charAt(i) === '/') {
                 i++;
-            }
-        } else if(text.charAt(i) == '*') {
-            i++;
-            while((text.charAt(i) !== '*' || text.charAt(i+1) !== '/') && i + 1 < text.length) {
+                while(text.charAt(i) !== '\n' && i < text.length) {
+                    i++;
+                }
+            } else if(text.charAt(i) == '*') {
                 i++;
+                while((text.charAt(i) !== '*' || text.charAt(i+1) !== '/') && i + 1 < text.length) {
+                    i++;
+                }
             }
-        }
 
         } else if(char === '"') {
 
@@ -1846,17 +1847,17 @@ LiveCode.prototype.parseJavaClasses = function(text) {
             startIndex = i;
             found = true;
             stack = 0;
-            pre = true;
+            header = true;
         } else if(found) {
             if(text.charAt(i) === '{') {
-                pre = false;
+                header = false;
                 stack++;
             }
             if(text.charAt(i) === '}') {
                 stack--;
             }
         }
-        if(!pre && stack === 0) {
+        if(!header && stack === 0) {
             endIndex = i;
 
             var nameFound = false;
@@ -1872,9 +1873,10 @@ LiveCode.prototype.parseJavaClasses = function(text) {
             }
             var className = text.substring(startIndex + 12, j-1).trim() + ".java";
 
-            classes.push({name: className, content: text.substring(startIndex, i+1)});
+            classes.push({name: className, content: text.substring(importIndex, i+1)});
             found = false;
-            pre = true;
+            header = true;
+            importIndex = i+1;
         }
 
     }
