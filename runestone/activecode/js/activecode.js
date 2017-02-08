@@ -825,6 +825,7 @@ ActiveCode.prototype.runProg = function () {
             this.logRunEvent({
                 'div_id': this.divid,
                 'code': this.editor.getValue(),
+                'lang': this.language,
                 'errinfo': 'success',
                 'to_save': saveCode,
                 'prefix': this.pretext,
@@ -839,6 +840,7 @@ ActiveCode.prototype.runProg = function () {
                 self.logRunEvent({
                     'div_id': self.divid,
                     'code': self.editor.getValue(),
+                    'lang': this.langauge,
                     'errinfo': err.toString(),
                     'to_save': saveCode,
                     'prefix': self.pretext,
