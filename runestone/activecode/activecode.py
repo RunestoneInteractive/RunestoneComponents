@@ -237,8 +237,8 @@ class ActiveCode(RunestoneDirective):
             self.options['include'] = ''
         else:
             lst = self.options['include'].split(',')
-            lst = [x.strip() for x in lst]
-            self.options['include'] = 'data-include=' + " ".join(lst)
+            my_lst = [x.strip() for x in lst]
+            self.options['include'] = 'data-include=' + "+".join(my_lst)
 
         if 'hidecode' in self.options:
             self.options['hidecode'] = 'data-hidecode="true"'

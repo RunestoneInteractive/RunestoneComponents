@@ -728,9 +728,10 @@ ActiveCode.prototype.buildProg = function() {
     this.pretext = "";
     if (this.includes !== undefined) {
         // iterate over the includes, in-order prepending to prog
+        includes = this.includes[0].split("+");
         pretext = "";
-        for (var x=0; x < this.includes.length; x++) {
-            pretext = pretext + edList[this.includes[x]].editor.getValue();
+        for (var x=0; x < includes.length; x++) {
+            pretext = pretext + edList[includes[x]].editor.getValue();
             }
         this.pretext = pretext;
         prog = pretext + prog
@@ -1555,13 +1556,13 @@ LiveCode.prototype.createErrorOutput = function () {
  * To do that split the original runProg into two functions: runProg and runProg_callback
  */
 LiveCode.prototype.runProg = function() {
-
     // parses java classes and chooses last one as main class, all others are supplemental
     var stdin;
     var scrubber_dfd, history_dfd;
     var saveCode = "True";
     var sfilemap = {java: '', cpp: 'test.cpp', c: 'test.c', python3: 'test.py', python2: 'test.py'};
     var source = this.editor.getValue();
+    source = this.buildProg();
 
     var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
     history_dfd = __ret.history_dfd;
@@ -1575,10 +1576,24 @@ LiveCode.prototype.runProg = function() {
         this.sourcefile = sfilemap[this.language];
     }
 
+    if (this.datafile) {
+        //do something with it
+    }
+
+
     var classes = [];
     if(this.language === "java") {
+
         classes = this.parseJavaClasses(source);
         source = classes[classes.length - 1].content;
+
+        var images = document.getElementsByClassName("myImage");
+        for(var i = 0; i < images.length; i++) {
+            var fileName = images[i].id + ".txt";
+            var base64 = images[i].toDataURL();
+            base64 = base64.substring(base64.indexOf(',') + 1);
+            classes.unshift({name: fileName, content: base64});
+        }
     }
 
     runspec = {
@@ -1599,11 +1614,13 @@ LiveCode.prototype.runProg = function() {
         data = JSON.stringify({'run_spec': runspec});
         this.runProg_callback(data);
     } else {
+
         runspec['file_list'] = [];
         var lastClass = classes.length - 2;
         for(var i = 0; i < classes.length - 1; i++) {
             var fileName = classes[i].name;
-            runspec['file_list'].push(["runestone" + new String(classes[i].name + classes[i].content).hashCode(), classes[i].name]); //.push([this.div2id[classes[i].name], classes[i].name]);
+            this.div2id[fileName] = "runestone" + new String(classes[i].name + classes[i].content).hashCode();
+            runspec['file_list'].push([this.div2id[fileName], classes[i].name]); //.push([this.div2id[classes[i].name], classes[i].name]);
             data = JSON.stringify({'run_spec': runspec});
             this.checkFile(classes[i].name, classes[i].content, lastClass === i, data);
 
@@ -1613,143 +1630,157 @@ LiveCode.prototype.runProg = function() {
 }
 LiveCode.prototype.runProg_callback = function(data) {
 
-        var xhr, stdin;
-        var runspec = {};
-        var scrubber_dfd, history_dfd;
-        var host, source, editor; //data
-        var saveCode = "True";
-        var sfilemap = {java: '', cpp: 'test.cpp', c: 'test.c', python3: 'test.py', python2: 'test.py'};
+        var attempt = 0;
 
-        xhr = new XMLHttpRequest();
+        while (attempt === 0 || attempt === 2) {
+            attempt++;
+            var xhr, stdin;
+            var runspec = {};
+            var scrubber_dfd, history_dfd;
+            var host, source, editor; //data
+            var saveCode = "True";
+            var sfilemap = {java: '', cpp: 'test.cpp', c: 'test.c', python3: 'test.py', python2: 'test.py'};
 
-        //Below is the code that stayed in runProg
-        /*
-        source = this.editor.getValue();
+            xhr = new XMLHttpRequest();
 
-        var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
-        history_dfd = __ret.history_dfd;
-        saveCode = __ret.saveCode;
+            //Below is the code that stayed in runProg
+            /*
+            source = this.editor.getValue();
 
-        if (this.stdin) {
-            stdin = $(this.stdin_el).val();
-        }
+            var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
+            history_dfd = __ret.history_dfd;
+            saveCode = __ret.saveCode;
 
-        if (! this.sourcefile ) {
-            this.sourcefile = sfilemap[this.language];
-        }
-
-
-        //parses java classes and chooses last one as main class, all others are sublemental
-        var classes = [];
-        if(this.language === "java") {
-            classes = this.parseJavaClasses(source);
-            source = classes[classes.length - 1].content;
-        }
-
-        runspec = {
-            language_id: this.language,
-            sourcecode: source,
-            sourcefilename: this.sourcefile
-        };
-
-        if(this.language === "java") {
-            runspec['sourcefilename'] =  classes[classes.length - 1].name;
-        }
-
-
-
-        if (stdin) {
-            runspec.input = stdin
-        }
-
-        //adds sublemental java class files to job
-        runspec['file_list'] = [];
-        for(var i = 0; i < classes.length - 1; i++) {
-            var fileName = classes[i].name;
-            //this.putClassFile(classes[i].content, classes[i].name);
-            this.checkFile(classes[i].name, classes[i].content);
-            runspec['file_list'].push([this.div2id[classes[i].name], classes[i].name]); //.push(["runestone" + new String(classes[i].name + classes[i].content).hashCode(), classes[i].name]);
-        }
-
-
-        if (this.datafile) {
-
-            this.pushDataFile(this.datafile);
-
-            runspec['file_list'] = [[this.div2id[this.datafile],this.datafile]];
-        }
-        data = JSON.stringify({'run_spec': runspec});
-        */
-
-        host = this.JOBE_SERVER + this.resource;
-
-        var odiv = this.output;
-        $(this.runButton).attr('disabled', 'disabled');
-        $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
-        $(this.outDiv).show({duration:700,queue:false});
-        $(this.errDiv).remove();
-        $(this.output).css("visibility","visible");
-
-        xhr.open("POST", host, true);
-        xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
-        xhr.setRequestHeader('Accept', 'application/json');
-        xhr.setRequestHeader('X-API-KEY', this.API_KEY);
-
-        xhr.onload = (function () {
-            var logresult;
-            $(this.runButton).removeAttr('disabled');
-            try {
-                var result = JSON.parse(xhr.responseText);
-            } catch (e) {
-                result = {};
-                result.outcome = -1;
+            if (this.stdin) {
+                stdin = $(this.stdin_el).val();
             }
 
-            if (result.outcome === 15) {
-                logresult = 'success';
-            } else {
-                logresult = result.outcome;
+            if (! this.sourcefile ) {
+                this.sourcefile = sfilemap[this.language];
             }
-            this.logRunEvent({'div_id': this.divid, 'code': source, 'errinfo': logresult, 'to_save':saveCode, 'event':'livecode'});
-            switch (result.outcome) {
-                case 15:
-                    $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
-                    console.log("*3*");
-                    break;
-                case 11: // compiler error
-                    $(odiv).html("There were errors compiling your code. See below.");
-                    this.addJobeErrorMessage(result.cmpinfo);
-                    break;
-                case 12:  // run time error
-                    $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
-                    if (result.stderr) {
-                        this.addJobeErrorMessage(result.stderr);
+
+
+            //parses java classes and chooses last one as main class, all others are sublemental
+            var classes = [];
+            if(this.language === "java") {
+                classes = this.parseJavaClasses(source);
+                source = classes[classes.length - 1].content;
+            }
+
+            runspec = {
+                language_id: this.language,
+                sourcecode: source,
+                sourcefilename: this.sourcefile
+            };
+
+            if(this.language === "java") {
+                runspec['sourcefilename'] =  classes[classes.length - 1].name;
+            }
+
+
+
+            if (stdin) {
+                runspec.input = stdin
+            }
+
+            //adds sublemental java class files to job
+            runspec['file_list'] = [];
+            for(var i = 0; i < classes.length - 1; i++) {
+                var fileName = classes[i].name;
+                //this.putClassFile(classes[i].content, classes[i].name);
+                this.checkFile(classes[i].name, classes[i].content);
+                runspec['file_list'].push([this.div2id[classes[i].name], classes[i].name]); //.push(["runestone" + new String(classes[i].name + classes[i].content).hashCode(), classes[i].name]);
+            }
+
+
+            if (this.datafile) {
+
+                this.pushDataFile(this.datafile);
+
+                runspec['file_list'] = [[this.div2id[this.datafile],this.datafile]];
+            }
+            data = JSON.stringify({'run_spec': runspec});
+            */
+
+
+            host = this.JOBE_SERVER + this.resource;
+
+            var odiv = this.output;
+            $(this.runButton).attr('disabled', 'disabled');
+            $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
+            $(this.outDiv).show({duration:700,queue:false});
+            $(this.errDiv).remove();
+            $(this.output).css("visibility","visible");
+
+            xhr.open("POST", host, true);
+            xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+            xhr.setRequestHeader('Accept', 'application/json');
+            xhr.setRequestHeader('X-API-KEY', this.API_KEY);
+
+            xhr.onload = (function () {
+                if(xhr.status === 404) {
+                    attempt++;
+                    this.runProg_callback(data);
+                } else {
+                    var logresult;
+                    $(this.runButton).removeAttr('disabled');
+                    try {
+                        var result = JSON.parse(xhr.responseText);
+                    } catch (e) {
+                        result = {};
+                        result.outcome = -1;
                     }
-                    break;
-                case 13:  // time limit
-                    $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
-                    this.addJobeErrorMessage("Time Limit Exceeded on your program");
-                    break;
-                default:
-                    if(result.stderr) {
-                        $(odiv).html(result.stderr.replace(/\n/g, "<br>"));
+
+                    if (result.outcome === 15) {
+                        logresult = 'success';
                     } else {
-                        this.addJobeErrorMessage("A server error occurred: " + xhr.status + " " + xhr.statusText);
+                        logresult = result.outcome;
                     }
-            }
+                    this.logRunEvent({'div_id': this.divid, 'code': source, 'errinfo': logresult, 'to_save':saveCode, 'event':'livecode'});
+                    switch (result.outcome) {
+                        case 15:
+                            $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
+                            break;
+                        case 11: // compiler error
+                            $(odiv).html("There were errors compiling your code. See below.");
+                            this.addJobeErrorMessage(result.cmpinfo);
+                            break;
+                        case 12:  // run time error
+                            $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
+                            if (result.stderr) {
+                                this.addJobeErrorMessage(result.stderr);
+                            }
+                            break;
+                        case 13:  // time limit
+                            $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
+                            this.addJobeErrorMessage("Time Limit Exceeded on your program");
+                            break;
+                        default:
+                            if(result.stderr && attempt != 2) {
+                                $(odiv).html(result.stderr.replace(/\n/g, "<br>"));
+                            } else {
+                                this.addJobeErrorMessage("A server error occurred: " + xhr.status + " " + xhr.statusText);
+                            }
+                    }
+                }
 
-            // todo: handle server busy and timeout errors too
-        }).bind(this);
 
-        ///$("#" + divid + "_errinfo").remove();
-        $(this.output).html("Compiling and Running your Code Now...");
+                    // todo: handle server busy and timeout errors too
+            }).bind(this);
 
-        xhr.onerror = function () {
-            this.addJobeErrorMessage("Error communicating with the server.");
-            $(this.runButton).removeAttr('disabled');
-        };
+            ///$("#" + divid + "_errinfo").remove();
+            $(this.output).html("Compiling and Running your Code Now...");
 
-        xhr.send(data);
+            xhr.onerror = function () {
+                this.addJobeErrorMessage("Error communicating with the server.");
+                $(this.runButton).removeAttr('disabled');
+            };
+
+            xhr.send(data);
+
+        }
+
+
 
 
 
@@ -1769,8 +1800,8 @@ LiveCode.prototype.addJobeErrorMessage = function (err) {
 // If file is not server it places it on server
 // Then calls runProg if needed
 LiveCode.prototype.checkFile = function(testName, contents, needToCallRun, data) {
-    var file_id = "runestone" + new String(testName + contents).hashCode();
-    this.div2id[testName] = file_id;
+    var file_id = this.div2id[testName]//"runestone" + new String(testName + contents).hashCode();
+    //this.div2id[testName] = file_id;
 
     var resource = '/jobe/index.php/restapi/files/' + file_id;
     var host = this.JOBE_SERVER + resource;
@@ -1847,7 +1878,7 @@ LiveCode.prototype.putClassFile = function (classdiv, testName, needToCallRun, o
             xhr.onload = (function () {
                 console.log("successfully sent file " + xhr.responseText);
                 console.log("File placed on server");
-                console.log("*2-*");
+
                 if(needToCallRun) {
                     this.runProg_callback(original_data);
                 }
@@ -1892,6 +1923,7 @@ String.prototype.hashCode = function(){
  LiveCode.prototype.parseJavaClasses = function(text) {
 
      text = text.trim();
+
      var found = false;
      var stack = 0;
      var startIndex = 0;
@@ -1925,9 +1957,13 @@ String.prototype.hashCode = function(){
              while(text.charAt(i) !== '\'' && i < text.length) {
                  i++;
              }
+         } else if(char === '(') {
+         	while(text.charAt(i) !== ')' && i < text.length) {
+                 i++;
+             }
          }
 
-         // just fine first open bracket then work backwrrds for name!
+
          if(!found && text.charAt(i) === '{') {
              startIndex = i;
              found = true;
@@ -1943,7 +1979,7 @@ String.prototype.hashCode = function(){
          if(found && stack === 0) {
              endIndex = i+1;
 
-             var words = text.substring(importIndex, startIndex).split(" ");
+             var words = text.substring(importIndex, startIndex).trim().split(" ");
              var className = "";
              for (var w = 0; w < words.length; w++) {
                  className = words[w];
