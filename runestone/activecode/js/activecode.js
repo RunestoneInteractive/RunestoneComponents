@@ -756,9 +756,18 @@ CljSActiveCode.prototype.iniit = function(opts) {
 
 CljSActiveCode.prototype.buildProg = function() {
     var prog = this.editor.getValue();
+    if (this.includes !== undefined) {
+        // iterate over the includes, in-order prepending to prog
+        pretext = "";
+        for (var x=0; x < this.includes.length; x++) {
+            pretext = pretext + edList[this.includes[x]].editor.getValue();
+            }
+        prog = pretext + prog
+    }
     if (this.suffix) {
         prog = prog + this.suffix;
     }
+    console.log("Built program" + prog);
     return prog;
 }
 
@@ -850,11 +859,13 @@ CljSActiveCode.prototype.runProg = function() {
     */
     
     if (result[0] != null || result[2] != null) {
-        var msg = result[0];
-        if (result[2] != "") {
-            msg += "\n***println output:\n" + result[2];
+        if (result[0] == 'nil' && result[2] != null){
+            msg = result[2];
+        } else if (result[0] != null & result[2] != null) {
+            msg = result[0] + "\n" + result[2];
+        } else {
+            msg = result[0];
         }
-        
         $(this.output).text(_this.outputfun(msg));
     }
     if (result[1] != null) {
