@@ -767,7 +767,6 @@ CljSActiveCode.prototype.buildProg = function() {
     if (this.suffix) {
         prog = prog + this.suffix;
     }
-    console.log("Built program" + prog);
     return prog;
 }
 
