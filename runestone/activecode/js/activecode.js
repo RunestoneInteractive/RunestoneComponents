@@ -756,6 +756,15 @@ CljSActiveCode.prototype.iniit = function(opts) {
 
 CljSActiveCode.prototype.buildProg = function() {
     var prog = this.editor.getValue();
+    if (this.includes !== undefined) {
+        // iterate over the includes, in-order prepending to prog
+        pretext = "";
+        for (var x=0; x < this.includes.length; x++) {
+            pretext = pretext + edList[this.includes[x]].editor.getValue();
+            }
+        prog = pretext + prog
+    }
+
     if (this.suffix) {
         prog = prog + this.suffix;
     }
