@@ -217,7 +217,7 @@ ActiveCode.prototype.createControls = function () {
         $(butt).css("margin-left", "10px");
         this.atButton = butt;
         ctrlDiv.appendChild(butt);
-        $(butt).click((function() {new AudioTour(this.divid, this.editor.getValue(), 1, $(this.origElem).data("audio"))}).bind(this));
+        $(butt).click((function() {new AudioTour(this.divid, this.code, 1, $(this.origElem).data("audio"))}).bind(this));
     }
 
 
@@ -728,10 +728,10 @@ ActiveCode.prototype.buildProg = function() {
     this.pretext = "";
     if (this.includes !== undefined) {
         // iterate over the includes, in-order prepending to prog
-        includes = this.includes[0].split("+");
+
         pretext = "";
         for (var x=0; x < includes.length; x++) {
-            pretext = pretext + edList[includes[x]].editor.getValue();
+            pretext = pretext + edList[this.includes[x]].editor.getValue();
             }
         this.pretext = pretext;
         prog = pretext + prog
