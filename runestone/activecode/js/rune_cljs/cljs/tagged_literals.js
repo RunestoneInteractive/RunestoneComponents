@@ -1,4 +1,4 @@
-// Compiled by ClojureScript 1.8.34 {:static-fns true, :optimize-constants true}
+// Compiled by ClojureScript 1.8.51 {:static-fns true, :optimize-constants true}
 goog.provide('cljs.tagged_literals');
 goog.require('cljs.core');
 goog.require('cljs.reader');
@@ -8,7 +8,9 @@ if(cljs.core.vector_QMARK_(form)){
 throw (new Error("Queue literal expects a vector for its elements."));
 }
 
-return cljs.core._conj(cljs.core._conj(cljs.core._conj(cljs.core.List.EMPTY,form),cljs.core.cst$sym$cljs$core$PersistentQueue$EMPTY),cljs.core.cst$sym$cljs$core_SLASH_into);
+return cljs.core._conj(cljs.core._conj((function (){var x__6696__auto__ = form;
+return cljs.core._conj(cljs.core.List.EMPTY,x__6696__auto__);
+})(),cljs.core.cst$sym$cljs$core$PersistentQueue$EMPTY),cljs.core.cst$sym$cljs$core_SLASH_into);
 });
 cljs.tagged_literals.read_uuid = (function cljs$tagged_literals$read_uuid(form){
 if(typeof form === 'string'){
@@ -17,7 +19,7 @@ throw (new Error("UUID literal expects a string as its representation."));
 }
 
 try{return cljs.core.uuid(form);
-}catch (e12062){var e = e12062;
+}catch (e12156){var e = e12156;
 throw (new Error(e.message));
 }});
 cljs.tagged_literals.read_inst = (function cljs$tagged_literals$read_inst(form){
@@ -27,7 +29,7 @@ throw (new Error("Instance literal expects a string for its timestamp."));
 }
 
 try{return cljs.reader.read_date(form);
-}catch (e12064){var e = e12064;
+}catch (e12158){var e = e12158;
 throw (new Error(e.message));
 }});
 cljs.tagged_literals.valid_js_literal_key_QMARK_ = (function cljs$tagged_literals$valid_js_literal_key_QMARK_(k){

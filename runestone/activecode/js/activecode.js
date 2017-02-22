@@ -768,21 +768,31 @@ CljSActiveCode.prototype.buildProg = function() {
     if (this.suffix) {
         prog = prog + this.suffix;
     }
-    return "(do " + prog + ")";
+    return prog;
 }
 
 CljSActiveCode.prototype.addErrorMessage = function(err) {
-    var errHead = $('<h3>').html('Error');
+    var errString = (err.cause) ? err.cause.message : err.message;
+    var errName = (err.cause) ? err.cause.__proto__.name : "";
+    var errHead;
+    if (err.cause) {
+        errHead = $('<h3>').html('Error');
+    } else {
+        errHead = $('<h3>').html('Warning');
+    }
     this.eContainer = this.outerDiv.appendChild(document.createElement('div'));
     this.eContainer.className = 'error alert alert-danger';
     this.eContainer.id = this.divid + '_errinfo';
     this.eContainer.appendChild(errHead[0]);
     var errText = this.eContainer.appendChild(document.createElement('pre'));
-    var errString = err.cause.message;
-    var errName = err.cause.__proto__.name;
     var description = "";
     var toFix = "";
-    errText.innerHTML = errName + ": " + errString;
+    if (errName) {
+        errText.innerHTML = errName + ": " + errString;
+    }
+    else {
+        errText.innerHTML = errString;
+    }
     var foundMatch = false;
     for (var index = 0; index < cljsErrorList.length && (! foundMatch); index += 2) {
         foundMatch = cljsErrorList[index].test(errString);
@@ -823,6 +833,7 @@ cljsErrorList = [
 ];
 
 CljSActiveCode.prototype.outputfun = function(a) {
+    // console.log('Outputfun: ' + a);
     $(this.output).css("visibility", "visible");
     return a;
 };
@@ -835,13 +846,34 @@ CljSActiveCode.prototype.runProg = function() {
     $(this.codeDiv).switchClass("col-md-12", "col-md-6", {duration:500,queue:false});
     $(this.outDiv).show({duration:700,queue:false});
     
-    var result = rune_cljs.core.compile_evaluate(prog);
-
-    if (result[0] != null) {
-        $(this.output).text(_this.outputfun(result[0]));
+    var result = rune_cljs.core.eval_source(prog);
+    
+    /*
+    console.log("---------run prog-------");
+    console.log(prog);
+    console.log("0 " + result[0]);
+    console.log("1 " + result[1]);
+    console.log("2 " + result[2]);
+    console.log("3 " + result[3]);
+    console.log("--------end run---------");
+    */
+    
+    if (result[0] != null || result[2] != null) {
+        if (result[0] == 'nil' && result[2] != null){
+            msg = result[2];
+        } else if (result[0] != null & result[2] != null) {
+            msg = result[0] + "\n" + result[2];
+        } else {
+            msg = result[0];
+        }
+        $(this.output).text(_this.outputfun(msg));
     }
     if (result[1] != null) {
         this.addErrorMessage(result[1])
+    }
+    else if (result[3] != "") {
+        this.addErrorMessage(
+            { message: result[3], cause: null});
     }
 }
     
