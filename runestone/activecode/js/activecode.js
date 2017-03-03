@@ -216,7 +216,7 @@ ActiveCode.prototype.createControls = function () {
         $(butt).css("margin-left", "10px");
         this.atButton = butt;
         ctrlDiv.appendChild(butt);
-        $(butt).click((function() {new AudioTour(this.divid, this.editor.getValue(), 1, $(this.origElem).data("audio"))}).bind(this));
+        $(butt).click((function() {new AudioTour(this.divid, this.code, 1, $(this.origElem).data("audio"))}).bind(this));
     }
 
 
