@@ -7,7 +7,14 @@ function TimedParsons (opts) {
 TimedParsons.prototype = new Parsons();
 
 TimedParsons.prototype.timedInit = function (opts) {
+	this.needsReinitialization = true;
 	this.init(opts);
+};
+
+TimedParsons.prototype.reinitializeListeners = function () {
+	if ($(this.checkButton).css("display") !== "none") {
+		this.initializeInteractivity();
+	}
 };
 
 TimedParsons.prototype.checkCorrectTimed = function () {
