@@ -730,9 +730,9 @@ ActiveCode.prototype.buildProg = function() {
         // iterate over the includes, in-order prepending to prog
 
         pretext = "";
-        for (var x=0; x < includes.length; x++) {
+        for (var x=0; x < this.includes.length; x++) {
             pretext = pretext + edList[this.includes[x]].editor.getValue();
-            }
+        }
         this.pretext = pretext;
         prog = pretext + prog
     }
@@ -1552,8 +1552,7 @@ LiveCode.prototype.createErrorOutput = function () {
 /**
  * Note:
  * In order to check for supplemental files in java and deal with asynchronicity
- * I needed to nest runProg as the last function call in a callback function chain.
- * To do that split the original runProg into two functions: runProg and runProg_callback
+ * I split the original runProg into two functions: runProg and runProg_callback
  */
 LiveCode.prototype.runProg = function() {
     // parses java classes and chooses last one as main class, all others are supplemental
@@ -1580,20 +1579,36 @@ LiveCode.prototype.runProg = function() {
         //do something with it
     }
 
-
-    var classes = [];
+    var files = [];
     if(this.language === "java") {
+        //gets java files
+        //if all java files are in the same div then parse
+        var javaClasses = document.getElementById("javaClasses");
+        if(javaClasses !== null) {
+            files = this.parseJavaClasses(javaClasses.textContent);
+        }
 
-        classes = this.parseJavaClasses(source);
-        source = classes[classes.length - 1].content;
+        //dont need to parse if all are in seperate divs
+        var classFiles = document.getElementsByClassName("javaFile");
+        console.log(classFiles);
+        for(var i = 0; i < classFiles.length; i++) {
+            files.push({name: classFiles[i].id, content: classFiles[i].textContent});
+        }
 
-        var images = document.getElementsByClassName("myImage");
+        //gets data files
+        var dataFiles = document.getElementsByClassName("dataFiles");
+        for(var i = 0; i < dataFiles.length; i++) {
+            files.push({name: dataFiles[i].id, content: dataFiles[i].textContent});
+        }
+
+        var images = document.getElementsByClassName("images");
         for(var i = 0; i < images.length; i++) {
             var fileName = images[i].id + ".txt";
             var base64 = images[i].toDataURL();
             base64 = base64.substring(base64.indexOf(',') + 1);
-            classes.unshift({name: fileName, content: base64});
+            files.push({name: fileName, content: base64});
         }
+
     }
 
     runspec = {
@@ -1602,187 +1617,116 @@ LiveCode.prototype.runProg = function() {
         sourcefilename: this.sourcefile
     };
 
-    if(this.language === "java") {
-        runspec['sourcefilename'] =  classes[classes.length - 1].name;
-    }
-
     if (stdin) {
         runspec.input = stdin
     }
 
-    if(this.language !== "java" || classes.length === 1) {
+    if(this.language !== "java") {
         data = JSON.stringify({'run_spec': runspec});
         this.runProg_callback(data);
     } else {
 
         runspec['file_list'] = [];
-        var lastClass = classes.length - 2;
-        for(var i = 0; i < classes.length - 1; i++) {
-            var fileName = classes[i].name;
-            this.div2id[fileName] = "runestone" + new String(classes[i].name + classes[i].content).hashCode();
-            runspec['file_list'].push([this.div2id[fileName], classes[i].name]); //.push([this.div2id[classes[i].name], classes[i].name]);
-            data = JSON.stringify({'run_spec': runspec});
-            this.checkFile(classes[i].name, classes[i].content, lastClass === i, data);
+        var promises = [];
+        var instance = this;
 
+        for(var i = 0; i < files.length; i++) {
+            var fileName = files[i].name;
+            this.div2id[fileName] = "runestone" + MD5(files[i].name + files[i].content);
+            runspec['file_list'].push([this.div2id[fileName], fileName]);
+            promises.push(new Promise((resolve, reject) => {
+                 instance.checkFile(files[i], resolve, reject);
+            }));
         }
+        data = JSON.stringify({'run_spec': runspec});
+
+        Promise.all(promises).then(function() {
+            console.log("All files on Server");
+            instance.runProg_callback(data);
+        }).catch(function(err) {
+            console.log("Error: " + err);
+        });
     }
 
 }
 LiveCode.prototype.runProg_callback = function(data) {
 
-        var attempt = 0;
+        var xhr, stdin;
+        var runspec = {};
+        var scrubber_dfd, history_dfd;
+        var host, source, editor;
+        var saveCode = "True";
+        var sfilemap = {java: '', cpp: 'test.cpp', c: 'test.c', python3: 'test.py', python2: 'test.py'};
 
-        while (attempt === 0 || attempt === 2) {
-            attempt++;
-            var xhr, stdin;
-            var runspec = {};
-            var scrubber_dfd, history_dfd;
-            var host, source, editor; //data
-            var saveCode = "True";
-            var sfilemap = {java: '', cpp: 'test.cpp', c: 'test.c', python3: 'test.py', python2: 'test.py'};
+        xhr = new XMLHttpRequest();
 
-            xhr = new XMLHttpRequest();
+        host = this.JOBE_SERVER + this.resource;
 
-            //Below is the code that stayed in runProg
-            /*
-            source = this.editor.getValue();
+        var odiv = this.output;
+        $(this.runButton).attr('disabled', 'disabled');
+        $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
+        $(this.outDiv).show({duration:700,queue:false});
+        $(this.errDiv).remove();
+        $(this.output).css("visibility","visible");
 
-            var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
-            history_dfd = __ret.history_dfd;
-            saveCode = __ret.saveCode;
+        xhr.open("POST", host, true);
+        xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+        xhr.setRequestHeader('Accept', 'application/json');
+        xhr.setRequestHeader('X-API-KEY', this.API_KEY);
 
-            if (this.stdin) {
-                stdin = $(this.stdin_el).val();
+        xhr.onload = (function () {
+            var logresult;
+            $(this.runButton).removeAttr('disabled');
+            try {
+                var result = JSON.parse(xhr.responseText);
+            } catch (e) {
+                result = {};
+                result.outcome = -1;
             }
 
-            if (! this.sourcefile ) {
-                this.sourcefile = sfilemap[this.language];
+            if (result.outcome === 15) {
+                logresult = 'success';
+            } else {
+                logresult = result.outcome;
             }
-
-
-            //parses java classes and chooses last one as main class, all others are sublemental
-            var classes = [];
-            if(this.language === "java") {
-                classes = this.parseJavaClasses(source);
-                source = classes[classes.length - 1].content;
-            }
-
-            runspec = {
-                language_id: this.language,
-                sourcecode: source,
-                sourcefilename: this.sourcefile
-            };
-
-            if(this.language === "java") {
-                runspec['sourcefilename'] =  classes[classes.length - 1].name;
-            }
-
-
-
-            if (stdin) {
-                runspec.input = stdin
-            }
-
-            //adds sublemental java class files to job
-            runspec['file_list'] = [];
-            for(var i = 0; i < classes.length - 1; i++) {
-                var fileName = classes[i].name;
-                //this.putClassFile(classes[i].content, classes[i].name);
-                this.checkFile(classes[i].name, classes[i].content);
-                runspec['file_list'].push([this.div2id[classes[i].name], classes[i].name]); //.push(["runestone" + new String(classes[i].name + classes[i].content).hashCode(), classes[i].name]);
-            }
-
-
-            if (this.datafile) {
-
-                this.pushDataFile(this.datafile);
-
-                runspec['file_list'] = [[this.div2id[this.datafile],this.datafile]];
-            }
-            data = JSON.stringify({'run_spec': runspec});
-            */
-
-
-            host = this.JOBE_SERVER + this.resource;
-
-            var odiv = this.output;
-            $(this.runButton).attr('disabled', 'disabled');
-            $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
-            $(this.outDiv).show({duration:700,queue:false});
-            $(this.errDiv).remove();
-            $(this.output).css("visibility","visible");
-
-            xhr.open("POST", host, true);
-            xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
-            xhr.setRequestHeader('Accept', 'application/json');
-            xhr.setRequestHeader('X-API-KEY', this.API_KEY);
-
-            xhr.onload = (function () {
-                if(xhr.status === 404) {
-                    attempt++;
-                    this.runProg_callback(data);
-                } else {
-                    var logresult;
-                    $(this.runButton).removeAttr('disabled');
-                    try {
-                        var result = JSON.parse(xhr.responseText);
-                    } catch (e) {
-                        result = {};
-                        result.outcome = -1;
+            this.logRunEvent({'div_id': this.divid, 'code': source, 'errinfo': logresult, 'to_save':saveCode, 'event':'livecode'});
+            switch (result.outcome) {
+                case 15:
+                    $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
+                    break;
+                case 11: // compiler error
+                    $(odiv).html("There were errors compiling your code. See below.");
+                    this.addJobeErrorMessage(result.cmpinfo);
+                    break;
+                case 12:  // run time error
+                    $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
+                    if (result.stderr) {
+                        this.addJobeErrorMessage(result.stderr);
                     }
-
-                    if (result.outcome === 15) {
-                        logresult = 'success';
+                    break;
+                case 13:  // time limit
+                    $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
+                    this.addJobeErrorMessage("Time Limit Exceeded on your program");
+                    break;
+                default:
+                    if(result.stderr){
+                        $(odiv).html(result.stderr.replace(/\n/g, "<br>"));
                     } else {
-                        logresult = result.outcome;
+                        this.addJobeErrorMessage("A server error occurred: " + xhr.status + " " + xhr.statusText);
                     }
-                    this.logRunEvent({'div_id': this.divid, 'code': source, 'errinfo': logresult, 'to_save':saveCode, 'event':'livecode'});
-                    switch (result.outcome) {
-                        case 15:
-                            $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
-                            break;
-                        case 11: // compiler error
-                            $(odiv).html("There were errors compiling your code. See below.");
-                            this.addJobeErrorMessage(result.cmpinfo);
-                            break;
-                        case 12:  // run time error
-                            $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
-                            if (result.stderr) {
-                                this.addJobeErrorMessage(result.stderr);
-                            }
-                            break;
-                        case 13:  // time limit
-                            $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
-                            this.addJobeErrorMessage("Time Limit Exceeded on your program");
-                            break;
-                        default:
-                            if(result.stderr && attempt != 2) {
-                                $(odiv).html(result.stderr.replace(/\n/g, "<br>"));
-                            } else {
-                                this.addJobeErrorMessage("A server error occurred: " + xhr.status + " " + xhr.statusText);
-                            }
-                    }
-                }
+            }
+            // todo: handle server busy and timeout errors too
+        }).bind(this);
 
+        ///$("#" + divid + "_errinfo").remove();
+        $(this.output).html("Compiling and Running your Code Now...");
 
-                    // todo: handle server busy and timeout errors too
-            }).bind(this);
+        xhr.onerror = function () {
+            this.addJobeErrorMessage("Error communicating with the server.");
+            $(this.runButton).removeAttr('disabled');
+        };
 
-            ///$("#" + divid + "_errinfo").remove();
-            $(this.output).html("Compiling and Running your Code Now...");
-
-            xhr.onerror = function () {
-                this.addJobeErrorMessage("Error communicating with the server.");
-                $(this.runButton).removeAttr('disabled');
-            };
-
-            xhr.send(data);
-
-        }
-
-
-
-
+        xhr.send(data);
 
     };
 LiveCode.prototype.addJobeErrorMessage = function (err) {
@@ -1796,20 +1740,28 @@ LiveCode.prototype.addJobeErrorMessage = function (err) {
         errText.innerHTML = err;
     };
 
-// returns false if file is not on jobe server or if bad request
-// If file is not server it places it on server
-// Then calls runProg if needed
-LiveCode.prototype.checkFile = function(testName, contents, needToCallRun, data) {
-    var file_id = this.div2id[testName]//"runestone" + new String(testName + contents).hashCode();
-    //this.div2id[testName] = file_id;
 
+/**
+ * Checks to see if file is on server
+ * Places it on server if it is not on server
+ * @param  {object{name, contents}} file    File to place on server
+ * @param  {function} resolve promise resolve function
+ * @param  {function} reject  promise reject function
+ */
+LiveCode.prototype.checkFile = function(file, resolve, reject) {
+    var testName = file.name;
+    var contents= file.content;
+
+    var file_id = this.div2id[testName];
     var resource = '/jobe/index.php/restapi/files/' + file_id;
     var host = this.JOBE_SERVER + resource;
+    var key = this.API_KEY;
+
     var xhr = new XMLHttpRequest();
     xhr.open("HEAD", host, true);
     xhr.setRequestHeader('Content-type', 'application/json');
     xhr.setRequestHeader('Accept', 'text/plain');
-    xhr.setRequestHeader('X-API-KEY', this.API_KEY);
+    xhr.setRequestHeader('X-API-KEY', key);
 
     xhr.onload = function () {
         console.log("successfully sent file " + xhr.responseText);
@@ -1823,23 +1775,19 @@ LiveCode.prototype.checkFile = function(testName, contents, needToCallRun, data)
         switch(xhr.status) {
             case 404:
                 console.log("File not on Server");
-                this.putClassFile(contents, testName, needToCallRun, data);
-                return false;
-                //break;
+                this.putClassFile(file, resolve, reject);
+                break;
             case 400:
                 console.log("Bad Request");
-                return false;
-                //break;
+                reject();
+                break;
             case 204:
                 console.log("File already on Server");
-                if(needToCallRun) {
-                    this.runProg_callback(data);
-                }
-                return true;
-                //break;
+                resolve();
+                break;
             default:
                 console.log("This case should never happen");
-                return false;
+                reject();
             }
     }).bind(this);
 
@@ -1851,68 +1799,55 @@ LiveCode.prototype.checkFile = function(testName, contents, needToCallRun, data)
  * @param  {string} classdiv contents of file
  * @param  {string} testName name of file
  */
-LiveCode.prototype.putClassFile = function (classdiv, testName, needToCallRun, original_data) {
+LiveCode.prototype.putClassFile = function (file, resolve, reject) {
 
-    //var onServer = this.checkFile(testName, classdiv);
-    //if(!onServer) {
-        var file_id = this.div2id[testName];//"runestone" + new String(testName + classdiv).hashCode();
+    var fileName = file.name;
+    var file_id = this.div2id[fileName];
+    var contents = file.content;
 
-        //var contents = $(document.getElementById(classdiv)).text();
-        var contents = classdiv;
-        var contentsb64 = btoa(contents);
-        var data = JSON.stringify({ 'file_contents' : contentsb64 });
+    var contentsb64 = btoa(contents);
 
-        var xhr = new XMLHttpRequest();
+    var data = JSON.stringify({ 'file_contents' : contentsb64 });
 
-        var resource = '/jobe/index.php/restapi/files/' + file_id;
-        var host = this.JOBE_SERVER + resource;
+    var resource = '/jobe/index.php/restapi/files/' + file_id;
+    var host = this.JOBE_SERVER + resource;
+    var key = this.API_KEY;
 
-        //if (this.div2id[testName] === undefined ) {
-            //this.div2id[testName] = file_id;
+    var xhr = new XMLHttpRequest();
+    xhr.open("PUT", host, true);
+    xhr.setRequestHeader('Content-type', 'application/json');
+    xhr.setRequestHeader('Accept', 'text/plain');
+    xhr.setRequestHeader('X-API-KEY', key);
 
-            xhr.open("PUT", host, true);
-            xhr.setRequestHeader('Content-type', 'application/json');
-            xhr.setRequestHeader('Accept', 'text/plain');
-            xhr.setRequestHeader('X-API-KEY', this.API_KEY);
-
-            xhr.onload = (function () {
+    xhr.onload = (function () {
+        switch(xhr.status) {
+            case 403:
+                console.log("Forbidden");
+                reject();
+                break;
+            case 400:
+                console.log("Bad Request");
+                reject();
+                break;
+            case 204:
                 console.log("successfully sent file " + xhr.responseText);
-                console.log("File placed on server");
+                //console.log("File " + testName +", " + file_id +" placed on server");
+                resolve();
+                break;
+            default:
+                console.log("This case should never happen");
+                reject();
+            }
+    }).bind(this);
 
-                if(needToCallRun) {
-                    this.runProg_callback(original_data);
-                }
-            }).bind(this);
+    xhr.onerror = function () {
+        console.log("error sending file" + xhr.responseText);
+        reject();
+    };
 
-            xhr.onerror = function () {
-                console.log("error sending file" + xhr.responseText);
-            };
-
-            xhr.send(data);
-        //}
-    //}
+    xhr.send(data);
 
 };
-
-/**
- * @see http://stackoverflow.com/q/7616461/940217
- * @return {number}
- */
-String.prototype.hashCode = function(){
-    //if (Array.prototype.reduce){
-    //    return this.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);
-    //}
-    var hash = 0;
-    if (this.length === 0) return hash;
-    for (var i = 0; i < this.length; i++) {
-        var character  = this.charCodeAt(i);
-        hash  = ((hash<<5)-hash)+character;
-        hash = hash & hash; // Convert to 32bit integer
-    }
-
-    //forces unsigned int
-    return hash >>> 0; //Math.abs(hash);
-}
 
 /**
  * Seperates text into multiple .java files
@@ -1930,6 +1865,8 @@ String.prototype.hashCode = function(){
      var classes = [];
      var importIndex = 0;
 
+     var endOfLastCommentBeforeClassBegins = 0;
+
      for(var i = 0; i < text.length; i++) {
 
          var char = text.charAt(i);
@@ -1940,10 +1877,16 @@ String.prototype.hashCode = function(){
                  while(text.charAt(i) !== '\n' && i < text.length) {
                      i++;
                  }
+                 if(!found) {
+                     endOfLastCommentBeforeClassBegins = i;
+                 }
              } else if(text.charAt(i) == '*') {
                  i++;
                  while((text.charAt(i) !== '*' || text.charAt(i+1) !== '/') && i + 1 < text.length) {
                      i++;
+                 }
+                 if(!found) {
+                     endOfLastCommentBeforeClassBegins = i;
                  }
              }
 
@@ -1979,7 +1922,7 @@ String.prototype.hashCode = function(){
          if(found && stack === 0) {
              endIndex = i+1;
 
-             var words = text.substring(importIndex, startIndex).trim().split(" ");
+             var words = text.substring(endOfLastCommentBeforeClassBegins, startIndex).trim().split(" ");
              var className = "";
              for (var w = 0; w < words.length; w++) {
                  className = words[w];
@@ -1993,6 +1936,7 @@ String.prototype.hashCode = function(){
              classes.push({name: className, content: text.substring(importIndex, endIndex)});
              found = false;
              importIndex = endIndex;
+             endOfLastCommentBeforeClassBegins = endIndex;
          }
 
      }
@@ -2175,3 +2119,207 @@ $(document).bind("runestone:logout",function() {
         }
     }
 });
+
+/**
+*  MD5 (Message-Digest Algorithm)
+*  http://www.webtoolkit.info/
+* http://www.webtoolkit.info/javascript-md5.html#.WLr_ezsrI2w
+**/
+
+var MD5 = function (string) {
+
+    function RotateLeft(lValue, iShiftBits) {
+        return (lValue<<iShiftBits) | (lValue>>>(32-iShiftBits));
+    }
+    function AddUnsigned(lX,lY) {
+
+        var lX4,lY4,lX8,lY8,lResult;
+        lX8 = (lX & 0x80000000);
+        lY8 = (lY & 0x80000000);
+        lX4 = (lX & 0x40000000);
+        lY4 = (lY & 0x40000000);
+        lResult = (lX & 0x3FFFFFFF)+(lY & 0x3FFFFFFF);
+
+        if (lX4 & lY4) {
+            return (lResult ^ 0x80000000 ^ lX8 ^ lY8);
+        }
+
+        if (lX4 | lY4) {
+            if (lResult & 0x40000000) {
+                return (lResult ^ 0xC0000000 ^ lX8 ^ lY8);
+            } else {
+                return (lResult ^ 0x40000000 ^ lX8 ^ lY8);
+            }
+        } else {
+            return (lResult ^ lX8 ^ lY8);
+        }
+     }
+     function F(x,y,z) { return (x & y) | ((~x) & z); }
+     function G(x,y,z) { return (x & z) | (y & (~z)); }
+     function H(x,y,z) { return (x ^ y ^ z); }
+     function I(x,y,z) { return (y ^ (x | (~z))); }
+
+    function FF(a,b,c,d,x,s,ac) {
+        a = AddUnsigned(a, AddUnsigned(AddUnsigned(F(b, c, d), x), ac));
+        return AddUnsigned(RotateLeft(a, s), b);
+    };
+
+    function GG(a,b,c,d,x,s,ac) {
+        a = AddUnsigned(a, AddUnsigned(AddUnsigned(G(b, c, d), x), ac));
+        return AddUnsigned(RotateLeft(a, s), b);
+    };
+
+    function HH(a,b,c,d,x,s,ac) {
+        a = AddUnsigned(a, AddUnsigned(AddUnsigned(H(b, c, d), x), ac));
+        return AddUnsigned(RotateLeft(a, s), b);
+    };
+
+    function II(a,b,c,d,x,s,ac) {
+        a = AddUnsigned(a, AddUnsigned(AddUnsigned(I(b, c, d), x), ac));
+        return AddUnsigned(RotateLeft(a, s), b);
+    };
+
+    function ConvertToWordArray(string) {
+
+        var lWordCount;
+        var lMessageLength = string.length;
+        var lNumberOfWords_temp1=lMessageLength + 8;
+        var lNumberOfWords_temp2=(lNumberOfWords_temp1-(lNumberOfWords_temp1 % 64))/64;
+        var lNumberOfWords = (lNumberOfWords_temp2+1)*16;
+        var lWordArray=Array(lNumberOfWords-1);
+        var lBytePosition = 0;
+        var lByteCount = 0;
+
+        while ( lByteCount < lMessageLength ) {
+            lWordCount = (lByteCount-(lByteCount % 4))/4;
+            lBytePosition = (lByteCount % 4)*8;
+            lWordArray[lWordCount] = (lWordArray[lWordCount] | (string.charCodeAt(lByteCount)<<lBytePosition));
+            lByteCount++;
+        }
+
+        lWordCount = (lByteCount-(lByteCount % 4))/4;
+        lBytePosition = (lByteCount % 4)*8;
+        lWordArray[lWordCount] = lWordArray[lWordCount] | (0x80<<lBytePosition);
+        lWordArray[lNumberOfWords-2] = lMessageLength<<3;
+        lWordArray[lNumberOfWords-1] = lMessageLength>>>29;
+        return lWordArray;
+    };
+
+    function WordToHex(lValue) {
+        var WordToHexValue="",WordToHexValue_temp="",lByte,lCount;
+        for (lCount = 0;lCount<=3;lCount++) {
+            lByte = (lValue>>>(lCount*8)) & 255;
+            WordToHexValue_temp = "0" + lByte.toString(16);
+            WordToHexValue = WordToHexValue + WordToHexValue_temp.substr(WordToHexValue_temp.length-2,2);
+        }
+        return WordToHexValue;
+    };
+
+    function Utf8Encode(string) {
+        string = string.replace(/\r\n/g,"\n");
+        var utftext = "";
+
+        for (var n = 0; n < string.length; n++) {
+            var c = string.charCodeAt(n);
+
+            if (c < 128) {
+                utftext += String.fromCharCode(c);
+            } else if((c > 127) && (c < 2048)) {
+                utftext += String.fromCharCode((c >> 6) | 192);
+                utftext += String.fromCharCode((c & 63) | 128);
+            } else {
+                utftext += String.fromCharCode((c >> 12) | 224);
+                utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+                utftext += String.fromCharCode((c & 63) | 128);
+            }
+        }
+        return utftext;
+    };
+    var x=Array();
+    var k,AA,BB,CC,DD,a,b,c,d;
+    var S11=7, S12=12, S13=17, S14=22;
+    var S21=5, S22=9 , S23=14, S24=20;
+    var S31=4, S32=11, S33=16, S34=23;
+    var S41=6, S42=10, S43=15, S44=21;
+
+    string = Utf8Encode(string);
+
+    x = ConvertToWordArray(string);
+
+    a = 0x67452301; b = 0xEFCDAB89; c = 0x98BADCFE; d = 0x10325476;
+
+    for (k=0;k<x.length;k+=16) {
+        AA=a; BB=b; CC=c; DD=d;
+
+        a=FF(a,b,c,d,x[k+0], S11,0xD76AA478);
+        d=FF(d,a,b,c,x[k+1], S12,0xE8C7B756);
+        c=FF(c,d,a,b,x[k+2], S13,0x242070DB);
+        b=FF(b,c,d,a,x[k+3], S14,0xC1BDCEEE);
+        a=FF(a,b,c,d,x[k+4], S11,0xF57C0FAF);
+        d=FF(d,a,b,c,x[k+5], S12,0x4787C62A);
+        c=FF(c,d,a,b,x[k+6], S13,0xA8304613);
+        b=FF(b,c,d,a,x[k+7], S14,0xFD469501);
+        a=FF(a,b,c,d,x[k+8], S11,0x698098D8);
+        d=FF(d,a,b,c,x[k+9], S12,0x8B44F7AF);
+        c=FF(c,d,a,b,x[k+10],S13,0xFFFF5BB1);
+        b=FF(b,c,d,a,x[k+11],S14,0x895CD7BE);
+        a=FF(a,b,c,d,x[k+12],S11,0x6B901122);
+        d=FF(d,a,b,c,x[k+13],S12,0xFD987193);
+        c=FF(c,d,a,b,x[k+14],S13,0xA679438E);
+        b=FF(b,c,d,a,x[k+15],S14,0x49B40821);
+        a=GG(a,b,c,d,x[k+1], S21,0xF61E2562);
+        d=GG(d,a,b,c,x[k+6], S22,0xC040B340);
+        c=GG(c,d,a,b,x[k+11],S23,0x265E5A51);
+        b=GG(b,c,d,a,x[k+0], S24,0xE9B6C7AA);
+        a=GG(a,b,c,d,x[k+5], S21,0xD62F105D);
+        d=GG(d,a,b,c,x[k+10],S22,0x2441453);
+        c=GG(c,d,a,b,x[k+15],S23,0xD8A1E681);
+        b=GG(b,c,d,a,x[k+4], S24,0xE7D3FBC8);
+        a=GG(a,b,c,d,x[k+9], S21,0x21E1CDE6);
+        d=GG(d,a,b,c,x[k+14],S22,0xC33707D6);
+        c=GG(c,d,a,b,x[k+3], S23,0xF4D50D87);
+        b=GG(b,c,d,a,x[k+8], S24,0x455A14ED);
+        a=GG(a,b,c,d,x[k+13],S21,0xA9E3E905);
+        d=GG(d,a,b,c,x[k+2], S22,0xFCEFA3F8);
+        c=GG(c,d,a,b,x[k+7], S23,0x676F02D9);
+        b=GG(b,c,d,a,x[k+12],S24,0x8D2A4C8A);
+        a=HH(a,b,c,d,x[k+5], S31,0xFFFA3942);
+        d=HH(d,a,b,c,x[k+8], S32,0x8771F681);
+        c=HH(c,d,a,b,x[k+11],S33,0x6D9D6122);
+        b=HH(b,c,d,a,x[k+14],S34,0xFDE5380C);
+        a=HH(a,b,c,d,x[k+1], S31,0xA4BEEA44);
+        d=HH(d,a,b,c,x[k+4], S32,0x4BDECFA9);
+        c=HH(c,d,a,b,x[k+7], S33,0xF6BB4B60);
+        b=HH(b,c,d,a,x[k+10],S34,0xBEBFBC70);
+        a=HH(a,b,c,d,x[k+13],S31,0x289B7EC6);
+        d=HH(d,a,b,c,x[k+0], S32,0xEAA127FA);
+        c=HH(c,d,a,b,x[k+3], S33,0xD4EF3085);
+        b=HH(b,c,d,a,x[k+6], S34,0x4881D05);
+        a=HH(a,b,c,d,x[k+9], S31,0xD9D4D039);
+        d=HH(d,a,b,c,x[k+12],S32,0xE6DB99E5);
+        c=HH(c,d,a,b,x[k+15],S33,0x1FA27CF8);
+        b=HH(b,c,d,a,x[k+2], S34,0xC4AC5665);
+        a=II(a,b,c,d,x[k+0], S41,0xF4292244);
+        d=II(d,a,b,c,x[k+7], S42,0x432AFF97);
+        c=II(c,d,a,b,x[k+14],S43,0xAB9423A7);
+        b=II(b,c,d,a,x[k+5], S44,0xFC93A039);
+        a=II(a,b,c,d,x[k+12],S41,0x655B59C3);
+        d=II(d,a,b,c,x[k+3], S42,0x8F0CCC92);
+        c=II(c,d,a,b,x[k+10],S43,0xFFEFF47D);
+        b=II(b,c,d,a,x[k+1], S44,0x85845DD1);
+        a=II(a,b,c,d,x[k+8], S41,0x6FA87E4F);
+        d=II(d,a,b,c,x[k+15],S42,0xFE2CE6E0);
+        c=II(c,d,a,b,x[k+6], S43,0xA3014314);
+        b=II(b,c,d,a,x[k+13],S44,0x4E0811A1);
+        a=II(a,b,c,d,x[k+4], S41,0xF7537E82);
+        d=II(d,a,b,c,x[k+11],S42,0xBD3AF235);
+        c=II(c,d,a,b,x[k+2], S43,0x2AD7D2BB);
+        b=II(b,c,d,a,x[k+9], S44,0xEB86D391);
+        a=AddUnsigned(a,AA);
+        b=AddUnsigned(b,BB);
+        c=AddUnsigned(c,CC);
+        d=AddUnsigned(d,DD);
+    }
+    var temp = WordToHex(a)+WordToHex(b)+WordToHex(c)+WordToHex(d);
+    return temp.toLowerCase();
+}
