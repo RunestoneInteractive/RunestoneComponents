@@ -1590,7 +1590,6 @@ LiveCode.prototype.runProg = function() {
 
         //dont need to parse if all are in seperate divs
         var classFiles = document.getElementsByClassName("javaFile");
-        console.log(classFiles);
         for(var i = 0; i < classFiles.length; i++) {
             files.push({name: classFiles[i].id, content: classFiles[i].textContent});
         }
