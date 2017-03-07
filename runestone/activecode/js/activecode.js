@@ -1600,6 +1600,7 @@ LiveCode.prototype.runProg = function() {
             files.push({name: dataFiles[i].id, content: dataFiles[i].textContent});
         }
 
+        //get images
         var images = document.getElementsByClassName("images");
         for(var i = 0; i < images.length; i++) {
             var fileName = images[i].id + ".txt";
@@ -1620,7 +1621,7 @@ LiveCode.prototype.runProg = function() {
         runspec.input = stdin
     }
 
-    if(this.language !== "java") {
+    if(this.language !== "java" || files.length === 0) {
         data = JSON.stringify({'run_spec': runspec});
         this.runProg_callback(data);
     } else {
