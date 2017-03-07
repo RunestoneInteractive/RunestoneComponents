@@ -1053,9 +1053,6 @@ Parsons.prototype.init = function (opts) {
 	} else {
 		this.checkLocalStorage();
 	}
-	if (this.needsReinitialization !== true) {
-		this.initializeInteractivity();
-	}
 };
 
 // Based on the data-fields in the original HTML, initialize options
@@ -1472,6 +1469,9 @@ Parsons.prototype.loadData = function(data) {
 	} else {
 		this.initializeAreas(this.blocksFromHash(sourceHash), this.blocksFromHash(answerHash));
 		this.grader.grade();
+	}
+	if (this.needsReinitialization !== true) {
+		this.initializeInteractivity();
 	}
 };
 
