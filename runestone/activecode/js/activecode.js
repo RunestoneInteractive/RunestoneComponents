@@ -1555,7 +1555,6 @@ LiveCode.prototype.createErrorOutput = function () {
  * I split the original runProg into two functions: runProg and runProg_callback
  */
 LiveCode.prototype.runProg = function() {
-    // parses java classes and chooses last one as main class, all others are supplemental
     var stdin;
     var scrubber_dfd, history_dfd;
     var saveCode = "True";
@@ -1575,26 +1574,26 @@ LiveCode.prototype.runProg = function() {
         this.sourcefile = sfilemap[this.language];
     }
 
-    if (this.datafile) {
-        //do something with it
-    }
+    if (this.datafile) {}
 
     var files = [];
     if(this.language === "java") {
         //gets java files
-        //if all java files are in the same div then parse
-        var javaClasses = document.getElementById("javaClasses");
-        if(javaClasses !== null) {
-            files = this.parseJavaClasses(javaClasses.textContent);
+        //if multiple java files are in the same div then parse
+        var javaClasses = document.getElementsByClassName("javaClasses");
+        for(var i = 0; i < javaClasses.length; i++) {
+            files = files.concat(this.parseJavaClasses(javaClasses[i].textContent));
         }
 
         //dont need to parse if all are in seperate divs
+        // file name is encoded in div id
         var classFiles = document.getElementsByClassName("javaFile");
         for(var i = 0; i < classFiles.length; i++) {
             files.push({name: classFiles[i].id, content: classFiles[i].textContent});
         }
 
-        //gets data files
+        // gets data files
+        // file name is encoded in div id
         var dataFiles = document.getElementsByClassName("dataFiles");
         for(var i = 0; i < dataFiles.length; i++) {
             files.push({name: dataFiles[i].id, content: dataFiles[i].textContent});
@@ -1901,7 +1900,14 @@ LiveCode.prototype.putClassFile = function (file, resolve, reject) {
                  i++;
              }
          } else if(char === '(') {
-         	while(text.charAt(i) !== ')' && i < text.length) {
+             var pCount = 1;
+             i++;
+         	while(pCount > 0 && i < text.length){//text.charAt(i) !== ')' && i < text.length) {
+                if(text.charAt(i) === '(') {
+                    pCount++;
+                } else if(text.charAt(i) === ')') {
+                    pCount--;
+                }
                  i++;
              }
          }
