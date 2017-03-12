@@ -122,6 +122,16 @@ def process_activcode_nodes(app, env, docname):
 def purge_activecodes(app, env, docname):
     pass
 
+database_connection = True
+try:
+    engine = create_engine(get_dburl(locals()))
+    meta = MetaData()
+    Source_code = Table('source_code', meta, autoload=True, autoload_with=engine)
+    Div = Table('div_ids', meta, autoload=True, autoload_with=engine)    
+except:
+    print("Cannot connect")
+    database_connection = False
+
 
 class ActiveCode(RunestoneDirective):
     """
@@ -182,6 +192,8 @@ class ActiveCode(RunestoneDirective):
         'sourcefile' : directives.unchanged,
         'available_files' : directives.unchanged,
     })
+
+
 
     def run(self):
 
@@ -305,13 +317,12 @@ class ActiveCode(RunestoneDirective):
         else:
             source = '\n'
             suffix = '\n'
-        try:
-            engine = create_engine(get_dburl(locals()))
-            meta = MetaData()
-            course_name = env.config.html_context['course_id']
-            Source_code = Table('source_code', meta, autoload=True, autoload_with=engine)
-            divid = self.options['divid']
 
+
+        course_name = env.config.html_context['course_id']
+        divid = self.options['divid']
+
+        try:
             engine.execute(Source_code.delete().where(Source_code.c.acid == divid).where(Source_code.c.course_id == course_name))
             engine.execute(Source_code.insert().values(
                 acid = divid,
@@ -325,7 +336,7 @@ class ActiveCode(RunestoneDirective):
                 ch, sub_ch = env.docname.split('/')
             except:
                 ch, sub_ch = (env.docname, 'null subchapter')
-            Div = Table('div_ids', meta, autoload=True, autoload_with=engine)
+
             engine.execute(Div.delete()\
                            .where(Div.c.course_name == course_name)\
                            .where(Div.c.chapter == ch)\
