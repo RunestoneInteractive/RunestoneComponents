@@ -99,7 +99,12 @@ def addChapterInfoToDB(subChapD, chapTitles, course_id):
     if all(name in os.environ for name in ['DBHOST', 'DBPASS', 'DBUSER', 'DBNAME']):
         dburl = 'postgresql://{DBUSER}:{DBPASS}@{DBHOST}/{DBNAME}'.format(**os.environ)
 
-    engine = create_engine(dburl)
+    try:
+        engine = create_engine(dburl)
+    except ImportError as imperr:
+        print("You need to install a DBAPI module - psycopg2 for Postgres")
+        return
+
     meta = MetaData()
     chapters = Table('chapters', meta, autoload=True, autoload_with=engine)
     sub_chapters = Table('sub_chapters', meta, autoload=True, autoload_with=engine)
