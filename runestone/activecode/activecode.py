@@ -200,7 +200,8 @@ class ActiveCode(RunestoneDirective):
         addQuestionToDB(self)
 
         env = self.state.document.settings.env
-        # keep track of how many activecodes we have.... could be used to automatically make a unique id for them.
+        # keep track of how many activecodes we have.... 
+        # could be used to automatically make a unique id for them.
         if not hasattr(env, 'activecodecounter'):
             env.activecodecounter = 0
         env.activecodecounter += 1
