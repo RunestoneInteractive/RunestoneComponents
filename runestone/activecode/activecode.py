@@ -137,6 +137,7 @@ class ActiveCode(RunestoneDirective):
     """
 .. activecode:: uniqueid
    :nocanvas: do not create a canvas
+   :autograde: normally set this to unittest
    :nopre: do not create an output component
    :above: put the canvas above the code
    :autorun: run this activecode as soon as the page is loaded
@@ -200,7 +201,7 @@ class ActiveCode(RunestoneDirective):
         addQuestionToDB(self)
 
         env = self.state.document.settings.env
-        # keep track of how many activecodes we have.... 
+        # keep track of how many activecodes we have....
         # could be used to automatically make a unique id for them.
         if not hasattr(env, 'activecodecounter'):
             env.activecodecounter = 0
