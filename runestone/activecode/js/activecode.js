@@ -1578,42 +1578,39 @@ LiveCode.prototype.runProg = function() {
 
     var files = [];
     if(this.language === "java") {
-        //gets java files
-        //if multiple java files are in the same div then parse
-        var javaClasses = document.getElementsByClassName("javaClasses");
-        for(var i = 0; i < javaClasses.length; i++) {
-            files = files.concat(this.parseJavaClasses(javaClasses[i].textContent));
+        if (this.datafile != undefined) {
+            var ids = this.datafile.split(",");
+            for (var i = 0; i < ids.length; i++) {
+                file = document.getElementById(ids[i].trim());
+                if (file === null || file === undefined) {
+                    console.log("No file with given id");
+                } else if (file.className === "javaFiles") {
+                    files = files.concat(this.parseJavaClasses(file.textContent));
+                } else if (file.className === "images") {
+                    var fileName = file.id + ".txt";
+                    var base64 = file.toDataURL();
+                    base64 = base64.substring(base64.indexOf(',') + 1);
+                    files.push({name: fileName, content: base64});
+                } else {
+                    // if no className or un recognized className it is treated as an individual file
+                    // this could be any type of file, .txt, .java, .csv, etc
+                    files.push({name: file.id, content: file.textContent});
+                }
+            }
         }
-
-        //dont need to parse if all are in seperate divs
-        // file name is encoded in div id
-        var classFiles = document.getElementsByClassName("javaFile");
-        for(var i = 0; i < classFiles.length; i++) {
-            files.push({name: classFiles[i].id, content: classFiles[i].textContent});
-        }
-
-        // gets data files
-        // file name is encoded in div id
-        var dataFiles = document.getElementsByClassName("dataFiles");
-        for(var i = 0; i < dataFiles.length; i++) {
-            files.push({name: dataFiles[i].id, content: dataFiles[i].textContent});
-        }
-
-        //get images
-        var images = document.getElementsByClassName("images");
-        for(var i = 0; i < images.length; i++) {
-            var fileName = images[i].id + ".txt";
-            var base64 = images[i].toDataURL();
-            base64 = base64.substring(base64.indexOf(',') + 1);
-            files.push({name: fileName, content: base64});
-        }
-
     }
 
     runspec = {
         language_id: this.language,
         sourcecode: source,
         sourcefilename: this.sourcefile
+        //parameters: {
+        //    compileargs: "-cp junit.jar;",
+        //    linkargs: "-cp junit.jar;"
+        //}
+        //try runargs
+        //try interpreterargs
+        //try linkargs
     };
 
     if (stdin) {
