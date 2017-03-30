@@ -125,7 +125,8 @@ def purge_activecodes(app, env, docname):
 
 class ActiveCode(RunestoneDirective):
     """
-.. activecode:: uniqueid   'nocanvas': directives.flag,
+.. activecode:: uniqueid
+   :nocanvas: do not create a canvas
    :nopre: do not create an output component
    :above: put the canvas above the code
    :autorun: run this activecode as soon as the page is loaded
