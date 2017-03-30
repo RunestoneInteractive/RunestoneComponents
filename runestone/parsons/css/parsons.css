@@ -149,6 +149,9 @@
     overflow: hidden;
     cursor: move;
 }
+.parsons .block.disabled {
+	opacity: 0.3;
+}
 .parsons .block.down {
 	border: 2px solid black;
 	padding: 4px 9px;
