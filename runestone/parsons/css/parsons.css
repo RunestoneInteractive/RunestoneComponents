@@ -33,6 +33,14 @@
 	background-color: #ffa;
 	border-color: #ee0;
 }
+.parsons .answer.incorrect {
+	background-color: #f2dede;
+	border-color: #f2b6b6;
+}
+.parsons .answer.correct {
+	background-color: #dff0d8;
+	border-color: #ade595;
+}
 .parsons .answer1 {
 	background: linear-gradient(#ee0, #ee0) no-repeat border-box;
 	background-size: 1px 100%;
@@ -40,6 +48,22 @@
 	background-origin: padding-box;
 	background-color: #ffa;
 	border-color: #ee0;
+}
+.parsons .answer1.incorrect {
+	background: linear-gradient(#f2b6b6, #f2b6b6) no-repeat border-box;
+	background-size: 1px 100%;
+	background-position: 30px 0;
+	background-origin: padding-box;
+	background-color: #f2dede;
+	border-color: #f2b6b6;
+}
+.parsons .answer1.correct {
+	background: linear-gradient(#ade595, #ade595) no-repeat border-box;
+	background-size: 1px 100%;
+	background-position: 30px 0;
+	background-origin: padding-box;
+	background-color: #dff0d8;
+	border-color: #ade595;
 }
 .parsons .answer2 {
 	background: linear-gradient(#ee0, #ee0) no-repeat border-box, linear-gradient(#ee0, #ee0) no-repeat border-box;
@@ -49,6 +73,22 @@
 	background-color: #ffa;
 	border-color: #ee0;
 }
+.parsons .answer2.incorrect {
+	background: linear-gradient(#f2b6b6, #f2b6b6) no-repeat border-box, linear-gradient(#f2b6b6, #f2b6b6) no-repeat border-box;
+	background-size: 1px 100%, 1px 100%;
+	background-position: 30px 0, 60px 0;
+	background-origin: padding-box, padding-box;
+	background-color: #f2dede;
+	border-color: #f2b6b6;
+}
+.parsons .answer2.correct {
+	background: linear-gradient(#ade595, #ade595) no-repeat border-box, linear-gradient(#ade595, #ade595) no-repeat border-box;
+	background-size: 1px 100%, 1px 100%;
+	background-position: 30px 0, 60px 0;
+	background-origin: padding-box, padding-box;
+	background-color: #dff0d8;
+	border-color: #ade595;
+}
 .parsons .answer3 {
 	background: linear-gradient(#ee0, #ee0) no-repeat border-box, linear-gradient(#ee0, #ee0) no-repeat border-box, linear-gradient(#ee0, #ee0) no-repeat border-box;
 	background-size: 1px 100%, 1px 100%, 1px 100%;
@@ -56,6 +96,22 @@
 	background-origin: padding-box, padding-box, padding-box;
 	background-color: #ffa;
 	border-color: #ee0;
+}
+.parsons .answer3.incorrect {
+	background: linear-gradient(#f2b6b6, #f2b6b6) no-repeat border-box, linear-gradient(#f2b6b6, #f2b6b6) no-repeat border-box, linear-gradient(#f2b6b6, #f2b6b6) no-repeat border-box;
+	background-size: 1px 100%, 1px 100%, 1px 100%;
+	background-position: 30px 0, 60px 0, 90px 0;
+	background-origin: padding-box, padding-box, padding-box;
+	background-color: #f2dede;
+	border-color: #f2b6b6;
+}
+.parsons .answer3.correct {
+	background: linear-gradient(#ade595, #ade595) no-repeat border-box, linear-gradient(#ade595, #ade595) no-repeat border-box, linear-gradient(#ade595, #ade595) no-repeat border-box;
+	background-size: 1px 100%, 1px 100%, 1px 100%;
+	background-position: 30px 0, 60px 0, 90px 0;
+	background-origin: padding-box, padding-box, padding-box;
+	background-color: #dff0d8;
+	border-color: #ade595;
 }
 .parsons .answer4 {
 	background: linear-gradient(#ee0, #ee0) no-repeat border-box, linear-gradient(#ee0, #ee0) no-repeat border-box, linear-gradient(#ee0, #ee0) no-repeat border-box, linear-gradient(#ee0, #ee0) no-repeat border-box;
@@ -65,17 +121,46 @@
 	background-color: #ffa;
 	border-color: #ee0;
 }
+.parsons .answer4.incorrect {
+	background: linear-gradient(#f2b6b6, #f2b6b6) no-repeat border-box, linear-gradient(#f2b6b6, #f2b6b6) no-repeat border-box, linear-gradient(#f2b6b6, #f2b6b6) no-repeat border-box, linear-gradient(#f2b6b6, #f2b6b6) no-repeat border-box;
+	background-size: 1px 100%, 1px 100%, 1px 100%, 1px 100%;
+	background-position: 30px 0, 60px 0, 90px 0, 120px 0;
+	background-origin: padding-box, padding-box, padding-box, padding-box;
+	background-color: #f2dede;
+	border-color: #f2b6b6;
+}
+.parsons .answer4.correct {
+	background: linear-gradient(#ade595, #ade595) no-repeat border-box, linear-gradient(#ade595, #ade595) no-repeat border-box, linear-gradient(#ade595, #ade595) no-repeat border-box, linear-gradient(#ade595, #ade595) no-repeat border-box;
+	background-size: 1px 100%, 1px 100%, 1px 100%, 1px 100%;
+	background-position: 30px 0, 60px 0, 90px 0, 120px 0;
+	background-origin: padding-box, padding-box, padding-box, padding-box;
+	background-color: #dff0d8;
+	border-color: #ade595;
+}
 .parsons .block {
 	position: absolute;
     -moz-border-radius: 10px;
     -webkit-border-radius: 10px;
     border-radius: 10px;
     background-color: #efefef;
-    border: 1px solid lightgray;
+    border: 1px solid #d3d3d3;
     padding: 5px 10px;
     margin-top: 5px;
     overflow: hidden;
     cursor: move;
+}
+.parsons .block.disabled {
+	opacity: 0.3;
+}
+.parsons .block.down {
+	border: 2px solid black;
+	padding: 4px 9px;
+}
+.parsons .block.up {
+	border: 2px solid black;
+	padding: 4px 9px;
+	background-color: white;
+	box-shadow: 3px 3px 4px black;
 }
 .parsons .block code {
 	display: block;
@@ -100,11 +185,6 @@
 }
 .parsons .indent4 {
 	margin-left: 120px;
-}
-.parsons .incorrect {
-    border: 1px solid #eed3d7;
-    background: none;
-    background-color: #f2dede;
 }
 .parsons .correct {
 	border: 1px solid #d6e9c6;
@@ -136,7 +216,10 @@
     -webkit-border-radius: 10px;
     border-radius: 10px;
     background-color: transparent;
-    border: 11px solid #b8b8f2;
+    border-left: 11px solid #b8b8f2;
+    border-right: 11px solid #b8b8f2;
+    border-top: 1px solid #b8b8f2;
+    border-bottom: 1px solid #b8b8f2;
     margin-top: 5px;
     overflow: hidden;
 }
@@ -156,4 +239,15 @@
 	margin-left: auto;
 	margin-right: auto;
 	text-align:center;
+}
+.parsons [role="tooltip"] {
+	max-width: 500pt;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	padding: 0px 10px;
+	top: 0;
+	text-align:center;
+	font-style: italic;
 }
