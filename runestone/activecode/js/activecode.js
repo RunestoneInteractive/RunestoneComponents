@@ -217,13 +217,6 @@ ActiveCode.prototype.createControls = function () {
         this.atButton = butt;
         ctrlDiv.appendChild(butt);
         
-        butt_temp = document.createElement("button");
-        $(butt_temp).addClass("ac_opt btn btn-default");
-        $(butt_temp).text("Stop Tour");
-        $(butt_temp).css("margin-left", "10px");
-        $(butt_temp).hide();
-        ctrlDiv.appendChild(butt_temp);
-        
         $(butt).click((function() {
         	new AudioTour(this.divid, this.code, 1, $(this.origElem).data("audio"));
         }).bind(this));
@@ -1038,6 +1031,7 @@ function AudioTour (divid, code, bnum, audio_text) {
     this.next_audio = null;
     this.last_audio = null;
     this.status = null;
+    this.stop_button = null;
     this.elem = null; // current audio element playing
     this.currIndex = null; // current index
     this.len = null; // current length of audio files for tour
@@ -1098,17 +1092,17 @@ function AudioTour (divid, code, bnum, audio_text) {
     this.next_audio = document.createElement("button");
     this.last_audio = document.createElement("button");
 
-    this.first_audio.className = "glyphicon glyphicon-fast-backward";
-    this.prev_audio.className = "glyphicon glyphicon-step-backward";
-    this.pause_audio.className = "glyphicon glyphicon-play";
-    this.next_audio.className = "glyphicon glyphicon-step-forward";
-    this.last_audio.className = "glyphicon glyphicon-fast-forward";
+    this.first_audio.className = "btn-default glyphicon glyphicon-fast-backward";
+    this.prev_audio.className = "btn-default glyphicon glyphicon-step-backward";
+    this.pause_audio.className = "btn-default glyphicon glyphicon-play";
+    this.next_audio.className = "btn-default glyphicon glyphicon-step-forward";
+    this.last_audio.className = "btn-default glyphicon glyphicon-fast-forward";
 
-    this.first_audio.style = "height: 25px; width: 25px;"
-    this.prev_audio.style = "height: 25px; width: 25px;"
-    this.pause_audio.style = "height: 25px; width: 25px;"
-    this.next_audio.style = "height: 25px; width: 25px;"
-    this.last_audio.style = "height: 25px; width: 25px;"
+    this.first_audio.setAttribute("style", "height: 22px; width: 25px; border-radius: 4px; margin-right:2px;");
+    this.prev_audio.setAttribute("style", "height: 22px; width: 25px; border-radius: 4px; margin-right:2px;");
+    this.pause_audio.setAttribute("style", "height: 22px; width: 25px; border-radius: 4px; margin-right:2px;");
+    this.next_audio.setAttribute("style", "height: 22px; width: 25px; border-radius: 4px; margin-right:2px;");
+    this.last_audio.setAttribute("style", "height: 22px; width: 25px; border-radius: 4px; margin-right:2px;");
 
     this.first_audio.name = "first_audio";
     this.prev_audio.name = "prev_audio";
@@ -1136,24 +1130,26 @@ function AudioTour (divid, code, bnum, audio_text) {
 
     this.status = document.createElement("div");
     this.status.className = "alert alert-info";
-    this.status.style= "display: inline-block; margin-top: 7px;";
+    this.status.setAttribute("style", "display: inline-block; margin-top: 7px; margin-bottom: 3px;");
 
-    $(this.audio_tour).append(this.audio_code, this.windowcode, document.createElement("br"), this.first_audio, this.prev_audio, this.pause_audio, this.next_audio, this.last_audio, document.createElement("br"), this.status);
+    this.stop_button = document.createElement("button");
+    this.stop_button.className = "btn btn-default";
+    this.stop_button.innerHTML = "Stop Tour";
+
+    $(this.audio_tour).append(this.audio_code, this.windowcode, document.createElement("br"), this.first_audio, this.prev_audio, this.pause_audio, this.next_audio, this.last_audio, document.createElement("br"), this.status, document.createElement("br"), this.stop_button);
     $("#"+divid+" .ac_code_div").append(this.audio_tour);
-    $('#'+divid+' .ac_opt.btn.btn-default:last-child').show();
     $('#'+divid+' .CodeMirror.cm-s-default.ui-resizable').hide();
-    $('#'+divid+' .ac_opt.btn.btn-default:nth-last-child(2)').hide();
+    $('#'+divid+' .ac_opt.btn.btn-default:last-child').hide();
 
-    $('#'+divid+' .ac_opt.btn.btn-default:last-child').click( (function () {
+    $(this.stop_button).click( (function () {
         if (this.playing) {
             this.elem.pause();
         }
         //log change to db
         this.logBookEvent({'event': 'Audio', 'act': 'closeWindow', 'div_id': divid});
         $(this.audio_tour).remove();
-        $('#'+divid+' .ac_opt.btn.btn-default:last-child').hide();
         $('#'+divid+' .CodeMirror.cm-s-default.ui-resizable').show();
-        $('#'+divid+' .ac_opt.btn.btn-default:nth-last-child(2)').show();
+        $('#'+divid+' .ac_opt.btn.btn-default:last-child').show();
     }).bind(this));
     this.tour(divid, audio_hash[0], bcount);
 
@@ -1169,7 +1165,7 @@ function AudioTour (divid, code, bnum, audio_text) {
     // handle the click to pause or play the audio
     $(this.pause_audio).click((function () {
         if (!this.isClicked) {
-            this.pause_audio.className = "glyphicon glyphicon-pause";
+            this.pause_audio.className = "btn-default glyphicon glyphicon-pause";
             this.pause_audio.title = "Pause current audio";
             this.pause_audio.setAttribute("aria-label", "Pause audio");
             // start at the first audio
@@ -1353,8 +1349,8 @@ AudioTour.prototype.playCurrIndexAudio = function () {
 
 // handle the end of the tour
 AudioTour.prototype.handleTourEnd = function () {
-    $(this.status).html("The Audio Tour has ended. You may restart the tour by clicking 'Play'");
-    this.pause_audio.className = "glyphicon glyphicon-play";
+    $(this.status).html("The Audio Tour has ended. You may restart the tour by clicking the play button.");
+    this.pause_audio.className = "btn-default glyphicon glyphicon-play";
     this.pause_audio.title = "Play audio";
     this.pause_audio.setAttribute("aria-label", "Play audio");
     this.isClicked = false;
@@ -1397,7 +1393,7 @@ AudioTour.prototype.playWhenReady = function (afile, divid, ahash) {
     this.playing = true;
     //console.log("in playWhenReady " + elem.duration);
     this.highlightLines(divid, ahash[afile]);
-    if (this.pause_audio.className === "glyphicon glyphicon-pause") {
+    if (this.pause_audio.className === "btn-default glyphicon glyphicon-pause") {
         $(this.status).html("Playing the " + this.tourName);
         $('#' + afile).bind('ended', (function () {
         this.outerAudio();
@@ -1436,7 +1432,7 @@ AudioTour.prototype.pauseAndPlayAudio = function (divid) {
         // calcualte the time left to play in milliseconds
         counter = (this.elem.duration - this.elem.currentTime) * 1000;
         this.elem.play(); // start the audio from current spot
-        this.pause_audio.className = "glyphicon glyphicon-pause";
+        this.pause_audio.className = "btn-default glyphicon glyphicon-pause";
         this.pause_audio.title = "Pause current audio";
         this.pause_audio.setAttribute("aria-label", "Pause audio");
         //log change to db
@@ -1446,7 +1442,7 @@ AudioTour.prototype.pauseAndPlayAudio = function (divid) {
     // if audio was this.playing pause it
     else if (this.playing) {
         this.elem.pause(); // pause the audio
-        this.pause_audio.className = "glyphicon glyphicon-play";
+        this.pause_audio.className = "btn-default glyphicon glyphicon-play";
         this.pause_audio.title = "Play paused audio";
         this.pause_audio.setAttribute("aria-label", "Play paused audio");
         //log change to db
