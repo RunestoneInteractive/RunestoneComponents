@@ -1583,10 +1583,10 @@ LiveCode.prototype.runProg = function() {
             for (var i = 0; i < ids.length; i++) {
                 file = document.getElementById(ids[i].trim());
                 if (file === null || file === undefined) {
-                    console.log("No file with given id");
+                    // console.log("No file with given id");
                 } else if (file.className === "javaFiles") {
                     files = files.concat(this.parseJavaClasses(file.textContent));
-                } else if (file.className === "images") {
+                } else if (file.className === "image") {
                     var fileName = file.id + ".txt";
                     var base64 = file.toDataURL();
                     base64 = base64.substring(base64.indexOf(',') + 1);
@@ -1604,13 +1604,6 @@ LiveCode.prototype.runProg = function() {
         language_id: this.language,
         sourcecode: source,
         sourcefilename: this.sourcefile
-        //parameters: {
-        //    compileargs: "-cp junit.jar;",
-        //    linkargs: "-cp junit.jar;"
-        //}
-        //try runargs
-        //try interpreterargs
-        //try linkargs
     };
 
     if (stdin) {
@@ -1637,10 +1630,10 @@ LiveCode.prototype.runProg = function() {
         data = JSON.stringify({'run_spec': runspec});
 
         Promise.all(promises).then(function() {
-            console.log("All files on Server");
+            // console.log("All files on Server");
             instance.runProg_callback(data);
         }).catch(function(err) {
-            console.log("Error: " + err);
+            // console.log("Error: " + err);
         });
     }
 
@@ -1747,7 +1740,6 @@ LiveCode.prototype.addJobeErrorMessage = function (err) {
 LiveCode.prototype.checkFile = function(file, resolve, reject) {
     var testName = file.name;
     var contents= file.content;
-
     var file_id = this.div2id[testName];
     var resource = '/jobe/index.php/restapi/files/' + file_id;
     var host = this.JOBE_SERVER + resource;
@@ -1760,29 +1752,29 @@ LiveCode.prototype.checkFile = function(file, resolve, reject) {
     xhr.setRequestHeader('X-API-KEY', key);
 
     xhr.onload = function () {
-        console.log("successfully sent file " + xhr.responseText);
+        // console.log("successfully sent file " + xhr.responseText);
     };
 
     xhr.onerror = function () {
-        console.log("error sending file" + xhr.responseText);
+        // console.log("error sending file" + xhr.responseText);
     };
 
     xhr.onload = (function () {
         switch(xhr.status) {
             case 404:
-                console.log("File not on Server");
+                // console.log("File not on Server");
                 this.putClassFile(file, resolve, reject);
                 break;
             case 400:
-                console.log("Bad Request");
+                // console.log("Bad Request");
                 reject();
                 break;
             case 204:
-                console.log("File already on Server");
+                // console.log("File already on Server");
                 resolve();
                 break;
             default:
-                console.log("This case should never happen");
+                //console.log("This case should never happen");
                 reject();
             }
     }).bind(this);
@@ -1818,26 +1810,26 @@ LiveCode.prototype.putClassFile = function (file, resolve, reject) {
     xhr.onload = (function () {
         switch(xhr.status) {
             case 403:
-                console.log("Forbidden");
+                // console.log("Forbidden");
                 reject();
                 break;
             case 400:
-                console.log("Bad Request");
+                // console.log("Bad Request");
                 reject();
                 break;
             case 204:
-                console.log("successfully sent file " + xhr.responseText);
-                //console.log("File " + testName +", " + file_id +" placed on server");
+                // console.log("successfully sent file " + xhr.responseText);
+                //console.log("File " + fileName +", " + file_id +" placed on server");
                 resolve();
                 break;
             default:
-                console.log("This case should never happen");
+                // console.log("This case should never happen");
                 reject();
             }
     }).bind(this);
 
     xhr.onerror = function () {
-        console.log("error sending file" + xhr.responseText);
+        // console.log("error sending file" + xhr.responseText);
         reject();
     };
 
