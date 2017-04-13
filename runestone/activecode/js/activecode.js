@@ -1587,8 +1587,9 @@ LiveCode.prototype.runProg = function() {
                 } else if (file.className === "javaFiles") {
                     files = files.concat(this.parseJavaClasses(file.textContent));
                 } else if (file.className === "image") {
-                    var fileName = file.id + ".txt";
-                    var base64 = file.toDataURL();
+                    var fileName = file.id;
+                    var extension = fileName.substring(fileName.indexOf('.') + 1);
+                    var base64 = file.toDataURL('image/' + extension);
                     base64 = base64.substring(base64.indexOf(',') + 1);
                     files.push({name: fileName, content: base64});
                 } else {
@@ -1739,7 +1740,7 @@ LiveCode.prototype.addJobeErrorMessage = function (err) {
  */
 LiveCode.prototype.checkFile = function(file, resolve, reject) {
     var testName = file.name;
-    var contents= file.content;
+
     var file_id = this.div2id[testName];
     var resource = '/jobe/index.php/restapi/files/' + file_id;
     var host = this.JOBE_SERVER + resource;
@@ -1790,10 +1791,20 @@ LiveCode.prototype.checkFile = function(file, resolve, reject) {
 LiveCode.prototype.putClassFile = function (file, resolve, reject) {
 
     var fileName = file.name;
+    var extension = fileName.substring(fileName.indexOf('.') + 1);
+
     var file_id = this.div2id[fileName];
     var contents = file.content;
 
-    var contentsb64 = btoa(contents);
+    // File types being uploaded that come in already in base64 format
+    var extensions = ['jar', 'zip', 'png', 'jpg', 'jpeg'];
+    var contentsb64;
+
+    if (extensions.indexOf(extension) === -1) {
+        contentsb64 = btoa(contents);
+    } else {
+        contentsb64 = contents;
+    }
 
     var data = JSON.stringify({ 'file_contents' : contentsb64 });
 
@@ -1818,7 +1829,7 @@ LiveCode.prototype.putClassFile = function (file, resolve, reject) {
                 reject();
                 break;
             case 204:
-                // console.log("successfully sent file " + xhr.responseText);
+                //console.log("successfully sent file " + xhr.responseText);
                 //console.log("File " + fileName +", " + file_id +" placed on server");
                 resolve();
                 break;
