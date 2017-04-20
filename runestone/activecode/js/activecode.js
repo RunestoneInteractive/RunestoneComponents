@@ -1138,6 +1138,7 @@ function AudioTour (divid, code, bnum, audio_text) {
 
     $(this.audio_tour).append(this.audio_code, this.windowcode, document.createElement("br"), this.first_audio, this.prev_audio, this.pause_audio, this.next_audio, this.last_audio, document.createElement("br"), this.status, document.createElement("br"), this.stop_button);
     $("#"+divid+" .ac_code_div").append(this.audio_tour);
+    $("#"+divid+" .ac_code_div").css("width", "50%");
     $('#'+divid+' .CodeMirror.cm-s-default.ui-resizable').hide();
     $('#'+divid+' .ac_opt.btn.btn-default:last-child').hide();
 
@@ -1150,6 +1151,7 @@ function AudioTour (divid, code, bnum, audio_text) {
         $(this.audio_tour).remove();
         $('#'+divid+' .CodeMirror.cm-s-default.ui-resizable').show();
         $('#'+divid+' .ac_opt.btn.btn-default:last-child').show();
+        $("#"+divid+" .ac_code_div").css("width", "");
     }).bind(this));
     this.tour(divid, audio_hash[0], bcount);
 
@@ -1216,7 +1218,7 @@ AudioTour.prototype.tour = function (divid, audio_type, bcount) {
     var atype = audio_type.split(";");
     var name = atype[0].replaceAll("\"", " ");
     this.tourName = name;
-    $(this.status).html("Starting the " + name);
+    $(this.status).html("Click the play button to begin the " + name);
 
     //log tour type to db
     this.logBookEvent({'event': 'Audio', 'act': name, 'div_id': divid});
@@ -1349,7 +1351,7 @@ AudioTour.prototype.playCurrIndexAudio = function () {
 
 // handle the end of the tour
 AudioTour.prototype.handleTourEnd = function () {
-    $(this.status).html("The Audio Tour has ended. You may restart the tour by clicking the play button.");
+    $(this.status).html("The " + this.tourName + " has ended. You may restart the tour by clicking the play button.");
     this.pause_audio.className = "btn-default glyphicon glyphicon-play";
     this.pause_audio.title = "Play audio";
     this.pause_audio.setAttribute("aria-label", "Play audio");
@@ -1435,6 +1437,7 @@ AudioTour.prototype.pauseAndPlayAudio = function (divid) {
         this.pause_audio.className = "btn-default glyphicon glyphicon-pause";
         this.pause_audio.title = "Pause current audio";
         this.pause_audio.setAttribute("aria-label", "Pause audio");
+        $(this.status).html("Playing the " + this.tourName);
         //log change to db
         this.logBookEvent({'event': 'Audio', 'act': 'play', 'div_id': this.theDivid});
     }
@@ -1445,6 +1448,7 @@ AudioTour.prototype.pauseAndPlayAudio = function (divid) {
         this.pause_audio.className = "btn-default glyphicon glyphicon-play";
         this.pause_audio.title = "Play paused audio";
         this.pause_audio.setAttribute("aria-label", "Play paused audio");
+        $(this.status).html("The " + this.tourName + " has been paused. Click on the play button to resume the tour.");
         //log change to db
         this.logBookEvent({'event': 'Audio', 'act': 'pause', 'div_id': this.theDivid});
     }
