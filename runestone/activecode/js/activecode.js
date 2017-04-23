@@ -218,7 +218,7 @@ ActiveCode.prototype.createControls = function () {
         ctrlDiv.appendChild(butt);
         
         $(butt).click((function() {
-        	new AudioTour(this.divid, this.code, 1, $(this.origElem).data("audio"));
+            new AudioTour(this.divid, this.code, 1, $(this.origElem).data("audio"));
         }).bind(this));
     }
 
@@ -1032,6 +1032,7 @@ function AudioTour (divid, code, bnum, audio_text) {
     this.last_audio = null;
     this.status = null;
     this.stop_button = null;
+    this.tourButtons = [];
     this.elem = null; // current audio element playing
     this.currIndex = null; // current index
     this.len = null; // current length of audio files for tour
@@ -1076,7 +1077,14 @@ function AudioTour (divid, code, bnum, audio_text) {
     //laying out the HTML content
 
     var bcount = 0;
-    
+
+    for (var i = 0; i < audio_type.length - 1; i++) {
+        var newButton = document.createElement("button");
+        newButton.className = "btn btn-default";
+        newButton.innerHTML = bval[i].replace(/\"/g,"");
+        this.tourButtons.push(newButton);
+        bcount++;
+    }
     this.audio_tour = document.createElement("div");
     this.audio_tour.align = "center";
 
@@ -1130,13 +1138,13 @@ function AudioTour (divid, code, bnum, audio_text) {
 
     this.status = document.createElement("div");
     this.status.className = "alert alert-info";
-    this.status.setAttribute("style", "display: inline-block; margin-top: 7px; margin-bottom: 3px;");
+    this.status.setAttribute("style", "display: none;");
 
     this.stop_button = document.createElement("button");
     this.stop_button.className = "btn btn-default";
-    this.stop_button.innerHTML = "Stop Tour";
+    this.stop_button.innerHTML = "Stop tour";
 
-    $(this.audio_tour).append(this.audio_code, this.windowcode, document.createElement("br"), this.first_audio, this.prev_audio, this.pause_audio, this.next_audio, this.last_audio, document.createElement("br"), this.status, document.createElement("br"), this.stop_button);
+    $(this.audio_tour).append(this.audio_code, this.windowcode, document.createElement("br"), this.first_audio, this.prev_audio, this.pause_audio, this.next_audio, this.last_audio, document.createElement("br"), this.status, document.createElement("br"), this.tourButtons, this.stop_button);
     $("#"+divid+" .ac_code_div").append(this.audio_tour);
     $("#"+divid+" .ac_code_div").css("width", "50%");
     $('#'+divid+' .CodeMirror.cm-s-default.ui-resizable').hide();
@@ -1153,7 +1161,22 @@ function AudioTour (divid, code, bnum, audio_text) {
         $('#'+divid+' .ac_opt.btn.btn-default:last-child').show();
         $("#"+divid+" .ac_code_div").css("width", "");
     }).bind(this));
-    this.tour(divid, audio_hash[0], bcount);
+
+    $(this.tourButtons[0]).click((function () {
+        this.tour(divid, audio_hash[0], bcount);
+    }).bind(this));
+    $(this.tourButtons[1]).click((function () {
+        this.tour(divid, audio_hash[1], bcount);
+    }).bind(this));
+    $(this.tourButtons[2]).click((function () {
+        this.tour(divid, audio_hash[2], bcount);
+    }).bind(this));
+    $(this.tourButtons[3]).click((function () {
+        this.tour(divid, audio_hash[3], bcount);
+    }).bind(this));
+    $(this.tourButtons[4]).click((function () {
+        this.tour(divid, audio_hash[4], bcount);
+    }).bind(this));
 
     // handle the click to go to the next audio
     $(this.first_audio).click((function () {
@@ -1191,12 +1214,21 @@ function AudioTour (divid, code, bnum, audio_text) {
     $(this.last_audio).click((function () {
         this.lastAudio();
     }).bind(this));
+
+    // make the image buttons look disabled
+    $(this.first_audio).css('opacity', 0.25);
+    $(this.prev_audio).css('opacity', 0.25);
+    $(this.pause_audio).css('opacity', 0.25);
+    $(this.next_audio).css('opacity', 0.25);
+    $(this.last_audio).css('opacity', 0.25);
 }
 
 AudioTour.prototype.tour = function (divid, audio_type, bcount) {
     // set globals
     this.buttonCount = bcount;
     this.theDivid = divid;
+
+    this.status.setAttribute("style", "display: inline-block; margin-top: 7px; margin-bottom: 3px;");
 
     // enable prev, pause/play and next buttons and make visible
     $(this.first_audio).removeAttr('disabled');
@@ -1213,7 +1245,7 @@ AudioTour.prototype.tour = function (divid, audio_type, bcount) {
 
     // disable tour buttons
     for (var i = 0; i < bcount; i++)
-        $('#button_audio_' + i).attr('disabled', 'disabled');
+        $(this.tourButtons[i]).attr('disabled', 'disabled');
 
     var atype = audio_type.split(";");
     var name = atype[0].replaceAll("\"", " ");
@@ -1351,12 +1383,28 @@ AudioTour.prototype.playCurrIndexAudio = function () {
 
 // handle the end of the tour
 AudioTour.prototype.handleTourEnd = function () {
-    $(this.status).html("The " + this.tourName + " has ended. You may restart the tour by clicking the play button.");
+    $(this.status).html("The " + this.tourName + " has ended.");
     this.pause_audio.className = "btn-default glyphicon glyphicon-play";
     this.pause_audio.title = "Play audio";
     this.pause_audio.setAttribute("aria-label", "Play audio");
     this.isClicked = false;
     this.currIndex = null;
+
+    $(this.first_audio).attr('disabled', 'disabled');
+    $(this.prev_audio).attr('disabled', 'disabled');
+    $(this.pause_audio).attr('disabled', 'disabled');
+    $(this.next_audio).attr('disabled', 'disabled');
+    $(this.last_audio).attr('disabled', 'disabled');
+
+    $(this.first_audio).css('opacity', 0.25);
+    $(this.prev_audio).css('opacity', 0.25);
+    $(this.pause_audio).css('opacity', 0.25);
+    $(this.next_audio).css('opacity', 0.25);
+    $(this.last_audio).css('opacity', 0.25);
+
+    // enable the tour buttons
+    for (var j = 0; j < this.buttonCount; j++)
+        $(this.tourButtons[j]).removeAttr('disabled');
 };
 
 // only call this one after the first time
