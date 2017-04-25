@@ -1018,7 +1018,6 @@ String.prototype.replaceAll = function (target, replacement) {
 AudioTour.prototype = new RunestoneBase();
 // function to display the audio tours
 function AudioTour (divid, code, bnum, audio_text) {
-    this.isClicked = false;
     this.audio_tour = null;
     this.audio_code = null;
     this.windowcode = null;
@@ -1099,7 +1098,7 @@ function AudioTour (divid, code, bnum, audio_text) {
 
     this.first_audio.className = "btn-default glyphicon glyphicon-fast-backward";
     this.prev_audio.className = "btn-default glyphicon glyphicon-step-backward";
-    this.pause_audio.className = "btn-default glyphicon glyphicon-play";
+    this.pause_audio.className = "btn-default glyphicon glyphicon-pause";
     this.next_audio.className = "btn-default glyphicon glyphicon-step-forward";
     this.last_audio.className = "btn-default glyphicon glyphicon-fast-forward";
 
@@ -1117,13 +1116,13 @@ function AudioTour (divid, code, bnum, audio_text) {
 
     this.first_audio.title = "Play first audio in tour";
     this.prev_audio.title = "Play previous audio in tour";
-    this.pause_audio.title = "Play audio";
+    this.pause_audio.title = "Pause current audio";
     this.next_audio.title = "Play next audio in tour";
     this.last_audio.title = "Play last audio in tour";
 
     this.first_audio.setAttribute("aria-label", "Play first audio in tour");
     this.prev_audio.setAttribute("aria-label", "Play previous audio in tour");
-    this.pause_audio.setAttribute("aria-label", "Play audio");
+    this.pause_audio.setAttribute("aria-label", "Pause audio");
     this.next_audio.setAttribute("aria-label", "Play next audio in tour");
     this.last_audio.setAttribute("aria-label", "Play last audio in tour");
 
@@ -1184,22 +1183,10 @@ function AudioTour (divid, code, bnum, audio_text) {
     $(this.prev_audio).click((function () {
         this.prevAudio();
     }).bind(this));
+    
     // handle the click to pause or play the audio
     $(this.pause_audio).click((function () {
-        if (!this.isClicked) {
-            this.pause_audio.className = "btn-default glyphicon glyphicon-pause";
-            this.pause_audio.title = "Pause current audio";
-            this.pause_audio.setAttribute("aria-label", "Pause audio");
-            // start at the first audio
-            if (this.currIndex == null) {
-                this.currIndex = 0;
-            }
-            // play the first audio in the tour
-            this.playCurrIndexAudio();
-        } else {
-            this.pauseAndPlayAudio(divid);
-        }
-        this.isClicked = true;
+        this.pauseAndPlayAudio(divid);
     }).bind(this));
 
     // handle the click to go to the next audio
@@ -1283,10 +1270,12 @@ AudioTour.prototype.tour = function (divid, audio_type, bcount) {
     }
     $(this.audio_code).html(str);
     this.len = this.aname.length; // set the number of audio file in the tour
+    
+    this.currIndex = 0;
+    this.playCurrIndexAudio();
 };
 
 AudioTour.prototype.handlePlaying = function() {
-    // if this.playing audio pause it
     this.elem.pause();
     // unbind current ended
     $('#' + this.afile).unbind('ended');
@@ -1381,11 +1370,9 @@ AudioTour.prototype.playCurrIndexAudio = function () {
 // handle the end of the tour
 AudioTour.prototype.handleTourEnd = function () {
     $(this.status).html("The " + this.tourName + " has ended.");
-    this.pause_audio.className = "btn-default glyphicon glyphicon-play";
-    this.pause_audio.title = "Play audio";
-    this.pause_audio.setAttribute("aria-label", "Play audio");
-    this.isClicked = false;
-    this.currIndex = null;
+    this.pause_audio.className = "btn-default glyphicon glyphicon-pause";
+    this.pause_audio.title = "Pause audio";
+    this.pause_audio.setAttribute("aria-label", "Pause audio");
 
     $(this.first_audio).attr('disabled', 'disabled');
     $(this.prev_audio).attr('disabled', 'disabled');
@@ -1446,6 +1433,11 @@ AudioTour.prototype.playWhenReady = function (afile, divid, ahash) {
         this.outerAudio();
         }).bind(this));
         this.elem.play();
+    }
+    else {
+        $('#' + afile).bind('ended', (function () {
+        this.outerAudio();
+        }).bind(this));
     }
 };
 
