@@ -415,6 +415,10 @@ Timed.prototype.startAssessment = function () {
             var storageObj = {"answer": [0,0,this.renderedQuestionArray.length,0], "timestamp": timeStamp};
             localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", JSON.stringify(storageObj));
         }
+        $(window).on('beforeunload', function(){
+            // this actual value gets ignored by newer browsers
+            return 'Are you sure you want to leave?';
+        });
     } else {
        this.handlePrevAssessment();
     }
@@ -551,24 +555,25 @@ Timed.prototype.tookTimedExam = function () {
 };
 
 Timed.prototype.finishAssessment = function () {
-        $("#relations-next").show(); // show the next page button for now
-        $("#relations-prev").show(); // show the previous button for now
-        if (!this.showResults) {
-           $(this.timedDiv).hide();
-           $(this.pauseBtn).hide();
-           $(this.timerContainer).hide();
-        }
-        this.findTimeTaken();
-        this.running = 0;
-        this.done = 1;
-        this.taken = 1;
-        this.submitTimedProblems(true); // log results
-        this.checkScore();
-        this.displayScore();
-        this.storeScore();
-        this.logScore();
-        $(this.pauseBtn).attr("disabled", true);
-        this.finishButton.disabled = true;
+    $("#relations-next").show(); // show the next page button for now
+    $("#relations-prev").show(); // show the previous button for now
+    if (!this.showResults) {
+        $(this.timedDiv).hide();
+        $(this.pauseBtn).hide();
+        $(this.timerContainer).hide();
+    }
+    this.findTimeTaken();
+    this.running = 0;
+    this.done = 1;
+    this.taken = 1;
+    this.submitTimedProblems(true); // log results
+    this.checkScore();
+    this.displayScore();
+    this.storeScore();
+    this.logScore();
+    $(this.pauseBtn).attr("disabled", true);
+    this.finishButton.disabled = true;
+    $(window).off('beforeunload');
 };
 
 Timed.prototype.submitTimedProblems = function (logFlag) {
