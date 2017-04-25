@@ -1574,7 +1574,6 @@ LiveCode.prototype.runProg = function() {
         this.sourcefile = sfilemap[this.language];
     }
 
-    if (this.datafile) {}
 
     var files = [];
     if(this.language === "java") {
@@ -1764,7 +1763,7 @@ LiveCode.prototype.checkFile = function(file, resolve, reject) {
         switch(xhr.status) {
             case 404:
                 // console.log("File not on Server");
-                this.putClassFile(file, resolve, reject);
+                this.pushDataFile(file, resolve, reject);
                 break;
             case 400:
                 // console.log("Bad Request");
@@ -1788,7 +1787,7 @@ LiveCode.prototype.checkFile = function(file, resolve, reject) {
  * @param  {string} classdiv contents of file
  * @param  {string} testName name of file
  */
-LiveCode.prototype.putClassFile = function (file, resolve, reject) {
+LiveCode.prototype.pushDataFile = function (file, resolve, reject) {
 
     var fileName = file.name;
     var extension = fileName.substring(fileName.indexOf('.') + 1);
@@ -1949,35 +1948,6 @@ LiveCode.prototype.putClassFile = function (file, resolve, reject) {
      return classes;
  }
 
-LiveCode.prototype.pushDataFile = function (datadiv) {
-
-        var file_id = 'runestone'+Math.floor(Math.random()*100000);
-        var contents = $(document.getElementById(datadiv)).text();
-        var contentsb64 = btoa(contents);
-        var data = JSON.stringify({ 'file_contents' : contentsb64 });
-        var resource = '/jobe/index.php/restapi/files/' + file_id;
-        var host = this.JOBE_SERVER + resource;
-        var xhr = new XMLHttpRequest();
-
-        if (this.div2id[datadiv] === undefined ) {
-            this.div2id[datadiv] = file_id;
-
-            xhr.open("PUT", host, true);
-            xhr.setRequestHeader('Content-type', 'application/json');
-            xhr.setRequestHeader('Accept', 'text/plain');
-            xhr.setRequestHeader('X-API-KEY', this.API_KEY);
-
-            xhr.onload = function () {
-                console.log("successfully sent file " + xhr.responseText);
-            };
-
-            xhr.onerror = function () {
-                console.log("error sending file" + xhr.responseText);
-            };
-
-            xhr.send(data)
-        }
-    };
 
 ACFactory = {};
 

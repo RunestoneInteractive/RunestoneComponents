@@ -135,6 +135,8 @@ class DataFile(RunestoneDirective):
             source = "\n".join(self.content)+"\n"
         else:
             source = '\n'
+        source = source.replace(">","&gt")
+        source = source.replace("<","&lt")
         self.options['filecontent'] = source
 
         if 'hide' in self.options:
