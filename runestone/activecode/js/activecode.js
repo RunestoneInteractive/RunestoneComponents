@@ -1076,7 +1076,7 @@ function AudioTour (divid, code, bnum, audio_text) {
 
     for (var i = 0; i < audio_type.length - 1; i++) {
         var newButton = document.createElement("button");
-        newButton.className = "btn btn-default";
+        newButton.className = "btn btn-success";
         newButton.innerHTML = bval[i].replace(/\"/g,"");
         this.tourButtons.push(newButton);
         bcount++;
