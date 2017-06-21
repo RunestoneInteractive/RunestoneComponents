@@ -10,7 +10,7 @@ class FITBtests(unittest.TestCase):
     def setUp(self):
         #self.driver = webdriver.Firefox()  # good for development
         # self.driver = webdriver.PhantomJS() # use this for Jenkins auto testing
-        self.driver = webdriver.PhantomJS(service_args=['--ignore-ssl-errors=true'])
+        self.driver = webdriver.PhantomJS()
         self.host = 'http://127.0.0.1:' + PORT
 
     # One of two correct answers
