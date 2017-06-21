@@ -54,9 +54,6 @@ class FITBtests(unittest.TestCase):
         self.assertIn("Correct", feedback.text)
 
     def test_fitb4(self):
-        '''
-        http://runestoneinteractive.org/build/html/directives.html#fill-in-the-blank for documentation
-        '''
         self.driver.get(self.host + "/index.html") # Access page
         quest = self.driver.find_element_by_id("fill-in-the-blank")
         blank1 = quest.find_element_by_id("fill1412_blank0")
