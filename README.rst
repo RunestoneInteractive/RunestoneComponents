@@ -120,7 +120,7 @@ Our goal is to have unit tests which rely on Selenium (a library that helps simu
 
 * You'll also need to have done the above installation. 
   
-  * You should be using virtual environment, you'll need a clone of the RunestoneComponents repository, and you'll need to have done ``pip install -e path/to/your/components/clone/directory``.
+  * You should be using virtual environment, you'll need a clone of the RunestoneComponents repository, and you'll need to have done ``pip install -e`` from the top level of the RunestoneComponents directory.
 
 **To run tests:**
 
