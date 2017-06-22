@@ -69,6 +69,7 @@ Timed.prototype.init = function (opts) {
     this.incorrectStr = "";
     this.skippedStr = "";
     this.skipped = 0;
+    this.reset = 0;
 
     this.currentQuestionIndex = 0;   // Which question is currently displaying on the page
     this.renderedQuestionArray = []; // list of all problems
@@ -146,6 +147,7 @@ Timed.prototype.renderControlButtons = function () {
     });
     this.startBtn = document.createElement("btn");
     this.pauseBtn = document.createElement("btn");
+    this.resetBtn = document.createElement("btn");
     $(this.startBtn).attr({
         "class": "btn btn-success",
         "id": "start"
@@ -164,8 +166,18 @@ Timed.prototype.renderControlButtons = function () {
     this.pauseBtn.addEventListener("click", function () {
         this.pauseAssessment();
     }.bind(this), false);
+    $(this.resetBtn).attr({
+        "class": "btn btn-default",
+        "id": "resetExam",
+        "disabled":"true"
+    });
+    this.resetBtn.textContent = "Reset Exam";
+    this.resetBtn.addEventListener("click", function() {
+        this.resetAssessment();
+    }.bind(this), false);
     this.controlDiv.appendChild(this.startBtn);
     this.controlDiv.appendChild(this.pauseBtn);
+    this.controlDiv.appendChild(this.resetBtn);
     this.assessDiv.appendChild(this.wrapperDiv);
     this.assessDiv.appendChild(this.controlDiv);
 };
@@ -443,6 +455,17 @@ Timed.prototype.pauseAssessment = function () {
     }
 };
 
+Timed.prototype.resetAssessment = function () {
+    if (this.taken) {
+        if (window.confirm("Only reset the exam if you encountered problems completing it. The Instructor will be notified of the reset.")) {
+            this.reset = 1;
+            this.logResetExam({"event":"timedExam","act":"reset","div_id":this.divid});
+            localStorage.clear();
+            location.reload();
+        }
+    }
+};
+
 Timed.prototype.showTime = function () { // displays the timer value
     if (this.showTimer) {
     	var mins = Math.floor(this.timeLimit / 60);
@@ -551,6 +574,9 @@ Timed.prototype.tookTimedExam = function () {
     });
 
     this.checkServer("timedExam");
+    if (this.taken) {
+        $(this.resetBtn).attr("disabled",false);
+    };
 
 };
 
