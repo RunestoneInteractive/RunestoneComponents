@@ -24,21 +24,6 @@ RunestoneBase.prototype.logRunEvent = function (eventInfo) {
     console.log("running " + JSON.stringify(eventInfo));
 };
 
-RunestoneBase.prototype.logResetExam = function (eventInfo) {
-    this.logBookEvent(eventInfo);
-    eventInfo.course = eBookConfig.course;
-    eventInfo.correct = this.score;
-    eventInfo.incorrect = this.incorrect;
-    eventInfo.skipped = this.skipped;
-    eventInfo.time_taken = this.timeTaken;
-    if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
-        jQuery.post(eBookConfig.ajaxURL + 'resetLog', eventInfo) // Log the reset event
-        .done(console.log("sent the reset"))
-        .fail(function(r,data,err) {
-            alert(err)})
-    }
-    console.log("logging event" + JSON.stringify(eventInfo));
-}
 /* Checking/loading from storage */
 
 RunestoneBase.prototype.checkServer = function (eventInfo) {

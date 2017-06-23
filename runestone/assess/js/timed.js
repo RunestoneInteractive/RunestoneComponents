@@ -458,12 +458,27 @@ Timed.prototype.pauseAssessment = function () {
 Timed.prototype.resetAssessment = function () {
     if (this.taken) {
         if (window.confirm("Only reset the exam if you encountered problems completing it. The Instructor will be notified of the reset.")) {
-            this.reset = 1;
-            this.logResetExam({"event":"timedExam","act":"reset","div_id":this.divid});
+            eventInfo = {"event":"timedExam","act":"reset","div_id":this.divid,
+                         "course":eBookConfig.course,"correct":this.score,"incorrect":this.incorrect,
+                         "skipped":this.skipped,"time":this.timeTaken,"reset":True}
+            this.logBookEvent(eventInfo);
             localStorage.clear();
             location.reload();
         }
     }
+};
+
+Timed.prototype.checkResetability = function () {
+    jQuery.getJSON(eBookConfig.ajaxURL + "checkTimedReset",
+                    {"div_id":this.divid,"course":eBookConfig.course},
+                    function (result) {
+                        if (result.canReset) {
+                            this.hideTimedFeedback();
+                            if (this.taken) {
+                                $(this.resetBtn).attr("disabled",false);
+                            }
+                        }
+                    }.bind(this));
 };
 
 Timed.prototype.showTime = function () { // displays the timer value
@@ -574,9 +589,7 @@ Timed.prototype.tookTimedExam = function () {
     });
 
     this.checkServer("timedExam");
-    if (this.taken) {
-        $(this.resetBtn).attr("disabled",false);
-    };
+    this.checkResetability();
 
 };
 
