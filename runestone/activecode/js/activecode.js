@@ -1751,16 +1751,6 @@ ACFactory.addActiveCodeToDiv = function(outerdivid, acdivid, sid, initialcode, l
     }
     newac = ACFactory.createActiveCode(thepre,language,addopts);
     var savediv = newac.divid;
-    //newac.divid = outerdivid;
-    //newac.sid = sid;
-    // if (! initialcode ) {
-    //     newac.loadEditor();
-    // } else {
-    //     newac.editor.setValue(initialcode);
-    //     setTimeout(function() {
-    //             newac.editor.refresh();
-    //         },500);
-    // }
     newac.divid = savediv;
     newac.editor.setSize(500,300);
     setTimeout(function() {
@@ -1768,6 +1758,10 @@ ACFactory.addActiveCodeToDiv = function(outerdivid, acdivid, sid, initialcode, l
         },500);
 
 };
+
+ACFactory.createActiveCodeFromOpts = function(opts) {
+    return ACFactory.createActiveCode(opts.orig, opts.lang, opts)
+}
 
 ACFactory.createScratchActivecode = function() {
     /* set up the scratch Activecode editor in the search menu */
@@ -1841,6 +1835,11 @@ $(document).ready(function() {
     }
 
 });
+
+if (typeof component_factory === 'undefined') {
+    component_factory = {}
+}
+component_factory['activecode'] = ACFactory.createActiveCodeFromOpts;
 
 $(document).bind("runestone:login", function() {
     $(".run-button").text("Save & Run");
