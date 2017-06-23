@@ -5,7 +5,6 @@
 var isMouseDown = false;
 document.onmousedown = function() { isMouseDown = true };
 document.onmouseup   = function() { isMouseDown = false };
-
 var edList = {};
 
 ActiveCode.prototype = new RunestoneBase();
@@ -114,9 +113,24 @@ ActiveCode.prototype.createEditor = function (index) {
             $(editor.getWrapperElement()).css('border-top', '2px solid #b43232');
             $(editor.getWrapperElement()).css('border-bottom', '2px solid #b43232');
             this.logBookEvent({'event': 'activecode', 'act': 'edit', 'div_id': this.divid});
-    }
+        }
         editor.acEditEvent = true;
-        }).bind(this));  // use bind to preserve *this* inside the on handler.
+    }).bind(this));  // use bind to preserve *this* inside the on handler.
+
+    //Solving Keyboard Trap of ActiveCode: If user use tab for navigation outside of ActiveCode, then change tab behavior in ActiveCode to enable tab user to tab out of the textarea
+    $(window).keydown(function (e) {
+        var code = (e.keyCode ? e.keyCode : e.which);
+        if (code == 9 && $('textarea:focus').length === 0) {
+            editor.setOption("extraKeys", {
+                "Tab": function(cm) {
+                    $(document.activeElement).closest('.tab-content').nextSibling.focus();
+                },
+                "Shift-Tab": function(cm) {
+                    $(document.activeElement).closest('.tab-content').previousSibling.focus();
+                }
+            });
+        }
+    });
 
     this.editor = editor;
     if (this.hidecode) {
