@@ -7,6 +7,7 @@ import six
 import click
 from paver.easy import sh
 from pkg_resources import resource_string, resource_filename, require
+import codecs
 
 @click.group(chain=True)
 def cli():
@@ -61,10 +62,10 @@ def init():
         paver_final = six.StringIO(paver_final, newline=None).read()
         config_final = six.StringIO(config_final, newline=None).read()
 
-    with open('pavement.py','w') as pvf:
+    with codecs.open('pavement.py','w',encoding='utf8') as pvf:
         pvf.write(paver_final)
 
-    with open('conf.py','w') as pvf:
+    with codecs.open('conf.py','w',encoding='utf8') as pvf:
         pvf.write(config_final)
 
     print("Done.  Type runestone build to build your project")
