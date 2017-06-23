@@ -94,13 +94,13 @@ class MChoice(Assessment):
     The syntax for a multiple-choice question is:
 
     .. mchoice:: uniqueid
-        :correct: letter of correct answer or list of correct answer letters (in case of multiple answers)
-        :multiple_answers: boolean  [optional]. Implied if ``:correct:`` contains a list.
+        :multiple_answers: boolean [optional]. Implied if ``:correct:`` contains a list.
         :random: boolean [optional]
 
         The following arguments supply answers and feedback. See below for an alternative method of specification.
 
-        :answer_a: possible answer  -- what follows _ is label
+        :correct: letter of correct answer or list of correct answer letters (in case of multiple answers)
+        :answer_a: possible answer  -- what follows the _ is the answer's label.
         :answer_b: possible answer
         :answer_c: possible answer
         :answer_d: possible answer
@@ -111,26 +111,39 @@ class MChoice(Assessment):
         :feedback_d: displayed if d is picked
         :feedback_e: displayed if e is picked
 
-        Question text ...
+        Question text; this may contain multiple paragraphs with any markup.
 
-        Alternative method of specifying answers and feedback: Place an `unordered list <http://www.sphinx-doc.org/en/stable/rest.html#lists-and-quote-like-blocks>`_
-        at the end of the question text, in the following format:
+        An alternative method of specifying answers and feedback: Place an `unordered list <http://www.sphinx-doc.org/en/stable/rest.html#lists-and-quote-like-blocks>`_
+        at the end of the question text, in the following format. Note: If your question text happens to end with an unordered list, then place a comment, consisting of a paragraph containing only ``..`` at the end of the list. For example:
 
-        -   Text for answer A.
+        -   This list is still part of the question text.
+
+        ..
+
+        -   +Text for answer A. The leading ``+`` indicates this answer is correct. Prefix all correct answers with a ``+``.
 
             Your text may be multiple paragraphs, including `images <http://www.sphinx-doc.org/en/stable/rest.html#images>`_
-            and any other `inline <http://www.sphinx-doc.org/en/stable/rest.html#inline-markup>`_ or block markup. For example: :math:`\sqrt(2)/2`.
+            and any other `inline <http://www.sphinx-doc.org/en/stable/rest.html#inline-markup>`_ or block markup. For example: :math:`\sqrt(2)/2`. As earlier, if your feedback contains an unordered list, end it with a comment.
 
-            -   Feedback for answer A.
+            -   For example, this is part of the answer text.
+
+            ..
+
+            -   This is feedback for answer A.
 
                 This may also span multiple paragraphs and include any markup.
                 However, there can be only one item in this unordered list.
 
-        - Text for answer B.
+        -   \+Text for answer B. This answer is incorrect, instead showing how to display a ``+`` at the beginning of an answer without marking it as a correct answer.
 
             -   Feedback for answer B.
+        -   Text for answer C. This answer is also incorrect. Note that the empty line between a sublist and a list may be omitted.
 
-        ... and so on.
+            -   Feedback for answer C. However, the empty line is required between a list and a sublist.
+
+        -   ... and so on.
+
+            -   Up to 26 answers and feedback may be provided.
     """
     required_arguments = 1
     optional_arguments = 1
@@ -155,24 +168,9 @@ class MChoice(Assessment):
     def run(self):
         """
             process the multiplechoice directive and generate html for output.
-            :param self:
-            :return:
-            .. mchoice:: qname
-            :multiple_answers: boolean
-            :random: boolean
-            :answer_a: possible answer  -- what follows _ is label
-            :answer_b: possible answer
-            ...
-            :answer_e: possible answer
-            :correct: letter of correct answer or list of correct answer letters (in case of multiple answers)
-            :feedback_a: displayed if a is picked
-            :feedback_b: displayed if b is picked
-            :feedback_c: displayed if c is picked
-            :feedback_d: displayed if d is picked
-            :feedback_e: displayed if e is picked
 
-            Question text
-            ...
+            :param self:
+            :return: An MChoiceNode.
             """
 
         TEMPLATE_START = '''
@@ -224,10 +222,33 @@ class MChoice(Assessment):
         #
         # See if the last item is a list. If so, and questions/answers weren't specified as options, assume it contains questions and answers.
         answers_bullet_list = mcNode[-1]
-        if isinstance(answers_bullet_list, nodes.bullet_list) and ('answer_a' not in self.options):
+        if isinstance(answers_bullet_list, nodes.bullet_list) and ('answer_a' not in self.options and ('correct' not in self.options)):
+            # Accumulate the correct answers.
+            correct_answers = []
+
             # Walk it, processing each answer and its associated feedback.
             for answer_list_item in answers_bullet_list:
                 assert isinstance(answer_list_item, nodes.list_item)
+
+                # Look for a correct answer: An initial ``+``. In this case, the expected structure is:
+                #
+                # .. code-block::
+                #   :number-lines:
+                #
+                #   list_item
+                #       paragraph
+                #           Text, where .rawsource = "Text of this item..."
+                #       Other nodes
+                possible_paragraph = answer_list_item[0]
+                if isinstance(possible_paragraph, nodes.paragraph):
+                    possible_Text = possible_paragraph[0]
+                    if isinstance(possible_Text, nodes.Text) and possible_Text.rawsource.startswith('+'):
+                        # This is a correct answer.
+                        #
+                        # Remove the +. While a simple statement like ``possible_Text.rawsource = possible_Text.rawsource[1:]`` might seem the right approach, it doesn't work: the ``__new__`` method for Text nodes does something weird.
+                        possible_paragraph[0] = nodes.Text(possible_Text.rawsource[1:])
+                        # Record this in the list of correct answers.
+                        correct_answers.append(chr(answer_list_item.parent.index(answer_list_item) + ord('a')))
 
                 # Look for the feedback for this answer -- the last child of this answer list item.
                 feedback_bullet_list = answer_list_item[-1]
@@ -248,6 +269,8 @@ class MChoice(Assessment):
 
             # Change the answer bulleted list (currently a bullet_list) to an AnswersBulletList.
             answers_bullet_list.replace_self(AnswersBulletList(answers_bullet_list.rawsource, *answers_bullet_list.children, **answers_bullet_list.attributes))
+            # Store the correct answers.
+            self.options['correct'] = ','.join(correct_answers)
 
         return [mcNode]
 
