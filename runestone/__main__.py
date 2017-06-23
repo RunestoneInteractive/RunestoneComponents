@@ -138,7 +138,19 @@ def deploy(dest):
             raise IOError("No destination configured add dest to your pavement.py or use --dest")
 
     click.echo('Deploying from ' + pavement.serving_dir + ' to ' + dest)
-    sh("rsync -rav --delete {} {}".format(pavement.serving_dir,dest))
+    if os.name == 'nt':
+        # From ``robocopy /?``:
+        #
+        # /MIR  MIRror a directory tree (equivalent to /E plus /PURGE).
+        #
+        # /MT   Do multi-threaded copies with n threads (default 8).
+        #
+        # /NFL  No File List - don't log file names.
+        #
+        # Robocopy copies the contents of the source directory, not the source directory itself. So, append the final path of the source directory to the destination directory.
+        sh("robocopy /mir /mt /nfl {} {}".format(pavement.serving_dir, os.path.join(dest, os.path.basename(pavement.serving_dir))), ignore_error=True)
+    else:
+        sh("rsync -rav --delete {} {}".format(pavement.serving_dir,dest))
 
 
 from runestone import cmap
