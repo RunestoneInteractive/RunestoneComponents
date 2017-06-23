@@ -88,7 +88,8 @@ def getTOCEntries(ftext):
 
 def addChapterInfoToDB(subChapD, chapTitles, course_id):
     dbname = 'runestone'
-    uname = os.environ['USER']
+    # Provide a default database URI if the ``USER`` environment variables is define (it is on Linux/Mac).
+    uname = os.environ.get('USER')
     if uname == 'bnmnetp':
         uname = 'bnmnetp_courselib'
         dbname = 'bnmnetp_courselib'

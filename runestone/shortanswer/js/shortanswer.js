@@ -210,3 +210,8 @@ $(document).ready(function () {
     });
 
 });
+
+if (typeof component_factory === 'undefined') {
+    component_factory = {}
+}
+component_factory['shortanswer'] = function(opts) { return new ShortAnswer(opts)}
