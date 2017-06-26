@@ -23,7 +23,7 @@ from docutils.parsers.rst import Directive
 from .textfield import *
 from sqlalchemy import create_engine, Table, MetaData, select, delete
 from runestone.server import get_dburl
-from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
+from runestone.server.componentdb import addQuestionToDB, addHTMLToDB, engine, meta
 from runestone.common.runestonedirective import RunestoneDirective
 
 try:
@@ -121,17 +121,6 @@ def process_activcode_nodes(app, env, docname):
 
 def purge_activecodes(app, env, docname):
     pass
-
-database_connection = True
-try:
-    engine = create_engine(get_dburl(locals()))
-    meta = MetaData()
-    Source_code = Table('source_code', meta, autoload=True, autoload_with=engine)
-    Div = Table('div_ids', meta, autoload=True, autoload_with=engine)    
-except:
-    print("Cannot connect")
-    database_connection = False
-
 
 class ActiveCode(RunestoneDirective):
     """
@@ -324,7 +313,8 @@ class ActiveCode(RunestoneDirective):
         course_name = env.config.html_context['course_id']
         divid = self.options['divid']
 
-        try:
+        if engine:
+            Source_code = Table('source_code', meta, autoload=True, autoload_with=engine)
             engine.execute(Source_code.delete().where(Source_code.c.acid == divid).where(Source_code.c.course_id == course_name))
             engine.execute(Source_code.insert().values(
                 acid = divid,
@@ -339,6 +329,7 @@ class ActiveCode(RunestoneDirective):
             except:
                 ch, sub_ch = (env.docname, 'null subchapter')
 
+            Div = Table('div_ids', meta, autoload=True, autoload_with=engine)
             engine.execute(Div.delete()\
                            .where(Div.c.course_name == course_name)\
                            .where(Div.c.chapter == ch)\
@@ -353,11 +344,7 @@ class ActiveCode(RunestoneDirective):
             ))
 
 
-        except Exception as e:
-            import traceback
-            print("The exception is ", e)
-            traceback.print_exc()
-            print(env.config.html_context['course_id'])
+        else:
             print("Unable to save to source_code table in activecode.py. Possible problems:")
             print("  1. dburl or course_id are not set in conf.py for your book")
             print("  2. unable to connect to the database using dburl")
