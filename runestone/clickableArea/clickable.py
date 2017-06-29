@@ -32,7 +32,7 @@ def setup(app):
 
 
 TEMPLATE = """
-<div data-component="clickablearea" id="%(divid)s" %(table)s %(correct)s %(incorrect)s>
+<div data-component="clickablearea" class="runestone" id="%(divid)s" %(table)s %(correct)s %(incorrect)s>
 <span data-question>%(question)s</span>%(feedback)s%(clickcode)s
 """
 TEMPLATE_END = """

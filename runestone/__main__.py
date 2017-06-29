@@ -7,6 +7,7 @@ import six
 import click
 from paver.easy import sh
 from pkg_resources import resource_string, resource_filename, require
+import codecs
 
 @click.group(chain=True)
 def cli():
@@ -55,10 +56,16 @@ def init():
     paver_final = paver_stuff.decode('utf-8') % conf_dict
     config_final = config_stuff.decode('utf-8') % conf_dict
 
-    with open('pavement.py','w') as pvf:
+    # On Windows, Python 3.6, the bytes read from ``template_base_dir`` and ``config_stuff`` contain Windows-style ``\n\r``. Unfortunately, `resource_string <http://setuptools.readthedocs.io/en/latest/pkg_resources.html#basic-resource-access>`_ does no universal newline support, so these remain intact. When written out, this is changed to ``\n\n``, making the file double-spaced. Python 3's `StringIO <https://docs.python.org/3/library/io.html#io.StringIO>`_ class provides universal newline support, while Python 2's `StringIO <https://docs.python.org/2/library/stringio.html#StringIO.StringIO>`__ doesn't. 
+    if six.PY3:
+        # Per the `TextIOWrapper docs <https://docs.python.org/3/library/io.html#io.TextIOWrapper>`_, ``newline=None`` selects universal newline mode. The Python 3 StringIO_ class's ``newline`` argument works the same.
+        paver_final = six.StringIO(paver_final, newline=None).read()
+        config_final = six.StringIO(config_final, newline=None).read()
+
+    with codecs.open('pavement.py','w',encoding='utf8') as pvf:
         pvf.write(paver_final)
 
-    with open('conf.py','w') as pvf:
+    with codecs.open('conf.py','w',encoding='utf8') as pvf:
         pvf.write(config_final)
 
     print("Done.  Type runestone build to build your project")
@@ -132,7 +139,19 @@ def deploy(dest):
             raise IOError("No destination configured add dest to your pavement.py or use --dest")
 
     click.echo('Deploying from ' + pavement.serving_dir + ' to ' + dest)
-    sh("rsync -rav --delete {} {}".format(pavement.serving_dir,dest))
+    if os.name == 'nt':
+        # From ``robocopy /?``:
+        #
+        # /MIR  MIRror a directory tree (equivalent to /E plus /PURGE).
+        #
+        # /MT   Do multi-threaded copies with n threads (default 8).
+        #
+        # /NFL  No File List - don't log file names.
+        #
+        # Robocopy copies the contents of the source directory, not the source directory itself. So, append the final path of the source directory to the destination directory.
+        sh("robocopy /mir /mt /nfl {} {}".format(pavement.serving_dir, os.path.join(dest, os.path.basename(pavement.serving_dir))), ignore_error=True)
+    else:
+        sh("rsync -rav --delete {} {}".format(pavement.serving_dir,dest))
 
 
 from runestone import cmap

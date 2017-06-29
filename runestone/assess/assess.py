@@ -40,6 +40,10 @@ def setup(app):
     app.add_node(TimedNode, html=(visit_timed_node, depart_timed_node))
     app.add_node(MChoiceNode, html=(visit_mc_node, depart_mc_node))
 
+    app.add_node(AnswersBulletList, html=(visit_answers_bullet_node, depart_answers_bullet_node))
+    app.add_node(AnswerListItem, html=(visit_answer_list_item, depart_answer_list_item))
+    app.add_node(FeedbackBulletList, html=(visit_feedback_bullet_node, depart_feedback_bullet_node))
+    app.add_node(FeedbackListItem, html=(visit_feedback_list_item, depart_feedback_list_item))
 
 
 

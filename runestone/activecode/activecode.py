@@ -59,7 +59,7 @@ def setup(app):
 
 
 TEMPLATE_START = """
-<div data-childcomponent="%(divid)s" class="explainer ac_section alert alert-warning">
+<div data-childcomponent="%(divid)s" class="runestone explainer ac_section alert alert-warning">
 """
 
 TEMPLATE_END = """
