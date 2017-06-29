@@ -145,12 +145,19 @@ Timed.prototype.renderControlButtons = function () {
         "id": "controls",
         "style": "text-align: center"
     });
+<<<<<<< HEAD
     this.startBtn = document.createElement("btn");
     this.pauseBtn = document.createElement("btn");
     this.resetBtn = document.createElement("btn");
+=======
+    this.startBtn = document.createElement("button");
+    this.pauseBtn = document.createElement("button");
+>>>>>>> upstream/master
     $(this.startBtn).attr({
         "class": "btn btn-success",
-        "id": "start"
+        "id": "start",
+        "tabindex": "0",
+        "role": "button"
     });
     this.startBtn.textContent = "Start";
     this.startBtn.addEventListener("click", function () {
@@ -160,7 +167,9 @@ Timed.prototype.renderControlButtons = function () {
     $(this.pauseBtn).attr({
         "class": "btn btn-default",
         "id": "pause",
-        "disabled":"true"
+        "disabled":"true",
+        "tabindex": "0",
+        "role": "button"
     });
     this.pauseBtn.textContent = "Pause";
     this.pauseBtn.addEventListener("click", function () {
@@ -186,15 +195,19 @@ Timed.prototype.renderNavControls = function () {
 	this.pagNavList = document.createElement("ul");
     $(this.pagNavList).addClass("pagination");
 	this.leftContainer = document.createElement("li");
-    this.leftNavButton = document.createElement("a");
+    this.leftNavButton = document.createElement("button");
     this.leftNavButton.innerHTML = "&#8249; Prev";
     $(this.leftNavButton).attr("aria-label", "Previous");
+    $(this.leftNavButton).attr("tabindex", "0");
+    $(this.leftNavButton).attr("role", "button");
     $(this.leftNavButton).css("cursor", "pointer");
 	this.leftContainer.appendChild(this.leftNavButton);
     this.pagNavList.appendChild(this.leftContainer);
     this.rightContainer = document.createElement("li");
-    this.rightNavButton = document.createElement("a");
+    this.rightNavButton = document.createElement("button");
     $(this.rightNavButton).attr("aria-label", "Next");
+    $(this.rightNavButton).attr("tabindex", "0");
+    $(this.rightNavButton).attr("role", "button");
     this.rightNavButton.innerHTML = "Next &#8250;";
     $(this.rightNavButton).css("cursor", "pointer");
     this.rightContainer.appendChild(this.rightNavButton);

@@ -405,3 +405,8 @@ $(document).bind("runestone:login-complete", function () {
         }
     });
 });
+
+if (typeof component_factory === 'undefined') {
+    component_factory = {}
+}
+component_factory['fillintheblank'] = function(opts) { return new FITB(opts)}
