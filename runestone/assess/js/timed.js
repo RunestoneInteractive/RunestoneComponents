@@ -145,14 +145,9 @@ Timed.prototype.renderControlButtons = function () {
         "id": "controls",
         "style": "text-align: center"
     });
-<<<<<<< HEAD
     this.startBtn = document.createElement("btn");
     this.pauseBtn = document.createElement("btn");
     this.resetBtn = document.createElement("btn");
-=======
-    this.startBtn = document.createElement("button");
-    this.pauseBtn = document.createElement("button");
->>>>>>> upstream/master
     $(this.startBtn).attr({
         "class": "btn btn-success",
         "id": "start",
