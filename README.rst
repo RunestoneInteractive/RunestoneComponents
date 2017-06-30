@@ -39,7 +39,7 @@ If you are completely new to pip and github text editors, I have written a more 
     $ virtualenv /path/to/home/MyEnv
     $ source /path/to/home/MyEnv/bin/activate
      
-* You will need to do the last command every time you want to work on RunestoneServer.  If you have not used Python virtual environments before I strongly recommend reading the docs or watching the video
+* You will need to do the last command **every time** you want to work on RunestoneComponents.  If you have not used Python virtual environments before I strongly recommend reading the docs or watching the video
  
 With the virtual environment installed and configured you can continue.
 
@@ -53,7 +53,7 @@ Or, if you prefer to live on the development edge, you can check out the very la
 
 ::
 
-    pip install git+git://github.com/RunestoneInteractive/RunestoneTools.git
+    pip install git+git://github.com/RunestoneInteractive/RunestoneComponents.git
 
 
 To start a project, create a new folder and then run the following command (installed by pip)  in that new folder ``runestone init``  For example:
