@@ -39,6 +39,7 @@ class ParsonsProblem(Assessment):
    :order:
    :language:
    :noindent:
+   :adaptive:
 
    Solve my really cool parsons problem...if you can.
    -----
@@ -67,7 +68,8 @@ class ParsonsProblem(Assessment):
         'maxdist' : directives.unchanged,
         'order' : directives.unchanged,
         'language' : directives.unchanged,
-        'noindent' : directives.flag
+        'noindent' : directives.flag,
+        'adaptive' : directives.flag
     })
     has_content = True
 
@@ -107,8 +109,11 @@ Example:
         addQuestionToDB(self)
 
         TEMPLATE = '''
-    <pre data-component="parsons" id="%(divid)s"%(maxdist)s%(order)s%(noindent)s%(language)s>
-        <span data-question>%(qnumber)s: %(instructions)s</span>%(code)s</pre>
+        <div class="runestone">
+        <pre data-component="parsons" id="%(divid)s"%(maxdist)s%(order)s%(noindent)s%(adaptive)s%(language)s>
+        <span data-question>%(qnumber)s: %(instructions)s</span>%(code)s
+        </pre>
+        </div>
     '''
         self.options['divid'] = self.arguments[0]
         self.options['qnumber'] = self.getNumber()
@@ -127,6 +132,10 @@ Example:
             self.options['noindent'] = ' data-noindent="true"'
         else:
             self.options['noindent'] = ''
+        if 'adaptive' in self.options:
+            self.options['adaptive'] = ' data-adaptive="true"'
+        else:
+            self.options['adaptive'] = ''
         if 'language' in self.options:
             self.options['language'] = ' data-language="' + self.options['language'] + '"'
         else:

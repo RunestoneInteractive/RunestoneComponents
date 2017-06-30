@@ -32,7 +32,9 @@ def setup(app):
 
 
 TEXT = """
+<div class="runestone"
 <p data-component="shortanswer" id=%(divid)s %(optional)s>%(qnum)s: %(content)s</p>
+</div>
 """
 
 class JournalNode(nodes.General, nodes.Element):

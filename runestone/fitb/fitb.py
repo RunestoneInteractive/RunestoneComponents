@@ -105,11 +105,13 @@ class FillInTheBlank(RunestoneDirective):
             """
 
         TEMPLATE_START = '''
+        <div class="runestone">
         <p data-component="fillintheblank" data-casei="%(casei)s" id="%(divid)s">
             '''
 
         TEMPLATE_END = '''
         </p>
+        </div>
             '''
 
         addQuestionToDB(self)

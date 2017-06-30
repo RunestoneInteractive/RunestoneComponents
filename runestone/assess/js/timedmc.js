@@ -28,6 +28,9 @@ TimedMC.prototype.renderTimedIcon = function (component) {
 };
 
 TimedMC.prototype.hideButtons = function () {
+    //Just hiding the buttons doesn't prevent submitting the form when entering is clicked
+    //We need to completely disable the buttons
+    $(this.submitButton).attr("disabled","true");
     $(this.submitButton).hide();
     $(this.compareButton).hide();
 };
