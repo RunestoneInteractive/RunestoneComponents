@@ -28,11 +28,14 @@ RunestoneBase.prototype.logRunEvent = function (eventInfo) {
 
 RunestoneBase.prototype.checkServer = function (eventInfo) {
     // Check if the server has stored answer
-    if (this.useRunestoneServices) {
+    if (this.useRunestoneServices || this.graderactive) {
         var data = {};
         data.div_id = this.divid;
         data.course = eBookConfig.course;
         data.event = eventInfo;
+        if (this.sid) {
+            data.sid = this.sid
+        }
         jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
     } else {
         this.checkLocalStorage();   // just go right to local storage
