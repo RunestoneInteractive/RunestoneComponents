@@ -126,7 +126,6 @@ LineBasedGrader.prototype.grade = function() {
 			       feedbackArea.html("Perfect!  It took you only one try to solve this.  Great job!");
 			    }
 				correct = true;
-				problem.helpButton.disabled = false;  // bje
 			} else {
 				// Incorrect Indention
 				state = "incorrectIndent";
