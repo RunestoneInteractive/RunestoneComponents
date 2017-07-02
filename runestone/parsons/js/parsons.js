@@ -3005,7 +3005,7 @@ Parsons.prototype.resetView = function() {
 
 $(document).bind("runestone:login-complete", function () {
 	$("[data-component=parsons]").each(function (index) {
-		if ($(this.parentNode).data("component") !== "timedAssessment") {
+		if ($(this).closest('[data-component=timedAssessment]').length == 0) {
 			prsList[this.id] = new Parsons({"orig": this, "useRunestoneServices": eBookConfig.useRunestoneServices});
 		}
 	});

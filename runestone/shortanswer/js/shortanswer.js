@@ -200,7 +200,7 @@ ShortAnswer.prototype.restoreAnswers = function (data) {
 =================================*/
 $(document).ready(function () {
     $("[data-component=shortanswer]").each(function (index) {
-        if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
+        if ($(this).closest('[data-component=timedAssessment]').length == 0) { // If this element exists within a timed component, don't render it here
             saList[this.id] = new ShortAnswer({"orig": this, 'useRunestoneServices': eBookConfig.useRunestoneServices});
         }
     });
