@@ -109,6 +109,10 @@ Example:
         addQuestionToDB(self)
 
         TEMPLATE = '''
+<<<<<<< HEAD
+=======
+        <div class="runestone" style="max-width: none;">
+>>>>>>> RunestoneInteractive/master
         <pre data-component="parsons" id="%(divid)s"%(maxdist)s%(order)s%(noindent)s%(adaptive)s%(language)s>
         <span data-question>%(qnumber)s: %(instructions)s</span>%(code)s
         </pre>

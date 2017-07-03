@@ -425,7 +425,7 @@ DragNDrop.prototype.setLocalStorage = function (data) {
 $(document).bind("runestone:login-complete", function () {
     $("[data-component=dragndrop]").each(function (index) {
         var opts = {"orig": this, 'useRunestoneServices':eBookConfig.useRunestoneServices};
-        if ($(this.parentNode).data("component") !== "timedAssessment") {   // If this element exists within a timed component, don't render it here
+        if ($(this).closest('[data-component=timedAssessment]').length == 0) {   // If this element exists within a timed component, don't render it here
             ddList[this.id] = new DragNDrop(opts);
         }
     });
