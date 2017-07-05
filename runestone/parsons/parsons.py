@@ -109,7 +109,7 @@ Example:
         addQuestionToDB(self)
 
         TEMPLATE = '''
-        <div class="runestone">
+        <div class="runestone" style="max-width: none;">
         <pre data-component="parsons" id="%(divid)s"%(maxdist)s%(order)s%(noindent)s%(adaptive)s%(language)s>
         <span data-question>%(qnumber)s: %(instructions)s</span>%(code)s
         </pre>

@@ -33,6 +33,9 @@ MultipleChoice.prototype.init = function (opts) {
     this.useRunestoneServices = opts.useRunestoneServices;
     this.multipleanswers = false;
     this.divid = orig.id;
+    this.sid = opts.sid;
+    this.graderactive = opts.graderactive;
+
     if ($(this.origElem).data("multipleanswers") === true) {
         this.multipleanswers = true;
     }
@@ -550,7 +553,7 @@ MultipleChoice.prototype.compareAnswers = function () {
 $(document).bind("runestone:login-complete", function () {
     $("[data-component=multiplechoice]").each(function (index) {    // MC
         var opts = {"orig": this, 'useRunestoneServices':eBookConfig.useRunestoneServices};
-        if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
+        if ($(this).closest('[data-component=timedAssessment]').length == 0) { // If this element exists within a timed component, don't render it here
             mcList[this.id] = new MultipleChoice(opts);
         }
     });

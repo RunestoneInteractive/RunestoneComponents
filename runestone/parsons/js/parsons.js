@@ -126,7 +126,9 @@ LineBasedGrader.prototype.grade = function() {
 			       feedbackArea.html("Perfect!  It took you only one try to solve this.  Great job!");
 			    }
 				correct = true;
-				problem.helpButton.disabled = false;  // bje
+				if (problem.helpButton) {  // non-adaptive problems don't have help buttons
+                    problem.helpButton.disabled = false;  // bje
+                }
 			} else {
 				// Incorrect Indention
 				state = "incorrectIndent";
@@ -3003,7 +3005,7 @@ Parsons.prototype.resetView = function() {
 
 $(document).bind("runestone:login-complete", function () {
 	$("[data-component=parsons]").each(function (index) {
-		if ($(this.parentNode).data("component") !== "timedAssessment") {
+		if ($(this).closest('[data-component=timedAssessment]').length == 0) {
 			prsList[this.id] = new Parsons({"orig": this, "useRunestoneServices": eBookConfig.useRunestoneServices});
 		}
 	});

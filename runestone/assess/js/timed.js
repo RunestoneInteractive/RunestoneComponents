@@ -330,9 +330,14 @@ Timed.prototype.renderFeedbackContainer = function () {
 Timed.prototype.createRenderedQuestionArray = function () {
     // this finds all the assess questions in this timed assessment and calls their constructor method
     // Also adds them to this.renderedQuestionArray
+    // todo:  This needs to be updated to account for the runestone div wrapper.
     for (var i = 0; i < this.newChildren.length; i++) {
         var tmpChild = this.newChildren[i];
         opts = {'orig':tmpChild, 'useRunestoneServices':eBookConfig.useRunestoneServices}
+        if ($(tmpChild).children("[data-component]")) {
+            tmpChild = $(tmpChild).children("[data-component]")[0];
+            opts.orig = tmpChild;
+        }
         if ($(tmpChild).is("[data-component=multiplechoice]")) {
             this.renderedQuestionArray.push({"question": new TimedMC(opts)});
         } else if ($(tmpChild).is("[data-component=fillintheblank]")) {
