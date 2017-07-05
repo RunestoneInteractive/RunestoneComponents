@@ -86,7 +86,7 @@ class FillInTheBlank(RunestoneDirective):
             :x: Try again. (Note: the last item of feedback matches anything, regardless of the string it's given.)
         -   :little: That's right.
             :.*: Nope.
-        -   :2: Right on!
+        -   :2: Right on! Numbers can be given in decimal, hex (0x10 == 16), octal (0o10 == 8), binary (0b10 == 2), or using scientific notation (1e1 == 10), both here and by the user when answering the question.
             :2 1: Close.... (The second number is a tolerance, so this matches 1 or 3.)
             :x: Nope. (As earlier, this matches anything.)
     """
@@ -160,10 +160,10 @@ class FillInTheBlank(RunestoneDirective):
         #   self.feedbackArray = [
         #       [   # blankArray
         #           { # blankFeedbackDict: feedback 1
-        #               "regex" : feedback_field_name   # (An answer, as a regex, including
+        #               "regex" : feedback_field_name   # (An answer, as a regex;
         #               "regexFlags" : "x"              # "i" if ``:casei:`` was specified, otherwise "".) OR
         #               "number" : [min, max]           # a range of correct numeric answers.
-        #               "feedback": feedbback_field_body (after being rendered as HTML)  # Provides feedback for this answer.
+        #               "feedback": feedback_field_body (after being rendered as HTML)  # Provides feedback for this answer.
         #           },
         #           { # Feedback 2
         #               Same as above.

@@ -33,32 +33,11 @@ FITB.prototype.init = function (opts) {
     this.origElem = orig;
     this.divid = orig.id;
     this.correct = null;
-    // The format of this array:
-    //
-    // .. code-block::
-    //  :number-lines:
-    //
-    //  [ // Overall data structure is an array.
-    //      [ // blank1
-    //          [ // correct answer
-    //              'regex1.1',
-    //              'text1.1'
-    //          ], [ // incorrect1
-    //              'regex1.2',
-    //              'text1.2'
-    //          ], // Followed by more incorrects.
-    //      ], [ // blank2
-    //          etc.
-    //      ]
-    //  ]
+    // See comments in fitb.py for the format of ``feedbackArray`` (which is identical in both files).
     //
     // Find the script tag containing JSON and parse it. See `SO <https://stackoverflow.com/questions/9320427/best-practice-for-embedding-arbitrary-json-in-the-dom>`_.
     this.feedbackArray = JSON.parse(this.scriptSelector(this.origElem).html());
 
-    this.casei = false;   // Case insensitive--boolean
-    if ($(this.origElem).data("casei") === true) {
-        this.casei = true;
-    }
     this.createFITBElement();
     this.checkServer("fillb");
 };
@@ -212,10 +191,6 @@ FITB.prototype.startEvaluation = function (logFlag) {
 FITB.prototype.evaluateAnswers = function () {
     for (var i = 0; i < this.blankArray.length; i++) {
         var given = this.blankArray[i].value;
-        var modifiers = "";
-        if (this.casei) {
-            modifiers = "i";
-        }
 
         // If this blank is empty, provide no feedback for it.
         if (given === "") {
