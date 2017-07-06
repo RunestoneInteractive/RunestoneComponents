@@ -28,13 +28,12 @@ MultipleChoice.prototype = new RunestoneBase();
 
 MultipleChoice.prototype.init = function (opts) {
     RunestoneBase.apply(this, arguments);
+    RunestoneBase.prototype.init.apply(this, arguments);
     var orig = opts.orig;    // entire <ul> element
     this.origElem = orig;
     this.useRunestoneServices = opts.useRunestoneServices;
     this.multipleanswers = false;
     this.divid = orig.id;
-    this.sid = opts.sid;
-    this.graderactive = opts.graderactive;
 
     if ($(this.origElem).data("multipleanswers") === true) {
         this.multipleanswers = true;
