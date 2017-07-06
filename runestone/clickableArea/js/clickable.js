@@ -25,6 +25,7 @@ ClickableArea.prototype = new RunestoneBase();
 
 ClickableArea.prototype.init = function (opts) {
     RunestoneBase.apply(this, arguments);
+    RunestoneBase.prototype.init.apply(this, arguments);
     var orig = opts.orig;    // entire <div> element that will be replaced by new HTML
     this.origElem = orig;
     this.divid = orig.id;

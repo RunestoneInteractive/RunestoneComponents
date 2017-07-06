@@ -19,6 +19,7 @@ function ActiveCode(opts) {
 
 ActiveCode.prototype.init = function(opts) {
     RunestoneBase.apply( this, arguments );  // call parent constructor
+    RunestoneBase.prototype.init.apply(this, arguments);
     var suffStart;
     var orig = opts.orig;
     this.useRunestoneServices = opts.useRunestoneServices;
@@ -31,8 +32,6 @@ ActiveCode.prototype.init = function(opts) {
     this.timelimit = $(orig).data('timelimit');
     this.includes = $(orig).data('include');
     this.hidecode = $(orig).data('hidecode');
-    this.sid = opts.sid;
-    this.graderactive = opts.graderactive;
     this.runButton = null;
     this.saveButton = null;
     this.loadButton = null;
@@ -289,7 +288,23 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
             $(scrubber).on("slidechange",this.slideit.bind(this));
             scrubberDiv.appendChild(scrubber);
 
-            if (pos_last) {
+            // If there is a deadline set then position the scrubber at the last submission
+            // prior to the deadline
+            if (this.deadline) {
+                let i = 0;
+                let done = false;
+                while (i < this.history.length && ! done) {
+                    if ((new Date(this.timestamps[i])) > this.deadline) {
+                        done = true;
+                    } else {
+                        i += 1
+                    }
+                }
+                i = i - 1;
+                scrubber.value = Math.max(i,0);
+                this.editor.setValue(this.history[scrubber.value]);
+            }
+            else if (pos_last) {
                 scrubber.value = this.history.length-1;
                 this.editor.setValue(this.history[scrubber.value]);
             } else {
