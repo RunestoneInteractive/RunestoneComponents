@@ -28,6 +28,7 @@ FITB.prototype = new RunestoneBase();
 
 FITB.prototype.init = function (opts) {
     RunestoneBase.apply(this, arguments);
+    RunestoneBase.prototype.init.apply(this, arguments);
     var orig = opts.orig;    // entire <p> element
     this.useRunestoneServices = opts.useRunestoneServices;
     this.origElem = orig;
