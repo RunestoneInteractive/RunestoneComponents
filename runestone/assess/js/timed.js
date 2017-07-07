@@ -473,7 +473,7 @@ Timed.prototype.resetAssessment = function () {
         if (window.confirm("Only reset the exam if you encountered problems completing it. The Instructor will be notified of the reset.")) {
             eventInfo = {"event":"timedExam","act":"reset","div_id":this.divid,
                          "course":eBookConfig.course,"correct":this.score,"incorrect":this.incorrect,
-                         "skipped":this.skipped,"time":this.timeTaken,"reset":True}
+                         "skipped":this.skipped,"time":this.timeTaken,"reset":true}
             this.logBookEvent(eventInfo);
             localStorage.clear();
             location.reload();
