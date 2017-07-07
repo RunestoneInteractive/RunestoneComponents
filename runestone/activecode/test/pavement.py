@@ -36,7 +36,7 @@ options(
     )
 )
 
-# If DBUSER etc. are in the environment override dburl
+# If DBURL is in the environment override dburl
 options.build.template_args['dburl'] = get_dburl(outer=locals())
 
 from runestone import build  # build is called implicitly by the paver driver.

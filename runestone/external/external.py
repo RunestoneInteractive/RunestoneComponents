@@ -19,7 +19,6 @@ from docutils.parsers.rst import directives
 from runestone.common.runestonedirective import RunestoneDirective
 from docutils.parsers.rst import Directive
 from sqlalchemy import create_engine, Table, MetaData, select, delete
-from runestone.server import get_dburl
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 from runestone.common.runestonedirective import RunestoneDirective
 
@@ -29,7 +28,7 @@ except ImportError:
     from cgi import escape  # py2
 
 __author__ = 'jczetta'
-# Code template is directly from question.py at the moment, which is (c) Bradley N. Miller. 
+# Code template is directly from question.py at the moment, which is (c) Bradley N. Miller.
 #This is intended as the basis for a potential new gradeable directive class, still potential TODO.
 
 
