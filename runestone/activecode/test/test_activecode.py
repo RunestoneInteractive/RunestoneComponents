@@ -1,17 +1,8 @@
-from selenium import webdriver
-from selenium.webdriver import ActionChains
-from selenium.common.exceptions import WebDriverException
-import unittest
-import sys
+from ...unittest_base import module_fixture_maker, RunestoneTestCase
 
-PORT = '8081'
+setUpModule, tearDownModule = module_fixture_maker(__file__)
 
-class ActiveCodeTests(unittest.TestCase):
-    def setUp(self):
-        #self.driver = webdriver.Firefox()  # good for development
-        self.driver = webdriver.PhantomJS() # use this for Jenkins auto testing
-        self.host = 'http://127.0.0.1:' + PORT
-
+class ActiveCodeTests(RunestoneTestCase):
     def test_hello(self):
         '''
         1. Get the outer div id of the activecode component
@@ -58,13 +49,3 @@ class ActiveCodeTests(unittest.TestCase):
         rb.click()
         output = t1.find_element_by_class_name("ac_output")
         self.assertEqual(output.text.strip(), "Hello World")
-
-    def tearDown(self):
-        self.driver.quit()
-
-
-
-if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        PORT = sys.argv.pop()
-    unittest.main()

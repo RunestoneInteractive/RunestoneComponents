@@ -1,20 +1,8 @@
-from selenium import webdriver
-import unittest
-import sys
+from ...unittest_base import module_fixture_maker, RunestoneTestCase
 
-PORT = '8081'
+setUpModule, tearDownModule = module_fixture_maker(__file__)
 
-class PollTests(unittest.TestCase):
-    def setUp(self):
-        self.driver = webdriver.PhantomJS() # use this for Jenkins auto testing
-        self.host = 'http://127.0.0.1:' + PORT
-
-
-    def tearDown(self):
-        self.driver.quit()
-
-
-    #################################################################################################
+class PollTests(RunestoneTestCase):
     def test_poll(self):
         ''' test the poll directive '''
         self.driver.get(self.host + '/index.html')
@@ -35,10 +23,3 @@ class PollTests(unittest.TestCase):
 
         # just make sure we can find the results div - an exception will be raised if the div cannot be found
         poll_div.find_element_by_id('pollid1_results')
-
-
-
-if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        PORT = sys.argv.pop()
-    unittest.main()

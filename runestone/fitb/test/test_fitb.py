@@ -1,18 +1,8 @@
-from selenium import webdriver
-from selenium.webdriver import ActionChains
-from selenium.common.exceptions import WebDriverException
-import unittest
-import sys
+from ...unittest_base import module_fixture_maker, RunestoneTestCase
 
-PORT = '8081'
+setUpModule, tearDownModule = module_fixture_maker(__file__)
 
-class FITBtests(unittest.TestCase):
-    def setUp(self):
-        #self.driver = webdriver.Firefox()  # good for development
-        # self.driver = webdriver.PhantomJS() # use this for Jenkins auto testing
-        self.driver = webdriver.PhantomJS()
-        self.host = 'http://127.0.0.1:' + PORT
-
+class FITBtests(RunestoneTestCase):
     # One of two correct answers
     def test_fitb(self):
         '''
@@ -39,7 +29,7 @@ class FITBtests(unittest.TestCase):
         self.assertIn("Incorrect",feedback.text)
 
 
-    # Both correct answers 
+    # Both correct answers
     def test_fitb3(self):
         self.driver.get(self.host + "/index.html") # Access page
         quest = self.driver.find_element_by_id("fill-in-the-blank")
@@ -66,15 +56,3 @@ class FITBtests(unittest.TestCase):
         checkme.click()
         feedback = quest.find_element_by_id("fill1412_feedback")
         self.assertIn("Correct",feedback.text)
-
-
-    def tearDown(self):
-        self.driver.quit()
-
-
-
-
-if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        PORT = sys.argv.pop()
-    unittest.main(verbosity=2)

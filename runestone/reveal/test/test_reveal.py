@@ -4,22 +4,11 @@ Test Reveal Answer question directive
 
 __author__ = 'yasinovskyy'
 
-from selenium import webdriver
-from selenium.webdriver import ActionChains
-from selenium.common.exceptions import WebDriverException
-import unittest
-import sys
+from ...unittest_base import module_fixture_maker, RunestoneTestCase
 
-PORT = '8081'
+setUpModule, tearDownModule = module_fixture_maker(__file__)
 
-class RevealQuestion_Tests(unittest.TestCase):
-    def setUp(self):
-        #self.driver = webdriver.Chrome()
-        #self.driver = webdriver.Firefox()  # good for development
-        self.driver = webdriver.PhantomJS() # use this for Jenkins auto testing
-        self.host = 'http://127.0.0.1:' + PORT
-
-    
+class RevealQuestion_Tests(RunestoneTestCase):
     def test_r1(self):
         '''Initial view. Content is hidden'''
         self.driver.get(self.host + "/index.html")
@@ -58,13 +47,3 @@ class RevealQuestion_Tests(unittest.TestCase):
 
         cnamestr = q1.get_attribute("style")
         self.assertEqual("display: none;", cnamestr)
-
-
-    def tearDown(self):
-        self.driver.quit()
-
-
-if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        PORT = sys.argv.pop()
-    unittest.main(verbosity=2)

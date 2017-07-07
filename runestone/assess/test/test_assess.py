@@ -4,20 +4,11 @@ Test Multiple Choice question directive
 
 __author__ = 'yasinovskyy'
 
-from selenium import webdriver
-from selenium.webdriver import ActionChains
-from selenium.common.exceptions import WebDriverException
-import unittest
-import sys
+from ...unittest_base import module_fixture_maker, RunestoneTestCase
 
-PORT = '8081'
+setUpModule, tearDownModule = module_fixture_maker(__file__)
 
-class MultipleChoiceQuestion_Tests(unittest.TestCase):
-    def setUp(self):
-        #self.driver = webdriver.Firefox()  # good for development
-        self.driver = webdriver.PhantomJS() # use this for Jenkins auto testing
-        self.host = 'http://127.0.0.1:' + PORT
-
+class MultipleChoiceQuestion_Tests(RunestoneTestCase):
     def test_ma1(self):
         '''Multiple Answer: Nothing selected, Check button clicked'''
         self.driver.get(self.host + "/index.html")
@@ -130,7 +121,7 @@ class MultipleChoiceQuestion_Tests(unittest.TestCase):
         '''Multiple Choice: Incorrect answer selected'''
         self.driver.get(self.host + "/index.html")
         t1 = self.driver.find_element_by_id("question2")
-        
+
         t1.find_element_by_id("question2_opt_1").click()
 
         btn_check = t1.find_element_by_tag_name('button')
@@ -161,13 +152,3 @@ class MultipleChoiceQuestion_Tests(unittest.TestCase):
         self.assertIsNotNone(fb)
         cnamestr = fb.get_attribute("class")
         self.assertIn("alert-danger", cnamestr)
-
-
-    def tearDown(self):
-        self.driver.quit()
-
-
-if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        PORT = sys.argv.pop()
-    unittest.main(verbosity=2)
