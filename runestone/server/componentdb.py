@@ -21,21 +21,25 @@ __author__ = 'bmiller'
 
 import os
 from sqlalchemy import create_engine, Table, MetaData, select, delete, update, and_
+from . import get_dburl
 
 # create a global DB query engine to share for the rest of the file
-if all(name in os.environ for name in ['DBHOST', 'DBPASS', 'DBUSER', 'DBNAME']):
-    dburl = 'postgresql://{DBUSER}:{DBPASS}@{DBHOST}/{DBNAME}'.format(**os.environ)
+try:
+    dburl = get_dburl()
     engine = create_engine(dburl)
+except RuntimeError as e:
+    dburl = None
+    engine = None
+    meta = None
+    print("Skipping all DB operations because environment variables not set up")
+else:
+    # If no exceptions are raised, then set up the database.
     meta = MetaData()
     questions = Table('questions', meta, autoload=True, autoload_with=engine)
     assignment_types = Table('assignment_types', meta, autoload=True, autoload_with=engine)
     assignment_questions = Table('assignment_questions', meta, autoload=True, autoload_with=engine)
     courses = Table('courses', meta, autoload=True, autoload_with=engine)
 
-else:
-    dburl = None
-    engine = None
-    print("Skipping all DB operations because environment variables not set up")
 
 def logSource(self):
     sourcelog = self.state.document.settings.env.config.html_context.get('dsource', None)
@@ -51,11 +55,6 @@ def logSource(self):
 
 
 def addQuestionToDB(self):
-    if all(name in os.environ for name in ['DBHOST', 'DBPASS', 'DBUSER', 'DBNAME']):
-        dburl = 'postgresql://{DBUSER}:{DBPASS}@{DBHOST}/{DBNAME}'.format(**os.environ)
-    else:
-        dburl = None
-
     if dburl:
         basecourse = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
         if basecourse == "unknown":
@@ -226,11 +225,6 @@ def addAssignmentToDB(name = None, course_id = None, assignment_type_id = None, 
     return a_id
 
 def addHTMLToDB(divid, basecourse, htmlsrc):
-    if all(name in os.environ for name in ['DBHOST', 'DBPASS', 'DBUSER', 'DBNAME']):
-        dburl = 'postgresql://{DBUSER}:{DBPASS}@{DBHOST}/{DBNAME}'.format(**os.environ)
-    else:
-        dburl = None
-
     if dburl:
         last_changed = datetime.now()
         sel = select([questions]).where(and_(questions.c.name == divid,

@@ -23,7 +23,7 @@ from docutils.parsers.rst import Directive
 from sqlalchemy import create_engine, Table, MetaData, select, delete
 from sqlalchemy.orm import sessionmaker
 from runestone.common.runestonedirective import RunestoneDirective
-from runestone.server.componentdb import addAssignmentToDB, getOrCreateAssignmentType, getCourseID, addAssignmentQuestionToDB, getOrInsertQuestionForPage
+from runestone.server.componentdb import addAssignmentToDB, getOrCreateAssignmentType, getCourseID, addAssignmentQuestionToDB, getOrInsertQuestionForPage, engine, meta
 from datetime import datetime
 from collections import OrderedDict
 import os
@@ -65,7 +65,7 @@ def visit_ua_node(self,node):
             if d['ch'] not in chapters_and_subchapters:
                 chapters_and_subchapters[d['ch']] = d['sub_chs']
             else:
-                # The order matters with respect to the list wherein they're added to the dictionary. 
+                # The order matters with respect to the list wherein they're added to the dictionary.
                 for subch in d['sub_chs']:
                     chapters_and_subchapters[d['ch']].append(subch)
 
@@ -80,7 +80,7 @@ def visit_ua_node(self,node):
             s += '</ul>'
             s += '</div>'
 
-    # is this needed?? 
+    # is this needed??
     s = s.replace("u'","'")  # hack:  there must be a better way to include the list and avoid unicode strings
 
     self.body.append(s)
@@ -141,14 +141,9 @@ class usageAssignment(Directive):
             :points: <int>
         """
 
-        if all(name in os.environ for name in ['DBHOST', 'DBPASS', 'DBUSER', 'DBNAME']):
-            dburl = 'postgresql://{DBUSER}:{DBPASS}@{DBHOST}/{DBNAME}'.format(**os.environ)
-        else:
-            dburl = None
+        if not engine:
             self.state.document.settings.env.warn(self.state.document.settings.env.docname, "Environment variables not set for DB access; can't save usageassignment to DB")
             return [usageAssignmentNode(self.options)]
-        engine = create_engine(dburl)
-        meta = MetaData()
         # create a configured "Session" class
         Session = sessionmaker(bind=engine)
         session = Session()
