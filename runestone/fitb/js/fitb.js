@@ -69,7 +69,7 @@ FITB.prototype.renderFITBInput = function () {
     this.containerDiv.id = this.divid;
 
     // Copy the original elements to the container holding what the user will see.
-    $(this.origElem).clone().appendTo(this.containerDiv);
+    $(this.origElem).children().clone().appendTo(this.containerDiv);
     // Remove the script tag.
     this.scriptSelector(this.containerDiv).remove();
     // Set the class for the text inputs, then store references to them.
