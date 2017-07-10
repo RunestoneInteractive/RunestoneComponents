@@ -203,8 +203,10 @@ class FillInTheBlank(RunestoneDirective):
                 feedback_field_name_raw = feedback_field_name.rawsource
                 # See if this is a number, optinonally followed by a tolerance.
                 try:
-                    # Parse the number.
-                    str_num, *list_tol = feedback_field_name_raw.split()
+                    # Parse the number. In Python 3 syntax, this would be ``str_num, *list_tol = feedback_field_name_raw.split()``.
+                    tmp = feedback_field_name_raw.split()
+                    str_num = tmp[0]
+                    list_tol = tmp[1:]
                     num = ast.literal_eval(str_num)
                     assert isinstance(num, Number)
                     # If no tolerance is given, use a tolarance of 0.
