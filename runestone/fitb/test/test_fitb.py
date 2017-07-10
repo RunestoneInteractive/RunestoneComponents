@@ -1,80 +1,72 @@
-from selenium import webdriver
-from selenium.webdriver import ActionChains
-from selenium.common.exceptions import WebDriverException
-import unittest
-import sys
+from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
-PORT = '8081'
+setUpModule, tearDownModule = module_fixture_maker(__file__)
 
-class FITBtests(unittest.TestCase):
+class FITBtests(RunestoneTestCase):
+    ## Helpers
+    ## =======
     def setUp(self):
-        #self.driver = webdriver.Firefox()  # good for development
-        # self.driver = webdriver.PhantomJS() # use this for Jenkins auto testing
-        self.driver = webdriver.PhantomJS()
-        self.host = 'http://127.0.0.1:' + PORT
+        super(FITBtests, self).setUp()
+        self.driver.get(self.host + "/index.html") # Access page
 
+    # Return the DIV containing a FITB question.
+    def find_fitb(self):
+        self.fitb = self.driver.find_element_by_id("fill1412")
+        return self.fitb
+
+    # Find one of the blanks, based on the given index.
+    def find_blank(self, index):
+        return self.fitb.find_elements_by_tag_name("input")[index]
+
+    # Click the "Check me" button.
+    def click_checkme(self):
+        self.fitb.find_element_by_tag_name('button').click()
+
+    # Find the question's feedback element.
+    def find_feedback(self):
+        return self.fitb.find_element_by_id("fill1412_feedback")
+
+    ## Tests
+    ## =====
     # One of two correct answers
     def test_fitb(self):
         '''
         http://runestoneinteractive.org/build/html/directives.html#fill-in-the-blank for documentation
         '''
-        self.driver.get(self.host + "/index.html") # Access page
-        quest = self.driver.find_element_by_id("fill-in-the-blank")
-        blank1 = quest.find_element_by_id("fill1412_blank0")
-        blank1.send_keys("red")
-        # inp = blank1.get_attribute("input")
-        checkme = quest.find_element_by_tag_name('button')
-        checkme.click()
-        feedback = quest.find_element_by_id("fill1412_feedback")
+        self.find_fitb()
+        self.find_blank(0).send_keys("red")
+        self.click_checkme()
+        feedback = self.find_feedback()
         self.assertIsNotNone(feedback.text)
 
     # No answers yet -- Incorrect feedback
     def test_fitb2(self):
-        self.driver.get(self.host + "/index.html") # Access page
-        quest = self.driver.find_element_by_id("fill-in-the-blank")
-        blank1 = quest.find_element_by_id("fill1412_blank0")
-        checkme = quest.find_element_by_tag_name('button')
-        checkme.click()
-        feedback = quest.find_element_by_id("fill1412_feedback")
+        self.find_fitb()
+        self.click_checkme()
+        feedback = self.find_feedback()
+        self.assertIsNotNone(feedback.text)
         self.assertIn("Incorrect",feedback.text)
 
 
-    # Both correct answers 
+    # Both correct answers
     def test_fitb3(self):
-        self.driver.get(self.host + "/index.html") # Access page
-        quest = self.driver.find_element_by_id("fill-in-the-blank")
-
-        blank1 = quest.find_element_by_id("fill1412_blank0")
-        blank2 = quest.find_element_by_id("fill1412_blank1")
-        blank1.send_keys("red")
-        blank2.send_keys("away")
-        checkme = quest.find_element_by_tag_name('button')
-        checkme.click()
-        feedback = quest.find_element_by_id("fill1412_feedback")
+        self.find_fitb()
+        self.find_blank(0).send_keys("red")
+        self.find_blank(1).send_keys("away")
+        self.click_checkme()
+        feedback = self.find_feedback()
         self.assertIn("Correct", feedback.text)
 
     def test_fitb4(self):
-        self.driver.get(self.host + "/index.html") # Access page
-        quest = self.driver.find_element_by_id("fill-in-the-blank")
-        blank1 = quest.find_element_by_id("fill1412_blank0")
-        blank2 = quest.find_element_by_id("fill1412_blank1")
-        blank1.send_keys("reds") # Type something wrong
-        blank1.clear() # Delete the wrong thing
-        blank1.send_keys("red") # Type the right thing
-        blank2.send_keys("away") # Type another correct answer in another blank
-        checkme = quest.find_element_by_tag_name('button')
-        checkme.click()
-        feedback = quest.find_element_by_id("fill1412_feedback")
-        self.assertIn("Correct",feedback.text)
-
-
-    def tearDown(self):
-        self.driver.quit()
-
-
-
-
-if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        PORT = sys.argv.pop()
-    unittest.main(verbosity=2)
+        self.find_fitb()
+        blank0 = self.find_blank(0)
+        # Type an incorrect answer.
+        blank0.send_keys("red")
+        # Delete it.
+        blank0.clear()
+        # Type the correct answer.
+        blank0.send_keys("red")
+        self.find_blank(1).send_keys("away")
+        self.click_checkme()
+        feedback = self.find_feedback()
+        self.assertIn("Correct", feedback.text)

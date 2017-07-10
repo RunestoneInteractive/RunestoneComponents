@@ -10,21 +10,14 @@ For some reason, question id had to be 3 or above
 
 __author__ = 'yasinovskyy'
 
-from selenium import webdriver
-from selenium.webdriver import ActionChains
-from selenium.common.exceptions import WebDriverException
-import unittest
-import sys
+from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
-PORT = '8081'
+setUpModule, tearDownModule = module_fixture_maker(__file__)
 jquery_url = "http://code.jquery.com/jquery-1.12.4.min.js"
 
-class DragAndDropQuestion_Tests(unittest.TestCase):
+class DragAndDropQuestion_Tests(RunestoneTestCase):
     def setUp(self):
-        #self.driver = webdriver.Chrome()
-        #self.driver = webdriver.Firefox()  # good for development
-        self.driver = webdriver.PhantomJS() # use this for Jenkins auto testing
-        self.host = 'http://127.0.0.1:' + PORT
+        super(DragAndDropQuestion_Tests, self).setUp()
         self.driver.set_script_timeout(5)
         with open("jquery_load_helper.js") as f:
             self.load_jquery_js = f.read()
@@ -32,7 +25,6 @@ class DragAndDropQuestion_Tests(unittest.TestCase):
         with open("drag_and_drop_helper.js") as f:
             self.js = f.read()
 
-    
     def test_dnd1(self):
         '''No selection. Button clicked'''
         self.driver.get(self.host + "/index.html")
@@ -140,13 +132,3 @@ class DragAndDropQuestion_Tests(unittest.TestCase):
         self.assertIsNotNone(fb)
         cnamestr = fb.get_attribute("class")
         self.assertIn("alert-success", cnamestr)
-
-
-    def tearDown(self):
-        self.driver.quit()
-
-
-if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        PORT = sys.argv.pop()
-    unittest.main(verbosity=2)
