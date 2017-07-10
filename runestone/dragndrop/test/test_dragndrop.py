@@ -10,7 +10,7 @@ For some reason, question id had to be 3 or above
 
 __author__ = 'yasinovskyy'
 
-from ...unittest_base import module_fixture_maker, RunestoneTestCase
+from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
 setUpModule, tearDownModule = module_fixture_maker(__file__)
 jquery_url = "http://code.jquery.com/jquery-1.12.4.min.js"

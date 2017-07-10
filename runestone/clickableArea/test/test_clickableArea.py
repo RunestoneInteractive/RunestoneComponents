@@ -4,7 +4,7 @@ Test Clickable Area question directive
 
 __author__ = 'yasinovskyy'
 
-from ...unittest_base import module_fixture_maker, RunestoneTestCase
+from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
 setUpModule, tearDownModule = module_fixture_maker(__file__)
 ANSWERS = ["Red Orange Yellow", "Red", "Orange", "Yellow", "Green", "Blue", "Indigo", "Violet"]
