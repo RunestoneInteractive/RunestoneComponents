@@ -4125,15 +4125,19 @@ function traceQCheckMe(inputId, divId, answer) {
    var ans = $('#'+inputId).val()
    var attrs = answer.split(".")
    var correctAns = curEntry;
+   var rb = new RunestoneBase()
    for (j in attrs) {
        correctAns = correctAns[attrs[j]]
    }
+
    feedbackElement = $("#" + divId + "_feedbacktext")
    if (ans.length > 0 && ans == correctAns) {
        feedbackElement.html('Correct')
    } else {
        feedbackElement.html(vis.curTrace[i].question.feedback)
    }
+   let isCorrect = (ans == correctAns);
+   rb.logBookEvent({"event": "codelensq", "act": `answer:${ans}:${isCorrect}`, "answer":ans, "correct": isCorrect, "div_id": divId})
 
 }
 
