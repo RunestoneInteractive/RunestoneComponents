@@ -1,4 +1,5 @@
 from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
+from selenium.webdriver import ActionChains
 
 setUpModule, tearDownModule = module_fixture_maker(__file__)
 
