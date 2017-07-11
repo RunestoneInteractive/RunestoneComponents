@@ -4,21 +4,11 @@ Test Short Answer question directive
 
 __author__ = 'yasinovskyy'
 
-from selenium import webdriver
-from selenium.webdriver import ActionChains
-from selenium.common.exceptions import WebDriverException
-import unittest
-import sys
+from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
-PORT = '8081'
+setUpModule, tearDownModule = module_fixture_maker(__file__)
 
-class ShortAnswerQuestion_Tests(unittest.TestCase):
-    def setUp(self):
-        #self.driver = webdriver.Firefox()  # good for development
-        self.driver = webdriver.PhantomJS() # use this for Jenkins auto testing
-        self.host = 'http://127.0.0.1:' + PORT
-
-
+class ShortAnswerQuestion_Tests(RunestoneTestCase):
     def test_sa1(self):
         '''No input. Button not clicked'''
         self.driver.get(self.host + "/index.html")
@@ -69,20 +59,10 @@ class ShortAnswerQuestion_Tests(unittest.TestCase):
 
         btn_check = t1.find_element_by_tag_name('button')
         btn_check.click()
-        
+
         ta.clear()
 
         fb = t1.find_element_by_id("question1_feedback")
         self.assertIsNotNone(fb)
         cnamestr = fb.get_attribute("class")
         self.assertIn("alert-success", cnamestr)
-
-
-    def tearDown(self):
-        self.driver.quit()
-
-
-if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        PORT = sys.argv.pop()
-    unittest.main(verbosity=2)

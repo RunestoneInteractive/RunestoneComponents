@@ -41,9 +41,8 @@ TEMPLATE_START = """
 TEMPLATE_OPTION = """
     <li data-component="draggable" id="%(divid)s_drag%(dnd_label)s">%(dragText)s</li>
     <li data-component="dropzone" for="%(divid)s_drag%(dnd_label)s">%(dropText)s</li>
-    </div>
 """
-TEMPLATE_END = """</ul>"""
+TEMPLATE_END = """</ul></div>"""
 
 
 class DragNDropNode(nodes.General, nodes.Element):

@@ -3,6 +3,7 @@ import os
 import re
 
 from sqlalchemy import create_engine, Table, MetaData, select, delete
+from .componentdb import engine, meta
 from collections import OrderedDict
 import sys
 from functools import reduce
@@ -87,26 +88,10 @@ def getTOCEntries(ftext):
 
 
 def addChapterInfoToDB(subChapD, chapTitles, course_id):
-    dbname = 'runestone'
-    # Provide a default database URI if the ``USER`` environment variables is define (it is on Linux/Mac).
-    uname = os.environ.get('USER')
-    if uname == 'bnmnetp':
-        uname = 'bnmnetp_courselib'
-        dbname = 'bnmnetp_courselib'
-
-    dburl = 'postgresql://{}@localhost/{}'.format(uname,dbname)
-
-
-    if all(name in os.environ for name in ['DBHOST', 'DBPASS', 'DBUSER', 'DBNAME']):
-        dburl = 'postgresql://{DBUSER}:{DBPASS}@{DBHOST}/{DBNAME}'.format(**os.environ)
-
-    try:
-        engine = create_engine(dburl)
-    except ImportError as imperr:
+    if not engine:
         print("You need to install a DBAPI module - psycopg2 for Postgres")
         return
 
-    meta = MetaData()
     chapters = Table('chapters', meta, autoload=True, autoload_with=engine)
     sub_chapters = Table('sub_chapters', meta, autoload=True, autoload_with=engine)
 

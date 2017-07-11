@@ -4,22 +4,11 @@ Test Tabbed stuff directive
 
 __author__ = 'yasinovskyy'
 
-from selenium import webdriver
-from selenium.webdriver import ActionChains
-from selenium.common.exceptions import WebDriverException
-import unittest
-import sys
+from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
-PORT = '8081'
+setUpModule, tearDownModule = module_fixture_maker(__file__)
 
-class TabbedQuestion_Tests(unittest.TestCase):
-    def setUp(self):
-        #self.driver = webdriver.Chrome()
-        #self.driver = webdriver.Firefox()  # good for development
-        self.driver = webdriver.PhantomJS() # use this for Jenkins auto testing
-        self.host = 'http://127.0.0.1:' + PORT
-
-    
+class TabbedQuestion_Tests(RunestoneTestCase):
     def test_t1(self):
         '''Initial view. Tab 1 is visible, tab 2 is hidden'''
         self.driver.get(self.host + "/index.html")
@@ -31,7 +20,7 @@ class TabbedQuestion_Tests(unittest.TestCase):
         self.assertEqual("Tab 1", t1.text)
         self.assertEqual("Hello!", tp1.text)
 
-    
+
     def test_t2(self):
         '''Tab 2 is visible, tab 1 is hidden'''
         self.driver.get(self.host + "/index.html")
@@ -46,7 +35,7 @@ class TabbedQuestion_Tests(unittest.TestCase):
         self.assertEqual("Tab 2", t1.text)
         self.assertEqual("Goodbye!", tp1.text)
 
-    
+
     def test_t3(self):
         '''Tab 2 is selected, then tab 1'''
         self.driver.get(self.host + "/index.html")
@@ -63,13 +52,3 @@ class TabbedQuestion_Tests(unittest.TestCase):
 
         self.assertEqual("Tab 1", t1.text)
         self.assertEqual("Hello!", tp1.text)
-    
-
-    def tearDown(self):
-        self.driver.quit()
-
-
-if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        PORT = sys.argv.pop()
-    unittest.main(verbosity=2)
