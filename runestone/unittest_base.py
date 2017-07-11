@@ -44,8 +44,14 @@ def module_fixture_maker(module_path):
 # Provide a base test case which sets up the `Selenium <http://selenium-python.readthedocs.io/>`_ driver.
 class RunestoneTestCase(unittest.TestCase):
     def setUp(self):
-        #self.driver = webdriver.Firefox()  # good for development.
-        self.driver = webdriver.PhantomJS() # use this for Jenkins auto testing
+
+        #self.driver = webdriver.PhantomJS() # use this for Jenkins auto testing
+        options = webdriver.ChromeOptions()
+        options.add_argument("headless")
+        options.add_argument("window-size=1200x800")
+        self.driver = webdriver.Chrome(chrome_options=options)  # good for development.
+
+
         self.host = 'http://127.0.0.1:' + PORT
 
     def tearDown(self):
