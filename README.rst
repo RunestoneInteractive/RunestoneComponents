@@ -115,10 +115,14 @@ Our goal is to have unit tests which rely on Selenium (a library that helps simu
 **In order to get started with writing a test/writing additional tests, you will need the following:**
 
 * ``pip install selenium`` in the virtualenv you're using for Runestone Components development
+* ``pip install pyvirtualdisplay``
 
-* Download `PhantomJS <http://phantomjs.org/>`_., which is a driver that helps you simulate the browser. You can download it `here <http://phantomjs.org/download.html>`_.
 
-* You'll also need to have done the above installation. 
+* Download the latest `ChromeDriver <https://chromedriver.storage.googleapis.com/index.html>`_., which is a driver that simulates Google Chrome.
+
+* On linux you will need to install Xvfb ``apt-get install xvfb``
+
+* You'll also need to have done the above installation.
   
   * You should be using virtual environment, you'll need a clone of the RunestoneComponents repository, and you'll need to have done ``pip install -e`` from the top level of the RunestoneComponents directory.
 
