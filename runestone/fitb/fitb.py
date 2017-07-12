@@ -20,7 +20,7 @@ import ast
 from numbers import Number
 from docutils import nodes
 from docutils.parsers.rst import directives
-from runestone.server.componentdb import addQuestionToDB
+from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 from runestone.common import RunestoneDirective
 
 
@@ -50,6 +50,10 @@ class FITBNode(nodes.General, nodes.Element):
 
 
 def visit_fitb_node(self,node):
+
+    node.delimiter = "_start__{}_".format(node.fitb_options['divid'])
+    self.body.append(node.delimiter)
+
     res = node.template_start % node.fitb_options
     self.body.append(res)
 
@@ -73,6 +77,13 @@ def depart_fitb_node(self, node):
     node.fitb_options['json'] = json.dumps(node.feedbackArray)
     res = node.template_end % node.fitb_options
     self.body.append(res)
+
+    # add HTML to the Database and clean up
+    addHTMLToDB(node.fitb_options['divid'],
+                node.fitb_options['basecourse'],
+                "".join(self.body[self.body.index(node.delimiter) + 1:]))
+
+    self.body.remove(node.delimiter)
 
 
 class FillInTheBlank(RunestoneDirective):

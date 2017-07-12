@@ -19,7 +19,7 @@ __author__ = 'isaiahmayerchak'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
-from runestone.server.componentdb import addQuestionToDB
+from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 from runestone.common.runestonedirective import RunestoneDirective
 
 def setup(app):
@@ -61,6 +61,9 @@ class DragNDropNode(nodes.General, nodes.Element):
 def visit_dnd_node(self,node):
     res = TEMPLATE_START
 
+    node.delimiter = "_start__{}_".format(node.dnd_options['divid'])
+    self.body.append(node.delimiter)
+
     if "feedback" in node.dnd_options:
         node.dnd_options["feedback"] = "<span data-component=feedback>" + node.dnd_options["feedback"] + "</span>"
     else:
@@ -85,6 +88,12 @@ def depart_dnd_node(self,node):
             res += node.template_option % node.dnd_options
     res += node.template_end % node.dnd_options
     self.body.append(res)
+
+    addHTMLToDB(node.dnd_options['divid'],
+                node.dnd_options['basecourse'],
+                "".join(self.body[self.body.index(node.delimiter) + 1:]))
+
+    self.body.remove(node.delimiter)
 
 
 class DragNDrop(RunestoneDirective):

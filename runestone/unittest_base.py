@@ -2,6 +2,7 @@ import unittest
 import os
 import subprocess
 from selenium import webdriver
+from pyvirtualdisplay import Display
 
 # Select an unused port for serving web pages to the test suite.
 PORT = '8081'
@@ -44,10 +45,19 @@ def module_fixture_maker(module_path):
 # Provide a base test case which sets up the `Selenium <http://selenium-python.readthedocs.io/>`_ driver.
 class RunestoneTestCase(unittest.TestCase):
     def setUp(self):
-        #self.driver = webdriver.Firefox()  # good for development.
-        self.driver = webdriver.PhantomJS() # use this for Jenkins auto testing
+
+        self.display = Display(visible=0, size=(1280, 1024))
+        self.display.start()
+        #self.driver = webdriver.PhantomJS() # use this for Jenkins auto testing
+        # options = webdriver.ChromeOptions()
+        # options.add_argument("headless")
+        # options.add_argument("window-size=1200x800")
+        #self.driver = webdriver.Chrome(chrome_options=options)  # good for development.
+        self.driver = webdriver.Chrome()  # good for development.
+
+
         self.host = 'http://127.0.0.1:' + PORT
 
     def tearDown(self):
         self.driver.quit()
-
+        self.display.stop()
