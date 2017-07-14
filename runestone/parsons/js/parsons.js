@@ -1244,6 +1244,7 @@ Parsons.prototype.initializeLines = function(text) {
 	var indents = [];
 	for (var i = 0; i < textBlocks.length; i++) {
 		var textBlock = textBlocks[i];
+
 		// Figure out options based on the #option and #option=value syntax
 		// Remove the options from the code
 		var options = {};
@@ -1280,12 +1281,16 @@ Parsons.prototype.initializeLines = function(text) {
 				}
 			}
 		}
-		// Add groupWithNext
-		for (j = 0; j < lines.length - 1; j++) {
-			lines[j].groupWithNext = true;
+		if (lines.length > 0)
+		{
+			// Add groupWithNext
+			for (j = 0; j < lines.length - 1; j++) {
+				lines[j].groupWithNext = true;
+			}
+			lines[lines.length - 1].groupWithNext = false;
 		}
-		lines[lines.length - 1].groupWithNext = false;
 	}
+	
 	// Normalize the indents
 	indents = indents.sort(function(a, b){return a-b});
 	for (i = 0; i < this.lines.length; i++) {
