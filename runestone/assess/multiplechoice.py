@@ -195,6 +195,7 @@ class MChoice(Assessment):
 
 
         mcNode = MChoiceNode(self.options)
+        mcNode.source, mcNode.line = self.state_machine.get_source_and_line(self.lineno)
         mcNode.template_start = TEMPLATE_START
         mcNode.template_option = OPTION
         mcNode.template_end = TEMPLATE_END

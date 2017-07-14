@@ -166,4 +166,6 @@ class DataFile(RunestoneDirective):
             print("This should only affect the grading interface. Everything else should be fine.")
 
 
-        return [DataFileNode(self.options)]
+        data_file_node = DataFileNode(self.options)
+        data_file_node.source, data_file_node.line = self.state_machine.get_source_and_line(self.lineno)
+        return [data_file_node]

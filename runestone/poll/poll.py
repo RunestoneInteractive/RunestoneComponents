@@ -136,5 +136,6 @@ class Poll(Directive):
         else:
             self.options["comment"] = ""
 
-
-        return [PollNode(self.options)]
+        poll_node = PollNode(self.options)
+        poll_node.source, poll_node.line = self.state_machine.get_source_and_line(self.lineno)
+        return [poll_node]

@@ -35,7 +35,9 @@ class Meta(Directive):
         :param self:
         :return:
         """
-        return [nodes.raw('','', format='html')]
+        raw_node = nodes.raw('','', format='html')
+        raw_node.source, raw_node.line = self.state_machine.get_source_and_line(self.lineno)
+        return [raw_node]
 
 
 

@@ -93,6 +93,7 @@ class QuestionDirective(RunestoneDirective):
         self.options['name'] = self.arguments[0].strip()
 
         question_node = QuestionNode(self.options)
+        question_node.source, question_node.line = self.state_machine.get_source_and_line(self.lineno)
         self.add_name(question_node)
 
         self.state.nested_parse(self.content, self.content_offset, question_node)

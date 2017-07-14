@@ -25,7 +25,8 @@ def unCamel(x):
 
 
 def findChaptersSubChapters(tocfile):
-    ftext = open(tocfile, 'r').readlines()
+    with open(tocfile, 'r') as f:
+        ftext = f.readlines()
     if '.. toc_version: 2\n' in ftext:
         return findV2ChaptersSubChapters(tocfile)
 
@@ -52,7 +53,8 @@ def findChaptersSubChapters(tocfile):
     return chdict, chtitles
 
 def findV2ChaptersSubChapters(tocfile):
-    ftext = open(tocfile, 'r').readlines()
+    with open(tocfile, 'r') as f:
+        ftext = f.readlines()
     # Find the the toctree directive
     # then make a list of all of the sub entries in the toctree
     # If the line has a  / in it then it is a chapter we can deal with

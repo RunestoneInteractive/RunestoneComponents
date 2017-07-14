@@ -42,12 +42,12 @@ def visit_timed_node(self, node):
         node.timed_options['nofeedback'] = 'data-no-feedback'
     else:
         node.timed_options['nofeedback'] = ''
-        
+
     if 'notimer' in node.timed_options:
         node.timed_options['notimer'] = 'data-no-timer'
     else:
         node.timed_options['notimer'] = ''
-        
+
     if 'fullwidth' in node.timed_options:
         node.timed_options['fullwidth'] = 'data-fullwidth'
     else:
@@ -107,6 +107,7 @@ class TimedDirective(Directive):
         self.options['divid'] = self.arguments[0]
 
         timed_node = TimedNode(self.options)
+        timed_node.source, timed_node.line = self.state_machine.get_source_and_line(self.lineno)
 
         self.state.nested_parse(self.content, self.content_offset, timed_node)
 

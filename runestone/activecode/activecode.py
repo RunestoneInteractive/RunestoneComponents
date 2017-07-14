@@ -353,6 +353,7 @@ class ActiveCode(RunestoneDirective):
 
 
         acnode = ActivcodeNode(self.options)
+        acnode.source, acnode.line = self.state_machine.get_source_and_line(self.lineno)
         self.add_name(acnode)    # make this divid available as a target for :ref:
 
         if explain_text:

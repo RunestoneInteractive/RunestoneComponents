@@ -104,6 +104,7 @@ class ExternalDirective(RunestoneDirective):
         self.options['name'] = self.arguments[0].strip()
 
         external_node = ExternalNode(self.options)
+        external_node.source, external_node.line = self.state_machine.get_source_and_line(self.lineno)
         self.add_name(external_node)
 
         self.state.nested_parse(self.content, self.content_offset, external_node)

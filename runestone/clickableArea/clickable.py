@@ -141,6 +141,7 @@ class ClickableArea(RunestoneDirective):
         else:
             self.options['clickcode'] = ''
         clickNode = ClickableAreaNode(self.options)
+        clickNode.source, clickNode.line = self.state_machine.get_source_and_line(self.lineno)
         clickNode.template_start = TEMPLATE
 
         if "table" in self.options:

@@ -68,8 +68,6 @@ def depart_fitb_node(self, node):
         blankCount += 1
 
     # Warn if there are fewer feedback items than blanks.
-    # TODO: node.source, node.line aren't defined.
-    #print(node.source, node.line)
     if len(node.feedbackArray) < blankCount:
         print('Warning at {} line {}: there'' not enough feedback for the number of blanks supplied.'.format(node.source, node.line))
 
@@ -137,8 +135,8 @@ class FillInTheBlank(RunestoneDirective):
 
         self.options['divid'] = self.arguments[0]
 
-        # TODO: How to include self.lineno in the directive?
         fitbNode = FITBNode(self.options)
+        fitbNode.source, fitbNode.line = self.state_machine.get_source_and_line(self.lineno)
         fitbNode.template_start = TEMPLATE_START
         fitbNode.template_end = TEMPLATE_END
 

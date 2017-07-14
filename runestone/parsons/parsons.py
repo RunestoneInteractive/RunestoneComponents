@@ -142,7 +142,7 @@ Example:
         self.options['qnumber'] = self.getNumber()
         self.options['instructions'] = ""
         self.options['code'] = self.content
-        
+
         if 'maxdist' in self.options:
             self.options['maxdist'] = ' data-maxdist="' + self.options['maxdist'] + '"'
         else:
@@ -163,8 +163,8 @@ Example:
             self.options['language'] = ' data-language="' + self.options['language'] + '"'
         else:
             self.options['language'] = ''
-         
-          
+
+
         if '-----' in self.content:
             index = self.content.index('-----')
             self.options['instructions'] = "\n".join(self.content[:index])
@@ -181,4 +181,6 @@ Example:
 
         self.assert_has_content()
 
-        return [ParsonsNode(self.options)]
+        parsons_node = ParsonsNode(self.options)
+        parsons_node.source, parsons_node.line = self.state_machine.get_source_and_line(self.lineno)
+        return [parsons_node]

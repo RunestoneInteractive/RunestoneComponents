@@ -177,7 +177,9 @@ class IframeVideo(Directive):
             self.options['height'] = self.default_height
         if not self.options.get('align'):
             self.options['align'] = 'left'
-        return [nodes.raw('', self.html % self.options, format='html')]
+        raw_node = nodes.raw('', self.html % self.options, format='html')
+        raw_node.source, raw_node.line = self.state_machine.get_source_and_line(self.lineno)
+        return [raw_node]
 
 
 class Youtube(IframeVideo):

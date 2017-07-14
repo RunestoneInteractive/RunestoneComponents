@@ -134,14 +134,14 @@ END = '''
       }
     }
 
-    Blockly.JavaScript['text_print'] = function(block) { 
-      // Print statement override. 
-      var argument0 = Blockly.JavaScript.valueToCode(block, 'TEXT', 
-          Blockly.JavaScript.ORDER_NONE) || '\\'\\''; 
-      return 'my_custom_print(' + argument0 + ', "%(divid)s" );\\n'; 
-    }; 
+    Blockly.JavaScript['text_print'] = function(block) {
+      // Print statement override.
+      var argument0 = Blockly.JavaScript.valueToCode(block, 'TEXT',
+          Blockly.JavaScript.ORDER_NONE) || '\\'\\'';
+      return 'my_custom_print(' + argument0 + ', "%(divid)s" );\\n';
+    };
 
-    function my_custom_print(text,divid) { 
+    function my_custom_print(text,divid) {
       var p = document.getElementById(divid+"_pre");
       p.innerHTML += text + "\\n"
       }
@@ -151,7 +151,7 @@ END = '''
     Blockly.Xml.domToWorkspace(Blockly.mainWorkspace, xmlDom);
 
   </script>
-  
+
   <pre class="active_out" id="%(divid)s_pre"></pre>
   </body>
   </html>
@@ -213,7 +213,7 @@ class Blockly(Directive):
 
         pathDepth = rel_filename.count("/")
         self.options['blocklyHomePrefix'] = "../"*pathDepth
-        
+
         plstart = len(self.content)
         if 'preload::' in self.content:
             plstart = self.content.index('preload::')
@@ -221,21 +221,23 @@ class Blockly(Directive):
 
         if self.content:
             self.options['controls'] = self.content[:plstart]
-        
-        return [BlocklyNode(self.options)]
+
+        blockly_node = BlocklyNode(self.options)
+        blockly_node.source, blockly_node.line = self.state_machine.get_source_and_line(self.lineno)
+        return [blockly_node]
 
 
 
 
 '''
-    Blockly.JavaScript['text_print'] = function(block) { 
-      // Print statement override. 
-      var argument0 = Blockly.JavaScript.valueToCode(block, 'TEXT', 
-          Blockly.JavaScript.ORDER_NONE) || '\'\''; 
-      return 'my_custom_print(' + argument0 + ');\n'; 
-    }; 
+    Blockly.JavaScript['text_print'] = function(block) {
+      // Print statement override.
+      var argument0 = Blockly.JavaScript.valueToCode(block, 'TEXT',
+          Blockly.JavaScript.ORDER_NONE) || '\'\'';
+      return 'my_custom_print(' + argument0 + ');\n';
+    };
 
-    function my_custom_print(text) { 
+    function my_custom_print(text) {
       var p = document.getElementById("blockly1_pre");
       p.innerHTML += text
       }
@@ -244,16 +246,16 @@ class Blockly(Directive):
 
 
 # to preload blockly with a finished or partial program, do the following
-# 
+#
 # https://blockly-demo.appspot.com/static/apps/code/index.html?lang=en
-# 
+#
 # Now save the xml string.  And append something like the following to the script after blockly
 # is created:
-# 
+#
 #       var xmlText = '<xml>  <block type="variables_set" id="1" inline="true" x="25" y="9">    <field name="VAR">X</field>    <value name="VALUE">      <block type="math_number" id="2">        <field name="NUM">10</field>      </block>    </value>  </block></xml>'
 #       xmlDom = Blockly.Xml.textToDom(xmlText);
 #       Blockly.Xml.domToWorkspace(Blockly.mainWorkspace, xmlDom);
- 
+
 
 
 

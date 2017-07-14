@@ -242,4 +242,6 @@ class usageAssignment(Directive):
             q_id = getOrInsertQuestionForPage(base_course=basecourse_name, name=acid, is_private='F', question_type="page", autograde = "visited", difficulty=1,chapter=None)
             addAssignmentQuestionToDB(q_id, assignment_id, 1, autograde="visited")
 
-        return [usageAssignmentNode(self.options)]
+        usage_assignment_node = usageAssignmentNode(self.options)
+        usage_assignment_node.source, usage_assignment_node.line = self.state_machine.get_source_and_line(self.lineno)
+        return [usage_assignment_node]

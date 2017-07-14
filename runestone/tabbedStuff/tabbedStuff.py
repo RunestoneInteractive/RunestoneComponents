@@ -173,6 +173,7 @@ class TabbedStuffDirective(Directive):
 
         # Create the node, to be populated by "nested_parse".
         tabbedstuff_node = TabbedStuffNode(self.options)
+        tabbedstuff_node.source, tabbedstuff_node.line = self.state_machine.get_source_and_line(self.lineno)
 
         # Parse the directive contents (should be 1 or more tab directives)
         self.state.nested_parse(self.content, self.content_offset, tabbedstuff_node)

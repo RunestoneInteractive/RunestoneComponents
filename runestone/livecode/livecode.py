@@ -73,7 +73,9 @@ class LiveCode(Directive):
         template = env.get_template('livecode.html')
         output = template.render(**self.options)
 
-        return [nodes.raw('', output, format='html')]
+        raw_node = nodes.raw('', output, format='html')
+        raw_node.source, raw_node.line = self.state_machine.get_source_and_line(self.lineno)
+        return [raw_node]
 
 
 

@@ -113,6 +113,7 @@ class RevealDirective(RunestoneDirective):
         self.options['divid'] = self.arguments[0]
 
         reveal_node = RevealNode(self.options)
+        reveal_node.source, reveal_node.line = self.state_machine.get_source_and_line(self.lineno)
 
         self.state.nested_parse(self.content, self.content_offset, reveal_node)
 

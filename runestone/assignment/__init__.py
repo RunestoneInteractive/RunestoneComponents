@@ -157,6 +157,8 @@ class Assignment(RunestoneDirective):
         self.options['question_ids'] = question_names
 
         if 'generate_html' in self.options:
-            return [AssignmentNode(self.options)]
+            assignment_node = AssignmentNode(self.options)
+            assignment_node.source, assignment_node.line = self.state_machine.get_source_and_line(self.lineno)
+            return [assignment_node]
         else:
             return []

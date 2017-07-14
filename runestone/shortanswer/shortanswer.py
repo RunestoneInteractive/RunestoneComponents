@@ -83,5 +83,6 @@ class JournalDirective(Assessment):
         self.options['content'] = "<p>".join(self.content)
         self.options['qnum'] = self.getNumber()
         journal_node = JournalNode(self.options)
+        journal_node.source, journal_node.line = self.state_machine.get_source_and_line(self.lineno)
 
         return [journal_node]

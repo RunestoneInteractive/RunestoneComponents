@@ -79,7 +79,9 @@ class AddButton(Directive):
         res = TEMPLATE_START % self.options
 
         res += TEMPLATE_END % self.options
-        return [nodes.raw('', res, format='html')]
+        rawnode = nodes.raw('', res, format='html')
+        rawnode.source, rawnode.line = self.state_machine.get_source_and_line(self.lineno)
+        return [rawnode]
 
 
 class QuestionNumber(Directive):

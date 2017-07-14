@@ -162,6 +162,7 @@ class DragNDrop(RunestoneDirective):
 
 
         dndNode = DragNDropNode(self.options)
+        dndNode.source, dndNode.line = self.state_machine.get_source_and_line(self.lineno)
         dndNode.template_start = TEMPLATE_START
         dndNode.template_option = TEMPLATE_OPTION
         dndNode.template_end = TEMPLATE_END

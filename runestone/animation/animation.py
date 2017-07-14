@@ -80,7 +80,9 @@ class Animation(Directive):
 
 
         res = res + SRC % self.options
-        return [nodes.raw('',res , format='html')]
+        rawnode = nodes.raw('',res , format='html')
+        rawnode.source, rawnode.line = self.state_machine.get_source_and_line(self.lineno)
+        return [rawnode]
 
 
 source = '''
