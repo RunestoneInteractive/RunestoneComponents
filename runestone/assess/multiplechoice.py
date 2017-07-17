@@ -21,15 +21,15 @@ from .assessbase import *
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 
 
-class MChoiceNode(nodes.General, nodes.Element):
-    def __init__(self,content):
+class MChoiceNode(nodes.General, nodes.Element, RunestoneNode):
+    def __init__(self, content, **kwargs):
         """
 
         Arguments:
         - `self`:
         - `content`:
         """
-        super(MChoiceNode,self).__init__()
+        super(MChoiceNode, self).__init__(**kwargs)
         self.mc_options = content
 
 def visit_mc_node(self,node):
@@ -194,7 +194,7 @@ class MChoice(Assessment):
 
 
 
-        mcNode = MChoiceNode(self.options)
+        mcNode = MChoiceNode(self.options, rawsource=self.block_text)
         mcNode.source, mcNode.line = self.state_machine.get_source_and_line(self.lineno)
         mcNode.template_start = TEMPLATE_START
         mcNode.template_option = OPTION
@@ -278,19 +278,19 @@ class MChoice(Assessment):
 
 
 # Define a bullet_list which contains answers (see the structure_).
-class AnswersBulletList(nodes.bullet_list):
+class AnswersBulletList(nodes.bullet_list, RunestoneNode):
     pass
 
 # Define a list_item which contains answers (see the structure_).
-class AnswerListItem(nodes.list_item):
+class AnswerListItem(nodes.list_item, RunestoneNode):
     pass
 
 # Define a bullet_list which contains feedback (see the structure_).
-class FeedbackBulletList(nodes.bullet_list):
+class FeedbackBulletList(nodes.bullet_list, RunestoneNode):
     pass
 
 # Define a list_item which contains answers (see the structure_).
-class FeedbackListItem(nodes.list_item):
+class FeedbackListItem(nodes.list_item, RunestoneNode):
     pass
 
 # The ``<ul>`` tag will be generated already -- don't output it.

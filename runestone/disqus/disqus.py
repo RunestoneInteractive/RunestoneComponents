@@ -17,7 +17,7 @@ __author__ = 'isaacdontjelindell'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
 
 
 DISQUS_BOX = """\
@@ -70,9 +70,9 @@ def setup(app):
     app.connect('doctree-resolved' ,process_disqus_nodes)
     app.connect('env-purge-doc', purge_disqus_nodes)
 
-class DisqusNode(nodes.General, nodes.Element):
-    def __init__(self,content):
-        super(DisqusNode,self).__init__()
+class DisqusNode(nodes.General, nodes.Element, RunestoneNode):
+    def __init__(self,content, **kwargs):
+        super(DisqusNode,self).__init__(**kwargs)
         self.disqus_components = content
 
 
@@ -94,7 +94,7 @@ def purge_disqus_nodes(app, env, docname):
     pass
 
 
-class DisqusDirective(Directive):
+class DisqusDirective(RunestoneDirective):
     """
 .. disqus::
    :shortname: Your registered disqus id
@@ -116,6 +116,6 @@ class DisqusDirective(Directive):
         :return:
         """
 
-        disqus_node = DisqusNode(self.options)
+        disqus_node = DisqusNode(self.options, rawsource=self.block_text)
         disqus_node.source, disqus_node.line = self.state_machine.get_source_and_line(self.lineno)
         return [disqus_node]

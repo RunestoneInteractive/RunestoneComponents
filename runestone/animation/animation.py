@@ -17,7 +17,7 @@ __author__ = 'bmiller'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
+from runestone.common.runestonedirective import RunestoneDirective
 
 
 def setup(app):
@@ -52,7 +52,7 @@ SRC = '''
 
 SCRIPTTAG = '''<script type="text/javascript" src="../_static/%s"></script>\n'''
 
-class Animation(Directive):
+class Animation(RunestoneDirective):
     required_arguments = 1
     optional_arguments = 1
     final_argument_whitespace = True
@@ -80,7 +80,7 @@ class Animation(Directive):
 
 
         res = res + SRC % self.options
-        rawnode = nodes.raw('',res , format='html')
+        rawnode = nodes.raw(self.block_text, res, format='html')
         rawnode.source, rawnode.line = self.state_machine.get_source_and_line(self.lineno)
         return [rawnode]
 

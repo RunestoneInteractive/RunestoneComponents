@@ -17,8 +17,7 @@ __author__ = 'isaiahmayerchak'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
-from runestone.common.runestonedirective import RunestoneDirective
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
 
 #add directives/javascript/css
 def setup(app):
@@ -28,9 +27,9 @@ def setup(app):
 
     app.add_node(RevealNode, html=(visit_reveal_node, depart_reveal_node))
 
-class RevealNode(nodes.General, nodes.Element):
-    def __init__(self,content):
-        super(RevealNode,self).__init__()
+class RevealNode(nodes.General, nodes.Element, RunestoneNode):
+    def __init__(self,content, **kwargs):
+        super(RevealNode,self).__init__(**kwargs)
         self.reveal_options = content
 
 
@@ -112,7 +111,7 @@ class RevealDirective(RunestoneDirective):
 
         self.options['divid'] = self.arguments[0]
 
-        reveal_node = RevealNode(self.options)
+        reveal_node = RevealNode(self.options, rawsource=self.block_text)
         reveal_node.source, reveal_node.line = self.state_machine.get_source_and_line(self.lineno)
 
         self.state.nested_parse(self.content, self.content_offset, reveal_node)

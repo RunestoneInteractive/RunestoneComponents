@@ -19,9 +19,8 @@ __author__ = 'Paul Resnick'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
 from runestone.server.componentdb import addAssignmentToDB, addAssignmentQuestionToDB, getCourseID, getOrCreateAssignmentType, getQuestionID, get_HTML_from_DB
-from runestone.common.runestonedirective import RunestoneDirective
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
 from datetime import datetime
 
 def setup(app):
@@ -31,15 +30,15 @@ def setup(app):
     app.connect('doctree-resolved',process_nodes)
     app.connect('env-purge-doc', purge)
 
-class AssignmentNode(nodes.General, nodes.Element):
-    def __init__(self, content):
+class AssignmentNode(nodes.General, nodes.Element, RunestoneNode):
+    def __init__(self, content, **kwargs):
         """
 
         Arguments:
         - `self`:
         - `content`:
         """
-        super(AssignmentNode, self).__init__(name=content['name'])
+        super(AssignmentNode, self).__init__(name=content['name'], **kwargs)
         self.a_components = content
 
 
@@ -157,7 +156,7 @@ class Assignment(RunestoneDirective):
         self.options['question_ids'] = question_names
 
         if 'generate_html' in self.options:
-            assignment_node = AssignmentNode(self.options)
+            assignment_node = AssignmentNode(self.options, rawsource=self.block_text)
             assignment_node.source, assignment_node.line = self.state_machine.get_source_and_line(self.lineno)
             return [assignment_node]
         else:

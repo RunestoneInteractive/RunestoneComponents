@@ -19,14 +19,12 @@ __author__ = 'Paul Resnick'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
-from sqlalchemy import create_engine, Table, MetaData, select, delete
+from sqlalchemy import Table
 from sqlalchemy.orm import sessionmaker
-from runestone.common.runestonedirective import RunestoneDirective
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
 from runestone.server.componentdb import addAssignmentToDB, getOrCreateAssignmentType, getCourseID, addAssignmentQuestionToDB, getOrInsertQuestionForPage, engine, meta
 from datetime import datetime
 from collections import OrderedDict
-import os
 
 def setup(app):
     app.add_directive('usageassignment',usageAssignment)
@@ -36,14 +34,14 @@ def setup(app):
     app.connect('doctree-resolved',process_nodes)
     app.connect('env-purge-doc', purge)
 
-class usageAssignmentNode(nodes.General, nodes.Element):
-    def __init__(self,content):
+class usageAssignmentNode(nodes.General, nodes.Element, RunestoneNode):
+    def __init__(self,content, **kwargs):
         """
         Arguments:
         - `self`:
         - `content`:
         """
-        super(usageAssignmentNode,self).__init__()
+        super(usageAssignmentNode,self).__init__(**kwargs)
         self.ua_content = content
 
 # self for these functions is an instance of the writer class.  For example
@@ -101,7 +99,7 @@ def purge(app,env,docname):
     pass
 
 
-class usageAssignment(Directive):
+class usageAssignment(RunestoneDirective):
     """
 .. usageassignment:: prep_1
    :chapters: chap_name1[, chapname2]*
@@ -242,6 +240,6 @@ class usageAssignment(Directive):
             q_id = getOrInsertQuestionForPage(base_course=basecourse_name, name=acid, is_private='F', question_type="page", autograde = "visited", difficulty=1,chapter=None)
             addAssignmentQuestionToDB(q_id, assignment_id, 1, autograde="visited")
 
-        usage_assignment_node = usageAssignmentNode(self.options)
+        usage_assignment_node = usageAssignmentNode(self.options, rawsource=self.block_text)
         usage_assignment_node.source, usage_assignment_node.line = self.state_machine.get_source_and_line(self.lineno)
         return [usage_assignment_node]

@@ -21,7 +21,7 @@ from numbers import Number
 from docutils import nodes
 from docutils.parsers.rst import directives
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common import RunestoneDirective
+from runestone.common import RunestoneDirective, RunestoneNode
 
 
 def setup(app):
@@ -34,16 +34,15 @@ def setup(app):
     app.add_node(BlankNode, html=(visit_blank_node, depart_blank_node))
     app.add_node(FITBFeedbackNode, html=(visit_fitb_feedback_node, depart_fitb_feedback_node))
 
-
-class FITBNode(nodes.General, nodes.Element):
-    def __init__(self,content):
+class FITBNode(nodes.General, nodes.Element, RunestoneNode):
+    def __init__(self, content, **kwargs):
         """
 
         Arguments:
         - `self`:
         - `content`:
         """
-        super(FITBNode,self).__init__()
+        super(FITBNode,self).__init__(**kwargs)
         self.fitb_options = content
         # Create a data structure of feedback.
         self.feedbackArray = []
@@ -135,7 +134,7 @@ class FillInTheBlank(RunestoneDirective):
 
         self.options['divid'] = self.arguments[0]
 
-        fitbNode = FITBNode(self.options)
+        fitbNode = FITBNode(self.options, rawsource=self.block_text)
         fitbNode.source, fitbNode.line = self.state_machine.get_source_and_line(self.lineno)
         fitbNode.template_start = TEMPLATE_START
         fitbNode.template_end = TEMPLATE_END
@@ -195,6 +194,7 @@ class FillInTheBlank(RunestoneDirective):
         #       ...
         #       FITBFeedbackNode(), which contains all the nodes in blank n's feedback_field_body
         #
+        self.assert_has_content()
         feedback_bullet_list = fitbNode.pop()
         if not isinstance(feedback_bullet_list, nodes.bullet_list):
             self.error('The last item in a fill-in-the-blank question must be a bulleted list.')
@@ -278,9 +278,11 @@ def BlankRole(
   content=[]):
 
     # Blanks ignore all arguments, just inserting a blank.
-    return [BlankNode(rawtext)], []
+    blank_node = BlankNode(rawtext)
+    blank_node.line = lineno
+    return [blank_node], []
 
-class BlankNode(nodes.Inline, nodes.TextElement):
+class BlankNode(nodes.Inline, nodes.TextElement, RunestoneNode):
     pass
 
 def visit_blank_node(self, node):
@@ -291,7 +293,7 @@ def depart_blank_node(self, node):
 
 
 # Contains feedback for one answer.
-class FITBFeedbackNode(nodes.General, nodes.Element):
+class FITBFeedbackNode(nodes.General, nodes.Element, RunestoneNode):
     pass
 
 def visit_fitb_feedback_node(self, node):

@@ -16,11 +16,10 @@
 
 __author__ = 'bmiller'
 
-from docutils import nodes
-from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
-import json
 import os
+from docutils import nodes
+from runestone.common import RunestoneDirective, RunestoneNode
+
 
 # try:
 #     import conf
@@ -45,15 +44,15 @@ def setup(app):
 
 
 #'
-class BlocklyNode(nodes.General, nodes.Element):
-    def __init__(self,content):
+class BlocklyNode(nodes.General, nodes.Element, RunestoneNode):
+    def __init__(self,content, **kwargs):
         """
 
         Arguments:
         - `self`:
         - `content`:
         """
-        super(BlocklyNode,self).__init__()
+        super(BlocklyNode,self).__init__(**kwargs)
         self.ac_components = content
 
 
@@ -199,7 +198,7 @@ def purge_activecodes(app,env,docname):
     pass
 
 
-class Blockly(Directive):
+class Blockly(RunestoneDirective):
     required_arguments = 1
     optional_arguments = 0
     has_content = True
@@ -222,7 +221,7 @@ class Blockly(Directive):
         if self.content:
             self.options['controls'] = self.content[:plstart]
 
-        blockly_node = BlocklyNode(self.options)
+        blockly_node = BlocklyNode(self.options, rawsource=self.block_text)
         blockly_node.source, blockly_node.line = self.state_machine.get_source_and_line(self.lineno)
         return [blockly_node]
 
