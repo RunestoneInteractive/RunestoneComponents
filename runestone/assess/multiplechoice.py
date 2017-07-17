@@ -206,7 +206,6 @@ class MChoice(Assessment):
         # .. code-block::
         #   :number-lines:
         #
-        #
         #   mcNode = MChoiceNode()
         #       Item 1 of problem text
         #       ...

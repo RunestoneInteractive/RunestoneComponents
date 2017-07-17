@@ -1023,6 +1023,7 @@ Parsons.counter = 0;
 // Initialize based on what is specified in the HTML file
 Parsons.prototype.init = function (opts) {
 	RunestoneBase.apply(this, arguments);
+    RunestoneBase.prototype.init.apply(this, arguments);
 	var orig = opts.orig;     // entire <pre> element that will be replaced by new HTML
 	this.origElem = orig;
 	this.useRunestoneServices = opts.useRunestoneServices;

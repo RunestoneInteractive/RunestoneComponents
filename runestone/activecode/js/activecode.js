@@ -19,6 +19,7 @@ function ActiveCode(opts) {
 
 ActiveCode.prototype.init = function(opts) {
     RunestoneBase.apply( this, arguments );  // call parent constructor
+    RunestoneBase.prototype.init.apply(this, arguments);
     var suffStart;
     var orig = opts.orig;
     this.useRunestoneServices = opts.useRunestoneServices;
@@ -31,8 +32,6 @@ ActiveCode.prototype.init = function(opts) {
     this.timelimit = $(orig).data('timelimit');
     this.includes = $(orig).data('include');
     this.hidecode = $(orig).data('hidecode');
-    this.sid = opts.sid;
-    this.graderactive = opts.graderactive;
     this.runButton = null;
     this.saveButton = null;
     this.loadButton = null;
@@ -289,7 +288,23 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
             $(scrubber).on("slidechange",this.slideit.bind(this));
             scrubberDiv.appendChild(scrubber);
 
-            if (pos_last) {
+            // If there is a deadline set then position the scrubber at the last submission
+            // prior to the deadline
+            if (this.deadline) {
+                let i = 0;
+                let done = false;
+                while (i < this.history.length && ! done) {
+                    if ((new Date(this.timestamps[i])) > this.deadline) {
+                        done = true;
+                    } else {
+                        i += 1
+                    }
+                }
+                i = i - 1;
+                scrubber.value = Math.max(i,0);
+                this.editor.setValue(this.history[scrubber.value]);
+            }
+            else if (pos_last) {
                 scrubber.value = this.history.length-1;
                 this.editor.setValue(this.history[scrubber.value]);
             } else {
@@ -373,59 +388,7 @@ ActiveCode.prototype.addCaption = function() {
     this.outerDiv.parentNode.insertBefore(capDiv, this.outerDiv.nextSibling);
 };
 
-ActiveCode.prototype.saveEditor = function () {
-    var res;
-    var saveSuccess = function(data, status, whatever) {
-        if (data.redirect) {
-            alert("Did not save!  It appears you are not logged in properly")
-        } else if (data == "") {
-            alert("Error:  Program not saved");
-        }
-        else {
-            var acid = eval(data)[0];
-            if (acid.indexOf("ERROR:") == 0) {
-                alert(acid);
-            } else {
-                // use a tooltip to provide some success feedback
-                var save_btn = $(this.saveButton);
-                save_btn.attr('title', 'Saved your code.');
-                var opts = {
-                    'trigger': 'manual',
-                    'placement': 'bottom',
-                    'delay': { show: 100, hide: 500}
-                };
-                save_btn.tooltip(opts);
-                save_btn.tooltip('show');
-                setTimeout(function () {
-                    save_btn.tooltip('destroy')
-                }, 4000);
 
-                $('#' + acid + ' .CodeMirror').css('border-top', '2px solid #aaa');
-                $('#' + acid + ' .CodeMirror').css('border-bottom', '2px solid #aaa');
-            }
-        }
-    }.bind(this);
-
-    var data = {acid: this.divid, code: this.editor.getValue()};
-    data.lang = this.language;
-    if (data.code.match(/^\s+$/)) {
-        res = confirm("You are about to save an empty program, this will overwrite a previously saved program.  Continue?");
-        if (! res) {
-            return;
-        }
-    }
-    $(document).ajaxError(function (e, jqhxr, settings, exception) {
-        //alert("Request Failed for" + settings.url)
-        console.log("Request Failed for" + settings.url);
-    });
-    jQuery.post(eBookConfig.ajaxURL + 'saveprog', data, saveSuccess);
-    if (this.editor.acEditEvent) {
-        this.logBookEvent({'event': 'activecode', 'act': 'edit', 'div_id': this.divid}); // Log the run event
-        this.editor.acEditEvent = false;
-    }
-    this.logBookEvent({'event': 'activecode', 'act': 'save', 'div_id': this.divid}); // Log the run event
-
-};
 
 ActiveCode.prototype.loadEditor = function () {
     var loadEditor = (function (data, status, whatever) {

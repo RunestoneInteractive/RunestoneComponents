@@ -19,7 +19,7 @@ __author__ = 'isaiahmayerchak'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
-from runestone.server.componentdb import addQuestionToDB
+from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 from runestone.common.runestonedirective import RunestoneDirective
 
 def setup(app):
@@ -41,9 +41,8 @@ TEMPLATE_START = """
 TEMPLATE_OPTION = """
     <li data-component="draggable" id="%(divid)s_drag%(dnd_label)s">%(dragText)s</li>
     <li data-component="dropzone" for="%(divid)s_drag%(dnd_label)s">%(dropText)s</li>
-    </div>
 """
-TEMPLATE_END = """</ul>"""
+TEMPLATE_END = """</ul></div>"""
 
 
 class DragNDropNode(nodes.General, nodes.Element):
@@ -61,6 +60,9 @@ class DragNDropNode(nodes.General, nodes.Element):
 # The node that is passed as a parameter is an instance of our node class.
 def visit_dnd_node(self,node):
     res = TEMPLATE_START
+
+    node.delimiter = "_start__{}_".format(node.dnd_options['divid'])
+    self.body.append(node.delimiter)
 
     if "feedback" in node.dnd_options:
         node.dnd_options["feedback"] = "<span data-component=feedback>" + node.dnd_options["feedback"] + "</span>"
@@ -86,6 +88,12 @@ def depart_dnd_node(self,node):
             res += node.template_option % node.dnd_options
     res += node.template_end % node.dnd_options
     self.body.append(res)
+
+    addHTMLToDB(node.dnd_options['divid'],
+                node.dnd_options['basecourse'],
+                "".join(self.body[self.body.index(node.delimiter) + 1:]))
+
+    self.body.remove(node.delimiter)
 
 
 class DragNDrop(RunestoneDirective):

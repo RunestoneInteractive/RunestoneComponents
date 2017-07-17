@@ -25,13 +25,12 @@ ShortAnswer.prototype = new RunestoneBase();
 ========================================*/
 ShortAnswer.prototype.init = function (opts) {
     RunestoneBase.apply(this, arguments);
+    RunestoneBase.prototype.init.apply(this, arguments);
     var orig = opts.orig;    // entire <p> element that will be replaced by new HTML
     this.useRunestoneServices = opts.useRunestoneServices || eBookConfig.useRunestoneServices;
     this.origElem = orig;
     this.divid = orig.id;
     this.question = this.origElem.innerHTML;
-    this.sid = opts.sid;
-    this.graderactive = opts.graderactive;
 
     this.optional = false;
     if ($(this.origElem).is("[data-optional]")) {

@@ -15,24 +15,24 @@
 #
 __author__ = 'isaiahmayerchak'
 
+import json
+import ast
+from numbers import Number
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
-#from runestone.assess.assessbase import *
-import json
-import random
-from runestone.server.componentdb import addQuestionToDB
+from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 from runestone.common import RunestoneDirective
 
 
 def setup(app):
     app.add_directive('fillintheblank', FillInTheBlank)
-    app.add_directive('blank', Blank)
+    app.add_role('blank', BlankRole)
     app.add_stylesheet('fitb.css')
     app.add_javascript('fitb.js')
     app.add_javascript('timedfitb.js')
     app.add_node(FITBNode, html=(visit_fitb_node, depart_fitb_node))
     app.add_node(BlankNode, html=(visit_blank_node, depart_blank_node))
+    app.add_node(FITBFeedbackNode, html=(visit_fitb_feedback_node, depart_fitb_feedback_node))
 
 
 class FITBNode(nodes.General, nodes.Element):
@@ -45,42 +45,61 @@ class FITBNode(nodes.General, nodes.Element):
         """
         super(FITBNode,self).__init__()
         self.fitb_options = content
+        # Create a data structure of feedback.
+        self.feedbackArray = []
 
 
 def visit_fitb_node(self,node):
-    res = ""
 
-    if 'casei' in node.fitb_options:
-        node.fitb_options['casei'] = 'true'
-    else:
-        node.fitb_options['casei'] = 'false'
+    node.delimiter = "_start__{}_".format(node.fitb_options['divid'])
+    self.body.append(node.delimiter)
+
     res = node.template_start % node.fitb_options
-
     self.body.append(res)
 
 
-def depart_fitb_node(self,node):
-    res = ""
+def depart_fitb_node(self, node):
+    # If there were fewer blanks than feedback items, add blanks at the end of the question.
+    blankCount = 0
+    for _ in node.traverse(BlankNode):
+        blankCount += 1
+    while blankCount < len(node.feedbackArray):
+        visit_blank_node(self, None)
+        blankCount += 1
 
-    res += node.template_end % node.fitb_options
+    # Warn if there are fewer feedback items than blanks.
+    # TODO: node.source, node.line aren't defined.
+    #print(node.source, node.line)
+    if len(node.feedbackArray) < blankCount:
+        print('Warning at {} line {}: there'' not enough feedback for the number of blanks supplied.'.format(node.source, node.line))
+
+    # Generate the HTML.
+    node.fitb_options['json'] = json.dumps(node.feedbackArray)
+    res = node.template_end % node.fitb_options
     self.body.append(res)
+
+    # add HTML to the Database and clean up
+    addHTMLToDB(node.fitb_options['divid'],
+                node.fitb_options['basecourse'],
+                "".join(self.body[self.body.index(node.delimiter) + 1:]))
+
+    self.body.remove(node.delimiter)
 
 
 class FillInTheBlank(RunestoneDirective):
     """
-    .. fillintheblank:: fill1412
+    .. fillintheblank:: some_unique_id_here
 
-        .. blank:: blank1345
-            :correct: \\bred\\b
-            :feedback1: (".*", "Try 'red'")
+        Complete the sentence: |blank| had a |blank| lamb. One plus one is: (note that if there aren't enough blanks for the feedback given, they're added to the end of the problem. So, we don't **need** to specify a blank here.)
 
-            Fill in the blanks to make the following sentence: "The red car drove away" The [blank here]
-
-        .. blank:: blank52532
-            :correct: \\baway\\b
-            :feedback1: (".*", "Try 'away'")
-
-            car drove [blank here]
+        -   :Mary: Is the correct answer.
+            :Sue: Is wrong.
+            :x: Try again. (Note: the last item of feedback matches anything, regardless of the string it's given.)
+        -   :little: That's right.
+            :.*: Nope.
+        -   :2: Right on! Numbers can be given in decimal, hex (0x10 == 16), octal (0o10 == 8), binary (0b10 == 2), or using scientific notation (1e1 == 10), both here and by the user when answering the question.
+            :2 1: Close.... (The second number is a tolerance, so this matches 1 or 3.)
+            :x: Nope. (As earlier, this matches anything.)
     """
     required_arguments = 1
     optional_arguments = 0
@@ -89,7 +108,6 @@ class FillInTheBlank(RunestoneDirective):
     option_spec = RunestoneDirective.option_spec.copy()
     option_spec.update(
        {'blankid':directives.unchanged,
-        'iscode':directives.flag,
         'casei':directives.flag  # case insensitive matching
     })
 
@@ -97,20 +115,21 @@ class FillInTheBlank(RunestoneDirective):
         """
             process the fillintheblank directive and generate html for output.
             :param self:
-            :return:
-            .. fillintheblank:: qname
-            :iscode: boolean
-            :casei: Case insensitive boolean
+            :return: Nodes resulting from this directive.
             ...
             """
 
         TEMPLATE_START = '''
         <div class="runestone">
-        <p data-component="fillintheblank" data-casei="%(casei)s" id="%(divid)s">
+        <div data-component="fillintheblank" id="%(divid)s">
             '''
 
         TEMPLATE_END = '''
-        </p>
+        <script type="application/json">
+            %(json)s
+        </script>
+
+        </div>
         </div>
             '''
 
@@ -118,129 +137,172 @@ class FillInTheBlank(RunestoneDirective):
 
         self.options['divid'] = self.arguments[0]
 
+        # TODO: How to include self.lineno in the directive?
         fitbNode = FITBNode(self.options)
         fitbNode.template_start = TEMPLATE_START
         fitbNode.template_end = TEMPLATE_END
 
         self.state.nested_parse(self.content, self.content_offset, fitbNode)
 
+        # Expected _`structure`, with assigned variable names and transformations made:
+        #
+        # .. code-block::
+        #   :number-lines:
+        #
+        #   fitbNode = FITBNode()
+        #       Item 1 of problem text
+        #       ...
+        #       Item n of problem text
+        #       feedback_bullet_list = bullet_list()  <-- The last element in fitbNode.
+        #           feedback_list_item = list_item()   <-- Feedback for the first blank.
+        #               feedback_field_list = field_list()
+        #                   feedback_field = field()
+        #                       feedback_field_name = field_name()  <-- Contains an answer.
+        #                       feedback_field_body = field_body()  <-- Contains feedback for this answer.
+        #                   feedback_field = field()  <-- Another answer/feedback pair.
+        #           feedback_list_item = bullet_item()  <-- Feedback for the second blank.
+        #               ...etc. ...
+        #
+        # This becomes a data structure:
+        #
+        # .. code-block::
+        #   :number-lines:
+        #
+        #   self.feedbackArray = [
+        #       [   # blankArray
+        #           { # blankFeedbackDict: feedback 1
+        #               "regex" : feedback_field_name   # (An answer, as a regex;
+        #               "regexFlags" : "x"              # "i" if ``:casei:`` was specified, otherwise "".) OR
+        #               "number" : [min, max]           # a range of correct numeric answers.
+        #               "feedback": feedback_field_body (after being rendered as HTML)  # Provides feedback for this answer.
+        #           },
+        #           { # Feedback 2
+        #               Same as above.
+        #           }
+        #       ],
+        #       [  # Blank 2, same as above.
+        #       ]
+        #   ]
+        #
+        # ...and a transformed node structure:
+        #
+        # .. code-block::
+        #   :number-lines:
+        #
+        #   fitbNode = FITBNode()
+        #       Item 1 of problem text
+        #       ...
+        #       Item n of problem text
+        #       FITBFeedbackNode(), which contains all the nodes in blank 1's feedback_field_body
+        #       ...
+        #       FITBFeedbackNode(), which contains all the nodes in blank n's feedback_field_body
+        #
+        feedback_bullet_list = fitbNode.pop()
+        if not isinstance(feedback_bullet_list, nodes.bullet_list):
+            self.error('The last item in a fill-in-the-blank question must be a bulleted list.')
+        for feedback_list_item in feedback_bullet_list.children:
+            assert isinstance(feedback_list_item, nodes.list_item)
+            feedback_field_list = feedback_list_item[0]
+            if len(feedback_list_item) != 1 or not isinstance(feedback_field_list, nodes.field_list):
+                self.error('Each list item in a fill-in-the-blank problems must contain only one item, a field list.')
+            blankArray = []
+            for feedback_field in feedback_field_list:
+                assert isinstance(feedback_field, nodes.field)
+
+                feedback_field_name = feedback_field[0]
+                assert isinstance(feedback_field_name, nodes.field_name)
+                feedback_field_name_raw = feedback_field_name.rawsource
+                # See if this is a number, optinonally followed by a tolerance.
+                try:
+                    # Parse the number. In Python 3 syntax, this would be ``str_num, *list_tol = feedback_field_name_raw.split()``.
+                    tmp = feedback_field_name_raw.split()
+                    str_num = tmp[0]
+                    list_tol = tmp[1:]
+                    num = ast.literal_eval(str_num)
+                    assert isinstance(num, Number)
+                    # If no tolerance is given, use a tolarance of 0.
+                    if len(list_tol) == 0:
+                        tol = 0
+                    else:
+                        assert len(list_tol) == 1
+                        tol = ast.literal_eval(list_tol[0])
+                        assert isinstance(tol, Number)
+                    # We have the number and a tolerance. Save that.
+                    blankFeedbackDict = {"number": [num - tol, num + tol]}
+                except (SyntaxError, ValueError, AssertionError):
+                    # We can't parse this as a number, so assume it's a regex.
+                    blankFeedbackDict = {
+                        'regex':
+                            # The given regex must match the entire string, from the beginning (which may be preceeded by spaces) ...
+                            '^ *' +
+                            # ... to the contents (where a single space in the provided pattern is treated as one or more spaces in the student's anwer) ...
+                            feedback_field_name.rawsource.replace(' ', ' +')
+                            # ... to the end (also with optional whitespace).
+                            + ' *$',
+                        'regexFlags':
+                            'i' if 'casei' in self.options else '',
+                    }
+                blankArray.append(blankFeedbackDict)
+
+                feedback_field_body = feedback_field[1]
+                assert isinstance(feedback_field_body, nodes.field_body)
+                # Append feedback for this asnwer to the end of the fitbNode.
+                ffn = FITBFeedbackNode(feedback_field_body.rawsource, *feedback_field_body.children, **feedback_field_body.attributes)
+                ffn.blankFeedbackDict = blankFeedbackDict
+                fitbNode += ffn
+
+            # Add all the feedback for this blank to the feedbackArray.
+            fitbNode.feedbackArray.append(blankArray)
+
         return [fitbNode]
 
 
+# BlankRole
+# ---------
+# Create role representing the blank in a fill-in-the-blank question. This function returns a tuple of two values:
+#
+# 0. A list of nodes which will be inserted into the document tree at the point where the interpreted role was encountered (can be an empty list).
+# #. A list of system messages, which will be inserted into the document tree immediately after the end of the current block (can also be empty).
+def BlankRole(
+  # _`roleName`: the local name of the interpreted role, the role name actually used in the document.
+  roleName,
+  # _`rawtext` is a string containing the enitre interpreted text input, including the role and markup. Return it as a problematic node linked to a system message if a problem is encountered.
+  rawtext,
+  # The interpreted _`text` content.
+  text,
+  # The line number (_`lineno`) where the interpreted text begins.
+  lineno,
+  # _`inliner` is the docutils.parsers.rst.states.Inliner object that called this function. It contains the several attributes useful for error reporting and document tree access.
+  inliner,
+  # A dictionary of directive _`options` for customization (from the "role" directive), to be interpreted by this function. Used for additional attributes for the generated elements and other functionality.
+  options={},
+  # A list of strings, the directive _`content` for customization (from the "role" directive). To be interpreted by the role function.
+  content=[]):
 
-class BlankNode(nodes.General, nodes.Element):
-    def __init__(self,content):
-        """
+    # Blanks ignore all arguments, just inserting a blank.
+    return [BlankNode(rawtext)], []
 
-        Arguments:
-        - `self`:
-        - `content`:
-        """
-        super(BlankNode,self).__init__()
-        self.blank_options = content
+class BlankNode(nodes.Inline, nodes.TextElement):
+    pass
 
+def visit_blank_node(self, node):
+    self.body.append('<input type="text">')
 
-def visit_blank_node(self,node):
-    res = ""
-
-    res = node.template_blank_start % node.blank_options
-
-    self.body.append(res)
-
-
-def depart_blank_node(self,node):
-    fbl = []
-    res = ""
-    feedCounter = 0
-
-    for k in sorted(node.blank_options.keys()):
-        if 'feedback' in k:
-            feedCounter += 1
-            node.blank_options['feedLabel'] = "feedback" + str(feedCounter)
-            pair = eval(node.blank_options[k])
-            p0 = pair[0]
-            p1 = pair[1]
-            node.blank_options['feedExp'] = p0
-            node.blank_options['feedText'] = p1
-            res += node.template_blank_option % node.blank_options
-
-    node.blank_options['fbl'] = json.dumps(fbl).replace('"',"'")
-
-    res += node.template_option_end % node.blank_options
+def depart_blank_node(self, node):
+    pass
 
 
-    self.body.append(res)
+# Contains feedback for one answer.
+class FITBFeedbackNode(nodes.General, nodes.Element):
+    pass
 
+def visit_fitb_feedback_node(self, node):
+    # Save the HTML generated thus far. Anything generated under this node will be placed in JSON.
+    self.context.append(self.body)
+    self.body = []
 
-
-
-class Blank(RunestoneDirective):
-    """
-.. blank:: blank52532
-    :correct: \\baway\\b
-    :feedback1: (".*", "Try 'away'")
-
-    car drove  [the blank will be here]
-
-    """
-    required_arguments = 1
-    optional_arguments = 0
-    final_argument_whitespace = True
-    has_content = True
-    option_spec = {'correct':directives.unchanged,
-        'feedback1':directives.unchanged,
-        'feedback2':directives.unchanged,
-        'feedback3':directives.unchanged,
-        'feedback4':directives.unchanged,
-    }
-
-    def run(self):
-        """
-            process the fillintheblank directive and generate html for output.
-            :param self:
-            :return:
-            .. blank:: qname
-            :correct: regular expression
-            :feedback1: ('.*', 'this is the message')
-            :feedback2: (RegEx, MessageString)
-            :feedback3: (RegEx, MessageString)
-            :feedback4: (RegEx, MessageString)
-
-
-
-            Question text
-            ...
-        """
-
-        self.options['divid'] = self.arguments[0]
-        if self.content:
-            if 'iscode' in self.options:
-                self.options['bodytext'] = '<pre>' + "\n".join(self.content) + '</pre>'
-            else:
-                self.options['bodytext'] = "\n".join(self.content)
-        else:
-            self.options['bodytext'] = '\n'
-
-        if 'correct' not in self.options:
-            raise ValueError("missing correct value in %s"%self.options['divid'])
-
-        TEMPLATE_BLANK_START = '''
-        <span data-blank>
-            '''
-        TEMPLATE_BLANK_OPTION = '''
-        <span data-feedback="regex" style="display: none" id="%(divid)s_%(feedLabel)s">%(feedExp)s</span>
-        <span data-feedback="text" style="display: none" for="%(divid)s_%(feedLabel)s">%(feedText)s</span>
-            '''
-        TEMPLATE_BLANK_END = '''
-        <span data-answer style="display: none" id="%(divid)s_answer">%(correct)s</span>
-        </span>
-        '''
-
-        blankNode = BlankNode(self.options)
-        blankNode.template_blank_start = TEMPLATE_BLANK_START
-        blankNode.template_blank_option = TEMPLATE_BLANK_OPTION
-        blankNode.template_option_end = TEMPLATE_BLANK_END
-
-        self.state.nested_parse(self.content, self.content_offset, blankNode)
-
-        return [blankNode]
+def depart_fitb_feedback_node(self, node):
+    # Place all the HTML generated for this node and its children into the feedbackArray.
+    node.blankFeedbackDict['feedback'] = ''.join(self.body)
+    # Restore HTML generated thus far.
+    self.body = self.context.pop()

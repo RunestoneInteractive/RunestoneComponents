@@ -120,6 +120,7 @@ def serve(port,listen):
     httpd.allow_reuse_address = True
     httpd.server_bind()
     httpd.server_activate()
+    sys.stderr = open('runestone.log','a')
     httpd.serve_forever()
 
 @cli.command()

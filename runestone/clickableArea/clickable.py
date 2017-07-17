@@ -19,7 +19,7 @@ __author__ = 'isaiahmayerchak'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
-from runestone.server.componentdb import addQuestionToDB
+from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 from runestone.common.runestonedirective import RunestoneDirective
 
 def setup(app):
@@ -55,6 +55,9 @@ class ClickableAreaNode(nodes.General, nodes.Element):
 def visit_ca_node(self,node):
     res = TEMPLATE
 
+    node.delimiter = "_start__{}_".format(node.ca_options['divid'])
+    self.body.append(node.delimiter)
+
     if "feedback" in node.ca_options:
         node.ca_options["feedback"] = "<span data-feedback>" + node.ca_options["feedback"] + "</span>"
     else:
@@ -75,6 +78,12 @@ def depart_ca_node(self,node):
     res = ""
     res = TEMPLATE_END % node.ca_options
     self.body.append(res)
+
+    addHTMLToDB(node.ca_options['divid'],
+                node.ca_options['basecourse'],
+                "".join(self.body[self.body.index(node.delimiter) + 1:]))
+
+    self.body.remove(node.delimiter)
 
 
 class ClickableArea(RunestoneDirective):

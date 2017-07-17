@@ -20,17 +20,47 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from runestone.assess import Assessment
-from runestone.server.componentdb import addQuestionToDB
+from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 from runestone.common.runestonedirective import RunestoneDirective
 
 def setup(app):
     app.add_directive('parsonsprob', ParsonsProblem)
+    app.add_node(ParsonsNode, html=(visit_parsons_node, depart_parsons_node))
     app.add_stylesheet('parsons.css')
     app.add_stylesheet('lib/prettify.css')
     app.add_javascript('lib/prettify.js')
     app.add_javascript('lib/hammer.min.js')
     app.add_javascript('parsons.js')
     app.add_javascript('timedparsons.js')
+
+
+TEMPLATE = '''
+        <div class="runestone" style="max-width: none;">
+        <pre data-component="parsons" id="%(divid)s"%(maxdist)s%(order)s%(noindent)s%(adaptive)s%(language)s>
+        <span data-question>%(qnumber)s: %(instructions)s</span>%(code)s
+        </pre>
+        </div>
+    '''
+
+class ParsonsNode(nodes.General, nodes.Element):
+    def __init__(self, options):
+        super(ParsonsNode, self).__init__()
+        self.parsonsnode_components = options
+
+def visit_parsons_node(self, node):
+    div_id = node.parsonsnode_components['divid']
+    components = dict(node.parsonsnode_components)
+    components.update({'divid': div_id})
+    res = TEMPLATE % components
+    addHTMLToDB(div_id, components['basecourse'], res)
+
+    self.body.append(res)
+
+def depart_parsons_node(self,node):
+    pass
+
+
+
 
 class ParsonsProblem(Assessment):
     """
@@ -108,15 +138,6 @@ Example:
 
         addQuestionToDB(self)
 
-        TEMPLATE = '''
-<<<<<<< HEAD
-=======
-        <div class="runestone" style="max-width: none;">
->>>>>>> RunestoneInteractive/master
-        <pre data-component="parsons" id="%(divid)s"%(maxdist)s%(order)s%(noindent)s%(adaptive)s%(language)s>
-        <span data-question>%(qnumber)s: %(instructions)s</span>%(code)s
-        </pre>
-    '''
         self.options['divid'] = self.arguments[0]
         self.options['qnumber'] = self.getNumber()
         self.options['instructions'] = ""
@@ -159,4 +180,5 @@ Example:
         self.options['divid'] = self.arguments[0]
 
         self.assert_has_content()
-        return [nodes.raw('', TEMPLATE % self.options, format='html')]
+
+        return [ParsonsNode(self.options)]
