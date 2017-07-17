@@ -18,7 +18,8 @@ __author__ = 'bmiller'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
-from runestone.server.componentdb import addQuestionToDB
+from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
+from runestone.common.runestonedirective import RunestoneDirective
 
 def setup(app):
     app.add_directive('video',Video)
@@ -27,7 +28,7 @@ def setup(app):
     app.add_stylesheet('video.css')
 
 CODE = """\
-<div id="%(divid)s" class="video_popup" >
+<div id="%(divid)s" class="video_popup runestone" >
 <video %(controls)s %(preload)s %(loop)s poster="%(thumb)s">
     %(sources)s
     No supported video types
@@ -73,7 +74,7 @@ INLINE = """\
 SOURCE = """<source src="%s" type="video/%s"></source>"""
 
 
-class Video(Directive):
+class Video(RunestoneDirective):
     """
 .. video:: id
    :controls:  Show the controls or not
@@ -125,6 +126,8 @@ class Video(Directive):
             res += POPUP % self.options
         else:
             res += INLINE % self.options
+
+        addHTMLToDB(self.options['divid'], self.options['basecourse'], res)
         return [nodes.raw('',res , format='html')]
 
 

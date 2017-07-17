@@ -22,7 +22,7 @@ from docutils.parsers.rst import Directive
 from .pg_logger import exec_script_str_local
 import json
 import six
-from runestone.server.componentdb import addQuestionToDB
+from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 from runestone.common.runestonedirective import RunestoneDirective
 
 def setup(app):
@@ -38,6 +38,7 @@ def setup(app):
 
 
 VIS = '''
+<div class="runestone" style="max-width: none;">
 <div class="alert alert-warning cd_section">
 <div id="%(divid)s"></div>
 <p class="cl_caption"><span class="cl_caption_text">%(caption)s (%(divid)s)</span> </p>
@@ -109,6 +110,7 @@ $(window).resize(function() {
     }
 });
 </script>
+</div>
 '''
 
 
@@ -233,6 +235,9 @@ class Codelens(RunestoneDirective):
             res += QUESTION
         if 'tracedata' in self.options:
             res += DATA
+        else:
+            res += '</div>'
+        addHTMLToDB(self.options['divid'], self.options['basecourse'], res % self.options)
         return [nodes.raw('', res % self.options, format='html')]
 
     def inject_questions(self, curTrace):
