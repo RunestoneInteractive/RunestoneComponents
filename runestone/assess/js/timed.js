@@ -473,7 +473,7 @@ Timed.prototype.checkResetability = function () {
 
 Timed.prototype.resetExam = function (result,status,ignore) {
     console.log(result);
-    if (result.canReset) {
+    if (result.canReset === true) {
         if (confirm("Only reset the exam if you experienced techinical difficulties. Your instructor will be notified of this reset.")) {
             this.logBookEvent({"event":"timedExam","act":"reset","div_id":this.divid,
                                "course":eBookConfig.course,"correct":this.score,"incorrect":this.incorrect,
