@@ -20,8 +20,8 @@ from runestone.common.runestonedirective import RunestoneDirective, RunestoneNod
 
 
 class TimedNode(nodes.General, nodes.Element, RunestoneNode):
-    def __init__(self,content):
-        super(TimedNode,self).__init__()
+    def __init__(self, content, **kwargs):
+        super(TimedNode,self).__init__(**kwargs)
         self.timed_options = content
 
 

@@ -71,8 +71,8 @@ def depart_tab_node(self,node):
 
 class TabbedStuffNode(nodes.General, nodes.Element, RunestoneNode):
     '''A TabbedStuffNode contains one or more TabNodes'''
-    def __init__(self,content):
-        super(TabbedStuffNode,self).__init__()
+    def __init__(self, content, **kwargs):
+        super(TabbedStuffNode,self).__init__(**kwargs)
         self.tabbed_stuff_options = content
         self.divid = content['divid']
 
