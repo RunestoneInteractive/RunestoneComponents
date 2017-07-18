@@ -79,20 +79,6 @@ def build(options):
     print('Building into ', options.build.outdir)
     rc = paverutils.run_sphinx(options,'build')
 
-
-    try:
-        if os.path.exists(os.path.join(options.build.sourcedir,'toc.rst')):
-            idxfile = os.path.join(options.build.sourcedir,'toc.rst')
-        else:
-            idxfile = os.path.join(options.build.sourcedir,'index.rst')
-
-        populateChapterInfo(options.build.project_name, idxfile)
-        print('Creating Chapter Information for {}'.format(idxfile))
-    except ImportError as e:
-        print('Chapter information database population skipped, This is OK for a standalone build.',e)
-    except Exception as e:
-        print('Chapter Information Creation Failed with', e)
-
     if rc == 0:
         print("Done, {} build successful".format(options.build.project_name))
     else:
