@@ -21,6 +21,11 @@ from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 import os
 
+# Provide a class which all Runestone nodes will inherit from.
+class RunestoneNode(nodes.Node):
+    pass
+
+
 # Notes
 # env = self.state.document.settings.env
 # env.config.html_context['course_id']

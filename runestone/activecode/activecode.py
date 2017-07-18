@@ -19,12 +19,10 @@ __author__ = 'bmiller'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
 from .textfield import *
-from sqlalchemy import create_engine, Table, MetaData, select, delete
-from runestone.server import get_dburl
+from sqlalchemy import Table
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB, engine, meta
-from runestone.common.runestonedirective import RunestoneDirective
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
 
 try:
     from html import escape  # py3
@@ -69,15 +67,15 @@ TEMPLATE_END = """
 </div>
 """
 
-class ActivcodeNode(nodes.General, nodes.Element):
-    def __init__(self, content):
+class ActivcodeNode(nodes.General, nodes.Element, RunestoneNode):
+    def __init__(self, content, **kwargs):
         """
 
         Arguments:
         - `self`:
         - `content`:
         """
-        super(ActivcodeNode, self).__init__(name=content['name'])
+        super(ActivcodeNode, self).__init__(name=content['name'], **kwargs)
         self.ac_components = content
 
 
@@ -352,7 +350,8 @@ class ActiveCode(RunestoneDirective):
             print("This should only affect the grading interface. Everything else should be fine.")
 
 
-        acnode = ActivcodeNode(self.options)
+        acnode = ActivcodeNode(self.options, rawsource=self.block_text)
+        acnode.source, acnode.line = self.state_machine.get_source_and_line(self.lineno)
         self.add_name(acnode)    # make this divid available as a target for :ref:
 
         if explain_text:

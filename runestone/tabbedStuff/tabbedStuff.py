@@ -17,7 +17,7 @@ __author__ = 'isaiahmayerchak'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
 
 def setup(app):
 #Add directives/javascript/css
@@ -45,8 +45,8 @@ END = """
 """
 
 class TabNode(nodes.General, nodes.Element):
-    def __init__(self, content):
-        super(TabNode, self).__init__()
+    def __init__(self, content, **kwargs):
+        super(TabNode, self).__init__(**kwargs)
         self.tabnode_options = content
         self.tabname = content['tabname']
 
@@ -69,7 +69,7 @@ def depart_tab_node(self,node):
 #Set options and format templates accordingly
     self.body.append(TABDIV_END)
 
-class TabbedStuffNode(nodes.General, nodes.Element):
+class TabbedStuffNode(nodes.General, nodes.Element, RunestoneNode):
     '''A TabbedStuffNode contains one or more TabNodes'''
     def __init__(self,content):
         super(TabbedStuffNode,self).__init__()
@@ -101,7 +101,7 @@ def depart_tabbedstuff_node(self,node):
 
 
 
-class TabDirective(Directive):
+class TabDirective(RunestoneDirective):
     """
 .. tab:: identifier
    :active: Optional flag that specifies this tab to be opened when page is loaded (default is first tab)--overridden by :inactive: flag on tabbedStuff
@@ -139,7 +139,7 @@ class TabDirective(Directive):
         self.state.nested_parse(self.content, self.content_offset, tab_node)
         return [tab_node]
 
-class TabbedStuffDirective(Directive):
+class TabbedStuffDirective(RunestoneDirective):
     """
 .. tabbed:: identifier
    :inactive: Optional flag that calls for no tabs to be open on page load
@@ -172,7 +172,8 @@ class TabbedStuffDirective(Directive):
         self.options['divid'] = self.arguments[0]
 
         # Create the node, to be populated by "nested_parse".
-        tabbedstuff_node = TabbedStuffNode(self.options)
+        tabbedstuff_node = TabbedStuffNode(self.options, rawsource=self.block_text)
+        tabbedstuff_node.source, tabbedstuff_node.line = self.state_machine.get_source_and_line(self.lineno)
 
         # Parse the directive contents (should be 1 or more tab directives)
         self.state.nested_parse(self.content, self.content_offset, tabbedstuff_node)

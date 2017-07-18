@@ -18,10 +18,9 @@ __author__ = 'bmiller'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
-import json
 import os
 from jinja2 import Environment, FileSystemLoader
+from runestone.common.runestonedirective import RunestoneDirective
 
 # try:
 #     import conf
@@ -38,7 +37,7 @@ def setup(app):
     app.add_javascript('livecode.js')
     app.add_javascript('clike.js')
 
-class LiveCode(Directive):
+class LiveCode(RunestoneDirective):
     required_arguments = 1
     optional_arguments = 0
     has_content = True
@@ -73,7 +72,9 @@ class LiveCode(Directive):
         template = env.get_template('livecode.html')
         output = template.render(**self.options)
 
-        return [nodes.raw('', output, format='html')]
+        raw_node = nodes.raw(self.block_text, output, format='html')
+        raw_node.source, raw_node.line = self.state_machine.get_source_and_line(self.lineno)
+        return [raw_node]
 
 
 

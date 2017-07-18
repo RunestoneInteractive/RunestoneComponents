@@ -14,12 +14,12 @@ __author__ = 'isaiahmayerchak'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
 
 #add directives/javascript/css
 
 
-class TimedNode(nodes.General, nodes.Element):
+class TimedNode(nodes.General, nodes.Element, RunestoneNode):
     def __init__(self,content):
         super(TimedNode,self).__init__()
         self.timed_options = content
@@ -42,12 +42,12 @@ def visit_timed_node(self, node):
         node.timed_options['nofeedback'] = 'data-no-feedback'
     else:
         node.timed_options['nofeedback'] = ''
-        
+
     if 'notimer' in node.timed_options:
         node.timed_options['notimer'] = 'data-no-timer'
     else:
         node.timed_options['notimer'] = ''
-        
+
     if 'fullwidth' in node.timed_options:
         node.timed_options['fullwidth'] = 'data-fullwidth'
     else:
@@ -69,7 +69,7 @@ TEMPLATE_START = '''
 
 TEMPLATE_END = '''</ul>
     '''
-class TimedDirective(Directive):
+class TimedDirective(RunestoneDirective):
     """
 .. timed:: identifier
     :timelimit: Number of minutes student has to take the timed assessment--if not provided, no time limit
@@ -106,7 +106,8 @@ class TimedDirective(Directive):
 
         self.options['divid'] = self.arguments[0]
 
-        timed_node = TimedNode(self.options)
+        timed_node = TimedNode(self.options, rawsource=self.block_text)
+        timed_node.source, timed_node.line = self.state_machine.get_source_and_line(self.lineno)
 
         self.state.nested_parse(self.content, self.content_offset, timed_node)
 

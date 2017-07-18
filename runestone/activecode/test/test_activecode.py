@@ -1,5 +1,8 @@
-from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 from selenium.webdriver import ActionChains
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
 setUpModule, tearDownModule = module_fixture_maker(__file__)
 
@@ -39,6 +42,7 @@ class ActiveCodeTests(RunestoneTestCase):
         ta = t1.find_element_by_class_name("cm-s-default")
         self.assertIsNotNone(ta)
         self.driver.execute_script("""edList['test1'].editor.setValue("print('GoodBye')")""")
+        WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, "run-button")))
         rb.click()
         output = t1.find_element_by_class_name("ac_output")
         self.assertEqual(output.text.strip(),"GoodBye")
