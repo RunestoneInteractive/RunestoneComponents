@@ -17,7 +17,7 @@ from .shortanswer import *
 from .tabbedStuff import *
 from .usageAssignment import *
 from .video import *
-from .server.chapternames import populateChapterInfo
+
 
 import os, sys
 
