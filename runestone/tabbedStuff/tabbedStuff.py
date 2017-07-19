@@ -133,7 +133,7 @@ class TabDirective(RunestoneDirective):
 
         # Create the node, to be populated by "nested_parse".
         self.options['tabname'] = self.arguments[0]
-        tab_node = TabNode(self.options)
+        tab_node = TabNode(self.options, rawsource=self.block_text)
 
         # Parse the child nodes (content of the tab)
         self.state.nested_parse(self.content, self.content_offset, tab_node)
