@@ -15,13 +15,11 @@
 #
 __author__ = 'isaiahmayerchak'
 
-import re
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
 from runestone.assess import Assessment
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common.runestonedirective import RunestoneDirective
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
 
 def setup(app):
     app.add_directive('parsonsprob', ParsonsProblem)
@@ -42,9 +40,9 @@ TEMPLATE = '''
         </div>
     '''
 
-class ParsonsNode(nodes.General, nodes.Element):
-    def __init__(self, options):
-        super(ParsonsNode, self).__init__()
+class ParsonsNode(nodes.General, nodes.Element, RunestoneNode):
+    def __init__(self, options, **kwargs):
+        super(ParsonsNode, self).__init__(**kwargs)
         self.parsonsnode_components = options
 
 def visit_parsons_node(self, node):
@@ -142,7 +140,7 @@ Example:
         self.options['qnumber'] = self.getNumber()
         self.options['instructions'] = ""
         self.options['code'] = self.content
-        
+
         if 'maxdist' in self.options:
             self.options['maxdist'] = ' data-maxdist="' + self.options['maxdist'] + '"'
         else:
@@ -163,8 +161,8 @@ Example:
             self.options['language'] = ' data-language="' + self.options['language'] + '"'
         else:
             self.options['language'] = ''
-         
-          
+
+
         if '-----' in self.content:
             index = self.content.index('-----')
             self.options['instructions'] = "\n".join(self.content[:index])
@@ -181,4 +179,6 @@ Example:
 
         self.assert_has_content()
 
-        return [ParsonsNode(self.options)]
+        parsons_node = ParsonsNode(self.options, rawsource=self.block_text)
+        parsons_node.source, parsons_node.line = self.state_machine.get_source_and_line(self.lineno)
+        return [parsons_node]

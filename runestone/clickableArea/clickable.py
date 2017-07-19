@@ -18,9 +18,8 @@ __author__ = 'isaiahmayerchak'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common.runestonedirective import RunestoneDirective
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
 
 def setup(app):
     app.add_directive('clickablearea',ClickableArea)
@@ -39,14 +38,14 @@ TEMPLATE_END = """
 </div>
 """
 
-class ClickableAreaNode(nodes.General, nodes.Element):
-    def __init__(self,content):
+class ClickableAreaNode(nodes.General, nodes.Element, RunestoneNode):
+    def __init__(self,content, **kwargs):
         """
         Arguments:
         - `self`:
         - `content`:
         """
-        super(ClickableAreaNode,self).__init__()
+        super(ClickableAreaNode,self).__init__(**kwargs)
         self.ca_options = content
 
 # self for these functions is an instance of the writer class.  For example
@@ -140,7 +139,8 @@ class ClickableArea(RunestoneDirective):
             self.options['clickcode'] = source
         else:
             self.options['clickcode'] = ''
-        clickNode = ClickableAreaNode(self.options)
+        clickNode = ClickableAreaNode(self.options, rawsource=self.block_text)
+        clickNode.source, clickNode.line = self.state_machine.get_source_and_line(self.lineno)
         clickNode.template_start = TEMPLATE
 
         if "table" in self.options:

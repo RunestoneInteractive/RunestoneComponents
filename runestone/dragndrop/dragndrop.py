@@ -20,7 +20,7 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common.runestonedirective import RunestoneDirective
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
 
 def setup(app):
     app.add_directive('dragndrop',DragNDrop)
@@ -45,14 +45,14 @@ TEMPLATE_OPTION = """
 TEMPLATE_END = """</ul></div>"""
 
 
-class DragNDropNode(nodes.General, nodes.Element):
-    def __init__(self,content):
+class DragNDropNode(nodes.General, nodes.Element, RunestoneNode):
+    def __init__(self,content, **kwargs):
         """
         Arguments:
         - `self`:
         - `content`:
         """
-        super(DragNDropNode,self).__init__()
+        super(DragNDropNode,self).__init__(**kwargs)
         self.dnd_options = content
 
 # self for these functions is an instance of the writer class.  For example
@@ -161,7 +161,8 @@ class DragNDrop(RunestoneDirective):
         self.options['question'] = source
 
 
-        dndNode = DragNDropNode(self.options)
+        dndNode = DragNDropNode(self.options, rawsource=self.block_text)
+        dndNode.source, dndNode.line = self.state_machine.get_source_and_line(self.lineno)
         dndNode.template_start = TEMPLATE_START
         dndNode.template_option = TEMPLATE_OPTION
         dndNode.template_end = TEMPLATE_END

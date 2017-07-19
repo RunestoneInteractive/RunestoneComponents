@@ -15,10 +15,7 @@
 #
 __author__ = 'bmiller'
 
-from docutils import nodes
-from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
-from runestone.common.runestonedirective import RunestoneDirective
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
 
 _base_js_escapes = (
     ('\\', r'\u005C'),
@@ -76,7 +73,7 @@ class Assessment(RunestoneDirective):
     def run(self):
 
         self.options['qnumber'] = self.getNumber()
-        
+
         self.options['divid'] = self.arguments[0]
 
         if self.content[0][:2] == '..':  # first line is a directive

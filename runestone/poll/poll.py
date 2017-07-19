@@ -18,7 +18,7 @@ __author__ = 'isaiahmayerchak'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
 from runestone.server.componentdb import addQuestionToDB
 
 
@@ -41,14 +41,14 @@ TEMPLATE_OPTION = """
 
 TEMPLATE_END = """</ul>"""
 
-class PollNode(nodes.General, nodes.Element):
-    def __init__(self,content):
+class PollNode(nodes.General, nodes.Element, RunestoneNode):
+    def __init__(self,content, **kwargs):
         """
         Arguments:
         - `self`:
         - `content`:
         """
-        super(PollNode,self).__init__()
+        super(PollNode,self).__init__(**kwargs)
         self.poll_content = content
 
 # self for these functions is an instance of the writer class.  For example
@@ -80,7 +80,7 @@ def depart_poll_node(self,node):
     pass
 
 
-class Poll(Directive):
+class Poll(RunestoneDirective):
     """
 .. poll:: identifier
     :scale: Mode 1--Implements the "On a scale of 1 to x" type method of poll--x is provided by author
@@ -136,5 +136,6 @@ class Poll(Directive):
         else:
             self.options["comment"] = ""
 
-
-        return [PollNode(self.options)]
+        poll_node = PollNode(self.options, rawsource=self.block_text)
+        poll_node.source, poll_node.line = self.state_machine.get_source_and_line(self.lineno)
+        return [poll_node]

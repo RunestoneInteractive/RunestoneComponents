@@ -18,7 +18,6 @@ __author__ = 'bmiller'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
 from .pg_logger import exec_script_str_local
 import json
 import six
@@ -238,7 +237,9 @@ class Codelens(RunestoneDirective):
         else:
             res += '</div>'
         addHTMLToDB(self.options['divid'], self.options['basecourse'], res % self.options)
-        return [nodes.raw('', res % self.options, format='html')]
+        raw_node = nodes.raw(self.block_text, res % self.options, format='html')
+        raw_node.source, raw_node.line = self.state_machine.get_source_and_line(self.lineno)
+        return [raw_node]
 
     def inject_questions(self, curTrace):
         if 'breakline' not in self.options:

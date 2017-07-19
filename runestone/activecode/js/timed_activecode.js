@@ -54,7 +54,6 @@ TimedActiveCode.prototype.processTimedSubmission = function (logFlag) {
     // Disable input & evaluate component
     if (this.useRunestoneServices) {
         if (logFlag) {
-            this.saveEditor();
             this.runProg();
         } else {
             this.loadEditor().done(this.runProg.bind(this));

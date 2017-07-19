@@ -45,9 +45,12 @@ def module_fixture_maker(module_path):
 # Provide a base test case which sets up the `Selenium <http://selenium-python.readthedocs.io/>`_ driver.
 class RunestoneTestCase(unittest.TestCase):
     def setUp(self):
-
-        self.display = Display(visible=0, size=(1280, 1024))
-        self.display.start()
+        # `PyVirtualDisplay <http://pyvirtualdisplay.readthedocs.io/en/latest/>`_ only runs on X-windows, meaning Linux. Mac seems to have `some support <https://support.apple.com/en-us/HT201341>`_. Windows is out of the question.
+        if os.name != 'nt':
+            self.display = Display(visible=0, size=(1280, 1024))
+            self.display.start()
+        else:
+            self.display = None
         #self.driver = webdriver.PhantomJS() # use this for Jenkins auto testing
         # options = webdriver.ChromeOptions()
         # options.add_argument("headless")
@@ -60,4 +63,5 @@ class RunestoneTestCase(unittest.TestCase):
 
     def tearDown(self):
         self.driver.quit()
-        self.display.stop()
+        if self.display:
+            self.display.stop()
