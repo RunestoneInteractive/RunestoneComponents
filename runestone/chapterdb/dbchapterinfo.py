@@ -32,7 +32,6 @@ def setup(app):
     app.connect('build-finished', build_finished)
 
 chap_order = [] # correct chapter order from the index.rst
-chap_id = '' # current chapter not sure this needs to be global
 chapsubs = {} # list of subchapter ids fromthe doctree for each chapter
 chaptitles = {} # chapter titles from the doctree
 subtitles = {} # The proper title of each sub chapter from the doctree
@@ -49,15 +48,12 @@ def doctree_resolved(app, doctree, docname):
     * If this is the top level index document then do the same for the toctree inclusions
 
     """
-    global chap_id
     for section in doctree.traverse(docutils.nodes.section):
         #print(section.source ,dir(section.document))
         title = section.next_node(docutils.nodes.Titular)
         pl = section.source.split('/')
         chap_id = pl[-2]
         subchap_id = pl[-1].replace('.rst', '')
-        if subchap_id == 'index':
-            print("INDEX ", section.source, docname)
         if subchap_id == 'index' and chap_order == []:
             chap_order.extend(get_top_toc(section.source))
         if chap_id not in chapsubs:
