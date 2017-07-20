@@ -39,10 +39,10 @@ subchap_order = {}  # order of the subchapters, gleaned from the toctree.rst fil
 
 def doctree_resolved(app, doctree, docname):
     """
-    Called in response to the doctree-resolved even in Sphinx.  This means that for 
+    Called in response to the doctree-resolved even in Sphinx.  This means that for
     a given document the doctree is complete and the TOC is fully realized.
 
-    * Walk the sections in this document, grabbing the nicely formatted title, in fact we only 
+    * Walk the sections in this document, grabbing the nicely formatted title, in fact we only
       want the first title as we don't track sub-sub sections.
     * If this is a toctree document then read that document to get the correct order.abs
     * If this is the top level index document then do the same for the toctree inclusions
@@ -72,8 +72,8 @@ def doctree_resolved(app, doctree, docname):
 
 def build_finished(app, ex):
     """
-    When the build is completely finished output the information gathered about chapters and subchapters
-    into the database.
+    When the build is completely finished output the information gathered about
+    chapters and subchapters into the database.
     """
     if not engine:
         print("You need to install a DBAPI module - psycopg2 for Postgres")
@@ -85,7 +85,6 @@ def build_finished(app, ex):
     print("Cleaning up old chapters info")
     engine.execute(chapters.delete().where(chapters.c.course_id == course_id))
 
-
     if 'Labs' in chapsubs:
         chap_order.append('Labs')
         subchap_order['Labs'] = chapsubs['Labs']
@@ -93,17 +92,17 @@ def build_finished(app, ex):
         # insert row for chapter in the chapter table and get the id
         print("Adding chapter subchapter info for {}".format(chap))
         ins = chapters.insert().values(chapter_name=chaptitles.get(chap, chap),
-                                  course_id=course_id, chapter_label=chap)
+                                       course_id=course_id, chapter_label=chap)
         res = engine.execute(ins)
         currentRowId = res.inserted_primary_key[0]
         for sub in subchap_order[chap]:
             # insert row for subchapter
             ins = sub_chapters.insert().values(sub_chapter_name=subtitles[chap][sub],
-                                    chapter_id=str(currentRowId),
-                                    sub_chapter_label=sub)
+                                               chapter_id=str(currentRowId),
+                                               sub_chapter_label=sub)
             engine.execute(ins)
 
-    
+
 def get_toctree(path):
     """
     Process the toctree for a chapter.
@@ -127,6 +126,7 @@ def get_toctree(path):
             break
 
     return [x.strip().replace('.rst', '') for x in all_lines[ix+iy+2:] if not re.match(r'^\s*$', x)]
+
 
 def get_top_toc(path):
     """
