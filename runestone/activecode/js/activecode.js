@@ -211,15 +211,16 @@ ActiveCode.prototype.createControls = function () {
         $(butt).click(this.showCodelens.bind(this));
     }
     // CodeCoach
-    if (this.useRunestoneServices && $(this.origElem).data("coach")) {
-        butt = document.createElement("button");
-        $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Code Coach");
-        $(butt).css("margin-left", "10px");
-        this.coachButton = butt;
-        ctrlDiv.appendChild(butt);
-        $(butt).click(this.showCodeCoach.bind(this));
-    }
+    // bnm - disable code coach until it is revamped  2017-7-22
+    // if (this.useRunestoneServices && $(this.origElem).data("coach")) {
+    //     butt = document.createElement("button");
+    //     $(butt).addClass("ac_opt btn btn-default");
+    //     $(butt).text("Code Coach");
+    //     $(butt).css("margin-left", "10px");
+    //     this.coachButton = butt;
+    //     ctrlDiv.appendChild(butt);
+    //     $(butt).click(this.showCodeCoach.bind(this));
+    // }
 
     // Audio Tour
     if ($(this.origElem).data("audio")) {
@@ -797,7 +798,9 @@ ActiveCode.prototype.runProg = function () {
 
     Promise.all([skulpt_run_dfd, history_dfd]).then((function (mod) { // success
             $(this.runButton).removeAttr('disabled');
-            $(this.historyScrubber).on("slidechange", this.slideit.bind(this));
+            if (this.slideit) {
+                $(this.historyScrubber).on("slidechange", this.slideit.bind(this));
+            }
             $(this.historyScrubber).slider("enable");
             this.logRunEvent({
                 'div_id': this.divid,

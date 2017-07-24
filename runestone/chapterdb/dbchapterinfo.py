@@ -32,7 +32,7 @@ def setup(app):
     app.connect('build-finished', build_finished)
 
 chap_order = [] # correct chapter order from the index.rst
-chapsubs = {} # list of subchapter ids fromthe doctree for each chapter
+sub_ids_for_chapter = {} # list of subchapter ids fromthe doctree for each chapter
 chaptitles = {} # chapter titles from the doctree
 subtitles = {} # The proper title of each sub chapter from the doctree
 subchap_order = {}  # order of the subchapters, gleaned from the toctree.rst file
@@ -56,16 +56,16 @@ def doctree_resolved(app, doctree, docname):
         subchap_id = pl[-1].replace('.rst', '')
         if subchap_id == 'index' and chap_order == []:
             chap_order.extend(get_top_toc(section.source))
-        if chap_id not in chapsubs:
-            chapsubs[chap_id] = []
+        if chap_id not in sub_ids_for_chapter:
+            sub_ids_for_chapter[chap_id] = []
         if chap_id not in subtitles:
             subtitles[chap_id] = {}
         if title:
             if subchap_id == 'toctree':
                 subchap_order[chap_id] = get_toctree(section.source)
                 chaptitles[chap_id] = title.astext()
-            if subchap_id not in chapsubs[chap_id]:
-                chapsubs[chap_id].append(subchap_id)
+            if subchap_id not in sub_ids_for_chapter[chap_id]:
+                sub_ids_for_chapter[chap_id].append(subchap_id)
             if subchap_id not in subtitles:
                 subtitles[chap_id][subchap_id] = title.astext()
 
@@ -85,9 +85,9 @@ def build_finished(app, ex):
     print("Cleaning up old chapters info")
     engine.execute(chapters.delete().where(chapters.c.course_id == course_id))
 
-    if 'Labs' in chapsubs:
+    if 'Labs' in sub_ids_for_chapter:
         chap_order.append('Labs')
-        subchap_order['Labs'] = chapsubs['Labs']
+        subchap_order['Labs'] = sub_ids_for_chapter['Labs']
     for chap in chap_order:
         # insert row for chapter in the chapter table and get the id
         print("Adding chapter subchapter info for {}".format(chap))
