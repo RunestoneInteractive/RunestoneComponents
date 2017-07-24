@@ -144,13 +144,15 @@ Timed.prototype.renderControlButtons = function () {
         "id": "controls",
         "style": "text-align: center"
     });
-    this.startBtn = document.createElement("btn");
-    this.pauseBtn = document.createElement("btn");
-    this.resetBtn = document.createElement("btn");
+    this.startBtn = document.createElement("button");
+    this.pauseBtn = document.createElement("button");
+    this.resetBtn = document.createElement("button");
 
     $(this.startBtn).attr({
         "class": "btn btn-success",
-        "id": "start"
+        "id": "start",
+        "tabindex": "0",
+        "role": "button"
     });
     this.startBtn.textContent = "Start";
     this.startBtn.addEventListener("click", function () {
@@ -161,7 +163,9 @@ Timed.prototype.renderControlButtons = function () {
     $(this.pauseBtn).attr({
         "class": "btn btn-default",
         "id": "pause",
-        "disabled":"true"
+        "disabled":"true",
+        "tabindex": "0",
+        "role": "button"
     });
     this.pauseBtn.textContent = "Pause";
     this.pauseBtn.addEventListener("click", function () {
@@ -171,7 +175,9 @@ Timed.prototype.renderControlButtons = function () {
     $(this.resetBtn).attr({
         "class": "btn btn-default",
         "id": "reset",
-        "disabled": "true"
+        "disabled": "true",
+        "tabindex": "1",
+        "role": "button"
     });
     this.resetBtn.textContent = "Reset";
     this.resetBtn.addEventListener("click", function () {
@@ -190,15 +196,19 @@ Timed.prototype.renderNavControls = function () {
 	this.pagNavList = document.createElement("ul");
     $(this.pagNavList).addClass("pagination");
 	this.leftContainer = document.createElement("li");
-    this.leftNavButton = document.createElement("a");
+    this.leftNavButton = document.createElement("button");
     this.leftNavButton.innerHTML = "&#8249; Prev";
     $(this.leftNavButton).attr("aria-label", "Previous");
+    $(this.leftNavButton).attr("tabindex", "0");
+    $(this.leftNavButton).attr("role", "button");
     $(this.leftNavButton).css("cursor", "pointer");
 	this.leftContainer.appendChild(this.leftNavButton);
     this.pagNavList.appendChild(this.leftContainer);
     this.rightContainer = document.createElement("li");
-    this.rightNavButton = document.createElement("a");
+    this.rightNavButton = document.createElement("button");
     $(this.rightNavButton).attr("aria-label", "Next");
+    $(this.rightNavButton).attr("tabindex", "0");
+    $(this.rightNavButton).attr("role", "button");
     this.rightNavButton.innerHTML = "Next &#8250;";
     $(this.rightNavButton).css("cursor", "pointer");
     this.rightContainer.appendChild(this.rightNavButton);
@@ -326,9 +336,14 @@ Timed.prototype.renderFeedbackContainer = function () {
 Timed.prototype.createRenderedQuestionArray = function () {
     // this finds all the assess questions in this timed assessment and calls their constructor method
     // Also adds them to this.renderedQuestionArray
+    // todo:  This needs to be updated to account for the runestone div wrapper.
     for (var i = 0; i < this.newChildren.length; i++) {
         var tmpChild = this.newChildren[i];
         opts = {'orig':tmpChild, 'useRunestoneServices':eBookConfig.useRunestoneServices}
+        if ($(tmpChild).children("[data-component]")) {
+            tmpChild = $(tmpChild).children("[data-component]")[0];
+            opts.orig = tmpChild;
+        }
         if ($(tmpChild).is("[data-component=multiplechoice]")) {
             this.renderedQuestionArray.push({"question": new TimedMC(opts)});
         } else if ($(tmpChild).is("[data-component=fillintheblank]")) {
@@ -588,9 +603,6 @@ Timed.prototype.tookTimedExam = function () {
     });
 
     this.checkServer("timedExam");
-    /* RunestoneBase.js checks server for which has
-       the most recent data, server or localStorage,
-       and populates the answers appropriately */
 
 };
 
@@ -699,7 +711,6 @@ Timed.prototype.shouldUseServer = function (data) {
                 return true;
         } else if (storedData.length == 7) {
             if (data.correct == storedData[0] && data.incorrect == storedData[2] && data.skipped == storedData[4] && data.timeTaken == storedData[6]) {
-                //this.logScore(); // Is this necessary if we determine that both the server and localStorage have the same info?
                 return false;   // In this case, because local storage has more info, we want to use that if it's consistent
             }
         }
@@ -769,7 +780,7 @@ Timed.prototype.restoreAnswers = function (data) {
         this.timeTaken = tmpArr[6];
     }
     else {
-        // Set localStorage in case of "accidental" reload.
+        // Set localStorage in case of "accidental" reload
         this.score = 0;
         this.incorrect = 0;
         this.skipped = this.renderedQuestionArray.length;
