@@ -146,6 +146,8 @@ Timed.prototype.renderControlButtons = function () {
     });
     this.startBtn = document.createElement("button");
     this.pauseBtn = document.createElement("button");
+    this.resetBtn = document.createElement("button");
+
     $(this.startBtn).attr({
         "class": "btn btn-success",
         "id": "start",
@@ -157,6 +159,7 @@ Timed.prototype.renderControlButtons = function () {
         this.renderTimedQuestion();
         this.startAssessment();
     }.bind(this), false);
+
     $(this.pauseBtn).attr({
         "class": "btn btn-default",
         "id": "pause",
@@ -168,8 +171,23 @@ Timed.prototype.renderControlButtons = function () {
     this.pauseBtn.addEventListener("click", function () {
         this.pauseAssessment();
     }.bind(this), false);
+
+    $(this.resetBtn).attr({
+        "class": "btn btn-default",
+        "id": "reset",
+        "disabled": "true",
+        "tabindex": "1",
+        "role": "button"
+    });
+    this.resetBtn.textContent = "Reset";
+    this.resetBtn.addEventListener("click", function () {
+        this.checkResetability();
+    }.bind(this), false);
+    $(this.resetBtn).hide();
+
     this.controlDiv.appendChild(this.startBtn);
     this.controlDiv.appendChild(this.pauseBtn);
+    this.controlDiv.appendChild(this.resetBtn);
     this.assessDiv.appendChild(this.wrapperDiv);
     this.assessDiv.appendChild(this.controlDiv);
 };
@@ -456,6 +474,37 @@ Timed.prototype.pauseAssessment = function () {
     }
 };
 
+Timed.prototype.checkResetability = function () {
+    /* Reset is only available if there is no record of a completed exam and the
+       localStorage does not reflect a partially completed exam */
+    let sendInfo = {"div_id":this.divid, "course":eBookConfig.course};
+    $(this.resetBtn).attr({
+        "disabled": true
+    });
+    console.log(sendInfo)
+    jQuery.getJSON(eBookConfig.ajaxURL + "checkTimedReset", sendInfo, this.resetExam.bind(this));
+
+}
+
+Timed.prototype.resetExam = function (result,status,ignore) {
+    console.log(result);
+    if (result.canReset === true) {
+        if (confirm("Only reset the exam if you experienced techinical difficulties. Your instructor will be notified of this reset.")) {
+            this.logBookEvent({"event":"timedExam","act":"reset","div_id":this.divid,
+                               "course":eBookConfig.course,"correct":this.score,"incorrect":this.incorrect,
+                               "skipped":this.skipped,"time":this.timeTaken,"reset":true});
+            localStorage.clear(); // Clear records of exam from localStorage
+
+            /* Prevent using server's record of the reset as the exam results when the page reloads */
+            localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given",JSON.stringify({"timestamp":new Date()}));
+
+            location.reload();
+        };
+    } else {
+        alert("This exam does not qualify to be reset. Contact your instructor with any questions.");
+    }
+}
+
 Timed.prototype.showTime = function () { // displays the timer value
     if (this.showTimer) {
     	var mins = Math.floor(this.timeLimit / 60);
@@ -506,6 +555,7 @@ Timed.prototype.increment = function () { // increments the timer
             } else {
                 this.timeLimit++; // Else count up to keep track of how long it took to complete
             }
+            localStorage.setItem(eBookConfig.email + ":" + this.divid + "-time", this.timeLimit);
             this.showTime();
             if (this.timeLimit > 0) {
                 this.increment();
@@ -522,17 +572,6 @@ Timed.prototype.increment = function () { // increments the timer
                 }
             }
         }.bind(this), 1000);
-    }
-};
-
-Timed.prototype.checkIfFinished = function () {
-    if (this.tookTimedExam()) {
-        $(this.startBtn).attr("disabled", true);
-        $(this.pauseBtn).attr("disabled", true);
-        $(this.finishButton).attr("disabled", true);
-        if (this.showResults) {
-           this.resetTimedMCMFStorage();
-        }
     }
 };
 
@@ -672,7 +711,6 @@ Timed.prototype.shouldUseServer = function (data) {
                 return true;
         } else if (storedData.length == 7) {
             if (data.correct == storedData[0] && data.incorrect == storedData[2] && data.skipped == storedData[4] && data.timeTaken == storedData[6]) {
-                this.logScore();
                 return false;   // In this case, because local storage has more info, we want to use that if it's consistent
             }
         }
@@ -710,6 +748,7 @@ Timed.prototype.restoreAnswers = function (data) {
     var tmpArr;
     if (data === "") {
         try {
+            this.timeLimit = parseInt(localStorage.getItem(eBookConfig.email + ":" + this.divid + "-time"));
             tmpArr = JSON.parse(localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given")).answer;
         } catch (err) {
             // error while parsing; likely due to bad value stored in storage
@@ -719,44 +758,52 @@ Timed.prototype.restoreAnswers = function (data) {
             return;
         }
     } else {
-        tmpArr = [parseInt(data.correct), parseInt(data.incorrect), parseInt(data.skipped), parseInt(data.timeTaken)];
-        this.setLocalStorage(data);
+        // Parse results from the database
+        tmpArr = [parseInt(data.correct), parseInt(data.incorrect), parseInt(data.skipped), parseInt(data.timeTaken), data.reset];
+        this.setLocalStorage(tmpArr);
     }
-    if (tmpArr.length == 4)
-    {
-       this.score = tmpArr[0];
-       this.incorrect = tmpArr[1];
-       this.skipped = tmpArr[2];
-       this.timeTaken = tmpArr[3];
+    if (tmpArr.length == 4) {
+        // Accidental Reload OR Database Entry
+        this.score = tmpArr[0];
+        this.incorrect = tmpArr[1];
+        this.skipped = tmpArr[2];
+        this.timeTaken = tmpArr[3];
     }
-    else if (tmpArr.length == 7)
-    {
-       this.score = tmpArr[0];
-       this.correctStr = tmpArr[1];
-       this.incorrect = tmpArr[2];
-       this.incorrectStr = tmpArr[3];
-       this.skipped = tmpArr[4];
-       this.skippedStr = tmpArr[5];
-       this.timeTaken = tmpArr[6];
+    else if (tmpArr.length == 7) {
+        // Loaded Completed Exam
+        this.score = tmpArr[0];
+        this.correctStr = tmpArr[1];
+        this.incorrect = tmpArr[2];
+        this.incorrectStr = tmpArr[3];
+        this.skipped = tmpArr[4];
+        this.skippedStr = tmpArr[5];
+        this.timeTaken = tmpArr[6];
     }
     else {
-       this.score = 0;
-       this.incorrect = 0;
-       this.skipped = this.renderedQuestionArray.length;
-       this.timeTaken = 0;
+        // Set localStorage in case of "accidental" reload
+        this.score = 0;
+        this.incorrect = 0;
+        this.skipped = this.renderedQuestionArray.length;
+        this.timeTaken = 0;
     }
     if (this.taken) {
-       this.handlePrevAssessment();
+        if (this.skipped === this.renderedQuestionArray.length) {
+            $(this.resetBtn).show();
+            $(this.resetBtn).attr({
+                "disabled": false
+            });
+            this.showFeedback = false;
+        }
+        this.handlePrevAssessment();
     }
     this.renderTimedQuestion();
     this.displayScore();
 	this.showTime();
 };
 
-Timed.prototype.setLocalStorage = function (data) {
+Timed.prototype.setLocalStorage = function (parsedData) {
     var timeStamp = new Date();
-    var answer = [parseInt(data.correct), parseInt(data.incorrect), parseInt(data.skipped), parseInt(data.timeTaken)];
-    var storageObj = {"answer": answer, "timestamp": timeStamp};
+    var storageObj = {"answer": parsedData, "timestamp": timeStamp};
     localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", JSON.stringify(storageObj));
 };
 
