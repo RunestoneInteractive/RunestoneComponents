@@ -18,6 +18,7 @@ from __future__ import print_function
 __author__ = 'bmiller'
 
 import re
+import os.path
 import docutils
 from sqlalchemy import Table
 from runestone.server.componentdb import engine, meta
@@ -51,9 +52,9 @@ def doctree_resolved(app, doctree, docname):
     for section in doctree.traverse(docutils.nodes.section):
         #print(section.source ,dir(section.document))
         title = section.next_node(docutils.nodes.Titular)
-        pl = section.source.split('/')
-        chap_id = pl[-2]
-        subchap_id = pl[-1].replace('.rst', '')
+        # Section.source is something like ``/abs/path/to/chap/subchap.rst``. Set ``chap_id = 'chap'`` and ``subchap_id = 'subchap'``.
+        chap_id = os.path.basename(os.path.dirname(section.source))
+        subchap_id = os.path.splitext(os.path.basename(section.source))[0]
         if subchap_id == 'index' and chap_order == []:
             chap_order.extend(get_top_toc(section.source))
         if chap_id not in sub_ids_for_chapter:
