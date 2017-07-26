@@ -152,7 +152,7 @@ Timed.prototype.renderControlButtons = function () {
         "class": "btn btn-success",
         "id": "start",
         "tabindex": "0",
-        "role": "button"
+        "role": "button",
     });
     this.startBtn.textContent = "Start";
     this.startBtn.addEventListener("click", function () {
@@ -496,7 +496,7 @@ Timed.prototype.resetExam = function (result,status,ignore) {
             localStorage.clear(); // Clear records of exam from localStorage
 
             /* Prevent using server's record of the reset as the exam results when the page reloads */
-            localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given",JSON.stringify({"timestamp":new Date()}));
+            localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given",JSON.stringify({"answer":[-1],"timestamp":new Date()}));
 
             location.reload();
         };
@@ -748,7 +748,6 @@ Timed.prototype.restoreAnswers = function (data) {
     var tmpArr;
     if (data === "") {
         try {
-            this.timeLimit = parseInt(localStorage.getItem(eBookConfig.email + ":" + this.divid + "-time"));
             tmpArr = JSON.parse(localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given")).answer;
         } catch (err) {
             // error while parsing; likely due to bad value stored in storage
@@ -761,6 +760,12 @@ Timed.prototype.restoreAnswers = function (data) {
         // Parse results from the database
         tmpArr = [parseInt(data.correct), parseInt(data.incorrect), parseInt(data.skipped), parseInt(data.timeTaken), data.reset];
         this.setLocalStorage(tmpArr);
+    }
+    if (tmpArr.length == 1) {
+        // Exam was previously reset
+        this.reset = true;
+        this.taken = 0;
+        return;
     }
     if (tmpArr.length == 4) {
         // Accidental Reload OR Database Entry
