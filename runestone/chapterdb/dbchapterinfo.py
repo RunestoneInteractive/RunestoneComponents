@@ -17,7 +17,7 @@ from __future__ import print_function
 
 __author__ = 'bmiller'
 
-import re
+import re, datetime
 import os.path
 import docutils
 from sqlalchemy import Table
@@ -67,7 +67,7 @@ def doctree_resolved(app, doctree, docname):
                 chaptitles[chap_id] = title.astext()
             if subchap_id not in sub_ids_for_chapter[chap_id]:
                 sub_ids_for_chapter[chap_id].append(subchap_id)
-            if subchap_id not in subtitles:
+            if subchap_id not in subtitles[chap_id]:
                 subtitles[chap_id][subchap_id] = title.astext()
 
 
@@ -83,9 +83,12 @@ def build_finished(app, ex):
     course_id = app.env.config.html_context.get('course_id', "unknown")
     chapters = Table('chapters', meta, autoload=True, autoload_with=engine)
     sub_chapters = Table('sub_chapters', meta, autoload=True, autoload_with=engine)
+    questions = Table('questions', meta, autoload=True, autoload_with=engine)
+    basecourse = app.config.html_context.get('basecourse',"unknown")
     print("Cleaning up old chapters info")
     engine.execute(chapters.delete().where(chapters.c.course_id == course_id))
-
+    engine.execute(questions.delete().where((questions.c.question_type == 'page') & 
+    (questions.c.base_course == basecourse)))
     if 'Labs' in sub_ids_for_chapter:
         chap_order.append('Labs')
         subchap_order['Labs'] = sub_ids_for_chapter['Labs']
@@ -102,7 +105,14 @@ def build_finished(app, ex):
                                                chapter_id=str(currentRowId),
                                                sub_chapter_label=sub)
             engine.execute(ins)
-
+            ins = questions.insert().values(chapter=chap, subchapter=sub,
+                                            question_type='page',
+                                            name="{}/{}".format(chaptitles.get(chap,chap),
+                                                                subtitles[chap][sub]),
+                                            timestamp=datetime.datetime.now(),   
+                                            base_course=basecourse)
+            engine.execute(ins)
+    
 
 def get_toctree(path):
     """
