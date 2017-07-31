@@ -94,7 +94,7 @@ def build_finished(app, ex):
         subchap_order['Labs'] = sub_ids_for_chapter['Labs']
     for chap in chap_order:
         # insert row for chapter in the chapter table and get the id
-        print("Adding chapter subchapter info for {}".format(chap))
+        print(u"Adding chapter subchapter info for {}".format(chap))
         ins = chapters.insert().values(chapter_name=chaptitles.get(chap, chap),
                                        course_id=course_id, chapter_label=chap)
         res = engine.execute(ins)
@@ -107,7 +107,7 @@ def build_finished(app, ex):
             engine.execute(ins)
             ins = questions.insert().values(chapter=chap, subchapter=sub,
                                             question_type='page',
-                                            name="{}/{}".format(chaptitles.get(chap,chap),
+                                            name=u"{}/{}".format(chaptitles.get(chap,chap),
                                                                 subtitles[chap][sub]),
                                             timestamp=datetime.datetime.now(),   
                                             base_course=basecourse)
