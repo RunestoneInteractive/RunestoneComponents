@@ -29,6 +29,9 @@ try:
 except ImportError:
     from cgi import escape  # py2
 
+if engine:
+    Source_code = Table('source_code', meta, autoload=True, autoload_with=engine)
+
 def setup(app):
     app.add_directive('activecode', ActiveCode)
     app.add_directive('actex', ActiveExercise)
@@ -312,7 +315,6 @@ class ActiveCode(RunestoneDirective):
         divid = self.options['divid']
 
         if engine:
-            Source_code = Table('source_code', meta, autoload=True, autoload_with=engine)
             engine.execute(Source_code.delete().where(Source_code.c.acid == divid).where(Source_code.c.course_id == course_name))
             engine.execute(Source_code.insert().values(
                 acid = divid,
@@ -322,26 +324,6 @@ class ActiveCode(RunestoneDirective):
                 includes = self.options['include'],
                 available_files = self.options.get('available_files', "")
             ))
-            try:
-                ch, sub_ch = env.docname.split('/')
-            except:
-                ch, sub_ch = (env.docname, 'null subchapter')
-
-            Div = Table('div_ids', meta, autoload=True, autoload_with=engine)
-            engine.execute(Div.delete()\
-                           .where(Div.c.course_name == course_name)\
-                           .where(Div.c.chapter == ch)\
-                           .where(Div.c.subchapter==sub_ch)\
-                           .where(Div.c.div_id==divid))
-            engine.execute(Div.insert().values(
-                course_name = course_name,
-                chapter = ch,
-                subchapter = sub_ch,
-                div_id = divid,
-                div_type = 'activecode'
-            ))
-
-
         else:
             print("Unable to save to source_code table in activecode.py. Possible problems:")
             print("  1. dburl or course_id are not set in conf.py for your book")
