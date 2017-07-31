@@ -22,24 +22,24 @@ from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 from runestone.common.runestonedirective import RunestoneDirective
 
 def setup(app):
-    app.add_directive('showeval', showEval)
+    app.add_directive('showeval', ShowEval)
     app.add_javascript('showEval.js')
 
 CODE = """\
 <div data-childcomponent="showeval" class="runestone explainer alert alert-warning">
     <button class="btn btn-success run-button" id="%(divid)s_nextStep">Next Step</button>
-    <button class="btn btn-default" id ="reset">Reset</button>
-    <div id="%(divid)s"></div>
+    <button class="btn btn-default" id ="%(divid)s_reset">Reset</button>
+    <div id="%(divid)s">%(preReqLines)s</div>
 </div>
 """
 
-INLINE = """\
+SCRIPT = """\
 <script>
     $(document).ready(function() {
-      steps = [%(steps)s];
+      steps = %(steps)s;
       s = new SHOWEVAL.ShowEval($('#%(divid)s)'), steps, %(trace_mode)s);
-      s.setNextButton('#nextStep');
-      s.setResetButton('#reset');
+      s.setNextButton('#%(divid)s_nextStep');
+      s.setResetButton('#%(divid)s_reset');
     });
 </script>
 """
@@ -60,7 +60,7 @@ class ShowEval(RunestoneDirective):
     optional_arguments = 0
     final_argument_whitespace = True
     has_content = True
-    option_spec = {'trace_mode':directives.flag}
+    option_spec = {'trace_mode':directives.unchanged_required}
 
     def run(self):
         """
@@ -88,12 +88,23 @@ class ShowEval(RunestoneDirective):
         """
 
         addQuestionToDB(self)
-        print("===========-=-=-=-=-=-=-=-=-=-=-=")
-        print(self.options)
 
         self.options['divid'] = self.arguments[0]
-        if self.options['trace_mode'].lower() == 'true':
+        self.options['trace_mode'] = self.options['trace_mode'].lower()
+        self.options['preReqLines'] = ''
+        self.options['steps'] = []
 
-        res = CODE % self.options
+        step = False
+        count = 0
+        for line in self.content:
+            if step == True:
+                self.options['steps'].append(line)
+            elif '~~~~' in line:
+                step = True
+            else:
+                self.options['preReqLines'] += line
+
+        res = (CODE + SCRIPT) % self.options
+
         addHTMLToDB(self.options['divid'], self.options['basecourse'], res)
         return [nodes.raw(self.block_text, res, format='html')]
