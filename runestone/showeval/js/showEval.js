@@ -123,6 +123,3 @@ var SHOWEVAL = (function () {
 
   return thisModule;
 }());
-
-
-

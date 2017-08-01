@@ -37,9 +37,9 @@ SCRIPT = """\
 <script>
     $(document).ready(function() {
       steps = %(steps)s;
-      s = new SHOWEVAL.ShowEval($('#%(divid)s)'), steps, %(trace_mode)s);
-      s.setNextButton('#%(divid)s_nextStep');
-      s.setResetButton('#%(divid)s_reset');
+      %(divid)s_object = new SHOWEVAL.ShowEval($('#%(divid)s'), steps, %(trace_mode)s);
+      %(divid)s_object.setNextButton('#%(divid)s_nextStep');
+      %(divid)s_object.setResetButton('#%(divid)s_reset');
     });
 </script>
 """
@@ -93,12 +93,14 @@ class ShowEval(RunestoneDirective):
         self.options['trace_mode'] = self.options['trace_mode'].lower()
         self.options['preReqLines'] = ''
         self.options['steps'] = []
+        self.options['content'] = {'content':self.content, 'type':type(self.content)}
 
         step = False
         count = 0
         for line in self.content:
             if step == True:
-                self.options['steps'].append(line)
+                if line != '':
+                    self.options['steps'].append(str(line))
             elif '~~~~' in line:
                 step = True
             else:
