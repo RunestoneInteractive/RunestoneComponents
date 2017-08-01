@@ -45,11 +45,11 @@ Runestone uses the ``restructuredText`` (rst) markup language.  We chose this ov
 SECTION 3: Sample Directives
 ::::::::::::::::::::::::::::
 
-ShowEval Replace Mode
----------------------
+ShowEval Trace Mode
+-------------------
 
 .. showeval:: showEval_0
-   :trace_mode: false
+   :trace_mode: true
 
    eggs = ['dogs', 'cats', 'moose']
    ~~~~
@@ -59,6 +59,22 @@ ShowEval Replace Mode
    {{'dogscatsmoose'.upper()}}{{'DOGSCATSMOOSE'}}.join(eggs)
    'DOGSCATSMOOSE'.join({{eggs}}{{['dogs', 'cats', 'moose']}})
    {{'DOGSCATSMOOSE'.join(['dogs', 'cats', 'moose'])}}{{'dogsDOGSCATSMOOSEcatsDOGSCATSMOOSEmoose'}}
+
+
+ShowEval Replace Mode
+---------------------
+
+.. showeval:: showEval_1
+  :trace_mode: false
+
+  eggs = ['dogs', 'cats', 'moose']
+  ~~~~
+
+  ''.join({{eggs}}{{['dogs', 'cats', 'moose']}}).upper().join(eggs)
+  {{''.join(['dogs', 'cats', 'moose'])}}{{'dogscatsmoose'}}.upper().join(eggs)
+  {{'dogscatsmoose'.upper()}}{{'DOGSCATSMOOSE'}}.join(eggs)
+  'DOGSCATSMOOSE'.join({{eggs}}{{['dogs', 'cats', 'moose']}})
+  {{'DOGSCATSMOOSE'.join(['dogs', 'cats', 'moose'])}}{{'dogsDOGSCATSMOOSEcatsDOGSCATSMOOSEmoose'}}
 
 
 Multiple Choice
