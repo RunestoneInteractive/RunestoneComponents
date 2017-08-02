@@ -28,7 +28,7 @@ def setup(app):
 
 CODE = """\
 <div data-childcomponent="showeval" class="runestone explainer alert alert-warning">
-    <button class="btn btn-success run-button" id="%(divid)s_nextStep">Next Step</button>
+    <button class="btn btn-success" id="%(divid)s_nextStep">Next Step</button>
     <button class="btn btn-default" id ="%(divid)s_reset">Reset</button>
     <div class="evalCont">
         <div id="%(divid)s">%(preReqLines)s</div>
