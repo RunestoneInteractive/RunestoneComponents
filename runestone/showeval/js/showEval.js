@@ -110,7 +110,7 @@ var SHOWEVAL = (function () {
             evalElem.fadeTo(400, 1, function() {
               window.setTimeout(function() {
                 //evalElem.css('overflow', 'visible');
-                evalElem.css('color', 'black');
+                evalElem.css('color', '#333');
                 thisShowEval.currentStep += 1;
                 if (thisShowEval.currentStep < thisShowEval.steps.length) {
                   thisShowEval.setStep(thisShowEval.currentStep);

@@ -1,0 +1,13 @@
+@charset "UTF-8";
+
+.evalCont {
+    font-family: monospace;
+    line-height: 1.5em;
+    padding: 9.5px;
+    background-color: #F5F5F5;
+    border: 1px solid #CCC;
+    border-radius: 4px;
+    display: block;
+    width: auto;
+    color: #333
+}

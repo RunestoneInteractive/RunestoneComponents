@@ -24,12 +24,15 @@ from runestone.common.runestonedirective import RunestoneDirective
 def setup(app):
     app.add_directive('showeval', ShowEval)
     app.add_javascript('showEval.js')
+    app.add_stylesheet('showEval.css')
 
 CODE = """\
 <div data-childcomponent="showeval" class="runestone explainer alert alert-warning">
     <button class="btn btn-success run-button" id="%(divid)s_nextStep">Next Step</button>
     <button class="btn btn-default" id ="%(divid)s_reset">Reset</button>
-    <div id="%(divid)s">%(preReqLines)s</div>
+    <div class="evalCont">
+        <div id="%(divid)s">%(preReqLines)s</div>
+    </div>
 </div>
 """
 
