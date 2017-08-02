@@ -39,7 +39,7 @@ var SHOWEVAL = (function () {
 
   thisModule.ShowEval.prototype.setNextButton = function(nextButtonSelector) {
     var thisObj = this; // uhg, javascript
-    $(nextButtonSelector).click(function() { thisObj.evaluateStep(); });
+    $(nextButtonSelector).click(function() { thisObj.evaluateStep(nextButtonSelector); });
   };
 
   thisModule.ShowEval.prototype.setResetButton = function(resetButtonSelector) {
@@ -74,13 +74,15 @@ var SHOWEVAL = (function () {
     this.currentStepDiv.before($('<div>').addClass('previousStep').html(this.steps[step][0] + this.steps[step][1] + this.steps[step][3]));
   };
 
-  thisModule.ShowEval.prototype.evaluateStep = function(step) {
+  thisModule.ShowEval.prototype.evaluateStep = function(buttonId, step) {
+    $(buttonId).attr("disabled", true);
     if (step === undefined) {
       step = this.currentStep;
     }
     if (this.currentStep >= this.steps.length) {
       //this.currentStep = 0;
       //step = 0;
+      $(buttonId).attr("disabled", false);
       return; // do nothing if on last step
     }
     this.setStep(step);
@@ -119,6 +121,7 @@ var SHOWEVAL = (function () {
         });
       }, 600);
     });
+    $(buttonId).attr("disabled", false);
   };
 
   return thisModule;
