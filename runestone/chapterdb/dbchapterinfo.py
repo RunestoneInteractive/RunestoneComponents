@@ -17,7 +17,8 @@ from __future__ import print_function
 
 __author__ = 'bmiller'
 
-import re
+import re, datetime
+import os.path
 import docutils
 from sqlalchemy import Table
 from runestone.server.componentdb import engine, meta
@@ -51,9 +52,9 @@ def doctree_resolved(app, doctree, docname):
     for section in doctree.traverse(docutils.nodes.section):
         #print(section.source ,dir(section.document))
         title = section.next_node(docutils.nodes.Titular)
-        pl = section.source.split('/')
-        chap_id = pl[-2]
-        subchap_id = pl[-1].replace('.rst', '')
+        # Section.source is something like ``/abs/path/to/chap/subchap.rst``. Set ``chap_id = 'chap'`` and ``subchap_id = 'subchap'``.
+        chap_id = os.path.basename(os.path.dirname(section.source))
+        subchap_id = os.path.splitext(os.path.basename(section.source))[0]
         if subchap_id == 'index' and chap_order == []:
             chap_order.extend(get_top_toc(section.source))
         if chap_id not in sub_ids_for_chapter:
@@ -66,7 +67,7 @@ def doctree_resolved(app, doctree, docname):
                 chaptitles[chap_id] = title.astext()
             if subchap_id not in sub_ids_for_chapter[chap_id]:
                 sub_ids_for_chapter[chap_id].append(subchap_id)
-            if subchap_id not in subtitles:
+            if subchap_id not in subtitles[chap_id]:
                 subtitles[chap_id][subchap_id] = title.astext()
 
 
@@ -82,15 +83,18 @@ def build_finished(app, ex):
     course_id = app.env.config.html_context.get('course_id', "unknown")
     chapters = Table('chapters', meta, autoload=True, autoload_with=engine)
     sub_chapters = Table('sub_chapters', meta, autoload=True, autoload_with=engine)
+    questions = Table('questions', meta, autoload=True, autoload_with=engine)
+    basecourse = app.config.html_context.get('basecourse',"unknown")
     print("Cleaning up old chapters info")
     engine.execute(chapters.delete().where(chapters.c.course_id == course_id))
-
+    engine.execute(questions.delete().where((questions.c.question_type == 'page') & 
+    (questions.c.base_course == basecourse)))
     if 'Labs' in sub_ids_for_chapter:
         chap_order.append('Labs')
         subchap_order['Labs'] = sub_ids_for_chapter['Labs']
     for chap in chap_order:
         # insert row for chapter in the chapter table and get the id
-        print("Adding chapter subchapter info for {}".format(chap))
+        print(u"Adding chapter subchapter info for {}".format(chap))
         ins = chapters.insert().values(chapter_name=chaptitles.get(chap, chap),
                                        course_id=course_id, chapter_label=chap)
         res = engine.execute(ins)
@@ -101,7 +105,14 @@ def build_finished(app, ex):
                                                chapter_id=str(currentRowId),
                                                sub_chapter_label=sub)
             engine.execute(ins)
-
+            ins = questions.insert().values(chapter=chap, subchapter=sub,
+                                            question_type='page',
+                                            name=u"{}/{}".format(chaptitles.get(chap,chap),
+                                                                subtitles[chap][sub]),
+                                            timestamp=datetime.datetime.now(),   
+                                            base_course=basecourse)
+            engine.execute(ins)
+    
 
 def get_toctree(path):
     """
