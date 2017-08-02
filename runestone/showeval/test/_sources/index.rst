@@ -76,6 +76,35 @@ ShowEval Replace Mode
   'DOGSCATSMOOSE'.join({{eggs}}{{['dogs', 'cats', 'moose']}})
   {{'DOGSCATSMOOSE'.join(['dogs', 'cats', 'moose'])}}{{'dogsDOGSCATSMOOSEcatsDOGSCATSMOOSEmoose'}}
 
+ShowEval Trace Mode 2
+---------------------
+
+.. showeval:: showEval_2
+   :trace_mode: true
+
+   eggs = ['dogs', 'cats', 'moose']
+   ham = ['elk', 'salmon']
+   eggs = eggs + ham
+   ~~~~
+   eggs = {{eggs}}{{['dogs', 'cats', 'moose']}} + ham
+   eggs = ['dogs', 'cats', 'moose'] + {{ham}}{{['elk', 'salmon']}}
+   eggs = {{['dogs', 'cats', 'moose'] + ['elk', 'salmon']}}{{['dogs', 'cats', 'moose', 'elk', 'salmon']}}
+
+
+CodeLens
+--------
+
+.. codelens:: ch08_acc2
+
+    def removeVowels(s):
+        vowels = "aeiouAEIOU"
+        sWithoutVowels = ""
+        for eachChar in s:
+            if eachChar not in vowels:
+                sWithoutVowels = sWithoutVowels + eachChar
+        return sWithoutVowels
+
+    print(removeVowels("compsci"))
 
 Multiple Choice
 ---------------
