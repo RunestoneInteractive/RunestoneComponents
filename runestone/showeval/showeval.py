@@ -103,7 +103,8 @@ class ShowEval(RunestoneDirective):
             elif '~~~~' in line:
                 step = True
             else:
-                self.options['preReqLines'] += line
+                self.options['preReqLines'] += line + '<br />\n'
+
 
         res = (CODE + SCRIPT) % self.options
 
