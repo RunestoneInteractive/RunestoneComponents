@@ -93,7 +93,6 @@ class ShowEval(RunestoneDirective):
         self.options['trace_mode'] = self.options['trace_mode'].lower()
         self.options['preReqLines'] = ''
         self.options['steps'] = []
-        self.options['content'] = {'content':self.content, 'type':type(self.content)}
 
         step = False
         count = 0
