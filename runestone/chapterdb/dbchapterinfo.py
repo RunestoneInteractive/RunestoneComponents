@@ -20,7 +20,7 @@ __author__ = 'bmiller'
 import re, datetime
 import os.path
 import docutils
-from sqlalchemy import Table
+from sqlalchemy import Table, select, and_
 from runestone.server.componentdb import engine, meta
 
 def setup(app):
@@ -87,8 +87,6 @@ def build_finished(app, ex):
     basecourse = app.config.html_context.get('basecourse',"unknown")
     print("Cleaning up old chapters info")
     engine.execute(chapters.delete().where(chapters.c.course_id == course_id))
-    engine.execute(questions.delete().where((questions.c.question_type == 'page') & 
-    (questions.c.base_course == basecourse)))
     if 'Labs' in sub_ids_for_chapter:
         chap_order.append('Labs')
         subchap_order['Labs'] = sub_ids_for_chapter['Labs']
@@ -101,17 +99,28 @@ def build_finished(app, ex):
         currentRowId = res.inserted_primary_key[0]
         for sub in subchap_order[chap]:
             # insert row for subchapter
+            q_name = u"{}/{}".format(chaptitles.get(chap,chap), subtitles[chap][sub])
             ins = sub_chapters.insert().values(sub_chapter_name=subtitles[chap][sub],
                                                chapter_id=str(currentRowId),
                                                sub_chapter_label=sub)
             engine.execute(ins)
-            ins = questions.insert().values(chapter=chap, subchapter=sub,
+            sel = select([questions]).where(and_(questions.c.chapter == chap,
+                                              questions.c.subchapter == sub,
+                                              questions.c.question_type == 'page',
+                                              questions.c.base_course == basecourse))
+            res = engine.execute(sel).first()
+            if res and res.name != q_name:
+                # In this case the title has changed
+                upd = questions.update().where(questions.c.id == res['id']).values(name=q_name)
+                engine.execute(upd)
+            if not res:
+                # this is a new subchapter
+                ins = questions.insert().values(chapter=chap, subchapter=sub,
                                             question_type='page',
-                                            name=u"{}/{}".format(chaptitles.get(chap,chap),
-                                                                subtitles[chap][sub]),
+                                            name=q_name,
                                             timestamp=datetime.datetime.now(),   
                                             base_course=basecourse)
-            engine.execute(ins)
+                engine.execute(ins)
     
 
 def get_toctree(path):
