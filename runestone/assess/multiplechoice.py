@@ -223,7 +223,7 @@ class MChoice(Assessment):
         #               ...and so on...
         #
         # See if the last item is a list. If so, and questions/answers weren't specified as options, assume it contains questions and answers.
-        answers_bullet_list = mcNode[-1]
+        answers_bullet_list = mcNode[-1] if len(mcNode) else None
         if isinstance(answers_bullet_list, nodes.bullet_list) and ('answer_a' not in self.options and ('correct' not in self.options)):
             # Accumulate the correct answers.
             correct_answers = []
@@ -232,7 +232,7 @@ class MChoice(Assessment):
             for answer_list_item in answers_bullet_list:
                 assert isinstance(answer_list_item, nodes.list_item)
 
-                # Look for a correct answer: An initial ``+``. In this case, the expected structure is:
+                # Look for a correct answer: An initial ``C``. In this case, the expected structure is:
                 #
                 # .. code-block::
                 #   :number-lines:
@@ -254,9 +254,10 @@ class MChoice(Assessment):
 
                 # Look for the feedback for this answer -- the last child of this answer list item.
                 feedback_bullet_list = answer_list_item[-1]
-                assert isinstance(feedback_bullet_list, nodes.bullet_list)
-                # It should have just one item (the feedback itself).
-                assert len(feedback_bullet_list) == 1
+                if ((not isinstance(feedback_bullet_list, nodes.bullet_list) or
+                  # It should have just one item (the feedback itself).
+                  (len(feedback_bullet_list) != 1))):
+                    raise self.error('On line {}, a single-item list must be nested under each answer.'.format(feedback_bullet_list.line))
 
                 # Change the feedback list item (which is currently a generic list_item) to our special node class (a FeedbackListItem).
                 feedback_list_item = feedback_bullet_list[0]
@@ -274,6 +275,9 @@ class MChoice(Assessment):
             # Store the correct answers.
             self.options['correct'] = ','.join(correct_answers)
 
+        # Check that a correct answer was provided.
+        if not self.options.get('correct'):
+            raise self.error('No correct answer specified.')
         return [mcNode]
 
 
