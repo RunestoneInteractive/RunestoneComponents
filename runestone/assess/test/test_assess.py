@@ -4,9 +4,42 @@ Test Multiple Choice question directive
 
 __author__ = 'yasinovskyy'
 
+from unittest import TestCase
 from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
-setUpModule, tearDownModule = module_fixture_maker(__file__)
+mf, setUpModule, tearDownModule = module_fixture_maker(__file__, True)
+
+# Look for error producted by invalid questions.
+class MultipleChoiceQuestion_Error_Tests(TestCase):
+    def test_1(self):
+        # Check for the following directive-level errors.
+        directive_level_errors =  (
+            # Produced my mchoice id: error1_no_content,
+            (48, 'No correct answer specified'),
+            # error2,
+            (50, 'No correct answer specified.'),
+            # error7,
+            (103, 'No correct answer specified.'),
+        )
+        for error_line, error_string in directive_level_errors:
+            # The rst_prolog in conf.py confuses line numbers. Adjust for it.
+            self.assertIn(':{}: WARNING: {}'.format(error_line + 4, error_string), mf.build_stderr_data)
+
+        # Check for the following error inside the directive.
+        inside_directive_lines = (
+            # Produced my mchoice id error3,
+            62,
+            # error4,
+            71,
+            # error6
+            96,
+        )
+        for error_line in inside_directive_lines:
+            # The rst_prolog in conf.py confuses line numbers. Adjust for it.
+            self.assertIn(': WARNING: On line {}, a single-item list must be nested under each answer.'.format(error_line + 4), mf.build_stderr_data)
+
+        # Make sure we saw all errors.
+        self.assertEqual(len(directive_level_errors) + len(inside_directive_lines), mf.build_stderr_data.count('WARNING'))
 
 class MultipleChoiceQuestion_Tests(RunestoneTestCase):
     def test_ma1(self):
