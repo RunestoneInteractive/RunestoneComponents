@@ -196,6 +196,7 @@ FITB.prototype.evaluateAnswers = function () {
         // If this blank is empty, provide no feedback for it.
         if (given === "") {
             this.isCorrectArray.push("");
+            this.displayFeed.push('No answer provided.');
         } else {
             // Look through all feedback for this blank. The last element in the array always matches.
             var fbl = this.feedbackArray[i];
@@ -277,7 +278,7 @@ FITB.prototype.renderFITBFeedback = function () {
     if (this.displayFeed.length == 1) {
         feedback_html = feedback_html.slice('<ul><li>'.length, -('</li></ul>'.length))
     }
-    this.feedBackDiv.innerHTML += feedback_html;
+    this.feedBackDiv.innerHTML = feedback_html;
 };
 
 /*==================================
