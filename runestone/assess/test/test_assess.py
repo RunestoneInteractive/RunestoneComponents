@@ -9,7 +9,7 @@ from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
 mf, setUpModule, tearDownModule = module_fixture_maker(__file__, True)
 
-# Look for error producted by invalid questions.
+# Look for errors producted by invalid questions.
 class MultipleChoiceQuestion_Error_Tests(TestCase):
     def test_1(self):
         # Check for the following directive-level errors.
