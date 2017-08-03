@@ -17,7 +17,8 @@ __author__ = 'bmiller'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from .assessbase import *
+from .assessbase import Assessment
+from runestone.common.runestonedirective import RunestoneNode, get_node_line
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 
 
@@ -149,7 +150,7 @@ class MChoice(Assessment):
     optional_arguments = 1
     final_argument_whitespace = True
     has_content = True
-    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec = Assessment.option_spec.copy()
     option_spec.update({'answer_a':directives.unchanged,
         'answer_b':directives.unchanged,
         'answer_c':directives.unchanged,
@@ -257,7 +258,7 @@ class MChoice(Assessment):
                 if ((not isinstance(feedback_bullet_list, nodes.bullet_list) or
                   # It should have just one item (the feedback itself).
                   (len(feedback_bullet_list) != 1))):
-                    raise self.error('On line {}, a single-item list must be nested under each answer.'.format(feedback_bullet_list.line))
+                    raise self.error('On line {}, a single-item list must be nested under each answer.'.format(get_node_line(feedback_bullet_list)))
 
                 # Change the feedback list item (which is currently a generic list_item) to our special node class (a FeedbackListItem).
                 feedback_list_item = feedback_bullet_list[0]
