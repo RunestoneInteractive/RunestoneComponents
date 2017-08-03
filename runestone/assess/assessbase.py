@@ -15,7 +15,7 @@
 #
 __author__ = 'bmiller'
 
-from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
+from runestone.common.runestonedirective import RunestoneDirective
 
 _base_js_escapes = (
     ('\\', r'\u005C'),
