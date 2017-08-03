@@ -197,12 +197,12 @@ class FillInTheBlank(RunestoneDirective):
         self.assert_has_content()
         feedback_bullet_list = fitbNode.pop()
         if not isinstance(feedback_bullet_list, nodes.bullet_list):
-            self.error('The last item in a fill-in-the-blank question must be a bulleted list.')
+            raise self.error('On line {}, the last item in a fill-in-the-blank question must be a bulleted list.'.format(feedback_bullet_list.line))
         for feedback_list_item in feedback_bullet_list.children:
             assert isinstance(feedback_list_item, nodes.list_item)
             feedback_field_list = feedback_list_item[0]
             if len(feedback_list_item) != 1 or not isinstance(feedback_field_list, nodes.field_list):
-                self.error('Each list item in a fill-in-the-blank problems must contain only one item, a field list.')
+                raise self.error('On line {}, each list item in a fill-in-the-blank problems must contain only one item, a field list.'.format(feedback_list_item.line))
             blankArray = []
             for feedback_field in feedback_field_list:
                 assert isinstance(feedback_field, nodes.field)
