@@ -43,7 +43,7 @@ class ModuleFixture(unittest.TestCase):
 #   setUpModule, tearDownModule = module_fixture_maker(__file__)
 def module_fixture_maker(module_path, return_mf=False):
     mf = ModuleFixture(module_path)
-    if mf:
+    if return_mf:
         return mf, mf.setUpModule, mf.tearDownModule
     else:
         return mf.setUpModule, mf.tearDownModule
