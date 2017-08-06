@@ -41,3 +41,7 @@ University of Michigan
 * Jackie Cohen
 * Charles Severence
 
+Mississippi State University
+----------------------------
+
+* Bryan Jones
