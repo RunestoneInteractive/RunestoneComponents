@@ -51,3 +51,11 @@ class RunestoneDirective(Directive):
         self.options['basecourse'] = self.basecourse
         self.options['chapter'] = self.chapter
         self.options['subchapter'] = self.subchapter
+
+# Some nodes have a line number of None. Look through their children to find the node's line number.
+def get_node_line(node):
+    while not node.line:
+        node = node[0]
+    return node.line
+
+

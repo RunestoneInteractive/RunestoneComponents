@@ -17,7 +17,8 @@ __author__ = 'bmiller'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from .assessbase import *
+from .assessbase import Assessment
+from runestone.common.runestonedirective import RunestoneNode, get_node_line
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 
 
@@ -61,7 +62,7 @@ def depart_mc_node(self,node):
         if 'answer_' in k:
             x,label = k.split('_')
             node.mc_options['alabel'] = label
-            node.mc_options['atext'] = "(" +k[-1].upper() + ") " + node.mc_options[k]
+            node.mc_options['atext'] = node.mc_options[k]
             currFeedback = "feedback_" + label
             node.mc_options['feedtext'] = node.mc_options.get(currFeedback,"") #node.mc_options[currFeedback]
             if label in node.mc_options['correct']:
@@ -94,8 +95,8 @@ class MChoice(Assessment):
     The syntax for a multiple-choice question is:
 
     .. mchoice:: uniqueid
-        :multiple_answers: boolean [optional]. Implied if ``:correct:`` contains a list.
-        :random: boolean [optional]
+        :multiple_answers: [optional]. Implied if ``:correct:`` contains a list.
+        :random: [optional]
 
         The following arguments supply answers and feedback. See below for an alternative method of specification.
 
@@ -120,7 +121,7 @@ class MChoice(Assessment):
 
         ..
 
-        -   +Text for answer A. The leading ``+`` indicates this answer is correct. Prefix all correct answers with a ``+``.
+        -   CText for answer A. The leading ``C`` indicates this answer is correct. Prefix all correct answers with a ``C``.
 
             Your text may be multiple paragraphs, including `images <http://www.sphinx-doc.org/en/stable/rest.html#images>`_
             and any other `inline <http://www.sphinx-doc.org/en/stable/rest.html#inline-markup>`_ or block markup. For example: :math:`\sqrt(2)/2`. As earlier, if your feedback contains an unordered list, end it with a comment.
@@ -134,10 +135,10 @@ class MChoice(Assessment):
                 This may also span multiple paragraphs and include any markup.
                 However, there can be only one item in this unordered list.
 
-        -   \+Text for answer B. This answer is incorrect, instead showing how to display a ``+`` at the beginning of an answer without marking it as a correct answer.
+        -   \CText for answer B. This answer is incorrect, instead showing how to display a ``C`` at the beginning of an answer without marking it as a correct answer.
 
             -   Feedback for answer B.
-        -   Text for answer C. This answer is also incorrect. Note that the empty line between a sublist and a list may be omitted.
+        -   C ``Text`` for answer C. This answer is correct. Note that the empty line between a sublist and a list may be omitted. Placing a space after the ``C`` allows the following text to be treated as an `inline literal <http://docutils.sourceforge.net/docs/ref/rst/restructuredtext.html#inline-literals>`_.
 
             -   Feedback for answer C. However, the empty line is required between a list and a sublist.
 
@@ -149,7 +150,7 @@ class MChoice(Assessment):
     optional_arguments = 1
     final_argument_whitespace = True
     has_content = True
-    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec = Assessment.option_spec.copy()
     option_spec.update({'answer_a':directives.unchanged,
         'answer_b':directives.unchanged,
         'answer_c':directives.unchanged,
@@ -223,7 +224,7 @@ class MChoice(Assessment):
         #               ...and so on...
         #
         # See if the last item is a list. If so, and questions/answers weren't specified as options, assume it contains questions and answers.
-        answers_bullet_list = mcNode[-1]
+        answers_bullet_list = mcNode[-1] if len(mcNode) else None
         if isinstance(answers_bullet_list, nodes.bullet_list) and ('answer_a' not in self.options and ('correct' not in self.options)):
             # Accumulate the correct answers.
             correct_answers = []
@@ -232,7 +233,7 @@ class MChoice(Assessment):
             for answer_list_item in answers_bullet_list:
                 assert isinstance(answer_list_item, nodes.list_item)
 
-                # Look for a correct answer: An initial ``+``. In this case, the expected structure is:
+                # Look for a correct answer: An initial ``C``. In this case, the expected structure is:
                 #
                 # .. code-block::
                 #   :number-lines:
@@ -244,19 +245,20 @@ class MChoice(Assessment):
                 possible_paragraph = answer_list_item[0]
                 if isinstance(possible_paragraph, nodes.paragraph):
                     possible_Text = possible_paragraph[0]
-                    if isinstance(possible_Text, nodes.Text) and possible_Text.rawsource.startswith('+'):
+                    if isinstance(possible_Text, nodes.Text) and possible_Text.rawsource.strip().startswith('C'):
                         # This is a correct answer.
                         #
                         # Remove the +. While a simple statement like ``possible_Text.rawsource = possible_Text.rawsource[1:]`` might seem the right approach, it doesn't work: the ``__new__`` method for Text nodes does something weird.
-                        possible_paragraph[0] = nodes.Text(possible_Text.rawsource[1:])
+                        possible_paragraph[0] = nodes.Text(possible_Text.rawsource.replace('C', '', 1))
                         # Record this in the list of correct answers.
                         correct_answers.append(chr(answer_list_item.parent.index(answer_list_item) + ord('a')))
 
                 # Look for the feedback for this answer -- the last child of this answer list item.
                 feedback_bullet_list = answer_list_item[-1]
-                assert isinstance(feedback_bullet_list, nodes.bullet_list)
-                # It should have just one item (the feedback itself).
-                assert len(feedback_bullet_list) == 1
+                if ((not isinstance(feedback_bullet_list, nodes.bullet_list) or
+                  # It should have just one item (the feedback itself).
+                  (len(feedback_bullet_list) != 1))):
+                    raise self.error('On line {}, a single-item list must be nested under each answer.'.format(get_node_line(feedback_bullet_list)))
 
                 # Change the feedback list item (which is currently a generic list_item) to our special node class (a FeedbackListItem).
                 feedback_list_item = feedback_bullet_list[0]
@@ -274,6 +276,9 @@ class MChoice(Assessment):
             # Store the correct answers.
             self.options['correct'] = ','.join(correct_answers)
 
+        # Check that a correct answer was provided.
+        if not self.options.get('correct'):
+            raise self.error('No correct answer specified.')
         return [mcNode]
 
 
@@ -314,14 +319,13 @@ def visit_answer_list_item(self, node):
     label = chr(node.parent.index(node) + ord('a'))
     # Update dict for formatting the HTML.
     mcNode.mc_options['alabel'] = label
-    mcNode.mc_options['letter'] = label.upper()
     if label in mcNode.mc_options['correct']:
         mcNode.mc_options['is_correct'] = 'data-correct'
     else:
         mcNode.mc_options['is_correct'] = ''
 
     # Format the HTML.
-    self.body.append('<li data-component="answer" %(is_correct)s id="%(divid)s_opt_%(alabel)s">(%(letter)s) ' % mcNode.mc_options)
+    self.body.append('<li data-component="answer" %(is_correct)s id="%(divid)s_opt_%(alabel)s">' % mcNode.mc_options)
 
 # Although the feedback for an answer is given as a sublist, the HTML is just a list. So, let the feedback list item close this list.
 def depart_answer_list_item(self, node):

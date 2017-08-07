@@ -45,5 +45,8 @@ bower_componenets/
 # Files produced by runestone builds.
 runestone/build_info
 runestone/*/test/build_info
+**/sphinx_settings.json
 
+# IDEs
 .vscode/
+**/sphinx-enki-info.txt

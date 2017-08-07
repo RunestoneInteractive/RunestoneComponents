@@ -194,7 +194,7 @@ MultipleChoice.prototype.renderMCFormOpts = function () {
         label.appendChild(input);
         label.appendChild(labelspan);
         //$(label).attr("for", optid);
-        $(labelspan).html(this.answerList[k].content);
+        $(labelspan).html(String.fromCharCode(65 + j) + '. ' + this.answerList[k].content);
 
         // create the object to store in optionArray
         var optObj = {
@@ -369,7 +369,7 @@ MultipleChoice.prototype.getSubmittedOpts = function () {
         if (buttonObjs[i].checked) {
             given = buttonObjs[i].value;
             this.givenArray.push(given);
-            this.feedbackString += given + ": " + this.feedbackList[i] + "<br />";
+            this.feedbackString += '<li value="' + (i + 1) + '">' + this.feedbackList[i] + "</li>";
             this.givenlog += given + ",";
             this.singlefeedback = this.feedbackList[i];
         }
@@ -416,12 +416,12 @@ MultipleChoice.prototype.renderMCMAFeedBack = function () {
     var feedbackText = this.feedbackString;
 
     if (numCorrect === numNeeded && numNeeded === numGiven) {
-        $(this.feedBackDiv).html("Correct!    <br />" + feedbackText);
+        $(this.feedBackDiv).html('Correct.<ol type="A">' + feedbackText + "</ul>");
         $(this.feedBackDiv).attr("class", "alert alert-success");
     } else {
         $(this.feedBackDiv).html("Incorrect.    " + "You gave " + numGiven +
             " " + answerStr + " and got " + numCorrect + " correct of " +
-            numNeeded + " needed.<br /> " + feedbackText);
+            numNeeded + ' needed.<ol type="A">' + feedbackText + "</ul>");
         $(this.feedBackDiv).attr("class", "alert alert-danger");
     }
 };
@@ -459,13 +459,13 @@ MultipleChoice.prototype.logMCMFsubmission = function () {
 
 MultipleChoice.prototype.renderMCMFFeedback = function (correct, feedbackText) {
     if (correct) {
-        $(this.feedBackDiv).html("Correct!    " + feedbackText);
+        $(this.feedBackDiv).html(feedbackText);
         $(this.feedBackDiv).attr("class", "alert alert-success");
     } else {
         if (feedbackText == null) {
             feedbackText = "";
         }
-        $(this.feedBackDiv).html("Incorrect.    " + feedbackText);
+        $(this.feedBackDiv).html(feedbackText);
         $(this.feedBackDiv).attr("class", "alert alert-danger");
     }
 };

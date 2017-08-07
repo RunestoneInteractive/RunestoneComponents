@@ -20,8 +20,9 @@ import ast
 from numbers import Number
 from docutils import nodes
 from docutils.parsers.rst import directives
+from sphinx.util import logging
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common import RunestoneDirective, RunestoneNode
+from runestone.common import RunestoneDirective, RunestoneNode, get_node_line
 
 
 def setup(app):
@@ -68,7 +69,9 @@ def depart_fitb_node(self, node):
 
     # Warn if there are fewer feedback items than blanks.
     if len(node.feedbackArray) < blankCount:
-        print('Warning at {} line {}: there'' not enough feedback for the number of blanks supplied.'.format(node.source, node.line))
+        # Taken from the example in the `logging API <http://www.sphinx-doc.org/en/stable/extdev/logging.html#logging-api>`_.
+        logger = logging.getLogger(__name__)
+        logger.warning('Not enough feedback for the number of blanks supplied.', location=node)
 
     # Generate the HTML.
     node.fitb_options['json'] = json.dumps(node.feedbackArray)
@@ -81,7 +84,6 @@ def depart_fitb_node(self, node):
                 "".join(self.body[self.body.index(node.delimiter) + 1:]))
 
     self.body.remove(node.delimiter)
-
 
 class FillInTheBlank(RunestoneDirective):
     """
@@ -197,12 +199,12 @@ class FillInTheBlank(RunestoneDirective):
         self.assert_has_content()
         feedback_bullet_list = fitbNode.pop()
         if not isinstance(feedback_bullet_list, nodes.bullet_list):
-            self.error('The last item in a fill-in-the-blank question must be a bulleted list.')
+            raise self.error('On line {}, the last item in a fill-in-the-blank question must be a bulleted list.'.format(get_node_line(feedback_bullet_list)))
         for feedback_list_item in feedback_bullet_list.children:
             assert isinstance(feedback_list_item, nodes.list_item)
             feedback_field_list = feedback_list_item[0]
             if len(feedback_list_item) != 1 or not isinstance(feedback_field_list, nodes.field_list):
-                self.error('Each list item in a fill-in-the-blank problems must contain only one item, a field list.')
+                raise self.error('On line {}, each list item in a fill-in-the-blank problems must contain only one item, a field list.'.format(get_node_line(feedback_list_item)))
             blankArray = []
             for feedback_field in feedback_field_list:
                 assert isinstance(feedback_field, nodes.field)
