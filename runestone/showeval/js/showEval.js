@@ -64,9 +64,7 @@ var SHOWEVAL = (function () {
   thisModule.ShowEval.prototype.getWidth = function(text) { // TODO - class style must match or else width will be off.
     var newElem = $("<div>").addClass('showEval evalCont').hide().html(text);
     $('body').append(newElem);
-    console.log(newElem.width());
     var newWidth = newElem.width() + 1; // +1 is a hack
-    console.log(newWidth);
     newElem.remove();
 
     return newWidth;
@@ -75,6 +73,10 @@ var SHOWEVAL = (function () {
   thisModule.ShowEval.prototype.createPreviousStepDiv = function(step) {
     this.currentStepDiv.before($('<div>').addClass('previousStep').html(this.steps[step][0] + this.steps[step][1] + this.steps[step][3]));
   };
+
+  thisModule.ShowEval.prototype.goBack = function() {
+
+  }
 
   thisModule.ShowEval.prototype.evaluateStep = function(buttonId, step) {
     $(buttonId).attr("disabled", true);
