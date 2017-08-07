@@ -74,10 +74,6 @@ var SHOWEVAL = (function () {
     this.currentStepDiv.before($('<div>').addClass('previousStep').html(this.steps[step][0] + this.steps[step][1] + this.steps[step][3]));
   };
 
-  thisModule.ShowEval.prototype.goBack = function() {
-
-  }
-
   thisModule.ShowEval.prototype.evaluateStep = function(buttonId, step) {
     $(buttonId).attr("disabled", true);
     if (step === undefined) {
