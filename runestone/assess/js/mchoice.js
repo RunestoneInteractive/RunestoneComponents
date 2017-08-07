@@ -299,6 +299,9 @@ MultipleChoice.prototype.restoreAnswers = function (data) {
 MultipleChoice.prototype.checkLocalStorage = function () {
     // Repopulates MCMA questions with a user's previous answers,
     // which were stored into local storage.
+    if (this.graderactive) {
+        return;
+    }
     var len = localStorage.length;
     if (len > 0) {
         var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
