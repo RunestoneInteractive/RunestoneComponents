@@ -15,11 +15,11 @@ class MultipleChoiceQuestion_Error_Tests(TestCase):
         # Check for the following directive-level errors.
         directive_level_errors =  (
             # Produced my mchoice id: error1_no_content,
-            (48, 'No correct answer specified'),
+            (47, 'No correct answer specified'),
             # error2,
-            (50, 'No correct answer specified.'),
+            (49, 'No correct answer specified.'),
             # error7,
-            (103, 'No correct answer specified.'),
+            (102, 'No correct answer specified.'),
         )
         for error_line, error_string in directive_level_errors:
             # The rst_prolog in conf.py confuses line numbers. Adjust for it.
@@ -28,11 +28,11 @@ class MultipleChoiceQuestion_Error_Tests(TestCase):
         # Check for the following error inside the directive.
         inside_directive_lines = (
             # Produced my mchoice id error3,
-            62,
+            61,
             # error4,
-            71,
+            70,
             # error6
-            96,
+            95,
         )
         for error_line in inside_directive_lines:
             # The rst_prolog in conf.py confuses line numbers. Adjust for it.
