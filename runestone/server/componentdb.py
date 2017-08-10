@@ -26,7 +26,7 @@ from . import get_dburl
 # create a global DB query engine to share for the rest of the file
 try:
     dburl = get_dburl()
-    engine = create_engine(dburl)
+    engine = create_engine(dburl, client_encoding='utf8', convert_unicode=True)
 except RuntimeError as e:
     dburl = None
     engine = None
