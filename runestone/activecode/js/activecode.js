@@ -211,15 +211,16 @@ ActiveCode.prototype.createControls = function () {
         $(butt).click(this.showCodelens.bind(this));
     }
     // CodeCoach
-    if (this.useRunestoneServices && $(this.origElem).data("coach")) {
-        butt = document.createElement("button");
-        $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Code Coach");
-        $(butt).css("margin-left", "10px");
-        this.coachButton = butt;
-        ctrlDiv.appendChild(butt);
-        $(butt).click(this.showCodeCoach.bind(this));
-    }
+    // bnm - disable code coach until it is revamped  2017-7-22
+    // if (this.useRunestoneServices && $(this.origElem).data("coach")) {
+    //     butt = document.createElement("button");
+    //     $(butt).addClass("ac_opt btn btn-default");
+    //     $(butt).text("Code Coach");
+    //     $(butt).css("margin-left", "10px");
+    //     this.coachButton = butt;
+    //     ctrlDiv.appendChild(butt);
+    //     $(butt).click(this.showCodeCoach.bind(this));
+    // }
 
     // Audio Tour
     if ($(this.origElem).data("audio")) {
@@ -668,6 +669,24 @@ ActiveCode.prototype.builtinRead = function (x) {
         return Sk.builtinFiles["files"][x];
 };
 
+ActiveCode.prototype.fileReader = function(divid) {
+    let elem = document.getElementById(divid);
+    let data = ""
+    if (elem == null && Sk.builtinFiles["files"][divid]) {
+        return Sk.builtinFiles["files"][divid];
+    }
+    if (elem == null) {
+        throw new Sk.builtin.IOError("[Errno 2] No such file or directory: '" + divid + "'");
+    } else {
+        if (elem.nodeName.toLowerCase() == "textarea") {
+            data = elem.value;
+        } else {
+            data = elem.textContent;
+        }
+    }
+    return data;
+}
+
 ActiveCode.prototype.outputfun = function(text) {
     // bnm python 3
     pyStr = function(x) {
@@ -766,7 +785,7 @@ ActiveCode.prototype.runProg = function () {
     $(this.eContainer).remove();
     Sk.configure({
         output: this.outputfun.bind(this),
-        read: this.builtinRead,
+        read: this.fileReader,
         python3: this.python3,
         imageProxy: 'http://image.runestone.academy:8080/320x',
         inputfunTakesPrompt: true,
@@ -797,7 +816,9 @@ ActiveCode.prototype.runProg = function () {
 
     Promise.all([skulpt_run_dfd, history_dfd]).then((function (mod) { // success
             $(this.runButton).removeAttr('disabled');
-            $(this.historyScrubber).on("slidechange", this.slideit.bind(this));
+            if (this.slideit) {
+                $(this.historyScrubber).on("slidechange", this.slideit.bind(this));
+            }
             $(this.historyScrubber).slider("enable");
             this.logRunEvent({
                 'div_id': this.divid,

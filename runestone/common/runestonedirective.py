@@ -21,6 +21,11 @@ from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 import os
 
+# Provide a class which all Runestone nodes will inherit from.
+class RunestoneNode(nodes.Node):
+    pass
+
+
 # Notes
 # env = self.state.document.settings.env
 # env.config.html_context['course_id']
@@ -46,3 +51,11 @@ class RunestoneDirective(Directive):
         self.options['basecourse'] = self.basecourse
         self.options['chapter'] = self.chapter
         self.options['subchapter'] = self.subchapter
+
+# Some nodes have a line number of None. Look through their children to find the node's line number.
+def get_node_line(node):
+    while not node.line:
+        node = node[0]
+    return node.line
+
+

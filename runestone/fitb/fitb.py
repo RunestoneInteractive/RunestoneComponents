@@ -20,8 +20,9 @@ import ast
 from numbers import Number
 from docutils import nodes
 from docutils.parsers.rst import directives
+from sphinx.util import logging
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common import RunestoneDirective
+from runestone.common import RunestoneDirective, RunestoneNode, get_node_line
 
 
 def setup(app):
@@ -34,16 +35,15 @@ def setup(app):
     app.add_node(BlankNode, html=(visit_blank_node, depart_blank_node))
     app.add_node(FITBFeedbackNode, html=(visit_fitb_feedback_node, depart_fitb_feedback_node))
 
-
-class FITBNode(nodes.General, nodes.Element):
-    def __init__(self,content):
+class FITBNode(nodes.General, nodes.Element, RunestoneNode):
+    def __init__(self, content, **kwargs):
         """
 
         Arguments:
         - `self`:
         - `content`:
         """
-        super(FITBNode,self).__init__()
+        super(FITBNode,self).__init__(**kwargs)
         self.fitb_options = content
         # Create a data structure of feedback.
         self.feedbackArray = []
@@ -68,10 +68,10 @@ def depart_fitb_node(self, node):
         blankCount += 1
 
     # Warn if there are fewer feedback items than blanks.
-    # TODO: node.source, node.line aren't defined.
-    #print(node.source, node.line)
     if len(node.feedbackArray) < blankCount:
-        print('Warning at {} line {}: there'' not enough feedback for the number of blanks supplied.'.format(node.source, node.line))
+        # Taken from the example in the `logging API <http://www.sphinx-doc.org/en/stable/extdev/logging.html#logging-api>`_.
+        logger = logging.getLogger(__name__)
+        logger.warning('Not enough feedback for the number of blanks supplied.', location=node)
 
     # Generate the HTML.
     node.fitb_options['json'] = json.dumps(node.feedbackArray)
@@ -84,7 +84,6 @@ def depart_fitb_node(self, node):
                 "".join(self.body[self.body.index(node.delimiter) + 1:]))
 
     self.body.remove(node.delimiter)
-
 
 class FillInTheBlank(RunestoneDirective):
     """
@@ -137,8 +136,8 @@ class FillInTheBlank(RunestoneDirective):
 
         self.options['divid'] = self.arguments[0]
 
-        # TODO: How to include self.lineno in the directive?
-        fitbNode = FITBNode(self.options)
+        fitbNode = FITBNode(self.options, rawsource=self.block_text)
+        fitbNode.source, fitbNode.line = self.state_machine.get_source_and_line(self.lineno)
         fitbNode.template_start = TEMPLATE_START
         fitbNode.template_end = TEMPLATE_END
 
@@ -197,14 +196,15 @@ class FillInTheBlank(RunestoneDirective):
         #       ...
         #       FITBFeedbackNode(), which contains all the nodes in blank n's feedback_field_body
         #
+        self.assert_has_content()
         feedback_bullet_list = fitbNode.pop()
         if not isinstance(feedback_bullet_list, nodes.bullet_list):
-            self.error('The last item in a fill-in-the-blank question must be a bulleted list.')
+            raise self.error('On line {}, the last item in a fill-in-the-blank question must be a bulleted list.'.format(get_node_line(feedback_bullet_list)))
         for feedback_list_item in feedback_bullet_list.children:
             assert isinstance(feedback_list_item, nodes.list_item)
             feedback_field_list = feedback_list_item[0]
             if len(feedback_list_item) != 1 or not isinstance(feedback_field_list, nodes.field_list):
-                self.error('Each list item in a fill-in-the-blank problems must contain only one item, a field list.')
+                raise self.error('On line {}, each list item in a fill-in-the-blank problems must contain only one item, a field list.'.format(get_node_line(feedback_list_item)))
             blankArray = []
             for feedback_field in feedback_field_list:
                 assert isinstance(feedback_field, nodes.field)
@@ -280,9 +280,11 @@ def BlankRole(
   content=[]):
 
     # Blanks ignore all arguments, just inserting a blank.
-    return [BlankNode(rawtext)], []
+    blank_node = BlankNode(rawtext)
+    blank_node.line = lineno
+    return [blank_node], []
 
-class BlankNode(nodes.Inline, nodes.TextElement):
+class BlankNode(nodes.Inline, nodes.TextElement, RunestoneNode):
     pass
 
 def visit_blank_node(self, node):
@@ -293,7 +295,7 @@ def depart_blank_node(self, node):
 
 
 # Contains feedback for one answer.
-class FITBFeedbackNode(nodes.General, nodes.Element):
+class FITBFeedbackNode(nodes.General, nodes.Element, RunestoneNode):
     pass
 
 def visit_fitb_feedback_node(self, node):

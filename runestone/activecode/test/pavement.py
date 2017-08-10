@@ -22,6 +22,7 @@ options(
         sourcedir="_sources",
         outdir="./build/activecodetest",
         confdir=".",
+        quiet=True,
         project_name = "activecodetest",
         template_args={'course_id': 'activecodetest',
                        'login_required':'false',

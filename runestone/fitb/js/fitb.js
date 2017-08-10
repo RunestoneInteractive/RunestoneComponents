@@ -196,6 +196,7 @@ FITB.prototype.evaluateAnswers = function () {
         // If this blank is empty, provide no feedback for it.
         if (given === "") {
             this.isCorrectArray.push("");
+            this.displayFeed.push('No answer provided.');
         } else {
             // Look through all feedback for this blank. The last element in the array always matches.
             var fbl = this.feedbackArray[i];
@@ -251,7 +252,6 @@ FITB.prototype.isCompletelyBlank = function () {
 
 FITB.prototype.renderFITBFeedback = function () {
     if (this.correct) {
-        $(this.feedBackDiv).html("Correct.<br>");
         $(this.feedBackDiv).attr("class", "alert alert-success");
         for (var j = 0; j < this.blankArray.length; j++) {
             $(this.blankArray[j]).removeClass("input-validation-error");
@@ -260,7 +260,6 @@ FITB.prototype.renderFITBFeedback = function () {
         if (this.displayFeed === null) {
             this.displayFeed = "";
         }
-        $(this.feedBackDiv).html("Incorrect.<br>");
         for (var j = 0; j < this.blankArray.length; j++) {
             if (!this.isCorrectArray[j]) {
                 $(this.blankArray[j]).addClass("input-validation-error");
@@ -270,10 +269,16 @@ FITB.prototype.renderFITBFeedback = function () {
         }
         $(this.feedBackDiv).attr("class", "alert alert-danger");
     }
+    var feedback_html = '<ul>';
     for (var i = 0; i < this.displayFeed.length; i++) {
-        this.feedBackDiv.innerHTML += this.displayFeed[i];
-        this.feedBackDiv.appendChild(document.createElement("br"));
+        feedback_html += '<li>' + this.displayFeed[i] + '</li>';
     }
+    feedback_html += '</ul>';
+    // Remove the list if it's just one element.
+    if (this.displayFeed.length == 1) {
+        feedback_html = feedback_html.slice('<ul><li>'.length, -('</li></ul>'.length))
+    }
+    this.feedBackDiv.innerHTML = feedback_html;
 };
 
 /*==================================

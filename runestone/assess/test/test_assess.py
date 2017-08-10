@@ -4,9 +4,42 @@ Test Multiple Choice question directive
 
 __author__ = 'yasinovskyy'
 
+from unittest import TestCase
 from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
-setUpModule, tearDownModule = module_fixture_maker(__file__)
+mf, setUpModule, tearDownModule = module_fixture_maker(__file__, True)
+
+# Look for errors producted by invalid questions.
+class MultipleChoiceQuestion_Error_Tests(TestCase):
+    def test_1(self):
+        # Check for the following directive-level errors.
+        directive_level_errors =  (
+            # Produced my mchoice id: error1_no_content,
+            (48, 'No correct answer specified'),
+            # error2,
+            (50, 'No correct answer specified.'),
+            # error7,
+            (103, 'No correct answer specified.'),
+        )
+        for error_line, error_string in directive_level_errors:
+            # The rst_prolog in conf.py confuses line numbers. Adjust for it.
+            self.assertIn(':{}: WARNING: {}'.format(error_line + 4, error_string), mf.build_stderr_data)
+
+        # Check for the following error inside the directive.
+        inside_directive_lines = (
+            # Produced my mchoice id error3,
+            62,
+            # error4,
+            71,
+            # error6
+            96,
+        )
+        for error_line in inside_directive_lines:
+            # The rst_prolog in conf.py confuses line numbers. Adjust for it.
+            self.assertIn(': WARNING: On line {}, a single-item list must be nested under each answer.'.format(error_line + 4), mf.build_stderr_data)
+
+        # Make sure we saw all errors.
+        self.assertEqual(len(directive_level_errors) + len(inside_directive_lines), mf.build_stderr_data.count('WARNING'))
 
 class MultipleChoiceQuestion_Tests(RunestoneTestCase):
     def test_ma1(self):
@@ -23,7 +56,8 @@ class MultipleChoiceQuestion_Tests(RunestoneTestCase):
         self.assertIn("alert-danger", cnamestr)
 
 
-    def test_ma2(self):
+    # Testing time in dominated by browser startup/shutdown. So, simply run all tests in a single browser instance to speed things up. On failures, uncomment test functions to diagnose.
+    #def test_ma2(self):
         '''Multiple Answer: Correct answer(s) selected'''
         self.driver.get(self.host + "/index.html")
         t1 = self.driver.find_element_by_id("question1")
@@ -40,7 +74,7 @@ class MultipleChoiceQuestion_Tests(RunestoneTestCase):
         self.assertIn("alert-success", cnamestr)
 
 
-    def test_ma3(self):
+    #def test_ma3(self):
         '''Multiple Answer: Incorrect answer(s) selected'''
         self.driver.get(self.host + "/index.html")
         t1 = self.driver.find_element_by_id("question1")
@@ -57,7 +91,7 @@ class MultipleChoiceQuestion_Tests(RunestoneTestCase):
         self.assertIn("alert-danger", cnamestr)
 
 
-    def test_ma4(self):
+    #def test_ma4(self):
         '''Multiple Answer: All options clicked one by one'''
         self.driver.get(self.host + "/index.html")
         t1 = self.driver.find_element_by_id("question1")
@@ -75,6 +109,7 @@ class MultipleChoiceQuestion_Tests(RunestoneTestCase):
         self.assertIn("alert-danger", cnamestr)
 
 
+    # If commented out, produces a failure on the first assertFalse below. ???
     def test_ma5(self):
         '''Multiple Answer: Correct answer(s) selected and unselected'''
         self.driver.get(self.host + "/index.html")
@@ -87,7 +122,7 @@ class MultipleChoiceQuestion_Tests(RunestoneTestCase):
         self.assertFalse(cbs.is_selected())
 
 
-    def test_mc1(self):
+    #def test_mc1(self):
         '''Multiple Choice: Nothing selected'''
         self.driver.get(self.host + "/index.html")
         t1 = self.driver.find_element_by_id("question2")
@@ -101,7 +136,7 @@ class MultipleChoiceQuestion_Tests(RunestoneTestCase):
         self.assertIn("alert-danger", cnamestr)
 
 
-    def test_mc2(self):
+    #def test_mc2(self):
         '''Multiple Choice: Correct answer selected'''
         self.driver.get(self.host + "/index.html")
         t1 = self.driver.find_element_by_id("question2")
@@ -117,7 +152,7 @@ class MultipleChoiceQuestion_Tests(RunestoneTestCase):
         self.assertIn("alert-success", cnamestr)
 
 
-    def test_mc3(self):
+    #def test_mc3(self):
         '''Multiple Choice: Incorrect answer selected'''
         self.driver.get(self.host + "/index.html")
         t1 = self.driver.find_element_by_id("question2")
@@ -133,7 +168,7 @@ class MultipleChoiceQuestion_Tests(RunestoneTestCase):
         self.assertIn("alert-danger", cnamestr)
 
 
-    def test_mc4(self):
+    #def test_mc4(self):
         '''Multiple Choice: All options clicked one by one'''
         self.driver.get(self.host + "/index.html")
         t1 = self.driver.find_element_by_id("question2")

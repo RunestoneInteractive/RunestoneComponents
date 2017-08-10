@@ -82,11 +82,13 @@ RunestoneBase.prototype.repopulateFromStorage = function (data, status, whatever
 
 RunestoneBase.prototype.shouldUseServer = function (data) {
     // returns true if server data is more recent than local storage or if server storage is correct
-    if (data.correct === "T" || localStorage.length === 0)
+    if (data.correct === "T" || localStorage.length === 0 || this.graderactive === true) {
         return true;
+    }
     let ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
-    if (ex === null)
+    if (ex === null) {
         return true;
+    }
     let storedData;
     try {
         storedData = JSON.parse(ex);
@@ -105,4 +107,3 @@ RunestoneBase.prototype.shouldUseServer = function (data) {
     return serverDate >= storageDate;
 
 };
-

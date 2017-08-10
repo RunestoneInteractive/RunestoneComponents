@@ -17,7 +17,7 @@ __author__ = 'bmiller'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
+from runestone.common.runestonedirective import RunestoneDirective
 from .assessbase import Assessment
 from .multiplechoice import *
 from .timedassessment import *
@@ -47,7 +47,7 @@ def setup(app):
 
 
 
-class AddButton(Directive):
+class AddButton(RunestoneDirective):
     required_arguments = 1
     optional_arguments = 1
     final_argument_whitespace = True
@@ -79,10 +79,12 @@ class AddButton(Directive):
         res = TEMPLATE_START % self.options
 
         res += TEMPLATE_END % self.options
-        return [nodes.raw('', res, format='html')]
+        rawnode = nodes.raw(self.block_text, res, format='html')
+        rawnode.source, rawnode.line = self.state_machine.get_source_and_line(self.lineno)
+        return [rawnode]
 
 
-class QuestionNumber(Directive):
+class QuestionNumber(RunestoneDirective):
     """Set Parameters for Question Numbering
 .. qnum::
    'prefix': character prefix before the number

@@ -15,14 +15,12 @@
 #
 __author__ = 'isaiahmayerchak'
 #acbart did most of this code, I mostly just changed the template
-import os
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
 from runestone.assess import Assessment
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common.runestonedirective import RunestoneDirective
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
 
 def setup(app):
     app.add_directive('shortanswer', JournalDirective)
@@ -37,9 +35,9 @@ TEXT = """
 </div>
 """
 
-class JournalNode(nodes.General, nodes.Element):
-    def __init__(self, options):
-        super(JournalNode, self).__init__()
+class JournalNode(nodes.General, nodes.Element, RunestoneNode):
+    def __init__(self, options, **kwargs):
+        super(JournalNode, self).__init__(**kwargs)
         self.journalnode_components = options
 
 def visit_journal_node(self, node):
@@ -82,6 +80,7 @@ class JournalDirective(Assessment):
         self.options['divid'] = self.arguments[0]
         self.options['content'] = "<p>".join(self.content)
         self.options['qnum'] = self.getNumber()
-        journal_node = JournalNode(self.options)
+        journal_node = JournalNode(self.options, rawsource=self.block_text)
+        journal_node.source, journal_node.line = self.state_machine.get_source_and_line(self.lineno)
 
         return [journal_node]
