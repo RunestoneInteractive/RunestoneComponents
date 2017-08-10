@@ -294,6 +294,11 @@ MultipleChoice.prototype.restoreAnswers = function (data) {
             }
         }
     }
+    if (this.multipleanswers) {
+        this.processMCMASubmission(false);
+    } else {
+        this.processMCMFSubmission(false);
+    }
 };
 
 MultipleChoice.prototype.checkLocalStorage = function () {

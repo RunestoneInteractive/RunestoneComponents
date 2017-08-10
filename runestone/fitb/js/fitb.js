@@ -127,6 +127,7 @@ FITB.prototype.restoreAnswers = function (data) {
     for (var i = 0; i < this.blankArray.length; i++) {
         $(this.blankArray[i]).attr("value", arr[i]);
     }
+    this.startEvaluation();
 };
 
 FITB.prototype.checkLocalStorage = function () {
