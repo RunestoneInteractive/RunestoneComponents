@@ -12,13 +12,15 @@ var SHOWEVAL = (function () {
 
   thisModule.version = '0.9.1';
 
+  
+  
   thisModule.ShowEval = function(container, steps, showTrace) {
     this.container = container;
     this.container.addClass('showEval');
     this.steps = steps.slice();
     this.currentStep = 0;
     this.createTrace = showTrace; // TODO - reset doesn't work for traces
-
+    this.rb = new RunestoneBase();
     // create elements
     this.currentStepDiv = $('<div>').addClass('currentStepDiv');
     this.container.append(this.currentStepDiv);
@@ -50,6 +52,7 @@ var SHOWEVAL = (function () {
   thisModule.ShowEval.prototype.reset = function() {
     this.container.find('.previousStep').remove();
     this.setStep(0);
+    this.rb.logBookEvent({"event": "showeval", "act": 'reset', "div_id": this.container[0].id});
   };
 
   thisModule.ShowEval.prototype.setStep = function(step) {
@@ -122,6 +125,8 @@ var SHOWEVAL = (function () {
       }, 600);
     });
     $(buttonId).attr("disabled", false);
+    this.rb.logBookEvent({"event": "showeval", "act": 'next', "div_id": this.container[0].id});
+    
   };
 
   return thisModule;
