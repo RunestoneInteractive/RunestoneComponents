@@ -90,7 +90,6 @@ def env_updated(app, env):
     """
     This may be the best place to walk the completed document with TOC
     """
-    print("ENV-UPDATED")
     relations = env.collect_relations()
     included_docs = []
     updated_docs = []
@@ -109,7 +108,6 @@ def env_updated(app, env):
         for section in doctree.traverse(docutils.nodes.section):
             updated_docs.append(docname)
             title = section.next_node(docutils.nodes.Titular)
-            print(docname, title)
             chap_id = os.path.dirname(docname)
             subchap_id = os.path.basename(docname)
             if chap_id in ignored_chapters or subchap_id == "index" :
