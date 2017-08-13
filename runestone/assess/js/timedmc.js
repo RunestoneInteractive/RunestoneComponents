@@ -87,8 +87,11 @@ TimedMC.prototype.renderMCFormOpts = function () {
 
         // Create the label for the input
         var label = document.createElement("label");
-        $(label).attr("for", optid);
-        $(label).html(this.answerList[k].content);
+        var labelspan = document.createElement("span");
+        label.appendChild(input);
+        label.appendChild(labelspan);
+        $(labelspan).html(String.fromCharCode(65 + j) + '. ' + this.answerList[k].content);
+
 
         // create the object to store in optionArray
         var optObj = {
@@ -98,7 +101,6 @@ TimedMC.prototype.renderMCFormOpts = function () {
         this.optionArray.push(optObj);
 
         // add the option to the form
-        this.optsForm.appendChild(input);
         this.optsForm.appendChild(label);
         this.optsForm.appendChild(document.createElement("br"));
 
