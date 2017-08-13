@@ -31,7 +31,7 @@ CODE = """\
     <button class="btn btn-success" id="%(divid)s_nextStep">Next Step</button>
     <button class="btn btn-default" id ="%(divid)s_reset">Reset</button>
     <div class="evalCont" style="background-color: #FDFDFD;">%(preReqLines)s</div>
-    <div class="evalCont" id="%(divid)s" class="evalCont"></div>
+    <div class="evalCont" id="%(divid)s"></div>
 </div>
 """
 
