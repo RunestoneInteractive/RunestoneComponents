@@ -31,3 +31,8 @@ The following option controls how the animation behaves.
 **Trace Mode** (`:trace_mode: true`) will print out a new line for each step of the animation, extending the `evalCont` with `id=unique_id_goes_here` mentioned above.
 
 **Replace Mode** (`:trace_mode: false`) will display and animate a single line presented in the `evalCont` with `id=unique_id_goes_here` mentioned above.
+
+
+Thanks to Al Sweigart for the inspiration and code that got this feature going!
+
+See:  https://github.com/asweigart/showeval
