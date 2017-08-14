@@ -36,6 +36,7 @@ else:
     # If no exceptions are raised, then set up the database.
     meta = MetaData()
     questions = Table('questions', meta, autoload=True, autoload_with=engine)
+    assignments =  Table('assignments', meta, autoload=True, autoload_with=engine)
     assignment_types = Table('assignment_types', meta, autoload=True, autoload_with=engine)
     assignment_questions = Table('assignment_questions', meta, autoload=True, autoload_with=engine)
     courses = Table('courses', meta, autoload=True, autoload_with=engine)
