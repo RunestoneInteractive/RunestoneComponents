@@ -5,6 +5,10 @@ var rsb = new RunestoneBase();
 
 function getCompletions() {
 // Get the completion status
+    if ((window.location.href).match(/(index.html|genindex.html|navhelp.html|toc.html|assignments.html|exercises.html)/)) {
+        return;
+    }
+
     var currentPathname = window.location.pathname;
     if (currentPathname.indexOf("?") !== -1) {
         currentPathname = currentPathname.substring(0, currentPathname.lastIndexOf("?"));
@@ -36,6 +40,9 @@ function showLastPositionBanner() {
 }
 
 function addNavigationAndCompletionButtons() {
+    if ((window.location.href).match(/(index.html|genindex.html|navhelp.html|toc.html|assignments.html|exercises.html)/)) {
+        return;
+    }
     var navLinkBgRightHiddenPosition = -$("#navLinkBgRight").outerWidth() - 5;
     var navLinkBgRightHalfOpen;
     var navLinkBgRightFullOpen = 0;
@@ -159,9 +166,17 @@ function decorateTableOfContents() {
     }
 }
 
+function enableCompletions() {
+
+    getCompletions();
+    showLastPositionBanner();
+    addNavigationAndCompletionButtons();
+    decorateTableOfContents();
+}
 
 // call enable user highlights after login
-$(document).bind("runestone:login",decorateTableOfContents);
+$(document).bind("runestone:login",enableCompletions);
+
 
 
 function processPageState(completionFlag) {
