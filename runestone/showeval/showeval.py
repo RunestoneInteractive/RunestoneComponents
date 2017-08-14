@@ -51,12 +51,12 @@ class ShowEval(RunestoneDirective):
 .. showeval:: unique_id_goes_here
    :trace_mode: boolean  <- Required option that enables 'Trace Mode'
 
-   ~~Prerequisite Information~~
-
+   some code
+   more code
    ~~~~
-
-   ~~Steps~~
-
+   more {{code}}{{what code becomes in step 1}}
+   more {{what code becomes in step 1}}{{what code becomes in step2}}
+   as many steps as you want {{the first double braces}}{{animate into the second}} wherever.
     """
     required_arguments = 1
     optional_arguments = 0
