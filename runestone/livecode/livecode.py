@@ -32,10 +32,8 @@ from runestone.common.runestonedirective import RunestoneDirective
 
 def setup(app):
     app.add_directive('livecode', LiveCode)
-    app.add_stylesheet('codemirror.css')
-    app.add_stylesheet('livecode.css')
-    app.add_javascript('livecode.js')
-    app.add_javascript('clike.js')
+
+
 
 class LiveCode(RunestoneDirective):
     required_arguments = 1
@@ -49,32 +47,7 @@ class LiveCode(RunestoneDirective):
     }
 
     def run(self):
-        self.options['divid'] = self.arguments[0]
-        if 'language' not in self.options:
-            raise KeyError("language must be specified")
-
-        if 'stdin' in self.options:
-            self.options['stdin_val'] = self.options['stdin']
-            self.options['stdin'] = True
-        else:
-            self.options['stdin'] = False
-
-        if 'datafile' not in self.options:
-            self.options['datafile'] = False
-
-        if 'sourcefile' not in self.options:
-            self.options['sourcefile'] = ""
-
-
-        self.options['initialcode'] = "\n".join(self.content)
-
-        env = Environment(loader=FileSystemLoader(os.path.dirname(__file__)))
-        template = env.get_template('livecode.html')
-        output = template.render(**self.options)
-
-        raw_node = nodes.raw(self.block_text, output, format='html')
-        raw_node.source, raw_node.line = self.state_machine.get_source_and_line(self.lineno)
-        return [raw_node]
+        raise RuntimeError("livecode is obsolete, Use the activecode directive with the language option")
 
 
 
