@@ -55,7 +55,7 @@ class ShowEval(RunestoneDirective):
    more code
    ~~~~
    more {{code}}{{what code becomes in step 1}}
-   more {{what code becomes in step 1}}{{what code becomes in step2}}
+   more {{what code becomes in step 1}}{{what code becomes in step2}}  ##Optional comment for step 2
    as many steps as you want {{the first double braces}}{{animate into the second}} wherever.
     """
     required_arguments = 1
@@ -71,7 +71,9 @@ class ShowEval(RunestoneDirective):
 
         The step animations follow the "-----" and are written one per line. Use
         "{{" and "}}" braces to surround the part of the line that should be replaced,
-        followed by the replacement text also in "{{" and "}}".
+        followed by the replacement text also in "{{" and "}}". If you would like to add
+        a comment that will appear in a div beside the animation, denote that at the end
+        of the step where you would like it to appear with "##".
 
     Example:
 
@@ -82,7 +84,7 @@ class ShowEval(RunestoneDirective):
        ~~~~
 
        ''.join({{eggs}}{{['dogs', 'cats', 'moose']}}).upper().join(eggs)
-       {{''.join(['dogs', 'cats', 'moose'])}}{{'dogscatsmoose'}}.upper().join(eggs)
+       {{''.join(['dogs', 'cats', 'moose'])}}{{'dogscatsmoose'}}.upper().join(eggs)  ##I want to put a comment here!
        {{'dogscatsmoose'.upper()}}{{'DOGSCATSMOOSE'}}.join(eggs)
        'DOGSCATSMOOSE'.join({{eggs}}{{['dogs', 'cats', 'moose']}})
        {{'DOGSCATSMOOSE'.join(['dogs', 'cats', 'moose'])}}{{'dogsDOGSCATSMOOSEcatsDOGSCATSMOOSEmoose'}}
