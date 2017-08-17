@@ -94,6 +94,7 @@ var SHOWEVAL = (function () {
   };
 
   thisModule.ShowEval.prototype.evaluateStep = function(buttonId, step) {
+    this.currentStepDiv.children('.anno').hide();
     $(buttonId).attr("disabled", true);
     if (step === undefined) {
       step = this.currentStep;
@@ -104,7 +105,7 @@ var SHOWEVAL = (function () {
       $(buttonId).attr("disabled", false);
       return; // do nothing if on last step
     }
-    this.setStep(step);
+    //this.setStep(step);
 
     var fadeInSpeed = 0;
     if (this.createTrace) {
