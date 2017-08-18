@@ -148,3 +148,13 @@ var SHOWEVAL = (function () {
 
   return thisModule;
 }());
+
+/*=================================
+== Find the custom HTML tags and ==
+==   execute our code on them    ==
+=================================*/
+
+if (typeof component_factory === 'undefined') {
+    component_factory = {}
+}
+component_factory['showeval'] = function(opts) { return new SHOWEVAL(opts)}
