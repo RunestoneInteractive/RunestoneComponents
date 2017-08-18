@@ -29,7 +29,7 @@ control in this regard and it would be nice to rein it in.
 Unit Testing
 ------------
 
-We are using selenium to create unit tests for each of the components.  Nearly every component has selenium tests now.  If you add a feature or a new component, please make sure to include a selenium test that verifies it works.
+We are using Selenium to create unit tests for each of the components.  Nearly every component has selenium tests now.  If you add a feature or a new component, please make sure to include a selenium test that verifies it works.
 
 Provide an example
 ------------------
