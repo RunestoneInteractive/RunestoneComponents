@@ -38,6 +38,24 @@ class ShowEvalTest_TraceMode(unittest.TestCase):
         driver.find_element_by_id("showEval_0_reset").click()
         assert len(evalDiv.find_elements_by_class_name("previousStep")) == 0
 
+    def test_Comment(self):
+        driver = self.driver
+        self.assertIn("ShowEval", driver.title)
+        evalDiv = driver.find_element_by_id("showEval_0")
+        commentDiv = evalDiv.find_element_by_class_name("anno")
+
+        assert commentDiv.is_displayed() == False
+
+        driver.find_element_by_id("showEval_0_nextStep").click()
+        time.sleep(4)
+
+        assert commentDiv.is_displayed() == True
+
+        driver.find_element_by_id("showEval_0_nextStep").click()
+        time.sleep(4)
+
+        assert commentDiv.is_displayed() == False
+
     def tearDown(self):
         self.driver.close()
 
@@ -74,6 +92,24 @@ class ShowEvalTest_ReplaceMode(unittest.TestCase):
         assert driver.find_element_by_class_name("eval").text != evalText1
         driver.find_element_by_id("showEval_0_reset").click()
         assert driver.find_element_by_class_name("eval").text == evalText1
+
+    def test_Comment(self):
+        driver = self.driver
+        self.assertIn("ShowEval", driver.title)
+        evalDiv = driver.find_element_by_id("showEval_0")
+        commentDiv = evalDiv.find_element_by_class_name("anno")
+
+        assert commentDiv.is_displayed() == False
+
+        driver.find_element_by_id("showEval_0_nextStep").click()
+        time.sleep(4)
+
+        assert commentDiv.is_displayed() == True
+
+        driver.find_element_by_id("showEval_0_nextStep").click()
+        time.sleep(4)
+
+        assert commentDiv.is_displayed() == False
 
     def tearDown(self):
         self.driver.close()
