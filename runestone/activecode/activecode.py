@@ -126,23 +126,22 @@ def purge_activecodes(app, env, docname):
 class ActiveCode(RunestoneDirective):
     """
 .. activecode:: uniqueid
-   :nocanvas: do not create a canvas
-   :autograde: normally set this to unittest
-   :nopre: do not create an output component
-   :above: put the canvas above the code
-   :autorun: run this activecode as soon as the page is loaded
-   :caption: caption under the active code
-   :include: invisibly include code from another activecode
-   :hidecode: Don:t show the editor initially
+   :nocanvas:  -- do not create a canvas
+   :autograde: unittest
+   :nopre: -- do not create an output component
+   :above: -- put the canvas above the code
+   :autorun: -- run this activecode as soon as the page is loaded
+   :caption: this is the caption
+   :include: div1,div2 -- invisibly include code from another activecode
+   :hidecode: -- Don't show the editor initially
+   :nocodelens: -- Do not show the codelens button
+   :timelimit: -- set the time limit for this program in seconds
    :language: python, html, javascript, java, python2, python3
    :tour_1: audio tour track
    :tour_2: audio tour track
    :tour_3: audio tour track
    :tour_4: audio tour track
    :tour_5: audio tour track
-   :nocodelens: Do not show the codelens button
-   :coach: Show the codecoach button
-   :timelimit: set the time limit for this program
    :stdin: : A file to simulate stdin (java, python2, python3)
    :datafile: : A datafile for the program to read (java, python2, python3)
    :sourcefile: : source files (java, python2, python3)
