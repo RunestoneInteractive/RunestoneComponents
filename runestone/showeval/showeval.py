@@ -27,11 +27,11 @@ def setup(app):
     app.add_stylesheet('showEval.css')
 
 CODE = """\
-<div data-childcomponent="showeval" class="runestone explainer alert alert-warning">
+<div data-childcomponent="showeval" data-optional="%(trace_mode)s" class="runestone explainer alert alert-warning">
     <button class="btn btn-success" id="%(divid)s_nextStep">Next Step</button>
     <button class="btn btn-default" id ="%(divid)s_reset">Reset</button>
     <div class="evalCont" style="background-color: #FDFDFD;">%(preReqLines)s</div>
-    <div class="evalCont" id="%(divid)s"></div>
+    <div class="evalCont" id="%(divid)s">%(steps)s</div>
 </div>
 """
 
@@ -96,21 +96,22 @@ class ShowEval(RunestoneDirective):
         self.options['divid'] = self.arguments[0]
         self.options['trace_mode'] = self.options['trace_mode'].lower()
         self.options['preReqLines'] = ''
-        self.options['steps'] = []
+        self.options['steps'] = "<ul>\n"
 
         step = False
         count = 0
         for line in self.content:
             if step == True:
                 if line != '':
-                    self.options['steps'].append(str(line))
+                    self.options['steps'] += "<li>" + str(line) + "</li>\n"
             elif '~~~~' in line:
                 step = True
             else:
                 self.options['preReqLines'] += line + '<br />\n'
 
+        self.options['steps'] += "</ul>"
 
-        res = (CODE + SCRIPT) % self.options
+        res = (CODE) % self.options
 
         addHTMLToDB(self.options['divid'], self.options['basecourse'], res)
         return [nodes.raw(self.block_text, res, format='html')]
