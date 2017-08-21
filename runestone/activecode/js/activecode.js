@@ -148,11 +148,13 @@ ActiveCode.prototype.createControls = function () {
     ctrlDiv.appendChild(butt);
     this.runButton = butt;
     $(butt).click(this.runProg.bind(this));
-
+    $(butt).attr("type","button")
+    
     if (! this.hidecode) {
         var butt = document.createElement("button");
         $(butt).text("Load History");
         $(butt).addClass("btn btn-default");
+        $(butt).attr("type","button")
         ctrlDiv.appendChild(butt);
         this.histButton = butt;
         $(butt).click(this.addHistoryScrubber.bind(this));
@@ -167,6 +169,7 @@ ActiveCode.prototype.createControls = function () {
         $(butt).addClass("ac_opt btn btn-default");
         $(butt).text("Show Feedback");
         $(butt).css("margin-left","10px");
+        $(butt).attr("type","button")
         this.gradeButton = butt;
         ctrlDiv.appendChild(butt);
         $(butt).click(this.createGradeSummary.bind(this))
@@ -178,6 +181,7 @@ ActiveCode.prototype.createControls = function () {
         $(butt).addClass("ac_opt btn btn-default");
         $(butt).text("Show Code");
         $(butt).css("margin-left", "10px");
+        $(butt).attr("type","button")
         this.showHideButt = butt;
         ctrlDiv.appendChild(butt);
         $(butt).click( (function() {

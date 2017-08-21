@@ -218,7 +218,8 @@ MultipleChoice.prototype.renderMCFormButtons = function () {
     this.submitButton.textContent = "Check Me";
     $(this.submitButton).attr({
         "class": "btn btn-success",
-        "name": "do answer"
+        "name": "do answer",
+        "type": "button"
     });
     if (this.multipleanswers) {
         this.submitButton.addEventListener("click", function () {
