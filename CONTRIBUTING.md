@@ -25,6 +25,8 @@ control in this regard and it would be nice to rein it in.
 * When making any changes, make sure the docstring for the class that implements the Sphinx directive is up to date.  These docstrings are used in several places for templates and quick help.
 * Make sure your new directive class inherits and uses RunestoneBase
 * Avoid writing a directive that returns a raw node.  Creating appropriate nodes that inherit from Runestone gives us much more flexibility to auto number and cross reference and store source in the database.
+* Make sure any buttons you create have their type specified.  Unless you know you want it to be submit or reset make sure it is 'button' otherwise it causes problems for previewing.
+
 
 Unit Testing
 ------------
