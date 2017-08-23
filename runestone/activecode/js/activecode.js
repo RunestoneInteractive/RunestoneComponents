@@ -2,13 +2,6 @@
  * Created by bmiller on 3/19/15.
  */
 
-
-var head= document.getElementsByTagName('head')[0];
-var script= document.createElement('script');
-script.type= 'text/javascript';
-script.src= '../_static/MD5.js';
-head.appendChild(script);
-
 var isMouseDown = false;
 document.onmousedown = function() { isMouseDown = true };
 document.onmouseup   = function() { isMouseDown = false };
@@ -1620,26 +1613,28 @@ LiveCode.prototype.runProg = function() {
         data = JSON.stringify({'run_spec': runspec});
         this.runProg_callback(data);
     } else {
-
         runspec['file_list'] = [];
         var promises = [];
         var instance = this;
-
-        for(var i = 0; i < files.length; i++) {
-            var fileName = files[i].name;
-            this.div2id[fileName] = "runestone" + MD5(files[i].name + files[i].content);
-            runspec['file_list'].push([this.div2id[fileName], fileName]);
-            promises.push(new Promise((resolve, reject) => {
-                 instance.checkFile(files[i], resolve, reject);
-            }));
-        }
-        data = JSON.stringify({'run_spec': runspec});
-
-        Promise.all(promises).then(function() {
-            // console.log("All files on Server");
-            instance.runProg_callback(data);
-        }).catch(function(err) {
-            // console.log("Error: " + err);
+        $.getScript('http://cdn.rawgit.com/killmenot/webtoolkit.md5/master/md5.js', function()
+        {
+            for(var i = 0; i < files.length; i++) {
+                var fileName = files[i].name;
+                var fileContent = files[i].content;
+                instance.div2id[fileName] = "runestone" + MD5(fileName + fileContent);
+                runspec['file_list'].push([instance.div2id[fileName], fileName]);
+                promises.push(new Promise((resolve, reject) => {
+                     instance.checkFile(files[i], resolve, reject);
+                }));
+            }
+            data = JSON.stringify({'run_spec': runspec});
+            this.div2id = instance.div2id;
+            Promise.all(promises).then(function() {
+                // console.log("All files on Server");
+                instance.runProg_callback(data);
+            }).catch(function(err) {
+                // console.log("Error: " + err);
+            });
         });
     }
 
@@ -1744,9 +1739,7 @@ LiveCode.prototype.addJobeErrorMessage = function (err) {
  * @param  {function} reject  promise reject function
  */
 LiveCode.prototype.checkFile = function(file, resolve, reject) {
-    var testName = file.name;
-
-    var file_id = this.div2id[testName];
+    var file_id = this.div2id[file.name];
     var resource = '/jobe/index.php/restapi/files/' + file_id;
     var host = this.JOBE_SERVER + resource;
     var key = this.API_KEY;
@@ -1756,10 +1749,6 @@ LiveCode.prototype.checkFile = function(file, resolve, reject) {
     xhr.setRequestHeader('Content-type', 'application/json');
     xhr.setRequestHeader('Accept', 'text/plain');
     xhr.setRequestHeader('X-API-KEY', key);
-
-    xhr.onload = function () {
-        // console.log("successfully sent file " + xhr.responseText);
-    };
 
     xhr.onerror = function () {
         // console.log("error sending file" + xhr.responseText);
@@ -1790,8 +1779,6 @@ LiveCode.prototype.checkFile = function(file, resolve, reject) {
 };
 /**
  * Places a file on a server then calls runProg if needed
- * @param  {string} classdiv contents of file
- * @param  {string} testName name of file
  */
 LiveCode.prototype.pushDataFile = function (file, resolve, reject) {
 
