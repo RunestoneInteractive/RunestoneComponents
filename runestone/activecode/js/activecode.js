@@ -1573,7 +1573,6 @@ LiveCode.prototype.runProg = function() {
         this.sourcefile = sfilemap[this.language];
     }
 
-
     var files = [];
     if(this.language === "java") {
         if (this.datafile != undefined) {
@@ -1778,7 +1777,7 @@ LiveCode.prototype.checkFile = function(file, resolve, reject) {
 
 };
 /**
- * Places a file on a server then calls runProg if needed
+ * Places a file on a server
  */
 LiveCode.prototype.pushDataFile = function (file, resolve, reject) {
 
