@@ -17,7 +17,7 @@ __author__ = 'bmiller'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
+from runestone.common.runestonedirective import RunestoneDirective
 from .assessbase import Assessment
 from .multiplechoice import *
 from .timedassessment import *
@@ -40,10 +40,14 @@ def setup(app):
     app.add_node(TimedNode, html=(visit_timed_node, depart_timed_node))
     app.add_node(MChoiceNode, html=(visit_mc_node, depart_mc_node))
 
+    app.add_node(AnswersBulletList, html=(visit_answers_bullet_node, depart_answers_bullet_node))
+    app.add_node(AnswerListItem, html=(visit_answer_list_item, depart_answer_list_item))
+    app.add_node(FeedbackBulletList, html=(visit_feedback_bullet_node, depart_feedback_bullet_node))
+    app.add_node(FeedbackListItem, html=(visit_feedback_list_item, depart_feedback_list_item))
 
 
 
-class AddButton(Directive):
+class AddButton(RunestoneDirective):
     required_arguments = 1
     optional_arguments = 1
     final_argument_whitespace = True
@@ -75,10 +79,12 @@ class AddButton(Directive):
         res = TEMPLATE_START % self.options
 
         res += TEMPLATE_END % self.options
-        return [nodes.raw('', res, format='html')]
+        rawnode = nodes.raw(self.block_text, res, format='html')
+        rawnode.source, rawnode.line = self.state_machine.get_source_and_line(self.lineno)
+        return [rawnode]
 
 
-class QuestionNumber(Directive):
+class QuestionNumber(RunestoneDirective):
     """Set Parameters for Question Numbering
 .. qnum::
    'prefix': character prefix before the number

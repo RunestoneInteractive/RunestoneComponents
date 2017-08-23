@@ -18,6 +18,7 @@ dist/*
 develop-eggs
 .installed.cfg
 __pycache__
+.cache
 _deploy
 conf.py
 
@@ -39,5 +40,13 @@ nosetests.xml
 .idea
 bower_componenets/
 .venv
+*~
 
+# Files produced by runestone builds.
 runestone/build_info
+runestone/*/test/build_info
+**/sphinx_settings.json
+
+# IDEs
+.vscode/
+**/sphinx-enki-info.txt

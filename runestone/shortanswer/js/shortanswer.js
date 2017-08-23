@@ -25,8 +25,9 @@ ShortAnswer.prototype = new RunestoneBase();
 ========================================*/
 ShortAnswer.prototype.init = function (opts) {
     RunestoneBase.apply(this, arguments);
+    RunestoneBase.prototype.init.apply(this, arguments);
     var orig = opts.orig;    // entire <p> element that will be replaced by new HTML
-    this.useRunestoneServies = opts.useRunestoneServices || eBookConfig.useRunestoneServices;
+    this.useRunestoneServices = opts.useRunestoneServices || eBookConfig.useRunestoneServices;
     this.origElem = orig;
     this.divid = orig.id;
     this.question = this.origElem.innerHTML;
@@ -37,7 +38,7 @@ ShortAnswer.prototype.init = function (opts) {
     }
 
     this.renderHTML();
-    this.loadJournal();
+    this.checkServer("shortanswer");
 };
 
 ShortAnswer.prototype.renderHTML = function() {
@@ -134,69 +135,63 @@ ShortAnswer.prototype.renderHTML = function() {
 
 ShortAnswer.prototype.submitJournal = function () {
     var value = $("#"+this.divid+"_solution").val();
-    localStorage.setItem(this.divid, value);
-    /*
-    directiveRemoteCommand("set_journal_entry",  this.divid, {"solution": value},
-                      function(data) {
-                        storage.remove(this.divid);
-                      },
-                      function(data) {
-                        console.log(data.message);
-                      });  */
+
+
+    this.setLocalStorage({answer: value, timestamp: new Date()})
     this.logBookEvent({'event': 'shortanswer', 'act': JSON.stringify(value), 'div_id': this.divid});
     this.feedbackDiv.innerHTML = "Your answer has been saved.";
     $(this.feedbackDiv).removeClass("alert-danger");
     $(this.feedbackDiv).addClass("alert alert-success");
 };
 
-ShortAnswer.prototype.loadJournal = function () {
-
-    // check if the item has been saved to local storage
-    value = localStorage.getItem(this.divid);
-    if (value != null) {
-       var solution = $("#" + this.divid + "_solution");
-       solution.text(value);
-       this.feedbackDiv.innerHTML = "Your current saved answer is shown above.";
-       $(this.feedbackDiv).removeClass("alert-danger");
-       $(this.feedbackDiv).addClass("alert alert-success");
+ShortAnswer.prototype.setLocalStorage = function(data) {
+    if (! this.graderactive ) {
+        let key = eBookConfig.email + ":" + this.divid + "-given"
+        localStorage.setItem(key, JSON.stringify(data));
     }
-
-    /* this doesn't seem to be doing anything since we aren't currently saving to the server
-    // Ask the server to send the latest
-    var loadAnswer = function(data,status,whatever) {
-        var len = localStorage.length;
-        var answer = {};
-        if (! jQuery.isEmptyObject(data)) {
-            answer = data;
-        }  else {
-            answer.answer = "";
-        }
-        var solution = $("#" + this.divid + "_solution");
-        if (len > 0) {
-            var ex = storage.get(this.divid);
-            if (ex !== null ) {
-                if (! storage.is_new(answer.divid, new Date(answer.timestamp))) {
-                    solution.text(storage.get(this.divid));
-                // now send the newer answer to the server...
-                } else {
-                    solution.text(answer.answer);
-                }
-            } else {
-                solution.text(answer.answer);
-            }
-        } else {
-            solution.text(answer.answer);
-        }
-    }.bind(this);
-    var data = {'div_id' : this.divid};
-    if (this.useRunestoneServices) {
-        jQuery.get(eBookConfig.ajaxURL + 'getlastanswer', data, loadAnswer);
-    } else {
-        loadAnswer({},null,null);
-    }
-    */
 };
 
+ShortAnswer.prototype.checkLocalStorage = function () {
+    // Repopulates the short answer text
+    // which was stored into local storage.
+    var len = localStorage.length;
+    if (len > 0) {
+        var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
+        if (ex !== null) {
+            try {
+                var storedData = JSON.parse(ex);
+                var answer = storedData.answer;
+            } catch (err) {
+                // error while parsing; likely due to bad value stored in storage
+                console.log(err.message);
+                localStorage.removeItem(eBookConfig.email + ":" + this.divid + "-given");
+                return;
+            }
+            let solution = $("#" + this.divid + "_solution");
+            solution.text(answer);
+            this.feedbackDiv.innerHTML = "Your current saved answer is shown above.";
+            $(this.feedbackDiv).removeClass("alert-danger");
+            $(this.feedbackDiv).addClass("alert alert-success");
+
+        }
+    }
+};
+
+ShortAnswer.prototype.restoreAnswers = function (data) {
+    // Restore answers from storage retrieval done in RunestoneBase
+    // sometimes data.answer can be null
+    if (!data.answer) {
+        data.answer = "";
+    }
+
+    let solution = $("#" + this.divid + "_solution");
+    solution.text(data.answer);
+    this.feedbackDiv.innerHTML = "Your current saved answer is shown above.";
+    $(this.feedbackDiv).removeClass("alert-danger");
+    $(this.feedbackDiv).addClass("alert alert-success");
+
+
+};
 
 /*=================================
 == Find the custom HTML tags and ==
@@ -204,9 +199,14 @@ ShortAnswer.prototype.loadJournal = function () {
 =================================*/
 $(document).ready(function () {
     $("[data-component=shortanswer]").each(function (index) {
-        if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
+        if ($(this).closest('[data-component=timedAssessment]').length == 0) { // If this element exists within a timed component, don't render it here
             saList[this.id] = new ShortAnswer({"orig": this, 'useRunestoneServices': eBookConfig.useRunestoneServices});
         }
     });
 
 });
+
+if (typeof component_factory === 'undefined') {
+    component_factory = {}
+}
+component_factory['shortanswer'] = function(opts) { return new ShortAnswer(opts)}

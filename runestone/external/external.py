@@ -16,12 +16,8 @@
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from runestone.common.runestonedirective import RunestoneDirective
-from docutils.parsers.rst import Directive
-from sqlalchemy import create_engine, Table, MetaData, select, delete
-from runestone.server import get_dburl
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common.runestonedirective import RunestoneDirective
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
 
 try:
     from html import escape  # py3
@@ -29,7 +25,7 @@ except ImportError:
     from cgi import escape  # py2
 
 __author__ = 'jczetta'
-# Code template is directly from question.py at the moment, which is (c) Bradley N. Miller. 
+# Code template is directly from question.py at the moment, which is (c) Bradley N. Miller.
 #This is intended as the basis for a potential new gradeable directive class, still potential TODO.
 
 
@@ -39,9 +35,9 @@ def setup(app):
     app.add_node(ExternalNode, html=(visit_external_node, depart_external_node))
 
 
-class ExternalNode(nodes.General, nodes.Element):
-    def __init__(self, content):
-        super(ExternalNode, self).__init__()
+class ExternalNode(nodes.General, nodes.Element, RunestoneNode):
+    def __init__(self, content, **kwargs):
+        super(ExternalNode, self).__init__(**kwargs)
         self.external_options = content
 
 
@@ -104,7 +100,8 @@ class ExternalDirective(RunestoneDirective):
 
         self.options['name'] = self.arguments[0].strip()
 
-        external_node = ExternalNode(self.options)
+        external_node = ExternalNode(self.options, rawsource=self.block_text)
+        external_node.source, external_node.line = self.state_machine.get_source_and_line(self.lineno)
         self.add_name(external_node)
 
         self.state.nested_parse(self.content, self.content_offset, external_node)

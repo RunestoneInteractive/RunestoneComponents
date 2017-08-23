@@ -19,17 +19,18 @@ __author__ = 'bmiller'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
 from .textfield import *
-from sqlalchemy import create_engine, Table, MetaData, select, delete
-from runestone.server import get_dburl
-from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common.runestonedirective import RunestoneDirective
+from sqlalchemy import Table
+from runestone.server.componentdb import addQuestionToDB, addHTMLToDB, engine, meta
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
 
 try:
     from html import escape  # py3
 except ImportError:
     from cgi import escape  # py2
+
+if engine:
+    Source_code = Table('source_code', meta, autoload=True, autoload_with=engine)
 
 def setup(app):
     app.add_directive('activecode', ActiveCode)
@@ -59,7 +60,7 @@ def setup(app):
 
 
 TEMPLATE_START = """
-<div data-childcomponent="%(divid)s" class="explainer ac_section alert alert-warning">
+<div data-childcomponent="%(divid)s" class="runestone explainer ac_section alert alert-warning">
 """
 
 TEMPLATE_END = """
@@ -69,15 +70,15 @@ TEMPLATE_END = """
 </div>
 """
 
-class ActivcodeNode(nodes.General, nodes.Element):
-    def __init__(self, content):
+class ActivcodeNode(nodes.General, nodes.Element, RunestoneNode):
+    def __init__(self, content, **kwargs):
         """
 
         Arguments:
         - `self`:
         - `content`:
         """
-        super(ActivcodeNode, self).__init__(name=content['name'])
+        super(ActivcodeNode, self).__init__(name=content['name'], **kwargs)
         self.ac_components = content
 
 
@@ -122,37 +123,25 @@ def process_activcode_nodes(app, env, docname):
 def purge_activecodes(app, env, docname):
     pass
 
-database_connection = True
-try:
-    engine = create_engine(get_dburl(locals()))
-    meta = MetaData()
-    Source_code = Table('source_code', meta, autoload=True, autoload_with=engine)
-    Div = Table('div_ids', meta, autoload=True, autoload_with=engine)    
-except:
-    print("Cannot connect")
-    database_connection = False
-
-
 class ActiveCode(RunestoneDirective):
     """
 .. activecode:: uniqueid
-   :nocanvas: do not create a canvas
-   :autograde: normally set this to unittest
-   :nopre: do not create an output component
-   :above: put the canvas above the code
-   :autorun: run this activecode as soon as the page is loaded
-   :caption: caption under the active code
-   :include: invisibly include code from another activecode
-   :hidecode: Don:t show the editor initially
+   :nocanvas:  -- do not create a canvas
+   :autograde: unittest
+   :nopre: -- do not create an output component
+   :above: -- put the canvas above the code
+   :autorun: -- run this activecode as soon as the page is loaded
+   :caption: this is the caption
+   :include: div1,div2 -- invisibly include code from another activecode
+   :hidecode: -- Don't show the editor initially
+   :nocodelens: -- Do not show the codelens button
+   :timelimit: -- set the time limit for this program in seconds
    :language: python, html, javascript, java, python2, python3
    :tour_1: audio tour track
    :tour_2: audio tour track
    :tour_3: audio tour track
    :tour_4: audio tour track
    :tour_5: audio tour track
-   :nocodelens: Do not show the codelens button
-   :coach: Show the codecoach button
-   :timelimit: set the time limit for this program
    :stdin: : A file to simulate stdin (java, python2, python3)
    :datafile: : A datafile for the program to read (java, python2, python3)
    :sourcefile: : source files (java, python2, python3)
@@ -325,7 +314,7 @@ class ActiveCode(RunestoneDirective):
         course_name = env.config.html_context['course_id']
         divid = self.options['divid']
 
-        try:
+        if engine:
             engine.execute(Source_code.delete().where(Source_code.c.acid == divid).where(Source_code.c.course_id == course_name))
             engine.execute(Source_code.insert().values(
                 acid = divid,
@@ -335,30 +324,7 @@ class ActiveCode(RunestoneDirective):
                 includes = self.options['include'],
                 available_files = self.options.get('available_files', "")
             ))
-            try:
-                ch, sub_ch = env.docname.split('/')
-            except:
-                ch, sub_ch = (env.docname, 'null subchapter')
-
-            engine.execute(Div.delete()\
-                           .where(Div.c.course_name == course_name)\
-                           .where(Div.c.chapter == ch)\
-                           .where(Div.c.subchapter==sub_ch)\
-                           .where(Div.c.div_id==divid))
-            engine.execute(Div.insert().values(
-                course_name = course_name,
-                chapter = ch,
-                subchapter = sub_ch,
-                div_id = divid,
-                div_type = 'activecode'
-            ))
-
-
-        except Exception as e:
-            import traceback
-            print("The exception is ", e)
-            traceback.print_exc()
-            print(env.config.html_context['course_id'])
+        else:
             print("Unable to save to source_code table in activecode.py. Possible problems:")
             print("  1. dburl or course_id are not set in conf.py for your book")
             print("  2. unable to connect to the database using dburl")
@@ -366,7 +332,8 @@ class ActiveCode(RunestoneDirective):
             print("This should only affect the grading interface. Everything else should be fine.")
 
 
-        acnode = ActivcodeNode(self.options)
+        acnode = ActivcodeNode(self.options, rawsource=self.block_text)
+        acnode.source, acnode.line = self.state_machine.get_source_and_line(self.lineno)
         self.add_name(acnode)    # make this divid available as a target for :ref:
 
         if explain_text:

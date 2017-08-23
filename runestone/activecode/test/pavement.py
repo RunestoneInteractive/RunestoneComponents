@@ -22,6 +22,7 @@ options(
         sourcedir="_sources",
         outdir="./build/activecodetest",
         confdir=".",
+        quiet=True,
         project_name = "activecodetest",
         template_args={'course_id': 'activecodetest',
                        'login_required':'false',
@@ -36,7 +37,7 @@ options(
     )
 )
 
-# If DBUSER etc. are in the environment override dburl
+# If DBURL is in the environment override dburl
 options.build.template_args['dburl'] = get_dburl(outer=locals())
 
 from runestone import build  # build is called implicitly by the paver driver.

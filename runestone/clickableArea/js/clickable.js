@@ -25,6 +25,7 @@ ClickableArea.prototype = new RunestoneBase();
 
 ClickableArea.prototype.init = function (opts) {
     RunestoneBase.apply(this, arguments);
+    RunestoneBase.prototype.init.apply(this, arguments);
     var orig = opts.orig;    // entire <div> element that will be replaced by new HTML
     this.origElem = orig;
     this.divid = orig.id;
@@ -378,8 +379,13 @@ ClickableArea.prototype.renderFeedback = function () {
 =================================*/
 $(document).bind("runestone:login-complete", function () {
     $("[data-component=clickablearea]").each(function (index) {
-        if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
+        if ($(this).closest('[data-component=timedAssessment]').length == 0) { // If this element exists within a timed component, don't render it here
             CAList[this.id] = new ClickableArea({"orig": this, "useRunestoneServices":eBookConfig.useRunestoneServices});
         }
     });
 });
+
+if (typeof component_factory === 'undefined') {
+    component_factory = {}
+}
+component_factory['clickablearea'] = function(opts) { return new ClickableArea(opts)}

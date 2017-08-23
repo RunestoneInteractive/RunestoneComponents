@@ -4,8 +4,8 @@
 ======== parsons.py script and the RST file.
 ==== CONTRIBUTORS ======================================================
 ======== Isaiah Mayerchak
-======== Barbara Ericson
 ======== Jeff Rick
+======== Barbara Ericson
 ==== Adapted form the original JS Parsons by ===========================
 ======== Ville Karavirta
 ======== Petri Ihantola
@@ -126,7 +126,6 @@ LineBasedGrader.prototype.grade = function() {
 			       feedbackArea.html("Perfect!  It took you only one try to solve this.  Great job!");
 			    }
 				correct = true;
-				problem.helpButton.disabled = true;
 			} else {
 				// Incorrect Indention
 				state = "incorrectIndent";
@@ -1024,6 +1023,7 @@ Parsons.counter = 0;
 // Initialize based on what is specified in the HTML file
 Parsons.prototype.init = function (opts) {
 	RunestoneBase.apply(this, arguments);
+    RunestoneBase.prototype.init.apply(this, arguments);
 	var orig = opts.orig;     // entire <pre> element that will be replaced by new HTML
 	this.origElem = orig;
 	this.useRunestoneServices = opts.useRunestoneServices;
@@ -1058,6 +1058,7 @@ Parsons.prototype.init = function (opts) {
 	var content = temp[1];
 	this.blockIndex = 0;
 	this.checkCount = 0;
+	this.numDistinct = 0;
 	this.hasSolved = false;
 	this.initializeLines(content);
 	this.initializeView();
@@ -1208,7 +1209,6 @@ Parsons.prototype.initializeView = function () {
 		event.preventDefault();
 		that.clearFeedback();
 		that.resetView();
-		//that.helpMe();
 		that.logMove("reset");
 		that.setLocalStorage();
 	});
@@ -1217,7 +1217,7 @@ Parsons.prototype.initializeView = function () {
 		$(this.helpButton).attr("class", "btn btn-primary");
 		this.helpButton.textContent = "Help Me";
 		this.helpButton.id = this.counterId + "-help";
-		this.helpButton.disabled = true;
+		this.helpButton.disabled = false; // bje
 		this.parsonsControlDiv.appendChild(this.helpButton);
 		this.helpButton.addEventListener('click', function(event) {
 			event.preventDefault();
@@ -1245,6 +1245,7 @@ Parsons.prototype.initializeLines = function(text) {
 	var indents = [];
 	for (var i = 0; i < textBlocks.length; i++) {
 		var textBlock = textBlocks[i];
+
 		// Figure out options based on the #option and #option=value syntax
 		// Remove the options from the code
 		var options = {};
@@ -1281,12 +1282,16 @@ Parsons.prototype.initializeLines = function(text) {
 				}
 			}
 		}
-		// Add groupWithNext
-		for (j = 0; j < lines.length - 1; j++) {
-			lines[j].groupWithNext = true;
+		if (lines.length > 0)
+		{
+			// Add groupWithNext
+			for (j = 0; j < lines.length - 1; j++) {
+				lines[j].groupWithNext = true;
+			}
+			lines[lines.length - 1].groupWithNext = false;
 		}
-		lines[lines.length - 1].groupWithNext = false;
 	}
+	
 	// Normalize the indents
 	indents = indents.sort(function(a, b){return a-b});
 	for (i = 0; i < this.lines.length; i++) {
@@ -2061,8 +2066,9 @@ Parsons.prototype.solutionIndent = function() {
 Parsons.prototype.checkMe = function() {
 	if (!this.hasSolved) 
 	{
+	
+	    this.checkCount++;
 	    this.clearFeedback();
-		this.checkCount++;
 		if (this.options.adaptive) {
 			localStorage.setItem(this.adaptiveId + "Count", this.checkCount);
 		}
@@ -2078,29 +2084,30 @@ Parsons.prototype.checkMe = function() {
 		this.logAnswer(grade);
 		this.setLocalStorage();
 		
-		// if not solved then check if should provide help
-		if (!this.hasSolved)
+		// if not solved and not too short then check if should provide help
+		if (!this.hasSolved  && grade !== "incorrectTooShort")
 		{
 			if (this.canHelp) {
 				// only count the attempt if the answer is different (to prevent gaming)
 				var answerHash = this.answerHash();
 				if (this.lastAnswerHash !== answerHash) {
-					this.helpCount++;
+					this.numDistinct++;
 					this.lastAnswerHash = answerHash;
 				}
 		
 		        // if time to offer help
-				if (this.helpCount == 0) {
+				if (this.numDistinct == 3 && !this.gotHelp) {
 					// activate the help button and wiggle it
-					this.helpButton.disabled = false;
-					$(this.helpButton).css("position","relative"); 
-        			for (var x = 1; x <= 3; x++) {
-        				$(this.helpButton)
-        					.animate({ left : -5 }, 60)
-        					.animate({ left : 5 }, 120)
-        					.animate({ left : 0 }, 60);
-        			} // end for
-    			} // end if helpCount = 0
+					//this.helpButton.disabled = false;
+					//$(this.helpButton).css("position","relative"); 
+        			//for (var x = 1; x <= 3; x++) {
+        			//	$(this.helpButton)
+        			//		.animate({ left : -5 }, 60)
+        			//		.animate({ left : 5 }, 120)
+        			//		.animate({ left : 0 }, 60);
+        			alert("Click on the Help Me button if you want to make the problem easier");
+        			//} // end for
+    			} // end if  
 			} // end if can help
 		} // end if not solved
 	} // end outer if not solved
@@ -2123,8 +2130,10 @@ Parsons.prototype.initializeAdaptive = function() {
 		this.adaptiveId = this.adaptiveId + "-parsons";
 	}
 	this.canHelp = true;
-	this.helpCount = -3; // Number of checks before help is offered
+	//this.helpCount = -3; // Number of checks before help is offered
 	this.checkCount = 0;
+	this.numDistinct = 0; // number of distinct solution attempts (different from previous)
+	this.gotHelp = false;
 	// Initialize the userRating
 	var storageProblem = localStorage.getItem(this.adaptiveId + "Problem");
 	if (storageProblem == this.divid) {
@@ -2555,33 +2564,52 @@ Parsons.prototype.combineBlocks = function() {
 Parsons.prototype.makeEasier = function() {
 	var distractorToRemove = this.distractorToRemove();
 	if (distractorToRemove !== undefined) {
+	    alert("Will remove an incorrect code block");
 		this.removeDistractor(distractorToRemove);
 		this.logMove("removedDistractor-" + distractorToRemove.hash());
 	} else if (this.usesIndentation()) {
+	    alert("Will provide indentation");
 		this.removeIndentation();
 		this.logMove("removedIndentation");
 	} else {
 		var numberOfBlocks = this.numberOfBlocks();
 		if (this.numberOfBlocks() > 3) {
+		    alert("Will combine two blocks");
 			this.combineBlocks();
 			this.logMove("combinedBlocks");
 		}
-		if (numberOfBlocks < 5) {
+		else {
+			alert("There are only 3 blocks left.  You should be able to put them in order");
 			this.canHelp = false;
-			this.helpButton.disabled = true;
 		}
+		//if (numberOfBlocks < 5) {
+		//	this.canHelp = false;
+		//	this.helpButton.disabled = true;
+		//}
 	}
 };
 
 // The "Help Me" button was pressed and the problem should be simplified
 Parsons.prototype.helpMe = function() {
 	this.clearFeedback();
-	this.helpCount = -1; // amount to allow for multiple helps in a row
-	if (this.helpCount < 0) {
-		this.helpCount = Math.max(this.helpCount, -1); // min 1 attempt before more help
-		this.helpButton.disabled = true;
+	
+	//this.helpCount = -1; // amount to allow for multiple helps in a row
+	//if (this.helpCount < 0) {
+	//	this.helpCount = Math.max(this.helpCount, -1); // min 1 attempt before more help
+		//this.helpButton.disabled = true;
+	//}
+	
+	// if less than 3 attempts
+	if (this.numDistinct < 3)
+	{
+	   alert("You must make at least three distinct full attempts at a solution before you can get help");
 	}
-	this.makeEasier();
+	// otherwise give help
+    else 
+    {
+     this.gotHelp = true;
+	 this.makeEasier();
+	}
 };
 
 /* =====================================================================
@@ -2963,11 +2991,12 @@ Parsons.prototype.resetView = function() {
 	this.noindent = this.options.noindent;
 	// Reinitialize
 	this.checkCount = 0;
+	this.numDistinct = 0;
 	this.hasSolved = false;
 	if (this.options.adaptive) {
 		this.canHelp = true;
-		this.helpCount = -3; // enable after 3 failed attempts
-		this.helpButton.disabled = true;
+		//this.helpCount = -3; // enable after 3 failed attempts
+		//this.helpButton.disabled = true;
 		localStorage.setItem(this.adaptiveId + "Problem", this.divid);
 		localStorage.setItem(this.adaptiveId + "Count", this.checkCount);
 		localStorage.setItem(this.adaptiveId + "Solved", false);
@@ -2979,8 +3008,13 @@ Parsons.prototype.resetView = function() {
 
 $(document).bind("runestone:login-complete", function () {
 	$("[data-component=parsons]").each(function (index) {
-		if ($(this.parentNode).data("component") !== "timedAssessment") {
+		if ($(this).closest('[data-component=timedAssessment]').length == 0) {
 			prsList[this.id] = new Parsons({"orig": this, "useRunestoneServices": eBookConfig.useRunestoneServices});
 		}
 	});
 });
+
+if (typeof component_factory === 'undefined') {
+    component_factory = {}
+}
+component_factory['parsons'] = function(opts) { return new Parsons(opts)}

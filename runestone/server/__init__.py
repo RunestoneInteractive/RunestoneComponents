@@ -1,4 +1,3 @@
-from .chapternames import *
 from os import environ
 import re
 
@@ -14,8 +13,8 @@ def get_dburl(outer={}):
     # outer may contain the locals from the calling function
     # nonlocal env, settings # Python 3 only
 
-    if all([x in environ for x in ['DBUSER', 'DBHOST', 'DBNAME']]):
-        return 'postgresql://{DBUSER}:{DBPASS}@{DBHOST}/{DBNAME}'.format(**environ)
+    if 'DBURL' in environ:
+        return environ['DBURL']
 
     if 'options' in outer:
         return outer['options'].build.template_args['dburl']

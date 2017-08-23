@@ -28,95 +28,25 @@ FITB.prototype = new RunestoneBase();
 
 FITB.prototype.init = function (opts) {
     RunestoneBase.apply(this, arguments);
+    RunestoneBase.prototype.init.apply(this, arguments);
     var orig = opts.orig;    // entire <p> element
     this.useRunestoneServices = opts.useRunestoneServices;
     this.origElem = orig;
     this.divid = orig.id;
-    this.questionArray = [];
     this.correct = null;
-    this.feedbackArray = [];
-    /* this.feedbackArray is an array of array of arrays--each outside element is a blank. Each middle element is a different "incorrect" feedback
-    that is tailored for how the question is incorrectly answered. Each inside array contains 2 elements: the regular expression, then text */
-    this.children = [];   // this contains all of the child elements of the entire tag...
-    this.correctAnswerArray = [];   // This array contains the regular expressions of the correct answers
+    // See comments in fitb.py for the format of ``feedbackArray`` (which is identical in both files).
+    //
+    // Find the script tag containing JSON and parse it. See `SO <https://stackoverflow.com/questions/9320427/best-practice-for-embedding-arbitrary-json-in-the-dom>`_.
+    this.feedbackArray = JSON.parse(this.scriptSelector(this.origElem).html());
 
-    this.adoptChildren();
-    this.populateCorrectAnswerArray();
-    this.populateQuestionArray();
-
-    this.casei = false;   // Case insensitive--boolean
-    if ($(this.origElem).data("casei") === true) {
-        this.casei = true;
-    }
-    this.populateFeedbackArray();
     this.createFITBElement();
     this.checkServer("fillb");
 };
 
-/*====================================
-====    Functions parsing data    ====
-====   out of intermediate HTML   ====
-====================================*/
-
-FITB.prototype.adoptChildren = function () {
-    // populates this.children
-    var children = this.origElem.childNodes;
-    for (var i = 0; i < this.origElem.childNodes.length; i++) {
-        if ($(this.origElem.childNodes[i]).is("[data-blank]")) {
-            this.children.push(this.origElem.childNodes[i]);
-        }
-    }
-};
-
-FITB.prototype.populateCorrectAnswerArray = function () {
-    for (var i = 0; i < this.children.length; i++) {
-        for (var j=0; j < this.children[i].childNodes.length; j++) {
-            if ($(this.children[i].childNodes[j]).is("[data-answer]")) {
-                this.correctAnswerArray.push($([this.children[i].childNodes[j]]).text().replace(/\\\\/g,"\\"));
-            }
-        }
-    }
-};
-
-FITB.prototype.populateQuestionArray = function () {
-    for (var i = 0; i < this.children.length; i++) {
-        for (var j = 0; j < this.children[i].childNodes.length; j++) {
-            if ($(this.children[i].childNodes[j]).is("[data-answer]")) {
-                var delimiter = this.children[i].childNodes[j].outerHTML;
-
-                var fulltext = $(this.children[i]).html();
-                var temp = fulltext.split(delimiter);
-                this.questionArray.push(temp[0]);
-                break;
-            }
-        }
-    }
-};
-
-FITB.prototype.populateFeedbackArray = function () {
-    for (var i = 0; i < this.children.length; i++) {
-        var AnswerNodeList = [];
-        var tmpContainArr = [];
-        for (var j = 0; j < this.children[i].childNodes.length; j++) {
-            if ($(this.children[i].childNodes[j]).is("[data-feedback=text]")) {
-
-                AnswerNodeList.push(this.children[i].childNodes[j]);
-                for (var k = 0; k < this.children[i].childNodes.length; k++) {
-                    if ($(this.children[i].childNodes[k]).is("[data-feedback=regex]")) {
-                        if ($(this.children[i].childNodes[j]).attr("for") === this.children[i].childNodes[k].id) {
-                            var tempArr = [];
-                            tempArr.push(this.children[i].childNodes[k].innerHTML.replace(/\\\\/g, "\\"));
-                            tempArr.push(this.children[i].childNodes[j].innerHTML);
-                            tmpContainArr.push(tempArr);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        this.feedbackArray.push(tmpContainArr);
-    }
-};
+// Find the script tag containing JSON in a given root DOM node.
+FITB.prototype.scriptSelector = function (root_node) {
+    return $(root_node).find('script[type="application/json"]');
+}
 
 /*===========================================
 ====   Functions generating final HTML   ====
@@ -138,22 +68,14 @@ FITB.prototype.renderFITBInput = function () {
     $(this.containerDiv).addClass("alert alert-warning");
     this.containerDiv.id = this.divid;
 
-    this.blankArray = [];
-    for (var i = 0; i < this.children.length; i++) {
-        var question = document.createElement("span");
-        question.innerHTML = this.questionArray[i];
-        this.containerDiv.appendChild(question);
-
-        var blank = document.createElement("input");
-        $(blank).attr({
-            "type": "text",
-            "id": this.divid + "_blank" + i,
-            "class": "form form-control selectwidthauto"
-        });
-        this.containerDiv.appendChild(blank);
-        this.blankArray.push(blank);
-    }
-
+    // Copy the original elements to the container holding what the user will see.
+    $(this.origElem).children().clone().appendTo(this.containerDiv);
+    // Remove the script tag.
+    this.scriptSelector(this.containerDiv).remove();
+    // Set the class for the text inputs, then store references to them.
+    let ba = $(this.containerDiv).find(':input');
+    ba.attr('class', 'form form-control selectwidthauto');
+    this.blankArray = ba.toArray();
 };
 
 FITB.prototype.renderFITBButtons = function () {
@@ -205,6 +127,7 @@ FITB.prototype.restoreAnswers = function (data) {
     for (var i = 0; i < this.blankArray.length; i++) {
         $(this.blankArray[i]).attr("value", arr[i]);
     }
+    this.startEvaluation();
 };
 
 FITB.prototype.checkLocalStorage = function () {
@@ -268,24 +191,46 @@ FITB.prototype.startEvaluation = function (logFlag) {
 };
 
 FITB.prototype.evaluateAnswers = function () {
-    for (var i = 0; i < this.children.length; i++) {
+    for (var i = 0; i < this.blankArray.length; i++) {
         var given = this.blankArray[i].value;
-        var modifiers = "";
-        if (this.casei) {
-            modifiers = "i";
-        }
 
-        var patt = RegExp(this.correctAnswerArray[i], modifiers);
-        if (given !== "") {
-            this.isCorrectArray.push(patt.test(given));
-        } else {
+        // If this blank is empty, provide no feedback for it.
+        if (given === "") {
             this.isCorrectArray.push("");
-        }
-
-        if (!this.isCorrectArray[i]) {
-            this.populateDisplayFeed(i, given);
+            this.displayFeed.push('No answer provided.');
+        } else {
+            // Look through all feedback for this blank. The last element in the array always matches.
+            var fbl = this.feedbackArray[i];
+            for (var j = 0; j < fbl.length; j++) {
+                // The last item of feedback always matches.
+                if (j === fbl.length - 1) {
+                    this.displayFeed.push(fbl[j]['feedback']);
+                    break;
+                }
+                // If this is a regexp...
+                if ('regex' in fbl[j]) {
+                    var patt = RegExp(fbl[j]['regex'], fbl[j]['regexFlags']);
+                    if (patt.test(given)) {
+                        this.displayFeed.push(fbl[j]['feedback']);
+                        break;
+                    }
+                } else {
+                    // This is a number.
+                    console.assert('number' in fbl[j]);
+                    var [min, max] = fbl[j]['number'];
+                    // Convert the given string to a number. While there are `lots of ways <https://coderwall.com/p/5tlhmw/converting-strings-to-number-in-javascript-pitfalls>`_ to do this,, this version supports other bases (hex/binary/octal) as well as floats.
+                    var actual = +given;
+                    if (actual >= min && actual <= max) {
+                        this.displayFeed.push(fbl[j]['feedback']);
+                        break;
+                    }
+                }
+            }
+            // The answer is correct if it matched the first element in the array.
+            this.isCorrectArray.push(j === 0);
         }
     }
+
     if ($.inArray("", this.isCorrectArray) < 0 && $.inArray(false, this.isCorrectArray) < 0) {
         this.correct = true;
     } else if (this.isCompletelyBlank()) {
@@ -306,22 +251,8 @@ FITB.prototype.isCompletelyBlank = function () {
     return true;
 };
 
-FITB.prototype.populateDisplayFeed = function (index, given) {
-    var fbl = this.feedbackArray[index];
-    for (var j = 0; j < fbl.length; j++) {
-        for (var k = 0; k < fbl[j].length; k++) {
-            var patt = RegExp(fbl[j][k]);
-            if (patt.test(given)) {
-                this.displayFeed.push(fbl[j][1]);
-                return 0;
-            }
-        }
-    }
-};
-
 FITB.prototype.renderFITBFeedback = function () {
     if (this.correct) {
-        $(this.feedBackDiv).html("You are Correct!");
         $(this.feedBackDiv).attr("class", "alert alert-success");
         for (var j = 0; j < this.blankArray.length; j++) {
             $(this.blankArray[j]).removeClass("input-validation-error");
@@ -330,7 +261,6 @@ FITB.prototype.renderFITBFeedback = function () {
         if (this.displayFeed === null) {
             this.displayFeed = "";
         }
-        $(this.feedBackDiv).html("Incorrect.    ");
         for (var j = 0; j < this.blankArray.length; j++) {
             if (!this.isCorrectArray[j]) {
                 $(this.blankArray[j]).addClass("input-validation-error");
@@ -338,12 +268,18 @@ FITB.prototype.renderFITBFeedback = function () {
                 $(this.blankArray[j]).removeClass("input-validation-error");
             }
         }
-        for (var i = 0; i < this.displayFeed.length; i++) {
-            this.feedBackDiv.innerHTML += this.displayFeed[i];
-            this.feedBackDiv.appendChild(document.createElement("br"));
-        }
         $(this.feedBackDiv).attr("class", "alert alert-danger");
     }
+    var feedback_html = '<ul>';
+    for (var i = 0; i < this.displayFeed.length; i++) {
+        feedback_html += '<li>' + this.displayFeed[i] + '</li>';
+    }
+    feedback_html += '</ul>';
+    // Remove the list if it's just one element.
+    if (this.displayFeed.length == 1) {
+        feedback_html = feedback_html.slice('<ul><li>'.length, -('</li></ul>'.length))
+    }
+    this.feedBackDiv.innerHTML = feedback_html;
 };
 
 /*==================================
@@ -400,8 +336,13 @@ FITB.prototype.compareFITB = function (data, status, whatever) {   // Creates a 
 $(document).bind("runestone:login-complete", function () {
     $("[data-component=fillintheblank]").each(function (index) {
         var opts = {"orig" : this, "useRunestoneServices": eBookConfig.useRunestoneServices};
-        if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
+        if ($(this).closest('[data-component=timedAssessment]').length == 0) { // If this element exists within a timed component, don't render it here
             FITBList[this.id] = new FITB(opts);
         }
     });
 });
+
+if (typeof component_factory === 'undefined') {
+    component_factory = {}
+}
+component_factory['fillintheblank'] = function(opts) { return new FITB(opts)}

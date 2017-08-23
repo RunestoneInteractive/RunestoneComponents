@@ -39,7 +39,7 @@ If you are completely new to pip and github text editors, I have written a more 
     $ virtualenv /path/to/home/MyEnv
     $ source /path/to/home/MyEnv/bin/activate
      
-* You will need to do the last command every time you want to work on RunestoneServer.  If you have not used Python virtual environments before I strongly recommend reading the docs or watching the video
+* You will need to do the last command **every time** you want to work on RunestoneComponents.  If you have not used Python virtual environments before I strongly recommend reading the docs or watching the video
  
 With the virtual environment installed and configured you can continue.
 
@@ -53,7 +53,7 @@ Or, if you prefer to live on the development edge, you can check out the very la
 
 ::
 
-    pip install git+git://github.com/RunestoneInteractive/RunestoneTools.git
+    pip install git+git://github.com/RunestoneInteractive/RunestoneComponents.git
 
 
 To start a project, create a new folder and then run the following command (installed by pip)  in that new folder ``runestone init``  For example:
@@ -95,13 +95,72 @@ Developing and Hacking
 
 So, you would like to help out with developing the Runestone Components.  What do you need to know?
 
-1.  Make a Fork of this repository.
-2.  Setup your environment on your development machine
+1.  Make a Fork of this repository. 
+2.  Set up your environment on your development machine
 
-    1.  Make a virtual environment for testing and working  I recommend pyvenv-3.4  as it is baked in to Python 3.4 and higher.
-    2.  Rather than following the instructions above for installing runestone simply run ``pip install -e .`` from the top level runestone directory.  This will install all of the required prerequisites and setup the runestone install as a link to the development directory.
+    1.  Make a virtual environment for testing and working  (I recommend pyvenv-3.4  as it is baked in to Python 3.4 and higher)
+    2.  To use Runestone Components, rather than following the instructions above for installing runestone simply run ``pip install -e .`` from the top level runestone directory.  This will install all of the required prerequisites and setup the runestone install as a link to the development directory.
 
 3.  When you have some changes to share, make a Pull Request.
+
+(See the RunestoneServer repository and **http://runestoneinteractive.org** for more complete documentation on how this project works.)
+
+Writing Tests
+-------------
+ 
+A great way to contribute to the Runestone Components repository is to add to our test suite.
+
+Our goal is to have unit tests which rely on Selenium (a library that helps simulate interactions in a web browser) for each directive, to see if the JavaScript that powers the directives is working correctly.
+
+**In order to get started with writing a test/writing additional tests, you will need the following:**
+
+* ``pip install selenium`` in the virtualenv you're using for Runestone Components development
+* ``pip install pyvirtualdisplay``
+
+
+* Download the latest `ChromeDriver <https://chromedriver.storage.googleapis.com/index.html>`_., which is a driver that simulates Google Chrome.
+
+* On linux you will need to install Xvfb ``apt-get install xvfb``
+
+* You'll also need to have done the above installation.
+  
+  * You should be using virtual environment, you'll need a clone of the RunestoneComponents repository, and you'll need to have done ``pip install -e`` from the top level of the RunestoneComponents directory.
+
+**To run tests:**
+
+* Make sure the directory containing the PhantomJS executable is in your ``PATH`` environment variable. e.g. ``PATH=$PATH:path/to/thedirectory/where/it/is/here`` at your command line (or edit your ``.bash_profile``).
+
+* Check out the existing tests, e.g. the ``test_question.py`` file that tests the Question directive, which you can find at the path ``/runestone/question/test/test_question.py``, for an example.
+
+* Each directive's individual set of tests requires a mini book. You'll see a ``_sources`` folder for each existing test containing an ``index.rst`` file. That file contains a title, as required by ``.rst``, and whatever directive examples you want to test.
+
+* Finally, to run a test, ensuring that you have accessed a ``test`` folder within a directive folder, type the following at the command prompt in this order:
+
+  * ``runestone build`` (to build the mini-book for testing)
+
+  * ``runestone serve --port 8081 &`` 
+
+  * ``python <testfilename>.py``, e.g. ``python test_question.py``
+
+.. note:: 
+
+  8081 is the default test port. See the Python files, e.g. ``test_question.py``, to see how this is set up. The ``&`` will set the process to run in the background. The mini-book needs to be served in order to test what's in the DOM as a result of using these components!
+
+You should then see some test output, showing a pass (``ok``), FAIL, or error(s).
+
+If you have an error relating to PhantomJS/a driver in the output, you probably have a PATH or driver installation problem.
+
+**To write a new test:**
+
+* Create a ``test`` directory inside a directive's folder
+
+* Create a Python file to hold the test suite inside that directory, e.g. ``test_directivename.py``
+
+* Run ``runestone init`` inside that folder and answer the following prompts
+
+* Write the appropriate directive example(s) inside the ``index.rst`` file (which will be created as a result of ``runestone init``)
+
+* Edit the Python file you created as appropriate (see documentation for the Python ``unittest`` module `here <https://docs.python.org/2/library/unittest.html>`_.)
 
 
 Notes for more Advanced Users

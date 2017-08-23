@@ -18,10 +18,9 @@ __author__ = 'bmiller'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
-import json
 import os
 from jinja2 import Environment, FileSystemLoader
+from runestone.common.runestonedirective import RunestoneDirective
 
 # try:
 #     import conf
@@ -33,12 +32,10 @@ from jinja2 import Environment, FileSystemLoader
 
 def setup(app):
     app.add_directive('livecode', LiveCode)
-    app.add_stylesheet('codemirror.css')
-    app.add_stylesheet('livecode.css')
-    app.add_javascript('livecode.js')
-    app.add_javascript('clike.js')
 
-class LiveCode(Directive):
+
+
+class LiveCode(RunestoneDirective):
     required_arguments = 1
     optional_arguments = 0
     has_content = True
@@ -50,30 +47,7 @@ class LiveCode(Directive):
     }
 
     def run(self):
-        self.options['divid'] = self.arguments[0]
-        if 'language' not in self.options:
-            raise KeyError("language must be specified")
-
-        if 'stdin' in self.options:
-            self.options['stdin_val'] = self.options['stdin']
-            self.options['stdin'] = True
-        else:
-            self.options['stdin'] = False
-
-        if 'datafile' not in self.options:
-            self.options['datafile'] = False
-
-        if 'sourcefile' not in self.options:
-            self.options['sourcefile'] = ""
-
-
-        self.options['initialcode'] = "\n".join(self.content)
-
-        env = Environment(loader=FileSystemLoader(os.path.dirname(__file__)))
-        template = env.get_template('livecode.html')
-        output = template.render(**self.options)
-
-        return [nodes.raw('', output, format='html')]
+        raise RuntimeError("livecode is obsolete, Use the activecode directive with the language option")
 
 
 

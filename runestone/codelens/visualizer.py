@@ -18,11 +18,10 @@ __author__ = 'bmiller'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
 from .pg_logger import exec_script_str_local
 import json
 import six
-from runestone.server.componentdb import addQuestionToDB
+from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 from runestone.common.runestonedirective import RunestoneDirective
 
 def setup(app):
@@ -38,6 +37,7 @@ def setup(app):
 
 
 VIS = '''
+<div class="runestone" style="max-width: none;">
 <div class="alert alert-warning cd_section">
 <div id="%(divid)s"></div>
 <p class="cl_caption"><span class="cl_caption_text">%(caption)s (%(divid)s)</span> </p>
@@ -109,6 +109,7 @@ $(window).resize(function() {
     }
 });
 </script>
+</div>
 '''
 
 
@@ -233,7 +234,12 @@ class Codelens(RunestoneDirective):
             res += QUESTION
         if 'tracedata' in self.options:
             res += DATA
-        return [nodes.raw('', res % self.options, format='html')]
+        else:
+            res += '</div>'
+        addHTMLToDB(self.options['divid'], self.options['basecourse'], res % self.options)
+        raw_node = nodes.raw(self.block_text, res % self.options, format='html')
+        raw_node.source, raw_node.line = self.state_machine.get_source_and_line(self.lineno)
+        return [raw_node]
 
     def inject_questions(self, curTrace):
         if 'breakline' not in self.options:

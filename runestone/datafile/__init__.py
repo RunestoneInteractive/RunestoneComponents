@@ -19,10 +19,9 @@ __author__ = 'isaiahmayerchak'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
-from sqlalchemy import create_engine, Table, MetaData, select, delete
-from runestone.server import get_dburl
-from runestone.common.runestonedirective import RunestoneDirective
+from sqlalchemy import Table
+from runestone.server.componentdb import engine, meta
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
 
 def setup(app):
     app.add_directive('datafile',DataFile)
@@ -43,14 +42,14 @@ TEMPLATE = """
 %(filecontent)s</pre>
 """
 
-class DataFileNode(nodes.General, nodes.Element):
-    def __init__(self,content):
+class DataFileNode(nodes.General, nodes.Element, RunestoneNode):
+    def __init__(self,content, **kwargs):
         """
         Arguments:
         - `self`:
         - `content`:
         """
-        super(DataFileNode,self).__init__()
+        super(DataFileNode,self).__init__(**kwargs)
         self.df_content = content
 
 # self for these functions is an instance of the writer class.  For example
@@ -149,9 +148,7 @@ class DataFile(RunestoneDirective):
         else:
             self.options['edit'] = "false"
 
-        try:
-            engine = create_engine(get_dburl(locals()))
-            meta = MetaData()
+        if engine:
             Source_code = Table('source_code', meta, autoload=True, autoload_with=engine)
             course_name = env.config.html_context['course_id']
             divid = self.options['divid']
@@ -162,8 +159,7 @@ class DataFile(RunestoneDirective):
                 course_id = course_name,
                 main_code= source,
             ))
-        except Exception as e:
-            print("the error is ", e)
+        else:
             print("Unable to save to source_code table in datafile__init__.py. Possible problems:")
             print("  1. dburl or course_id are not set in conf.py for your book")
             print("  2. unable to connect to the database using dburl")
@@ -171,4 +167,6 @@ class DataFile(RunestoneDirective):
             print("This should only affect the grading interface. Everything else should be fine.")
 
 
-        return [DataFileNode(self.options)]
+        data_file_node = DataFileNode(self.options, rawsource=self.block_text)
+        data_file_node.source, data_file_node.line = self.state_machine.get_source_and_line(self.lineno)
+        return [data_file_node]

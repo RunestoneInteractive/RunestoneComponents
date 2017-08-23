@@ -28,11 +28,13 @@ MultipleChoice.prototype = new RunestoneBase();
 
 MultipleChoice.prototype.init = function (opts) {
     RunestoneBase.apply(this, arguments);
+    RunestoneBase.prototype.init.apply(this, arguments);
     var orig = opts.orig;    // entire <ul> element
     this.origElem = orig;
     this.useRunestoneServices = opts.useRunestoneServices;
     this.multipleanswers = false;
     this.divid = orig.id;
+
     if ($(this.origElem).data("multipleanswers") === true) {
         this.multipleanswers = true;
     }
@@ -192,7 +194,7 @@ MultipleChoice.prototype.renderMCFormOpts = function () {
         label.appendChild(input);
         label.appendChild(labelspan);
         //$(label).attr("for", optid);
-        $(labelspan).html(this.answerList[k].content);
+        $(labelspan).html(String.fromCharCode(65 + j) + '. ' + this.answerList[k].content);
 
         // create the object to store in optionArray
         var optObj = {
@@ -216,7 +218,8 @@ MultipleChoice.prototype.renderMCFormButtons = function () {
     this.submitButton.textContent = "Check Me";
     $(this.submitButton).attr({
         "class": "btn btn-success",
-        "name": "do answer"
+        "name": "do answer",
+        "type": "button"
     });
     if (this.multipleanswers) {
         this.submitButton.addEventListener("click", function () {
@@ -292,11 +295,19 @@ MultipleChoice.prototype.restoreAnswers = function (data) {
             }
         }
     }
+    if (this.multipleanswers) {
+        this.processMCMASubmission(false);
+    } else {
+        this.processMCMFSubmission(false);
+    }
 };
 
 MultipleChoice.prototype.checkLocalStorage = function () {
     // Repopulates MCMA questions with a user's previous answers,
     // which were stored into local storage.
+    if (this.graderactive) {
+        return;
+    }
     var len = localStorage.length;
     if (len > 0) {
         var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
@@ -367,7 +378,7 @@ MultipleChoice.prototype.getSubmittedOpts = function () {
         if (buttonObjs[i].checked) {
             given = buttonObjs[i].value;
             this.givenArray.push(given);
-            this.feedbackString += given + ": " + this.feedbackList[i] + "<br />";
+            this.feedbackString += '<li value="' + (i + 1) + '">' + this.feedbackList[i] + "</li>";
             this.givenlog += given + ",";
             this.singlefeedback = this.feedbackList[i];
         }
@@ -414,12 +425,12 @@ MultipleChoice.prototype.renderMCMAFeedBack = function () {
     var feedbackText = this.feedbackString;
 
     if (numCorrect === numNeeded && numNeeded === numGiven) {
-        $(this.feedBackDiv).html("Correct!    <br />" + feedbackText);
+        $(this.feedBackDiv).html('Correct.<ol type="A">' + feedbackText + "</ul>");
         $(this.feedBackDiv).attr("class", "alert alert-success");
     } else {
         $(this.feedBackDiv).html("Incorrect.    " + "You gave " + numGiven +
             " " + answerStr + " and got " + numCorrect + " correct of " +
-            numNeeded + " needed.<br /> " + feedbackText);
+            numNeeded + ' needed.<ol type="A">' + feedbackText + "</ul>");
         $(this.feedBackDiv).attr("class", "alert alert-danger");
     }
 };
@@ -457,13 +468,13 @@ MultipleChoice.prototype.logMCMFsubmission = function () {
 
 MultipleChoice.prototype.renderMCMFFeedback = function (correct, feedbackText) {
     if (correct) {
-        $(this.feedBackDiv).html("Correct!    " + feedbackText);
+        $(this.feedBackDiv).html(feedbackText);
         $(this.feedBackDiv).attr("class", "alert alert-success");
     } else {
         if (feedbackText == null) {
             feedbackText = "";
         }
-        $(this.feedBackDiv).html("Incorrect.    " + feedbackText);
+        $(this.feedBackDiv).html(feedbackText);
         $(this.feedBackDiv).attr("class", "alert alert-danger");
     }
 };
@@ -550,8 +561,13 @@ MultipleChoice.prototype.compareAnswers = function () {
 $(document).bind("runestone:login-complete", function () {
     $("[data-component=multiplechoice]").each(function (index) {    // MC
         var opts = {"orig": this, 'useRunestoneServices':eBookConfig.useRunestoneServices};
-        if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
+        if ($(this).closest('[data-component=timedAssessment]').length == 0) { // If this element exists within a timed component, don't render it here
             mcList[this.id] = new MultipleChoice(opts);
         }
     });
 });
+
+if (typeof component_factory === 'undefined') {
+    component_factory = {}
+}
+component_factory['multiplechoice'] = function(opts) { return new MultipleChoice(opts)}
