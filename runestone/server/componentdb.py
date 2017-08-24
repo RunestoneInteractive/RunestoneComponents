@@ -40,7 +40,6 @@ else:
     assignment_questions = Table('assignment_questions', meta, autoload=True, autoload_with=engine)
     courses = Table('courses', meta, autoload=True, autoload_with=engine)
 
-
 def logSource(self):
     sourcelog = self.state.document.settings.env.config.html_context.get('dsource', None)
     if sourcelog:
@@ -63,6 +62,9 @@ def addQuestionToDB(self):
 
         last_changed = datetime.now()
 
+        engine = create_engine(dburl)
+        meta = MetaData()
+        questions = Table('questions', meta, autoload=True, autoload_with=engine)
         if 'difficulty' in self.options:
             difficulty = self.options['difficulty']
         else:
@@ -78,7 +80,6 @@ def addQuestionToDB(self):
         chapter = srcpath.split(os.path.sep)[-2]
 
         autograde = self.options.get('autograde', None)
-
 
         sel = select([questions]).where(and_(questions.c.name == self.arguments[0],
                                               questions.c.base_course == basecourse))
@@ -96,6 +97,8 @@ question_type=self.name, subchapter=subchapter, autograde = autograde, author=au
 
 def getQuestionID(base_course, name):
     meta = MetaData()
+    questions = Table('questions', meta, autoload=True, autoload_with=engine)
+
 
     sel = select([questions]).where(and_(questions.c.name == name,
                                           questions.c.base_course == base_course))
@@ -107,6 +110,10 @@ def getQuestionID(base_course, name):
 
 def getOrInsertQuestionForPage(base_course=None, name=None, is_private='F', question_type="page", autograde = "visited", author=None, difficulty=1,chapter=None):
     last_changed = datetime.now()
+
+    meta = MetaData()
+    questions = Table('questions', meta, autoload=True, autoload_with=engine)
+
 
     sel = select([questions]).where(and_(questions.c.name == name,
                                           questions.c.base_course == base_course))
@@ -140,7 +147,8 @@ def getOrInsertQuestionForPage(base_course=None, name=None, is_private='F', ques
 
 def getOrCreateAssignmentType(assignment_type_name, grade_type = None, points_possible = None, assignments_count = None, assignments_dropped = None):
 
-
+    meta = MetaData()
+    assignment_types = Table('assignment_types', meta, autoload=True, autoload_with=engine)
 
     # search for it in the DB
     sel = select([assignment_types]).where(assignment_types.c.name == assignment_type_name)
@@ -158,7 +166,11 @@ def getOrCreateAssignmentType(assignment_type_name, grade_type = None, points_po
         res = engine.execute(ins)
         return res.inserted_primary_key[0]
 
-def addAssignmentQuestionToDB(question_id, assignment_id, points, assessment_type = None, timed=None, autograde=None):
+def addAssignmentQuestionToDB(question_id, assignment_id, points, assessment_type = None, timed=None, autograde=None, reading_assignment=None):
+    meta = MetaData()
+    questions = Table('questions', meta, autoload=True, autoload_with=engine)
+    assignment_questions = Table('assignment_questions', meta, autoload=True, autoload_with=engine)
+
     # now insert or update the assignment_questions row
     sel = select([assignment_questions]).where(and_(assignment_questions.c.assignment_id == assignment_id,
                                           assignment_questions.c.question_id == question_id))
@@ -171,7 +183,8 @@ def addAssignmentQuestionToDB(question_id, assignment_id, points, assessment_typ
             points = points,
             timed= timed,
             assessment_type = assessment_type,
-            autograde = autograde
+            autograde = autograde,
+            reading_assignment = reading_assignment
             )
         engine.execute(stmt)
     else:
@@ -182,18 +195,27 @@ def addAssignmentQuestionToDB(question_id, assignment_id, points, assessment_typ
             points = points,
             timed=timed,
             assessment_type = assessment_type,
-            autograde = autograde
+            autograde = autograde,
+            reading_assignment = reading_assignment
             )
         engine.execute(ins)
 
 def getCourseID(coursename):
+    meta = MetaData()
+    courses = Table('courses', meta, autoload=True, autoload_with=engine)
+
     sel = select([courses]).where(courses.c.course_name == coursename)
     res = engine.execute(sel).first()
     return res['id']
 
-def addAssignmentToDB(name = None, course_id = None, assignment_type_id = None, deadline = None, points = None, threshold = None):
+def addAssignmentToDB(name = None, course_id = None, assignment_type_id = None, deadline = None, points = None, threshold = None, readings_autograder = 'interact'):
 
     last_changed = datetime.now()
+
+    meta = MetaData()
+    assignments = Table('assignments', meta, autoload=True, autoload_with=engine)
+    assignment_questions = Table('assignment_questions', meta, autoload=True, autoload_with=engine)
+
     sel = select([assignments]).where(and_(assignments.c.name == name,
                                           assignments.c.course == course_id))
     res = engine.execute(sel).first()
@@ -202,7 +224,8 @@ def addAssignmentToDB(name = None, course_id = None, assignment_type_id = None, 
             assignment_type = assignment_type_id,
             duedate = deadline,
             points = points,
-            threshold = threshold
+            threshold = threshold,
+            readings_autograder = readings_autograder
         )
         engine.execute(stmt)
         a_id = res['id']
@@ -218,7 +241,8 @@ def addAssignmentToDB(name = None, course_id = None, assignment_type_id = None, 
             assignment_type = assignment_type_id,
             duedate = deadline,
             points = points,
-            threshold = threshold)
+            threshold = threshold,
+            readings_autograder = readings_autograder)
         res = engine.execute(ins)
         a_id = res.inserted_primary_key[0]
 
@@ -227,6 +251,9 @@ def addAssignmentToDB(name = None, course_id = None, assignment_type_id = None, 
 def addHTMLToDB(divid, basecourse, htmlsrc):
     if dburl:
         last_changed = datetime.now()
+        engine = create_engine(dburl)
+        meta = MetaData()
+        questions = Table('questions', meta, autoload=True, autoload_with=engine)
         sel = select([questions]).where(and_(questions.c.name == divid,
                                               questions.c.base_course == basecourse))
         res = engine.execute(sel).first()
@@ -241,6 +268,8 @@ def addHTMLToDB(divid, basecourse, htmlsrc):
             print("Error while trying to add directive {} to the DB".format(divid))
 
 def get_HTML_from_DB(divid, basecourse):
+    meta = MetaData()
+    questions = Table('questions', meta, autoload=True, autoload_with=engine)
     sel = select([questions]).where(and_(questions.c.name == divid,
                                           questions.c.base_course == basecourse))
     res = engine.execute(sel).first()
