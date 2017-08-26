@@ -1196,6 +1196,7 @@ Parsons.prototype.initializeView = function () {
 	this.checkButton.textContent = "Check Me";
 	this.checkButton.id = this.counterId + "-check";
 	this.parsonsControlDiv.appendChild(this.checkButton);
+	this.checkButton.type = "button";
 	this.checkButton.addEventListener('click', function(event) {
 		event.preventDefault();
 		that.checkMe();
@@ -1204,6 +1205,7 @@ Parsons.prototype.initializeView = function () {
 	$(this.resetButton).attr("class", "btn btn-default");
 	this.resetButton.textContent = "Reset";
 	this.resetButton.id = this.counterId + "-reset";
+	this.resetButton.type = "button";
 	this.parsonsControlDiv.appendChild(this.resetButton);
 	this.resetButton.addEventListener('click', function(event) {
 		event.preventDefault();

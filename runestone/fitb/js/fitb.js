@@ -84,7 +84,8 @@ FITB.prototype.renderFITBButtons = function () {
     this.submitButton.textContent = "Check Me";
     $(this.submitButton).attr({
         "class": "btn btn-success",
-        "name": "do answer"
+        "name": "do answer",
+        "type": "button",
     });
     this.submitButton.addEventListener("click", function () {
         this.startEvaluation(true);
