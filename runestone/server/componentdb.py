@@ -166,38 +166,30 @@ def getOrCreateAssignmentType(assignment_type_name, grade_type = None, points_po
         res = engine.execute(ins)
         return res.inserted_primary_key[0]
 
-def addAssignmentQuestionToDB(question_id, assignment_id, points, assessment_type = None, timed=None, autograde=None, reading_assignment=None):
+def addAssignmentQuestionToDB(question_id, assignment_id, points, activities_required = 0, autograde=None, which_to_grade = None, reading_assignment=None, sorting_priority=0):
     meta = MetaData()
-    questions = Table('questions', meta, autoload=True, autoload_with=engine)
     assignment_questions = Table('assignment_questions', meta, autoload=True, autoload_with=engine)
 
     # now insert or update the assignment_questions row
     sel = select([assignment_questions]).where(and_(assignment_questions.c.assignment_id == assignment_id,
                                           assignment_questions.c.question_id == question_id))
     res = engine.execute(sel).first()
-    if res:
-        #update
-        stmt = assignment_questions.update().where(assignment_questions.c.id == res['id']).values( \
+    vals = dict(
             assignment_id = assignment_id,
             question_id = question_id,
-            points = points,
-            timed= timed,
-            assessment_type = assessment_type,
-            autograde = autograde,
-            reading_assignment = reading_assignment
-            )
+            activities_required=activities_required,
+            points=points,
+            autograde=autograde,
+            which_to_grade = which_to_grade,
+            reading_assignment = reading_assignment,
+            sorting_priority = sorting_priority)
+    if res:
+        #update
+        stmt = assignment_questions.update().where(assignment_questions.c.id == res['id']).values(**vals)
         engine.execute(stmt)
     else:
         #insert
-        ins = assignment_questions.insert().values(
-            assignment_id = assignment_id,
-            question_id = question_id,
-            points = points,
-            timed=timed,
-            assessment_type = assessment_type,
-            autograde = autograde,
-            reading_assignment = reading_assignment
-            )
+        ins = assignment_questions.insert().values(**vals)
         engine.execute(ins)
 
 def getCourseID(coursename):
@@ -208,7 +200,7 @@ def getCourseID(coursename):
     res = engine.execute(sel).first()
     return res['id']
 
-def addAssignmentToDB(name = None, course_id = None, assignment_type_id = None, deadline = None, points = None, threshold = None, readings_autograder = 'interact'):
+def addAssignmentToDB(name = None, course_id = None, assignment_type_id = None, deadline = None, points = None):
 
     last_changed = datetime.now()
 
@@ -223,9 +215,7 @@ def addAssignmentToDB(name = None, course_id = None, assignment_type_id = None, 
         stmt = assignments.update().where(assignments.c.id == res['id']).values(
             assignment_type = assignment_type_id,
             duedate = deadline,
-            points = points,
-            threshold = threshold,
-            readings_autograder = readings_autograder
+            points = points
         )
         engine.execute(stmt)
         a_id = res['id']
@@ -240,9 +230,7 @@ def addAssignmentToDB(name = None, course_id = None, assignment_type_id = None, 
             name=name,
             assignment_type = assignment_type_id,
             duedate = deadline,
-            points = points,
-            threshold = threshold,
-            readings_autograder = readings_autograder)
+            points = points)
         res = engine.execute(ins)
         a_id = res.inserted_primary_key[0]
 
