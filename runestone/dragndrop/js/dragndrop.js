@@ -348,6 +348,7 @@ DragNDrop.prototype.dragEval = function (logFlag) {
             "minHeight": this.minheight,
             "div_id": this.divid,
             "correct": this.correct,
+            "correctNum": this.correctNum,
             "dragNum": this.dragNum
         });
     }
