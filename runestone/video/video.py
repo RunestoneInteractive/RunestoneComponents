@@ -171,7 +171,7 @@ class IframeVideo(Directive):
         'height': directives.nonnegative_int,
         'width': directives.nonnegative_int,
         'align': align,
-        'align': httpOption,
+        'http': httpOption,
     }
     default_width = 500
     default_height = 281
