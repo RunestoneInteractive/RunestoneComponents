@@ -34,6 +34,19 @@ class ModuleFixture(unittest.TestCase):
         # Restore the directory.
         os.chdir(self.old_cwd)
 
+    # Without this, Python 2.7 produces errors when running unit tests:
+    #
+    #   .. code::
+    #       :number-lines:
+    #
+    #       python -m unitest discover
+    #
+    #       ImportError: Failed to import test module: runestone.tabbedStuff.test.test_tabbedStuff
+    #       Traceback (most recent call last):  (omitted)
+    #       ValueError: no such test method in <class 'runestone.unittest_base.ModuleFixture'>: runTest
+    def runTest(self):
+        pass
+
 # Provide a simple way to instantiante a ModuleFixture in a test module. Typical use:
 #
 # .. code:: Python
