@@ -341,8 +341,16 @@ DragNDrop.prototype.dragEval = function (logFlag) {
     this.renderFeedback();
     if (logFlag) {  // Sometimes we don't want to log the answers--for example, on re-load of a timed exam
         let answer = this.pregnantIndexArray.join(";");
-        answer = answer + ":" + this.correctNum + "/" + this.dragNum ;
-        this.logBookEvent({"event": "dragNdrop", "act": answer, "answer":answer, "minHeight": this.minheight, "div_id": this.divid, "correct": this.correct});
+        this.logBookEvent({
+            "event": "dragNdrop",
+            "act": answer,
+            "answer": answer,
+            "minHeight": this.minheight,
+            "div_id": this.divid,
+            "correct": this.correct,
+            "correctNum": this.correctNum,
+            "dragNum": this.dragNum
+        });
     }
 };
 
