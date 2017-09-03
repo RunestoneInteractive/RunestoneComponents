@@ -199,7 +199,7 @@ class Youtube(IframeVideo):
    :align: left
    :http: http
     """
-    html = '<iframe src="%(http)://www.youtube.com/embed/%(video_id)s" \
+    html = '<iframe src="%(http)s://www.youtube.com/embed/%(video_id)s" \
     width="%(width)u" height="%(height)u" frameborder="0" \
     webkitAllowFullScreen mozallowfullscreen allowfullscreen \
     class="align-%(align)s" seamless ></iframe>'
@@ -213,7 +213,7 @@ class Vimeo(IframeVideo):
    :align: left
    :http: http
     """
-    html = '<iframe src="%(http)://player.vimeo.com/video/%(video_id)s" \
+    html = '<iframe src="%(http)s://player.vimeo.com/video/%(video_id)s" \
     width="%(width)u" height="%(height)u" frameborder="0" \
     webkitAllowFullScreen mozallowfullscreen allowFullScreen \
     class="align-%(align)s" seamless ></iframe>'
