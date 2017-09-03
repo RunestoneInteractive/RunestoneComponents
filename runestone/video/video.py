@@ -185,7 +185,7 @@ class IframeVideo(Directive):
         if not self.options.get('align'):
             self.options['align'] = 'left'
         if not self.options.get('http'):
-            self.options['http'] = 'http'
+            self.options['http'] = 'https'
         raw_node = nodes.raw(self.block_text, self.html % self.options, format='html')
         raw_node.source, raw_node.line = self.state_machine.get_source_and_line(self.lineno)
         return [raw_node]
