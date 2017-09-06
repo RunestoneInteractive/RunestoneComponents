@@ -81,7 +81,7 @@ LineBasedGrader.prototype.grade = function() {
 	var answerLines = problem.answerLines();
 	var i;
 	var state;
-	
+
 	if (answerLines.length < solutionLines.length) {
 		state = "incorrectTooShort";
 		// too little code
@@ -260,6 +260,7 @@ ParsonsLine.prototype.viewIndent = function() {
 ======== lines: an array of ParsonsLine in this block
 ======== indent: indent based on movement
 ======== view: an element for viewing this object
+======== labels: [label, line] the labels numbering the block and the lines they go on
 ======== hammer: the controller based on hammer.js
 ===================================================================== */
 
@@ -268,6 +269,7 @@ var ParsonsBlock = function(problem, lines) {
 	this.problem = problem;
 	this.lines = lines;
 	this.indent = 0;
+	this.labels = [];
 	// Create view, adding view of lines and updating indent
 	var view = document.createElement("div");
 	view.id = problem.counterId + "-block-" + problem.blockIndex;
@@ -335,6 +337,10 @@ ParsonsBlock.prototype.consumeBlock = function(block) {
 			newBlocks.push(this.problem.blocks[i]);
 		}
 	}
+	for (var i = 0; i < block.labels.length; i++) {
+		this.addLabel(block.labels[i][0], this.lines.length - block.lines.length + block.labels[i][1]);
+	}
+	
 	this.problem.blocks = newBlocks;
 	this.problem.state = undefined;
 	this.problem.updateView();
@@ -357,6 +363,19 @@ ParsonsBlock.prototype.addIndent = function() {
 		'width' : this.problem.areaWidth - 22
 	});
 };
+
+// Add a label to block and update its view
+ParsonsBlock.prototype.addLabel = function(label, line) {
+	this.labels.push([label, line]);
+	//**
+	var div = document.createElement("div");
+	$(div).addClass("label");
+	$(div).append(document.createTextNode(label));
+	$(this.lines[line].view).append(div); 
+	
+	
+	//this.lines[line].view.innerHTML += "<div class='label'>" + label + "</div>";  
+}
 
 // Initialize Interactivity
 ParsonsBlock.prototype.initializeInteractivity = function() {
@@ -667,7 +686,7 @@ ParsonsBlock.prototype.keyDown = function(event) {
 			} else {
 				this.selectLeft();
 			}
-				
+
 			break;
 		case 38: // up
 			if (this.problem.textMove) {
@@ -1036,7 +1055,7 @@ Parsons.prototype.init = function (opts) {
 		storageId += this.divid;
 	}
 	this.storageId = storageId;
-	
+
 	this.children = this.origElem.childNodes;     // this contains all of the child elements of the entire tag...
 	this.contentArray = [];
 	Parsons.counter++;     //    Unique identifier
@@ -1137,7 +1156,7 @@ Parsons.prototype.initializeView = function () {
 	this.containerDiv = document.createElement("div");
 	$(this.containerDiv).addClass("parsons alert alert-warning");
 	this.containerDiv.id = this.counterId;
-	
+
 	this.parsTextDiv = document.createElement("div");
 	$(this.parsTextDiv).addClass("parsons-text");
 	this.parsTextDiv.innerHTML = this.question.innerHTML;
@@ -1200,7 +1219,7 @@ Parsons.prototype.initializeView = function () {
 	this.checkButton.addEventListener('click', function(event) {
 		event.preventDefault();
 		that.checkMe();
-	});	
+	});
 	this.resetButton = document.createElement("button");
 	$(this.resetButton).attr("class", "btn btn-default");
 	this.resetButton.textContent = "Reset";
@@ -1230,7 +1249,7 @@ Parsons.prototype.initializeView = function () {
 	this.messageDiv.id = this.counterId + "-message";
 	this.parsonsControlDiv.appendChild(this.messageDiv);
 	$(this.messageDiv).hide();
-	
+
 	$(this.origElem).replaceWith(this.containerDiv);
 };
 
@@ -1293,7 +1312,7 @@ Parsons.prototype.initializeLines = function(text) {
 			lines[lines.length - 1].groupWithNext = false;
 		}
 	}
-	
+
 	// Normalize the indents
 	indents = indents.sort(function(a, b){return a-b});
 	for (i = 0; i < this.lines.length; i++) {
@@ -1319,7 +1338,7 @@ Parsons.prototype.initializeAreas = function(sourceBlocks, answerBlocks, options
 		this.answerArea.appendChild(block.view);
 	}
 	this.blocks = blocks;
-	
+
 	// If present, disable some blocks
 	var disabled = options.disabled;
 	if (disabled !== undefined) {
@@ -1336,12 +1355,11 @@ Parsons.prototype.initializeAreas = function(sourceBlocks, answerBlocks, options
 		if (this.options.language == "natural") {
 			indent = this.solutionIndent();
 		} else {
-			// Minimally, it should have 1 level of indent
-			indent = Math.max(1, this.solutionIndent());
+			indent = Math.max(0, this.solutionIndent());
 		}
 	}
 	this.indent = indent;
-	
+
 	// For rendering, place in an onscreen position
 	var isHidden = this.containerDiv.offsetParent == null;
 	var replaceElement;
@@ -1350,14 +1368,14 @@ Parsons.prototype.initializeAreas = function(sourceBlocks, answerBlocks, options
 		$(this.containerDiv).replaceWith(replaceElement);
 		document.body.appendChild(this.containerDiv);
 	}
-		
+
 	if (this.options.prettifyLanguage !== "") {
 		prettyPrint();
 	}
 	for (var i = 0; i < this.lines.length; i++) {
 		this.lines[i].initializeWidth();
 	}
-	
+
 	// Layout the areas
 	var areaWidth, areaHeight;
 	// Establish the width and height of the droppable areas
@@ -1373,20 +1391,20 @@ Parsons.prototype.initializeAreas = function(sourceBlocks, answerBlocks, options
 		areaWidth = 0;
 		maxFunction = function(item) {
 			areaHeight += item.outerHeight(true);
-			areaWidth = Math.max(areaWidth, item.outerWidth(true));			
+			areaWidth = Math.max(areaWidth, item.outerWidth(true));
 		};
 	}
 	for (i = 0; i < blocks.length; i++) {
 		maxFunction($(blocks[i].view));
 	}
-	this.areaWidth = areaWidth;
+	this.areaWidth = areaWidth + 20;
 	this.areaHeight = areaHeight;
 	$(this.sourceArea).css({
-		'width' : areaWidth + 2,
+		'width' : this.areaWidth + 2,
 		'height' : areaHeight
 	});
 	$(this.answerArea).css({
-		'width' : this.options.pixelsPerIndent * indent + areaWidth + 2,
+		'width' : this.options.pixelsPerIndent * indent + this.areaWidth + 2,
 		'height' : areaHeight
 	});
 	if (indent > 0 && indent <= 4) {
@@ -1442,11 +1460,11 @@ Parsons.prototype.initializeAreas = function(sourceBlocks, answerBlocks, options
 	}
 	this.pairedBins = pairedBins;
 	this.pairedDivs = pairedDivs;
-	
+	this.addBlockLabels(sourceBlocks);
 	// Update the view
 	this.state = undefined; // needs to be here for loading from storage
 	this.updateView();
-	
+
 	// Put back into the offscreen position
 	if (isHidden) {
 		$(replaceElement).replaceWith(this.containerDiv);
@@ -2066,15 +2084,14 @@ Parsons.prototype.solutionIndent = function() {
 
 // The "Check Me" button was pressed.
 Parsons.prototype.checkMe = function() {
-	if (!this.hasSolved) 
+	if (!this.hasSolved)
 	{
-	
-	    this.checkCount++;
+		this.checkCount++;
 	    this.clearFeedback();
 		if (this.options.adaptive) {
 			localStorage.setItem(this.adaptiveId + "Count", this.checkCount);
 		}
-		
+
 		var grade = this.grader.grade();
 		if (grade == "correct") {
 			this.hasSolved = true;
@@ -2082,10 +2099,10 @@ Parsons.prototype.checkMe = function() {
 				localStorage.setItem(this.adaptiveId + "Solved", true);
 			}
 		}
-		
+
 		this.logAnswer(grade);
 		this.setLocalStorage();
-		
+
 		// if not solved and not too short then check if should provide help
 		if (!this.hasSolved  && grade !== "incorrectTooShort")
 		{
@@ -2096,12 +2113,12 @@ Parsons.prototype.checkMe = function() {
 					this.numDistinct++;
 					this.lastAnswerHash = answerHash;
 				}
-		
+
 		        // if time to offer help
 				if (this.numDistinct == 3 && !this.gotHelp) {
 					// activate the help button and wiggle it
 					//this.helpButton.disabled = false;
-					//$(this.helpButton).css("position","relative"); 
+					//$(this.helpButton).css("position","relative");
         			//for (var x = 1; x <= 3; x++) {
         			//	$(this.helpButton)
         			//		.animate({ left : -5 }, 60)
@@ -2109,7 +2126,7 @@ Parsons.prototype.checkMe = function() {
         			//		.animate({ left : 0 }, 60);
         			alert("Click on the Help Me button if you want to make the problem easier");
         			//} // end for
-    			} // end if  
+    			} // end if
 			} // end if can help
 		} // end if not solved
 	} // end outer if not solved
@@ -2177,7 +2194,7 @@ Parsons.prototype.initializeAdaptive = function() {
 		} else {
 			calculatedRating = Math.max(60 - 16 * Math.log(count), 0);
 		}
-		this.userRating = (existingRating + calculatedRating) / 2;		
+		this.userRating = (existingRating + calculatedRating) / 2;
 	}
 	localStorage.setItem(this.adaptiveId + "Problem", this.divid);
 	localStorage.setItem(this.adaptiveId + "Count", this.checkCount);
@@ -2219,10 +2236,10 @@ Parsons.prototype.distractorToRemove = function() {
 };
 
 // Return the number of blocks that exist
-Parsons.prototype.numberOfBlocks = function() {
+Parsons.prototype.numberOfBlocks = function(fIncludeDistractors = true) {
 	var numberOfBlocks = 0;
 	for (var i = 0; i < this.blocks.length; i++) {
-		if (this.blocks[i].enabled()) {
+		if (this.blocks[i].enabled() && (fIncludeDistractors || !this.blocks[i].isDistractor())) {
 			numberOfBlocks += 1;
 		}
 	}
@@ -2245,7 +2262,7 @@ Parsons.prototype.removeDistractor = function(block) {
 		var startY = block.pageYCenter();
 		var endX = sourceRect.left + window.pageXOffset + sourceRect.width / 2;
 		var endY = sourceRect.top + window.pageYOffset + block.view.getBoundingClientRect().height / 2;
-		
+
 		var slideUnderBlock = block.slideUnderBlock();
 		if (slideUnderBlock !== undefined) {
 			endY += slideUnderBlock.view.getBoundingClientRect().height + 20;
@@ -2325,7 +2342,7 @@ Parsons.prototype.removeIndentation = function() {
 	var blockWidth = 200;
 	for (var i = 0; i < this.lines.length; i++) {
 		var line = this.lines[i];
-		blockWidth = Math.max(blockWidth, line.width + line.indent * this.options.pixelsPerIndent);
+		blockWidth = Math.max(blockWidth, 25 + line.width + line.indent * this.options.pixelsPerIndent);
 	}
 	this.areaWidth = blockWidth + 22;
 	var block, indent;
@@ -2511,7 +2528,7 @@ Parsons.prototype.combineBlocks = function() {
 				that.updateView();
 				block2.lines[0].index -= 1000;
 				block1.consumeBlock(block2);
-				$(block1.view).animate({ 
+				$(block1.view).animate({
 					"border-color" : "#d3d3d3",
 					"background-color" : "#efefef"
 				}, {
@@ -2542,7 +2559,7 @@ Parsons.prototype.combineBlocks = function() {
 			},
 			"complete" : function() {
 				block1.consumeBlock(block2);
-				$(block1.view).animate({ 
+				$(block1.view).animate({
 					"border-color" : "#d3d3d3",
 					"background-color" : "#efefef"
 				}, {
@@ -2565,8 +2582,8 @@ Parsons.prototype.combineBlocks = function() {
 //  * combine blocks until 3 are left
 Parsons.prototype.makeEasier = function() {
 	var distractorToRemove = this.distractorToRemove();
-	if (distractorToRemove !== undefined) {
-	    alert("Will remove an incorrect code block");
+	if (distractorToRemove !== undefined && !distractorToRemove.inSourceArea()) {
+	    alert("Will remove an incorrect code block from answer area");
 		this.removeDistractor(distractorToRemove);
 		this.logMove("removedDistractor-" + distractorToRemove.hash());
 	} else if (this.usesIndentation()) {
@@ -2574,13 +2591,16 @@ Parsons.prototype.makeEasier = function() {
 		this.removeIndentation();
 		this.logMove("removedIndentation");
 	} else {
-		var numberOfBlocks = this.numberOfBlocks();
-		if (this.numberOfBlocks() > 3) {
+		var numberOfBlocks = this.numberOfBlocks(false);
+		if (numberOfBlocks > 3) {
 		    alert("Will combine two blocks");
 			this.combineBlocks();
 			this.logMove("combinedBlocks");
-		}
-		else {
+		} else if(this.numberOfBlocks(true) > 3 && distractorToRemove !==  undefined) {
+			alert("Will remove an incorrect code block from source area");
+			this.removeDistractor(distractorToRemove);
+			this.logMove("removedDistractor-" + distractorToRemove.hash());
+		} else {
 			alert("There are only 3 blocks left.  You should be able to put them in order");
 			this.canHelp = false;
 		}
@@ -2594,7 +2614,7 @@ Parsons.prototype.makeEasier = function() {
 // The "Help Me" button was pressed and the problem should be simplified
 Parsons.prototype.helpMe = function() {
 	this.clearFeedback();
-	
+
 	//this.helpCount = -1; // amount to allow for multiple helps in a row
 	//if (this.helpCount < 0) {
 	//	this.helpCount = Math.max(this.helpCount, -1); // min 1 attempt before more help
@@ -2607,7 +2627,7 @@ Parsons.prototype.helpMe = function() {
 	   alert("You must make at least three distinct full attempts at a solution before you can get help");
 	}
 	// otherwise give help
-    else 
+    else
     {
      this.gotHelp = true;
 	 this.makeEasier();
@@ -2745,10 +2765,10 @@ Parsons.prototype.updateView = function() {
 		movingHeight = $(this.moving.view).outerHeight(true);
 		$(this.moving.view).detach();
 	}
-	
+
 	var positionTop, width;
 	var baseWidth = this.areaWidth - 22;
-	
+
 	// Update the Source Area
 	if (updateSource) {
 		positionTop = 0;
@@ -2786,7 +2806,7 @@ Parsons.prototype.updateView = function() {
 				} else if (binForBlock[binForBlock.length - 1] == movingBin) {
 					insertPositions.push(binForBlock.length);
 				}
-			}			
+			}
 			var x = this.movingX - this.sourceArea.getBoundingClientRect().left - window.pageXOffset - baseWidth / 2 - 11;
 			var y = this.movingY - this.sourceArea.getBoundingClientRect().top - window.pageYOffset;
 			for (i = 0; i < blocks.length; i++) {
@@ -2869,7 +2889,7 @@ Parsons.prototype.updateView = function() {
 			}
 		}
 	}
-	
+
 	// Update the Answer Area
 	if (updateAnswer) {
 		var block, indent;
@@ -2913,7 +2933,7 @@ Parsons.prototype.updateView = function() {
 				});
 				positionTop = positionTop + $(block.view).outerHeight(true);
 			}
-			if (!hasInserted) {				
+			if (!hasInserted) {
 				$(this.moving.view).appendTo("#" + this.counterId + "-answer");
 				$(this.moving.view).css({
 					"left" : x,
@@ -2966,10 +2986,27 @@ Parsons.prototype.updateView = function() {
 			"z-index" : 3
 		});
 	}
-	
+
 	state = newState;
 	this.state = state;
 };
+
+Parsons.prototype.addBlockLabels = function(blocks) {
+	var bin = -1;
+	var binCount = 0;
+	var binChildren = 0;
+	for (var i = 0; i < blocks.length; i++) {
+		var currentBin = blocks[i].pairedBin();
+		if(currentBin == -1 || currentBin != bin) {
+			bin = currentBin;
+			binChildren = 0;
+			binCount++;
+		}
+		var label = "" + binCount + ((currentBin != -1) ? String.fromCharCode(97 + binChildren) : "");
+		blocks[i].addLabel(label, 0);
+		binChildren++;
+	}
+}
 
 // Put all the blocks back into the source area, reshuffling as necessary
 Parsons.prototype.resetView = function() {
@@ -2979,9 +3016,16 @@ Parsons.prototype.resetView = function() {
 	var block;
 	for (var i = 0; i < this.blocks.length; i++) {
 		block = this.blocks[i];
+		for(var j = 0; j < block.lines.length; j++) {
+			var children = $(block.lines[j].view).children(".label");
+			for(var c = 0; c < children.length; c++) {
+				children[c].remove();
+			}
+		} 
 		block.destroy();
 		$(this.blocks[i].view).detach();
-	}	
+		
+	}
 	delete this.blocks;
 	this.blockIndex = 0;
 	for (var i = 0; i < this.pairedDivs.length; i++) {
