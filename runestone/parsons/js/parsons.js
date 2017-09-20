@@ -2342,7 +2342,7 @@ Parsons.prototype.removeIndentation = function() {
 	var blockWidth = 200;
 	for (var i = 0; i < this.lines.length; i++) {
 		var line = this.lines[i];
-		blockWidth = Math.max(blockWidth, 25 + line.width + line.indent * this.options.pixelsPerIndent);
+		blockWidth = Math.max(blockWidth, 50 + line.width + line.indent * this.options.pixelsPerIndent);
 	}
 	this.areaWidth = blockWidth + 22;
 	var block, indent;
