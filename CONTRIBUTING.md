@@ -1,7 +1,7 @@
 Contributing to the Runestone Components
 ========================================
 
-We welcome contributions through pull requests to the Runestone Components.
+We welcome contributions large and small to the Runestone Components.  We welcome contributions from newcomers as well as seasoned Runestone hackers.  You don't need to be an expert to make a contribution here.  When I started this project I had barely written a line of Javascript, Runestone is a project that is all about helping people learn, if you learn by helping us improve Runestone that is even better!
 
 Understand the RoadMap
 ----------------------
@@ -21,17 +21,22 @@ of jQuery in the common folder.
 * Avoid proliferation of additional third party javascript modules.  We are already out of 
 control in this regard and it would be nice to rein it in.
 * When creating a new directive, assign a unique class name to the outermost HTML division. That will allow you to easily confine your CSS declarations to apply only within your directive. Since there are many directives, chances for CSS namespace conflicts are high without that.
+* When making a new directive Also put the outer div in the runestone class, this makes it easy for us to select all runestone components on a page.
 * When making any changes, make sure the docstring for the class that implements the Sphinx directive is up to date.  These docstrings are used in several places for templates and quick help.
+* Make sure your new directive class inherits and uses RunestoneBase
+* Avoid writing a directive that returns a raw node.  Creating appropriate nodes that inherit from Runestone gives us much more flexibility to auto number and cross reference and store source in the database.
+* Make sure any buttons you create have their type specified.  Unless you know you want it to be submit or reset make sure it is 'button' otherwise it causes problems for previewing.
+
 
 Unit Testing
 ------------
 
-We are using selenium to create unit tests for each of the components.  Look at poll or activecode for some examples.
+We are using Selenium to create unit tests for each of the components.  Nearly every component has selenium tests now.  If you add a feature or a new component, please make sure to include a selenium test that verifies it works.
 
 Provide an example
 ------------------
 
-The folder ``runestone/common/project_template/_sources`` folder is a great place to add a file
+The folder ``runestone/<component>/test/index.rst``  is a great place to add code
 that demonstrates your new feature or component in action.
 
 In fact you should provide two examples whenever possible to demonstrate that you can have 

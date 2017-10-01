@@ -26,22 +26,21 @@ New style
 
     Which colors might be found in a rainbow (check all)?
 
-    -   Cred
+    -   red
 
-        -   Red it is.
+        +   Red it is.
 
     -   brown
 
         -   Not brown.
 
-    -   Cblue
+    -   blue
 
-        -   Blue it is.
+        +   Blue it is.
 
     -   gray
 
         -   Not gray.
-
 
 Test error handling
 ^^^^^^^^^^^^^^^^^^^
@@ -55,9 +54,9 @@ Test error handling
 
     A list with missing sublists.
 
-    -   COne
+    -   One
 
-        -   Yes.
+        +   Yes.
 
     -   Two
 
@@ -66,22 +65,22 @@ Test error handling
 
     A list with extra sublists.
 
-    -   COne
+    -   One
 
-        -   Yes.
-        -   OK.
+        +   Yes.
+        +   OK.
 
     -   Two
 
         -   No.
 
-.. This just produces a confused question. The auto-numbering in the base classes prepends ``Q-x`` to ``-   COne``, which means it's no longer a list. There's no easy way to detect this, without rewriting the way question numbers are prepended.
+.. This just produces a confused question. The auto-numbering in the base classes prepends ``Q-x`` to ``-   One``, which means it's no longer a list. There's no easy way to detect this, without rewriting the way question numbers are prepended.
 
     .. mchoice:: error5_only_list_is_provided
 
-        -   COne
+        -   One
 
-            -   Yes.
+            +   Yes.
 
         -   Two
 
@@ -91,13 +90,13 @@ Test error handling
 
     A list with something else instead of sublists.
 
-    -   COne
+    -   One
 
         Not a sublist.
 
     -   Two
 
-        -   No
+        +   No
 
 
 .. mchoice:: error7
@@ -113,8 +112,9 @@ Test error handling
         -   Nope.
 
 Multiple Choice
----------------
-
+===============
+Old style
+---------
 .. mchoice:: question2
     :correct: a
     :answer_a: red
@@ -126,4 +126,27 @@ Multiple Choice
     :feedback_c: Not black.
     :feedback_d: Not gray.
 
-    Which color might be found in a rainbow?
+    What color is a stop sign?
+
+New style
+---------
+.. mchoice:: question2_new
+
+    What color is a stop sign?
+
+    -   red
+
+        +   Red it is.
+
+    -   brown
+
+        -   Not brown.
+
+    -   blue
+
+        -   Not blue.
+
+    -   gray
+
+        -   Not gray.
+

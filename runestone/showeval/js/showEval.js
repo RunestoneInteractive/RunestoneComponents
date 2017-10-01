@@ -18,21 +18,33 @@ var SHOWEVAL = (function () {
     this.steps = steps.slice();
     this.currentStep = 0;
     this.createTrace = showTrace; // TODO - reset doesn't work for traces
-
+    this.rb = new RunestoneBase();
     // create elements
     this.currentStepDiv = $('<div>').addClass('currentStepDiv');
     this.container.append(this.currentStepDiv);
     this.currentStepDiv.append($('<span>').addClass('pre'));
     this.currentStepDiv.append($('<span>').addClass('eval'));
     this.currentStepDiv.append($('<span>').addClass('post'));
+    this.currentStepDiv.append($('<div>').addClass('anno'));
 
     // parse steps and turn into a 4-string array: ['pre', 'before eval', 'after eval', 'post']
     for (var i = 0 ; i < this.steps.length; i++) {
       var s = this.steps[i];
+      let endpoint, pItem;
+
+      if (s.includes('##')) { // If there is an annotation
+         endpoint = s.indexOf('##');
+         comment = s.substring(endpoint + 2, s.length);
+      } else {
+         endpoint = s.length;
+         comment = false;
+      };
       this.steps[i] = [s.substring(0, s.indexOf('{{')), // 'pre'
                        s.substring(s.indexOf('{{') + 2, s.indexOf('}}{{')), // 'before eval'
                        s.substring(s.indexOf('}}{{') + 4, s.indexOf('}}', s.indexOf('}}{{') + 4)), // 'after eval'
-                       s.substring(s.indexOf('}}', s.indexOf('}}{{') + 4) + 2)];  // 'post'
+                       s.substring(s.indexOf('}}', s.indexOf('}}{{') + 4) + 2, endpoint)];  // 'post'
+
+      this.steps[i].push(comment); // 'anno'
     }
     this.reset();
   };
@@ -50,11 +62,18 @@ var SHOWEVAL = (function () {
   thisModule.ShowEval.prototype.reset = function() {
     this.container.find('.previousStep').remove();
     this.setStep(0);
+    this.rb.logBookEvent({"event": "showeval", "act": 'reset', "div_id": this.container[0].id});
   };
 
   thisModule.ShowEval.prototype.setStep = function(step) {
     this.currentStep = step;
     newWidth = this.getWidth(this.steps[this.currentStep][1]);
+    if (this.steps[step][4]) {
+        this.currentStepDiv.children('.anno').html(this.steps[step][4]);
+        this.currentStepDiv.children('.anno').show();
+    } else {
+        this.currentStepDiv.children('.anno').hide();
+    }
     this.currentStepDiv.children('.eval').width(newWidth);
     this.currentStepDiv.children('.pre').html(this.steps[step][0]);
     this.currentStepDiv.children('.eval').html(this.steps[step][1]);
@@ -75,6 +94,7 @@ var SHOWEVAL = (function () {
   };
 
   thisModule.ShowEval.prototype.evaluateStep = function(buttonId, step) {
+    this.currentStepDiv.children('.anno').hide();
     $(buttonId).attr("disabled", true);
     if (step === undefined) {
       step = this.currentStep;
@@ -85,7 +105,7 @@ var SHOWEVAL = (function () {
       $(buttonId).attr("disabled", false);
       return; // do nothing if on last step
     }
-    this.setStep(step);
+    //this.setStep(step);
 
     var fadeInSpeed = 0;
     if (this.createTrace) {
@@ -122,7 +142,19 @@ var SHOWEVAL = (function () {
       }, 600);
     });
     $(buttonId).attr("disabled", false);
+    this.rb.logBookEvent({"event": "showeval", "act": 'next', "div_id": this.container[0].id});
+
   };
 
   return thisModule;
 }());
+
+/*=================================
+== Find the custom HTML tags and ==
+==   execute our code on them    ==
+=================================*/
+
+if (typeof component_factory === 'undefined') {
+    component_factory = {}
+}
+component_factory['showeval'] = function(opts) { return new SHOWEVAL(opts)}

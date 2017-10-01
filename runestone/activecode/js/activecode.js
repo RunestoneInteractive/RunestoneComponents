@@ -148,11 +148,13 @@ ActiveCode.prototype.createControls = function () {
     ctrlDiv.appendChild(butt);
     this.runButton = butt;
     $(butt).click(this.runProg.bind(this));
-
+    $(butt).attr("type","button")
+    
     if (! this.hidecode) {
         var butt = document.createElement("button");
         $(butt).text("Load History");
         $(butt).addClass("btn btn-default");
+        $(butt).attr("type","button")
         ctrlDiv.appendChild(butt);
         this.histButton = butt;
         $(butt).click(this.addHistoryScrubber.bind(this));
@@ -167,6 +169,7 @@ ActiveCode.prototype.createControls = function () {
         $(butt).addClass("ac_opt btn btn-default");
         $(butt).text("Show Feedback");
         $(butt).css("margin-left","10px");
+        $(butt).attr("type","button")
         this.gradeButton = butt;
         ctrlDiv.appendChild(butt);
         $(butt).click(this.createGradeSummary.bind(this))
@@ -178,6 +181,7 @@ ActiveCode.prototype.createControls = function () {
         $(butt).addClass("ac_opt btn btn-default");
         $(butt).text("Show Code");
         $(butt).css("margin-left", "10px");
+        $(butt).attr("type","button")
         this.showHideButt = butt;
         ctrlDiv.appendChild(butt);
         $(butt).click( (function() {
@@ -1516,8 +1520,8 @@ LiveCode.prototype.init = function(opts) {
 
     this.API_KEY = "67033pV7eUUvqo07OJDIV8UZ049aLEK1";
     this.USE_API_KEY = true;
-    this.JOBE_SERVER = 'http://jobe2.cosc.canterbury.ac.nz';
-    this.resource = '/jobe/index.php/restapi/runs/';
+    this.JOBE_SERVER = eBookConfig.host;
+    this.resource = '/runestone/proxy/jobeRun';
     this.div2id = {};
     if (this.stdin) {
         this.createInputElement();
@@ -1597,7 +1601,6 @@ LiveCode.prototype.runProg = function() {
         xhr.open("POST", host, true);
         xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
         xhr.setRequestHeader('Accept', 'application/json');
-        xhr.setRequestHeader('X-API-KEY', this.API_KEY);
 
         xhr.onload = (function () {
             var logresult;
@@ -1647,10 +1650,10 @@ LiveCode.prototype.runProg = function() {
         ///$("#" + divid + "_errinfo").remove();
         $(this.output).html("Compiling and Running your Code Now...");
 
-        xhr.onerror = function () {
+        xhr.onerror = (function () {
             this.addJobeErrorMessage("Error communicating with the server.");
             $(this.runButton).removeAttr('disabled');
-        };
+        }).bind(this);
 
         xhr.send(data);
     };
@@ -1672,7 +1675,7 @@ LiveCode.prototype.pushDataFile = function (datadiv) {
         var contents = $(document.getElementById(datadiv)).text();
         var contentsb64 = btoa(contents);
         var data = JSON.stringify({ 'file_contents' : contentsb64 });
-        var resource = '/jobe/index.php/restapi/files/' + file_id;
+        var resource = '/runestone/proxy/jobePushFile/' + file_id;
         var host = this.JOBE_SERVER + resource;
         var xhr = new XMLHttpRequest();
 

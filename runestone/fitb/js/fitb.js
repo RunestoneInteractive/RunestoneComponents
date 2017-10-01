@@ -84,7 +84,8 @@ FITB.prototype.renderFITBButtons = function () {
     this.submitButton.textContent = "Check Me";
     $(this.submitButton).attr({
         "class": "btn btn-success",
-        "name": "do answer"
+        "name": "do answer",
+        "type": "button",
     });
     this.submitButton.addEventListener("click", function () {
         this.startEvaluation(true);
@@ -127,6 +128,7 @@ FITB.prototype.restoreAnswers = function (data) {
     for (var i = 0; i < this.blankArray.length; i++) {
         $(this.blankArray[i]).attr("value", arr[i]);
     }
+    this.startEvaluation();
 };
 
 FITB.prototype.checkLocalStorage = function () {

@@ -150,6 +150,7 @@ DragNDrop.prototype.createButtons = function () {
     $(this.submitButton).attr({
         "class": "btn btn-success drag-button",
         "name": "do answer",
+        "type": "button",
     });
 
     this.submitButton.onclick = function () {
@@ -338,9 +339,19 @@ DragNDrop.prototype.dragEval = function (logFlag) {
     this.correctNum = this.dragNum - this.incorrectNum - this.unansweredNum;
     this.setLocalStorage({"correct": (this.correct ? "T" : "F")});
     this.renderFeedback();
-    if (logFlag)   // Sometimes we don't want to log the answers--for example, on re-load of a timed exam
-        var answer = this.pregnantIndexArray.join(";");
-        this.logBookEvent({"event": "dragNdrop", "act": answer, "answer":answer, "minHeight": this.minheight, "div_id": this.divid, "correct": this.correct});
+    if (logFlag) {  // Sometimes we don't want to log the answers--for example, on re-load of a timed exam
+        let answer = this.pregnantIndexArray.join(";");
+        this.logBookEvent({
+            "event": "dragNdrop",
+            "act": answer,
+            "answer": answer,
+            "minHeight": this.minheight,
+            "div_id": this.divid,
+            "correct": this.correct,
+            "correctNum": this.correctNum,
+            "dragNum": this.dragNum
+        });
+    }
 };
 
 DragNDrop.prototype.renderFeedback = function () {

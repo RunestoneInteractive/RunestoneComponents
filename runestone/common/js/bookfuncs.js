@@ -171,7 +171,8 @@ function isLoggedIn() {
 
 function handleLoginLogout() {
     if (shouldLogin()) {
-        jQuery.get(eBookConfig.ajaxURL + 'getuser', null, gotUser).error(notifyRunestoneComponents);
+        data = {timezoneoffset: (new Date()).getTimezoneOffset()/60 }
+        jQuery.get(eBookConfig.ajaxURL + 'getuser', data, gotUser).error(notifyRunestoneComponents);
     } else {
         $(document).trigger("runestone:logout")
 		// Let runestone components know they can run their javascript now

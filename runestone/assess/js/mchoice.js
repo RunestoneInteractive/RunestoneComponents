@@ -218,7 +218,8 @@ MultipleChoice.prototype.renderMCFormButtons = function () {
     this.submitButton.textContent = "Check Me";
     $(this.submitButton).attr({
         "class": "btn btn-success",
-        "name": "do answer"
+        "name": "do answer",
+        "type": "button"
     });
     if (this.multipleanswers) {
         this.submitButton.addEventListener("click", function () {
@@ -293,6 +294,11 @@ MultipleChoice.prototype.restoreAnswers = function (data) {
                 $(this.optionArray[b].input).attr("checked", "true");
             }
         }
+    }
+    if (this.multipleanswers) {
+        this.processMCMASubmission(false);
+    } else {
+        this.processMCMFSubmission(false);
     }
 };
 

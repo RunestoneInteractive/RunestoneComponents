@@ -114,14 +114,13 @@ class MChoice(Assessment):
 
         Question text; this may contain multiple paragraphs with any markup.
 
-        An alternative method of specifying answers and feedback: Place an `unordered list <http://www.sphinx-doc.org/en/stable/rest.html#lists-and-quote-like-blocks>`_
-        at the end of the question text, in the following format. Note: If your question text happens to end with an unordered list, then place a comment, consisting of a paragraph containing only ``..`` at the end of the list. For example:
+        An alternative method of specifying answers and feedback: Place an `unordered list <http://www.sphinx-doc.org/en/stable/rest.html#lists-and-quote-like-blocks>`_ at the end of the question text, in the following format. Note: If your question text happens to end with an unordered list, then place a comment, consisting of a paragraph containing only ``..`` at the end of the list. For example:
 
         -   This list is still part of the question text.
 
         ..
 
-        -   CText for answer A. The leading ``C`` indicates this answer is correct. Prefix all correct answers with a ``C``.
+        -   Text for answer A.
 
             Your text may be multiple paragraphs, including `images <http://www.sphinx-doc.org/en/stable/rest.html#images>`_
             and any other `inline <http://www.sphinx-doc.org/en/stable/rest.html#inline-markup>`_ or block markup. For example: :math:`\sqrt(2)/2`. As earlier, if your feedback contains an unordered list, end it with a comment.
@@ -130,21 +129,21 @@ class MChoice(Assessment):
 
             ..
 
-            -   This is feedback for answer A.
+            +   This is feedback for answer A. This is a correct answer because the bullet is a ``+``.
 
                 This may also span multiple paragraphs and include any markup.
                 However, there can be only one item in this unordered list.
 
-        -   \CText for answer B. This answer is incorrect, instead showing how to display a ``C`` at the beginning of an answer without marking it as a correct answer.
+        -   Text for answer B.
 
-            -   Feedback for answer B.
-        -   C ``Text`` for answer C. This answer is correct. Note that the empty line between a sublist and a list may be omitted. Placing a space after the ``C`` allows the following text to be treated as an `inline literal <http://docutils.sourceforge.net/docs/ref/rst/restructuredtext.html#inline-literals>`_.
+            -   Feedback for answer B. This is an incorrect answer, because the bullet is not a ``+``.
+        -   Text for answer C. Note that the empty line between a sublist and a list may be omitted.
 
-            -   Feedback for answer C. However, the empty line is required between a list and a sublist.
+            +   Feedback for answer C, which is a correct answer. However, the empty line is required between a list and a sublist.
 
         -   ... and so on.
 
-            -   Up to 26 answers and feedback may be provided.
+            -   Up to 26 answers and feedback pairs may be provided.
     """
     required_arguments = 1
     optional_arguments = 1
@@ -183,17 +182,13 @@ class MChoice(Assessment):
             <li data-component="answer" %(is_correct)s id="%(divid)s_opt_%(alabel)s">%(atext)s</li><li data-component="feedback" id="%(divid)s_opt_%(alabel)s">%(feedtext)s</li>
             '''
 
-
         TEMPLATE_END = '''
 
             </ul>
             </div>
             '''
         addQuestionToDB(self)
-        super(MChoice,self).run()
-
-
-
+        super(MChoice, self).run()
 
         mcNode = MChoiceNode(self.options, rawsource=self.block_text)
         mcNode.source, mcNode.line = self.state_machine.get_source_and_line(self.lineno)
@@ -233,26 +228,6 @@ class MChoice(Assessment):
             for answer_list_item in answers_bullet_list:
                 assert isinstance(answer_list_item, nodes.list_item)
 
-                # Look for a correct answer: An initial ``C``. In this case, the expected structure is:
-                #
-                # .. code-block::
-                #   :number-lines:
-                #
-                #   list_item
-                #       paragraph
-                #           Text, where .rawsource = "Text of this item..."
-                #       Other nodes
-                possible_paragraph = answer_list_item[0]
-                if isinstance(possible_paragraph, nodes.paragraph):
-                    possible_Text = possible_paragraph[0]
-                    if isinstance(possible_Text, nodes.Text) and possible_Text.rawsource.strip().startswith('C'):
-                        # This is a correct answer.
-                        #
-                        # Remove the +. While a simple statement like ``possible_Text.rawsource = possible_Text.rawsource[1:]`` might seem the right approach, it doesn't work: the ``__new__`` method for Text nodes does something weird.
-                        possible_paragraph[0] = nodes.Text(possible_Text.rawsource.replace('C', '', 1))
-                        # Record this in the list of correct answers.
-                        correct_answers.append(chr(answer_list_item.parent.index(answer_list_item) + ord('a')))
-
                 # Look for the feedback for this answer -- the last child of this answer list item.
                 feedback_bullet_list = answer_list_item[-1]
                 if ((not isinstance(feedback_bullet_list, nodes.bullet_list) or
@@ -260,9 +235,13 @@ class MChoice(Assessment):
                   (len(feedback_bullet_list) != 1))):
                     raise self.error('On line {}, a single-item list must be nested under each answer.'.format(get_node_line(feedback_bullet_list)))
 
-                # Change the feedback list item (which is currently a generic list_item) to our special node class (a FeedbackListItem).
+                # Check for a correct answer.
                 feedback_list_item = feedback_bullet_list[0]
                 assert isinstance(feedback_list_item, nodes.list_item)
+                if feedback_bullet_list['bullet'] == '+':
+                    correct_answers.append(chr(answer_list_item.parent.index(answer_list_item) + ord('a')))
+
+                # Change the feedback list item (which is currently a generic list_item) to our special node class (a FeedbackListItem).
                 feedback_list_item.replace_self(FeedbackListItem(feedback_list_item.rawsource, *feedback_list_item.children, **feedback_list_item.attributes))
 
                 # Change the feedback bulleted list (currently a bullet_list) to our class (a FeedbackBulletList).
