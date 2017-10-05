@@ -1,5 +1,5 @@
 /**
-* TEST1
+ * 
  * Created by bmiller on 3/19/15.
  */
 
@@ -10,7 +10,7 @@ var edList = {};
 
 ActiveCode.prototype = new RunestoneBase();
 var socket, connection, doc;
-var chatcodesServer = 'localhost:8080';
+var chatcodesServer = 'chat.codes';
 
 // separate into constructor and init
 
@@ -53,7 +53,7 @@ ActiveCode.prototype.init = function(opts) {
 
     if(this.chatcodes) {
         if(!socket) {
-            socket = new WebSocket('ws://'+chatcodesServer);
+            socket = new WebSocket('wss://'+chatcodesServer);
         }
         if(!connection) {
             connection = new sharedb.Connection(socket);
