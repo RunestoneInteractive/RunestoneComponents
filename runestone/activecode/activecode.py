@@ -47,6 +47,7 @@ def setup(app):
     app.add_javascript('htmlmixed.js')
     app.add_javascript('python.js')
     app.add_javascript('javascript.js')
+    app.add_javascript('sharedb.js')
     app.add_javascript('activecode.js')
     app.add_javascript('skulpt.min.js')
     app.add_javascript('skulpt-stdlib.js')
@@ -65,7 +66,7 @@ TEMPLATE_START = """
 
 TEMPLATE_END = """
 <textarea data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s
-    %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s
+    %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s %(chatcodes)s
     data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s
     %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s>
 %(initialcode)s
@@ -140,6 +141,7 @@ class ActiveCode(RunestoneIdDirective):
    :nocodelens: -- Do not show the codelens button
    :timelimit: -- set the time limit for this program in seconds
    :language: python, html, javascript, java, python2, python3
+   :chatcodes: -- Enable users to talk about this code snippet with others
    :tour_1: audio tour track
    :tour_2: audio tour track
    :tour_3: audio tour track
@@ -172,6 +174,7 @@ class ActiveCode(RunestoneIdDirective):
         'include': directives.unchanged,
         'hidecode': directives.flag,
         'language': directives.unchanged,
+        'chatcodes': directives.flag,
         'tour_1': directives.unchanged,
         'tour_2': directives.unchanged,
         'tour_3': directives.unchanged,
@@ -259,6 +262,11 @@ class ActiveCode(RunestoneIdDirective):
             self.options['enabledownload'] = 'data-enabledownload="true"'
         else:
             self.options['enabledownload'] = ''
+
+        if 'chatcodes' in self.options:
+            self.options['chatcodes'] = 'data-chatcodes="true"'
+        else:
+            self.options['chatcodes'] = ''
 
         if 'language' not in self.options:
             self.options['language'] = 'python'

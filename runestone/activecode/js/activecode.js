@@ -1,4 +1,5 @@
 /**
+* TEST1
  * Created by bmiller on 3/19/15.
  */
 
@@ -8,6 +9,8 @@ document.onmouseup   = function() { isMouseDown = false };
 var edList = {};
 
 ActiveCode.prototype = new RunestoneBase();
+var socket, connection, doc;
+var chatcodesServer = 'localhost:8080';
 
 // separate into constructor and init
 
@@ -32,6 +35,7 @@ ActiveCode.prototype.init = function(opts) {
     this.timelimit = $(orig).data('timelimit');
     this.includes = $(orig).data('include');
     this.hidecode = $(orig).data('hidecode');
+    this.chatcodes = $(orig).data('chatcodes');
     this.runButton = null;
     this.enabledownload = $(orig).data('enabledownload');
     this.downloadButton = null;
@@ -46,6 +50,18 @@ ActiveCode.prototype.init = function(opts) {
     this.historyScrubber = null;
     this.timestamps = ["Original"];
     this.autorun = $(orig).data('autorun');
+
+    if(this.chatcodes) {
+        if(!socket) {
+            socket = new WebSocket('ws://'+chatcodesServer);
+        }
+        if(!connection) {
+            connection = new sharedb.Connection(socket);
+        }
+        if(!doc) {
+            doc = connection.get('chatcodes', 'channels');
+        }
+    }
 
     if(this.graderactive) {
         this.hidecode = false;
@@ -246,6 +262,50 @@ ActiveCode.prototype.createControls = function () {
         this.atButton = butt;
         ctrlDiv.appendChild(butt);
         $(butt).click((function() {new AudioTour(this.divid, this.code, 1, $(this.origElem).data("audio"))}).bind(this));
+    }
+
+    if(this.chatcodes) {
+        var chatBar = document.createElement("div");
+        var channels = document.createElement("span");
+        var topic = window.location.host+'-'+this.divid;
+        ctrlDiv.appendChild(chatBar);
+        $(chatBar).text("Chat: ");
+        $(chatBar).append(channels);
+        butt = document.createElement("a");
+        $(butt).addClass("ac_opt btn btn-default");
+        $(butt).text("Create Channel");
+        $(butt).css("margin-left","10px");
+        $(butt).attr("type","button")
+        $(butt).attr("target","_blank")
+        $(butt).attr("href", 'http://'+chatcodesServer+"?"+$.param({
+            topic: window.location.host+'-'+this.divid,
+            code: this.editor.getValue()
+        }));
+        this.chatButton = butt;
+        chatBar.appendChild(butt);
+        var updateChatCodesChannels = function() {
+            var data = doc.data;
+            var i = 1;
+            $(channels).html('');
+            data['channels'].forEach(function(channel) {
+                if(!channel.archived && topic === channel.topic) {
+                    var link = $('<a />');
+                    var href = 'http://'+chatcodesServer+"/"+channel.channelName;
+                    link.attr({
+                        'href': href,
+                        'target': '_blank'
+                    });
+                    link.text(' ' + channel.channelName + '('+i+') ');
+                    $(channels).append(link);
+                    i++;
+                }
+            });
+            if(i===1) {
+                $(channels).text('(no active converstations on this problem)');
+            }
+        };
+        doc.subscribe(updateChatCodesChannels);
+        doc.on('op', updateChatCodesChannels);
     }
 
 
