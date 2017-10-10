@@ -51,6 +51,7 @@ class ParsonsTests(RunestoneTestCase):
         ActionChains(self.driver).drag_and_drop(source.find_element_by_id("parsons-1-block-1"), answer.find_element_by_id("parsons-1-block-2")).perform()
         ActionChains(self.driver).drag_and_drop(source.find_element_by_id("parsons-1-block-0"), answer.find_element_by_id("parsons-1-block-1")).perform()
         ActionChains(self.driver).drag_and_drop_by_offset(answer.find_element_by_id("parsons-1-block-0"), -50, 0).perform()
+        self.wait_for_animation("#parsons-1-block-0")
         checkme.click()
         message = self.driver.find_element_by_id("parsons-1-message")
         self.assertEquals(message.get_attribute("class"), "alert alert-success")
@@ -78,13 +79,17 @@ class ParsonsTests(RunestoneTestCase):
         ActionChains(self.driver).drag_and_drop(source.find_element_by_id("parsons-1-block-2"), answer.find_element_by_id("parsons-1-block-4")).perform()
         ActionChains(self.driver).drag_and_drop(source.find_element_by_id("parsons-1-block-1"), answer.find_element_by_id("parsons-1-block-2")).perform()
         ActionChains(self.driver).drag_and_drop(source.find_element_by_id("parsons-1-block-0"), answer.find_element_by_id("parsons-1-block-1")).perform()
+        self.wait_for_animation("#parsons-1-block-0")
         checkme.click()
         ActionChains(self.driver).drag_and_drop(source.find_element_by_id("parsons-1-block-3"), answer.find_element_by_id("parsons-1-block-0")).perform()
+        self.wait_for_animation("#parsons-1-block-3")
         checkme.click()
         ActionChains(self.driver).drag_and_drop(answer.find_element_by_id("parsons-1-block-3"), answer.find_element_by_id("parsons-1-block-4")).perform()
+        self.wait_for_animation("#parsons-1-block-3")
         checkme.click()     
         self.assertTrue(self.wait_and_close_alert())
         ActionChains(self.driver).drag_and_drop(answer.find_element_by_id("parsons-1-block-3"), source).perform()
+        self.wait_for_animation("#parsons-1-block-3")
 
         helpBtn.click() # remove incorrect
         self.assertTrue(self.wait_and_close_alert())    
@@ -151,5 +156,5 @@ class ParsonsTests(RunestoneTestCase):
             return False
         
         
-# if __name__ == '__main__':
-#    unittest.main()
+if __name__ == '__main__':
+    unittest.main()
