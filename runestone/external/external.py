@@ -92,11 +92,10 @@ class ExternalDirective(RunestoneDirective):
     option_spec.update({'number': directives.positive_int})
 
     def run(self):
+        super(ExternalDirective, self).run()
         addQuestionToDB(self)
 
         self.assert_has_content()  # make sure activity has something in it
-        self.options['divid'] = self.arguments[0]
-        self.options['basecourse'] = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
 
         self.options['name'] = self.arguments[0].strip()
 

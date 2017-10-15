@@ -186,6 +186,7 @@ class ActiveCode(RunestoneDirective):
 
 
     def run(self):
+        super(ActiveCode, self).run()
 
         addQuestionToDB(self)
 
@@ -196,10 +197,6 @@ class ActiveCode(RunestoneDirective):
             env.activecodecounter = 0
         env.activecodecounter += 1
         self.options['name'] = self.arguments[0].strip()
-        self.options['divid'] = self.arguments[0]
-
-        if not self.options['divid']:
-            raise Exception("No divid for ..activecode or ..actex in activecode.py")
 
         explain_text = None
         if self.content:

@@ -118,6 +118,8 @@ class FillInTheBlank(RunestoneDirective):
             ...
             """
 
+        super(FillInTheBlank, self).run()
+
         TEMPLATE_START = '''
         <div class="runestone">
         <div data-component="fillintheblank" id="%(divid)s">
@@ -133,8 +135,6 @@ class FillInTheBlank(RunestoneDirective):
             '''
 
         addQuestionToDB(self)
-
-        self.options['divid'] = self.arguments[0]
 
         fitbNode = FITBNode(self.options, rawsource=self.block_text)
         fitbNode.source, fitbNode.line = self.state_machine.get_source_and_line(self.lineno)

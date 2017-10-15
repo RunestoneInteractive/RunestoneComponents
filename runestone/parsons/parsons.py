@@ -134,9 +134,9 @@ Example:
 
         """
 
+        super(ParsonsProblem, self).run()
         addQuestionToDB(self)
 
-        self.options['divid'] = self.arguments[0]
         self.options['qnumber'] = self.getNumber()
         self.options['instructions'] = ""
         self.options['code'] = self.content
@@ -174,8 +174,6 @@ Example:
             self.options['code'] = self.options['code'].replace('=====', '---')
         else:
             self.options['code'] = "\n".join(self.options['code'])
-
-        self.options['divid'] = self.arguments[0]
 
         self.assert_has_content()
 

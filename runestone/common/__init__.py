@@ -1,1 +1,1 @@
-from .runestonedirective import RunestoneDirective, RunestoneNode, get_node_line
+from .runestonedirective import setup, RunestoneDirective, RunestoneNode, get_node_line

@@ -69,9 +69,8 @@ class Animation(RunestoneDirective):
         :param self:
         :return:
         """
-
+        super(Animation, self).run()
         res = ''
-        self.options['divid'] = self.arguments[0]
 
         if 'modelfile' in self.options:
           res = res + SCRIPTTAG % self.options['modelfile']

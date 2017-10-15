@@ -71,9 +71,8 @@ class Assessment(RunestoneDirective):
 
 
     def run(self):
+        super(Assessment, self).run()
         self.options['qnumber'] = self.getNumber()
-
-        self.options['divid'] = self.arguments[0]
 
         if self.content:
             if self.content[0][:2] == '..':  # first line is a directive

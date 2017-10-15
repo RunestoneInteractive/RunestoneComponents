@@ -116,6 +116,7 @@ class DisqusDirective(RunestoneDirective):
         :return:
         """
 
+        super(DisqusDirective, self).run()
         disqus_node = DisqusNode(self.options, rawsource=self.block_text)
         disqus_node.source, disqus_node.line = self.state_machine.get_source_and_line(self.lineno)
         return [disqus_node]

@@ -149,9 +149,8 @@ class DragNDrop(RunestoneDirective):
 
                 The question goes here.
         """
+        super(DragNDrop, self).run()
         addQuestionToDB(self)
-
-        self.options['divid'] = self.arguments[0]
 
         if self.content:
             source = "\n".join(self.content)

@@ -128,6 +128,7 @@ class TabDirective(RunestoneDirective):
             Content
             ...
             """
+        super(TabDirective, self).run()
         # Raise an error if the directive does not have contents.
         self.assert_has_content()
 
@@ -165,11 +166,10 @@ class TabbedStuffDirective(RunestoneDirective):
             ...
             """
 
+        super(TabbedStuffDirective, self).run()
         # Raise an error if the directive does not have contents.
         self.assert_has_content()
 
-
-        self.options['divid'] = self.arguments[0]
 
         # Create the node, to be populated by "nested_parse".
         tabbedstuff_node = TabbedStuffNode(self.options, rawsource=self.block_text)

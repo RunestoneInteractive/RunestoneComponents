@@ -102,6 +102,7 @@ class Assignment(RunestoneDirective):
                 :generate_html:
         """
 
+        super(Assignment, self).run()
         course_name = self.state.document.settings.env.config.html_context['course_id']
         self.options['course_name'] = course_name
 

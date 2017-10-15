@@ -61,6 +61,7 @@ class AddButton(RunestoneDirective):
 
             ...
             """
+        super(AddButton, self).run()
 
         TEMPLATE_START = '''
             <div id="%(divid)s" class="alert alert-warning">
@@ -72,8 +73,6 @@ class AddButton(RunestoneDirective):
             </form>
             </div>
             '''
-
-        self.options['divid'] = self.arguments[0]
 
         res = ""
         res = TEMPLATE_START % self.options
@@ -104,6 +103,8 @@ class QuestionNumber(RunestoneDirective):
                    }
 
     def run(self):
+        super(QuestionNumber, self).run()
+
         env = self.state.document.settings.env
 
         if 'start' in self.options:

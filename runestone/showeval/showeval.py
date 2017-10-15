@@ -91,9 +91,10 @@ class ShowEval(RunestoneDirective):
 
         """
 
+        # Raise an error if the directive does not have contents.
+        super(ShowEval, self).run()
         addQuestionToDB(self)
 
-        self.options['divid'] = self.arguments[0]
         self.options['trace_mode'] = self.options['trace_mode'].lower()
         self.options['preReqLines'] = ''
         self.options['steps'] = []

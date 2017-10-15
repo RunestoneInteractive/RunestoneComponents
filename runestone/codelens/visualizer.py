@@ -182,6 +182,7 @@ class Codelens(RunestoneDirective):
     has_content = True
 
     def run(self):
+        super(Codelens, self).run()
 
         addQuestionToDB(self)
 
@@ -198,7 +199,6 @@ class Codelens(RunestoneDirective):
             json_output = json.dumps(ret, indent=None)
             return "var %s = %s;" % (self.JS_VARNAME, json_output)
 
-        self.options['divid'] = self.arguments[0]
         if self.content:
             source = "\n".join(self.content)
         else:

@@ -16,10 +16,12 @@
 __author__ = 'bmiller'
 
 
+import os
+from collections import defaultdict
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
-import os
+from docutils.utils import get_source_line
 
 # Provide a class which all Runestone nodes will inherit from.
 class RunestoneNode(nodes.Node):
@@ -34,6 +36,67 @@ class RunestoneNode(nodes.Node):
 #env.activecodecounter += 1
 # similar trick for assessments using getNumber()
 
+# Easily create and initialize an object with named methods from the object's constructor. Taken from http://stackoverflow.com/a/3652937. While a collections.namedtuple could probably be forced to do this, the following approach seems fairly straightforward.
+class Struct:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+    # Provide a nice printable representation.
+    def __repr__(self):
+        args = ['{}={}'.format(k, repr(v)) for (k,v) in vars(self).items()]
+        return 'Struct({})'.format(', '.join(args))
+
+# Get a data structure which holds Runestone data from the environment. Create one if it doesn't exist.
+def _get_runestone_data(
+    # The Sphinx environment which (possibly) contains Runestone data.
+    env):
+
+    # Create the Runestone data structure if it doesn't yet exist.
+    if not hasattr(env, 'runestone_data'):
+        # .. _Runestone data:
+        env.runestone_data = Struct(
+            # Maps from a question's ID to the page containing it:
+            #
+            # .. code:: Python
+            #   :number-lines:
+            #
+            #   .id_to_page = {
+            #       # The ID maps to a Struct(), which contains:
+            #       str(id): Struct()
+            #           # The path of the file which contains this ID.
+            #           .srcpath = str()
+            #           # The line in this file which contains this ID.
+            #           .line = int()
+            #   }
+            id_to_page=dict(),
+            # Provide the inverse map: from a page to a set of IDs it contains.
+            #
+            # .. code:: Python
+            #   :number-lines:
+            #
+            #   .page_to_id: = {
+            #       # The path to a source file maps to a set:
+            #       str(srcpath) : set(
+            #           # Which consists of a strings, each of which is an ID on that page.
+            #           str(id_), ...
+            #       )
+            #   }
+            page_to_id=defaultdict(set),
+        )
+    return env.runestone_data
+
+# When a source file is modified, clear all accumulated Runestone data from it.
+def _purge_runestone_data(app, env, docname):
+    runestone_data = _get_runestone_data(env)
+
+    for id_ in runestone_data.page_to_id[docname]:
+        runestone_data.id_to_page.pop(id_)
+    runestone_data.page_to_id.pop(docname)
+
+def setup(app):
+    # See http://www.sphinx-doc.org/en/stable/extdev/appapi.html#event-env-purge-doc.
+    app.connect('env-purge-doc', _purge_runestone_data)
+
+
 class RunestoneDirective(Directive):
     option_spec = {'author': directives.unchanged,
                    'tags': directives.unchanged,
@@ -41,8 +104,11 @@ class RunestoneDirective(Directive):
                    'autograde': directives.unchanged,
                    }
 
-    def __init__(self, *args, **kwargs):
-        super(RunestoneDirective,self).__init__(*args, **kwargs)
+    def run(self):
+        # Make sure the runestone directive at least requires an ID.
+        assert self.required_arguments >= 1
+        self.options['divid'] = self.arguments[0]
+
         srcpath, self.line = self.state_machine.get_source_and_line()
         self.subchapter = os.path.basename(srcpath).replace('.rst','')
         self.chapter = srcpath.split(os.path.sep)[-2]
@@ -51,6 +117,27 @@ class RunestoneDirective(Directive):
         self.options['basecourse'] = self.basecourse
         self.options['chapter'] = self.chapter
         self.options['subchapter'] = self.subchapter
+
+        # Check for a duplicate question.
+        id_ = self.options['divid']
+        # Get references to `runestone data`_.
+        env = self.state.document.settings.env
+        runestone_data = _get_runestone_data(env)
+        id_to_page = runestone_data.id_to_page
+        page_to_id = runestone_data.page_to_id
+        # See if this ID already exists.
+        if id_ in id_to_page:
+            page = id_to_page[id_]
+            # If it's not simply an update to an existing ID, complain.
+            if page.srcpath != self.srcpath or page.line != self.lineno:
+                raise self.error('Duplicate ID -- see {}, line {}'.format(page.srcpath, page.line))
+            # Make sure our data structure is consistent.
+            assert id_ in page_to_id[page.srcpath]
+        else:
+            # Add a new entry.
+            id_to_page[id_] = Struct(srcpath=self.srcpath, line=self.lineno)
+            page_to_id[self.srcpath].add(id_)
+
 
 # Some nodes have a line number of None. Look through their children to find the node's line number.
 def get_node_line(node):
