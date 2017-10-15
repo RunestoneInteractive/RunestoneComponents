@@ -120,9 +120,9 @@ class Poll(RunestoneDirective):
                 :option_3: Option 3
                 ...etc...(Up to 10 options in mode 2)
         """
+        super(Poll, self).run()
         addQuestionToDB(self)
 
-        self.options['divid'] = self.arguments[0]
         if self.content:
             source = "\n".join(self.content)
         else:

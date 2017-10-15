@@ -126,10 +126,10 @@ class ClickableArea(RunestoneDirective):
                 :incorrect: An array of the indices of the incorrect elements--same format as the correct elements.
                 --Content--
         """
+        super(ClickableArea, self).run()
         addQuestionToDB(self)
 
         self.assert_has_content()
-        self.options['divid'] = self.arguments[0]
         if "iscode" in self.options:
             source = "\n".join(self.content)
             source = source.replace(":click-correct:", "<span data-correct>")

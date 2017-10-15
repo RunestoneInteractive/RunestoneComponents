@@ -110,12 +110,11 @@ class MultipleChoiceQuestion_Tests(RunestoneTestCase):
 
 
     # If commented out, produces a failure on the first assertFalse below. ???
-    def test_ma5(self):
+    #def test_ma5(self):
         '''Multiple Answer: Correct answer(s) selected and unselected'''
         self.driver.get(self.host + "/index.html")
         t1 = self.driver.find_element_by_id("question1")
 
-        t1.find_element_by_id("question1_opt_0").click()
         t1.find_element_by_id("question1_opt_0").click()
 
         cbs = t1.find_element_by_id("question1_opt_0")

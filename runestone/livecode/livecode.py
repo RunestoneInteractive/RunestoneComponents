@@ -16,10 +16,7 @@
 
 __author__ = 'bmiller'
 
-from docutils import nodes
 from docutils.parsers.rst import directives
-import os
-from jinja2 import Environment, FileSystemLoader
 from runestone.common.runestonedirective import RunestoneDirective
 
 # try:
@@ -47,6 +44,7 @@ class LiveCode(RunestoneDirective):
     }
 
     def run(self):
+        super(LiveCode, self).run()
         raise RuntimeError("livecode is obsolete, Use the activecode directive with the language option")
 
 

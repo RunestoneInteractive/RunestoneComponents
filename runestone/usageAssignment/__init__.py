@@ -139,6 +139,7 @@ class usageAssignment(RunestoneDirective):
             :points: <int>
         """
 
+        super(usageAssignment, self).run()
         if not engine:
             self.state.document.settings.env.warn(self.state.document.settings.env.docname, "Environment variables not set for DB access; can't save usageassignment to DB")
             return [usageAssignmentNode(self.options)]

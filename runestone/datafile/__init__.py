@@ -109,6 +109,7 @@ class DataFile(RunestoneDirective):
                 :rows: If editable, number of rows--default is 40
                 :hide: Flag that sets a non-editable datafile to be hidden
         """
+        super(DataFile, self).run()
         env = self.state.document.settings.env
 
         if not hasattr(env,'datafilecounter'):
@@ -129,7 +130,6 @@ class DataFile(RunestoneDirective):
         else:
             self.options['rows'] = 20
 
-        self.options['divid'] = self.arguments[0]
         if self.content:
             source = "\n".join(self.content)+"\n"
         else:

@@ -102,12 +102,12 @@ class Video(RunestoneDirective):
         :param self:
         :return:
         """
+        super(Video, self).run()
         addQuestionToDB(self)
 
         mimeMap = {'mov':'mp4','webm':'webm', 'm4v':'m4v'}
 
         sources = [SOURCE % (directives.uri(line),mimeMap[line[line.rindex(".")+1:]]) for line in self.content]
-        self.options['divid'] = self.arguments[0]
         if 'controls' in self.options:
             self.options['controls'] = 'controls'
         if 'loop' in self.options:

@@ -102,9 +102,8 @@ class TimedDirective(RunestoneDirective):
                 :fullwidth: Boolean, allows the items in the timed assessment to take the full width of the screen
             ...
             """
+        super(TimedDirective, self).run()
         self.assert_has_content() # make sure timed has something in it
-
-        self.options['divid'] = self.arguments[0]
 
         timed_node = TimedNode(self.options, rawsource=self.block_text)
         timed_node.source, timed_node.line = self.state_machine.get_source_and_line(self.lineno)

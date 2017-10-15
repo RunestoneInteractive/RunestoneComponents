@@ -34,6 +34,7 @@ class Meta(RunestoneDirective):
         :param self:
         :return:
         """
+        super(Meta, self).run()
         raw_node = nodes.raw(self.block_text,'', format='html')
         raw_node.source, raw_node.line = self.state_machine.get_source_and_line(self.lineno)
         return [raw_node]

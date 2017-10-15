@@ -98,6 +98,7 @@ class RevealDirective(RunestoneDirective):
             Content
             ...
             """
+        super(RevealDirective, self).run()
         self.assert_has_content() # make sure reveal has something in it
 
         if not 'showtitle' in self.options:
@@ -108,8 +109,6 @@ class RevealDirective(RunestoneDirective):
             self.options['hidetitle'] = 'data-hidetitle="Hide"'
         else:
             self.options['hidetitle'] = '''data-hidetitle=''' + '"' + self.options['hidetitle'] + '"'
-
-        self.options['divid'] = self.arguments[0]
 
         reveal_node = RevealNode(self.options, rawsource=self.block_text)
         reveal_node.source, reveal_node.line = self.state_machine.get_source_and_line(self.lineno)

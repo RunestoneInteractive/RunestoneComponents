@@ -205,10 +205,10 @@ class Blockly(RunestoneDirective):
     option_spec = {}
 
     def run(self):
+        super(Blockly, self).run()
 
         document = self.state.document
         rel_filename, filename = document.settings.env.relfn2path(self.arguments[0])
-        self.options['divid'] = self.arguments[0]
 
         pathDepth = rel_filename.count("/")
         self.options['blocklyHomePrefix'] = "../"*pathDepth
