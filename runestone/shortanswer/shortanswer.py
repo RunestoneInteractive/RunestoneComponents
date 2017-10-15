@@ -64,20 +64,18 @@ class JournalDirective(Assessment):
     optional_arguments = 0
     final_argument_whitespace = True
     has_content = True
-    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec = Assessment.option_spec.copy()
     option_spec.update({'optional': directives.flag})
 
     node_class = JournalNode
 
     def run(self):
-        # Raise an error if the directive does not have contents.
-
+        super(JournalDirective, self).run()
         addQuestionToDB(self)
-
+        # Raise an error if the directive does not have contents.
         self.assert_has_content()
 
         self.options['optional'] = 'data-optional' if 'optional' in self.options else ''
-        self.options['divid'] = self.arguments[0]
         self.options['content'] = "<p>".join(self.content)
         self.options['qnum'] = self.getNumber()
         journal_node = JournalNode(self.options, rawsource=self.block_text)

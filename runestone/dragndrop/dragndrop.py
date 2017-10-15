@@ -20,7 +20,7 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
 
 def setup(app):
     app.add_directive('dragndrop',DragNDrop)
@@ -96,7 +96,7 @@ def depart_dnd_node(self,node):
     self.body.remove(node.delimiter)
 
 
-class DragNDrop(RunestoneDirective):
+class DragNDrop(RunestoneIdDirective):
     """
 .. dragndrop:: identifier
     :feedback: Feedback that is displayed if things are incorrectly matched--is optional
@@ -110,7 +110,7 @@ class DragNDrop(RunestoneDirective):
     required_arguments = 1
     optional_arguments = 0
     has_content = True
-    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec = RunestoneIdDirective.option_spec.copy()
     option_spec.update({"feedback":directives.unchanged,
         "match_1":directives.unchanged,
         "match_2":directives.unchanged,
@@ -149,9 +149,8 @@ class DragNDrop(RunestoneDirective):
 
                 The question goes here.
         """
+        super(DragNDrop, self).run()
         addQuestionToDB(self)
-
-        self.options['divid'] = self.arguments[0]
 
         if self.content:
             source = "\n".join(self.content)

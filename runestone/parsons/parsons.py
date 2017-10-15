@@ -19,7 +19,7 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from runestone.assess import Assessment
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
+from runestone.common.runestonedirective import RunestoneNode
 
 def setup(app):
     app.add_directive('parsonsprob', ParsonsProblem)
@@ -91,7 +91,7 @@ class ParsonsProblem(Assessment):
     required_arguments = 1
     optional_arguments = 1
     final_argument_whitespace = False
-    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec = Assessment.option_spec.copy()
     option_spec.update({
         'maxdist' : directives.unchanged,
         'order' : directives.unchanged,
@@ -134,9 +134,9 @@ Example:
 
         """
 
+        super(ParsonsProblem, self).run()
         addQuestionToDB(self)
 
-        self.options['divid'] = self.arguments[0]
         self.options['qnumber'] = self.getNumber()
         self.options['instructions'] = ""
         self.options['code'] = self.content
@@ -174,8 +174,6 @@ Example:
             self.options['code'] = self.options['code'].replace('=====', '---')
         else:
             self.options['code'] = "\n".join(self.options['code'])
-
-        self.options['divid'] = self.arguments[0]
 
         self.assert_has_content()
 

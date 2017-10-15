@@ -173,6 +173,8 @@ class MChoice(Assessment):
             :return: An MChoiceNode.
             """
 
+        super(MChoice, self).run()
+
         TEMPLATE_START = '''
             <div class="runestone">
             <ul data-component="multiplechoice" data-multipleanswers="%(multipleAnswers)s" %(random)s id="%(divid)s">
