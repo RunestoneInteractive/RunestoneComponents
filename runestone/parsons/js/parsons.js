@@ -279,6 +279,10 @@ var ParsonsBlock = function(problem, lines) {
 	for (var i = 1; i < lines.length; i++) {
 		sharedIndent = Math.min(sharedIndent, lines[i].indent);
 	}
+	var lineDiv = document.createElement("div");
+	$(lineDiv).addClass("lines");
+	$(view).append(lineDiv);
+
 	for (i = 0; i < lines.length; i++) {
 		var line = lines[i];
 		var lineIndent;
@@ -291,8 +295,11 @@ var ParsonsBlock = function(problem, lines) {
 		if (lineIndent > 0) {
 			$(line.view).addClass("indent" + lineIndent);
 		}
-		view.appendChild(line.view);
+		lineDiv.appendChild(line.view);
 	}
+	var labelDiv = document.createElement("div");
+	$(labelDiv).addClass("labels");
+	$(view).append(labelDiv);
 	this.view = view;
 };
 
@@ -319,7 +326,7 @@ ParsonsBlock.prototype.addLine = function(line) {
 		}
 	}
 	this.lines.push(line);
-	this.view.appendChild(line.view);
+	$(this.view).children(".lines")[0].appendChild(line.view);
 };
 
 // Add the contents of that block to myself and then delete that block
@@ -366,15 +373,15 @@ ParsonsBlock.prototype.addIndent = function() {
 
 // Add a label to block and update its view
 ParsonsBlock.prototype.addLabel = function(label, line) {
-	this.labels.push([label, line]);
-	//**
 	var div = document.createElement("div");
-	$(div).addClass("label");
+	$(div).addClass("block-label");
 	$(div).append(document.createTextNode(label));
-	$(this.lines[line].view).append(div); 
+	$(this.view).children(".labels")[0].append(div);
+	if(this.labels.length != 0) {
+		$(div).css("margin-top", (line - this.labels[this.labels.length - 1][1] - 1) * this.lines[line].view.offsetHeight);
+	}
 	
-	
-	//this.lines[line].view.innerHTML += "<div class='label'>" + label + "</div>";  
+	this.labels.push([label, line]);
 }
 
 // Initialize Interactivity
@@ -1397,7 +1404,7 @@ Parsons.prototype.initializeAreas = function(sourceBlocks, answerBlocks, options
 	for (i = 0; i < blocks.length; i++) {
 		maxFunction($(blocks[i].view));
 	}
-	this.areaWidth = areaWidth + 20;
+	this.areaWidth = areaWidth + 25;
 	this.areaHeight = areaHeight;
 	$(this.sourceArea).css({
 		'width' : this.areaWidth + 2,
@@ -1460,7 +1467,7 @@ Parsons.prototype.initializeAreas = function(sourceBlocks, answerBlocks, options
 	}
 	this.pairedBins = pairedBins;
 	this.pairedDivs = pairedDivs;
-	this.addBlockLabels(sourceBlocks);
+	this.addBlockLabels(sourceBlocks.concat(answerBlocks));
 	// Update the view
 	this.state = undefined; // needs to be here for loading from storage
 	this.updateView();
@@ -2342,7 +2349,7 @@ Parsons.prototype.removeIndentation = function() {
 	var blockWidth = 200;
 	for (var i = 0; i < this.lines.length; i++) {
 		var line = this.lines[i];
-		blockWidth = Math.max(blockWidth, 50 + line.width + line.indent * this.options.pixelsPerIndent);
+		blockWidth = Math.max(blockWidth, 55 + line.width + line.indent * this.options.pixelsPerIndent);
 	}
 	this.areaWidth = blockWidth + 22;
 	var block, indent;
@@ -2995,6 +3002,12 @@ Parsons.prototype.addBlockLabels = function(blocks) {
 	var bin = -1;
 	var binCount = 0;
 	var binChildren = 0;
+	this.nBlocksInBins = 0;
+	for(var i = 0; i < blocks.length; i++) {
+		if(blocks[i].pairedBin() != -1) {
+			this.nBlocksInBins++;
+		}
+	}
 	for (var i = 0; i < blocks.length; i++) {
 		var currentBin = blocks[i].pairedBin();
 		if(currentBin == -1 || currentBin != bin) {
@@ -3002,7 +3015,10 @@ Parsons.prototype.addBlockLabels = function(blocks) {
 			binChildren = 0;
 			binCount++;
 		}
-		var label = "" + binCount + ((currentBin != -1) ? String.fromCharCode(97 + binChildren) : "");
+		var label = "" + binCount + ((currentBin != -1) ? String.fromCharCode(97 + binChildren) : " ");
+		if (binCount < 10 && blocks.length - this.nBlocksInBins >= 10) {
+			label += " ";
+		}
 		blocks[i].addLabel(label, 0);
 		binChildren++;
 	}
@@ -3017,7 +3033,7 @@ Parsons.prototype.resetView = function() {
 	for (var i = 0; i < this.blocks.length; i++) {
 		block = this.blocks[i];
 		for(var j = 0; j < block.lines.length; j++) {
-			var children = $(block.lines[j].view).children(".label");
+			var children = $(block.lines[j].view).find(".block-label");
 			for(var c = 0; c < children.length; c++) {
 				children[c].remove();
 			}
