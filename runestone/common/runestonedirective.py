@@ -133,14 +133,14 @@ class RunestoneIdDirective(RunestoneDirective):
         if id_ in id_to_page:
             page = id_to_page[id_]
             # If it's not simply an update to an existing ID, complain.
-            if page.srcpath != self.srcpath or page.line != self.lineno:
-                raise self.error('Duplicate ID -- see {}, line {}'.format(page.srcpath, page.line))
+            if page.docname != env.docname or page.lineno != self.lineno:
+                raise self.error('Duplicate ID -- see {}, line {}'.format(page.docname, page.lineno))
             # Make sure our data structure is consistent.
-            assert id_ in page_to_id[page.srcpath]
+            assert id_ in page_to_id[page.docname]
         else:
             # Add a new entry.
-            id_to_page[id_] = Struct(srcpath=self.srcpath, line=self.lineno)
-            page_to_id[self.srcpath].add(id_)
+            id_to_page[id_] = Struct(docname=env.docname, lineno=self.lineno)
+            page_to_id[env.docname].add(id_)
 
 
 # Some nodes have a line number of None. Look through their children to find the node's line number.
