@@ -3009,18 +3009,23 @@ Parsons.prototype.addBlockLabels = function(blocks) {
 		}
 	}
 	for (var i = 0; i < blocks.length; i++) {
-		var currentBin = blocks[i].pairedBin();
-		if(currentBin == -1 || currentBin != bin) {
-			bin = currentBin;
-			binChildren = 0;
-			binCount++;
+		if(this.nBlocksInBins != 0) {
+			var currentBin = blocks[i].pairedBin();
+			if(currentBin == -1 || currentBin != bin) {
+				bin = currentBin;
+				binChildren = 0;
+				binCount++;
+			}
+			var label = "" + binCount + ((currentBin != -1) ? String.fromCharCode(97 + binChildren) : " ");
+			if (binCount < 10 && blocks.length - this.nBlocksInBins >= 10) {
+				label += " ";
+			}
+			blocks[i].addLabel(label, 0);
+			binChildren++;
+		} else {
+			$(blocks[i].view).find(".labels").removeClass("labels");
 		}
-		var label = "" + binCount + ((currentBin != -1) ? String.fromCharCode(97 + binChildren) : " ");
-		if (binCount < 10 && blocks.length - this.nBlocksInBins >= 10) {
-			label += " ";
-		}
-		blocks[i].addLabel(label, 0);
-		binChildren++;
+		
 	}
 }
 

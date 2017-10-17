@@ -255,7 +255,7 @@
 .block-label {
 	font-family: "Courier";
 	font-size: 10px;
-	color: #b6a6a6;
+	color: #b0b0b0;
 	padding: .2em 0.0em .3em .6em;
 	vertical-align: top;
 	white-space: pre;
@@ -263,7 +263,7 @@
 
 .labels {
 	margin-top: 2px; 
-	border-left: 1px solid #b6a6a6;
+	border-left: 1px solid #b0b0b0;
 	display: inline-block;
 	float:right;
 	vertical-align: top;
