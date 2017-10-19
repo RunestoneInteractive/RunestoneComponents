@@ -1335,10 +1335,6 @@ Parsons.prototype.initializeAreas = function(sourceBlocks, answerBlocks, options
 	// Create blocks property as the sum of the two
 	var blocks = [];
 	var i, block;
-	var sourceBlocks = sourceBlocks;
-	if(!this.pairDistractors && this.options.adaptive) {
-		sourceBlocks = this.shuffled(sourceBlocks);
-	}
 	for (i = 0; i < sourceBlocks.length; i++) {
 		block = sourceBlocks[i];
 		blocks.push(block);
@@ -1774,51 +1770,64 @@ Parsons.prototype.adaptBlocks = function(input) {
 	var nBlocks = blocks.length;
 	var nBlocksToCombine = 0;
 	var nDistractors = distractors.length;
-	if(this.options.maxdist != undefined) {
-		nDistractors = distractors.length - this.options.maxdist;
-	}
 	var nToRemove = 0;
-	this.pairDistractors = true;
-	this.limitDistractors = true;
+	this.pairDistractors = false;
 
 	var giveIndentation = false;
-	if(lastestAttemptCount < 2) { // 1 Try
+	if(lastestAttemptCount < 3) { // 1-2 Tries
 		this.pairDistractors = false;
 		this.limitDistractors = false;
-	} else if (lastestAttemptCount < 3) { // 2 Tries
-		this.pairDistractors = false;
 	} else if(lastestAttemptCount < 4) { // 3 Tries
 		// Do nothing they are doing normal
 	} else if(lastestAttemptCount < 6) { // 4-5 Tries
+		// pair distractors
+		this.pairDistractors = true;
+	} else if(lastestAttemptCount < 8) { // 6-7 Tries
 		// Remove 50% of distractors
 		nToRemove = .5 * nDistractors;
-	} else if(lastestAttemptCount < 8) { // 6-7 Tries
+		this.pairDistractors = true;
+	} else if(lastestAttemptCount < 10) { // 8-9 tries
 		// Remove all of distractors
 		nToRemove = nDistractors;
-	} else if(lastestAttemptCount < 10) { // 8-9 tries
+		this.pairDistractors = true;
+	} else if(lastestAttemptCount < 12) { //10-11
 		//Remove all distractors and give indentation
 		nToRemove = nDistractors;
 		giveIndentation = true;
-	} else if(lastestAttemptCount < 15) { // 10-14 Tries
+		this.pairDistractors = true;
+	} else if(lastestAttemptCount < 14) { // 12-13 Tries
 		// Remove all of distractors
 		// give indentation
 		// reduce problem to 3/4 size
 		giveIndentation = true;
 		nToRemove = nDistractors;
 		nBlocksToCombine = .25 * nBlocks;
-	} else { // > 15 Tries
+		this.pairDistractors = true;
+	} else { // >= 14 Tries
 		// Remove all of distractors
 		// give indentation
 		// reduce problem to 1/2 size
 		giveIndentation = true;
 		nToRemove = nDistractors;
 		nBlocksToCombine = .5 * nBlocks;
+		this.pairDistractors = true;
 	}
 	nBlocksToCombine = Math.min(nBlocksToCombine, nBlocks - 3);
 	// Never combine so where there are less than three blocks left
 
-	this.nDistractorsToRemove = nToRemove;
-	var output = input;
+	// Remove distractors
+	distractors = this.shuffled(distractors);
+	distractors = distractors.slice(0, nToRemove);
+	var output = [];
+	for (i = 0; i < input.length; i++) {
+		block = input[i];
+		if (!block.isDistractor()) {
+			output.push(block);
+		} else if ($.inArray(block, distractors) == -1) {
+			output.push(block);
+		}
+	}
+	//var output = input;
 	if (giveIndentation) {
 		for(var i = 0; i < output.length; i++) {
 			output[i].addIndent();
@@ -1887,6 +1896,7 @@ Parsons.prototype.adaptBlocks = function(input) {
 // Return an array of code blocks based on what is specified in the problem
 Parsons.prototype.blocksFromSource = function() {
 	var unorderedBlocks = [];
+	var originalBlocks = [];
 	var blocks = [];
 	var lines = [];
 	var block, line, i;
@@ -1898,40 +1908,39 @@ Parsons.prototype.blocksFromSource = function() {
 			lines = [];
 		}
 	}
-
-	this.nDistractorsToRemove = 0;
-	if (this.options.adaptive) {
-		unorderedBlocks = this.adaptBlocks(unorderedBlocks);
-	} 
-
-	if (this.options.order === undefined) {
-		// Trim the distractors
-		if (this.options.maxdist !== undefined && (!this.options.adaptive || this.limitDistractors)) {
-			var maxdist = Math.max(this.options.maxdist - this.nDistractorsToRemove, 0);
-			var distractors = [];
+	originalBlocks = unorderedBlocks;
+	// Trim the distractors
+	var removedBlocks = [];
+	if (this.options.maxdist !== undefined) {
+		var maxdist = this.options.maxdist;
+		var distractors = [];
+		for (i = 0; i < unorderedBlocks.length; i++) {
+			block = unorderedBlocks[i];
+			if (block.lines[0].distractor) {
+				distractors.push(block);
+			}
+		}
+		if (maxdist < distractors.length) {
+			distractors = this.shuffled(distractors);
+			distractors = distractors.slice(0, maxdist);
 			for (i = 0; i < unorderedBlocks.length; i++) {
 				block = unorderedBlocks[i];
 				if (block.lines[0].distractor) {
-					distractors.push(block);
-				}
-			}
-			if (maxdist < distractors.length) {
-				distractors = this.shuffled(distractors);
-				distractors = distractors.slice(0, maxdist);
-				for (i = 0; i < unorderedBlocks.length; i++) {
-					block = unorderedBlocks[i];
-					if (block.lines[0].distractor) {
-						if ($.inArray(block, distractors) > -1) {
-							blocks.push(block);
-						}
-					} else {
+					if ($.inArray(block, distractors) > -1) {
 						blocks.push(block);
 					}
+					else {
+						removedBlocks.push(i);
+					}
+				} else {
+					blocks.push(block);
 				}
-				unorderedBlocks = blocks;
-				blocks = [];
 			}
+			unorderedBlocks = blocks;
+			blocks = [];
 		}
+	}
+	if (this.options.order === undefined) {
 		// Shuffle, respecting paired distractors
 		var chunks = [], chunk = [];
 		for (i = 0; i < unorderedBlocks.length; i++) {
@@ -1960,12 +1969,24 @@ Parsons.prototype.blocksFromSource = function() {
 	} else {
 		// Order according to order specified
 		for (i = 0; i < this.options.order.length; i++) {
-			block = unorderedBlocks[this.options.order[i]];
-			if (block !== undefined) {
+			block = originalBlocks[this.options.order[i]];
+			if (block !== undefined && $.inArray(this.options.order[i], removedBlocks) < 0) {
 				blocks.push(block);
 			}
 		}
 	}
+
+	if (this.options.adaptive) {
+		this.limitDistractors = true;
+		blocks = this.adaptBlocks(blocks);
+		if(!this.limitDistractors) {
+			for(i = 0; i < removedBlocks.length; i++) {
+				var index = this.options.order == undefined ? Math.random(0, blocks.length): $.inArray(removedBlocks[i], this.options.order);
+				blocks.splice(index, 0, originalBlocks[removedBlocks[i]]);
+			}
+		}
+		return blocks;
+	} 
 	return blocks;
 };
 
@@ -2214,7 +2235,6 @@ Parsons.prototype.initializeAdaptive = function() {
 
 		
 	this.recentAttempts = localStorage.getItem(this.adaptiveId + "recentAttempts");
-	console.log("RecentAttepmts: " + this.recentAttempts);
 	
 	if(this.recentAttempts == undefined || this.recentAttempts == "NaN") {
 		this.recentAttempts = 3;
@@ -3086,7 +3106,7 @@ Parsons.prototype.resetView = function() {
 		localStorage.setItem(this.adaptiveId + this.divid + "Count", this.checkCount);
 		localStorage.setItem(this.adaptiveId + "Solved", false);
 	}
-	this.areaWidth -= 25;
+	this.areaWidth -= 24.5;
 	this.initializeAreas(this.blocksFromSource(), [], {});
 	this.initializeInteractivity();
 	document.body.scrollTop = scrollTop;
