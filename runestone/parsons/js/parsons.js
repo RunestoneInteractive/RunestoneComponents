@@ -1975,7 +1975,7 @@ Parsons.prototype.blocksFromSource = function() {
 			}
 		}
 	}
-
+	this.pairDistractors = true;
 	if (this.options.adaptive) {
 		this.limitDistractors = true;
 		blocks = this.adaptBlocks(blocks);
@@ -1985,7 +1985,22 @@ Parsons.prototype.blocksFromSource = function() {
 				blocks.splice(index, 0, originalBlocks[removedBlocks[i]]);
 			}
 		}
-		return blocks;
+	}
+	if(this.pairDistractors && this.options.order != undefined) {
+		//move pairs together
+		//Go through array looking for ditractor and its pair
+		for(i = 1; i < originalBlocks.length; i++) {
+			if(originalBlocks[i].lines[0].paired && $.inArray(originalBlocks[i], blocks) >= 0) { 
+				var j = i;
+				while($.inArray(originalBlocks[j - 1], blocks) < 0) { // find the paired distractor or solution block it will be next to
+					j--;
+				}
+				var indexTo = $.inArray(originalBlocks[j - 1], blocks);
+				var indexFrom = $.inArray(originalBlocks[i], blocks);
+				blocks.splice(indexFrom, 1);
+				blocks.splice(indexTo, 0, originalBlocks[i]);
+			}
+		}
 	} 
 	return blocks;
 };
