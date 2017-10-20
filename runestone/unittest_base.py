@@ -1,5 +1,6 @@
 import unittest
 import os
+import platform
 import subprocess
 from selenium import webdriver
 from pyvirtualdisplay import Display
@@ -15,6 +16,9 @@ class ModuleFixture(unittest.TestCase):
 
         super(ModuleFixture, self).__init__()
         self.base_path = os.path.dirname(module_path)
+        # Windows Compatability
+        if platform.system() is 'Windows' and self.base_path is '':
+            self.base_path = '.'
 
     def setUpModule(self):
         # Change to this directory for running Runestone.
