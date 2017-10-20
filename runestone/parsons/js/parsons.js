@@ -6,6 +6,7 @@
 ======== Isaiah Mayerchak
 ======== Jeff Rick
 ======== Barbara Ericson
+======== Cole Bowers
 ==== Adapted form the original JS Parsons by ===========================
 ======== Ville Karavirta
 ======== Petri Ihantola
@@ -1404,7 +1405,7 @@ Parsons.prototype.initializeAreas = function(sourceBlocks, answerBlocks, options
 	for (i = 0; i < blocks.length; i++) {
 		maxFunction($(blocks[i].view));
 	}
-	this.areaWidth = areaWidth + 25;
+	this.areaWidth = areaWidth + 25; 
 	this.areaHeight = areaHeight;
 	$(this.sourceArea).css({
 		'width' : this.areaWidth + 2,
@@ -1440,30 +1441,34 @@ Parsons.prototype.initializeAreas = function(sourceBlocks, answerBlocks, options
 	}
 	var pairedBins = [];
 	var lineNumbers = [];
-	for (i = bins.length - 1; i > -1; i--) {
-		bin = bins[i];
-		if (bin[0].paired) {
-			// Add all in bin to line numbers
-			for (j = bin.length - 1; j > -1; j--) {
-				lineNumbers.unshift(bin[j].index);
-			}
-		} else {
-			if (lineNumbers.length > 0) {
+	var pairedDivs = [];
+	if(this.pairDistractors || !this.options.adaptive) {
+		for (i = bins.length - 1; i > -1; i--) {
+			bin = bins[i];
+			if (bin[0].paired) {
 				// Add all in bin to line numbers
 				for (j = bin.length - 1; j > -1; j--) {
 					lineNumbers.unshift(bin[j].index);
 				}
-				pairedBins.unshift(lineNumbers);
-				lineNumbers = [];
+			} else {
+				if (lineNumbers.length > 0) {
+					// Add all in bin to line numbers
+					for (j = bin.length - 1; j > -1; j--) {
+						lineNumbers.unshift(bin[j].index);
+					}
+					pairedBins.unshift(lineNumbers);
+					lineNumbers = [];
+				}
 			}
 		}
-	}
-	var pairedDivs = [];
-	for (i = 0; i < pairedBins.length; i++) {
-		var pairedDiv = document.createElement("div");
-		$(pairedDiv).addClass("paired");
-		pairedDivs.push(pairedDiv);
-		this.sourceArea.appendChild(pairedDiv);
+		for (i = 0; i < pairedBins.length; i++) {
+			var pairedDiv = document.createElement("div");
+			$(pairedDiv).addClass("paired");
+			pairedDivs.push(pairedDiv);
+			this.sourceArea.appendChild(pairedDiv);
+		}
+	} else {
+		pairedBins = [];
 	}
 	this.pairedBins = pairedBins;
 	this.pairedDivs = pairedDivs;
@@ -1544,7 +1549,7 @@ Parsons.prototype.loadData = function(data) {
 	if (options.hasSolved !== undefined) {
 		this.hasSolved = options.hasSolved;
 	}
-	if ((sourceHash == undefined) || (answerHash == undefined)) {
+	if ((sourceHash == undefined) || (answerHash == undefined) || (answerHash.length == 1)) {
 		this.initializeAreas(this.blocksFromSource(), [], options);
 	} else {
 		this.initializeAreas(this.blocksFromHash(sourceHash), this.blocksFromHash(answerHash), options);
@@ -1743,7 +1748,7 @@ Parsons.prototype.sourceHash = function() {
 };
 
 // Inter-problem adaptive changes
-// Based on the userRating, remove distractors, add indent, combine blocks
+// Based on the recentAttempts, remove distractors, add indent, combine blocks
 Parsons.prototype.adaptBlocks = function(input) {
 	var blocks = [];
 	var distractors = [];
@@ -1755,36 +1760,67 @@ Parsons.prototype.adaptBlocks = function(input) {
 			blocks.push(block);
 		}
 	}
-	// how difficult is the problem?
-	var problemRating = 7 * distractors.length + (blocks.length - 3) * 9;
-	if (!this.options.noindent) {
-		problemRating += 15;
+	
+	this.recentAttempts = localStorage.getItem(this.adaptiveId + "recentAttempts");
+	if(this.recentAttempts == undefined || this.recentAttempts == "NaN") {
+		this.recentAttempts = 3;
 	}
-	problemRating = Math.min(problemRating, 100);
-	var compensate = problemRating - this.userRating;
-	if (compensate <= 0) {
-		return input;
+
+	var lastestAttemptCount = this.recentAttempts; 
+	var nBlocks = blocks.length;
+	var nBlocksToCombine = 0;
+	var nDistractors = distractors.length;
+	var nToRemove = 0;
+	this.pairDistractors = false;
+
+	var giveIndentation = false;
+	if(lastestAttemptCount < 2) { // 1 Try
+		this.pairDistractors = false;
+		this.limitDistractors = false;
+	} else if(lastestAttemptCount < 4) { // 2-3 Tries
+		// Do nothing they are doing normal
+	} else if(lastestAttemptCount < 6) { // 4-5 Tries
+		// pair distractors
+		this.pairDistractors = true;
+	} else if(lastestAttemptCount < 8) { // 6-7 Tries
+		// Remove 50% of distractors
+		nToRemove = .5 * nDistractors;
+		this.pairDistractors = true;
+	} else { // 8+ Tries
+		// Remove all of distractors
+		nToRemove = nDistractors;
+		this.pairDistractors = true;
+	} 
+	/*
+	else if(lastestAttemptCount < 12) { //10-11
+		// Remove all distractors and give indentation
+		nToRemove = nDistractors;
+		giveIndentation = true;
+		this.pairDistractors = true;
+	} else if(lastestAttemptCount < 14) { // 12-13 Tries
+		// Remove all of distractors
+		// give indentation
+		// reduce problem to 3/4 size
+		giveIndentation = true;
+		nToRemove = nDistractors;
+		nBlocksToCombine = .25 * nBlocks;
+		this.pairDistractors = true;
+	} else { // >= 14 Tries
+		// Remove all of distractors
+		// give indentation
+		// reduce problem to 1/2 size
+		giveIndentation = true;
+		nToRemove = nDistractors;
+		nBlocksToCombine = .5 * nBlocks;
+		this.pairDistractors = true;
 	}
-	// Determine noindent
-	if ((this.userRating <= 50) && !this.options.noindent) {
-		this.noindent = true;
-		for (i = 0; i < input.length; i++) {
-			input[i].addIndent();
-		}
-		compensate -= 15;
-		if (compensate <= 0) {
-			return input;
-		}
-	}
+	*/
+	nBlocksToCombine = Math.min(nBlocksToCombine, nBlocks - 3);
+	// Never combine so where there are less than three blocks left
+
 	// Remove distractors
-	var nDistractorsToRemove = Math.min(Math.ceil(compensate / 7), distractors.length);
-	if (nDistractorsToRemove > 0) {
-		compensate -= nDistractorsToRemove * 7;
-		distractors = this.shuffled(distractors);
-		distractors = distractors.slice(0, nDistractorsToRemove);
-	} else {
-		distractors = [];
-	}
+	distractors = this.shuffled(distractors);
+	distractors = distractors.slice(0, nToRemove);
 	var output = [];
 	for (i = 0; i < input.length; i++) {
 		block = input[i];
@@ -1794,12 +1830,16 @@ Parsons.prototype.adaptBlocks = function(input) {
 			output.push(block);
 		}
 	}
-	if (compensate <= 0) {
-		return output;
+	//var output = input;
+	if (giveIndentation) {
+		for(var i = 0; i < output.length; i++) {
+			output[i].addIndent();
+		}
+		this.indent = 0;
+		this.noindent = true;
 	}
-	// Determine how many blocks to combine
-	var nBlocksToCombine = Math.min(Math.round(compensate / 9), output.length - 3);
-	// Combine blocks
+
+	// combine blocks
 	var solution = [];
 	for (i = 0; i < this.lines.length; i++) {
 		for (var j = 0; j < output.length; j++) {
@@ -1854,11 +1894,12 @@ Parsons.prototype.adaptBlocks = function(input) {
 		}
 	}
 	return combinedOutput;
-};
+}
 
 // Return an array of code blocks based on what is specified in the problem
 Parsons.prototype.blocksFromSource = function() {
 	var unorderedBlocks = [];
+	var originalBlocks = [];
 	var blocks = [];
 	var lines = [];
 	var block, line, i;
@@ -1870,33 +1911,39 @@ Parsons.prototype.blocksFromSource = function() {
 			lines = [];
 		}
 	}
-	if (this.options.order === undefined) {
-		// Trim the distractors
-		if (this.options.maxdist !== undefined) {
-			var distractors = [];
+	originalBlocks = unorderedBlocks;
+	// Trim the distractors
+	var removedBlocks = [];
+	if (this.options.maxdist !== undefined) {
+		var maxdist = this.options.maxdist;
+		var distractors = [];
+		for (i = 0; i < unorderedBlocks.length; i++) {
+			block = unorderedBlocks[i];
+			if (block.lines[0].distractor) {
+				distractors.push(block);
+			}
+		}
+		if (maxdist < distractors.length) {
+			distractors = this.shuffled(distractors);
+			distractors = distractors.slice(0, maxdist);
 			for (i = 0; i < unorderedBlocks.length; i++) {
 				block = unorderedBlocks[i];
 				if (block.lines[0].distractor) {
-					distractors.push(block);
-				}
-			}
-			if (this.options.maxdist < distractors.length) {
-				distractors = this.shuffled(distractors);
-				distractors = distractors.slice(0, this.options.maxdist);
-				for (i = 0; i < unorderedBlocks.length; i++) {
-					block = unorderedBlocks[i];
-					if (block.lines[0].distractor) {
-						if ($.inArray(block, distractors) > -1) {
-							blocks.push(block);
-						}
-					} else {
+					if ($.inArray(block, distractors) > -1) {
 						blocks.push(block);
 					}
+					else {
+						removedBlocks.push(i);
+					}
+				} else {
+					blocks.push(block);
 				}
-				unorderedBlocks = blocks;
-				blocks = [];
 			}
+			unorderedBlocks = blocks;
+			blocks = [];
 		}
+	}
+	if (this.options.order === undefined) {
 		// Shuffle, respecting paired distractors
 		var chunks = [], chunk = [];
 		for (i = 0; i < unorderedBlocks.length; i++) {
@@ -1925,17 +1972,40 @@ Parsons.prototype.blocksFromSource = function() {
 	} else {
 		// Order according to order specified
 		for (i = 0; i < this.options.order.length; i++) {
-			block = unorderedBlocks[this.options.order[i]];
-			if (block !== undefined) {
+			block = originalBlocks[this.options.order[i]];
+			if (block !== undefined && $.inArray(this.options.order[i], removedBlocks) < 0) {
 				blocks.push(block);
 			}
 		}
 	}
+	this.pairDistractors = true;
 	if (this.options.adaptive) {
-		return this.adaptBlocks(blocks);
-	} else {
-		return blocks;
+		this.limitDistractors = true;
+		blocks = this.adaptBlocks(blocks);
+		if(!this.limitDistractors) {
+			for(i = 0; i < removedBlocks.length; i++) {
+				var index = this.options.order == undefined ? Math.random(0, blocks.length): $.inArray(removedBlocks[i], this.options.order);
+				blocks.splice(index, 0, originalBlocks[removedBlocks[i]]);
+			}
+		}
 	}
+	if(this.pairDistractors && this.options.order != undefined) {
+		//move pairs together
+		//Go through array looking for ditractor and its pair
+		for(i = 1; i < originalBlocks.length; i++) {
+			if(originalBlocks[i].lines[0].paired && $.inArray(originalBlocks[i], blocks) >= 0) { 
+				var j = i;
+				while($.inArray(originalBlocks[j - 1], blocks) < 0) { // find the paired distractor or solution block it will be next to
+					j--;
+				}
+				var indexTo = $.inArray(originalBlocks[j - 1], blocks);
+				var indexFrom = $.inArray(originalBlocks[i], blocks);
+				blocks.splice(indexFrom, 1);
+				blocks.splice(indexTo, 0, originalBlocks[i]);
+			}
+		}
+	} 
+	return blocks;
 };
 
 // Return a codeblock that corresponds to the hash
@@ -1966,7 +2036,11 @@ Parsons.prototype.blocksFromHash = function(hash) {
 	for (var i = 0; i < split.length; i++) {
 		blocks.push(this.blockFromHash(split[i]));
 	}
-	return blocks;
+	if (this.options.adaptive) {
+		return this.adaptBlocks(blocks);
+	} else {
+		return blocks;
+	}
 };
 
 // Return a block object by the full id including id prefix
@@ -2095,17 +2169,18 @@ Parsons.prototype.checkMe = function() {
 	{
 		this.checkCount++;
 	    this.clearFeedback();
-		if (this.options.adaptive) {
-			localStorage.setItem(this.adaptiveId + "Count", this.checkCount);
-		}
-
+	    if (this.adaptiveId == undefined) {
+	    	this.adaptiveId = this.storageId;
+	    }
 		var grade = this.grader.grade();
 		if (grade == "correct") {
 			this.hasSolved = true;
-			if (this.options.adaptive) {
-				localStorage.setItem(this.adaptiveId + "Solved", true);
-			}
-		}
+			localStorage.setItem(this.adaptiveId + "Solved", true);
+			this.recentAttempts = this.checkCount;
+			this.checkCount = 0;
+			localStorage.setItem(this.adaptiveId + "recentAttempts", this.recentAttempts);
+		} 
+		localStorage.setItem(this.adaptiveId + this.divid + "Count", this.checkCount); 
 
 		this.logAnswer(grade);
 		this.setLocalStorage();
@@ -2164,49 +2239,28 @@ Parsons.prototype.initializeAdaptive = function() {
 	var storageProblem = localStorage.getItem(this.adaptiveId + "Problem");
 	if (storageProblem == this.divid) {
 		// Already in this problem
-		this.checkCount = localStorage.getItem(this.adaptiveId + "Count");
+		this.checkCount = localStorage.getItem(this.adaptiveId  + this.divid + "Count");
 		if (this.checkCount == undefined) {
 			this.checkCount = 0;
 		}
 		return this;
 	}
-	this.checkCount = 0;
-	var existingRating = localStorage.getItem(this.adaptiveId + "Rating");
-	if (existingRating == undefined) {
-		existingRating = 80;
-	} else {
-		existingRating = parseInt(existingRating);
+	var count = localStorage.getItem(this.adaptiveId  + this.divid + "Count");
+	if (count == undefined || count == "NaN") {
+		count = 0;
 	}
-	if (storageProblem == undefined) {
-		this.userRating = existingRating;
-	} else {
-		var count = localStorage.getItem(this.adaptiveId + "Count");
-		if (count == undefined) {
-			count = 5;
-		} else {
-			count = parseInt(count);
-			if (count == 0) {
-				count = 1;
-			}
-		}
-		var solved = localStorage.getItem(this.adaptiveId + "Solved");
-		if (solved == undefined) {
-			solved = false;
-		} else {
-			solved = solved == "true";
-		}
-		var calculatedRating;
-		if (solved) {
-			calculatedRating = Math.max(100 - 10 * Math.log(count), 50);
-		} else {
-			calculatedRating = Math.max(60 - 16 * Math.log(count), 0);
-		}
-		this.userRating = (existingRating + calculatedRating) / 2;
+	this.checkCount = count;
+
+		
+	this.recentAttempts = localStorage.getItem(this.adaptiveId + "recentAttempts");
+	
+	if(this.recentAttempts == undefined || this.recentAttempts == "NaN") {
+		this.recentAttempts = 3;
 	}
+	localStorage.setItem(this.adaptiveId + "recentAttempts", this.recentAttempts);
 	localStorage.setItem(this.adaptiveId + "Problem", this.divid);
-	localStorage.setItem(this.adaptiveId + "Count", this.checkCount);
+	localStorage.setItem(this.adaptiveId + this.divid + "Count", this.checkCount);
 	localStorage.setItem(this.adaptiveId + "Solved", false);
-	localStorage.setItem(this.adaptiveId + "Rating", this.userRating);
 };
 
 // Return a boolean of whether the user must deal with indentation
@@ -3042,10 +3096,9 @@ Parsons.prototype.resetView = function() {
 			for(var c = 0; c < children.length; c++) {
 				children[c].remove();
 			}
-		} 
+		}
 		block.destroy();
 		$(this.blocks[i].view).detach();
-		
 	}
 	delete this.blocks;
 	this.blockIndex = 0;
@@ -3057,17 +3110,21 @@ Parsons.prototype.resetView = function() {
 	$(this.answerArea).attr("style", "");
 	this.noindent = this.options.noindent;
 	// Reinitialize
-	this.checkCount = 0;
-	this.numDistinct = 0;
-	this.hasSolved = false;
-	if (this.options.adaptive) {
-		this.canHelp = true;
+	if(this.hasSolved) {
+
+		this.checkCount = 0;
+		this.numDistinct = 0;
+		this.hasSolved = false;
+		if (this.options.adaptive) {
+			this.canHelp = true;
+		}
 		//this.helpCount = -3; // enable after 3 failed attempts
 		//this.helpButton.disabled = true;
 		localStorage.setItem(this.adaptiveId + "Problem", this.divid);
-		localStorage.setItem(this.adaptiveId + "Count", this.checkCount);
+		localStorage.setItem(this.adaptiveId + this.divid + "Count", this.checkCount);
 		localStorage.setItem(this.adaptiveId + "Solved", false);
 	}
+	this.areaWidth -= 24.5;
 	this.initializeAreas(this.blocksFromSource(), [], {});
 	this.initializeInteractivity();
 	document.body.scrollTop = scrollTop;

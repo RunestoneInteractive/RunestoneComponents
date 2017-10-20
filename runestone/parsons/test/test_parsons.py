@@ -33,10 +33,7 @@ class ParsonsTests(RunestoneTestCase):
         blocks = source.find_elements_by_class_name("block")
         self.assertIsNotNone(source)
         self.assertEquals(len(blocks), 5)
-        labels = source.find_elements_by_class_name("block-label")
-        self.assertIsNotNone(labels)
-        self.assertEquals(len(labels), len(blocks))
-
+        
         # check that messages appear correctly
         checkme = self.driver.find_element_by_id('parsons-1-check')
         reset = self.driver.find_element_by_id('parsons-1-reset')
@@ -156,5 +153,5 @@ class ParsonsTests(RunestoneTestCase):
             return False
         
         
-# if __name__ == '__main__':
-    # unittest.main()
+if __name__ == '__main__':
+    unittest.main()
