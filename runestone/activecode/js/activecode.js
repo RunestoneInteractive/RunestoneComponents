@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * Created by bmiller on 3/19/15.
  */
 
@@ -265,9 +265,10 @@ ActiveCode.prototype.createControls = function () {
         $(butt).css("margin-left","10px");
         $(butt).attr("type","button")
         $(butt).attr("target","_blank")
-        $(butt).attr("href", 'http://'+chatcodesServer+"?"+$.param({
+        $(butt).attr("href", 'http://'+chatcodesServer+"/new?"+$.param({
             topic: window.location.host+'-'+this.divid,
-            code: this.editor.getValue()
+            code: this.editor.getValue(),
+            lang: 'Python'
         }));
         this.chatButton = butt;
         chatBar.appendChild(butt);
