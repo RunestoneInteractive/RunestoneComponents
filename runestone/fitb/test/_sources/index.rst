@@ -49,12 +49,14 @@ Error testing
 
     -   :Feedback: For blank 1.
 
+Regex testing
+-------------
 .. fillintheblank:: fillregex
    :casei:
 
    Complete the sentence: |blank| had a |blank| lamb. One plus one is: (note that if there aren't enough blanks for the feedback given, they're added to the end of the problem. So, we don't **need** to specify a blank here.)
 
-   -   :mary: Correct.
+   -   :mary|Mair[a|e|i]: Correct.
        :Sue: Is wrong.
        :wrong: Try again. (Note: the last item of feedback matches anything, regardless of the string it's given.)
    -   :little: That's right.

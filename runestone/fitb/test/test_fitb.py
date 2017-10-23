@@ -119,7 +119,8 @@ class FITBtests(RunestoneTestCase):
 
     def test_fitbregex(self):
         self.find_fitb("fillregex")
-        self.find_blank(0).send_keys(" mARy ")
+        self.find_blank(0).send_keys(" maire ")
+        #self.find_blank(0).send_keys(" mARy ")
         self.find_blank(1).send_keys("LITTLE")
         self.find_blank(2).send_keys("2")
         self.click_checkme()
