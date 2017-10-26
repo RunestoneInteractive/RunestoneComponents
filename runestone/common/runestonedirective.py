@@ -106,11 +106,10 @@ class RunestoneDirective(Directive):
                    }
 
     def __init__(self, *args, **kwargs):
-        super(RunestoneDirective,self).__init__(*args, **kwargs)
+        super(RunestoneDirective, self).__init__(*args, **kwargs)
         self.srcpath, self.line = self.state_machine.get_source_and_line()
         self.subchapter = os.path.basename(self.srcpath).replace('.rst', '')
-        # Use a range to avoid exceptions if this file isn't in a chapter.
-        self.chapter = self.srcpath.split(os.path.sep)[-2:-1]
+        self.chapter = self.srcpath.split(os.path.sep)[-2]
         self.basecourse = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
         self.options['basecourse'] = self.basecourse
         self.options['chapter'] = self.chapter
