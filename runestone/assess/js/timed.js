@@ -422,6 +422,11 @@ Timed.prototype.renderTimedQuestion = function () {
 =================================*/
 
 Timed.prototype.handlePrevAssessment = function () {
+        // if can retake then show the reset button
+        if (this.retake) {
+            $(this.resetBtn).show();
+            $(this.resetBtn).attr("disabled", false);
+        }
 		$(this.startBtn).hide();
 		$(this.pauseBtn).hide();
 		$(this.finishButton).hide();
@@ -433,11 +438,7 @@ Timed.prototype.handlePrevAssessment = function () {
         } else {
            $(this.timerContainer).hide(); // do not show the results
         }
-        // if can retake then show the reset button
-        if (this.retake) {
-            $(this.resetBtn).show();
-            $(this.resetBtn).attr("disabled", false);
-        }
+        
 };
 
 Timed.prototype.startAssessment = function () {
@@ -445,6 +446,7 @@ Timed.prototype.startAssessment = function () {
         $("#relations-next").hide(); // hide the next page button for now
         $("#relations-prev").hide(); // hide the previous button for now
         $(this.startBtn).hide();
+        $(this.resetBtn).hide();
         $(this.pauseBtn).attr("disabled", false);
         if (this.running === 0 && this.paused === 0) {
             this.running = 1;
@@ -491,16 +493,28 @@ Timed.prototype.checkResetability = function () {
        
     if (this.retake)
     {
+    	this.running = 0;
+    	this.paused = 0;
+    	this.done = 0;
+    	this.taken = 0;
+    	this.score = 0;
+    	this.incorrect = 0;
+    	this.correctStr = "";
+    	this.incorrectStr = "";
+    	this.skippedStr = "";
+    	this.skipped = 0;
     	this.logResetClearStorageAndReload();
     }
+    else
+    {
 
-    let sendInfo = {"div_id":this.divid, "course":eBookConfig.course};
-    $(this.resetBtn).attr({
-        "disabled": true
-    });
-    console.log(sendInfo)
-    jQuery.getJSON(eBookConfig.ajaxURL + "checkTimedReset", sendInfo, this.resetExam.bind(this));
-
+        let sendInfo = {"div_id":this.divid, "course":eBookConfig.course};
+        $(this.resetBtn).attr({
+            "disabled": true
+        });
+        console.log(sendInfo)
+        jQuery.getJSON(eBookConfig.ajaxURL + "checkTimedReset", sendInfo, this.resetExam.bind(this));
+    }
 }
 
 Timed.prototype.logResetClearStorageAndReload = function () {
@@ -513,7 +527,8 @@ Timed.prototype.logResetClearStorageAndReload = function () {
     /* Prevent using server's record of the reset as the exam results when the page reloads */
     localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given",JSON.stringify({"answer":[-1],"timestamp":new Date()}));
 
-    location.reload();
+    /* reload the page from the server and clear cache */
+    location.reload(true);
 }
 
 Timed.prototype.resetExam = function (result,status,ignore) {
@@ -631,6 +646,11 @@ Timed.prototype.tookTimedExam = function () {
 Timed.prototype.finishAssessment = function () {
     $("#relations-next").show(); // show the next page button for now
     $("#relations-prev").show(); // show the previous button for now
+    if (this.reset)
+    {
+       $(this.resetBtn).show();
+       $(this.resetBtn).attr("disabled", false);
+    }
     if (!this.showFeedback) {  // bje - changed from showResults
         $(this.timedDiv).hide();
         $(this.timerContainer).hide();
@@ -647,11 +667,7 @@ Timed.prototype.finishAssessment = function () {
     this.storeScore();
     this.logScore();
     $(window).off('beforeunload');
-    if (this.reset)
-    {
-       $(this.resetBtn).show();
-       $(this.resetBtn).attr("disabled", false);
-    }
+    
 };
 
 Timed.prototype.submitTimedProblems = function (logFlag) {
