@@ -58,6 +58,10 @@ Timed.prototype.init = function (opts) {
     if ($(this.origElem).is("[data-fullwidth]")) {
         this.fullwidth = true;
     }
+    this.retake = false;
+    if ($(this.origElem).is("[data-retake]")) {
+        this.retake = true;
+    }
 
     this.running = 0;
     this.paused = 0;
@@ -104,7 +108,8 @@ Timed.prototype.renderTimedAssess = function () {
     $(this.origElem).replaceWith(this.assessDiv);
 
     // check if already taken and if so show results
-    this.tookTimedExam();
+    this.tookTimedExam();  
+    
 };
 
 Timed.prototype.renderContainer = function () {
@@ -418,16 +423,20 @@ Timed.prototype.renderTimedQuestion = function () {
 
 Timed.prototype.handlePrevAssessment = function () {
 		$(this.startBtn).hide();
-        $(this.pauseBtn).attr("disabled", true);
-        $(this.finishButton).attr("disabled", true);
+		$(this.pauseBtn).hide();
+		$(this.finishButton).hide();
         this.running = 0;
         this.done = 1;
-        if (this.showResults) {
+        if (this.showFeedback) {
            $(this.timedDiv).show();
            this.submitTimedProblems(false); // do not log these results
         } else {
-           $(this.pauseBtn).hide();
-           $(this.timerContainer).hide();
+           $(this.timerContainer).hide(); // do not show the results
+        }
+        // if can retake then show the reset button
+        if (this.retake) {
+            $(this.resetBtn).show();
+            $(this.resetBtn).attr("disabled", false);
         }
 };
 
@@ -440,6 +449,8 @@ Timed.prototype.startAssessment = function () {
         if (this.running === 0 && this.paused === 0) {
             this.running = 1;
             $(this.timedDiv).show();
+            $(this.finishButton).show();
+            $(this.pauseBtn).show();
             this.increment();
             this.logBookEvent({"event": "timedExam", "act": "start", "div_id": this.divid});
             var timeStamp = new Date();
@@ -475,8 +486,14 @@ Timed.prototype.pauseAssessment = function () {
 };
 
 Timed.prototype.checkResetability = function () {
-    /* Reset is only available if there is no record of a completed exam and the
+    /* Reset is only available if the retake flag is true or there is no record of a completed exam and the
        localStorage does not reflect a partially completed exam */
+       
+    if (this.retake)
+    {
+    	this.logResetClearStorageAndReload();
+    }
+
     let sendInfo = {"div_id":this.divid, "course":eBookConfig.course};
     $(this.resetBtn).attr({
         "disabled": true
@@ -486,19 +503,24 @@ Timed.prototype.checkResetability = function () {
 
 }
 
+Timed.prototype.logResetClearStorageAndReload = function () {
+
+    this.logBookEvent({"event":"timedExam","act":"reset","div_id":this.divid,
+                       "course":eBookConfig.course,"correct":this.score,"incorrect":this.incorrect,
+                       "skipped":this.skipped,"time":this.timeTaken,"reset":true});
+    localStorage.clear(); // Clear records of exam from localStorage
+
+    /* Prevent using server's record of the reset as the exam results when the page reloads */
+    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given",JSON.stringify({"answer":[-1],"timestamp":new Date()}));
+
+    location.reload();
+}
+
 Timed.prototype.resetExam = function (result,status,ignore) {
     console.log(result);
     if (result.canReset === true) {
         if (confirm("Only reset the exam if you experienced techinical difficulties. Your instructor will be notified of this reset.")) {
-            this.logBookEvent({"event":"timedExam","act":"reset","div_id":this.divid,
-                               "course":eBookConfig.course,"correct":this.score,"incorrect":this.incorrect,
-                               "skipped":this.skipped,"time":this.timeTaken,"reset":true});
-            localStorage.clear(); // Clear records of exam from localStorage
-
-            /* Prevent using server's record of the reset as the exam results when the page reloads */
-            localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given",JSON.stringify({"answer":[-1],"timestamp":new Date()}));
-
-            location.reload();
+           this.logResetClearStorageAndReload(); 
         };
     } else {
         alert("This exam does not qualify to be reset. Contact your instructor with any questions.");
@@ -611,9 +633,10 @@ Timed.prototype.finishAssessment = function () {
     $("#relations-prev").show(); // show the previous button for now
     if (!this.showFeedback) {  // bje - changed from showResults
         $(this.timedDiv).hide();
-        $(this.pauseBtn).hide();
         $(this.timerContainer).hide();
     }
+    $(this.pauseBtn).hide();
+    $(this.finishButton).hide();
     this.findTimeTaken();
     this.running = 0;
     this.done = 1;
@@ -623,9 +646,12 @@ Timed.prototype.finishAssessment = function () {
     this.displayScore();
     this.storeScore();
     this.logScore();
-    $(this.pauseBtn).attr("disabled", true);
-    this.finishButton.disabled = true;
     $(window).off('beforeunload');
+    if (this.reset)
+    {
+       $(this.resetBtn).show();
+       $(this.resetBtn).attr("disabled", false);
+    }
 };
 
 Timed.prototype.submitTimedProblems = function (logFlag) {

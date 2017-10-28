@@ -47,6 +47,11 @@ def visit_timed_node(self, node):
         node.timed_options['notimer'] = 'data-no-timer'
     else:
         node.timed_options['notimer'] = ''
+        
+    if 'retake' in node.timed_options:
+        node.timed_options['retake'] = 'data-retake'
+    else:
+        node.timed_options['retake'] = ''
 
     if 'fullwidth' in node.timed_options:
         node.timed_options['fullwidth'] = 'data-fullwidth'
@@ -64,7 +69,7 @@ def depart_timed_node(self,node):
 
 #Templates to be formatted by node options
 TEMPLATE_START = '''
-    <ul data-component="timedAssessment" %(timelimit)s id="%(divid)s" %(noresult)s %(nofeedback)s %(notimer)s %(fullwidth)s>
+    <ul data-component="timedAssessment" %(timelimit)s id="%(divid)s" %(noresult)s %(nofeedback)s %(retake)s %(notimer)s %(fullwidth)s>
     '''
 
 TEMPLATE_END = '''</ul>
@@ -77,6 +82,7 @@ class TimedDirective(RunestoneDirective):
     :nofeedback: Boolean, doesn't display feedback
     :notimer: Boolean, doesn't show timer
     :fullwidth: Boolean, allows the items in the timed assessment to take the full width of the screen...
+    :retake: Boolean, allow the exam to be taken again
 
     """
     required_arguments = 1
@@ -87,7 +93,8 @@ class TimedDirective(RunestoneDirective):
                     "noresult":directives.flag,
                     "nofeedback":directives.flag,
                     "fullwidth":directives.flag,
-                    "notimer":directives.flag}
+                    "notimer":directives.flag,
+                    "retake":directives.flag}
 
     def run(self):
         """
@@ -100,6 +107,7 @@ class TimedDirective(RunestoneDirective):
                 :nofeedback: Boolean, doesn't display feedback
                 :notimer: Boolean, doesn't show timer
                 :fullwidth: Boolean, allows the items in the timed assessment to take the full width of the screen
+                :retake: Boolean, allows the user to retake the exam
             ...
             """
         self.assert_has_content() # make sure timed has something in it
