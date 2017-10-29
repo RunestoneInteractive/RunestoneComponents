@@ -65,3 +65,20 @@ Regex testing
        :2 1: Close.... (The second number is a tolerance, so this matches 1 or 3.)
        :x: Nope. (As earlier, this matches anything.)
 
+.. fillintheblank:: regexescapes1
+   :casei:
+
+   Windows system files are stored in: |blank|. 
+
+   -   :C\:\\Windows\\system: Correct.
+       :program files: Third party applications are stored here, not system files.
+       :x: Try again.
+
+.. fillintheblank:: regexescapes2
+   :casei:
+
+   Python lists are declared using: |blank|. 
+
+   -   :\[\]: Correct.
+       :x: Try again.
+

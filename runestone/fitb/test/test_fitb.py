@@ -127,3 +127,17 @@ class FITBtests(RunestoneTestCase):
         feedback = self.find_feedback("fillregex")
         self.assertIn('Correct.', feedback.text)
 
+    def test_regexescapes1(self):
+        self.find_fitb("regexescapes1")
+        self.find_blank(0).send_keys("C:\windows\system")
+        self.click_checkme()
+        feedback = self.find_feedback("regexescapes1")
+        self.assertIn('Correct.', feedback.text)
+
+    def test_regexescapes2(self):
+        self.find_fitb("regexescapes2")
+        self.find_blank(0).send_keys("[]")
+        self.click_checkme()
+        feedback = self.find_feedback("regexescapes2")
+        self.assertIn('Correct.', feedback.text)
+
