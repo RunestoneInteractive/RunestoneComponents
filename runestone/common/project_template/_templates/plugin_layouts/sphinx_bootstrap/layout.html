@@ -286,7 +286,7 @@
 
   function loadProgressBar() {
     curPath = window.location.pathname;
-    if (curPath == "/") {
+    if (curPath == "/" || curPath == "/index.html") {
       var book = {
         chapterNames: [],
         chapterSectionPaths: [],
