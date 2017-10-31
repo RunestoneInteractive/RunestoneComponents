@@ -19,14 +19,12 @@ __author__ = 'Paul Resnick'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
-from sqlalchemy import create_engine, Table, MetaData, select, delete
+from sqlalchemy import Table
 from sqlalchemy.orm import sessionmaker
-from runestone.common.runestonedirective import RunestoneDirective
-from runestone.server.componentdb import addAssignmentToDB, getOrCreateAssignmentType, getCourseID, addAssignmentQuestionToDB, getOrInsertQuestionForPage
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
+from runestone.server.componentdb import addAssignmentToDB, getOrCreateAssignmentType, getCourseID, addAssignmentQuestionToDB, getOrInsertQuestionForPage, engine, meta
 from datetime import datetime
 from collections import OrderedDict
-import os
 
 def setup(app):
     app.add_directive('usageassignment',usageAssignment)
@@ -36,14 +34,14 @@ def setup(app):
     app.connect('doctree-resolved',process_nodes)
     app.connect('env-purge-doc', purge)
 
-class usageAssignmentNode(nodes.General, nodes.Element):
-    def __init__(self,content):
+class usageAssignmentNode(nodes.General, nodes.Element, RunestoneNode):
+    def __init__(self,content, **kwargs):
         """
         Arguments:
         - `self`:
         - `content`:
         """
-        super(usageAssignmentNode,self).__init__()
+        super(usageAssignmentNode,self).__init__(**kwargs)
         self.ua_content = content
 
 # self for these functions is an instance of the writer class.  For example
@@ -65,7 +63,7 @@ def visit_ua_node(self,node):
             if d['ch'] not in chapters_and_subchapters:
                 chapters_and_subchapters[d['ch']] = d['sub_chs']
             else:
-                # The order matters with respect to the list wherein they're added to the dictionary. 
+                # The order matters with respect to the list wherein they're added to the dictionary.
                 for subch in d['sub_chs']:
                     chapters_and_subchapters[d['ch']].append(subch)
 
@@ -80,7 +78,7 @@ def visit_ua_node(self,node):
             s += '</ul>'
             s += '</div>'
 
-    # is this needed?? 
+    # is this needed??
     s = s.replace("u'","'")  # hack:  there must be a better way to include the list and avoid unicode strings
 
     self.body.append(s)
@@ -101,7 +99,7 @@ def purge(app,env,docname):
     pass
 
 
-class usageAssignment(Directive):
+class usageAssignment(RunestoneDirective):
     """
 .. usageassignment:: prep_1
    :chapters: chap_name1[, chapname2]*
@@ -141,36 +139,31 @@ class usageAssignment(Directive):
             :points: <int>
         """
 
-        if all(name in os.environ for name in ['DBHOST', 'DBPASS', 'DBUSER', 'DBNAME']):
-            dburl = 'postgresql://{DBUSER}:{DBPASS}@{DBHOST}/{DBNAME}'.format(**os.environ)
-        else:
-            dburl = None
+        if not engine:
             self.state.document.settings.env.warn(self.state.document.settings.env.docname, "Environment variables not set for DB access; can't save usageassignment to DB")
             return [usageAssignmentNode(self.options)]
-        engine = create_engine(dburl)
-        meta = MetaData()
         # create a configured "Session" class
         Session = sessionmaker(bind=engine)
         session = Session()
 
         Chapter = Table('chapters', meta, autoload=True, autoload_with=engine)
         SubChapter = Table('sub_chapters', meta, autoload=True, autoload_with=engine)
-        Problem = Table('problems', meta, autoload=True, autoload_with=engine)
-        Div = Table('div_ids', meta, autoload=True, autoload_with=engine)
-        AssignmentType = Table('assignment_types', meta, autoload=True, autoload_with=engine)
-        Section = Table('sections', meta, autoload=True, autoload_with=engine)
+        # Problem = Table('problems', meta, autoload=True, autoload_with=engine)
+        # Questions = Table('questions', meta, autoload=True, autoload_with=engine)
+        # AssignmentType = Table('assignment_types', meta, autoload=True, autoload_with=engine)
+        # Section = Table('sections', meta, autoload=True, autoload_with=engine)
 
-        assignment_type_id = getOrCreateAssignmentType("Lecture Prep",
-                                  grade_type = 'use',
-                                  points_possible = '50',
-                                  assignments_count = 23,
-                                  assignments_dropped = 3)
+        # assignment_type_id = getOrCreateAssignmentType("Lecture Prep",
+        #                           grade_type = 'use',
+        #                           points_possible = '50',
+        #                           assignments_count = 23,
+        #                           assignments_dropped = 3)
 
 
         course_name = self.state.document.settings.env.config.html_context['course_id']
         self.options['course_name'] = course_name
-        course_id = getCourseID(course_name)
-        basecourse_name = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
+        # course_id = getCourseID(course_name)
+        # basecourse_name = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
 
         # Accumulate all the Chapters and SubChapters that are to be visited
         # For each chapter, accumulate all subchapters
@@ -205,46 +198,46 @@ class usageAssignment(Directive):
                 self.state.document.settings.env.warn(self.state.document.settings.env.docname, "Subchapters requested not found: %s" % (self.options.get('subchapters')))
 
         # Accumulate all the ActiveCodes that are to be run and URL paths to be visited
-        divs = []
-        paths = []
-        for subch in sub_chs:
-            try:
-                ch_name = session.query(Chapter).filter(Chapter.c.id == subch.chapter_id).first().chapter_label
-                divs += session.query(Div).filter(Div.c.course_name == course_name,
-                                                  Div.c.chapter == ch_name,
-                                                  Div.c.subchapter == subch.sub_chapter_label).all()
-                paths.append('/runestone/static/%s/%s/%s.html' % (course_name, ch_name, subch.sub_chapter_label))
-            except:
-                self.state.document.settings.env.warn(self.state.document.settings.env.docname, "Subchapter not found: %s" % (subch))
-        tracked_div_types = ['activecode', 'actex']
-        active_codes = [d.div_id for d in divs if d.div_type in tracked_div_types]
+        # questions = []
+        # paths = []
+        # for subch in sub_chs:
+        #     try:
+        #         ch_name = session.query(Chapter).filter(Chapter.c.id == subch.chapter_id).first().chapter_label
+        #         questions += session.query(Questions).filter(Questions.c.base_course == basecourse_name,
+        #                                           Questions.c.chapter == ch_name,
+        #                                           Questions.c.subchapter == subch.sub_chapter_label).all()
+        #         paths.append('/runestone/static/%s/%s/%s.html' % (course_name, ch_name, subch.sub_chapter_label))
+        #     except:
+        #         self.state.document.settings.env.warn(self.state.document.settings.env.docname, "Subchapter not found: %s" % (subch))
+        # # tracked_q_types = ['activecode', 'actex']
+        # active_codes = [d.name for d in questions if d.question_type in tracked_q_types]
 
+        # min_activities = (len(paths) + len(active_codes)) * self.options.get('pct_required', 0) / 100
+        #
+        # deadline = None
+        # if 'deadline' in self.options:
+        #     try:
+        #         deadline = datetime.strptime(self.options['deadline'], '%Y-%m-%d %H:%M')
+        #     except:
+        #         try:
+        #             deadline = datetime.strptime(self.options['deadline'], '%Y-%m-%d %H:%M:%S')
+        #             self.state.document.settings.env.warn(self.state.document.settings.env.docname, "deadline not in preferred format %Y-%m-%d %H:%M but accepting alternate format with seconds")
+        #         except:
+        #             self.state.document.settings.env.warn(self.state.document.settings.env.docname, "deadline missing or incorrectly formatted; Omitting deadline")
+        #
+        # points = self.options.get('points', 0)
 
+        # assignment_id = addAssignmentToDB(name = self.options.get('assignment_name', 'dummy_assignment'),
+        #                   course_id = course_id,
+        #                   assignment_type_id = assignment_type_id,
+        #                   deadline = deadline,
+        #                   points = points)
 
-        min_activities = (len(paths) + len(active_codes)) * self.options.get('pct_required', 0) / 100
+        # for acid in paths + active_codes:
+        #     q_id = getOrInsertQuestionForPage(base_course=basecourse_name, name=acid, is_private='F', question_type="page", autograde = "visited", difficulty=1,chapter=None)
+        #     ## Associate the question with the assignment, by adding a row to the assignment_questions table
+        #     addAssignmentQuestionToDB(q_id, assignment_id, 1, autograde="visited", reading_assignment='T', )
 
-        deadline = None
-        if 'deadline' in self.options:
-            try:
-                deadline = datetime.strptime(self.options['deadline'], '%Y-%m-%d %H:%M')
-            except:
-                try:
-                    deadline = datetime.strptime(self.options['deadline'], '%Y-%m-%d %H:%M:%S')
-                    self.state.document.settings.env.warn(self.state.document.settings.env.docname, "deadline not in preferred format %Y-%m-%d %H:%M but accepting alternate format with seconds")
-                except:
-                    self.state.document.settings.env.warn(self.state.document.settings.env.docname, "deadline missing or incorrectly formatted; Omitting deadline")
-
-        points = self.options.get('points', 0)
-
-        assignment_id = addAssignmentToDB(name = self.options.get('assignment_name', 'dummy_assignment'),
-                          course_id = course_id,
-                          assignment_type_id = assignment_type_id,
-                          deadline = deadline,
-                          points = points,
-                          threshold = min_activities)
-
-        for acid in paths + active_codes:
-            q_id = getOrInsertQuestionForPage(base_course=basecourse_name, name=acid, is_private='F', question_type="page", autograde = "visited", difficulty=1,chapter=None)
-            addAssignmentQuestionToDB(q_id, assignment_id, 1, autograde="visited")
-
-        return [usageAssignmentNode(self.options)]
+        usage_assignment_node = usageAssignmentNode(self.options, rawsource=self.block_text)
+        usage_assignment_node.source, usage_assignment_node.line = self.state_machine.get_source_and_line(self.lineno)
+        return [usage_assignment_node]

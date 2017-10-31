@@ -18,9 +18,8 @@ __author__ = 'isaiahmayerchak'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
-from runestone.server.componentdb import addQuestionToDB
-from runestone.common.runestonedirective import RunestoneDirective
+from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
 
 def setup(app):
     app.add_directive('clickablearea',ClickableArea)
@@ -32,21 +31,21 @@ def setup(app):
 
 
 TEMPLATE = """
-<div data-component="clickablearea" id="%(divid)s" %(table)s %(correct)s %(incorrect)s>
+<div data-component="clickablearea" class="runestone" id="%(divid)s" %(table)s %(correct)s %(incorrect)s>
 <span data-question>%(question)s</span>%(feedback)s%(clickcode)s
 """
 TEMPLATE_END = """
 </div>
 """
 
-class ClickableAreaNode(nodes.General, nodes.Element):
-    def __init__(self,content):
+class ClickableAreaNode(nodes.General, nodes.Element, RunestoneNode):
+    def __init__(self,content, **kwargs):
         """
         Arguments:
         - `self`:
         - `content`:
         """
-        super(ClickableAreaNode,self).__init__()
+        super(ClickableAreaNode,self).__init__(**kwargs)
         self.ca_options = content
 
 # self for these functions is an instance of the writer class.  For example
@@ -54,6 +53,9 @@ class ClickableAreaNode(nodes.General, nodes.Element):
 # The node that is passed as a parameter is an instance of our node class.
 def visit_ca_node(self,node):
     res = TEMPLATE
+
+    node.delimiter = "_start__{}_".format(node.ca_options['divid'])
+    self.body.append(node.delimiter)
 
     if "feedback" in node.ca_options:
         node.ca_options["feedback"] = "<span data-feedback>" + node.ca_options["feedback"] + "</span>"
@@ -75,6 +77,12 @@ def depart_ca_node(self,node):
     res = ""
     res = TEMPLATE_END % node.ca_options
     self.body.append(res)
+
+    addHTMLToDB(node.ca_options['divid'],
+                node.ca_options['basecourse'],
+                "".join(self.body[self.body.index(node.delimiter) + 1:]))
+
+    self.body.remove(node.delimiter)
 
 
 class ClickableArea(RunestoneDirective):
@@ -131,7 +139,8 @@ class ClickableArea(RunestoneDirective):
             self.options['clickcode'] = source
         else:
             self.options['clickcode'] = ''
-        clickNode = ClickableAreaNode(self.options)
+        clickNode = ClickableAreaNode(self.options, rawsource=self.block_text)
+        clickNode.source, clickNode.line = self.state_machine.get_source_and_line(self.lineno)
         clickNode.template_start = TEMPLATE
 
         if "table" in self.options:

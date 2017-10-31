@@ -90,6 +90,16 @@ pygments_style = 'sphinx'
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
 
+# `rst_prolog <http://www.sphinx-doc.org/en/stable/config.html#confval-rst_prolog>`_:
+# A string of reStructuredText that will be included at the beginning of every
+# source file that is read.
+rst_prolog = (
+# For fill-in-the-blank questions, provide a convenient means to indicate a blank.
+"""
+
+.. |blank| replace:: :blank:`x`
+"""
+)
 
 # -- Options for HTML output ---------------------------------------------------
 

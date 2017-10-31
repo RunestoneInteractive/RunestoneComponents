@@ -18,7 +18,8 @@ __author__ = 'bmiller'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
-from runestone.server.componentdb import addQuestionToDB
+from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
+from runestone.common.runestonedirective import RunestoneDirective
 
 def setup(app):
     app.add_directive('video',Video)
@@ -27,7 +28,7 @@ def setup(app):
     app.add_stylesheet('video.css')
 
 CODE = """\
-<div id="%(divid)s" class="video_popup" >
+<div id="%(divid)s" class="video_popup runestone" >
 <video %(controls)s %(preload)s %(loop)s poster="%(thumb)s">
     %(sources)s
     No supported video types
@@ -73,7 +74,7 @@ INLINE = """\
 SOURCE = """<source src="%s" type="video/%s"></source>"""
 
 
-class Video(Directive):
+class Video(RunestoneDirective):
     """
 .. video:: id
    :controls:  Show the controls or not
@@ -125,7 +126,9 @@ class Video(Directive):
             res += POPUP % self.options
         else:
             res += INLINE % self.options
-        return [nodes.raw('',res , format='html')]
+
+        addHTMLToDB(self.options['divid'], self.options['basecourse'], res)
+        return [nodes.raw(self.block_text, res, format='html')]
 
 
 """
@@ -134,8 +137,9 @@ class Video(Directive):
     There are two directives added: ``youtube`` and ``vimeo``. The only
     argument is the video id of the video to include.
 
-    Both directives have three optional arguments: ``height``, ``width``
+    Both directives have four optional arguments: ``height``, ``width``
     and ``align``. Default height is 281 and default width is 500.
+    The default transport is HTTP although HTTPS can be specified.
 
     Example::
 
@@ -143,6 +147,7 @@ class Video(Directive):
             :height: 315
             :width: 560
             :align: left
+            :http: http
 
     :copyright: (c) 2012 by Danilo Bargen.
     :license: BSD 3-clause
@@ -151,6 +156,10 @@ class Video(Directive):
 def align(argument):
     """Conversion function for the "align" option."""
     return directives.choice(argument, ('left', 'center', 'right'))
+
+def httpOption(argument):
+    """Conversion function for the "http" option."""
+    return directives.choice(argument, ('http', 'https'))
 
 
 class IframeVideo(Directive):
@@ -162,6 +171,7 @@ class IframeVideo(Directive):
         'height': directives.nonnegative_int,
         'width': directives.nonnegative_int,
         'align': align,
+        'http': httpOption,
     }
     default_width = 500
     default_height = 281
@@ -174,7 +184,11 @@ class IframeVideo(Directive):
             self.options['height'] = self.default_height
         if not self.options.get('align'):
             self.options['align'] = 'left'
-        return [nodes.raw('', self.html % self.options, format='html')]
+        if not self.options.get('http'):
+            self.options['http'] = 'https'
+        raw_node = nodes.raw(self.block_text, self.html % self.options, format='html')
+        raw_node.source, raw_node.line = self.state_machine.get_source_and_line(self.lineno)
+        return [raw_node]
 
 
 class Youtube(IframeVideo):
@@ -183,8 +197,9 @@ class Youtube(IframeVideo):
    :height: 315
    :width: 560
    :align: left
+   :http: http
     """
-    html = '<iframe src="http://www.youtube.com/embed/%(video_id)s" \
+    html = '<iframe src="%(http)s://www.youtube.com/embed/%(video_id)s" \
     width="%(width)u" height="%(height)u" frameborder="0" \
     webkitAllowFullScreen mozallowfullscreen allowfullscreen \
     class="align-%(align)s" seamless ></iframe>'
@@ -196,8 +211,9 @@ class Vimeo(IframeVideo):
    :height: 315
    :width: 560
    :align: left
+   :http: http
     """
-    html = '<iframe src="http://player.vimeo.com/video/%(video_id)s" \
+    html = '<iframe src="%(http)s://player.vimeo.com/video/%(video_id)s" \
     width="%(width)u" height="%(height)u" frameborder="0" \
     webkitAllowFullScreen mozallowfullscreen allowFullScreen \
     class="align-%(align)s" seamless ></iframe>'

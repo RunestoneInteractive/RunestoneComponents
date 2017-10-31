@@ -17,15 +17,14 @@ __author__ = 'bmiller'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
-
+from runestone.common.runestonedirective import RunestoneDirective
 
 def setup(app):
     app.add_directive('shortname',Meta)
     app.add_directive('description',Meta)
 
 
-class Meta(Directive):
+class Meta(RunestoneDirective):
     required_arguments = 1
     optional_arguments = 50
 
@@ -35,7 +34,9 @@ class Meta(Directive):
         :param self:
         :return:
         """
-        return [nodes.raw('','', format='html')]
+        raw_node = nodes.raw(self.block_text,'', format='html')
+        raw_node.source, raw_node.line = self.state_machine.get_source_and_line(self.lineno)
+        return [raw_node]
 
 
 
