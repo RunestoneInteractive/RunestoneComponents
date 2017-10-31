@@ -1,3 +1,5 @@
+console.log("bootstrap-sphinx.js running")
+
 (function ($) {
   /**
    * Patch TOC list.
@@ -52,6 +54,7 @@
   };
 
   $(document).ready(function () {
+    console.log("bootstrap-sphinx.js running")
 
     /*
      * Scroll the window to avoid the topnav bar

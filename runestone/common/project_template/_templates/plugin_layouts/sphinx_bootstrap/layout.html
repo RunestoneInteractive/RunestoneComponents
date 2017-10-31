@@ -44,7 +44,7 @@
 
   <div class="container">
 
-    <div class="navbar-header">
+    <div class="navbar-header" style="width:22%">
       <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
       <button type='button' class='navbar-toggle' data-toggle="collapse" data-target=".navbar-ex1-collapse">
         <span class="icon-bar"></span>
@@ -59,8 +59,29 @@
     </div>
 
     <div class="navbar-collapse collapse navbar-ex1-collapse">
+      <!-- <div style="width:70%; float:left">
+        <h5 id="locationText" style="float:left; width:50%"></h5>   
+        <div style="width:30%; float:left;">
+          <h5 style="float:left;">Progress in Chapter: </h5>
+          <div id="chapterProgress" style="margin-left:5px; margin-top:22px; float:left; width:25%; border:1px solid grey;">
+            <div id="progressBar" style="margin-left:1px; margin-top:1px; width:1%; height:9px; background-color:limegreen;"></div>
+          </div>
+        </div>     
+        <h5 id="bookProgress" style="width:20%; float:right;">Progress in Book: 0%</h5>
+      </div> -->
+      <div style="width:60%; float:left">
+        <h5 id="locationText" style="margin:0px; float:left; width:70%"></h5>   
+        <div style="width:30%; float:left;">
+          <h5 style="float:left; margin: 0px; padding-bottom:0px;">Progress in Chapter: </h5>
+          <div id="chapterProgress" style="margin-left:5px; margin-top:12px; float:left; width:25%; border:1px solid grey;">
+            <div id="progressBar" style="margin-left:0px; margin-top:1px; width:1%; height:9px; background-color:limegreen;"></div>
+          </div>
+          <h5 id="bookProgress" style="padding-top:0px; margin:0px; float:left;">Progress in Book: 0%</h5>          
+        </div>     
+      </div>
 
-      <ul class="nav navbar-nav navbar-right">
+      <div id="links" style="float:right; width:18%">
+      <ul class="nav navbar-nav navbar-right" >
 
         <li class="divider-vertical"></li>
 
@@ -182,6 +203,7 @@
         <li class="divider-vertical"></li>
 
       </ul>
+      </div>
 
       <ul class="nav navbar-nav">
         <li class="divider-vertical"></li>
@@ -197,7 +219,7 @@
         {% endif %}
       </ul>
 
-    </div>
+    </div>    
   </div>
 </div>
 {% endmacro %}
@@ -233,8 +255,76 @@
     js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&status=0";
     fjs.parentNode.insertBefore(js, fjs);
   }(document, 'script', 'facebook-jssdk'));
-</script>
 
+  function parseBook(parent, book) {
+    for(var i = 0; i < parent.childNodes.length; i++){
+      var child = parent.childNodes[i];
+      if (child.className == "toctree-l1") {
+        var chapterName = (child.childNodes[0].textContent===undefined) ? child.childNodes[0].innerText : child.childNodes[0].textContent;
+        book.chapterNames.push(chapterName);
+        book.chapterSectionPaths.push([]);
+        book.chapterSectionNames.push([]);
+      }
+      if (child.nodeName == "A" && book.chapterSectionPaths.length != 0
+        && child.pathname != "/"
+        && child.pathname != "/genindex.html"
+        && child.pathname != "/search.html") {
+        var path = book.chapterSectionPaths.pop();
+        if (path[path.length-1] != child.pathname) {
+          path.push(child.pathname);
+          var name = book.chapterSectionNames.pop();
+          var sectionName = (child.childNodes[0].textContent===undefined) ? child.childNodes[0].innerText : child.childNodes[0].textContent;
+          name.push(sectionName);
+          book.chapterSectionNames.push(name);
+          book.bookTotal += 1;
+        }
+        book.chapterSectionPaths.push(path);
+      }
+      parseBook(child, book);
+    }
+  }
+
+  function loadProgressBar() {
+    curPath = window.location.pathname;
+    if (curPath == "/") {
+      var book = {
+        chapterNames: [],
+        chapterSectionPaths: [],
+        chapterSectionNames: [],
+        curChapter: null,
+        curSection: null,
+        curChapterPercent: 0,
+        curBookPercent: 0,
+        bookTotal: 0
+      };
+      parseBook(document.getElementById("main-content"), book);
+      console.log("book: ", book);
+      localStorage.setItem("book", JSON.stringify(book));
+    } else {
+      var book = JSON.parse(localStorage.getItem("book"));
+      for (var i = 0; i < book.chapterSectionPaths.length; i++) {
+        var chapter = book.chapterSectionPaths[i];
+        var chapterIndex = chapter.indexOf(curPath);
+        if (chapterIndex != -1) {
+          book.curChapter = book.chapterNames[i];
+          book.curSection = book.chapterSectionNames[i][chapterIndex];
+          book.curChapterPercent = 100*((chapterIndex+1)/parseFloat(chapter.length));
+          var bookProgressCount = chapterIndex;
+          for (var j = 0; j < i; j++) {
+            bookProgressCount += book.chapterSectionPaths[j].length;
+          }
+          book.curBookPercent = Math.floor(100*(bookProgressCount/parseFloat(book.bookTotal)));
+        }
+      }
+      document.getElementById("locationText").innerHTML = book.curChapter + "<br>" + book.curSection;
+      document.getElementById("bookProgress").innerHTML = "Progress in Book: " + book.curBookPercent + "%";
+      document.getElementById("progressBar").style.width = book.curChapterPercent-1 + "%";
+    }
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    loadProgressBar();
+  }, false);
+</script>
 
 {% endblock %}
 
