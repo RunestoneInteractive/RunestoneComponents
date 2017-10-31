@@ -73,6 +73,7 @@ div.section {
 .container  .section .parsons, .container .section .parsons .sortable-code-container, .container  .section .ac_section, .container  .section .cd_section, .container  .section .arabic {
 	max-width: none;
 }
+
 .container .section div[role = tabpanel]{
     max-width: none;
 }
