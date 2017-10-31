@@ -401,10 +401,7 @@ MultipleChoice.prototype.scoreMCMASubmission = function () {
             correctIndex++;
         }
     }
-    var numGiven = this.givenArray.length;
-    var numCorrect = this.correctCount;
-    var numNeeded = this.correctList.length;
-    this.correct = (numCorrect === numNeeded) && (numNeeded === numGiven);
+    this.correct = (this.correctCount == this.correctList.length);
 };
 
 
@@ -427,7 +424,7 @@ MultipleChoice.prototype.renderMCMAFeedBack = function () {
     var numNeeded = this.correctList.length;
     var feedbackText = this.feedbackString;
 
-    if (this.correct) {
+    if (numCorrect === numNeeded && numNeeded === numGiven) {
         $(this.feedBackDiv).html('Correct.<ol type="A">' + feedbackText + "</ul>");
         $(this.feedBackDiv).attr("class", "alert alert-success");
     } else {

@@ -114,6 +114,9 @@ Our goal is to have unit tests which rely on Selenium (a library that helps simu
 
 **In order to get started with writing a test/writing additional tests, you will need the following:**
 
+* ``pip install selenium`` in the virtualenv you're using for Runestone Components development
+* ``pip install pyvirtualdisplay``
+
 
 * Download the latest `ChromeDriver <https://chromedriver.storage.googleapis.com/index.html>`_., which is a driver that simulates Google Chrome.
 
@@ -121,35 +124,27 @@ Our goal is to have unit tests which rely on Selenium (a library that helps simu
 
 * You'll also need to have done the above installation.
   
-  * You should be using virtual environment, 
-    you'll need a clone of the RunestoneComponents repository, 
-    and you'll need to have done ``pip install -e .`` from 
-    the top level of the RunestoneComponents directory.
-
-* If you have installed RunestoneComponents in your virtualenv using ``pip install -e .``,
-  then you should have all the python dependencies you need.
-
-  * ``pip install selenium`` in the virtualenv you're using for Runestone Components development
-  * ``pip install pyvirtualdisplay``
-
+  * You should be using virtual environment, you'll need a clone of the RunestoneComponents repository, and you'll need to have done ``pip install -e`` from the top level of the RunestoneComponents directory.
 
 **To run tests:**
 
-* Make sure the directory containing the PhantomJS executable is in your ``PATH`` environment variable. e.g. ``PATH=$PATH:path/to/virtualenv/directory/where/it/is/here`` at your command line (or edit your ``.bash_profile``). It should live in the site-packages/selenium/webdriver/ directory of your virtualenv.
+* Make sure the directory containing the PhantomJS executable is in your ``PATH`` environment variable. e.g. ``PATH=$PATH:path/to/thedirectory/where/it/is/here`` at your command line (or edit your ``.bash_profile``).
 
 * Check out the existing tests, e.g. the ``test_question.py`` file that tests the Question directive, which you can find at the path ``/runestone/question/test/test_question.py``, for an example.
 
 * Each directive's individual set of tests requires a mini book. You'll see a ``_sources`` folder for each existing test containing an ``index.rst`` file. That file contains a title, as required by ``.rst``, and whatever directive examples you want to test.
 
-* Finally, to run a test, ensuring that you have accessed a directive folder, type the following at the command prompt:
+* Finally, to run a test, ensuring that you have accessed a ``test`` folder within a directive folder, type the following at the command prompt in this order:
 
-  * ``python -m unittest discover``
+  * ``runestone build`` (to build the mini-book for testing)
+
+  * ``runestone serve --port 8081 &`` 
+
+  * ``python <testfilename>.py``, e.g. ``python test_question.py``
 
 .. note:: 
 
-  8081 is the default test port. 
-  If you are running another server on this port, you may encounter an error.
-  See the Python files, e.g. ``test_question.py``, to see how this is set up. 
+  8081 is the default test port. See the Python files, e.g. ``test_question.py``, to see how this is set up. The ``&`` will set the process to run in the background. The mini-book needs to be served in order to test what's in the DOM as a result of using these components!
 
 You should then see some test output, showing a pass (``ok``), FAIL, or error(s).
 

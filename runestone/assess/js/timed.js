@@ -609,7 +609,7 @@ Timed.prototype.tookTimedExam = function () {
 Timed.prototype.finishAssessment = function () {
     $("#relations-next").show(); // show the next page button for now
     $("#relations-prev").show(); // show the previous button for now
-    if (!this.showFeedback) {  // bje - changed from showResults
+    if (!this.showResults) {
         $(this.timedDiv).hide();
         $(this.pauseBtn).hide();
         $(this.timerContainer).hide();
