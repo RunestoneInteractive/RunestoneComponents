@@ -263,10 +263,18 @@
 
 .labels {
 	margin-top: 2px; 
-	border-left: 1px solid #b0b0b0;
+	/*border-left: 1px solid #b0b0b0;*/
 	display: inline-block;
-	float:right;
+	
 	vertical-align: top;
+}
+.left_label {
+    border-right: 1px solid #b0b0b0;
+    float:left;
+}
+.right_label {
+    border-left: 1px solid #b0b0b0;
+    float:right;
 }
 
 .lines {

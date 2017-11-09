@@ -266,7 +266,7 @@ ParsonsLine.prototype.viewIndent = function() {
 ===================================================================== */
 
 // Initialize based on the problem and the lines
-var ParsonsBlock = function(problem, lines) {
+var ParsonsBlock = function(problem, lines, labelLocation = null) {
 	this.problem = problem;
 	this.lines = lines;
 	this.indent = 0;
@@ -300,7 +300,14 @@ var ParsonsBlock = function(problem, lines) {
 	}
 	var labelDiv = document.createElement("div");
 	$(labelDiv).addClass("labels");
-	$(view).append(labelDiv);
+	if(labelLocation == "left") {
+		$(labelDiv).addClass("left_label");
+		$(view).prepend(labelDiv);
+	} else if(labelLocation == "right") {
+		$(labelDiv).addClass("right_label");
+		$(view).append(labelDiv);
+	}
+	//$(view).append(labelDiv);
 	this.view = view;
 };
 
@@ -1107,6 +1114,13 @@ Parsons.prototype.initializeOptions = function() {
 	var order = $(this.origElem).data('order');
 	var noindent = $(this.origElem).data('noindent');
 	var adaptive = $(this.origElem).data('adaptive');
+
+	var numbered = $(this.origElem).data('numbered');
+	// if(numbered == undefined) {
+	// 	numbered = false;
+	// }
+	options["numbered"] = numbered;
+ 
 	if (maxdist !== undefined) {
 	    options["maxdist"] = maxdist;
 	}
@@ -1405,7 +1419,10 @@ Parsons.prototype.initializeAreas = function(sourceBlocks, answerBlocks, options
 	for (i = 0; i < blocks.length; i++) {
 		maxFunction($(blocks[i].view));
 	}
-	this.areaWidth = areaWidth + 25; 
+	this.areaWidth = areaWidth;
+	if(this.options.numbered != undefined) {
+		this.areaWidth += 25;
+	}
 	this.areaHeight = areaHeight;
 	$(this.sourceArea).css({
 		'width' : this.areaWidth + 2,
@@ -1472,7 +1489,11 @@ Parsons.prototype.initializeAreas = function(sourceBlocks, answerBlocks, options
 	}
 	this.pairedBins = pairedBins;
 	this.pairedDivs = pairedDivs;
-	this.addBlockLabels(sourceBlocks.concat(answerBlocks));
+
+	if(this.options.numbered != undefined) {
+		this.addBlockLabels(sourceBlocks.concat(answerBlocks));
+	}
+	
 	// Update the view
 	this.state = undefined; // needs to be here for loading from storage
 	this.updateView();
@@ -1907,7 +1928,7 @@ Parsons.prototype.blocksFromSource = function() {
 		line = this.lines[i];
 		lines.push(line);
 		if (!line.groupWithNext) {
-			unorderedBlocks.push(new ParsonsBlock(this, lines));
+			unorderedBlocks.push(new ParsonsBlock(this, lines, this.options.numbered));
 			lines = [];
 		}
 	}
@@ -2015,7 +2036,7 @@ Parsons.prototype.blockFromHash = function(hash) {
 	for (var i = 0; i < split.length - 1; i++) {
 		lines.push(this.lines[split[i]]);
 	}
-	var block = new ParsonsBlock(this, lines);
+	var block = new ParsonsBlock(this, lines, this.options.numbered);
 	if (this.noindent) {
 		block.indent = 0;
 	} else {
@@ -2403,7 +2424,12 @@ Parsons.prototype.removeIndentation = function() {
 	var blockWidth = 200;
 	for (var i = 0; i < this.lines.length; i++) {
 		var line = this.lines[i];
-		blockWidth = Math.max(blockWidth, 55 + line.width + line.indent * this.options.pixelsPerIndent);
+		var expandedWidth = line.width + (line.indent * this.options.pixelsPerIndent) + 30;
+		if (this.options.numbered != undefined) {
+			expandedWidth += 25;
+		}
+		//55 "Taken care of now"
+		blockWidth = Math.max(blockWidth, expandedWidth);
 	}
 	this.areaWidth = blockWidth + 22;
 	var block, indent;
@@ -2657,12 +2683,12 @@ Parsons.prototype.makeEasier = function() {
 		    alert("Will combine two blocks");
 			this.combineBlocks();
 			this.logMove("combinedBlocks");
-		} else if(this.numberOfBlocks(true) > 3 && distractorToRemove !==  undefined) {
+		} /*else if(this.numberOfBlocks(true) > 3 && distractorToRemove !==  undefined) {
 			alert("Will remove an incorrect code block from source area");
 			this.removeDistractor(distractorToRemove);
 			this.logMove("removedDistractor-" + distractorToRemove.hash());
-		} else {
-			alert("There are only 3 blocks left.  You should be able to put them in order");
+		} */else {
+			alert("There are only 3 blocks left in the answer area.  You should be able to put them in order");
 			this.canHelp = false;
 		}
 		//if (numberOfBlocks < 5) {
@@ -3056,14 +3082,14 @@ Parsons.prototype.addBlockLabels = function(blocks) {
 	var bin = -1;
 	var binCount = 0;
 	var binChildren = 0;
-	this.nBlocksInBins = 0;
-	for(var i = 0; i < blocks.length; i++) {
-		if(blocks[i].pairedBin() != -1) {
-			this.nBlocksInBins++;
-		}
-	}
+	// this.nBlocksInBins = 0;
+	// for(var i = 0; i < blocks.length; i++) {
+	// 	if(blocks[i].pairedBin() != -1) {
+	// 		this.nBlocksInBins++;
+	// 	}
+	// }
 	for (var i = 0; i < blocks.length; i++) {
-		if(this.nBlocksInBins != 0) {
+		//if(/*this.nBlocksInBins != 0*/this.options.numbered) {
 			var currentBin = blocks[i].pairedBin();
 			if(currentBin == -1 || currentBin != bin) {
 				bin = currentBin;
@@ -3076,9 +3102,11 @@ Parsons.prototype.addBlockLabels = function(blocks) {
 			}
 			blocks[i].addLabel(label, 0);
 			binChildren++;
-		} else {
+		/*} else {
+			$(blocks[i].view).find(".labels").removeClass("left_label");
+			$(blocks[i].view).find(".labels").removeClass("right_label");
 			$(blocks[i].view).find(".labels").removeClass("labels");
-		}
+		}*/
 		
 	}
 }
@@ -3124,7 +3152,7 @@ Parsons.prototype.resetView = function() {
 		localStorage.setItem(this.adaptiveId + this.divid + "Count", this.checkCount);
 		localStorage.setItem(this.adaptiveId + "Solved", false);
 	}
-	this.areaWidth -= 24.5;
+	// this.areaWidth -= 24.5;
 	this.initializeAreas(this.blocksFromSource(), [], {});
 	this.initializeInteractivity();
 	document.body.scrollTop = scrollTop;
