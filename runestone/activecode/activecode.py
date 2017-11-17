@@ -241,6 +241,7 @@ class ActiveCode(RunestoneDirective):
             self.options['include'] = ''
         else:
             lst = self.options['include'].split(',')
+
             lst = [x.strip() for x in lst]
             self.options['include'] = 'data-include="' + " ".join(lst) + '"'
 
