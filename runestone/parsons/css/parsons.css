@@ -251,3 +251,29 @@
 	text-align:center;
 	font-style: italic;
 }
+
+.block-label {
+	font-family: "Courier";
+	font-size: 10px;
+	color: #b0b0b0;
+	padding: .2em 0.0em .3em .6em;
+	vertical-align: top;
+	white-space: pre;
+}
+
+.labels {
+	margin-top: 2px; 
+	border-left: 1px solid #b0b0b0;
+	display: inline-block;
+	float:right;
+	vertical-align: top;
+}
+
+.lines {
+	display: inline-block;
+	align-self: left;
+}
+.block {
+    display: flex;
+    justify-content: space-between;
+}

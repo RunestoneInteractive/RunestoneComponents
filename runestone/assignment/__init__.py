@@ -104,53 +104,53 @@ class Assignment(RunestoneDirective):
 
         course_name = self.state.document.settings.env.config.html_context['course_id']
         self.options['course_name'] = course_name
-        course_id = getCourseID(course_name)
-        basecourse_name = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
-        self.options['basecourse'] = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
+
+        ## No longer doing DB operations
+        # course_id = getCourseID(course_name)
+        # basecourse_name = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
+        # self.options['basecourse'] = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
 
         name = self.options.get('name') # required; error if missing
-        assignment_type_name = self.options.get('assignment_type')
-        assignment_type_id = getOrCreateAssignmentType(assignment_type_name)
-
-        deadline = None
-
-        if 'deadline' in self.options:
-            try:
-                deadline = datetime.strptime(self.options['deadline'], '%Y-%m-%d %H:%M')
-            except:
-                try:
-                    deadline = datetime.strptime(self.options['deadline'], '%Y-%m-%d %H:%M:%S')
-                    self.state.document.settings.env.warn(self.state.document.settings.env.docname, "deadline not in preferred format %Y-%m-%d %H:%M but accepting alternate format with seconds")
-                except:
-                    self.state.document.settings.env.warn(self.state.document.settings.env.docname, "deadline missing or incorrectly formatted; Omitting deadline")
-
-        points = self.options.get('points', 0)
-        threshold = self.options.get('threshold', None)
-        if threshold:
-            threshold = int(threshold)
-        autograde = self.options.get('autograde', None)
-
-        assignment_id = addAssignmentToDB(name = name,
-                          course_id = course_id,
-                          assignment_type_id = assignment_type_id,
-                          deadline = deadline,
-                          points = points,
-                          threshold = threshold)
+        # assignment_type_name = self.options.get('assignment_type')
+        # assignment_type_id = getOrCreateAssignmentType(assignment_type_name)
+        #
+        # deadline = None
+        #
+        # if 'deadline' in self.options:
+        #     try:
+        #         deadline = datetime.strptime(self.options['deadline'], '%Y-%m-%d %H:%M')
+        #     except:
+        #         try:
+        #             deadline = datetime.strptime(self.options['deadline'], '%Y-%m-%d %H:%M:%S')
+        #             self.state.document.settings.env.warn(self.state.document.settings.env.docname, "deadline not in preferred format %Y-%m-%d %H:%M but accepting alternate format with seconds")
+        #         except:
+        #             self.state.document.settings.env.warn(self.state.document.settings.env.docname, "deadline missing or incorrectly formatted; Omitting deadline")
+        #
+        # points = self.options.get('points', 0)
+        # threshold = self.options.get('threshold', None)
+        # if threshold:
+        #     threshold = int(threshold)
+        # autograde = self.options.get('autograde', None)
+        #
+        # assignment_id = addAssignmentToDB(name = name,
+        #                   course_id = course_id,
+        #                   assignment_type_id = assignment_type_id,
+        #                   deadline = deadline,
+        #                   points = points)
 
         unparsed = self.options.get('questions', None)
         question_names = []
         if unparsed:
-            summative_type_id = getOrCreateAssignmentType("summative")
             q_strings = unparsed.split(',')
             for q in q_strings:
                 (question_name, points) = q.strip().split()
                 question_names.append(question_name)
                 # first get the question_id associated with question_name
-                question_id = getQuestionID(basecourse_name, question_name)
-                if question_id:
-                    addAssignmentQuestionToDB(question_id, assignment_id, points, assessment_type = summative_type_id, autograde = autograde)
-                else:
-                    self.state.document.settings.env.warn(self.state.document.settings.env.docname, "Question {} is not in the database for basecourse {}".format(question_name, basecourse_name))
+                # question_id = getQuestionID(basecourse_name, question_name)
+                # if question_id:
+                #     addAssignmentQuestionToDB(question_id, assignment_id, points, autograde = autograde)
+                # else:
+                #     self.state.document.settings.env.warn(self.state.document.settings.env.docname, "Question {} is not in the database for basecourse {}".format(question_name, basecourse_name))
         else:
             self.state.document.settings.env.warn(self.state.document.settings.env.docname, "No questions for assignment {}".format(name))
         self.options['question_ids'] = question_names
