@@ -44,7 +44,7 @@
 
   <div class="container">
 
-    <div class="navbar-header" style="width:22%">
+    <div class="navbar-header" style="width:20%">
       <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
       <button type='button' class='navbar-toggle' data-toggle="collapse" data-target=".navbar-ex1-collapse">
         <span class="icon-bar"></span>
@@ -69,9 +69,9 @@
         </div>     
         <h5 id="bookProgress" style="width:20%; float:right;">Progress in Book: 0%</h5>
       </div> -->
-      <div style="width:60%; float:left">
-        <h5 id="locationText" style="margin:0px; float:left; width:70%"></h5>   
-        <div style="width:30%; float:left;">
+      <div style="width:57%; float:left">
+        <h5 id="locationText" style="margin:0px; float:left; width:67%"></h5>   
+        <div style="width:33%; float:left;">
           <h5 style="float:left; margin: 0px; padding-bottom:0px;">Progress in Chapter: </h5>
           <div id="chapterProgress" style="margin-left:5px; margin-top:12px; float:left; width:25%; border:1px solid grey;">
             <div id="progressBar" style="margin-left:0px; margin-top:1px; width:1%; height:9px; background-color:limegreen;"></div>
@@ -80,7 +80,7 @@
         </div>     
       </div>
 
-      <div id="links" style="float:right; width:18%">
+      <div id="links" style="float:right; width:22%">
       <ul class="nav navbar-nav navbar-right" >
 
         <li class="divider-vertical"></li>
@@ -88,7 +88,7 @@
         <!-- social media dropdown -->
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
-            <i class="glyphicon glyphicon-share-alt" style="opacity: 0.9"></i>
+            <i class="glyphicon glyphicon-globe" style="opacity: 0.9"></i>
           </a>
           <ul class="dropdown-menu social-menu">
               <li>
@@ -133,8 +133,6 @@
                 <li><a href='{{ pathto(master_doc) }}'>Table of Contents</a></li>
             {% endif %}
             <li><a href='/{{appname}}/static/{{course_id}}/genindex.html'>Book Index</a></li>
-            <li class="divider"></li>
-            <li id="scratch_ac_link"><a href="javascript:ACFactory.toggleScratchActivecode()">Scratch ActiveCode</a></li>
             <li class="divider"></li>
             <li style="width: 240px;">
               <form class="navbar-search" style="margin:10px;" action="{{ pathto('search') }}" method="get">
@@ -184,7 +182,15 @@
         <!-- end user account dropdown -->
         {% endif %}
         <li class="divider-vertical"></li>
+        <!-- <li id="scratch_ac_link"><a href="javascript:ACFactory.toggleScratchActivecode()">Scratch ActiveCode</a></li> -->
+        
+        <!-- <li class="dropdown">             -->
+          <li id="scratch_ac_link" class="dropdown"><a href="javascript:ACFactory.toggleScratchActivecode()">
+              <i class="glyphicon glyphicon-pencil" style="opacity:0.9;"></i></a></li>
+        <!-- </li> -->
 
+        <li class="divider-vertical"></li>
+        
         <!-- help menu dropdown -->
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">

@@ -61,8 +61,8 @@ ActiveCode.prototype.init = function(opts) {
 
     this.history = [this.code];
     this.createEditor();
-    this.createOutput();
-    this.createControls();
+    // this.createOutput();
+    // this.createControls();
     if ($(orig).data('caption')) {
         this.caption = $(orig).data('caption');
     } else {

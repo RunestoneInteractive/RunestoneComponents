@@ -3,7 +3,6 @@
  */
 
 /* Sets up the interactive navhelp */
-var navHelp = "this is from navHelp.js"
 function setup() {
     guiders.createGuider({
         buttons: [{name: "Next"}],

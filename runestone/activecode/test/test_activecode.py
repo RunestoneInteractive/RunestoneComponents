@@ -5,7 +5,6 @@ from selenium.webdriver.common.by import By
 from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
 setUpModule, tearDownModule = module_fixture_maker(__file__)
-print "test_activecode.py"
 class ActiveCodeTests(RunestoneTestCase):
     def test_hello(self):
         '''
