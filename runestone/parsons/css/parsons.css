@@ -162,12 +162,22 @@
 	background-color: white;
 	box-shadow: 3px 3px 4px black;
 }
-.parsons .block code {
-	display: block;
+.parsons {
+    display: block;
+}
+.parsons .block {
 	clear: both;
 	float: left;
-	background-color: transparent;
+	/*background-color: transparent;*/
 }
+
+code {
+    display: inline-block;
+    clear: both;
+    float: left;
+    background-color: transparent;
+}
+
 .parsons .block p {
 	margin: 0;
 }
@@ -256,24 +266,33 @@
 	font-family: "Courier";
 	font-size: 10px;
 	color: #b0b0b0;
-	padding: .2em 0.0em .3em .6em;
 	vertical-align: top;
 	white-space: pre;
 }
+.right-label {
+    padding: .2em 0.0em .3em .6em;
+}
+.left-label {
+    padding: .2em 0.6em .3em 0.0em;
+}
 
 .labels {
-	margin-top: 2px; 
-	border-left: 1px solid #b0b0b0;
+	padding-top: 2px; 
 	display: inline-block;
-	float:right;
 	vertical-align: top;
 }
 
 .lines {
-	display: inline-block;
-	align-self: left;
+    display: inline-block;
+    align-self: left;
 }
+
+.border_left {
+    border-left: 1px solid #b0b0b0;
+}
+
 .block {
     display: flex;
-    justify-content: space-between;
+    align-items: stretch;
+    align-content: stretch;
 }
