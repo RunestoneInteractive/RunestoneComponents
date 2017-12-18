@@ -149,7 +149,7 @@ ActiveCode.prototype.createControls = function () {
     this.runButton = butt;
     $(butt).click(this.runProg.bind(this));
     $(butt).attr("type","button")
-    
+
     if (! this.hidecode) {
         var butt = document.createElement("button");
         $(butt).text("Load History");
@@ -1765,6 +1765,7 @@ ACFactory.createScratchActivecode = function() {
     divid = divid.split('?')[0];  // remove any query string (e.g ?lastPosition)
     divid = divid.replaceAll('/', '').replace('.html', '').replace(':', '');
     eBookConfig.scratchDiv = divid;
+    var lang = eBookConfig.acDefaultLanguage ? eBookConfig.acDefaultLanguage : 'python'
     // generate the HTML
     var html = '<div id="ac_modal_' + divid + '" class="modal fade">' +
         '  <div class="modal-dialog scratch-ac-modal">' +
@@ -1774,7 +1775,7 @@ ACFactory.createScratchActivecode = function() {
         '        <h4 class="modal-title">Scratch ActiveCode</h4>' +
         '      </div> ' +
         '      <div class="modal-body">' +
-        '      <textarea data-component="activecode" id="' + divid + '">' +
+        '      <textarea data-component="activecode" id="' + divid + '" data-lang="'+ lang +'">' +
         '\n' +
         '\n' +
         '\n' +

@@ -35,6 +35,7 @@ def init():
     conf_dict['author'] = click.prompt("Your Name ", default=getpass.getuser())
     conf_dict['project_title'] = click.prompt("Title for this project ", default="Runestone Default")
     conf_dict['python3'] = click.prompt("Use Simple Python3 Semantics ", default="false")
+    conf_dict['default_ac_lang'] = click.prompt("Default ActiveCode language", default="python")
     conf_dict['basecourse'] = conf_dict['project_name']
     if conf_dict['use_services'] == "true":
         conf_dict['login_req'] = click.prompt("Require login  ", default="false")
@@ -56,7 +57,7 @@ def init():
     paver_final = paver_stuff.decode('utf-8') % conf_dict
     config_final = config_stuff.decode('utf-8') % conf_dict
 
-    # On Windows, Python 3.6, the bytes read from ``template_base_dir`` and ``config_stuff`` contain Windows-style ``\n\r``. Unfortunately, `resource_string <http://setuptools.readthedocs.io/en/latest/pkg_resources.html#basic-resource-access>`_ does no universal newline support, so these remain intact. When written out, this is changed to ``\n\n``, making the file double-spaced. Python 3's `StringIO <https://docs.python.org/3/library/io.html#io.StringIO>`_ class provides universal newline support, while Python 2's `StringIO <https://docs.python.org/2/library/stringio.html#StringIO.StringIO>`__ doesn't. 
+    # On Windows, Python 3.6, the bytes read from ``template_base_dir`` and ``config_stuff`` contain Windows-style ``\n\r``. Unfortunately, `resource_string <http://setuptools.readthedocs.io/en/latest/pkg_resources.html#basic-resource-access>`_ does no universal newline support, so these remain intact. When written out, this is changed to ``\n\n``, making the file double-spaced. Python 3's `StringIO <https://docs.python.org/3/library/io.html#io.StringIO>`_ class provides universal newline support, while Python 2's `StringIO <https://docs.python.org/2/library/stringio.html#StringIO.StringIO>`__ doesn't.
     if six.PY3:
         # Per the `TextIOWrapper docs <https://docs.python.org/3/library/io.html#io.TextIOWrapper>`_, ``newline=None`` selects universal newline mode. The Python 3 StringIO_ class's ``newline`` argument works the same.
         paver_final = six.StringIO(paver_final, newline=None).read()
@@ -101,7 +102,7 @@ def serve(port,listen):
     except:
         print("Error, you must be in your project root directory")
         return
-    
+
     os.chdir(pavement.serving_dir)
 
 

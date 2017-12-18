@@ -160,14 +160,14 @@
         {% endif %}
         <li class="divider-vertical"></li>
         <!-- <li id="scratch_ac_link"><a href="javascript:ACFactory.toggleScratchActivecode()">Scratch ActiveCode</a></li> -->
-        
+
         <!-- <li class="dropdown">             -->
           <li id="scratch_ac_link" class="dropdown"><a href="javascript:ACFactory.toggleScratchActivecode()">
               <i class="glyphicon glyphicon-pencil" style="opacity:0.9;"></i></a></li>
         <!-- </li> -->
 
         <li class="divider-vertical"></li>
-        
+
         <!-- help menu dropdown -->
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
@@ -201,8 +201,8 @@
           <li>{% include "sourcelink.html" %}</li>
         {% endif %}
       </ul>
-      {% include "progress.html" %}      
-    </div>    
+      {% include "progress.html" %}
+    </div>
   </div>
 </div>
 {% endmacro %}
@@ -226,6 +226,7 @@
   eBookConfig.useRunestoneServices = {{ use_services }};
   eBookConfig.python3 = {{ python3 }};
   eBookConfig.basecourse = '{{ basecourse }}';
+  eBookConfig.acDefaultLanguage = '{{ default_ac_lang }}' ? '{{ default_ac_lang }}' : 'python'
   eBookConfig.runestone_version = '{{ runestone_version }}';
 </script>
 
