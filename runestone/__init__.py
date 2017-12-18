@@ -8,7 +8,6 @@ from .datafile import *
 from .disqus import *
 from .dragndrop import *
 from .fitb import *
-from .livecode import *
 from .meta import *
 from .parsons import *
 from .poll import *
