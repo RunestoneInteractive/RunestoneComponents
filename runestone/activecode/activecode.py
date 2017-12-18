@@ -64,7 +64,10 @@ TEMPLATE_START = """
 """
 
 TEMPLATE_END = """
-<textarea data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(gradebutton)s %(caption)s>
+<textarea data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s
+    %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s
+    data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s
+    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s>
 %(initialcode)s
 </textarea>
 </div>
@@ -181,6 +184,10 @@ class ActiveCode(RunestoneDirective):
         'datafile' : directives.unchanged,
         'sourcefile' : directives.unchanged,
         'available_files' : directives.unchanged,
+        'compileargs': directives.unchanged,
+        'linkargs': directives.unchanged,
+        'interpreterargs': directives.unchanged,
+        'runargs': directives.unchanged,
     })
 
 
@@ -291,6 +298,12 @@ class ActiveCode(RunestoneDirective):
             self.options['sourcefile'] = ""
         else:
             self.options['sourcefile'] = "data-sourcefile='%s'" % self.options['sourcefile']
+
+        for opt,tp in [('compileargs','cargs'),('linkargs','largs'),('runargs','rargs'),('interpreterargs','iargs')]:
+            if opt in self.options:
+                self.options[tp] = 'data-{}="{}"'.format(opt, escape(self.options[opt]))
+            else:
+                self.options[tp] = ""
 
         if 'gradebutton' not in self.options:
             self.options['gradebutton'] = ''

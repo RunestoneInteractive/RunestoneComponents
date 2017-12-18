@@ -6,7 +6,6 @@ import time
 from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
 setUpModule, tearDownModule = module_fixture_maker(__file__)
-
 class ActiveCodeTests(RunestoneTestCase):
     def test_hello(self):
         '''

@@ -149,7 +149,7 @@ ActiveCode.prototype.createControls = function () {
     this.runButton = butt;
     $(butt).click(this.runProg.bind(this));
     $(butt).attr("type","button")
-    
+
     if (! this.hidecode) {
         var butt = document.createElement("button");
         $(butt).text("Load History");
@@ -1508,7 +1508,15 @@ function LiveCode(opts) {
         this.init(opts)
         }
     }
-
+function unescapeHtml(safe) {
+    if (safe) {
+        return safe.replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&quot;/g, '"')
+            .replace(/&#x27;/g, "'");
+    }
+}
 LiveCode.prototype.init = function(opts) {
     ActiveCode.prototype.init.apply(this,arguments);
 
@@ -1516,7 +1524,10 @@ LiveCode.prototype.init = function(opts) {
     this.stdin = $(orig).data('stdin');
     this.datafile = $(orig).data('datafile');
     this.sourcefile = $(orig).data('sourcefile');
-
+    this.compileargs = unescapeHtml($(orig).data('compileargs'));
+    this.linkargs = unescapeHtml($(orig).data('linkargs'));
+    this.runargs = unescapeHtml($(orig).data('runargs'));
+    this.interpreterargs = unescapeHtml($(orig).data('interpreterargs'));
     this.API_KEY = "67033pV7eUUvqo07OJDIV8UZ049aLEK1";
     this.USE_API_KEY = true;
 
@@ -1567,6 +1578,14 @@ LiveCode.prototype.runProg = function() {
     var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
     history_dfd = __ret.history_dfd;
     saveCode = __ret.saveCode;
+    
+    var paramlist = ['compileargs','linkargs','runargs','interpreterargs'];
+    var paramobj = {}
+    for (param of paramlist) {
+        if (this[param]) {
+            paramobj[param] = eval(this[param]); // needs a list
+        }
+    }
 
     if (this.stdin) {
         stdin = $(this.stdin_el).val();
@@ -1604,14 +1623,16 @@ LiveCode.prototype.runProg = function() {
     }
 
     runspec = {
-        language_id: this.language,
-        sourcecode: source,
-        sourcefilename: this.sourcefile
+            language_id: this.language,
+            sourcecode: source,
+            parameters: paramobj,
+            sourcefilename: this.sourcefile
     };
 
     if (stdin) {
         runspec.input = stdin
     }
+
 
     if(this.language !== "java" || files.length === 0) {
         data = JSON.stringify({'run_spec': runspec});
@@ -2010,6 +2031,7 @@ ACFactory.createScratchActivecode = function() {
     divid = divid.split('?')[0];  // remove any query string (e.g ?lastPosition)
     divid = divid.replaceAll('/', '').replace('.html', '').replace(':', '');
     eBookConfig.scratchDiv = divid;
+    var lang = eBookConfig.acDefaultLanguage ? eBookConfig.acDefaultLanguage : 'python'
     // generate the HTML
     var html = '<div id="ac_modal_' + divid + '" class="modal fade">' +
         '  <div class="modal-dialog scratch-ac-modal">' +
@@ -2019,7 +2041,7 @@ ACFactory.createScratchActivecode = function() {
         '        <h4 class="modal-title">Scratch ActiveCode</h4>' +
         '      </div> ' +
         '      <div class="modal-body">' +
-        '      <textarea data-component="activecode" id="' + divid + '">' +
+        '      <textarea data-component="activecode" id="' + divid + '" data-lang="'+ lang +'">' +
         '\n' +
         '\n' +
         '\n' +

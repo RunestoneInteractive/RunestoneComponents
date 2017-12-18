@@ -25,6 +25,7 @@ class ParsonsTests(RunestoneTestCase):
     def test_general(self):
         
         self.driver.get(self.host + "/index.html")
+        self.driver.execute_script('window.localStorage.clear();')
         
         # Source has correct number of blocks and each block has a label
         source = self.driver.find_element_by_id("parsons-1-source")
@@ -33,10 +34,7 @@ class ParsonsTests(RunestoneTestCase):
         blocks = source.find_elements_by_class_name("block")
         self.assertIsNotNone(source)
         self.assertEquals(len(blocks), 5)
-        labels = source.find_elements_by_class_name("block-label")
-        self.assertIsNotNone(labels)
-        self.assertEquals(len(labels), len(blocks))
-
+        
         # check that messages appear correctly
         checkme = self.driver.find_element_by_id('parsons-1-check')
         reset = self.driver.find_element_by_id('parsons-1-reset')
@@ -64,6 +62,8 @@ class ParsonsTests(RunestoneTestCase):
     
     def test_help(self):
         self.driver.get(self.host + "/index.html")
+        self.driver.execute_script('window.localStorage.clear();')
+
         source = self.driver.find_element_by_id("parsons-1-source")
         answer = self.driver.find_element_by_id("parsons-1-answer")
         reset = self.driver.find_element_by_id('parsons-1-reset')
@@ -156,5 +156,5 @@ class ParsonsTests(RunestoneTestCase):
             return False
         
         
-# if __name__ == '__main__':
-    # unittest.main()
+if __name__ == '__main__':
+    unittest.main()
