@@ -299,7 +299,7 @@ class ActiveCode(RunestoneDirective):
         else:
             self.options['sourcefile'] = "data-sourcefile='%s'" % self.options['sourcefile']
 
-        for opt,tp in [('compilerargs','cargs'),('linkargs','largs'),('runargs','rargs'),('interpreterargs','iargs')]:
+        for opt,tp in [('compileargs','cargs'),('linkargs','largs'),('runargs','rargs'),('interpreterargs','iargs')]:
             if opt in self.options:
                 self.options[tp] = 'data-{}="{}"'.format(opt, escape(self.options[opt]))
             else:
