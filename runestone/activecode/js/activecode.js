@@ -1519,8 +1519,10 @@ LiveCode.prototype.init = function(opts) {
 
     this.API_KEY = "67033pV7eUUvqo07OJDIV8UZ049aLEK1";
     this.USE_API_KEY = true;
-    this.JOBE_SERVER = eBookConfig.host;
-    this.resource = '/runestone/proxy/jobeRun';
+
+    this.JOBE_SERVER = eBookConfig.jobehost;
+    this.resource = eBookConfig.proxyuri_runs;
+
     this.div2id = {};
     if (this.stdin) {
         this.createInputElement();
@@ -1664,6 +1666,7 @@ LiveCode.prototype.runProg_callback = function(data) {
         xhr.open("POST", host, true);
         xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
         xhr.setRequestHeader('Accept', 'application/json');
+        xhr.setRequestHeader('X-API-KEY', this.API_KEY);
 
         xhr.onload = (function () {
             var logresult;
@@ -1740,13 +1743,14 @@ LiveCode.prototype.addJobeErrorMessage = function (err) {
  */
 LiveCode.prototype.checkFile = function(file, resolve, reject) {
     var file_id = this.div2id[file.name];
-    var resource = '/runestone/proxy/jobeCheckFile/' + file_id;
+    var resource = eBookConfig.proxyuri_files + file_id;
     var host = this.JOBE_SERVER + resource;
 
     var xhr = new XMLHttpRequest();
     xhr.open("HEAD", host, true);
     xhr.setRequestHeader('Content-type', 'application/json');
     xhr.setRequestHeader('Accept', 'text/plain');
+    xhr.setRequestHeader('X-API-KEY', this.API_KEY);
 
     xhr.onerror = function () {
         // console.log("error sending file" + xhr.responseText);
@@ -1798,13 +1802,15 @@ LiveCode.prototype.pushDataFile = function (file, resolve, reject) {
 
     var data = JSON.stringify({ 'file_contents' : contentsb64 });
 
-    var resource = '/runestone/proxy/jobePushFile/' + file_id;
+    var resource = eBookConfig.proxyuri_files + file_id;
     var host = this.JOBE_SERVER + resource;
 
     var xhr = new XMLHttpRequest();
     xhr.open("PUT", host, true);
     xhr.setRequestHeader('Content-type', 'application/json');
     xhr.setRequestHeader('Accept', 'text/plain');
+
+    xhr.setRequestHeader('X-API-KEY', this.API_KEY);
 
     xhr.onload = (function () {
         switch(xhr.status) {
