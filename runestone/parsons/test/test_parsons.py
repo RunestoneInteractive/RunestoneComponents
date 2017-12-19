@@ -58,8 +58,8 @@ class ParsonsTests(RunestoneTestCase):
         reset.click()
         blocks = source.find_elements_by_class_name("block")
         self.assertEquals(len(blocks), 5)
-      
-    
+
+
     def test_help(self):
         self.driver.get(self.host + "/index.html")
         self.driver.execute_script('window.localStorage.clear();')
@@ -123,6 +123,31 @@ class ParsonsTests(RunestoneTestCase):
         self.assertEquals(answer_initial, answer_after)
         source_after = source.get_attribute('innerHTML')
         self.assertEquals(source_initial, source_after)
+
+
+    def test_numbering(self):
+        self.driver.get(self.host + "/index.html")
+
+        # right label block
+        rlb = self.driver.find_element_by_id('parsons-2-block-1')
+        self.assertEquals(len(rlb.find_elements_by_class_name("labels")), 1) # has label
+        self.assertEquals(len(rlb.find_elements_by_class_name("lines")), 1) # has lines
+        children = rlb.find_elements_by_xpath("*")
+        self.assertTrue("lines" in children[0].get_attribute("class").split())
+        self.assertTrue("labels" in children[1].get_attribute("class").split()) # label on right
+
+        # left label block
+        llb = self.driver.find_element_by_id('parsons-3-block-1')
+        self.assertEquals(len(llb.find_elements_by_class_name("labels")), 1) # has label
+        self.assertEquals(len(llb.find_elements_by_class_name("lines")), 1) # has lines
+        children = llb.find_elements_by_xpath("*")
+        self.assertTrue("lines" in children[1].get_attribute("class").split())
+        self.assertTrue("labels" in children[0].get_attribute("class").split()) # label on left
+
+        # no label block
+        nlb = self.driver.find_element_by_id('parsons-4-block-1')
+        self.assertEquals(len(nlb.find_elements_by_class_name("labels")), 0) # no label
+        self.assertEquals(len(nlb.find_elements_by_class_name("lines")), 1) # has lines
 
 
     def wait_for_animation(self, selector):
