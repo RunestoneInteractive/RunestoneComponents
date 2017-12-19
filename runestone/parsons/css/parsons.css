@@ -171,7 +171,7 @@
 	/*background-color: transparent;*/
 }
 
-code {
+.parsons code {
     display: inline-block;
     clear: both;
     float: left;
@@ -277,7 +277,7 @@ code {
 }
 
 .labels {
-	padding-top: 2px; 
+	padding-top: 2px;
 	display: inline-block;
 	vertical-align: top;
 }
