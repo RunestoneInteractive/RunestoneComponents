@@ -727,10 +727,11 @@ ActiveCode.prototype.buildProg = function() {
     this.pretext = "";
     if (this.includes !== undefined) {
         // iterate over the includes, in-order prepending to prog
+
         pretext = "";
         for (var x=0; x < this.includes.length; x++) {
             pretext = pretext + edList[this.includes[x]].editor.getValue();
-            }
+        }
         this.pretext = pretext;
         prog = pretext + prog
     }
@@ -1499,8 +1500,6 @@ AudioTour.prototype.setBackgroundForLines = function (divid, lnum, color) {
     }
 };
 
-//
-//
 
 LiveCode.prototype = new ActiveCode();
 
@@ -1531,8 +1530,10 @@ LiveCode.prototype.init = function(opts) {
     this.interpreterargs = unescapeHtml($(orig).data('interpreterargs'));
     this.API_KEY = "67033pV7eUUvqo07OJDIV8UZ049aLEK1";
     this.USE_API_KEY = true;
-    this.JOBE_SERVER = eBookConfig.host;
-    this.resource = '/runestone/proxy/jobeRun';
+
+    this.JOBE_SERVER = eBookConfig.jobehost;
+    this.resource = eBookConfig.proxyuri_runs;
+
     this.div2id = {};
     if (this.stdin) {
         this.createInputElement();
@@ -1561,54 +1562,119 @@ LiveCode.prototype.createErrorOutput = function () {
 
 };
 
+/**
+ * Note:
+ * In order to check for supplemental files in java and deal with asynchronicity
+ * I split the original runProg into two functions: runProg and runProg_callback
+ */
 LiveCode.prototype.runProg = function() {
-        var xhr, stdin;
-        var runspec = {};
-        var scrubber_dfd, history_dfd;
-        var data, host, source, editor;
-        var saveCode = "True";
-        var sfilemap = {java: '', cpp: 'test.cpp', c: 'test.c', python3: 'test.py', python2: 'test.py'};
+    var stdin;
+    var scrubber_dfd, history_dfd;
+    var saveCode = "True";
+    var sfilemap = {java: '', cpp: 'test.cpp', c: 'test.c', python3: 'test.py', python2: 'test.py'};
+    var source = this.editor.getValue();
+    source = this.buildProg();
 
-        xhr = new XMLHttpRequest();
-        source = this.editor.getValue();
+    var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
+    history_dfd = __ret.history_dfd;
+    saveCode = __ret.saveCode;
+    
+    var paramlist = ['compileargs','linkargs','runargs','interpreterargs'];
+    var paramobj = {}
+    for (param of paramlist) {
+        if (this[param]) {
+            paramobj[param] = eval(this[param]); // needs a list
+        }
+    }
 
-        var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
-        history_dfd = __ret.history_dfd;
-        saveCode = __ret.saveCode;
+    if (this.stdin) {
+        stdin = $(this.stdin_el).val();
+    }
 
-        var paramlist = ['compileargs','linkargs','runargs','interpreterargs'];
-        var paramobj = {}
-        for (param of paramlist) {
-            if (this[param]) {
-                paramobj[param] = eval(this[param]); // needs a list
+    if (! this.sourcefile ) {
+        this.sourcefile = sfilemap[this.language];
+    }
+    
+    $(this.output).html("Compiling and Running your Code Now...");
+
+    var files = [];
+    if(this.language === "java") {
+        if (this.datafile != undefined) {
+            var ids = this.datafile.split(",");
+            for (var i = 0; i < ids.length; i++) {
+                file = document.getElementById(ids[i].trim());
+                if (file === null || file === undefined) {
+                    // console.log("No file with given id");
+                } else if (file.className === "javaFiles") {
+                    files = files.concat(this.parseJavaClasses(file.textContent));
+                } else if (file.className === "image") {
+                    var fileName = file.id;
+                    var extension = fileName.substring(fileName.indexOf('.') + 1);
+                    var base64 = file.toDataURL('image/' + extension);
+                    base64 = base64.substring(base64.indexOf(',') + 1);
+                    files.push({name: fileName, content: base64});
+                } else {
+                    // if no className or un recognized className it is treated as an individual file
+                    // this could be any type of file, .txt, .java, .csv, etc
+                    files.push({name: file.id, content: file.textContent});
+                }
             }
         }
+    }
 
-        if (this.stdin) {
-            stdin = $(this.stdin_el).val();
-        }
-
-        if (! this.sourcefile ) {
-            this.sourcefile = sfilemap[this.language];
-        }
-
-        runspec = {
+    runspec = {
             language_id: this.language,
             sourcecode: source,
             parameters: paramobj,
             sourcefilename: this.sourcefile
-        };
+    };
+
+    if (stdin) {
+        runspec.input = stdin
+    }
 
 
-        if (stdin) {
-            runspec.input = stdin
-        }
-
-        if (this.datafile) {
-            this.pushDataFile(this.datafile);
-            runspec['file_list'] = [[this.div2id[this.datafile],this.datafile]];
-        }
+    if(this.language !== "java" || files.length === 0) {
         data = JSON.stringify({'run_spec': runspec});
+        this.runProg_callback(data);
+    } else {
+        runspec['file_list'] = [];
+        var promises = [];
+        var instance = this;
+        $.getScript('http://cdn.rawgit.com/killmenot/webtoolkit.md5/master/md5.js', function()
+        {
+            for(var i = 0; i < files.length; i++) {
+                var fileName = files[i].name;
+                var fileContent = files[i].content;
+                instance.div2id[fileName] = "runestone" + MD5(fileName + fileContent);
+                runspec['file_list'].push([instance.div2id[fileName], fileName]);
+                promises.push(new Promise((resolve, reject) => {
+                     instance.checkFile(files[i], resolve, reject);
+                }));
+            }
+            data = JSON.stringify({'run_spec': runspec});
+            this.div2id = instance.div2id;
+            Promise.all(promises).then(function() {
+                // console.log("All files on Server");
+                instance.runProg_callback(data);
+            }).catch(function(err) {
+                // console.log("Error: " + err);
+            });
+        });
+    }
+
+}
+LiveCode.prototype.runProg_callback = function(data) {
+
+        var xhr, stdin;
+        var runspec = {};
+        var scrubber_dfd, history_dfd;
+        var host, source, editor;
+        var saveCode = "True";
+        var sfilemap = {java: '', cpp: 'test.cpp', c: 'test.c', python3: 'test.py', python2: 'test.py'};
+
+        xhr = new XMLHttpRequest();
+
         host = this.JOBE_SERVER + this.resource;
 
         var odiv = this.output;
@@ -1621,6 +1687,7 @@ LiveCode.prototype.runProg = function() {
         xhr.open("POST", host, true);
         xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
         xhr.setRequestHeader('Accept', 'application/json');
+        xhr.setRequestHeader('X-API-KEY', this.API_KEY);
 
         xhr.onload = (function () {
             var logresult;
@@ -1657,18 +1724,16 @@ LiveCode.prototype.runProg = function() {
                     this.addJobeErrorMessage("Time Limit Exceeded on your program");
                     break;
                 default:
-                    if(result.stderr) {
+                    if(result.stderr){
                         $(odiv).html(result.stderr.replace(/\n/g, "<br>"));
                     } else {
                         this.addJobeErrorMessage("A server error occurred: " + xhr.status + " " + xhr.statusText);
                     }
             }
-
             // todo: handle server busy and timeout errors too
         }).bind(this);
 
         ///$("#" + divid + "_errinfo").remove();
-        $(this.output).html("Compiling and Running your Code Now...");
 
         xhr.onerror = (function () {
             this.addJobeErrorMessage("Error communicating with the server.");
@@ -1676,6 +1741,7 @@ LiveCode.prototype.runProg = function() {
         }).bind(this);
 
         xhr.send(data);
+
     };
 LiveCode.prototype.addJobeErrorMessage = function (err) {
         var errHead = $('<h3>').html('Error');
@@ -1689,35 +1755,215 @@ LiveCode.prototype.addJobeErrorMessage = function (err) {
     };
 
 
-LiveCode.prototype.pushDataFile = function (datadiv) {
+/**
+ * Checks to see if file is on server
+ * Places it on server if it is not on server
+ * @param  {object{name, contents}} file    File to place on server
+ * @param  {function} resolve promise resolve function
+ * @param  {function} reject  promise reject function
+ */
+LiveCode.prototype.checkFile = function(file, resolve, reject) {
+    var file_id = this.div2id[file.name];
+    var resource = eBookConfig.proxyuri_files + file_id;
+    var host = this.JOBE_SERVER + resource;
 
-        var file_id = 'runestone'+Math.floor(Math.random()*100000);
-        var contents = $(document.getElementById(datadiv)).text();
-        var contentsb64 = btoa(contents);
-        var data = JSON.stringify({ 'file_contents' : contentsb64 });
-        var resource = '/runestone/proxy/jobePushFile/' + file_id;
-        var host = this.JOBE_SERVER + resource;
-        var xhr = new XMLHttpRequest();
+    var xhr = new XMLHttpRequest();
+    xhr.open("HEAD", host, true);
+    xhr.setRequestHeader('Content-type', 'application/json');
+    xhr.setRequestHeader('Accept', 'text/plain');
+    xhr.setRequestHeader('X-API-KEY', this.API_KEY);
 
-        if (this.div2id[datadiv] === undefined ) {
-            this.div2id[datadiv] = file_id;
-
-            xhr.open("PUT", host, true);
-            xhr.setRequestHeader('Content-type', 'application/json');
-            xhr.setRequestHeader('Accept', 'text/plain');
-            xhr.setRequestHeader('X-API-KEY', this.API_KEY);
-
-            xhr.onload = function () {
-                console.log("successfully sent file " + xhr.responseText);
-            };
-
-            xhr.onerror = function () {
-                console.log("error sending file" + xhr.responseText);
-            };
-
-            xhr.send(data)
-        }
+    xhr.onerror = function () {
+        // console.log("error sending file" + xhr.responseText);
     };
+
+    xhr.onload = (function () {
+        switch(xhr.status) {
+            case 208:
+                // console.log("File not on Server");
+                this.pushDataFile(file, resolve, reject);
+                break;
+            case 400:
+                // console.log("Bad Request");
+                reject();
+                break;
+            case 204:
+                // console.log("File already on Server");
+                resolve();
+                break;
+            default:
+                //console.log("This case should never happen");
+                reject();
+            }
+    }).bind(this);
+
+    xhr.send();
+
+};
+/**
+ * Places a file on a server
+ */
+LiveCode.prototype.pushDataFile = function (file, resolve, reject) {
+
+    var fileName = file.name;
+    var extension = fileName.substring(fileName.indexOf('.') + 1);
+
+    var file_id = this.div2id[fileName];
+    var contents = file.content;
+
+    // File types being uploaded that come in already in base64 format
+    var extensions = ['jar', 'zip', 'png', 'jpg', 'jpeg'];
+    var contentsb64;
+
+    if (extensions.indexOf(extension) === -1) {
+        contentsb64 = btoa(contents);
+    } else {
+        contentsb64 = contents;
+    }
+
+    var data = JSON.stringify({ 'file_contents' : contentsb64 });
+
+    var resource = eBookConfig.proxyuri_files + file_id;
+    var host = this.JOBE_SERVER + resource;
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("PUT", host, true);
+    xhr.setRequestHeader('Content-type', 'application/json');
+    xhr.setRequestHeader('Accept', 'text/plain');
+
+    xhr.setRequestHeader('X-API-KEY', this.API_KEY);
+
+    xhr.onload = (function () {
+        switch(xhr.status) {
+            case 403:
+                // console.log("Forbidden");
+                reject();
+                break;
+            case 400:
+                // console.log("Bad Request");
+                reject();
+                break;
+            case 204:
+                //console.log("successfully sent file " + xhr.responseText);
+                //console.log("File " + fileName +", " + file_id +" placed on server");
+                resolve();
+                break;
+            default:
+                // console.log("This case should never happen");
+                reject();
+            }
+    }).bind(this);
+
+    xhr.onerror = function () {
+        // console.log("error sending file" + xhr.responseText);
+        reject();
+    };
+
+    xhr.send(data);
+
+};
+
+/**
+ * Seperates text into multiple .java files
+ * @param  {String} text String with muliple java classes needed to be seperated
+ * @return {array of objects}  .name gives the name of the java file with .java extension
+ *                   .content gives the contents of the file
+ */
+ LiveCode.prototype.parseJavaClasses = function(text) {
+
+     text = text.trim();
+
+     var found = false;
+     var stack = 0;
+     var startIndex = 0;
+     var classes = [];
+     var importIndex = 0;
+
+     var endOfLastCommentBeforeClassBegins = 0;
+
+     for(var i = 0; i < text.length; i++) {
+
+         var char = text.charAt(i);
+         if(char === '/') {
+             i++;
+             if(text.charAt(i) === '/') {
+                 i++;
+                 while(text.charAt(i) !== '\n' && i < text.length) {
+                     i++;
+                 }
+                 if(!found) {
+                     endOfLastCommentBeforeClassBegins = i;
+                 }
+             } else if(text.charAt(i) == '*') {
+                 i++;
+                 while((text.charAt(i) !== '*' || text.charAt(i+1) !== '/') && i + 1 < text.length) {
+                     i++;
+                 }
+                 if(!found) {
+                     endOfLastCommentBeforeClassBegins = i;
+                 }
+             }
+
+         } else if(char === '"') {
+
+             i++;
+             while(text.charAt(i) !== '"' && i < text.length) {
+                 i++;
+             }
+         } else if(char === '\'') {
+             while(text.charAt(i) !== '\'' && i < text.length) {
+                 i++;
+             }
+         } else if(char === '(') {
+             var pCount = 1;
+             i++;
+         	while(pCount > 0 && i < text.length){
+                if(text.charAt(i) === '(') {
+                    pCount++;
+                } else if(text.charAt(i) === ')') {
+                    pCount--;
+                }
+                 i++;
+             }
+         }
+
+
+         if(!found && text.charAt(i) === '{') {
+             startIndex = i;
+             found = true;
+             stack = 1;
+         } else if(found) {
+             if(text.charAt(i) === '{') {
+                 stack++;
+             }
+             if(text.charAt(i) === '}') {
+                 stack--;
+             }
+         }
+         if(found && stack === 0) {
+             endIndex = i+1;
+
+             var words = text.substring(endOfLastCommentBeforeClassBegins, startIndex).trim().split(" ");
+             var className = "";
+             for (var w = 0; w < words.length; w++) {
+                 className = words[w];
+                 if(words[w] === "extends" || words[w] === "implements") {
+                     className = words[w-1];
+                     w = words.length;
+                 }
+             }
+             className = className.trim() + ".java";
+
+             classes.push({name: className, content: text.substring(importIndex, endIndex)});
+             found = false;
+             importIndex = endIndex;
+             endOfLastCommentBeforeClassBegins = endIndex;
+         }
+
+     }
+     return classes;
+ }
+
 
 ACFactory = {};
 
