@@ -77,6 +77,7 @@ def addQuestionToDB(self):
         chapter = srcpath.split(os.path.sep)[-2]
 
         autograde = self.options.get('autograde', None)
+        practice = self.options.get('practice', None)
 
         sel = select([questions]).where(and_(questions.c.name == self.arguments[0],
                                               questions.c.base_course == basecourse))
@@ -84,10 +85,10 @@ def addQuestionToDB(self):
         try:
             if res:
                 stmt = questions.update().where(questions.c.id == res['id']).values(question = self.block_text, timestamp=last_changed, is_private='F',
-question_type=self.name, subchapter=subchapter, autograde = autograde, author=author,difficulty=difficulty,chapter=chapter)
+question_type=self.name, subchapter=subchapter, autograde = autograde, author=author,difficulty=difficulty,chapter=chapter, practice=practice)
                 engine.execute(stmt)
             else:
-                ins = questions.insert().values(base_course=basecourse, name=self.arguments[0], question=self.block_text.encode('utf8'), timestamp=last_changed, is_private='F', question_type=self.name, subchapter=subchapter, autograde = autograde, author=author,difficulty=difficulty,chapter=chapter)
+                ins = questions.insert().values(base_course=basecourse, name=self.arguments[0], question=self.block_text.encode('utf8'), timestamp=last_changed, is_private='F', question_type=self.name, subchapter=subchapter, autograde = autograde, author=author,difficulty=difficulty,chapter=chapter, practice=practice)
                 engine.execute(ins)
         except UnicodeEncodeError:
             raise self.severe("Bad character in directive {} in {}/{} this will not be saved to the DB".format(self.arguments[0], self.chapter, self.subchapter))
