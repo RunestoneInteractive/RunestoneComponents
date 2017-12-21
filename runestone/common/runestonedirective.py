@@ -103,6 +103,7 @@ class RunestoneDirective(Directive):
                    'tags': directives.unchanged,
                    'difficulty': directives.positive_int,
                    'autograde': directives.unchanged,
+                   'practice': directives.unchanged,
                    }
 
     def __init__(self, *args, **kwargs):
