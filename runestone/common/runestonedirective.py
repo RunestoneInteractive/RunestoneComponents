@@ -41,7 +41,7 @@ class RunestoneDirective(Directive):
                    'autograde': directives.unchanged,
                    'practice': directives.unchanged,
                    }
-    foobar
+
     def __init__(self, *args, **kwargs):
         super(RunestoneDirective,self).__init__(*args, **kwargs)
         srcpath, self.line = self.state_machine.get_source_and_line()

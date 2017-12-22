@@ -257,72 +257,79 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
         data['sid'] = this.sid;
     }
     console.log("before get hist");
-    jQuery.getJSON(eBookConfig.ajaxURL + 'gethist.json', data, function(data, status, whatever) {
-        if (data.history !== undefined) {
-            this.history = this.history.concat(data.history);
-            for (t in data.timestamps) {
-                this.timestamps.push( (new Date(data.timestamps[t])).toLocaleString() )
-            }
-            console.log("gethist successful history updated")
-        }
-    }.bind(this))
-        .always(function() {
-            console.log("making a new scrubber");
-            var scrubberDiv = document.createElement("div");
-            $(scrubberDiv).css("display","inline-block");
-            $(scrubberDiv).css("margin-left","10px");
-            $(scrubberDiv).css("margin-right","10px");
-            $(scrubberDiv).width("180px");
-            var scrubber = document.createElement("div");
-            this.slideit = function() {
-                console.log("slideit was called");
-                this.editor.setValue(this.history[$(scrubber).slider("value")]);
-                var curVal = this.timestamps[$(scrubber).slider("value")];
-                var tooltip = '<div class="sltooltip"><div class="sltooltip-inner">' +
-                    curVal + '</div><div class="sltooltip-arrow"></div></div>';
-                $(scrubber).find(".ui-slider-handle").html(tooltip);
-                setTimeout(function () {
-                    $(scrubber).find(".sltooltip").fadeOut()
-                }, 4000);
-            };
-            $(scrubber).slider({
-                max: this.history.length-1,
-                value: this.history.length-1,
-            });
-            $(scrubber).on("slide",this.slideit.bind(this));
-            $(scrubber).on("slidechange",this.slideit.bind(this));
-            scrubberDiv.appendChild(scrubber);
+    var helper = function() {
+        console.log("making a new scrubber");
+        var scrubberDiv = document.createElement("div");
+        $(scrubberDiv).css("display","inline-block");
+        $(scrubberDiv).css("margin-left","10px");
+        $(scrubberDiv).css("margin-right","10px");
+        $(scrubberDiv).width("180px");
+        var scrubber = document.createElement("div");
+        this.slideit = function() {
+            console.log("slideit was called");
+            this.editor.setValue(this.history[$(scrubber).slider("value")]);
+            var curVal = this.timestamps[$(scrubber).slider("value")];
+            var tooltip = '<div class="sltooltip"><div class="sltooltip-inner">' +
+                curVal + '</div><div class="sltooltip-arrow"></div></div>';
+            $(scrubber).find(".ui-slider-handle").html(tooltip);
+            setTimeout(function () {
+                $(scrubber).find(".sltooltip").fadeOut()
+            }, 4000);
+        };
+        $(scrubber).slider({
+            max: this.history.length-1,
+            value: this.history.length-1,
+        });
+        $(scrubber).on("slide",this.slideit.bind(this));
+        $(scrubber).on("slidechange",this.slideit.bind(this));
+        scrubberDiv.appendChild(scrubber);
 
-            // If there is a deadline set then position the scrubber at the last submission
-            // prior to the deadline
-            if (this.deadline) {
-                let i = 0;
-                let done = false;
-                while (i < this.history.length && ! done) {
-                    if ((new Date(this.timestamps[i])) > this.deadline) {
-                        done = true;
-                    } else {
-                        i += 1
-                    }
+        // If there is a deadline set then position the scrubber at the last submission
+        // prior to the deadline
+        if (this.deadline) {
+            let i = 0;
+            let done = false;
+            while (i < this.history.length && ! done) {
+                if ((new Date(this.timestamps[i])) > this.deadline) {
+                    done = true;
+                } else {
+                    i += 1
                 }
-                i = i - 1;
-                scrubber.value = Math.max(i,0);
-                this.editor.setValue(this.history[scrubber.value]);
             }
-            else if (pos_last) {
-                scrubber.value = this.history.length-1;
-                this.editor.setValue(this.history[scrubber.value]);
-            } else {
-                scrubber.value = 0;
-            }
+            i = i - 1;
+            scrubber.value = Math.max(i,0);
+            this.editor.setValue(this.history[scrubber.value]);
+        }
+        else if (pos_last) {
+            scrubber.value = this.history.length-1;
+            this.editor.setValue(this.history[scrubber.value]);
+        } else {
+            scrubber.value = 0;
+        }
 
-            $(this.histButton).remove();
-            this.histButton = null;
-            this.historyScrubber = scrubber;
-            $(scrubberDiv).insertAfter(this.runButton);
-            console.log("resoving deferred in addHistoryScrubber");
-            deferred.resolve();
-        }.bind(this));
+        $(this.histButton).remove();
+        this.histButton = null;
+        this.historyScrubber = scrubber;
+        $(scrubberDiv).insertAfter(this.runButton);
+        console.log("resoving deferred in addHistoryScrubber");
+        deferred.resolve();
+    }.bind(this)
+    var practice = true;
+    if (eBookConfig.practice_mode){
+        helper();
+        }
+    else{
+        jQuery.getJSON(eBookConfig.ajaxURL + 'gethist.json', data, function(data, status, whatever) {
+            if (data.history !== undefined) {
+                this.history = this.history.concat(data.history);
+                for (t in data.timestamps) {
+                    this.timestamps.push( (new Date(data.timestamps[t])).toLocaleString() )
+                }
+                console.log("gethist successful history updated")
+            }
+        }.bind(this))
+            .always(helper());
+        }
     return deferred;
 };
 

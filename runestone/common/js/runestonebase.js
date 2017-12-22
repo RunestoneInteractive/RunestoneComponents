@@ -64,7 +64,9 @@ RunestoneBase.prototype.checkServer = function (eventInfo) {
         if (this.sid) {
             data.sid = this.sid
         }
-        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
+        if (!eBookConfig.practice_mode){
+            jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
+        }
     } else {
         this.checkLocalStorage();   // just go right to local storage
     }
