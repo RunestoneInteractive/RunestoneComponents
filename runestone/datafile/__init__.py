@@ -21,7 +21,7 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from sqlalchemy import Table
 from runestone.server.componentdb import engine, meta
-from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
 
 def setup(app):
     app.add_directive('datafile',DataFile)
@@ -79,7 +79,7 @@ def purge_datafiles(app,env,docname):
     pass
 
 
-class DataFile(RunestoneDirective):
+class DataFile(RunestoneIdDirective):
     """
 .. datafile:: identifier
    :edit: Option that makes the datafile editable
@@ -90,7 +90,7 @@ class DataFile(RunestoneDirective):
     required_arguments = 1
     optional_arguments = 0
     has_content = True
-    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec = RunestoneIdDirective.option_spec.copy()
     option_spec.update({
         'hide':directives.flag,
         'edit':directives.flag,
@@ -109,6 +109,7 @@ class DataFile(RunestoneDirective):
                 :rows: If editable, number of rows--default is 40
                 :hide: Flag that sets a non-editable datafile to be hidden
         """
+        super(DataFile, self).run()
         env = self.state.document.settings.env
 
         if not hasattr(env,'datafilecounter'):
@@ -129,7 +130,6 @@ class DataFile(RunestoneDirective):
         else:
             self.options['rows'] = 20
 
-        self.options['divid'] = self.arguments[0]
         if self.content:
             source = "\n".join(self.content)+"\n"
         else:

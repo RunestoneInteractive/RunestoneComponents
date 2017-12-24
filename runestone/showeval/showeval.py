@@ -19,7 +19,7 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common.runestonedirective import RunestoneDirective
+from runestone.common.runestonedirective import RunestoneIdDirective
 
 def setup(app):
     app.add_directive('showeval', ShowEval)
@@ -46,7 +46,7 @@ SCRIPT = """\
 </script>
 """
 
-class ShowEval(RunestoneDirective):
+class ShowEval(RunestoneIdDirective):
     """
 .. showeval:: unique_id_goes_here
    :trace_mode: boolean  <- Required option that enables 'Trace Mode'
@@ -91,9 +91,10 @@ class ShowEval(RunestoneDirective):
 
         """
 
+        # Raise an error if the directive does not have contents.
+        super(ShowEval, self).run()
         addQuestionToDB(self)
 
-        self.options['divid'] = self.arguments[0]
         self.options['trace_mode'] = self.options['trace_mode'].lower()
         self.options['preReqLines'] = ''
         self.options['steps'] = []

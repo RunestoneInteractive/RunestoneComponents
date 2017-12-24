@@ -17,7 +17,7 @@ __author__ = 'isaiahmayerchak'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
 
 #add directives/javascript/css
 def setup(app):
@@ -63,7 +63,7 @@ TEMPLATE_START = '''
 TEMPLATE_END = '''
     </div>
     '''
-class RevealDirective(RunestoneDirective):
+class RevealDirective(RunestoneIdDirective):
     """
 .. reveal:: identifier
    :showtitle: Text on the 'show' button--default is "Show"
@@ -78,7 +78,7 @@ class RevealDirective(RunestoneDirective):
     optional_arguments = 0
     final_argument_whitespace = True
     has_content = True
-    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec = RunestoneIdDirective.option_spec.copy()
     option_spec.update({"showtitle":directives.unchanged,
                    "hidetitle":directives.unchanged,
                    "modal":directives.flag,
@@ -98,6 +98,7 @@ class RevealDirective(RunestoneDirective):
             Content
             ...
             """
+        super(RevealDirective, self).run()
         self.assert_has_content() # make sure reveal has something in it
 
         if not 'showtitle' in self.options:
@@ -108,8 +109,6 @@ class RevealDirective(RunestoneDirective):
             self.options['hidetitle'] = 'data-hidetitle="Hide"'
         else:
             self.options['hidetitle'] = '''data-hidetitle=''' + '"' + self.options['hidetitle'] + '"'
-
-        self.options['divid'] = self.arguments[0]
 
         reveal_node = RevealNode(self.options, rawsource=self.block_text)
         reveal_node.source, reveal_node.line = self.state_machine.get_source_and_line(self.lineno)

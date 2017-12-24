@@ -173,6 +173,8 @@ class MChoice(Assessment):
             :return: An MChoiceNode.
             """
 
+        super(MChoice, self).run()
+
         TEMPLATE_START = '''
             <div class="runestone">
             <ul data-component="multiplechoice" data-multipleanswers="%(multipleAnswers)s" %(random)s id="%(divid)s">
@@ -188,7 +190,6 @@ class MChoice(Assessment):
             </div>
             '''
         addQuestionToDB(self)
-        super(MChoice, self).run()
 
         mcNode = MChoiceNode(self.options, rawsource=self.block_text)
         mcNode.source, mcNode.line = self.state_machine.get_source_and_line(self.lineno)

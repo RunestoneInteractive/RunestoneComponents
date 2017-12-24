@@ -18,7 +18,7 @@ __author__ = 'isaiahmayerchak'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
 from runestone.server.componentdb import addQuestionToDB
 
 
@@ -80,7 +80,7 @@ def depart_poll_node(self,node):
     pass
 
 
-class Poll(RunestoneDirective):
+class Poll(RunestoneIdDirective):
     """
 .. poll:: identifier
     :scale: Mode 1--Implements the "On a scale of 1 to x" type method of poll--x is provided by author
@@ -120,9 +120,9 @@ class Poll(RunestoneDirective):
                 :option_3: Option 3
                 ...etc...(Up to 10 options in mode 2)
         """
+        super(Poll, self).run()
         addQuestionToDB(self)
 
-        self.options['divid'] = self.arguments[0]
         if self.content:
             source = "\n".join(self.content)
         else:

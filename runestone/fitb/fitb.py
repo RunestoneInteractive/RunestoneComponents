@@ -22,7 +22,7 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from sphinx.util import logging
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common import RunestoneDirective, RunestoneNode, get_node_line
+from runestone.common import RunestoneIdDirective, RunestoneNode, get_node_line
 
 
 def setup(app):
@@ -85,7 +85,7 @@ def depart_fitb_node(self, node):
 
     self.body.remove(node.delimiter)
 
-class FillInTheBlank(RunestoneDirective):
+class FillInTheBlank(RunestoneIdDirective):
     """
     .. fillintheblank:: some_unique_id_here
 
@@ -104,7 +104,7 @@ class FillInTheBlank(RunestoneDirective):
     optional_arguments = 0
     final_argument_whitespace = True
     has_content = True
-    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec = RunestoneIdDirective.option_spec.copy()
     option_spec.update(
        {'blankid':directives.unchanged,
         'casei':directives.flag  # case insensitive matching
@@ -117,6 +117,8 @@ class FillInTheBlank(RunestoneDirective):
             :return: Nodes resulting from this directive.
             ...
             """
+
+        super(FillInTheBlank, self).run()
 
         TEMPLATE_START = '''
         <div class="runestone">
@@ -133,8 +135,6 @@ class FillInTheBlank(RunestoneDirective):
             '''
 
         addQuestionToDB(self)
-
-        self.options['divid'] = self.arguments[0]
 
         fitbNode = FITBNode(self.options, rawsource=self.block_text)
         fitbNode.source, fitbNode.line = self.state_machine.get_source_and_line(self.lineno)
