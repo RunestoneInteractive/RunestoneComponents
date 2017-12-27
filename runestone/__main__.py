@@ -35,6 +35,7 @@ def init():
     conf_dict['author'] = click.prompt("Your Name ", default=getpass.getuser())
     conf_dict['project_title'] = click.prompt("Title for this project ", default="Runestone Default")
     conf_dict['python3'] = click.prompt("Use Simple Python3 Semantics ", default="false")
+    conf_dict['default_ac_lang'] = click.prompt("Default ActiveCode language", default="python")
     conf_dict['basecourse'] = conf_dict['project_name']
     if conf_dict['use_services'] == "true":
         conf_dict['login_req'] = click.prompt("Require login  ", default="false")

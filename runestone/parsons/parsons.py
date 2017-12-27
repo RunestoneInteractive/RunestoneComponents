@@ -34,7 +34,7 @@ def setup(app):
 
 TEMPLATE = '''
         <div class="runestone" style="max-width: none;">
-        <pre data-component="parsons" id="%(divid)s"%(maxdist)s%(order)s%(noindent)s%(adaptive)s%(language)s>
+        <pre data-component="parsons" id="%(divid)s" %(adaptive)s %(maxdist)s %(order)s %(noindent)s %(language)s %(numbered)s>
         <span data-question>%(qnumber)s: %(instructions)s</span>%(code)s
         </pre>
         </div>
@@ -68,6 +68,7 @@ class ParsonsProblem(Assessment):
    :language:
    :noindent:
    :adaptive:
+   :numbered:
 
    Solve my really cool parsons problem...if you can.
    -----
@@ -97,7 +98,8 @@ class ParsonsProblem(Assessment):
         'order' : directives.unchanged,
         'language' : directives.unchanged,
         'noindent' : directives.flag,
-        'adaptive' : directives.flag
+        'adaptive' : directives.flag,
+        'numbered' : directives.unchanged
     })
     has_content = True
 
@@ -140,6 +142,11 @@ Example:
         self.options['qnumber'] = self.getNumber()
         self.options['instructions'] = ""
         self.options['code'] = self.content
+
+        if 'numbered' in self.options:
+            self.options['numbered'] = ' data-numbered="' + self.options['numbered'] + '"' #' data-numbered="true"'
+        else:
+            self.options['numbered'] = ''
 
         if 'maxdist' in self.options:
             self.options['maxdist'] = ' data-maxdist="' + self.options['maxdist'] + '"'

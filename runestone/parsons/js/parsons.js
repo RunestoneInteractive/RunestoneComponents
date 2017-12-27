@@ -300,7 +300,22 @@ var ParsonsBlock = function(problem, lines) {
 	}
 	var labelDiv = document.createElement("div");
 	$(labelDiv).addClass("labels");
-	$(view).append(labelDiv);
+	if(this.problem.options.numbered == "left") {
+		$(lineDiv).addClass("border_left");
+		$(view).prepend(labelDiv);
+		$(view).css({
+			"justify-content": "flex-start"
+		});
+	} else if(this.problem.options.numbered == "right") {
+		$(labelDiv).addClass("border_left");
+		$(labelDiv).css({
+			"float" : "right"
+		});
+		$(view).css({
+			"justify-content": "space-between"
+		});
+		$(view).append(labelDiv);
+	}
 	this.view = view;
 };
 
@@ -376,6 +391,14 @@ ParsonsBlock.prototype.addIndent = function() {
 ParsonsBlock.prototype.addLabel = function(label, line) {
 	var div = document.createElement("div");
 	$(div).addClass("block-label");
+	
+	if(this.problem.options.numbered == "right") {
+		$(div).addClass("right-label");
+	}
+	if(this.problem.options.numbered == "left") {
+		$(div).addClass("left-label");
+	}
+
 	$(div).append(document.createTextNode(label));
 	$(this.view).children(".labels")[0].append(div);
 	if(this.labels.length != 0) {
@@ -1107,6 +1130,10 @@ Parsons.prototype.initializeOptions = function() {
 	var order = $(this.origElem).data('order');
 	var noindent = $(this.origElem).data('noindent');
 	var adaptive = $(this.origElem).data('adaptive');
+
+	var numbered = $(this.origElem).data('numbered');
+	options["numbered"] = numbered;
+ 
 	if (maxdist !== undefined) {
 	    options["maxdist"] = maxdist;
 	}
@@ -1405,7 +1432,10 @@ Parsons.prototype.initializeAreas = function(sourceBlocks, answerBlocks, options
 	for (i = 0; i < blocks.length; i++) {
 		maxFunction($(blocks[i].view));
 	}
-	this.areaWidth = areaWidth + 25; 
+	this.areaWidth = areaWidth;
+	if(this.options.numbered != undefined) {
+		this.areaWidth += 25;
+	}
 	this.areaHeight = areaHeight;
 	$(this.sourceArea).css({
 		'width' : this.areaWidth + 2,
@@ -1472,7 +1502,11 @@ Parsons.prototype.initializeAreas = function(sourceBlocks, answerBlocks, options
 	}
 	this.pairedBins = pairedBins;
 	this.pairedDivs = pairedDivs;
-	this.addBlockLabels(sourceBlocks.concat(answerBlocks));
+
+	if(this.options.numbered != undefined) {
+		this.addBlockLabels(sourceBlocks.concat(answerBlocks));
+	}
+	
 	// Update the view
 	this.state = undefined; // needs to be here for loading from storage
 	this.updateView();
@@ -2403,7 +2437,11 @@ Parsons.prototype.removeIndentation = function() {
 	var blockWidth = 200;
 	for (var i = 0; i < this.lines.length; i++) {
 		var line = this.lines[i];
-		blockWidth = Math.max(blockWidth, 55 + line.width + line.indent * this.options.pixelsPerIndent);
+		var expandedWidth = line.width + (line.indent * this.options.pixelsPerIndent) + 30;
+		blockWidth = Math.max(blockWidth, expandedWidth);
+	}
+	if (this.options.numbered != undefined) {
+		blockWidth += 25;
 	}
 	this.areaWidth = blockWidth + 22;
 	var block, indent;
@@ -2657,12 +2695,12 @@ Parsons.prototype.makeEasier = function() {
 		    alert("Will combine two blocks");
 			this.combineBlocks();
 			this.logMove("combinedBlocks");
-		} else if(this.numberOfBlocks(true) > 3 && distractorToRemove !==  undefined) {
+		} /*else if(this.numberOfBlocks(true) > 3 && distractorToRemove !==  undefined) {
 			alert("Will remove an incorrect code block from source area");
 			this.removeDistractor(distractorToRemove);
 			this.logMove("removedDistractor-" + distractorToRemove.hash());
-		} else {
-			alert("There are only 3 blocks left.  You should be able to put them in order");
+		} */else {
+			alert("There are only 3 correct blocks left.  You should be able to put them in order");
 			this.canHelp = false;
 		}
 		//if (numberOfBlocks < 5) {
@@ -3056,31 +3094,37 @@ Parsons.prototype.addBlockLabels = function(blocks) {
 	var bin = -1;
 	var binCount = 0;
 	var binChildren = 0;
-	this.nBlocksInBins = 0;
+	var blocksNotInBins = 0;
 	for(var i = 0; i < blocks.length; i++) {
-		if(blocks[i].pairedBin() != -1) {
-			this.nBlocksInBins++;
+		if(blocks[i].pairedBin() == -1) {
+			blocksNotInBins++;
 		}
 	}
 	for (var i = 0; i < blocks.length; i++) {
-		if(this.nBlocksInBins != 0) {
-			var currentBin = blocks[i].pairedBin();
-			if(currentBin == -1 || currentBin != bin) {
-				bin = currentBin;
-				binChildren = 0;
-				binCount++;
-			}
-			var label = "" + binCount + ((currentBin != -1) ? String.fromCharCode(97 + binChildren) : " ");
-			if (binCount < 10 && blocks.length - this.nBlocksInBins >= 10) {
-				label += " ";
-			}
-			blocks[i].addLabel(label, 0);
-			binChildren++;
-		} else {
-			$(blocks[i].view).find(".labels").removeClass("labels");
-		}
 		
+		var currentBin = blocks[i].pairedBin();
+		if(currentBin == -1 || currentBin != bin) {
+			bin = currentBin;
+			binChildren = 0;
+			binCount++;
+		}
+		var label = "" + binCount + ((currentBin != -1) ? String.fromCharCode(97 + binChildren) : " ");
+		if (binCount < 10 && blocksNotInBins + this.pairedBins.length >= 10) {
+			label += " ";
+		}
+		blocks[i].addLabel(label, 0);
+		binChildren++;
 	}
+	
+	if(blocksNotInBins + this.pairedBins.length >= 10) {
+		this.areaWidth += 5;
+		$(this.sourceArea).css({
+			'width' : $(this.sourceArea).width() + 5,
+		});
+		$(this.answerArea).css({
+			'width' : $(this.answerArea).width() + 5,
+		});
+	}	
 }
 
 // Put all the blocks back into the source area, reshuffling as necessary
@@ -3124,7 +3168,7 @@ Parsons.prototype.resetView = function() {
 		localStorage.setItem(this.adaptiveId + this.divid + "Count", this.checkCount);
 		localStorage.setItem(this.adaptiveId + "Solved", false);
 	}
-	this.areaWidth -= 24.5;
+
 	this.initializeAreas(this.blocksFromSource(), [], {});
 	this.initializeInteractivity();
 	document.body.scrollTop = scrollTop;

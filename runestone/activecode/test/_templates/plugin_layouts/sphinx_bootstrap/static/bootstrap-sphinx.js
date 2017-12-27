@@ -52,7 +52,6 @@
   };
 
   $(document).ready(function () {
-
     /*
      * Scroll the window to avoid the topnav bar
      * https://github.com/twitter/bootstrap/issues/1768

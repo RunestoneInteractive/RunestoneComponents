@@ -2,10 +2,10 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
+import time
 from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
 setUpModule, tearDownModule = module_fixture_maker(__file__)
-
 class ActiveCodeTests(RunestoneTestCase):
     def test_hello(self):
         '''
@@ -54,3 +54,25 @@ class ActiveCodeTests(RunestoneTestCase):
         rb.click()
         output = t1.find_element_by_class_name("ac_output")
         self.assertEqual(output.text.strip(), "Hello World")
+
+
+    def test_datafile(self):
+        '''
+        Runs test2 example
+        Code is dependent on supplementary file
+        '''
+        self.driver.get(self.host + "/index.html")
+        t2 = self.driver.find_element_by_id("test2")
+        self.assertIsNotNone(t2)
+        rb = t2.find_element_by_class_name("run-button")
+        self.assertIsNotNone(rb)
+        rb.click()
+        output = t2.find_element_by_class_name("ac_output")
+
+        count = 0
+        # Give it some time run
+        while output.text.strip() != "Width: 25.0" and count < 20:
+            count += 1
+            time.sleep(.5)
+
+        self.assertLess(count, 20)
