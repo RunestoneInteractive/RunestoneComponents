@@ -175,7 +175,7 @@ or type help <directive> for doc on a runestone directive""")
         command = command[0]
         if command in cmap:
             print(cmap[command].__doc__)
-        elif command == 'list2':
+        elif command == 'list':
             print("Runestone Directives List")
             print("  ", "\n   ".join(sorted(cmap.keys())))
         else:
