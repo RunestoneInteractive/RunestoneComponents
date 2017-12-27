@@ -32,10 +32,8 @@ ActiveCode.prototype.init = function(opts) {
     this.timelimit = $(orig).data('timelimit');
     this.includes = $(orig).data('include');
     this.hidecode = $(orig).data('hidecode');
-    console.log(":hidecode: " + $(orig).data('hidecode'));
     this.runButton = null;
     this.enabledownload = $(orig).data('enabledownload');
-    console.log(":enabledownload: " + $(orig).data('enabledownload'));
     this.downloadButton = null;
     this.saveButton = null;
     this.loadButton = null;
@@ -160,7 +158,7 @@ ActiveCode.prototype.createControls = function () {
       $(butt).addClass("btn save-button");
       ctrlDiv.appendChild(butt);
       this.downloadButton = butt;
-      $(butt).click(this.downloadFile.bind(this, 'filename.txt'));
+      $(butt).click(this.downloadFile.bind(this, this.language));
       $(butt).attr("type","button")
     }
 
@@ -396,20 +394,24 @@ ActiveCode.prototype.disableSaveLoad = function() {
     $(this.loadButton).attr('title','Login to load your code');
 };
 
-ActiveCode.prototype.downloadFile = function (fn) {
+var languageExtensions = { python:     'py',
+                           html:       'html',
+                           javascript: 'js',
+                           java:       'java',
+                           python2:    'py',
+                           python3:    'py'};
+
+ActiveCode.prototype.downloadFile = function (lang) {
   var fnb = this.divid;
-  console.log( fnb );
   var d = new Date();
-  var fileName = fnb + '_' + d.toJSON().substring(0,10).split('-').join('')+'.py';
+  var fileName = fnb + '_' + d.toJSON()
+                              .substring(0,10) // reverse date format
+                              .split('-')
+                              .join('') + languageExtensions[lang];
   var code = this.editor.getValue();
-  console.log( 'Saving as file: '+fileName+'\n'+code );
 
   if ('Blob' in window) {
-//    var fileName = prompt('Please enter file name to save', 'Untitled.txt');
-//    if (fileName) {
-//      var textToWrite = document.getElementById('exampleTextarea').value.replace(/\n/g, '\r\n');
       var textToWrite = code.replace(/\n/g, '\r\n');
-      console.log("ttw:"+'\n'+textToWrite);
       var textFileAsBlob = new Blob([textToWrite], { type: 'text/plain' });
 
       if ('msSaveOrOpenBlob' in navigator) {
