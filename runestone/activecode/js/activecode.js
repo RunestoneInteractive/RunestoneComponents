@@ -152,7 +152,7 @@ ActiveCode.prototype.createControls = function () {
     $(butt).click(this.runProg.bind(this));
     $(butt).attr("type","button")
 
-    if (this.enabledownload) {
+    if (this.enabledownload || eBookConfig.downloadsEnabled) {
       var butt = document.createElement("button");
       $(butt).text("Download");
       $(butt).addClass("btn save-button");
@@ -407,7 +407,7 @@ ActiveCode.prototype.downloadFile = function (lang) {
   var fileName = fnb + '_' + d.toJSON()
                               .substring(0,10) // reverse date format
                               .split('-')
-                              .join('') + languageExtensions[lang];
+                              .join('') + '.' + languageExtensions[lang];
   var code = this.editor.getValue();
 
   if ('Blob' in window) {
