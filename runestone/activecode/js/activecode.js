@@ -32,7 +32,11 @@ ActiveCode.prototype.init = function(opts) {
     this.timelimit = $(orig).data('timelimit');
     this.includes = $(orig).data('include');
     this.hidecode = $(orig).data('hidecode');
+    console.log(":hidecode: " + $(orig).data('hidecode'));
     this.runButton = null;
+    this.enabledownload = $(orig).data('enabledownload');
+    console.log(":enabledownload: " + $(orig).data('enabledownload'));
+    this.downloadButton = null;
     this.saveButton = null;
     this.loadButton = null;
     this.outerDiv = null;
@@ -149,7 +153,18 @@ ActiveCode.prototype.createControls = function () {
     this.runButton = butt;
     $(butt).click(this.runProg.bind(this));
     $(butt).attr("type","button")
-    
+
+    // Download
+    if (this.enabledownload) {
+      var butt = document.createElement("button");
+      $(butt).text("Download"); // or "Save"
+      $(butt).addClass("btn save-button");
+      ctrlDiv.appendChild(butt);
+      this.downloadButton = butt;
+      $(butt).click(this.downloadFile.bind(this, 'filename.txt')); // ->saveFile
+      $(butt).attr("type","button")
+    }
+
     if (! this.hidecode) {
         var butt = document.createElement("button");
         $(butt).text("Load History");
@@ -162,7 +177,6 @@ ActiveCode.prototype.createControls = function () {
             this.addHistoryScrubber(true);
         }
     }
-
 
     if ($(this.origElem).data('gradebutton') && ! this.graderactive) {
         butt = document.createElement("button");
@@ -381,6 +395,38 @@ ActiveCode.prototype.disableSaveLoad = function() {
     $(this.saveButton).attr('title','Login to save your code');
     $(this.loadButton).addClass('disabled');
     $(this.loadButton).attr('title','Login to load your code');
+};
+
+ActiveCode.prototype.downloadFile = function (fn) {
+  var fnb = this.divid;
+  console.log( fnb );
+  var d = new Date();
+  var fileName = fnb + '_' + d.toJSON().substring(0,10).split('-').join('')+'.py';
+  var code = this.editor.getValue();
+  console.log( 'Saving as file: '+fileName+'\n'+code );
+
+  if ('Blob' in window) {
+//    var fileName = prompt('Please enter file name to save', 'Untitled.txt');
+//    if (fileName) {
+//      var textToWrite = document.getElementById('exampleTextarea').value.replace(/\n/g, '\r\n');
+      var textToWrite = code.replace(/\n/g, '\r\n');
+      console.log("ttw:"+'\n'+textToWrite);
+      var textFileAsBlob = new Blob([textToWrite], { type: 'text/plain' });
+
+      if ('msSaveOrOpenBlob' in navigator) {
+        navigator.msSaveOrOpenBlob(textFileAsBlob, fileName);
+      } else {
+        var downloadLink = document.createElement('a');
+        downloadLink.download = fileName;
+        downloadLink.innerHTML = 'Download File';
+        downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+        downloadLink.style.display = 'none';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+      }
+  } else {
+    alert('Your browser does not support the HTML5 Blob.');
+  }
 };
 
 ActiveCode.prototype.addCaption = function() {

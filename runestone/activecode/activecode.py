@@ -64,7 +64,7 @@ TEMPLATE_START = """
 """
 
 TEMPLATE_END = """
-<textarea data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(gradebutton)s %(caption)s>
+<textarea data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(gradebutton)s %(caption)s>
 %(initialcode)s
 </textarea>
 </div>
@@ -146,6 +146,7 @@ class ActiveCode(RunestoneDirective):
    :datafile: : A datafile for the program to read (java, python2, python3)
    :sourcefile: : source files (java, python2, python3)
    :available_files: : other additional files (java, python2, python3)
+   :enabledownload: -- allow textfield contents to be downloaded as *.py file
 
     If this is a homework problem instead of an example in the text
     then the assignment text should go here.  The assignment text ends with
@@ -181,6 +182,7 @@ class ActiveCode(RunestoneDirective):
         'datafile' : directives.unchanged,
         'sourcefile' : directives.unchanged,
         'available_files' : directives.unchanged,
+        'enabledownload' : directives.flag,
     })
 
 
@@ -248,6 +250,11 @@ class ActiveCode(RunestoneDirective):
             self.options['hidecode'] = 'data-hidecode="true"'
         else:
             self.options['hidecode'] = ''
+
+        if 'enabledownload' in self.options:
+            self.options['enabledownload'] = 'data-enabledownload="true"'
+        else:
+            self.options['enabledownload'] = ''
 
         if 'language' not in self.options:
             self.options['language'] = 'python'
