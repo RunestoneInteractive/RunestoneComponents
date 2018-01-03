@@ -17,7 +17,7 @@ __author__ = 'bmiller'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from runestone.common.runestonedirective import RunestoneDirective
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneIdDirective
 from .assessbase import Assessment
 from .multiplechoice import *
 from .timedassessment import *
@@ -47,7 +47,7 @@ def setup(app):
 
 
 
-class AddButton(RunestoneDirective):
+class AddButton(RunestoneIdDirective):
     required_arguments = 1
     optional_arguments = 1
     final_argument_whitespace = True
@@ -61,6 +61,7 @@ class AddButton(RunestoneDirective):
 
             ...
             """
+        super(AddButton, self).run()
 
         TEMPLATE_START = '''
             <div id="%(divid)s" class="alert alert-warning">
@@ -72,8 +73,6 @@ class AddButton(RunestoneDirective):
             </form>
             </div>
             '''
-
-        self.options['divid'] = self.arguments[0]
 
         res = ""
         res = TEMPLATE_START % self.options

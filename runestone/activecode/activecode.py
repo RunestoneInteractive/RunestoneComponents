@@ -22,7 +22,7 @@ from docutils.parsers.rst import directives
 from .textfield import *
 from sqlalchemy import Table
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB, engine, meta
-from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
 
 try:
     from html import escape  # py3
@@ -126,7 +126,7 @@ def process_activcode_nodes(app, env, docname):
 def purge_activecodes(app, env, docname):
     pass
 
-class ActiveCode(RunestoneDirective):
+class ActiveCode(RunestoneIdDirective):
     """
 .. activecode:: uniqueid
    :nocanvas:  -- do not create a canvas
@@ -162,7 +162,7 @@ class ActiveCode(RunestoneDirective):
     required_arguments = 1
     optional_arguments = 1
     has_content = True
-    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec = RunestoneIdDirective.option_spec.copy()
     option_spec.update({
         'nocanvas': directives.flag,
         'nopre': directives.flag,
@@ -195,6 +195,7 @@ class ActiveCode(RunestoneDirective):
 
 
     def run(self):
+        super(ActiveCode, self).run()
 
         addQuestionToDB(self)
 
@@ -205,10 +206,6 @@ class ActiveCode(RunestoneDirective):
             env.activecodecounter = 0
         env.activecodecounter += 1
         self.options['name'] = self.arguments[0].strip()
-        self.options['divid'] = self.arguments[0]
-
-        if not self.options['divid']:
-            raise Exception("No divid for ..activecode or ..actex in activecode.py")
 
         explain_text = None
         if self.content:

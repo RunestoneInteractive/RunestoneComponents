@@ -14,7 +14,7 @@ __author__ = 'isaiahmayerchak'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
 
 #add directives/javascript/css
 
@@ -69,7 +69,7 @@ TEMPLATE_START = '''
 
 TEMPLATE_END = '''</ul>
     '''
-class TimedDirective(RunestoneDirective):
+class TimedDirective(RunestoneIdDirective):
     """
 .. timed:: identifier
     :timelimit: Number of minutes student has to take the timed assessment--if not provided, no time limit
@@ -102,9 +102,8 @@ class TimedDirective(RunestoneDirective):
                 :fullwidth: Boolean, allows the items in the timed assessment to take the full width of the screen
             ...
             """
+        super(TimedDirective, self).run()
         self.assert_has_content() # make sure timed has something in it
-
-        self.options['divid'] = self.arguments[0]
 
         timed_node = TimedNode(self.options, rawsource=self.block_text)
         timed_node.source, timed_node.line = self.state_machine.get_source_and_line(self.lineno)

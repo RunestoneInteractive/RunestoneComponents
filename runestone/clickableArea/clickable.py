@@ -19,7 +19,7 @@ __author__ = 'isaiahmayerchak'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
 
 def setup(app):
     app.add_directive('clickablearea',ClickableArea)
@@ -85,7 +85,7 @@ def depart_ca_node(self,node):
     self.body.remove(node.delimiter)
 
 
-class ClickableArea(RunestoneDirective):
+class ClickableArea(RunestoneIdDirective):
     """
 .. clickablearea:: identifier
     :question: Question text
@@ -102,7 +102,7 @@ class ClickableArea(RunestoneDirective):
     optional_arguments = 0
     has_content = True
     final_argument_whitespace = True
-    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec = RunestoneIdDirective.option_spec.copy()
     option_spec.update({"question":directives.unchanged,
         "feedback":directives.unchanged,
         "iscode":directives.flag,
@@ -126,10 +126,10 @@ class ClickableArea(RunestoneDirective):
                 :incorrect: An array of the indices of the incorrect elements--same format as the correct elements.
                 --Content--
         """
+        super(ClickableArea, self).run()
         addQuestionToDB(self)
 
         self.assert_has_content()
-        self.options['divid'] = self.arguments[0]
         if "iscode" in self.options:
             source = "\n".join(self.content)
             source = source.replace(":click-correct:", "<span data-correct>")
