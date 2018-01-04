@@ -205,8 +205,8 @@ class WebglDemo(Directive):
         if 'htmlprogram' in self.options:
             path, name = os.path.split(self.options['htmlprogram'])
 
-            self.options['htmlprogrampath'] = path.encode('ascii', 'ignore')
-            self.options['htmlprogram'] = name.encode('ascii', 'ignore')
+            self.options['htmlprogrampath'] = path  # .encode('ascii', 'ignore')
+            self.options['htmlprogram'] = name      # .encode('ascii', 'ignore')
 
             # Determine how much the path to resources must be adjusted.
             find_relative_path(self.state.document.settings.env, self.options)
@@ -295,8 +295,8 @@ def visit_webgldemo_node(self, node):
     bodyCode = fileContents[startPos:endPos]
 
     # Update the paths to library files
-    bodyCode = string.replace(bodyCode, "../", node.webgl_components['lib_folder_prefix'])
-    bodyCode = string.replace(bodyCode, 'src="./', 'src="' + node.webgl_components['program_folder_prefix'] + node.webgl_components['htmlprogrampath'] + os.sep)
+    bodyCode = bodyCode.replace("../", node.webgl_components['lib_folder_prefix'])
+    bodyCode = bodyCode.replace('src="./', 'src="' + node.webgl_components['program_folder_prefix'] + node.webgl_components['htmlprogrampath'] + os.sep)
 
     # make the canvas a specific size
     if node.webgl_components['width'] > 0 and node.webgl_components['height'] > 0:
@@ -654,13 +654,13 @@ class WebglInteractive(Directive):
 
 OUTPUT_OPTIONS = '''
 <div>
-Show: 
+Show:
 <input type="checkbox" id="%(divid)s_webgl_displayInfo" name="Display" value="InfoMessages" checked='checked' />
 <span id="webgl_infoMessages" class="webgl_infoMessages">Process information &nbsp&nbsp</span>
 <input type="checkbox" id="%(divid)s_webgl_displayWarnings" name="Display" value="Warnings" checked='checked' />
-<span id="webgl_warningMessages" class="webgl_warningMessages">Warnings &nbsp&nbsp</span> 
+<span id="webgl_warningMessages" class="webgl_warningMessages">Warnings &nbsp&nbsp</span>
 <input type="checkbox" id="%(divid)s_webgl_displayErrors" name="Display" value="Errors" checked='checked' />
-<span id="webgl_errorMessages" class="webgl_errorMessages">Errors</span> 
+<span id="webgl_errorMessages" class="webgl_errorMessages">Errors</span>
 </div>
 '''
 
@@ -979,8 +979,8 @@ def visit_webglinteractive_node(self, node):
     bodyCode = fileContents[startPos:endPos]
 
     # Update the paths to library files
-    bodyCode = string.replace(bodyCode, "../", node.webgl_components['lib_folder_prefix'])
-    bodyCode = string.replace(bodyCode, 'src="./', 'src="' + node.webgl_components['program_folder_prefix'] + node.webgl_components['htmlprogrampath'] + os.sep)
+    bodyCode = bodyCode.replace("../", node.webgl_components['lib_folder_prefix'])
+    bodyCode = bodyCode.replace('src="./', 'src="' + node.webgl_components['program_folder_prefix'] + node.webgl_components['htmlprogrampath'] + os.sep)
 
     bodyCode = change_html_code_ids(bodyCode, node.webgl_components)
 
@@ -1035,5 +1035,4 @@ def process_webglinteractive_nodes(app, env, docname):
 
 def purge_webglinteractive(app, env, docname):
     pass
-
 
