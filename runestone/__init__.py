@@ -8,6 +8,7 @@ from .datafile import *
 from .disqus import *
 from .dragndrop import *
 from .fitb import *
+from .matrixeq import *
 from .meta import *
 from .parsons import *
 from .poll import *
@@ -17,6 +18,7 @@ from .showeval import *
 from .tabbedStuff import *
 from .usageAssignment import *
 from .video import *
+from .webgldemo import *
 
 
 import os, sys
