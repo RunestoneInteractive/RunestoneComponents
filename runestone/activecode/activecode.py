@@ -22,7 +22,7 @@ from docutils.parsers.rst import directives
 from .textfield import *
 from sqlalchemy import Table
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB, engine, meta
-from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
 
 try:
     from html import escape  # py3
@@ -66,7 +66,7 @@ TEMPLATE_START = """
 
 TEMPLATE_END = """
 <textarea data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s
-    %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(chatcodes)s
+    %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s %(chatcodes)s
     data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s
     %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s>
 %(initialcode)s
@@ -127,7 +127,7 @@ def process_activcode_nodes(app, env, docname):
 def purge_activecodes(app, env, docname):
     pass
 
-class ActiveCode(RunestoneDirective):
+class ActiveCode(RunestoneIdDirective):
     """
 .. activecode:: uniqueid
    :nocanvas:  -- do not create a canvas
@@ -151,6 +151,7 @@ class ActiveCode(RunestoneDirective):
    :datafile: : A datafile for the program to read (java, python2, python3)
    :sourcefile: : source files (java, python2, python3)
    :available_files: : other additional files (java, python2, python3)
+   :enabledownload: -- allow textfield contents to be downloaded as *.py file
 
     If this is a homework problem instead of an example in the text
     then the assignment text should go here.  The assignment text ends with
@@ -163,7 +164,7 @@ class ActiveCode(RunestoneDirective):
     required_arguments = 1
     optional_arguments = 1
     has_content = True
-    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec = RunestoneIdDirective.option_spec.copy()
     option_spec.update({
         'nocanvas': directives.flag,
         'nopre': directives.flag,
@@ -187,6 +188,7 @@ class ActiveCode(RunestoneDirective):
         'datafile' : directives.unchanged,
         'sourcefile' : directives.unchanged,
         'available_files' : directives.unchanged,
+        'enabledownload' : directives.flag,
         'compileargs': directives.unchanged,
         'linkargs': directives.unchanged,
         'interpreterargs': directives.unchanged,
@@ -196,6 +198,7 @@ class ActiveCode(RunestoneDirective):
 
 
     def run(self):
+        super(ActiveCode, self).run()
 
         addQuestionToDB(self)
 
@@ -206,10 +209,6 @@ class ActiveCode(RunestoneDirective):
             env.activecodecounter = 0
         env.activecodecounter += 1
         self.options['name'] = self.arguments[0].strip()
-        self.options['divid'] = self.arguments[0]
-
-        if not self.options['divid']:
-            raise Exception("No divid for ..activecode or ..actex in activecode.py")
 
         explain_text = None
         if self.content:
@@ -263,6 +262,10 @@ class ActiveCode(RunestoneDirective):
             self.options['chatcodes'] = 'data-chatcodes="true"'
         else:
             self.options['chatcodes'] = ''
+        if 'enabledownload' in self.options:
+            self.options['enabledownload'] = 'data-enabledownload="true"'
+        else:
+            self.options['enabledownload'] = ''
 
         if 'language' not in self.options:
             self.options['language'] = 'python'

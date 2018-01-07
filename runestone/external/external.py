@@ -17,7 +17,7 @@
 from docutils import nodes
 from docutils.parsers.rst import directives
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
 
 try:
     from html import escape  # py3
@@ -77,7 +77,7 @@ TEMPLATE_END = '''
     '''
 
 
-class ExternalDirective(RunestoneDirective):
+class ExternalDirective(RunestoneIdDirective):
     """
 .. external:: identifier
 
@@ -88,15 +88,14 @@ class ExternalDirective(RunestoneDirective):
     optional_arguments = 0
     final_argument_whitespace = True
     has_content = True
-    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec = RunestoneIdDirective.option_spec.copy()
     option_spec.update({'number': directives.positive_int})
 
     def run(self):
+        super(ExternalDirective, self).run()
         addQuestionToDB(self)
 
         self.assert_has_content()  # make sure activity has something in it
-        self.options['divid'] = self.arguments[0]
-        self.options['basecourse'] = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
 
         self.options['name'] = self.arguments[0].strip()
 

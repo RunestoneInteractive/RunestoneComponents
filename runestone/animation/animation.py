@@ -17,7 +17,7 @@ __author__ = 'bmiller'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from runestone.common.runestonedirective import RunestoneDirective
+from runestone.common.runestonedirective import RunestoneIdDirective
 
 
 def setup(app):
@@ -52,7 +52,7 @@ SRC = '''
 
 SCRIPTTAG = '''<script type="text/javascript" src="../_static/%s"></script>\n'''
 
-class Animation(RunestoneDirective):
+class Animation(RunestoneIdDirective):
     required_arguments = 1
     optional_arguments = 1
     final_argument_whitespace = True
@@ -69,9 +69,8 @@ class Animation(RunestoneDirective):
         :param self:
         :return:
         """
-
+        super(Animation, self).run()
         res = ''
-        self.options['divid'] = self.arguments[0]
 
         if 'modelfile' in self.options:
           res = res + SCRIPTTAG % self.options['modelfile']

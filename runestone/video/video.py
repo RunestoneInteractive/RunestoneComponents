@@ -19,7 +19,7 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common.runestonedirective import RunestoneDirective
+from runestone.common.runestonedirective import RunestoneIdDirective
 
 def setup(app):
     app.add_directive('video',Video)
@@ -74,7 +74,7 @@ INLINE = """\
 SOURCE = """<source src="%s" type="video/%s"></source>"""
 
 
-class Video(RunestoneDirective):
+class Video(RunestoneIdDirective):
     """
 .. video:: id
    :controls:  Show the controls or not
@@ -102,12 +102,12 @@ class Video(RunestoneDirective):
         :param self:
         :return:
         """
+        super(Video, self).run()
         addQuestionToDB(self)
 
         mimeMap = {'mov':'mp4','webm':'webm', 'm4v':'m4v'}
 
         sources = [SOURCE % (directives.uri(line),mimeMap[line[line.rindex(".")+1:]]) for line in self.content]
-        self.options['divid'] = self.arguments[0]
         if 'controls' in self.options:
             self.options['controls'] = 'controls'
         if 'loop' in self.options:

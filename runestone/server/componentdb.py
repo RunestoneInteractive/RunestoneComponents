@@ -20,8 +20,9 @@ from datetime import datetime
 __author__ = 'bmiller'
 
 import os
-from sqlalchemy import create_engine, Table, MetaData, select, delete, update, and_
+from sqlalchemy import create_engine, Table, MetaData, select, and_
 from . import get_dburl
+from runestone.common.runestonedirective import RunestoneDirective
 
 # create a global DB query engine to share for the rest of the file
 try:
@@ -54,6 +55,9 @@ def logSource(self):
 
 
 def addQuestionToDB(self):
+    # ``self`` must be a RunestoneDirective.
+    assert isinstance(self, RunestoneDirective)
+
     if dburl:
         basecourse = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
         if basecourse == "unknown":
@@ -70,28 +74,24 @@ def addQuestionToDB(self):
         if 'author' in self.options:
             author = self.options['author']
         else:
-            author = os.environ.get('USER','Brad Miller')
-
-        srcpath, line = self.state_machine.get_source_and_line()
-        subchapter = os.path.basename(srcpath).replace('.rst','')
-        chapter = srcpath.split(os.path.sep)[-2]
+            author = os.environ.get('USER', 'Brad Miller')
 
         autograde = self.options.get('autograde', None)
         practice = self.options.get('practice', None)
 
-        sel = select([questions]).where(and_(questions.c.name == self.arguments[0],
+        id_ = self.options['divid']
+        sel = select([questions]).where(and_(questions.c.name == id_,
                                               questions.c.base_course == basecourse))
         res = engine.execute(sel).first()
         try:
             if res:
-                stmt = questions.update().where(questions.c.id == res['id']).values(question = self.block_text, timestamp=last_changed, is_private='F',
-question_type=self.name, subchapter=subchapter, autograde = autograde, author=author,difficulty=difficulty,chapter=chapter, practice=practice)
+                stmt = questions.update().where(questions.c.id == res['id']).values(question = self.block_text, timestamp=last_changed, is_private='F', question_type=self.name, subchapter=self.subchapter, autograde=autograde, author=author,difficulty=difficulty,chapter=self.chapter, practice=practice)
                 engine.execute(stmt)
             else:
-                ins = questions.insert().values(base_course=basecourse, name=self.arguments[0], question=self.block_text.encode('utf8'), timestamp=last_changed, is_private='F', question_type=self.name, subchapter=subchapter, autograde = autograde, author=author,difficulty=difficulty,chapter=chapter, practice=practice)
+                ins = questions.insert().values(base_course=basecourse, name=id_, question=self.block_text.encode('utf8'), timestamp=last_changed, is_private='F', question_type=self.name, subchapter=self.subchapter, autograde=autograde, author=author,difficulty=difficulty,chapter=self.chapter, practice=practice)
                 engine.execute(ins)
         except UnicodeEncodeError:
-            raise self.severe("Bad character in directive {} in {}/{} this will not be saved to the DB".format(self.arguments[0], self.chapter, self.subchapter))
+            raise self.severe("Bad character in directive {} in {}/{}. This will not be saved to the DB".format(id_, self.chapter, self.subchapter))
 
 def getQuestionID(base_course, name):
 

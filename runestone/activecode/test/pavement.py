@@ -32,7 +32,10 @@ options(
                        'use_services': 'false',
                        'python3': 'true',
                        'dburl': '',
-                       'basecourse': 'activecodetest'
+                       'basecourse': 'activecodetest',
+                       'jobe_server': 'http://jobe2.cosc.canterbury.ac.nz',
+                       'proxy_uri_runs': '/jobe/index.php/restapi/runs/',
+                       'proxy_uri_files': '/jobe/index.php/restapi/files/'
                         }
     )
 )
