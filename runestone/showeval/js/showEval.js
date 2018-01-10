@@ -135,13 +135,14 @@ var SHOWEVAL = (function () {
                 if (thisShowEval.currentStep < thisShowEval.steps.length) {
                   thisShowEval.setStep(thisShowEval.currentStep);
                 }
+                $(buttonId).attr("disabled", false);
               }, 600);
             });
           });
         });
       }, 600);
     });
-    $(buttonId).attr("disabled", false);
+
     this.rb.logBookEvent({"event": "showeval", "act": 'next', "div_id": this.container[0].id});
 
   };
