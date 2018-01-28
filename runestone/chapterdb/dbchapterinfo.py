@@ -117,6 +117,8 @@ def env_updated(app, env):
                     chap_titles[chap_id] = title.astext()
                 else:
                     chap_titles[chap_id] = chap_id
+                    env.warn(docname, "Using a substandard chapter title")
+
             if chap_id not in subchap_titles:
                 subchap_titles[chap_id] = OrderedDict()
             if subchap_id not in subchap_titles[chap_id] and subchap_id != 'toctree':
