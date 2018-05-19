@@ -41,3 +41,8 @@ that demonstrates your new feature or component in action.
 
 In fact you should provide two examples whenever possible to demonstrate that you can have 
 multiple instances of your component on a single web page.
+
+Internationalization
+--------------------
+
+It is recomended to implement internationalization as described in [I18N.md](I18N.md) even if you plan to support only English currently. Besides making easy to support other languages in the future, internationalization helps you to better separate natural language text fragments from the rest of your code.

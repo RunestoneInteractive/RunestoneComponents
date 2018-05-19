@@ -264,6 +264,18 @@ window.WebglInteractive_directive = function (id) {
   }
 
   //-----------------------------------------------------------------------
+  function _updatePLY(download, file_name, code_mirror) {
+    let text;
+
+    // Get the text from the codemirror editor
+    text = code_mirror.getValue();
+
+    // Update the model data definitions
+    let name = download.parseFilename(file_name).filename;
+    download.model_data_dictionary[name] = text;
+  }
+
+  //-----------------------------------------------------------------------
   function _updateMTL(download, file_name, code_mirror) {
     let text;
 
@@ -355,6 +367,10 @@ window.WebglInteractive_directive = function (id) {
             break;
           case "obj":
             _updateOBJ(download, file_name, self.code_mirrors[j]);
+            download.out.displayInfo("Updated definition of model '" + file_name + "." + file_extension + "'");
+            break;
+          case "ply":
+            _updatePLY(download, file_name, self.code_mirrors[j]);
             download.out.displayInfo("Updated definition of model '" + file_name + "." + file_extension + "'");
             break;
           case "mtl":
