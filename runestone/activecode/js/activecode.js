@@ -145,7 +145,7 @@ ActiveCode.prototype.createControls = function () {
     $(ctrlDiv).addClass("col-md-12");
     // Run
     var butt = document.createElement("button");
-    $(butt).text("Run");
+    $(butt).text($.i18n("msg_activecode_run_code"));
     $(butt).addClass("btn btn-success run-button");
     ctrlDiv.appendChild(butt);
     this.runButton = butt;
@@ -164,7 +164,7 @@ ActiveCode.prototype.createControls = function () {
 
     if (! this.hidecode) {
         var butt = document.createElement("button");
-        $(butt).text("Load History");
+        $(butt).text($.i18n("msg_activecode_load_history"));
         $(butt).addClass("btn btn-default");
         $(butt).attr("type","button")
         ctrlDiv.appendChild(butt);
@@ -178,7 +178,7 @@ ActiveCode.prototype.createControls = function () {
     if ($(this.origElem).data('gradebutton') && ! this.graderactive) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Show Feedback");
+        $(butt).text($.i18n("msg_activecode_show_feedback"));
         $(butt).css("margin-left","10px");
         $(butt).attr("type","button")
         this.gradeButton = butt;
@@ -190,7 +190,7 @@ ActiveCode.prototype.createControls = function () {
         $(this.runButton).attr('disabled', 'disabled');
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Show Code");
+        $(butt).text($.i18n("msg_activecode_show_code"));
         $(butt).css("margin-left", "10px");
         $(butt).attr("type","button")
         this.showHideButt = butt;
@@ -202,10 +202,10 @@ ActiveCode.prototype.createControls = function () {
             } else {
                 $(this.historyScrubber.parentElement).toggle();
             }
-            if ($(this.showHideButt).text() == "Show Code") {
-                $(this.showHideButt).text("Hide Code");
+            if ($(this.showHideButt).text() == $.i18n("msg_activecode_show_code")) {
+                $(this.showHideButt).text($.i18n("msg_activecode_hide_code"));
             } else {
-                $(this.showHideButt).text("Show Code");
+                $(this.showHideButt).text($.i18n("msg_activecode_show_code"));
             }
             if ($(this.runButton).attr('disabled')) {
                 $(this.runButton).removeAttr('disabled');
@@ -219,7 +219,7 @@ ActiveCode.prototype.createControls = function () {
     if ($(this.origElem).data("codelens") && ! this.graderactive) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Show CodeLens");
+        $(butt).text($.i18n("msg_activecode_show_codelens"));
         $(butt).css("margin-left", "10px");
         this.clButton = butt;
         ctrlDiv.appendChild(butt);
@@ -241,7 +241,7 @@ ActiveCode.prototype.createControls = function () {
     if ($(this.origElem).data("audio")) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Audio Tour");
+        $(butt).text($.i18n("msg_activecode_audio_tour"));
         $(butt).css("margin-left", "10px");
         this.atButton = butt;
         ctrlDiv.appendChild(butt);
@@ -452,12 +452,12 @@ ActiveCode.prototype.loadEditor = function () {
                 this.editor.refresh();
             }.bind(this),500);
             $(this.loadButton).tooltip({'placement': 'bottom',
-                             'title': "Loaded your saved code.",
+                             'title': $.i18n("msg_activecode_loaded_code"),
                              'trigger': 'manual'
                             });
         } else {
             $(this.loadButton).tooltip({'placement': 'bottom',
-                             'title': "No saved code.",
+                             'title': $.i18n("msg_activecode_no_saved_code"),
                              'trigger': 'manual'
                             });
         }
@@ -534,10 +534,10 @@ ActiveCode.prototype.showCodelens = function () {
 
     if (this.codelens.style.display == 'none') {
         this.codelens.style.display = 'block';
-        this.clButton.innerText = "Hide Codelens";
+        this.clButton.innerText = $.i18n("msg_activecode_hide_codelens");
     } else {
         this.codelens.style.display = "none";
-        this.clButton.innerText = "Show in Codelens";
+        this.clButton.innerText = $.i18n("msg_activecode_show_in_codelens");
         return;
     }
 
@@ -650,42 +650,42 @@ ActiveCode.prototype.addErrorMessage = function (err) {
 
 var errorText = {};
 
-errorText.ParseError = "A parse error means that Python does not understand the syntax on the line the error message points out.  Common examples are forgetting commas beteween arguments or forgetting a : on a for statement";
-errorText.ParseErrorFix = "To fix a parse error you just need to look carefully at the line with the error and possibly the line before it.  Make sure it conforms to all of Python's rules.";
-errorText.TypeError = "Type errors most often occur when an expression tries to combine two objects with types that should not be combined.  Like raising a string to a power";
-errorText.TypeErrorFix = "To fix a type error you will most likely need to trace through your code and make sure the variables have the types you expect them to have.  It may be helpful to print out each variable along the way to be sure its value is what you think it should be.";
-errorText.NameError = "A name error almost always means that you have used a variable before it has a value.  Often this may be a simple typo, so check the spelling carefully.";
-errorText.NameErrorFix = "Check the right hand side of assignment statements and your function calls, this is the most likely place for a NameError to be found.";
-errorText.ValueError = "A ValueError most often occurs when you pass a parameter to a function and the function is expecting one type and you pass another.";
-errorText.ValueErrorFix = "The error message gives you a pretty good hint about the name of the function as well as the value that is incorrect.  Look at the error message closely and then trace back to the variable containing the problematic value.";
-errorText.AttributeError = "This error message is telling you that the object on the left hand side of the dot, does not have the attribute or method on the right hand side.";
-errorText.AttributeErrorFix = "The most common variant of this message is that the object undefined does not have attribute X.  This tells you that the object on the left hand side of the dot is not what you think. Trace the variable back and print it out in various places until you discover where it becomes undefined.  Otherwise check the attribute on the right hand side of the dot for a typo.";
-errorText.TokenError = "Most of the time this error indicates that you have forgotten a right parenthesis or have forgotten to close a pair of quotes.";
-errorText.TokenErrorFix = "Check each line of your program and make sure that your parenthesis are balanced.";
-errorText.TimeLimitError = "Your program is running too long.  Most programs in this book should run in less than 10 seconds easily. This probably indicates your program is in an infinite loop.";
-errorText.TimeLimitErrorFix = "Add some print statements to figure out if your program is in an infinte loop.  If it is not you can increase the run time with sys.setExecutionLimit(msecs)";
-errorText.Error = "Your program is running for too long.  Most programs in this book should run in less than 30 seconds easily. This probably indicates your program is in an infinite loop.";
-errorText.ErrorFix = "Add some print statements to figure out if your program is in an infinte loop.  If it is not you can increase the run time with sys.setExecutionLimit(msecs)";
-errorText.SyntaxError = "This message indicates that Python can't figure out the syntax of a particular statement.  Some examples are assigning to a literal, or a function call";
-errorText.SyntaxErrorFix = "Check your assignment statments and make sure that the left hand side of the assignment is a variable, not a literal or a function.";
-errorText.IndexError = "This message means that you are trying to index past the end of a string or a list.  For example if your list has 3 things in it and you try to access the item at position 3 or more.";
-errorText.IndexErrorFix = "Remember that the first item in a list or string is at index position 0, quite often this message comes about because you are off by one.  Remember in a list of length 3 the last legal index is 2";
-errorText.URIError = "";
-errorText.URIErrorFix = "";
-errorText.ImportError = "This error message indicates that you are trying to import a module that does not exist";
-errorText.ImportErrorFix = "One problem may simply be that you have a typo.  It may also be that you are trying to import a module that exists in 'real' Python, but does not exist in this book.  If this is the case, please submit a feature request to have the module added.";
-errorText.ReferenceError = "This is most likely an internal error, particularly if the message references the console.";
-errorText.ReferenceErrorFix = "Try refreshing the webpage, and if the error continues, submit a bug report along with your code";
-errorText.ZeroDivisionError = "This tells you that you are trying to divide by 0. Typically this is because the value of the variable in the denominator of a division expression has the value 0";
-errorText.ZeroDivisionErrorFix = "You may need to protect against dividing by 0 with an if statment, or you may need to rexamine your assumptions about the legal values of variables, it could be an earlier statment that is unexpectedly assigning a value of zero to the variable in question.";
-errorText.RangeError = "This message almost always shows up in the form of Maximum call stack size exceeded.";
-errorText.RangeErrorFix = "This always occurs when a function calls itself.  Its pretty likely that you are not doing this on purpose. Except in the chapter on recursion.  If you are in that chapter then its likely you haven't identified a good base case.";
-errorText.InternalError = "An Internal error may mean that you've triggered a bug in our Python";
-errorText.InternalErrorFix = "Report this error, along with your code as a bug.";
-errorText.IndentationError = "This error occurs when you have not indented your code properly.  This is most likely to happen as part of an if, for, while or def statement.";
-errorText.IndentationErrorFix = "Check your if, def, for, and while statements to be sure the lines are properly indented beneath them.  Another source of this error comes from copying and pasting code where you have accidentally left some bits of code lying around that don't belong there anymore.";
-errorText.NotImplementedError = "This error occurs when you try to use a builtin function of Python that has not been implemented in this in-browser version of Python.";
-errorText.NotImplementedErrorFix = "For now the only way to fix this is to not use the function.  There may be workarounds.  If you really need this builtin function then file a bug report and tell us how you are trying to use the function.";
+errorText.ParseError = $.i18n("msg_sctivecode_parse_error");
+errorText.ParseErrorFix = $.i18n( "msg_sctivecode_parse_error_fix");
+errorText.TypeError = $.i18n("msg_activecode_type_error");
+errorText.TypeErrorFix = $.i18n("msg_activecode_type_error_fix");
+errorText.NameError = $.i18n("msg_activecode_name_error");
+errorText.NameErrorFix = $.i18n("msg_activecode_name_error_fix");
+errorText.ValueError = $.i18n("msg_activecode_value_error");
+errorText.ValueErrorFix = $.i18n("msg_activecode_value_error_fix");
+errorText.AttributeError = $.i18n("msg_activecode_attribute_error");
+errorText.AttributeErrorFix = $.i18n("msg_activecode_attribute_error_fix");
+errorText.TokenError = $.i18n("msg_activecode_token_error");
+errorText.TokenErrorFix =  $.i18n("msg_activecode_token_error_fix");
+errorText.TimeLimitError = $.i18n("msg_activecode_time_limit_error");
+errorText.TimeLimitErrorFix = $.i18n("msg_activecode_time_limit_error_fix");
+errorText.Error = $.i18n("msg_activecode_general_error");
+errorText.ErrorFix = $.i18n("msg_activecode_general_error_fix");
+errorText.SyntaxError = $.i18n("msg_activecode_syntax_error");
+errorText.SyntaxErrorFix = $.i18n("msg_activecode_syntax_error_fix");
+errorText.IndexError = $.i18n("msg_activecode_index_error");
+errorText.IndexErrorFix = $.i18n("msg_activecode_index_error_fix");
+errorText.URIError = $.i18n("msg_activecode_uri_error");
+errorText.URIErrorFix = $.i18n("msg_activecode_uri_error_fix");
+errorText.ImportError = $.i18n("msg_activecode_import_error");
+errorText.ImportErrorFix = $.i18n("msg_activecode_import_error_fix");
+errorText.ReferenceError = $.i18n("msg_activecode_reference_error");
+errorText.ReferenceErrorFix = $.i18n("msg_activecode_reference_error_fix");
+errorText.ZeroDivisionError = $.i18n("msg_activecode_zero_division_error");
+errorText.ZeroDivisionErrorFix = $.i18n("msg_activecode_zero_division_error_fix");
+errorText.RangeError = $.i18n("msg_activecode_range_error");
+errorText.RangeErrorFix = $.i18n("msg_activecode_range_error_fix");
+errorText.InternalError = $.i18n("msg_activecode_internal_error");
+errorText.InternalErrorFix = $.i18n("msg_activecode_internal_error_fix");
+errorText.IndentationError = $.i18n("msg_activecode_indentation_error");
+errorText.IndentationErrorFix = $.i18n("msg_activecode_indentation_error_fix");
+errorText.NotImplementedError = $.i18n("msg_activecode_not_implemented_error");
+errorText.NotImplementedErrorFix = $.i18n("msg_activecode_not_implemented_error_fix");
 
 
 
@@ -716,7 +716,7 @@ ActiveCode.prototype.setTimeLimit = function (timer) {
 
 ActiveCode.prototype.builtinRead = function (x) {
         if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
-            throw "File not found: '" + x + "'";
+            throw $.i18n("msg_activecode_file_not_found",x);
         return Sk.builtinFiles["files"][x];
 };
 
@@ -727,7 +727,7 @@ ActiveCode.prototype.fileReader = function(divid) {
         return Sk.builtinFiles["files"][divid];
     }
     if (elem == null) {
-        throw new Sk.builtin.IOError("[Errno 2] No such file or directory: '" + divid + "'");
+        throw new Sk.builtin.IOError($.i18n("msg_activecode_no_file_or_dir",divid));
     } else {
         if (elem.nodeName.toLowerCase() == "textarea") {
             data = elem.value;
@@ -1285,7 +1285,7 @@ AudioTour.prototype.tour = function (divid, audio_type, bcount) {
     var atype = audio_type.split(";");
     var name = atype[0].replaceAll("\"", " ");
     this.tourName = name;
-    $(this.status).html("Click the play button to begin the " + name);
+    $(this.status).html($.i18n("msg_activecode_starting", name));
 
     //log tour type to db
     this.logBookEvent({'event': 'Audio', 'act': name, 'div_id': divid});
@@ -1479,7 +1479,7 @@ AudioTour.prototype.playWhenReady = function (afile, divid, ahash) {
     //console.log("in playWhenReady " + elem.duration);
     this.highlightLines(divid, ahash[afile]);
     if (this.pause_audio.className === "btn-default glyphicon glyphicon-pause") {
-        $(this.status).html("Playing the " + this.tourName);
+        $(this.status).html($.i18n("msg_activecode_playing", this.tourName));
         $('#' + afile).bind('ended', (function () {
         this.outerAudio();
         }).bind(this));
@@ -1502,7 +1502,7 @@ AudioTour.prototype.playaudio = function (i, aname, divid, ahash) {
     //console.log("in playaudio " + elem.duration);
     if (isNaN(this.elem.duration) || this.elem.duration == 0) {
         // set the status
-        $(this.status).html("Loading audio.  Please wait.   If the tour doesn't start soon click on 'Stop Tour' and try again.");
+        $(this.status).html($.i18n("msg_activecode_loading_audio"));
         $('#' + this.afile).bind('canplaythrough', (function () {
             this.playWhenReady(this.afile, divid, ahash);
         }).bind(this));
@@ -1523,9 +1523,9 @@ AudioTour.prototype.pauseAndPlayAudio = function (divid) {
         counter = (this.elem.duration - this.elem.currentTime) * 1000;
         this.elem.play(); // start the audio from current spot
         this.pause_audio.className = "btn-default glyphicon glyphicon-pause";
-        this.pause_audio.title = "Pause current audio";
-        this.pause_audio.setAttribute("aria-label", "Pause audio");
-        $(this.status).html("Playing the " + this.tourName);
+        this.pause_audio.title = $.i18n("msg_activecode_pause_current_audio");
+        this.pause_audio.setAttribute("aria-label", $.i18n("msg_activecode_pause_audio"));
+        $(this.status).html($.i18n("msg_activecode_playing", this.tourName));
         //log change to db
         this.logBookEvent({'event': 'Audio', 'act': 'play', 'div_id': this.theDivid});
     }
@@ -1534,9 +1534,9 @@ AudioTour.prototype.pauseAndPlayAudio = function (divid) {
     else if (this.playing) {
         this.elem.pause(); // pause the audio
         this.pause_audio.className = "btn-default glyphicon glyphicon-play";
-        this.pause_audio.title = "Play paused audio";
-        this.pause_audio.setAttribute("aria-label", "Play paused audio");
-        $(this.status).html("The " + this.tourName + " has been paused. Click on the play button to resume the tour.");
+        this.pause_audio.title = $.i18n("msg_activecode_play_paused_audio");
+        this.pause_audio.setAttribute("aria-label", $.i18n("msg_activecode_play_paused_audio"));
+        $(this.status).html($.i18n("msg_activecode_audio_paused", this.tourName));
         //log change to db
         this.logBookEvent({'event': 'Audio', 'act': 'pause', 'div_id': this.theDivid});
     }
@@ -1639,7 +1639,7 @@ LiveCode.prototype.createInputElement = function () {
 
     var label = document.createElement('label');
     label.for = this.divid + "_stdin";
-    $(label).text("Input for Program");
+    $(label).text($.i18n("msg_activecode_input_prg"));
     var input = document.createElement('input');
     input.id = this.divid + "_stdin";
     input.type = "text";
@@ -1687,7 +1687,7 @@ LiveCode.prototype.runProg = function() {
         this.sourcefile = sfilemap[this.language];
     }
 
-    $(this.output).html("Compiling and Running your Code Now...");
+    $(this.output).html($.i18n("msg_activecode_compiling_running"));
 
     var files = [];
     if(this.language === "java") {
@@ -1802,7 +1802,7 @@ LiveCode.prototype.runProg_callback = function(data) {
                     $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
                     break;
                 case 11: // compiler error
-                    $(odiv).html("There were errors compiling your code. See below.");
+                    $(odiv).html($.i18n("msg_activecode_were_compiling_err"));
                     this.addJobeErrorMessage(result.cmpinfo);
                     break;
                 case 12:  // run time error
@@ -1813,13 +1813,13 @@ LiveCode.prototype.runProg_callback = function(data) {
                     break;
                 case 13:  // time limit
                     $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
-                    this.addJobeErrorMessage("Time Limit Exceeded on your program");
+                    this.addJobeErrorMessage($.i18n("msg_activecode_time_limit_exc"));
                     break;
                 default:
                     if(result.stderr){
                         $(odiv).html(result.stderr.replace(/\n/g, "<br>"));
                     } else {
-                        this.addJobeErrorMessage("A server error occurred: " + xhr.status + " " + xhr.statusText);
+                        this.addJobeErrorMessage($.i18n("msg_activecode_server_err", xhr.status, xhr.statusText));
                     }
             }
             // todo: handle server busy and timeout errors too
@@ -1828,7 +1828,7 @@ LiveCode.prototype.runProg_callback = function(data) {
         ///$("#" + divid + "_errinfo").remove();
 
         xhr.onerror = (function () {
-            this.addJobeErrorMessage("Error communicating with the server.");
+            this.addJobeErrorMessage($.i18n("msg_activecode_server_comm_err"));
             $(this.runButton).removeAttr('disabled');
         }).bind(this);
 
@@ -2188,7 +2188,7 @@ if (typeof component_factory === 'undefined') {
 component_factory['activecode'] = ACFactory.createActiveCodeFromOpts;
 
 $(document).bind("runestone:login", function() {
-    $(".run-button").text("Save & Run");
+    $(".run-button").text($.i18n("msg_activecode_save_run"));
 });
 
 // This seems a bit hacky and possibly brittle, but its hard to know how long it will take to
