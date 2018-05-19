@@ -32,7 +32,7 @@ DISQUS_BOX = """\
                 reload: true,
                 config: function () {
                     this.page.identifier = '%(identifier)s_' + eBookConfig.course;
-                    this.page.url = 'http://%(identifier)s_'+eBookConfig.course+'.interactivepython.com/#!';
+                    this.page.url = 'https://%(identifier)s_'+eBookConfig.course+'.interactivepython.com/#!';
                 }
             });
 
@@ -47,7 +47,7 @@ DISQUS_BOX = """\
 
             //append the Disqus embed script to HTML
             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-            dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+            dsq.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
             $('head').append(dsq);
 
         }
