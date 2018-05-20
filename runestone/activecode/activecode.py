@@ -37,6 +37,9 @@ def setup(app):
     app.add_directive('activecode', ActiveCode)
     app.add_directive('actex', ActiveExercise)
     app.add_role('textfield',textfield_role)
+    app.add_config_value('activecode_div_class', "runestone explainer ac_section alert alert-warning", 'html')
+    app.add_config_value('activecode_hide_load_history', False, 'html')
+
     app.add_stylesheet('activecode.css')
 
     app.add_javascript('jquery.highlight.js')
@@ -59,14 +62,14 @@ def setup(app):
 
 
 TEMPLATE_START = """
-<div data-childcomponent="%(divid)s" class="runestone explainer ac_section alert alert-warning">
+<div data-childcomponent="%(divid)s" class="%(divclass)s">
 """
 
 TEMPLATE_END = """
 <textarea data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s
     %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s
     data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s
-    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s>
+    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(hidehistory)s>
 %(initialcode)s
 </textarea>
 </div>
@@ -312,6 +315,12 @@ class ActiveCode(RunestoneIdDirective):
             self.options['gradebutton'] = ''
         else:
             self.options['gradebutton'] = "data-gradebutton=true"
+
+        self.options['divclass'] = env.config.activecode_div_class
+        if env.config.activecode_hide_load_history:
+            self.options['hidehistory'] = 'data-hidehistory=true'
+        else:
+            self.options['hidehistory'] = ''
 
         if self.content:
             if '====' in self.content:

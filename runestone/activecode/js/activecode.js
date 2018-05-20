@@ -32,6 +32,7 @@ ActiveCode.prototype.init = function(opts) {
     this.timelimit = $(orig).data('timelimit');
     this.includes = $(orig).data('include');
     this.hidecode = $(orig).data('hidecode');
+    this.hidehistory = $(orig).data('hidehistory');
     this.runButton = null;
     this.enabledownload = $(orig).data('enabledownload');
     this.downloadButton = null;
@@ -162,7 +163,7 @@ ActiveCode.prototype.createControls = function () {
       $(butt).attr("type","button")
     }
 
-    if (! this.hidecode) {
+    if (!this.hidecode && !this.hidehistory) {
         var butt = document.createElement("button");
         $(butt).text($.i18n("msg_activecode_load_history"));
         $(butt).addClass("btn btn-default");
