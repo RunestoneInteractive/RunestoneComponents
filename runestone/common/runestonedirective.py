@@ -141,22 +141,47 @@ class RunestoneIdDirective(RunestoneDirective):
             id_to_page[id_] = Struct(docname=env.docname, lineno=self.lineno)
             page_to_id[env.docname].add(id_)
 
+# returns True when called first time with particular parameters' values
+def first_time(app, *keys):
+    key = '$'.join(keys)
+    if not hasattr(app,'runestone_flags'):
+        app.runestone_flags = set()
+    if not key in app.runestone_flags:
+        app.runestone_flags.add(key)
+        return True
+    return False
+
 # An internationalized component should call add_i18n_javascript() from its setup() function
-def add_i18n_javascript(app, supported_langs, *i18n_resources):
-    app.add_javascript('jquery_i18n/CLDRPluralRuleParser.js')
-    app.add_javascript('jquery_i18n/jquery.i18n.js')
-    app.add_javascript('jquery_i18n/jquery.i18n.messagestore.js')
-    app.add_javascript('jquery_i18n/jquery.i18n.fallbacks.js')
-    app.add_javascript('jquery_i18n/jquery.i18n.language.js')
-    app.add_javascript('jquery_i18n/jquery.i18n.parser.js')
-    app.add_javascript('jquery_i18n/jquery.i18n.emitter.js')
-    app.add_javascript('jquery_i18n/jquery.i18n.emitter.bidi.js')
+def add_i18n_js(app, supported_langs, *i18n_resources):
+    if first_time(app, 'add_i18n_js'):
+        app.add_javascript('jquery_i18n/CLDRPluralRuleParser.js')
+        app.add_javascript('jquery_i18n/jquery.i18n.js')
+        app.add_javascript('jquery_i18n/jquery.i18n.messagestore.js')
+        app.add_javascript('jquery_i18n/jquery.i18n.fallbacks.js')
+        app.add_javascript('jquery_i18n/jquery.i18n.language.js')
+        app.add_javascript('jquery_i18n/jquery.i18n.parser.js')
+        app.add_javascript('jquery_i18n/jquery.i18n.emitter.js')
+        app.add_javascript('jquery_i18n/jquery.i18n.emitter.bidi.js')
     for res in i18n_resources:
-        app.add_javascript(res + ".en.js")
-        if app.config.language and app.config.language != "en" and app.config.language in supported_langs:
-            app.add_javascript(res + "." + app.config.language + ".js")
+        if(first_time(app,'add_i18n_js','key')):
+            app.add_javascript(res + ".en.js")
+            if app.config.language and app.config.language != "en" and app.config.language in supported_langs:
+                app.add_javascript(res + "." + app.config.language + ".js")
 
+# Adds CSS and JavaScript for the CodeMirror text editor
+def add_codemirror_css_and_js(app, *mods):
+    if first_time(app, 'add_codemirror_css_and_js'):
+        app.add_stylesheet('codemirror.css')
+        app.add_javascript('codemirror.js')
+    for mod in mods:
+        if first_time(app, 'add_codemirror_css_and_js',mod):
+            app.add_javascript(mod + '.js')
 
+# Adds JavaScript for the Sculpt in-browser implementation of Python
+def add_skulpt_js(app):
+    if first_time(app, 'add_skulpt_js'):
+        app.add_javascript('skulpt.min.js')
+        app.add_javascript('skulpt-stdlib.js')
 
 # Some nodes have a line number of None. Look through their children to find the node's line number.
 def get_node_line(node):
