@@ -47,7 +47,7 @@ def setup(app):
     app.add_stylesheet('webglinteractive.css')
 
     # CodeMirror syntax highlighting for various types of code
-    add_codemirror_css_and_js(app,'xml','css','htmlmixex','javascript')
+    add_codemirror_css_and_js(app,'xml','css','htmlmixed','javascript')
 
     app.add_javascript('webglinteractive.js')
 
