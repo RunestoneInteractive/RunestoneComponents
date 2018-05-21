@@ -412,7 +412,7 @@ class InlineMatrixEqNode(nodes.General, nodes.Element, RunestoneNode):
         super(InlineMatrixEqNode, self).__init__(**kwargs)
         matrix_text = re.search(':inline_matrixeq:`(.*)`', content).group(1)
         self.components = {'contents' : matrix_text,
-                           'colorscheme' : ' style="background-color:#fcf8e3; color: inherit"',
+                           'colorscheme' : ' style="background-color:inherit; color: inherit"',
                            'highlightcolor' : "red",
                            'equationcounter' : 0}
 
