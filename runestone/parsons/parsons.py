@@ -30,10 +30,10 @@ def setup(app):
     app.add_javascript('lib/hammer.min.js')
     app.add_javascript('parsons.js')
     app.add_javascript('timedparsons.js')
-
+    app.add_config_value('parsons_div_class', '', 'html')
 
 TEMPLATE = '''
-        <div class="runestone" style="max-width: none;">
+        <div class="runestone %(divclass)s" style="max-width: none;">
         <pre data-component="parsons" id="%(divid)s" %(adaptive)s %(maxdist)s %(order)s %(noindent)s %(language)s %(numbered)s>
         <span data-question>%(qnumber)s: %(instructions)s</span>%(code)s
         </pre>
@@ -139,9 +139,11 @@ Example:
         super(ParsonsProblem, self).run()
         addQuestionToDB(self)
 
+        env = self.state.document.settings.env
         self.options['qnumber'] = self.getNumber()
         self.options['instructions'] = ""
         self.options['code'] = self.content
+        self.options['divclass'] = env.config.parsons_div_class
 
         if 'numbered' in self.options:
             self.options['numbered'] = ' data-numbered="' + self.options['numbered'] + '"' #' data-numbered="true"'
