@@ -176,7 +176,7 @@ class MChoice(Assessment):
         super(MChoice, self).run()
 
         TEMPLATE_START = '''
-            <div class="runestone">
+            <div class="runestone %(divclass)s">
             <ul data-component="multiplechoice" data-multipleanswers="%(multipleAnswers)s" %(random)s id="%(divid)s">
             '''
 
@@ -198,7 +198,8 @@ class MChoice(Assessment):
         mcNode.template_end = TEMPLATE_END
 
         self.state.nested_parse(self.content, self.content_offset, mcNode)
-
+        env = self.state.document.settings.env
+        self.options['divclass'] = env.config.mchoice_div_class
         # Expected _`structure`, with assigned variable names and transformations made:
         #
         # .. code-block::
