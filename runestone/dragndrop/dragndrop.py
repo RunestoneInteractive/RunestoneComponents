@@ -20,19 +20,21 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode, add_i18n_js
 
 def setup(app):
     app.add_directive('dragndrop',DragNDrop)
     app.add_javascript('dragndrop.js')
     app.add_javascript('timeddnd.js')
+    add_i18n_js(app, {"en","sr-Cyrl"}, "dragndrop-i18n")
     app.add_stylesheet('dragndrop.css')
 
     app.add_node(DragNDropNode, html=(visit_dnd_node, depart_dnd_node))
 
+    app.add_config_value('dragndrop_div_class', '', 'html')
 
 TEMPLATE_START = """
-<div class="runestone">
+<div class="runestone %(divclass)s">
 <ul data-component="dragndrop" id="%(divid)s">
     <span data-component="question">%(question)s</span>
 	%(feedback)s
@@ -165,5 +167,6 @@ class DragNDrop(RunestoneIdDirective):
         dndNode.template_start = TEMPLATE_START
         dndNode.template_option = TEMPLATE_OPTION
         dndNode.template_end = TEMPLATE_END
-
+        env = self.state.document.settings.env
+        self.options['divclass'] = env.config.dragndrop_div_class
         return [dndNode]
