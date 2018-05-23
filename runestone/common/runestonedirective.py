@@ -163,7 +163,7 @@ def add_i18n_js(app, supported_langs, *i18n_resources):
         app.add_javascript('jquery_i18n/jquery.i18n.emitter.js')
         app.add_javascript('jquery_i18n/jquery.i18n.emitter.bidi.js')
     for res in i18n_resources:
-        if(first_time(app,'add_i18n_js','key')):
+        if(first_time(app,'add_i18n_js',res)):
             app.add_javascript(res + ".en.js")
             if app.config.language and app.config.language != "en" and app.config.language in supported_langs:
                 app.add_javascript(res + "." + app.config.language + ".js")
