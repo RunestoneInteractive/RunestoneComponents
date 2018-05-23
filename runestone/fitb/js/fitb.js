@@ -198,7 +198,7 @@ FITB.prototype.evaluateAnswers = function () {
         // If this blank is empty, provide no feedback for it.
         if (given === "") {
             this.isCorrectArray.push("");
-            this.displayFeed.push('No answer provided.');
+            this.displayFeed.push($.i18n("msg_no_answer"));
         } else {
             // Look through all feedback for this blank. The last element in the array always matches.
             var fbl = this.feedbackArray[i];

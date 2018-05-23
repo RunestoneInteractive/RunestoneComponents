@@ -428,12 +428,10 @@ MultipleChoice.prototype.renderMCMAFeedBack = function () {
     var feedbackText = this.feedbackString;
 
     if (this.correct) {
-        $(this.feedBackDiv).html('Correct.<ol type="A">' + feedbackText + "</ul>");
+        $(this.feedBackDiv).html($.i18n("msg_mchoice_correct_answer"));
         $(this.feedBackDiv).attr("class", "alert alert-success");
     } else {
-        $(this.feedBackDiv).html("Incorrect.    " + "You gave " + numGiven +
-            " " + answerStr + " and got " + numCorrect + " correct of " +
-            numNeeded + ' needed.<ol type="A">' + feedbackText + "</ul>");
+        $(this.feedBackDiv).html($.i18n($.i18n("msg_mchoice_incorrect_answer"), numGiven, numCorrect, numNeeded) + '<ol type="A">' + feedbackText + '</ul>')
         $(this.feedBackDiv).attr("class", "alert alert-danger");
     }
 };
