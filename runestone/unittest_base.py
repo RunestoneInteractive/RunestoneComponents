@@ -80,7 +80,7 @@ class RunestoneTestCase(unittest.TestCase):
         # options.add_argument("window-size=1200x800")
         #self.driver = webdriver.Chrome(chrome_options=options)  # good for development.
         self.driver = webdriver.Chrome()  # good for development.
-
+        self.driver.implicitly_wait(10)
 
         self.host = 'http://127.0.0.1:' + PORT
 
