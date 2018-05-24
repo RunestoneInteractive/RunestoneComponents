@@ -51,7 +51,7 @@ ActiveCode.prototype.init = function(opts) {
     this.timestamps = ["Original"];
     this.autorun = $(orig).data('autorun');
 
-    if(this.chatcodes) {
+    if(this.chatcodes && eBookConfig.enable_chatcodes) {
         if(!socket) {
             socket = new WebSocket('wss://'+chatcodesServer);
         }
@@ -264,7 +264,7 @@ ActiveCode.prototype.createControls = function () {
         $(butt).click((function() {new AudioTour(this.divid, this.code, 1, $(this.origElem).data("audio"))}).bind(this));
     }
 
-    if(this.chatcodes) {
+    if(this.chatcodes && eBookConfig.enable_chatcodes) {
         var chatBar = document.createElement("div");
         var channels = document.createElement("span");
         var topic = window.location.host+'-'+this.divid;
