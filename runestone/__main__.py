@@ -50,7 +50,7 @@ def init():
         conf_dict['logging'] = False
         conf_dict['log_level'] = 0
         conf_dict['dburl'] = ""
-        conf_dict['enable_chatcodes'] = False
+        conf_dict['enable_chatcodes'] = 'false'
     conf_dict['downloads_enabled'] = click.prompt("Enable inline Activecode downloads by default (single activecode downloads may be enabled with the :enabledownload: flag)", default="false")
 
     shutil.copytree(os.path.join(template_base_dir,'_sources'),'_sources')
