@@ -77,6 +77,8 @@ def addQuestionToDB(self):
             author = os.environ.get('USER', 'Brad Miller')
 
         autograde = self.options.get('autograde', None)
+        practice = self.options.get('practice', None)
+        topics = self.options.get('topics', "{}/{}".format(self.chapter, self.subchapter))
 
         id_ = self.options['divid']
         sel = select([questions]).where(and_(questions.c.name == id_,
@@ -84,11 +86,11 @@ def addQuestionToDB(self):
         res = engine.execute(sel).first()
         try:
             if res:
-                stmt = questions.update().where(questions.c.id == res['id']).values(question = self.block_text, timestamp=last_changed, is_private='F',
-question_type=self.name, subchapter=self.subchapter, autograde=autograde, author=author,difficulty=difficulty,chapter=self.chapter)
+                stmt = questions.update().where(questions.c.id == res['id']).values(question = self.block_text, timestamp=last_changed, is_private='F', question_type=self.name, subchapter=self.subchapter, autograde=autograde, author=author,difficulty=difficulty,chapter=self.chapter, practice=practice, topic=topics)
                 engine.execute(stmt)
             else:
-                ins = questions.insert().values(base_course=basecourse, name=id_, question=self.block_text.encode('utf8'), timestamp=last_changed, is_private='F', question_type=self.name, subchapter=self.subchapter, autograde=autograde, author=author,difficulty=difficulty,chapter=self.chapter)
+                ins = questions.insert().values(base_course=basecourse, name=id_, question=self.block_text.encode('utf8'), timestamp=last_changed, is_private='F', question_type=self.name, subchapter=self.subchapter, autograde=autograde, author=author,difficulty=difficulty,chapter=self.chapter, practice=practice, topic=topics)
+
                 engine.execute(ins)
         except UnicodeEncodeError:
             raise self.severe("Bad character in directive {} in {}/{}. This will not be saved to the DB".format(id_, self.chapter, self.subchapter))
