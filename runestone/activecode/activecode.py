@@ -161,6 +161,11 @@ class ActiveCode(RunestoneIdDirective):
     print("hello world")
     ====
     print("Hidden code, such as unit tests come after the four = signs")
+
+config values (conf.py): 
+
+- activecode_div_class - custom CSS class of the component's outermost div
+- activecode_hide_load_history - if True, hide the load history button
     """
     required_arguments = 1
     optional_arguments = 1
