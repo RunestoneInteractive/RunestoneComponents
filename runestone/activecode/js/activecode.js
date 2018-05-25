@@ -51,7 +51,7 @@ ActiveCode.prototype.init = function(opts) {
     this.timestamps = ["Original"];
     this.autorun = $(orig).data('autorun');
 
-    if(this.chatcodes) {
+    if(this.chatcodes && eBookConfig.enable_chatcodes) {
         if(!socket) {
             socket = new WebSocket('wss://'+chatcodesServer);
         }
@@ -161,7 +161,7 @@ ActiveCode.prototype.createControls = function () {
     $(ctrlDiv).addClass("col-md-12");
     // Run
     var butt = document.createElement("button");
-    $(butt).text("Run");
+    $(butt).text($.i18n("msg_activecode_run_code"));
     $(butt).addClass("btn btn-success run-button");
     ctrlDiv.appendChild(butt);
     this.runButton = butt;
@@ -180,7 +180,7 @@ ActiveCode.prototype.createControls = function () {
 
     if (! this.hidecode) {
         var butt = document.createElement("button");
-        $(butt).text("Load History");
+        $(butt).text($.i18n("msg_activecode_load_history"));
         $(butt).addClass("btn btn-default");
         $(butt).attr("type","button")
         ctrlDiv.appendChild(butt);
@@ -194,7 +194,7 @@ ActiveCode.prototype.createControls = function () {
     if ($(this.origElem).data('gradebutton') && ! this.graderactive) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Show Feedback");
+        $(butt).text($.i18n("msg_activecode_show_feedback"));
         $(butt).css("margin-left","10px");
         $(butt).attr("type","button")
         this.gradeButton = butt;
@@ -206,7 +206,7 @@ ActiveCode.prototype.createControls = function () {
         $(this.runButton).attr('disabled', 'disabled');
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Show Code");
+        $(butt).text($.i18n("msg_activecode_show_code"));
         $(butt).css("margin-left", "10px");
         $(butt).attr("type","button")
         this.showHideButt = butt;
@@ -218,10 +218,10 @@ ActiveCode.prototype.createControls = function () {
             } else {
                 $(this.historyScrubber.parentElement).toggle();
             }
-            if ($(this.showHideButt).text() == "Show Code") {
-                $(this.showHideButt).text("Hide Code");
+            if ($(this.showHideButt).text() == $.i18n("msg_activecode_show_code")) {
+                $(this.showHideButt).text($.i18n("msg_activecode_hide_code"));
             } else {
-                $(this.showHideButt).text("Show Code");
+                $(this.showHideButt).text($.i18n("msg_activecode_show_code"));
             }
             if ($(this.runButton).attr('disabled')) {
                 $(this.runButton).removeAttr('disabled');
@@ -235,7 +235,7 @@ ActiveCode.prototype.createControls = function () {
     if ($(this.origElem).data("codelens") && ! this.graderactive) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Show CodeLens");
+        $(butt).text($.i18n("msg_activecode_show_codelens"));
         $(butt).css("margin-left", "10px");
         this.clButton = butt;
         ctrlDiv.appendChild(butt);
@@ -257,14 +257,14 @@ ActiveCode.prototype.createControls = function () {
     if ($(this.origElem).data("audio")) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Audio Tour");
+        $(butt).text($.i18n("msg_activecode_audio_tour"));
         $(butt).css("margin-left", "10px");
         this.atButton = butt;
         ctrlDiv.appendChild(butt);
         $(butt).click((function() {new AudioTour(this.divid, this.code, 1, $(this.origElem).data("audio"))}).bind(this));
     }
 
-    if(this.chatcodes) {
+    if(this.chatcodes && eBookConfig.enable_chatcodes) {
         var chatBar = document.createElement("div");
         var channels = document.createElement("span");
         var topic = window.location.host+'-'+this.divid;
@@ -519,12 +519,12 @@ ActiveCode.prototype.loadEditor = function () {
                 this.editor.refresh();
             }.bind(this),500);
             $(this.loadButton).tooltip({'placement': 'bottom',
-                             'title': "Loaded your saved code.",
+                             'title': $.i18n("msg_activecode_loaded_code"),
                              'trigger': 'manual'
                             });
         } else {
             $(this.loadButton).tooltip({'placement': 'bottom',
-                             'title': "No saved code.",
+                             'title': $.i18n("msg_activecode_no_saved_code"),
                              'trigger': 'manual'
                             });
         }
@@ -601,10 +601,10 @@ ActiveCode.prototype.showCodelens = function () {
 
     if (this.codelens.style.display == 'none') {
         this.codelens.style.display = 'block';
-        this.clButton.innerText = "Hide Codelens";
+        this.clButton.innerText = $.i18n("msg_activecode_hide_codelens");
     } else {
         this.codelens.style.display = "none";
-        this.clButton.innerText = "Show in Codelens";
+        this.clButton.innerText = $.i18n("msg_activecode_show_in_codelens");
         return;
     }
 
@@ -717,42 +717,42 @@ ActiveCode.prototype.addErrorMessage = function (err) {
 
 var errorText = {};
 
-errorText.ParseError = "A parse error means that Python does not understand the syntax on the line the error message points out.  Common examples are forgetting commas beteween arguments or forgetting a : on a for statement";
-errorText.ParseErrorFix = "To fix a parse error you just need to look carefully at the line with the error and possibly the line before it.  Make sure it conforms to all of Python's rules.";
-errorText.TypeError = "Type errors most often occur when an expression tries to combine two objects with types that should not be combined.  Like raising a string to a power";
-errorText.TypeErrorFix = "To fix a type error you will most likely need to trace through your code and make sure the variables have the types you expect them to have.  It may be helpful to print out each variable along the way to be sure its value is what you think it should be.";
-errorText.NameError = "A name error almost always means that you have used a variable before it has a value.  Often this may be a simple typo, so check the spelling carefully.";
-errorText.NameErrorFix = "Check the right hand side of assignment statements and your function calls, this is the most likely place for a NameError to be found.";
-errorText.ValueError = "A ValueError most often occurs when you pass a parameter to a function and the function is expecting one type and you pass another.";
-errorText.ValueErrorFix = "The error message gives you a pretty good hint about the name of the function as well as the value that is incorrect.  Look at the error message closely and then trace back to the variable containing the problematic value.";
-errorText.AttributeError = "This error message is telling you that the object on the left hand side of the dot, does not have the attribute or method on the right hand side.";
-errorText.AttributeErrorFix = "The most common variant of this message is that the object undefined does not have attribute X.  This tells you that the object on the left hand side of the dot is not what you think. Trace the variable back and print it out in various places until you discover where it becomes undefined.  Otherwise check the attribute on the right hand side of the dot for a typo.";
-errorText.TokenError = "Most of the time this error indicates that you have forgotten a right parenthesis or have forgotten to close a pair of quotes.";
-errorText.TokenErrorFix = "Check each line of your program and make sure that your parenthesis are balanced.";
-errorText.TimeLimitError = "Your program is running too long.  Most programs in this book should run in less than 10 seconds easily. This probably indicates your program is in an infinite loop.";
-errorText.TimeLimitErrorFix = "Add some print statements to figure out if your program is in an infinte loop.  If it is not you can increase the run time with sys.setExecutionLimit(msecs)";
-errorText.Error = "Your program is running for too long.  Most programs in this book should run in less than 30 seconds easily. This probably indicates your program is in an infinite loop.";
-errorText.ErrorFix = "Add some print statements to figure out if your program is in an infinte loop.  If it is not you can increase the run time with sys.setExecutionLimit(msecs)";
-errorText.SyntaxError = "This message indicates that Python can't figure out the syntax of a particular statement.  Some examples are assigning to a literal, or a function call";
-errorText.SyntaxErrorFix = "Check your assignment statments and make sure that the left hand side of the assignment is a variable, not a literal or a function.";
-errorText.IndexError = "This message means that you are trying to index past the end of a string or a list.  For example if your list has 3 things in it and you try to access the item at position 3 or more.";
-errorText.IndexErrorFix = "Remember that the first item in a list or string is at index position 0, quite often this message comes about because you are off by one.  Remember in a list of length 3 the last legal index is 2";
-errorText.URIError = "";
-errorText.URIErrorFix = "";
-errorText.ImportError = "This error message indicates that you are trying to import a module that does not exist";
-errorText.ImportErrorFix = "One problem may simply be that you have a typo.  It may also be that you are trying to import a module that exists in 'real' Python, but does not exist in this book.  If this is the case, please submit a feature request to have the module added.";
-errorText.ReferenceError = "This is most likely an internal error, particularly if the message references the console.";
-errorText.ReferenceErrorFix = "Try refreshing the webpage, and if the error continues, submit a bug report along with your code";
-errorText.ZeroDivisionError = "This tells you that you are trying to divide by 0. Typically this is because the value of the variable in the denominator of a division expression has the value 0";
-errorText.ZeroDivisionErrorFix = "You may need to protect against dividing by 0 with an if statment, or you may need to rexamine your assumptions about the legal values of variables, it could be an earlier statment that is unexpectedly assigning a value of zero to the variable in question.";
-errorText.RangeError = "This message almost always shows up in the form of Maximum call stack size exceeded.";
-errorText.RangeErrorFix = "This always occurs when a function calls itself.  Its pretty likely that you are not doing this on purpose. Except in the chapter on recursion.  If you are in that chapter then its likely you haven't identified a good base case.";
-errorText.InternalError = "An Internal error may mean that you've triggered a bug in our Python";
-errorText.InternalErrorFix = "Report this error, along with your code as a bug.";
-errorText.IndentationError = "This error occurs when you have not indented your code properly.  This is most likely to happen as part of an if, for, while or def statement.";
-errorText.IndentationErrorFix = "Check your if, def, for, and while statements to be sure the lines are properly indented beneath them.  Another source of this error comes from copying and pasting code where you have accidentally left some bits of code lying around that don't belong there anymore.";
-errorText.NotImplementedError = "This error occurs when you try to use a builtin function of Python that has not been implemented in this in-browser version of Python.";
-errorText.NotImplementedErrorFix = "For now the only way to fix this is to not use the function.  There may be workarounds.  If you really need this builtin function then file a bug report and tell us how you are trying to use the function.";
+errorText.ParseError = $.i18n("msg_sctivecode_parse_error");
+errorText.ParseErrorFix = $.i18n( "msg_sctivecode_parse_error_fix");
+errorText.TypeError = $.i18n("msg_activecode_type_error");
+errorText.TypeErrorFix = $.i18n("msg_activecode_type_error_fix");
+errorText.NameError = $.i18n("msg_activecode_name_error");
+errorText.NameErrorFix = $.i18n("msg_activecode_name_error_fix");
+errorText.ValueError = $.i18n("msg_activecode_value_error");
+errorText.ValueErrorFix = $.i18n("msg_activecode_value_error_fix");
+errorText.AttributeError = $.i18n("msg_activecode_attribute_error");
+errorText.AttributeErrorFix = $.i18n("msg_activecode_attribute_error_fix");
+errorText.TokenError = $.i18n("msg_activecode_token_error");
+errorText.TokenErrorFix =  $.i18n("msg_activecode_token_error_fix");
+errorText.TimeLimitError = $.i18n("msg_activecode_time_limit_error");
+errorText.TimeLimitErrorFix = $.i18n("msg_activecode_time_limit_error_fix");
+errorText.Error = $.i18n("msg_activecode_general_error");
+errorText.ErrorFix = $.i18n("msg_activecode_general_error_fix");
+errorText.SyntaxError = $.i18n("msg_activecode_syntax_error");
+errorText.SyntaxErrorFix = $.i18n("msg_activecode_syntax_error_fix");
+errorText.IndexError = $.i18n("msg_activecode_index_error");
+errorText.IndexErrorFix = $.i18n("msg_activecode_index_error_fix");
+errorText.URIError = $.i18n("msg_activecode_uri_error");
+errorText.URIErrorFix = $.i18n("msg_activecode_uri_error_fix");
+errorText.ImportError = $.i18n("msg_activecode_import_error");
+errorText.ImportErrorFix = $.i18n("msg_activecode_import_error_fix");
+errorText.ReferenceError = $.i18n("msg_activecode_reference_error");
+errorText.ReferenceErrorFix = $.i18n("msg_activecode_reference_error_fix");
+errorText.ZeroDivisionError = $.i18n("msg_activecode_zero_division_error");
+errorText.ZeroDivisionErrorFix = $.i18n("msg_activecode_zero_division_error_fix");
+errorText.RangeError = $.i18n("msg_activecode_range_error");
+errorText.RangeErrorFix = $.i18n("msg_activecode_range_error_fix");
+errorText.InternalError = $.i18n("msg_activecode_internal_error");
+errorText.InternalErrorFix = $.i18n("msg_activecode_internal_error_fix");
+errorText.IndentationError = $.i18n("msg_activecode_indentation_error");
+errorText.IndentationErrorFix = $.i18n("msg_activecode_indentation_error_fix");
+errorText.NotImplementedError = $.i18n("msg_activecode_not_implemented_error");
+errorText.NotImplementedErrorFix = $.i18n("msg_activecode_not_implemented_error_fix");
 
 
 
@@ -783,7 +783,7 @@ ActiveCode.prototype.setTimeLimit = function (timer) {
 
 ActiveCode.prototype.builtinRead = function (x) {
         if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
-            throw "File not found: '" + x + "'";
+            throw $.i18n("msg_activecode_file_not_found",x);
         return Sk.builtinFiles["files"][x];
 };
 
@@ -794,7 +794,7 @@ ActiveCode.prototype.fileReader = function(divid) {
         return Sk.builtinFiles["files"][divid];
     }
     if (elem == null) {
-        throw new Sk.builtin.IOError("[Errno 2] No such file or directory: '" + divid + "'");
+        throw new Sk.builtin.IOError($.i18n("msg_activecode_no_file_or_dir",divid));
     } else {
         if (elem.nodeName.toLowerCase() == "textarea") {
             data = elem.value;
@@ -1136,6 +1136,17 @@ AudioTour.prototype = new RunestoneBase();
 
 // function to display the audio tours
 function AudioTour (divid, code, bnum, audio_text) {
+    this.audio_tour = null;
+    this.audio_code = null;
+    this.windowcode = null;
+    this.first_audio = null;
+    this.prev_audio = null;
+    this.pause_audio = null;
+    this.next_audio = null;
+    this.last_audio = null;
+    this.status = null;
+    this.stop_button = null;
+    this.tourButtons = [];
     this.elem = null; // current audio element playing
     this.currIndex = null; // current index
     this.len = null; // current length of audio files for tour
@@ -1146,7 +1157,6 @@ function AudioTour (divid, code, bnum, audio_text) {
     this.afile = null; // file name for audio
     this.playing = false; // flag to say if playing or not
     this.tourName = "";
-
     // Replacing has been done here to make sure special characters in the code are displayed correctly
     code = code.replaceAll("*doubleq*", "\"");
     code = code.replaceAll("*singleq*", "'");
@@ -1154,7 +1164,6 @@ function AudioTour (divid, code, bnum, audio_text) {
     code = code.replaceAll("*close*", ")");
     code = code.replaceAll("*nline*", "<br/>");
     var codeArray = code.split("\n");
-
     var audio_hash = [];
     var bval = [];
     var atype = audio_text.replaceAll("*doubleq*", "\"");
@@ -1164,7 +1173,6 @@ function AudioTour (divid, code, bnum, audio_text) {
         var aword = audio_type[i].split(";");
         bval.push(aword[0]);
     }
-
     var first = "<pre><div id='" + divid + "_l1'>" + "1.   " + codeArray[0] + "</div>";
     var num_lines = codeArray.length;
     for (var i = 1; i < num_lines; i++) {
@@ -1183,103 +1191,138 @@ function AudioTour (divid, code, bnum, audio_text) {
     //laying out the HTML content
 
     var bcount = 0;
-    var html_string = "<div class='modal-lightsout'></div><div class='modal-profile'><h3>Take an audio tour!</h3><div class='modal-close-profile'></div><p id='windowcode'></p><p id='" + divid + "_audiocode'></p>";
-    html_string += "<p id='status'></p>";
-    html_string += "<input type='image' src='../_static/first.png' width='25' id='first_audio' name='first_audio' title='Play first audio in tour' alt='Play first audio in tour' onerror=\"this.onerror=null;this.src='_static/first.png'\" disabled/>" +
-                   "<input type='image' src='../_static/prev.png' width='25' id='prev_audio' name='prev_audio' title='Play previous audio in tour' alt='Play previous audio in tour' onerror=\"this.onerror=null;this.src='_static/prev.png'\" disabled/>" +
-                   "<input type='image' src='../_static/pause.png' width='25' id='pause_audio' name='pause_audio' title='Pause current audio' alt='Pause current audio' onerror=\"this.onerror=null;this.src='_static/pause.png'\" disabled/>" + "" +
-                   "<input type='image' src='../_static/next.png' width ='25' id='next_audio' name='next_audio' title='Play next audio in tour' alt='Play next audio in tour' onerror=\"this.onerror=null;this.src='_static/next.png'\" disabled/>" +
-                   "<input type='image' src='../_static/last.png' width ='25' id='last_audio' name='last_audio' title='Play last audio in tour' alt='Play last audio in tour' onerror=\"this.onerror=null;this.src='_static/last.png'\" disabled/><br/>";
+
     for (var i = 0; i < audio_type.length - 1; i++) {
-        html_string += "<input type='button' style='margin-right:5px;' class='btn btn-default btn-sm' id='button_audio_" + i + "' name='button_audio_" + i + "' value=" + bval[i] + " />";
+        var newButton = document.createElement("button");
+        newButton.className = "btn btn-success";
+        newButton.innerHTML = bval[i].replace(/\"/g,"");
+        this.tourButtons.push(newButton);
         bcount++;
     }
-    //html_string += "<p id='hightest'></p><p id='hightest1'></p><br/><br/><p id='test'></p><br/><p id='audi'></p></div>";
-    html_string += "</div>";
+    this.audio_tour = document.createElement("div");
+    this.audio_tour.align = "center";
 
-    var tourdiv = document.createElement('div');
-    document.body.appendChild(tourdiv);
-    $(tourdiv).html(html_string);
-    $('#windowcode').html(first);
+    this.audio_code = document.createElement("p");
 
-    // Position modal box
-    $.fn.center = function () {
-        this.css("position", "absolute");
-        // y position
-        this.css("top", ($(window).scrollTop() + $(navbar).height() + 10 + "px"));
-        // show window on the left so that you can see the output from the code still
-        this.css("left", ($(window).scrollLeft() + "px"));
-        return this;
-    };
+    this.windowcode = document.createElement("div");
+    this.windowcode.align = "left";
+    $(this.windowcode).html(first);
 
-    $(".modal-profile").center();
-    $('.modal-profile').fadeIn("slow");
-    //$('.modal-lightsout').css("height", $(document).height());
-    $('.modal-lightsout').fadeTo("slow", .5);
-    $('.modal-close-profile').show();
+    this.first_audio = document.createElement("button");
+    this.prev_audio = document.createElement("button");
+    this.pause_audio = document.createElement("button");
+    this.next_audio = document.createElement("button");
+    this.last_audio = document.createElement("button");
 
-    // closes modal box once close link is clicked, or if the lights out divis clicked
-    $('.modal-close-profile, .modal-lightsout').click( (function () {
+    this.first_audio.className = "btn-default glyphicon glyphicon-fast-backward";
+    this.prev_audio.className = "btn-default glyphicon glyphicon-step-backward";
+    this.pause_audio.className = "btn-default glyphicon glyphicon-pause";
+    this.next_audio.className = "btn-default glyphicon glyphicon-step-forward";
+    this.last_audio.className = "btn-default glyphicon glyphicon-fast-forward";
+
+    this.first_audio.setAttribute("style", "height: 22px; width: 25px; border-radius: 4px; margin-right:2px;");
+    this.prev_audio.setAttribute("style", "height: 22px; width: 25px; border-radius: 4px; margin-right:2px;");
+    this.pause_audio.setAttribute("style", "height: 22px; width: 25px; border-radius: 4px; margin-right:2px;");
+    this.next_audio.setAttribute("style", "height: 22px; width: 25px; border-radius: 4px; margin-right:2px;");
+    this.last_audio.setAttribute("style", "height: 22px; width: 25px; border-radius: 4px; margin-right:2px;");
+
+    this.first_audio.name = "first_audio";
+    this.prev_audio.name = "prev_audio";
+    this.pause_audio.name = "pause_audio";
+    this.next_audio.name = "next_audio";
+    this.last_audio.name = "last_audio";
+
+    this.first_audio.title = "Play first audio in tour";
+    this.prev_audio.title = "Play previous audio in tour";
+    this.pause_audio.title = "Pause current audio";
+    this.next_audio.title = "Play next audio in tour";
+    this.last_audio.title = "Play last audio in tour";
+
+    this.first_audio.setAttribute("aria-label", "Play first audio in tour");
+    this.prev_audio.setAttribute("aria-label", "Play previous audio in tour");
+    this.pause_audio.setAttribute("aria-label", "Pause audio");
+    this.next_audio.setAttribute("aria-label", "Play next audio in tour");
+    this.last_audio.setAttribute("aria-label", "Play last audio in tour");
+
+    this.first_audio.disabled = true;
+    this.prev_audio.disabled = true;
+    this.pause_audio.disabled = true;
+    this.next_audio.disabled = true;
+    this.last_audio.disabled = true;
+
+    this.status = document.createElement("div");
+    this.status.className = "alert alert-info";
+    this.status.setAttribute("style", "display: none;");
+
+    this.stop_button = document.createElement("button");
+    this.stop_button.className = "btn btn-default";
+    this.stop_button.innerHTML = "Stop tour";
+
+    $(this.audio_tour).append(this.audio_code, this.windowcode, document.createElement("br"), this.first_audio, this.prev_audio, this.pause_audio, this.next_audio, this.last_audio, document.createElement("br"), this.status, document.createElement("br"), this.tourButtons, this.stop_button);
+    $("#"+divid+" .ac_code_div").append(this.audio_tour);
+    $("#"+divid+" .ac_code_div").css("width", "50%");
+    $('#'+divid+' .CodeMirror.cm-s-default.ui-resizable').hide();
+    $('#'+divid+' .ac_opt.btn.btn-default:last-child').hide();
+
+    $(this.stop_button).click( (function () {
         if (this.playing) {
             this.elem.pause();
         }
         //log change to db
         this.logBookEvent({'event': 'Audio', 'act': 'closeWindow', 'div_id': divid});
-        $('.modal-profile').fadeOut("slow");
-        $('.modal-lightsout').fadeOut("slow");
-        document.body.removeChild(tourdiv);
+        $(this.audio_tour).remove();
+        $('#'+divid+' .CodeMirror.cm-s-default.ui-resizable').show();
+        $('#'+divid+' .ac_opt.btn.btn-default:last-child').show();
+        $("#"+divid+" .ac_code_div").css("width", "");
     }).bind(this));
 
-    // Accommodate buttons for a maximum of five tours
-
-    $('#' + 'button_audio_0').click((function () {
+    $(this.tourButtons[0]).click((function () {
         this.tour(divid, audio_hash[0], bcount);
     }).bind(this));
-    $('#' + 'button_audio_1').click((function () {
+    $(this.tourButtons[1]).click((function () {
         this.tour(divid, audio_hash[1], bcount);
     }).bind(this));
-    $('#' + 'button_audio_2').click((function () {
+    $(this.tourButtons[2]).click((function () {
         this.tour(divid, audio_hash[2], bcount);
     }).bind(this));
-    $('#' + 'button_audio_3').click((function () {
+    $(this.tourButtons[3]).click((function () {
         this.tour(divid, audio_hash[3], bcount);
     }).bind(this));
-    $('#' + 'button_audio_4').click((function () {
+    $(this.tourButtons[4]).click((function () {
         this.tour(divid, audio_hash[4], bcount);
     }).bind(this));
 
     // handle the click to go to the next audio
-    $('#first_audio').click((function () {
+    $(this.first_audio).click((function () {
         this.firstAudio();
     }).bind(this));
 
     // handle the click to go to the next audio
-    $('#prev_audio').click((function () {
+    $(this.prev_audio).click((function () {
         this.prevAudio();
     }).bind(this));
-
+    
     // handle the click to pause or play the audio
-    $('#pause_audio').click((function () {
-        this.pauseAndPlayAudio();
+    $(this.pause_audio).click((function () {
+        this.pauseAndPlayAudio(divid);
     }).bind(this));
 
     // handle the click to go to the next audio
-    $('#next_audio').click((function () {
+    $(this.next_audio).click((function () {
         this.nextAudio();
     }).bind(this));
 
     // handle the click to go to the next audio
-    $('#last_audio').click((function () {
+    $(this.last_audio).click((function () {
         this.lastAudio();
     }).bind(this));
 
     // make the image buttons look disabled
-    $("#first_audio").css('opacity', 0.25);
-    $("#prev_audio").css('opacity', 0.25);
-    $("#pause_audio").css('opacity', 0.25);
-    $("#next_audio").css('opacity', 0.25);
-    $("#last_audio").css('opacity', 0.25);
-
+    $(this.first_audio).css('opacity', 0.25);
+    $(this.prev_audio).css('opacity', 0.25);
+    $(this.pause_audio).css('opacity', 0.25);
+    $(this.next_audio).css('opacity', 0.25);
+    $(this.last_audio).css('opacity', 0.25);
 }
 
 AudioTour.prototype.tour = function (divid, audio_type, bcount) {
@@ -1287,26 +1330,29 @@ AudioTour.prototype.tour = function (divid, audio_type, bcount) {
     this.buttonCount = bcount;
     this.theDivid = divid;
 
+    this.status.setAttribute("style", "display: inline-block; margin-top: 7px; margin-bottom: 3px;");
+
     // enable prev, pause/play and next buttons and make visible
-    $('#first_audio').removeAttr('disabled');
-    $('#prev_audio').removeAttr('disabled');
-    $('#pause_audio').removeAttr('disabled');
-    $('#next_audio').removeAttr('disabled');
-    $('#last_audio').removeAttr('disabled');
-    $("#first_audio").css('opacity', 1.0);
-    $("#prev_audio").css('opacity', 1.0);
-    $("#pause_audio").css('opacity', 1.0);
-    $("#next_audio").css('opacity', 1.0);
-    $("#last_audio").css('opacity', 1.0);
+    $(this.first_audio).removeAttr('disabled');
+    $(this.prev_audio).removeAttr('disabled');
+    $(this.pause_audio).removeAttr('disabled');
+    $(this.next_audio).removeAttr('disabled');
+    $(this.last_audio).removeAttr('disabled');
+
+    $(this.first_audio).css('opacity', 1.0);
+    $(this.prev_audio).css('opacity', 1.0);
+    $(this.pause_audio).css('opacity', 1.0);
+    $(this.next_audio).css('opacity', 1.0);
+    $(this.last_audio).css('opacity', 1.0);
 
     // disable tour buttons
     for (var i = 0; i < bcount; i++)
-        $('#button_audio_' + i).attr('disabled', 'disabled');
+        $(this.tourButtons[i]).attr('disabled', 'disabled');
 
     var atype = audio_type.split(";");
     var name = atype[0].replaceAll("\"", " ");
     this.tourName = name;
-    $('#status').html("Starting the " + name);
+    $(this.status).html($.i18n("msg_activecode_starting", name));
 
     //log tour type to db
     this.logBookEvent({'event': 'Audio', 'act': name, 'div_id': divid});
@@ -1329,7 +1375,7 @@ AudioTour.prototype.tour = function (divid, audio_type, bcount) {
         // akey+".mp3' type='audio/mpeg'><source src='http://ice-web.cc.gatech.edu/ce21/audio/"+akey+
         // ".ogg' type='audio/ogg'>Your browser does not support the audio tag</audio>";
 
-        var dir = "http://media.interactivepython.org/" + eBookConfig.basecourse + "/audio/";
+        var dir = "http://media.interactivepython.org/" + eBookConfig.basecourse.toLowerCase() + "/audio/";
         //var dir = "../_static/audio/"
         str += "<audio id=" + akey + " preload='auto' >";
         str += "<source src='" + dir + akey + ".wav' type='audio/wav'>";
@@ -1340,31 +1386,19 @@ AudioTour.prototype.tour = function (divid, audio_type, bcount) {
         this.ahash[akey] = lnums;
         this.aname.push(akey);
     }
-    var ahtml = "#" + divid + "_audiocode";
-    $(ahtml).html(str); // set the html to the audio tags
+    $(this.audio_code).html(str);
     this.len = this.aname.length; // set the number of audio file in the tour
-
-    // start at the first audio
+    
     this.currIndex = 0;
-
-    // play the first audio in the tour
     this.playCurrIndexAudio();
 };
 
 AudioTour.prototype.handlePlaying = function() {
-
-    // if this.playing audio pause it
-    if (this.playing) {
-
-        this.elem.pause();
-
-        // unbind current ended
-        $('#' + this.afile).unbind('ended');
-
-        // unhighlight the prev lines
-        this.unhighlightLines(this.theDivid, this.ahash[this.aname[this.currIndex]]);
-    }
-
+    this.elem.pause();
+    // unbind current ended
+    $('#' + this.afile).unbind('ended');
+    // unhighlight the prev lines
+    this.unhighlightLines(this.theDivid, this.ahash[this.aname[this.currIndex]]);
 };
 
 AudioTour.prototype.firstAudio = function () {
@@ -1453,24 +1487,26 @@ AudioTour.prototype.playCurrIndexAudio = function () {
 
 // handle the end of the tour
 AudioTour.prototype.handleTourEnd = function () {
+    $(this.status).html("The " + this.tourName + " has ended.");
+    this.pause_audio.className = "btn-default glyphicon glyphicon-pause";
+    this.pause_audio.title = "Pause audio";
+    this.pause_audio.setAttribute("aria-label", "Pause audio");
 
-    $('#status').html(" The " + this.tourName + " Ended");
+    $(this.first_audio).attr('disabled', 'disabled');
+    $(this.prev_audio).attr('disabled', 'disabled');
+    $(this.pause_audio).attr('disabled', 'disabled');
+    $(this.next_audio).attr('disabled', 'disabled');
+    $(this.last_audio).attr('disabled', 'disabled');
 
-    // disable the prev, pause/play, and next buttons and make them more invisible
-    $('#first_audio').attr('disabled', 'disabled');
-    $('#prev_audio').attr('disabled', 'disabled');
-    $('#pause_audio').attr('disabled', 'disabled');
-    $('#next_audio').attr('disabled', 'disabled');
-    $('#last_audio').attr('disabled', 'disabled');
-    $("#first_audio").css('opacity', 0.25);
-    $("#prev_audio").css('opacity', 0.25);
-    $("#pause_audio").css('opacity', 0.25);
-    $("#next_audio").css('opacity', 0.25);
-    $("#last_audio").css('opacity', 0.25);
+    $(this.first_audio).css('opacity', 0.25);
+    $(this.prev_audio).css('opacity', 0.25);
+    $(this.pause_audio).css('opacity', 0.25);
+    $(this.next_audio).css('opacity', 0.25);
+    $(this.last_audio).css('opacity', 0.25);
 
     // enable the tour buttons
     for (var j = 0; j < this.buttonCount; j++)
-        $('#button_audio_' + j).removeAttr('disabled');
+        $(this.tourButtons[j]).removeAttr('disabled');
 };
 
 // only call this one after the first time
@@ -1505,17 +1541,22 @@ AudioTour.prototype.outerAudio = function () {
 AudioTour.prototype.playWhenReady = function (afile, divid, ahash) {
     // unbind current
     $('#' + afile).unbind('canplaythrough');
-    //console.log("in playWhenReady " + elem.duration);
-
-    $('#status').html("Playing the " + this.tourName);
     this.elem.currentTime = 0;
-    this.highlightLines(divid, ahash[afile]);
-    $('#' + afile).bind('ended', (function () {
-        this.outerAudio();
-    }).bind(this));
     this.playing = true;
-    this.elem.play();
-
+    //console.log("in playWhenReady " + elem.duration);
+    this.highlightLines(divid, ahash[afile]);
+    if (this.pause_audio.className === "btn-default glyphicon glyphicon-pause") {
+        $(this.status).html($.i18n("msg_activecode_playing", this.tourName));
+        $('#' + afile).bind('ended', (function () {
+        this.outerAudio();
+        }).bind(this));
+        this.elem.play();
+    }
+    else {
+        $('#' + afile).bind('ended', (function () {
+        this.outerAudio();
+        }).bind(this));
+    }
 };
 
 
@@ -1528,7 +1569,7 @@ AudioTour.prototype.playaudio = function (i, aname, divid, ahash) {
     //console.log("in playaudio " + elem.duration);
     if (isNaN(this.elem.duration) || this.elem.duration == 0) {
         // set the status
-        $('#status').html("Loading audio.  Please wait.   If it doesn't start soon close this window (click on the red X) and try again");
+        $(this.status).html($.i18n("msg_activecode_loading_audio"));
         $('#' + this.afile).bind('canplaythrough', (function () {
             this.playWhenReady(this.afile, divid, ahash);
         }).bind(this));
@@ -1540,16 +1581,18 @@ AudioTour.prototype.playaudio = function (i, aname, divid, ahash) {
 };
 
 // pause if this.playing and play if paused
-AudioTour.prototype.pauseAndPlayAudio = function () {
-    var btn = document.getElementById('pause_audio');
+AudioTour.prototype.pauseAndPlayAudio = function (divid) {
+    var btn = this.pause_audio;
 
     // if paused and clicked then continue from current
     if (this.elem.paused) {
         // calcualte the time left to play in milliseconds
         counter = (this.elem.duration - this.elem.currentTime) * 1000;
         this.elem.play(); // start the audio from current spot
-        document.getElementById("pause_audio").src = "../_static/pause.png";
-        document.getElementById("pause_audio").title = "Pause current audio";
+        this.pause_audio.className = "btn-default glyphicon glyphicon-pause";
+        this.pause_audio.title = $.i18n("msg_activecode_pause_current_audio");
+        this.pause_audio.setAttribute("aria-label", $.i18n("msg_activecode_pause_audio"));
+        $(this.status).html($.i18n("msg_activecode_playing", this.tourName));
         //log change to db
         this.logBookEvent({'event': 'Audio', 'act': 'play', 'div_id': this.theDivid});
     }
@@ -1557,8 +1600,10 @@ AudioTour.prototype.pauseAndPlayAudio = function () {
     // if audio was this.playing pause it
     else if (this.playing) {
         this.elem.pause(); // pause the audio
-        document.getElementById("pause_audio").src = "../_static/play.png";
-        document.getElementById("pause_audio").title = "Play paused audio";
+        this.pause_audio.className = "btn-default glyphicon glyphicon-play";
+        this.pause_audio.title = $.i18n("msg_activecode_play_paused_audio");
+        this.pause_audio.setAttribute("aria-label", $.i18n("msg_activecode_play_paused_audio"));
+        $(this.status).html($.i18n("msg_activecode_audio_paused", this.tourName));
         //log change to db
         this.logBookEvent({'event': 'Audio', 'act': 'pause', 'div_id': this.theDivid});
     }
@@ -1661,7 +1706,7 @@ LiveCode.prototype.createInputElement = function () {
 
     var label = document.createElement('label');
     label.for = this.divid + "_stdin";
-    $(label).text("Input for Program");
+    $(label).text($.i18n("msg_activecode_input_prg"));
     var input = document.createElement('input');
     input.id = this.divid + "_stdin";
     input.type = "text";
@@ -1709,7 +1754,7 @@ LiveCode.prototype.runProg = function() {
         this.sourcefile = sfilemap[this.language];
     }
 
-    $(this.output).html("Compiling and Running your Code Now...");
+    $(this.output).html($.i18n("msg_activecode_compiling_running"));
 
     var files = [];
     if(this.language === "java") {
@@ -1824,7 +1869,7 @@ LiveCode.prototype.runProg_callback = function(data) {
                     $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
                     break;
                 case 11: // compiler error
-                    $(odiv).html("There were errors compiling your code. See below.");
+                    $(odiv).html($.i18n("msg_activecode_were_compiling_err"));
                     this.addJobeErrorMessage(result.cmpinfo);
                     break;
                 case 12:  // run time error
@@ -1835,13 +1880,13 @@ LiveCode.prototype.runProg_callback = function(data) {
                     break;
                 case 13:  // time limit
                     $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
-                    this.addJobeErrorMessage("Time Limit Exceeded on your program");
+                    this.addJobeErrorMessage($.i18n("msg_activecode_time_limit_exc"));
                     break;
                 default:
                     if(result.stderr){
                         $(odiv).html(result.stderr.replace(/\n/g, "<br>"));
                     } else {
-                        this.addJobeErrorMessage("A server error occurred: " + xhr.status + " " + xhr.statusText);
+                        this.addJobeErrorMessage($.i18n("msg_activecode_server_err", xhr.status, xhr.statusText));
                     }
             }
             // todo: handle server busy and timeout errors too
@@ -1850,7 +1895,7 @@ LiveCode.prototype.runProg_callback = function(data) {
         ///$("#" + divid + "_errinfo").remove();
 
         xhr.onerror = (function () {
-            this.addJobeErrorMessage("Error communicating with the server.");
+            this.addJobeErrorMessage($.i18n("msg_activecode_server_comm_err"));
             $(this.runButton).removeAttr('disabled');
         }).bind(this);
 
@@ -2210,7 +2255,7 @@ if (typeof component_factory === 'undefined') {
 component_factory['activecode'] = ACFactory.createActiveCodeFromOpts;
 
 $(document).bind("runestone:login", function() {
-    $(".run-button").text("Save & Run");
+    $(".run-button").text($.i18n("msg_activecode_save_run"));
 });
 
 // This seems a bit hacky and possibly brittle, but its hard to know how long it will take to

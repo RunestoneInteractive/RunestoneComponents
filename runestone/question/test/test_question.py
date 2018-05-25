@@ -29,33 +29,33 @@ class QuestionTests(RunestoneTestCase):
         num = li.get_attribute("start")
         self.assertEqual(num,"2")
 
-    def test_mc(self):
-        self.driver.get(self.host + "/index.html")
-        t1 = self.driver.find_element_by_id("qtest_2")
-        cbs = t1.find_elements_by_tag_name("li")
-        for el in cbs:
-            el.click()
-
-        checkme = t1.find_element_by_tag_name('button')
-        checkme.click()
-
-        fb = t1.find_element_by_id("question1_2_feedback")
-        self.assertIsNotNone(fb)
-        cnamestr = fb.get_attribute("class")
-        self.assertEqual(cnamestr, "alert alert-danger")
-
-    def test_mc2(self):
-        self.driver.get(self.host + "/index.html")
-        t1 = self.driver.find_element_by_id("qtest_2")
-        t1.find_element_by_id("question1_2_opt_0").click()
-        t1.find_element_by_id("question1_2_opt_1").click()
-        t1.find_element_by_id("question1_2_opt_3").click()
-
-        checkme = t1.find_element_by_tag_name('button')
-        checkme.click()
-
-        fb = t1.find_element_by_id("question1_2_feedback")
-        self.assertIsNotNone(fb)
-        cnamestr = fb.get_attribute("class")
-        self.assertEqual(cnamestr, "alert alert-success")
+    # def test_mc(self):
+    #     self.driver.get(self.host + "/index.html")
+    #     t1 = self.driver.find_element_by_id("qtest_2")
+    #     cbs = t1.find_elements_by_tag_name("li")
+    #     for el in cbs:
+    #         el.click()
+    #
+    #     checkme = t1.find_element_by_tag_name('button')
+    #     checkme.click()
+    #
+    #     fb = t1.find_element_by_id("question1_2_feedback")
+    #     self.assertIsNotNone(fb)
+    #     cnamestr = fb.get_attribute("class")
+    #     self.assertEqual(cnamestr, "alert alert-danger")
+    #
+    # def test_mc2(self):
+    #     self.driver.get(self.host + "/index.html")
+    #     t1 = self.driver.find_element_by_id("qtest_2")
+    #     t1.find_element_by_id("question1_2_opt_0").click()
+    #     t1.find_element_by_id("question1_2_opt_1").click()
+    #     t1.find_element_by_id("question1_2_opt_3").click()
+    #
+    #     checkme = t1.find_element_by_tag_name('button')
+    #     checkme.click()
+    #
+    #     fb = t1.find_element_by_id("question1_2_feedback")
+    #     self.assertIsNotNone(fb)
+    #     cnamestr = fb.get_attribute("class")
+    #     self.assertEqual(cnamestr, "alert alert-success")
 
