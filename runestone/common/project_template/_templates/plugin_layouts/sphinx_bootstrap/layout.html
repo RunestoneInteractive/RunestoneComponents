@@ -6,18 +6,16 @@
     '_static'+'/bootstrap-3.0.0/js/bootstrap.min.js',
     '_static'+'/bootstrap-sphinx.js',
     '_static'+'/waypoints.min.js',
-    '_static'+'/rangy-core.js',
-    '_static'+'/rangy-textrange.js',
-    '_static'+'/rangy-cssclassapplier.js',
     '_static'+'/user-highlights.js',
     '_static'+'/jquery.idle-timer.js',
     '_static'+'/processing-1.4.1.min.js',
     '_static'+'/jquery.hotkey.js',
-    '_static'+'/jquery-migrate-1.2.1.min.js'
+    '_static'+'/jquery-migrate-1.2.1.min.js',
+    '_static'+'/presenter_mode.js',    
   ]
 %}
 
-{% set css_files = ['_static/bootstrap-3.0.0/css/bootstrap.min.css'] + css_files %}
+{% set css_files = ['_static/bootstrap-3.0.0/css/bootstrap.min.css', '_static/presenter_mode.css'] + css_files %}
 {% if theme_bootswatch_theme %}
   {% set css_files = css_files +
     ['http://netdna.bootstrapcdn.com/bootswatch/2.3.1/' + theme_bootswatch_theme + '/bootstrap.min.css']
@@ -140,6 +138,8 @@
           <ul class="dropdown-menu user-menu">
             <li><span class='loggedinuser'></span></li>
             <li class="divider"></li>
+            <li><a href='{{course_url}}/{{appname}}/assignments/practice'>Practice</a></li>
+            <li class="divider"></li>
             <li><a href='/{{appname}}/default/courses'>Change Course</a></li>
             <li class="divider"></li>
             <li><a href='{{course_url}}/{{appname}}/mygroup/initiateGroup' id="joinGroupLink">Join a Study Group</a></li>
@@ -231,8 +231,8 @@
   eBookConfig.jobehost = '{{jobe_server}}';
   eBookConfig.proxyuri_runs = '{{proxy_uri_runs}}';
   eBookConfig.proxyuri_files = '{{proxy_uri_files}}';
-  eBookConfig.downloadsEnabled = '{{downloads_enabled}}'
-
+  eBookConfig.downloadsEnabled = {{downloads_enabled}};
+  eBookConfig.enable_chatcodes = {{enable_chatcodes}} ? {{ enable_chatcodes }} : false;
 </script>
 
 <div id="fb-root"></div>

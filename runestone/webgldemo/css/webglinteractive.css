@@ -233,7 +233,7 @@ webgl_container  background-color    #fcf8e3
   height: 100%;
 }
 
-.CodeMirror {
+.CodeMirror.webgl-default {
   border: 1px solid #eee;
   font-family: monospace, sans-serif;
   font-size: 8pt;
