@@ -386,7 +386,6 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
         console.log("resoving deferred in addHistoryScrubber");
         deferred.resolve();
     }.bind(this)
-    var practice = true;
     if (eBookConfig.practice_mode){
         helper();
         }
@@ -400,7 +399,7 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
                 console.log("gethist successful history updated")
             }
         }.bind(this))
-            .always(helper());
+            .always(helper); // For an explanation, please look at https://stackoverflow.com/questions/336859/var-functionname-function-vs-function-functionname
         }
     return deferred;
 };
