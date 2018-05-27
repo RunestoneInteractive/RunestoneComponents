@@ -22,7 +22,7 @@ from docutils.parsers.rst import directives
 from .textfield import *
 from sqlalchemy import Table
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB, engine, meta
-from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode, add_i18n_javascript
 
 try:
     from html import escape  # py3
@@ -48,11 +48,16 @@ def setup(app):
     app.add_javascript('python.js')
     app.add_javascript('javascript.js')
     app.add_javascript('sharedb.js')
+    add_i18n_javascript(app, {"en","sr-Cyrl"},"activecode-i18n")
     app.add_javascript('activecode.js')
     app.add_javascript('skulpt.min.js')
     app.add_javascript('skulpt-stdlib.js')
     app.add_javascript('clike.js')
     app.add_javascript('timed_activecode.js')
+
+
+
+    
 
     app.add_node(ActivcodeNode, html=(visit_ac_node, depart_ac_node))
 
@@ -258,14 +263,15 @@ class ActiveCode(RunestoneIdDirective):
         else:
             self.options['hidecode'] = ''
 
-        if 'chatcodes' in self.options:
-            self.options['chatcodes'] = 'data-chatcodes="true"'
-        else:
-            self.options['chatcodes'] = ''
         if 'enabledownload' in self.options:
             self.options['enabledownload'] = 'data-enabledownload="true"'
         else:
             self.options['enabledownload'] = ''
+
+        if 'chatcodes' in self.options:
+            self.options['chatcodes'] = 'data-chatcodes="true"'
+        else:
+            self.options['chatcodes'] = ''
 
         if 'language' not in self.options:
             self.options['language'] = 'python'

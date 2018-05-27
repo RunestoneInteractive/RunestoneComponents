@@ -51,6 +51,7 @@ def setup(app):
     app.add_javascript('xml.js')
     app.add_javascript('css.js')
     app.add_javascript('htmlmixed.js')
+    app.add_javascript('python.js')
     app.add_javascript('javascript.js')
 
     app.add_javascript('webglinteractive.js')
