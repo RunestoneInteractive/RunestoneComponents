@@ -14,6 +14,19 @@
   display: initial;
 }
 
+.present{
+    height: 100vh;
+}
+
+.full-height{
+    height: 100vh;
+}
+
+.bottom{
+    position: absolute;
+    bottom: 0;
+}
+
 #codeDisplayDiv{
   width: auto!important;
 }
