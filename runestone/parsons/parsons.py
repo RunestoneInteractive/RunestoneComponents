@@ -87,7 +87,9 @@ class ParsonsProblem(Assessment):
       return curmax
 
 
+config values (conf.py): 
 
+- parsons_div_class - custom CSS class of the component's outermost div
     """
     required_arguments = 1
     optional_arguments = 1

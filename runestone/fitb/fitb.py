@@ -99,6 +99,10 @@ class FillInTheBlank(RunestoneIdDirective):
         -   :2: Right on! Numbers can be given in decimal, hex (0x10 == 16), octal (0o10 == 8), binary (0b10 == 2), or using scientific notation (1e1 == 10), both here and by the user when answering the question.
             :2 1: Close.... (The second number is a tolerance, so this matches 1 or 3.)
             :x: Nope. (As earlier, this matches anything.)
+
+    config values (conf.py): 
+
+    - fitb_div_class - custom CSS class of the component's outermost div
     """
     required_arguments = 1
     optional_arguments = 0

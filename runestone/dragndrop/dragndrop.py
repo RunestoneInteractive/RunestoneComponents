@@ -106,6 +106,10 @@ class DragNDrop(RunestoneIdDirective):
     etc. (up to 20 matches)
 
     The question goes here.
+
+config values (conf.py): 
+
+- dragndrop_div_class - custom CSS class of the component's outermost div
     """
     required_arguments = 1
     optional_arguments = 0
