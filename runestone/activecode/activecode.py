@@ -22,7 +22,8 @@ from docutils.parsers.rst import directives
 from .textfield import *
 from sqlalchemy import Table
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB, engine, meta
-from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode, add_i18n_javascript
+from runestone.common.runestonedirective import (RunestoneIdDirective, RunestoneNode, 
+    add_i18n_js, add_codemirror_css_and_js, add_skulpt_js)
 
 try:
     from html import escape  # py3
@@ -36,22 +37,14 @@ def setup(app):
     app.add_directive('activecode', ActiveCode)
     app.add_directive('actex', ActiveExercise)
     app.add_role('textfield',textfield_role)
-    app.add_stylesheet('codemirror.css')
     app.add_stylesheet('activecode.css')
 
     app.add_javascript('jquery.highlight.js')
     app.add_javascript('bookfuncs.js')
-    app.add_javascript('codemirror.js')
-    app.add_javascript('xml.js')
-    app.add_javascript('css.js')
-    app.add_javascript('htmlmixed.js')
-    app.add_javascript('python.js')
-    app.add_javascript('javascript.js')
-    app.add_javascript('sharedb.js')
-    add_i18n_javascript(app, {"en","sr-Cyrl"},"activecode-i18n")
+    add_codemirror_css_and_js(app,'xml','css','python','htmlmixed','javascript')
+    add_i18n_js(app, {"en","sr-Cyrl"},"activecode-i18n")
+    add_skulpt_js(app)
     app.add_javascript('activecode.js')
-    app.add_javascript('skulpt.min.js')
-    app.add_javascript('skulpt-stdlib.js')
     app.add_javascript('clike.js')
     app.add_javascript('timed_activecode.js')
 
