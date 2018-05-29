@@ -29,9 +29,10 @@ def setup(app):
 
     app.add_node(ClickableAreaNode, html=(visit_ca_node, depart_ca_node))
 
+    app.add_config_value('clickable_div_class', "alert alert-warning", 'html')
 
 TEMPLATE = """
-<div data-component="clickablearea" class="runestone" id="%(divid)s" %(table)s %(correct)s %(incorrect)s>
+<div data-component="clickablearea" class="runestone %(divclass)s" id="%(divid)s" %(table)s %(correct)s %(incorrect)s>
 <span data-question>%(question)s</span>%(feedback)s%(clickcode)s
 """
 TEMPLATE_END = """
@@ -97,6 +98,11 @@ class ClickableArea(RunestoneIdDirective):
     :incorrect: An array of the indices of the incorrect elements--same format as the correct elements.
 
     --Content--
+
+
+config values (conf.py): 
+
+- clickable_div_class - custom CSS class of the component's outermost div
     """
     required_arguments = 1
     optional_arguments = 0
@@ -150,5 +156,9 @@ class ClickableArea(RunestoneIdDirective):
 
         if "iscode" not in self.options:
             self.state.nested_parse(self.content, self.content_offset, clickNode)
+
+        
+        env = self.state.document.settings.env
+        self.options['divclass'] = env.config.clickable_div_class
 
         return [clickNode]
