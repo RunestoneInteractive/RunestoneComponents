@@ -21,12 +21,12 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from sqlalchemy import Table
 from runestone.server.componentdb import engine, meta
-from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode, add_skulpt_js
 
 def setup(app):
     app.add_directive('datafile',DataFile)
-    app.add_javascript('skulpt.min.js')
-    app.add_javascript('skulpt-stdlib.js')
+    add_skulpt_js(app)
+
     app.add_javascript('datafile.js')
 
     app.add_stylesheet('datafile.css')
