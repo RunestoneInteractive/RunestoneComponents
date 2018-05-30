@@ -34,6 +34,8 @@ def setup(app):
     app.add_node(FITBNode, html=(visit_fitb_node, depart_fitb_node))
     app.add_node(BlankNode, html=(visit_blank_node, depart_blank_node))
     app.add_node(FITBFeedbackNode, html=(visit_fitb_feedback_node, depart_fitb_feedback_node))
+    app.add_config_value('fitb_div_class', '', 'html')
+
 
 class FITBNode(nodes.General, nodes.Element, RunestoneNode):
     def __init__(self, content, **kwargs):
@@ -125,7 +127,7 @@ class FillInTheBlank(RunestoneIdDirective):
         super(FillInTheBlank, self).run()
 
         TEMPLATE_START = '''
-        <div class="runestone">
+        <div class="runestone %(divclass)s">
         <div data-component="fillintheblank" id="%(divid)s">
             '''
 
@@ -146,6 +148,8 @@ class FillInTheBlank(RunestoneIdDirective):
         fitbNode.template_end = TEMPLATE_END
 
         self.state.nested_parse(self.content, self.content_offset, fitbNode)
+        env = self.state.document.settings.env
+        self.options['divclass'] = env.config.fitb_div_class
 
         # Expected _`structure`, with assigned variable names and transformations made:
         #

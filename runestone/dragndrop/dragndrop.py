@@ -30,9 +30,11 @@ def setup(app):
 
     app.add_node(DragNDropNode, html=(visit_dnd_node, depart_dnd_node))
 
+    app.add_config_value('dragndrop_div_class', '', 'html')
+
 
 TEMPLATE_START = """
-<div class="runestone">
+<div class="runestone %(divclass)s">
 <ul data-component="dragndrop" id="%(divid)s">
     <span data-component="question">%(question)s</span>
 	%(feedback)s
@@ -162,7 +164,8 @@ config values (conf.py):
             source = '\n'
 
         self.options['question'] = source
-
+        env = self.state.document.settings.env
+        self.options['divclass'] = env.config.dragndrop_div_class
 
         dndNode = DragNDropNode(self.options, rawsource=self.block_text)
         dndNode.source, dndNode.line = self.state_machine.get_source_and_line(self.lineno)
