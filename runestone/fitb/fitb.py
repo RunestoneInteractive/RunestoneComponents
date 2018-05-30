@@ -34,7 +34,7 @@ def setup(app):
     app.add_node(FITBNode, html=(visit_fitb_node, depart_fitb_node))
     app.add_node(BlankNode, html=(visit_blank_node, depart_blank_node))
     app.add_node(FITBFeedbackNode, html=(visit_fitb_feedback_node, depart_fitb_feedback_node))
-    app.add_config_value('fitb_div_class', '', 'html')
+    app.add_config_value('fitb_div_class', 'runestone', 'html')
 
 
 class FITBNode(nodes.General, nodes.Element, RunestoneNode):
@@ -127,7 +127,7 @@ class FillInTheBlank(RunestoneIdDirective):
         super(FillInTheBlank, self).run()
 
         TEMPLATE_START = '''
-        <div class="runestone %(divclass)s">
+        <div class="%(divclass)s">
         <div data-component="fillintheblank" id="%(divid)s">
             '''
 

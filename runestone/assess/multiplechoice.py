@@ -180,7 +180,7 @@ class MChoice(Assessment):
         super(MChoice, self).run()
 
         TEMPLATE_START = '''
-            <div class="runestone %(divclass)s">
+            <div class="%(divclass)s">
             <ul data-component="multiplechoice" data-multipleanswers="%(multipleAnswers)s" %(random)s id="%(divid)s">
             '''
 

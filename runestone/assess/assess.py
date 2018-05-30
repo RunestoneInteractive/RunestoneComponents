@@ -32,7 +32,7 @@ def setup(app):
     app.add_directive('qnum', QuestionNumber)
     app.add_directive('timed', TimedDirective)
 
-    app.add_config_value('mchoice_div_class', 'alert alert-warning', 'html')
+    app.add_config_value('mchoice_div_class', 'runestone alert alert-warning', 'html')
 
     #app.add_javascript('assess.js')
     app.add_javascript('mchoice.js')

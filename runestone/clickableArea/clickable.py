@@ -29,10 +29,10 @@ def setup(app):
 
     app.add_node(ClickableAreaNode, html=(visit_ca_node, depart_ca_node))
 
-    app.add_config_value('clickable_div_class', "alert alert-warning", 'html')
+    app.add_config_value('clickable_div_class', "runestone alert alert-warning", 'html')
 
 TEMPLATE = """
-<div data-component="clickablearea" class="runestone %(divclass)s" id="%(divid)s" %(table)s %(correct)s %(incorrect)s>
+<div data-component="clickablearea" class="%(divclass)s" id="%(divid)s" %(table)s %(correct)s %(incorrect)s>
 <span data-question>%(question)s</span>%(feedback)s%(clickcode)s
 """
 TEMPLATE_END = """

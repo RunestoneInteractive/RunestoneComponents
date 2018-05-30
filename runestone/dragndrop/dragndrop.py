@@ -30,11 +30,11 @@ def setup(app):
 
     app.add_node(DragNDropNode, html=(visit_dnd_node, depart_dnd_node))
 
-    app.add_config_value('dragndrop_div_class', '', 'html')
+    app.add_config_value('dragndrop_div_class', 'runestone', 'html')
 
 
 TEMPLATE_START = """
-<div class="runestone %(divclass)s">
+<div class="%(divclass)s">
 <ul data-component="dragndrop" id="%(divid)s">
     <span data-component="question">%(question)s</span>
 	%(feedback)s

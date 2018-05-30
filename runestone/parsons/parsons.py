@@ -30,10 +30,10 @@ def setup(app):
     app.add_javascript('lib/hammer.min.js')
     app.add_javascript('parsons.js')
     app.add_javascript('timedparsons.js')
-    app.add_config_value('parsons_div_class', '', 'html')
+    app.add_config_value('parsons_div_class', 'runestone', 'html')
 
 TEMPLATE = '''
-        <div class="runestone %(divclass)s" style="max-width: none;">
+        <div class="%(divclass)s" style="max-width: none;">
         <pre data-component="parsons" id="%(divid)s" %(adaptive)s %(maxdist)s %(order)s %(noindent)s %(language)s %(numbered)s>
         <span data-question>%(qnumber)s: %(instructions)s</span>%(code)s
         </pre>
