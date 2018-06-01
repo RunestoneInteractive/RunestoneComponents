@@ -30,7 +30,6 @@ h5 {
 @media (min-width: 768px) {
     /* when navbar is collapsed we don't want any vertical dividers taking up space */
     .navbar .divider-vertical {
-        height: 50px;
         margin: 0 3px;
         border-left: 1px solid #f2f2f2;
     }
