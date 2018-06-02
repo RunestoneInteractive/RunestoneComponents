@@ -27,8 +27,8 @@ def setup(app):
     app.add_node(JournalNode, html=(visit_journal_node, depart_journal_node))
     app.add_javascript('shortanswer.js')
     app.add_javascript('timed_shortanswer.js')
-
-    app.add_config_value('shortanswer_div_class', '', 'html')
+    app.add_config_value('shortanswer_div_class', 'journal alert alert-warning', 'html')
+    app.add_config_value('shortanswer_optional_div_class', 'journal alert alert-success', 'html')
 
 TEXT = """
 <div class="runestone">
@@ -86,10 +86,11 @@ config values (conf.py):
         self.options['qnum'] = self.getNumber()
         journal_node = JournalNode(self.options, rawsource=self.block_text)
         journal_node.source, journal_node.line = self.state_machine.get_source_and_line(self.lineno)
-        
+
         env = self.state.document.settings.env
-        self.options['divclass'] = env.config.shortanswer_div_class
-        if self.options['divclass'] == '':
-            self.options['divclass'] = "journal alert alert-" + ('success' if self.options['optional'] else 'warning')
+        if self.options['optional']:
+            self.options['divclass'] = env.config.shortanswer_optional_div_class
+        else:
+            self.options['divclass'] = env.config.shortanswer_div_class
 
         return [journal_node]
