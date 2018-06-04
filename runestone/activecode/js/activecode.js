@@ -50,6 +50,8 @@ ActiveCode.prototype.init = function(opts) {
     this.historyScrubber = null;
     this.timestamps = ["Original"];
     this.autorun = $(orig).data('autorun');
+    this.test_vars = $(orig).data('runortest');
+    this.runortest = this.test_vars ? true : false;
 
     if(this.chatcodes && eBookConfig.enable_chatcodes) {
         if(!socket) {
@@ -75,6 +77,25 @@ ActiveCode.prototype.init = function(opts) {
     if (suffStart > -1) {
         this.suffix = this.code.substring(suffStart+5);
         this.code = this.code.substring(0,suffStart);
+    }
+
+    if (this.runortest) {
+        var tmp = this.code.split('\n');
+        var c = 0;
+        for (var i = 0; i < tmp.length; i++) {
+            if (tmp[i].indexOf('acsection: general-init') > -1) {
+                this.general_init_sec = i;
+            }
+            if (tmp[i].indexOf('acsection: var-init') > -1) {
+                this.va_init_sec = i;
+            }
+            if (tmp[i].indexOf('acsection: main') > -1) {
+                this.main_sec = i;
+            }
+            if (tmp[i].indexOf('acsection: after-main') > -1) {
+                this.after_main_sec = i;
+            }
+        }
     }
 
     this.history = [this.code];
@@ -115,6 +136,10 @@ ActiveCode.prototype.createEditor = function (index) {
         matchBrackets: true, autoMatchParens: true,
         extraKeys: {"Tab": "indentMore", "Shift-Tab": "indentLess"}
     });
+    if (this.runortest) {
+        editor.markText({line: this.general_init_sec, ch: 0}, {line: this.main_sec + 1, ch: 0}, {readOnly: true});
+        editor.markText({line: this.after_main_sec, ch: 0}, {line: editor.lineCount() + 1, ch: 0}, {readOnly: true});
+    }
 
     // Make the editor resizable
     $(editor.getWrapperElement()).resizable({
@@ -164,9 +189,20 @@ ActiveCode.prototype.createControls = function () {
     $(butt).text($.i18n("msg_activecode_run_code"));
     $(butt).addClass("btn btn-success run-button");
     ctrlDiv.appendChild(butt);
+    if (this.runortest) {
+        var test_button = document.createElement("button");
+        $(test_button).text("Test");
+        $(test_button).addClass("btn btn-success test-button");
+        ctrlDiv.appendChild(test_button);
+        this.testButton = test_button;
+        $(test_button).click(this.runProg.bind(this, true));
+        $(test_button).attr("type", "button");
+    }
     this.runButton = butt;
     $(butt).click(this.runProg.bind(this));
-    $(butt).attr("type","button")
+    $(butt).attr("type","button")    
+
+
 
     if (this.enabledownload || eBookConfig.downloadsEnabled) {
       var butt = document.createElement("button");
@@ -852,7 +888,7 @@ ActiveCode.prototype.buildProg = function() {
 
     if(this.suffix) {
         prog = prog + this.suffix;
-}
+    }
 
     return prog;
 };
@@ -894,7 +930,7 @@ ActiveCode.prototype.manage_scrubber = function (scrubber_dfd, history_dfd, save
 };
 
 
-ActiveCode.prototype.runProg = function () {
+ActiveCode.prototype.runProg = function (test = false) {
     var prog = this.buildProg();
     var saveCode = "True";
     var scrubber_dfd, history_dfd, skulpt_run_dfd;
