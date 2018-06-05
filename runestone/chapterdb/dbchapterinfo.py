@@ -120,8 +120,11 @@ def env_updated(app, env):
         for section in doctree.traverse(docutils.nodes.section):
             updated_docs.append(docname)
             title = section.next_node(docutils.nodes.Titular)
-            chap_id = os.path.dirname(docname)
-            subchap_id = os.path.basename(docname)
+            # ``docname`` is stored with Unix-style forward slashes, even on Windows. Therefore, we can't use ``os.path.basename`` or ``os.sep``.
+            splits = docname.split('/')
+            # If the docname is ``'index'``, then set ``chap_id`` to an empty string.
+            chap_id = splits[-2] if len(splits) > 1 else ''
+            subchap_id = splits[-1]
             if chap_id in ignored_chapters or subchap_id == "index" :
                 continue
             if chap_id not in chap_titles:

@@ -109,9 +109,10 @@ class RunestoneDirective(Directive):
 
     def __init__(self, *args, **kwargs):
         super(RunestoneDirective, self).__init__(*args, **kwargs)
-        self.srcpath, self.line = self.state_machine.get_source_and_line()
-        self.subchapter = os.path.basename(self.srcpath).replace('.rst', '')
-        self.chapter = self.srcpath.split(os.path.sep)[-2]
+        self.srcpath = self.state.document.settings.env.docname
+        # Rather tha use ``os.sep`` to split ``self.srcpath``, use ``'/'``, because Sphinx internally stores filesnames using this separator, even on Windows.
+        self.subchapter = self.srcpath.split('/')[-1].replace('.rst', '')
+        self.chapter = self.srcpath.split('/')[-2]
         self.basecourse = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
         self.options['basecourse'] = self.basecourse
         self.options['chapter'] = self.chapter
