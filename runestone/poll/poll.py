@@ -29,10 +29,11 @@ def setup(app):
     app.add_stylesheet('poll.css')
     app.add_node(PollNode, html=(visit_poll_node, depart_poll_node))
 
+    app.add_config_value('poll_div_class', 'alert alert-warning', 'html')
 
 
 TEMPLATE_START = """
-<ul data-component="poll" id=%(divid)s %(comment)s>%(question)s
+<ul data-component="poll" id=%(divid)s %(comment)s class='%(divclass)s'>%(question)s
 """
 
 TEMPLATE_OPTION = """
@@ -88,6 +89,12 @@ class Poll(RunestoneIdDirective):
     :option_1: Mode 2--Implements the "Choose one of these options" type method of poll.
     :option_2: Option 2
     :option_3: Option 3    ...etc...(Up to 10 options in mode 2)
+
+
+
+config values (conf.py): 
+
+- poll_div_class - custom CSS class of the component's outermost div
     """
     required_arguments = 1
     optional_arguments = 0
@@ -135,6 +142,9 @@ class Poll(RunestoneIdDirective):
             self.options["comment"] = "data-comment"
         else:
             self.options["comment"] = ""
+
+        env = self.state.document.settings.env
+        self.options['divclass'] = env.config.poll_div_class
 
         poll_node = PollNode(self.options, rawsource=self.block_text)
         poll_node.source, poll_node.line = self.state_machine.get_source_and_line(self.lineno)

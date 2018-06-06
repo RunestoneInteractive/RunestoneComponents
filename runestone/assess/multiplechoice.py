@@ -144,6 +144,10 @@ class MChoice(Assessment):
         -   ... and so on.
 
             -   Up to 26 answers and feedback pairs may be provided.
+
+    config values (conf.py): 
+
+    - mchoice_div_class - custom CSS class of the component's outermost div
     """
     required_arguments = 1
     optional_arguments = 1
@@ -176,7 +180,7 @@ class MChoice(Assessment):
         super(MChoice, self).run()
 
         TEMPLATE_START = '''
-            <div class="runestone">
+            <div class="%(divclass)s">
             <ul data-component="multiplechoice" data-multipleanswers="%(multipleAnswers)s" %(random)s id="%(divid)s">
             '''
 
@@ -198,7 +202,8 @@ class MChoice(Assessment):
         mcNode.template_end = TEMPLATE_END
 
         self.state.nested_parse(self.content, self.content_offset, mcNode)
-
+        env = self.state.document.settings.env
+        self.options['divclass'] = env.config.mchoice_div_class
         # Expected _`structure`, with assigned variable names and transformations made:
         #
         # .. code-block::
