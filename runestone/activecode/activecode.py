@@ -69,7 +69,7 @@ TEMPLATE_END = """
 <textarea data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s
     %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s %(chatcodes)s
     data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s
-    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(hidehistory)s>
+    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(runortest)s %(hidehistory)s>
 %(initialcode)s
 </textarea>
 </div>
@@ -153,6 +153,7 @@ class ActiveCode(RunestoneIdDirective):
    :sourcefile: : source files (java, python2, python3)
    :available_files: : other additional files (java, python2, python3)
    :enabledownload: -- allow textfield contents to be downloaded as *.py file
+   :runortest:  -- TODO define the option
 
     If this is a homework problem instead of an example in the text
     then the assignment text should go here.  The assignment text ends with
@@ -199,6 +200,7 @@ config values (conf.py):
         'linkargs': directives.unchanged,
         'interpreterargs': directives.unchanged,
         'runargs': directives.unchanged,
+        'runortest': directives.unchanged
     })
 
 
@@ -295,6 +297,13 @@ config values (conf.py):
             self.options['autorun'] = ''
         else:
             self.options['autorun'] = 'data-autorun="true"'
+
+        if 'runortest' not in self.options:
+            self.options['runortest'] = ''
+        else:
+            lst = self.options['runortest'].split(',')
+            lst = [x.strip() for x in lst]
+            self.options['runortest'] = 'data-runortest="' + " ".join(lst) + '"'
 
         if 'coach' in self.options:
             self.options['coach'] = 'data-coach="true"'

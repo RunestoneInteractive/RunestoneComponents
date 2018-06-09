@@ -51,6 +51,9 @@ ActiveCode.prototype.init = function(opts) {
     this.historyScrubber = null;
     this.timestamps = ["Original"];
     this.autorun = $(orig).data('autorun');
+    this.testParameters = $(orig).data('runortest');
+    this.runortest = this.testParameters ? true : false;
+    this.temp = 0;
 
     if(this.chatcodes && eBookConfig.enable_chatcodes) {
         if(!socket) {
@@ -78,6 +81,39 @@ ActiveCode.prototype.init = function(opts) {
         this.code = this.code.substring(0,suffStart);
     }
 
+    if (this.runortest) {
+        var tmp = this.code.split('\n');
+        var c = 0;
+        var replacement = "";
+        this.generalInitContent = "";
+        this.generalInitSec = -1;
+        this.varInitSec     = -1;
+        for (var i = 0; i < tmp.length; i++) {
+            if (tmp[i].indexOf('acsection: general-init') > -1) {
+                this.generalInitSec = c;
+                continue;
+            }
+            if (tmp[i].indexOf('acsection: var-init') > -1) {
+                this.varInitSec = c;
+                continue;
+            }
+            if (tmp[i].indexOf('acsection: main') > -1) {
+                this.mainSec = c;
+                continue;
+            }
+            if (tmp[i].indexOf('acsection: after-main') > -1) {
+                this.afterMainSec = c;
+                continue;
+            }
+            replacement += tmp[i] + "\n";
+            if (this.varInitSec == -1 && this.generalInitSec > -1) {
+                this.generalInitContent += tmp[i] + "\n";
+            }
+            c++;
+        }
+        this.code = replacement;
+    }
+
     this.history = [this.code];
     this.createEditor();
     this.createOutput();
@@ -90,7 +126,7 @@ ActiveCode.prototype.init = function(opts) {
     this.addCaption();
 
     if (this.autorun) {
-        $(document).ready(this.runProg.bind(this));
+        $(document).ready(this.runProg.bind(this, [false]));
     }
 };
 
@@ -111,11 +147,22 @@ ActiveCode.prototype.createEditor = function (index) {
         this.containerDiv.appendChild(linkdiv);
     }
     this.containerDiv.appendChild(codeDiv);
-    var editor = CodeMirror(codeDiv, {value: this.code, lineNumbers: true,
+    var editor = CodeMirror(codeDiv, {
+        value: this.code, lineNumbers: true,
         mode: this.containerDiv.lang, indentUnit: 4,
         matchBrackets: true, autoMatchParens: true,
         extraKeys: {"Tab": "indentMore", "Shift-Tab": "indentLess"}
     });
+    
+    if (this.runortest) {
+        this.lineHandles = [];
+        for (var i  = this.generalInitSec; i < this.mainSec; i++) {
+            this.lineHandles.push(editor.addLineClass(i, "background", "shaded"));
+        }
+        for (var i  = this.afterMainSec; i < editor.lineCount() + 1; i++) {
+            this.lineHandles.push(editor.addLineClass(i, "background", "shaded"));
+        }
+    }
 
     // Make the editor resizable
     $(editor.getWrapperElement()).resizable({
@@ -165,9 +212,20 @@ ActiveCode.prototype.createControls = function () {
     $(butt).text($.i18n("msg_activecode_run_code"));
     $(butt).addClass("btn btn-success run-button");
     ctrlDiv.appendChild(butt);
+    if (this.runortest) {
+        var test_button = document.createElement("button");
+        $(test_button).text("Test");
+        $(test_button).addClass("btn btn-success test-button");
+        ctrlDiv.appendChild(test_button);
+        this.testButton = test_button;
+        $(test_button).click(this.runProg.bind(this, [true]));
+        $(test_button).attr("type", "button");
+    }
     this.runButton = butt;
-    $(butt).click(this.runProg.bind(this));
-    $(butt).attr("type","button")
+    $(butt).click(this.runProg.bind(this, [false]));
+    $(butt).attr("type","button")    
+
+
 
     if (this.enabledownload || eBookConfig.downloadsEnabled) {
       var butt = document.createElement("button");
@@ -835,10 +893,11 @@ ActiveCode.prototype.outputfun = function(text) {
         $(this.output).append(text);
     };
 
-ActiveCode.prototype.buildProg = function() {
+ActiveCode.prototype.buildProg = function(test_flag = false) {
     // assemble code from prefix, suffix, and editor for running.
     var pretext;
-    var prog = this.editor.getValue() + "\n";
+    var prog = test_flag ? "" : this.editor.getValue() + "\n";
+    
     this.pretext = "";
     if (this.includes !== undefined) {
         // iterate over the includes, in-order prepending to prog
@@ -851,9 +910,34 @@ ActiveCode.prototype.buildProg = function() {
         prog = pretext + prog
     }
 
+    if (this.runortest) {
+        if (test_flag) {
+            var tmp = this.editor.getValue().split('\n');
+            var readOnlyLines = [];
+            var main = "";
+            for (var i = 0; i < this.lineHandles.length; i++) 
+                readOnlyLines.push(this.editor.getLineNumber(this.lineHandles[i]));
+            for (var i = 0; i < tmp.length; i++) {
+                if (readOnlyLines.includes(i)) continue;
+                main += "\t" + tmp[i] + "\n";
+            }
+            var parameters = this.testParameters.trim().split(' ');
+            
+            var parametersString = "";
+            var returnString     = "";
+            for (var i = 0; i < parameters.length; i++) {
+                parametersString += parameters[i] + "=None" + (i < parameters.length - 1 ? ',' : '');
+                returnString     += parameters[i] + "=" + parameters[i] + (i < parameters.length - 1 ? ',' : '');
+            }
+            pretext = this.generalInitContent + "def acMainSection(" + parametersString + "):\n";
+            returnString = "\treturn dict(" + returnString + ")\n"; 
+            prog += pretext + main + returnString;
+        }
+    } 
+
     if(this.suffix) {
-        prog = prog + this.suffix;
-}
+        if (!this.runortest || (this.runortest && test_flag)) prog = prog + this.suffix;
+    }
 
     return prog;
 };
@@ -895,8 +979,8 @@ ActiveCode.prototype.manage_scrubber = function (scrubber_dfd, history_dfd, save
 };
 
 
-ActiveCode.prototype.runProg = function () {
-    var prog = this.buildProg();
+ActiveCode.prototype.runProg = function (params = [false]) {
+    var prog = this.buildProg(params[0]);
     var saveCode = "True";
     var scrubber_dfd, history_dfd, skulpt_run_dfd;
     console.log("starting a new run of " + this.divid);
@@ -920,10 +1004,11 @@ ActiveCode.prototype.runProg = function () {
     $(this.codeDiv).switchClass("col-md-12", "col-md-7", {duration: 500, queue: false});
     $(this.outDiv).show({duration: 700, queue: false});
 
-    var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
-    history_dfd = __ret.history_dfd;
-    saveCode = __ret.saveCode;
-
+    // var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
+    // history_dfd = __ret.history_dfd;
+    // saveCode = __ret.saveCode;
+    history_dfd = null;
+    saveCode = false;
 
     skulpt_run_dfd = Sk.misceval.asyncToPromise(function () {
 
@@ -936,10 +1021,10 @@ ActiveCode.prototype.runProg = function () {
 
     Promise.all([skulpt_run_dfd, history_dfd]).then((function (mod) { // success
             $(this.runButton).removeAttr('disabled');
-            if (this.slideit) {
-                $(this.historyScrubber).on("slidechange", this.slideit.bind(this));
-            }
-            $(this.historyScrubber).slider("enable");
+            // if (this.slideit) {
+            //     $(this.historyScrubber).on("slidechange", this.slideit.bind(this));
+            // }
+            // $(this.historyScrubber).slider("enable");
             this.logRunEvent({
                 'div_id': this.divid,
                 'code': this.editor.getValue(),
@@ -973,7 +1058,6 @@ ActiveCode.prototype.runProg = function () {
             e.redrawConnectors();
         });
     }
-
 };
 
 
