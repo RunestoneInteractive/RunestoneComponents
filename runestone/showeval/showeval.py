@@ -26,8 +26,10 @@ def setup(app):
     app.add_javascript('showEval.js')
     app.add_stylesheet('showEval.css')
 
+    app.add_config_value('showeval_div_class', 'runestone explainer alert alert-warning', 'html')
+
 CODE = """\
-<div data-childcomponent="showeval" class="runestone explainer alert alert-warning">
+<div data-childcomponent="showeval" class="%(divclass)s">
     <button class="btn btn-success" id="%(divid)s_nextStep">Next Step</button>
     <button class="btn btn-default" id ="%(divid)s_reset">Reset</button>
     <div class="evalCont" style="background-color: #FDFDFD;">%(preReqLines)s</div>
@@ -57,6 +59,11 @@ class ShowEval(RunestoneIdDirective):
    more {{code}}{{what code becomes in step 1}}
    more {{what code becomes in step 1}}{{what code becomes in step2}}  ##Optional comment for step 2
    as many steps as you want {{the first double braces}}{{animate into the second}} wherever.
+
+
+config values (conf.py): 
+
+- showeval_div_class - custom CSS class of the component's outermost div
     """
     required_arguments = 1
     optional_arguments = 0
@@ -98,6 +105,9 @@ class ShowEval(RunestoneIdDirective):
         self.options['trace_mode'] = self.options['trace_mode'].lower()
         self.options['preReqLines'] = ''
         self.options['steps'] = []
+
+        env = self.state.document.settings.env
+        self.options['divclass'] = env.config.showeval_div_class
 
         step = False
         count = 0

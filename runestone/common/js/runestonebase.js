@@ -64,11 +64,22 @@ RunestoneBase.prototype.checkServer = function (eventInfo) {
         if (this.sid) {
             data.sid = this.sid
         }
-        jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
+        if (!eBookConfig.practice_mode){
+            jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
+        }
+        else{
+            this.loadData({});
+        }
     } else {
         this.checkLocalStorage();   // just go right to local storage
     }
 };
+
+RunestoneBase.prototype.loadData = function (data){
+    // for most classes, loadData doesn't do anything. But for Parsons, and perhaps others in the future,
+    // initialization can happen even when there's no history to be loaded
+    return null;
+}
 
 RunestoneBase.prototype.repopulateFromStorage = function (data, status, whatever) {
     // decide whether to use the server's answer (if there is one) or to load from storage

@@ -44,12 +44,7 @@ ShortAnswer.prototype.init = function (opts) {
 ShortAnswer.prototype.renderHTML = function() {
     this.containerDiv = document.createElement("div");
     this.containerDiv.id = this.divid;
-    if (this.optional) {
-        $(this.containerDiv).addClass("journal alert alert-success");
-                            } else {
-        $(this.containerDiv).addClass("journal alert alert-warning");
-                            }
-
+    $(this.containerDiv).addClass(this.origElem.getAttribute("class"));
     this.newForm = document.createElement("form");
     this.newForm.id = this.divid + "_journal";
     this.newForm.name = this.newForm.id;

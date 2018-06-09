@@ -32,6 +32,8 @@ def setup(app):
     app.add_directive('qnum', QuestionNumber)
     app.add_directive('timed', TimedDirective)
 
+    app.add_config_value('mchoice_div_class', 'runestone alert alert-warning', 'html')
+
     #app.add_javascript('assess.js')
     app.add_javascript('mchoice.js')
     app.add_javascript('timedmc.js')
@@ -45,6 +47,7 @@ def setup(app):
     app.add_node(FeedbackBulletList, html=(visit_feedback_bullet_node, depart_feedback_bullet_node))
     app.add_node(FeedbackListItem, html=(visit_feedback_list_item, depart_feedback_list_item))
 
+    
 
 
 class AddButton(RunestoneIdDirective):
