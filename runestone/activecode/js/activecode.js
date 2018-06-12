@@ -159,9 +159,15 @@ ActiveCode.prototype.createEditor = function (index) {
         for (var i  = this.generalInitSec; i < this.mainSec; i++) {
             this.lineHandles.push(editor.addLineClass(i, "background", "shaded"));
         }
+        editor.markText({line: 0, ch: 0}, {line: this.mainSec, ch: 0}, {
+            readOnly: true
+        });
         for (var i  = this.afterMainSec; i < editor.lineCount() + 1; i++) {
             this.lineHandles.push(editor.addLineClass(i, "background", "shaded"));
         }
+        editor.markText({line: this.afterMainSec, ch: 0}, {line: editor.lineCount(), ch: 0}, {
+            readOnly: true
+        });
     }
 
     // Make the editor resizable
@@ -985,7 +991,17 @@ ActiveCode.prototype.runProg = function (params = [false]) {
     var scrubber_dfd, history_dfd, skulpt_run_dfd;
     console.log("starting a new run of " + this.divid);
     $(this.output).text('');
-
+    if (this.runortest) {
+        if (params[0] == false) {
+            var el = document.getElementById(this.divid + '_unit_results');
+            if (el) {
+                el.parentNode.removeChild(el);
+            }
+        }
+        else {
+            $(this.output).css("visibility","hidden");
+        }
+    }
     $(this.eContainer).remove();
     Sk.configure({
         output: this.outputfun.bind(this),
