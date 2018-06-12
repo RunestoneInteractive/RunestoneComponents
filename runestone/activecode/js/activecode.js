@@ -1052,21 +1052,19 @@ ActiveCode.prototype.runProg = function (params = [false]) {
             }); // Log the run event
         }).bind(this),
         (function (err) {  // fail
-            history_dfd.done(function () {
-                $(self.runButton).removeAttr('disabled');
-                $(self.historyScrubber).on("slidechange", self.slideit.bind(self));
-                $(self.historyScrubber).slider("enable");
-                self.logRunEvent({
-                    'div_id': self.divid,
-                    'code': self.editor.getValue(),
-                    'lang': this.langauge,
-                    'errinfo': err.toString(),
-                    'to_save': saveCode,
-                    'prefix': self.pretext,
-                    'suffix': self.suffix
-                }); // Log the run event
-                self.addErrorMessage(err)
-            });
+            $(self.runButton).removeAttr('disabled');
+            // $(self.historyScrubber).on("slidechange", self.slideit.bind(self));
+            // $(self.historyScrubber).slider("enable");
+            self.logRunEvent({
+                'div_id': self.divid,
+                'code': self.editor.getValue(),
+                'lang': this.langauge,
+                'errinfo': err.toString(),
+                'to_save': saveCode,
+                'prefix': self.pretext,
+                'suffix': self.suffix
+            }); // Log the run event
+            self.addErrorMessage(err);
         }));
 
     if (typeof(allVisualizers) != "undefined") {
