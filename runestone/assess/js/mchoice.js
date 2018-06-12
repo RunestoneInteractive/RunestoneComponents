@@ -137,7 +137,7 @@ MultipleChoice.prototype.createMCForm = function () {
 MultipleChoice.prototype.renderMCContainer = function () {
     this.containerDiv = document.createElement("div");
     $(this.containerDiv).html(this.question);
-    $(this.containerDiv).addClass("alert alert-warning");
+    $(this.containerDiv).addClass(this.origElem.getAttribute("class"));
     this.containerDiv.id = this.divid;
 };
 

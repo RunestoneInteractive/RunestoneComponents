@@ -90,7 +90,7 @@ ClickableArea.prototype.renderNewElements = function () {
     // wrapper function for generating everything
     this.containerDiv = document.createElement("div");
     this.containerDiv.appendChild(this.question);
-    $(this.containerDiv).addClass("alert alert-warning");
+    $(this.containerDiv).addClass(this.origElem.getAttribute("class"));
 
     this.newDiv = document.createElement("div");
     var newContent = $(this.origElem).html();

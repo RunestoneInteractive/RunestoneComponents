@@ -67,7 +67,7 @@ Poll.prototype.renderPoll = function() {
     this.resultsDiv = document.createElement("div");
 
     this.containerDiv.id = this.divid + "_container";
-    $(this.containerDiv).addClass("alert alert-warning");
+    $(this.containerDiv).addClass(this.origElem.getAttribute("class"));
 
     $(this.pollForm).text(this.question);
     $(this.pollForm).attr({
