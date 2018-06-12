@@ -152,10 +152,6 @@ class FillInTheBlank(RunestoneIdDirective):
         self.state.nested_parse(self.content, self.content_offset, fitbNode)
         env = self.state.document.settings.env
         self.options['divclass'] = env.config.fitb_div_class
-<<<<<<< HEAD
-=======
-
->>>>>>> eb7bb5734ac2e8516893853ffae6343eb80e46d3
         # Expected _`structure`, with assigned variable names and transformations made:
         #
         # .. code-block::
