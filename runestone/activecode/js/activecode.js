@@ -2353,7 +2353,8 @@ if (typeof component_factory === 'undefined') {
 }
 component_factory['activecode'] = ACFactory.createActiveCodeFromOpts;
 
-$(document).bind("runestone:login", function() {
+//$(document).bind("runestone:login", function() {
+$(document).ready(function () {
     $(".run-button").text($.i18n("msg_activecode_save_run"));
 });
 

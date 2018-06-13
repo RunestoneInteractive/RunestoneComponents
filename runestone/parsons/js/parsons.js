@@ -3174,7 +3174,8 @@ Parsons.prototype.resetView = function() {
 	document.body.scrollTop = scrollTop;
 };
 
-$(document).bind("runestone:login-complete", function () {
+//$(document).bind("runestone:login-complete", function () {
+$(document).ready(function() {
 	$("[data-component=parsons]").each(function (index) {
 		if ($(this).closest('[data-component=timedAssessment]').length == 0) {
 			prsList[this.id] = new Parsons({"orig": this, "useRunestoneServices": eBookConfig.useRunestoneServices});

@@ -877,7 +877,8 @@ Timed.prototype.highlightNumberedList = function () {
 /*=======================================================
 === Function that calls the constructors on page load ===
 =======================================================*/
-$(document).bind("runestone:login-complete",function () {
+//$(document).bind("runestone:login-complete",function () {
+$(document).ready(function () {
     $("[data-component=timedAssessment]").each(function (index) {
         TimedList[this.id] = new Timed({"orig": this, "useRunestoneServices":eBookConfig.useRunestoneServices});
     });
