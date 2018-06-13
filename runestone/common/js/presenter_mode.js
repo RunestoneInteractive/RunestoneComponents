@@ -4,15 +4,23 @@ var codeExercises;
 function presentToggle() {
   let bod = $('body');
   let presentClass = 'present';
+  let fullHeightClass = 'full-height';
+  let bottomClass = 'bottom';
   if(bod.hasClass(presentClass)){
     $('.section *').not('.runestone, .runestone *').removeClass('hidden'); //show everything
     bod.removeClass(presentClass);
+    $('.'+fullHeightClass).removeClass(fullHeightClass);
+    $('.'+bottomClass).removeClass(bottomClass);
     localStorage.setItem("presentMode", 'text');
     codeExercises.removeClass('hidden');
   }
   else{
     $('.section *').not('.runestone, .runestone *').addClass('hidden'); // hide extraneous stuff
     bod.addClass(presentClass);
+    bod.addClass(fullHeightClass);
+    $('html').addClass(fullHeightClass);
+    $('.section .runestone').addClass(fullHeightClass);
+    $('.ac-caption').addClass(bottomClass);
     localStorage.setItem("presentMode", presentClass);
     activateExercise()
   }

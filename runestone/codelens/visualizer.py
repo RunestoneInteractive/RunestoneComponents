@@ -35,10 +35,12 @@ def setup(app):
     app.add_javascript('pytutor.js')
     app.add_javascript('codelens.js')
 
+    app.add_config_value('codelens_div_class', "alert alert-warning cd_section", 'html')
+
 
 VIS = '''
 <div class="runestone" style="max-width: none;">
-<div class="alert alert-warning cd_section">
+<div class="%(divclass)s">
 <div id="%(divid)s"></div>
 <p class="cl_caption"><span class="cl_caption_text">%(caption)s (%(divid)s)</span> </p>
 </div>'''
@@ -164,6 +166,11 @@ class Codelens(RunestoneIdDirective):
     x = 0
     for i in range(10):
        x = x + i
+
+
+config values (conf.py): 
+
+- codelens_div_class - custom CSS class of the component's outermost div
     """
     required_arguments = 1
     optional_arguments = 1
@@ -206,6 +213,9 @@ class Codelens(RunestoneIdDirective):
 
         CUMULATIVE_MODE = False
         self.JS_VARNAME = self.options['divid'] + '_trace'
+        env = self.state.document.settings.env
+        self.options['divclass'] = env.config.codelens_div_class
+
         if 'showoutput' not in self.options:
             self.options['embedded'] = 'true'  # to set embeddedmode to true
         else:
