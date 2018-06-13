@@ -198,7 +198,7 @@ FITB.prototype.evaluateAnswers = function () {
         // If this blank is empty, provide no feedback for it.
         if (given === "") {
             this.isCorrectArray.push("");
-            this.displayFeed.push('No answer provided.');
+            this.displayFeed.push($.i18n("msg_no_answer"));
         } else {
             // Look through all feedback for this blank. The last element in the array always matches.
             var fbl = this.feedbackArray[i];
@@ -334,7 +334,8 @@ FITB.prototype.compareFITB = function (data, status, whatever) {   // Creates a 
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
 =================================*/
-$(document).bind("runestone:login-complete", function () {
+//$(document).bind("runestone:login-complete", function () {
+$(document).ready(function () {
     $("[data-component=fillintheblank]").each(function (index) {
         var opts = {"orig" : this, "useRunestoneServices": eBookConfig.useRunestoneServices};
         if ($(this).closest('[data-component=timedAssessment]').length == 0) { // If this element exists within a timed component, don't render it here

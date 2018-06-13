@@ -428,12 +428,10 @@ MultipleChoice.prototype.renderMCMAFeedBack = function () {
     var feedbackText = this.feedbackString;
 
     if (this.correct) {
-        $(this.feedBackDiv).html('Correct.<ol type="A">' + feedbackText + "</ul>");
+        $(this.feedBackDiv).html($.i18n("msg_mchoice_correct_answer"));
         $(this.feedBackDiv).attr("class", "alert alert-success");
     } else {
-        $(this.feedBackDiv).html("Incorrect.    " + "You gave " + numGiven +
-            " " + answerStr + " and got " + numCorrect + " correct of " +
-            numNeeded + ' needed.<ol type="A">' + feedbackText + "</ul>");
+        $(this.feedBackDiv).html($.i18n($.i18n("msg_mchoice_incorrect_answer"), numGiven, numCorrect, numNeeded) + '<ol type="A">' + feedbackText + '</ul>')
         $(this.feedBackDiv).attr("class", "alert alert-danger");
     }
 };
@@ -561,7 +559,8 @@ MultipleChoice.prototype.compareAnswers = function () {
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
 =================================*/
-$(document).bind("runestone:login-complete", function () {
+//$(document).bind("runestone:login-complete", function () {
+$(document).ready(function() {
     $("[data-component=multiplechoice]").each(function (index) {    // MC
         var opts = {"orig": this, 'useRunestoneServices':eBookConfig.useRunestoneServices};
         if ($(this).closest('[data-component=timedAssessment]').length == 0) { // If this element exists within a timed component, don't render it here

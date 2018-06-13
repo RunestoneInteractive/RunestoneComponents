@@ -23,6 +23,7 @@ from docutils.parsers.rst import directives
 from sphinx.util import logging
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 from runestone.common import RunestoneIdDirective, RunestoneNode, get_node_line
+from runestone.common.runestonedirective import add_i18n_js
 
 
 def setup(app):
@@ -31,6 +32,7 @@ def setup(app):
     app.add_stylesheet('fitb.css')
     app.add_javascript('fitb.js')
     app.add_javascript('timedfitb.js')
+    add_i18n_js(app, {"en","sr-Cyrl"}, "fitb-i18n")
     app.add_node(FITBNode, html=(visit_fitb_node, depart_fitb_node))
     app.add_node(BlankNode, html=(visit_blank_node, depart_blank_node))
     app.add_node(FITBFeedbackNode, html=(visit_fitb_feedback_node, depart_fitb_feedback_node))
@@ -150,7 +152,6 @@ class FillInTheBlank(RunestoneIdDirective):
         self.state.nested_parse(self.content, self.content_offset, fitbNode)
         env = self.state.document.settings.env
         self.options['divclass'] = env.config.fitb_div_class
-
         # Expected _`structure`, with assigned variable names and transformations made:
         #
         # .. code-block::
