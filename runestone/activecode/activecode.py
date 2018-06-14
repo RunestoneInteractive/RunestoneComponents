@@ -69,7 +69,7 @@ TEMPLATE_END = """
 <textarea data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s
     %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s %(chatcodes)s
     data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s
-    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(runortest)s %(hidehistory)s>
+    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(runortest)s %(playtask)s %(hidehistory)s>
 %(initialcode)s
 </textarea>
 </div>
@@ -153,7 +153,8 @@ class ActiveCode(RunestoneIdDirective):
    :sourcefile: : source files (java, python2, python3)
    :available_files: : other additional files (java, python2, python3)
    :enabledownload: -- allow textfield contents to be downloaded as *.py file
-   :runortest:  -- TODO define the option
+   :runortest:  -- run activecode or run unit tests within activecode
+   :playtask:  -- run hidden code
 
     If this is a homework problem instead of an example in the text
     then the assignment text should go here.  The assignment text ends with
@@ -200,7 +201,8 @@ config values (conf.py):
         'linkargs': directives.unchanged,
         'interpreterargs': directives.unchanged,
         'runargs': directives.unchanged,
-        'runortest': directives.unchanged
+        'runortest': directives.unchanged,
+        'playtask': directives.flag
     })
 
 
@@ -304,6 +306,15 @@ config values (conf.py):
             lst = self.options['runortest'].split(',')
             lst = [x.strip() for x in lst]
             self.options['runortest'] = 'data-runortest="' + " ".join(lst) + '"'
+
+        if 'playtask' not in self.options:
+            print(self.options['runortest'])
+            print('playtask = _')
+            self.options['playtask'] = ''
+        elif self.options['runortest']:
+            raise self.error('There must not be interference between runortest and playtask options')
+        else:
+            self.options['playtask'] = 'data-playtask="true"'
 
         if 'coach' in self.options:
             self.options['coach'] = 'data-coach="true"'
