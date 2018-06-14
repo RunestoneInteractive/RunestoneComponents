@@ -32,10 +32,12 @@ def setup(app):
     app.add_config_value('clickable_div_class', "runestone alert alert-warning", 'html')
 
 TEMPLATE = """
+<div class="%(divclass)s">
 <div data-component="clickablearea" class="%(divclass)s" id="%(divid)s" %(table)s %(correct)s %(incorrect)s>
 <span data-question>%(question)s</span>%(feedback)s%(clickcode)s
 """
 TEMPLATE_END = """
+</div>
 </div>
 """
 
