@@ -69,7 +69,7 @@ TEMPLATE_END = """
 <textarea data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s
     %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s %(chatcodes)s
     data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s
-    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(runortest)s %(playtask)s %(hidehistory)s>
+    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(runortest)s %(playtask)s %(passivecode)s %(hidehistory)s>
 %(initialcode)s
 </textarea>
 </div>
@@ -202,7 +202,8 @@ config values (conf.py):
         'interpreterargs': directives.unchanged,
         'runargs': directives.unchanged,
         'runortest': directives.unchanged,
-        'playtask': directives.flag
+        'playtask': directives.flag,
+        'passivecode': directives.flag
     })
 
 
@@ -308,13 +309,16 @@ config values (conf.py):
             self.options['runortest'] = 'data-runortest="' + " ".join(lst) + '"'
 
         if 'playtask' not in self.options:
-            print(self.options['runortest'])
-            print('playtask = _')
             self.options['playtask'] = ''
         elif self.options['runortest']:
             raise self.error('There must not be interference between runortest and playtask options')
         else:
             self.options['playtask'] = 'data-playtask="true"'
+
+        if 'passivecode' not in self.options:
+            self.options['passivecode'] = ''
+        else:
+            self.options['passivecode'] = 'data-passivecode="true"'
 
         if 'coach' in self.options:
             self.options['coach'] = 'data-coach="true"'
