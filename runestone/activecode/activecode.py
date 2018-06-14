@@ -155,7 +155,8 @@ class ActiveCode(RunestoneIdDirective):
    :enabledownload: -- allow textfield contents to be downloaded as *.py file
    :runortest:  -- run activecode or run unit tests within activecode
    :playtask:  -- run hidden code
-
+   :passivecode: -- used for just showing incomplete pieces of code without interaction
+   
     If this is a homework problem instead of an example in the text
     then the assignment text should go here.  The assignment text ends with
     the line containing four tilde ~
