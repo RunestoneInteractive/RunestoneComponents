@@ -11,6 +11,7 @@ $.i18n().load({
         "msg_activecode_show_codelens": "Show CodeLens",
         "msg_activecode_show_in_codelens": "Show in CodeLens",
         "msg_activecode_hide_codelens": "Hide Codelens",
+        "msg_activecode_play_task": "Play task",
 
         "msg_activecode_parse_error": "A parse error means that Python does not understand the syntax on the line the error message points out. Common examples are forgetting commas beteween arguments or forgetting a : on a for statement",
         "msg_activecode_parse_error_fix": "To fix a parse error you just need to look carefully at the line with the error and possibly the line before it.  Make sure it conforms to all of Python's rules.",

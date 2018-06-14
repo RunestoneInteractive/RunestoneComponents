@@ -53,7 +53,7 @@ ActiveCode.prototype.init = function(opts) {
     this.autorun = $(orig).data('autorun');
     this.testParameters = $(orig).data('runortest');
     this.runortest = this.testParameters ? true : false;
-    this.temp = 0;
+    this.playtask = $(orig).data('playtask');
 
     if(this.chatcodes && eBookConfig.enable_chatcodes) {
         if(!socket) {
@@ -219,13 +219,22 @@ ActiveCode.prototype.createControls = function () {
     $(butt).addClass("btn btn-success run-button");
     ctrlDiv.appendChild(butt);
     if (this.runortest) {
-        var test_button = document.createElement("button");
-        $(test_button).text("Test");
-        $(test_button).addClass("btn btn-success test-button");
-        ctrlDiv.appendChild(test_button);
-        this.testButton = test_button;
-        $(test_button).click(this.runProg.bind(this, [true]));
-        $(test_button).attr("type", "button");
+        var testButton = document.createElement("button");
+        $(testButton).text("Test");
+        $(testButton).addClass("btn btn-success test-button");
+        ctrlDiv.appendChild(testButton);
+        this.testButton = testButton;
+        $(testButton).click(this.runProg.bind(this, [1]));
+        $(testButton).attr("type", "button");
+    }
+    if (this.playtask) {
+        var playTaskButton = document.createElement("button");
+        $(playTaskButton).text($.i18n("msg_activecode_play_task"));
+        $(playTaskButton).addClass("btn btn-success test-button")
+        ctrlDiv.appendChild(playTaskButton);
+        this.plaTaskButton = playTaskButton;
+        $(playTaskButton).click(this.runProg.bind(this, [2]));
+        $(playTaskButton).attr("type", "button");
     }
     this.runButton = butt;
     $(butt).click(this.runProg.bind(this, [false]));
@@ -899,10 +908,10 @@ ActiveCode.prototype.outputfun = function(text) {
         $(this.output).append(text);
     };
 
-ActiveCode.prototype.buildProg = function(test_flag = false) {
+ActiveCode.prototype.buildProg = function(buildType = 0) {
     // assemble code from prefix, suffix, and editor for running.
     var pretext;
-    var prog = test_flag ? "" : this.editor.getValue() + "\n";
+    var prog = buildType > 0 ? "" : this.editor.getValue() + "\n";
     
     this.pretext = "";
     if (this.includes !== undefined) {
@@ -917,7 +926,7 @@ ActiveCode.prototype.buildProg = function(test_flag = false) {
     }
 
     if (this.runortest) {
-        if (test_flag) {
+        if (buildType == 1) {
             var tmp = this.editor.getValue().split('\n');
             var readOnlyLines = [];
             var main = "";
@@ -942,7 +951,7 @@ ActiveCode.prototype.buildProg = function(test_flag = false) {
     } 
 
     if(this.suffix) {
-        if (!this.runortest || (this.runortest && test_flag)) prog = prog + this.suffix;
+        if (!this.runortest && !this.playtask || (this.runortest && buildType == 1) || (this.playtask && buildType == 2)) prog = prog + this.suffix;
     }
 
     return prog;
@@ -985,21 +994,17 @@ ActiveCode.prototype.manage_scrubber = function (scrubber_dfd, history_dfd, save
 };
 
 
-ActiveCode.prototype.runProg = function (params = [false]) {
+ActiveCode.prototype.runProg = function (params = [0]) {
     var prog = this.buildProg(params[0]);
     var saveCode = "True";
     var scrubber_dfd, history_dfd, skulpt_run_dfd;
     console.log("starting a new run of " + this.divid);
     $(this.output).text('');
     if (this.runortest) {
-        if (params[0] == false) {
-            var el = document.getElementById(this.divid + '_unit_results');
-            if (el) {
-                el.parentNode.removeChild(el);
-            }
-        }
-        else {
-            $(this.output).css("visibility","hidden");
+        $(this.output).css("visibility", "hidden");
+        var el = document.getElementById(this.divid + '_unit_results');
+        if (el) {
+            el.parentNode.removeChild(el);
         }
     }
     $(this.eContainer).remove();
@@ -1014,7 +1019,17 @@ ActiveCode.prototype.runProg = function (params = [false]) {
     this.setTimeLimit();
     (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = this.graphics;
     Sk.canvas = this.graphics.id; //todo: get rid of this here and in image
-    $(this.runButton).attr('disabled', 'disabled');
+    switch (params[0]) {
+        case 0:
+            $(this.runButton).attr('disabled', 'disabled');
+            break;
+        case 1:
+            $(this.testButton).attr('disabled', 'disabled');
+            break;
+        case 2:
+            $(this.playTaskButton).attr('disabled', 'disabled');
+            break;      
+    } 
     $(this.historyScrubber).off("slidechange");
     $(this.historyScrubber).slider("disable");
     $(this.codeDiv).switchClass("col-md-12", "col-md-7", {duration: 500, queue: false});
@@ -1037,6 +1052,17 @@ ActiveCode.prototype.runProg = function (params = [false]) {
 
     Promise.all([skulpt_run_dfd, history_dfd]).then((function (mod) { // success
             $(this.runButton).removeAttr('disabled');
+            switch (params[0]) {
+                case 0:
+                    $(this.runButton).removeAttr('disabled');
+                    break;
+                case 1:
+                    $(this.testButton).removeAttr('disabled');
+                    break;
+                case 2:
+                    $(this.playTaskButton).removeAttr('disabled');
+                    break;      
+            } 
             // if (this.slideit) {
             //     $(this.historyScrubber).on("slidechange", this.slideit.bind(this));
             // }
