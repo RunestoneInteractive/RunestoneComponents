@@ -54,6 +54,7 @@ ActiveCode.prototype.init = function(opts) {
     this.testParameters = $(orig).data('runortest');
     this.runortest = this.testParameters ? true : false;
     this.playtask = $(orig).data('playtask');
+    this.passivecode = $(orig).data('passivecode');
 
     if(this.chatcodes && eBookConfig.enable_chatcodes) {
         if(!socket) {
@@ -117,7 +118,10 @@ ActiveCode.prototype.init = function(opts) {
     this.history = [this.code];
     this.createEditor();
     this.createOutput();
-    this.createControls();
+    if (!this.passivecode) {
+        this.createControls();
+    }
+
     if ($(orig).data('caption')) {
         this.caption = $(orig).data('caption');
     } else {
@@ -151,7 +155,8 @@ ActiveCode.prototype.createEditor = function (index) {
         value: this.code, lineNumbers: true,
         mode: this.containerDiv.lang, indentUnit: 4,
         matchBrackets: true, autoMatchParens: true,
-        extraKeys: {"Tab": "indentMore", "Shift-Tab": "indentLess"}
+        extraKeys: {"Tab": "indentMore", "Shift-Tab": "indentLess"},
+        readOnly: this.passivecode 
     });
     
     if (this.runortest) {
