@@ -31,8 +31,10 @@ def setup(app):
 
     app.add_stylesheet('tabbedstuff.css')
 
+    app.add_config_value('tabbed_div_class', 'alert alert-warning', 'html')
+
 #Templates to be formatted by node options
-BEGIN = """<div id='%(divid)s' data-component="tabbedStuff" %(inactive)s>"""
+BEGIN = """<div id='%(divid)s' data-component="tabbedStuff" %(inactive)s class='%(divclass)s'>"""
 
 TABDIV_BEGIN = """<div data-component="tab" data-tabname="%(tabname)s" %(active)s>
 """
@@ -84,6 +86,7 @@ def visit_tabbedstuff_node(self, node):
         node.tabbed_stuff_options['inactive'] = ''
 
     res = BEGIN % {'divid':divid,
+                    'divclass':node.tabbed_stuff_options['divclass'],
                     'inactive':node.tabbed_stuff_options['inactive']}
 
     self.body.append(res)
@@ -108,6 +111,11 @@ class TabDirective(RunestoneDirective):
 
    Content
    ...
+
+
+config values (conf.py): 
+
+- tabbed_div_class - custom CSS class of the component's outermost div
     """
     required_arguments = 1  # the name of the tab
     optional_arguments = 0
@@ -146,6 +154,12 @@ class TabbedStuffDirective(RunestoneDirective):
 
    Content (put tabs here)
    ...
+
+
+
+config values (conf.py): 
+
+- tabbed_div_class - custom CSS class of the component's outermost div
     """
     required_arguments = 1  # the div to put the tabbed exhibit in
     optional_arguments = 0
@@ -170,6 +184,9 @@ class TabbedStuffDirective(RunestoneDirective):
 
 
         self.options['divid'] = self.arguments[0]
+
+        env = self.state.document.settings.env
+        self.options['divclass'] = env.config.tabbed_div_class
 
         # Create the node, to be populated by "nested_parse".
         tabbedstuff_node = TabbedStuffNode(self.options, rawsource=self.block_text)

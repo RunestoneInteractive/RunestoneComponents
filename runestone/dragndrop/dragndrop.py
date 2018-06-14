@@ -31,9 +31,11 @@ def setup(app):
 
     app.add_node(DragNDropNode, html=(visit_dnd_node, depart_dnd_node))
 
+    app.add_config_value('dragndrop_div_class', 'runestone', 'html')
+
 
 TEMPLATE_START = """
-<div class="runestone">
+<div class="%(divclass)s">
 <ul data-component="dragndrop" id="%(divid)s">
     <span data-component="question">%(question)s</span>
 	%(feedback)s
@@ -107,6 +109,10 @@ class DragNDrop(RunestoneIdDirective):
     etc. (up to 20 matches)
 
     The question goes here.
+
+config values (conf.py): 
+
+- dragndrop_div_class - custom CSS class of the component's outermost div
     """
     required_arguments = 1
     optional_arguments = 0
@@ -159,12 +165,14 @@ class DragNDrop(RunestoneIdDirective):
             source = '\n'
 
         self.options['question'] = source
-
+        env = self.state.document.settings.env
+        self.options['divclass'] = env.config.dragndrop_div_class
 
         dndNode = DragNDropNode(self.options, rawsource=self.block_text)
         dndNode.source, dndNode.line = self.state_machine.get_source_and_line(self.lineno)
         dndNode.template_start = TEMPLATE_START
         dndNode.template_option = TEMPLATE_OPTION
         dndNode.template_end = TEMPLATE_END
-
+        env = self.state.document.settings.env
+        self.options['divclass'] = env.config.dragndrop_div_class
         return [dndNode]

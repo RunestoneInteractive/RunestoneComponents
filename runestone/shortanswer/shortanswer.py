@@ -27,11 +27,12 @@ def setup(app):
     app.add_node(JournalNode, html=(visit_journal_node, depart_journal_node))
     app.add_javascript('shortanswer.js')
     app.add_javascript('timed_shortanswer.js')
-
+    app.add_config_value('shortanswer_div_class', 'journal alert alert-warning', 'html')
+    app.add_config_value('shortanswer_optional_div_class', 'journal alert alert-success', 'html')
 
 TEXT = """
-<div class="runestone"
-<p data-component="shortanswer" id=%(divid)s %(optional)s>%(qnum)s: %(content)s</p>
+<div class="runestone">
+<p data-component="shortanswer" class="%(divclass)s" id=%(divid)s %(optional)s>%(qnum)s: %(content)s</p>
 </div>
 """
 
@@ -59,6 +60,11 @@ class JournalDirective(Assessment):
    :optional:
 
    text of the question goes here
+
+
+config values (conf.py): 
+
+- shortanswer_div_class - custom CSS class of the component's outermost div
     """
     required_arguments = 1  # the div id
     optional_arguments = 0
@@ -80,5 +86,11 @@ class JournalDirective(Assessment):
         self.options['qnum'] = self.getNumber()
         journal_node = JournalNode(self.options, rawsource=self.block_text)
         journal_node.source, journal_node.line = self.state_machine.get_source_and_line(self.lineno)
+
+        env = self.state.document.settings.env
+        if self.options['optional']:
+            self.options['divclass'] = env.config.shortanswer_optional_div_class
+        else:
+            self.options['divclass'] = env.config.shortanswer_div_class
 
         return [journal_node]

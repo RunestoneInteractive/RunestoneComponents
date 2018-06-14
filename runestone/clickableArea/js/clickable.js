@@ -90,7 +90,7 @@ ClickableArea.prototype.renderNewElements = function () {
     // wrapper function for generating everything
     this.containerDiv = document.createElement("div");
     this.containerDiv.appendChild(this.question);
-    $(this.containerDiv).addClass("alert alert-warning");
+    $(this.containerDiv).addClass(this.origElem.getAttribute("class"));
 
     this.newDiv = document.createElement("div");
     var newContent = $(this.origElem).html();
@@ -378,7 +378,8 @@ ClickableArea.prototype.renderFeedback = function () {
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
 =================================*/
-$(document).bind("runestone:login-complete", function () {
+//$(document).bind("runestone:login-complete", function () {
+$(document).ready(function () {
     $("[data-component=clickablearea]").each(function (index) {
         if ($(this).closest('[data-component=timedAssessment]').length == 0) { // If this element exists within a timed component, don't render it here
             CAList[this.id] = new ClickableArea({"orig": this, "useRunestoneServices":eBookConfig.useRunestoneServices});
