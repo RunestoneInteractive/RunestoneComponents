@@ -81,8 +81,10 @@ ActiveCode.prototype.init = function(opts) {
         this.suffix = this.code.substring(suffStart+5);
         this.code = this.code.substring(0,suffStart);
     }
-
-    if (this.runortest) {
+    var re = /#\s-\*-.+(acsection:).+-\*-/
+    this.markedText = false;
+    if (re.exec(this.code)) {
+        this.markedText = true;
         var tmp = this.code.split('\n');
         var c = 0;
         var replacement = "";
@@ -159,19 +161,24 @@ ActiveCode.prototype.createEditor = function (index) {
         readOnly: this.passivecode 
     });
     
-    if (this.runortest) {
+    if (this.markedText) {
         this.lineHandles = [];
         for (var i  = this.generalInitSec; i < this.mainSec; i++) {
             this.lineHandles.push(editor.addLineClass(i, "background", "shaded"));
         }
         editor.markText({line: 0, ch: 0}, {line: this.mainSec, ch: 0}, {
-            readOnly: true
+            readOnly: true,
+            inclusiveLeft: true,
+            atomic: true
         });
         for (var i  = this.afterMainSec; i < editor.lineCount() + 1; i++) {
             this.lineHandles.push(editor.addLineClass(i, "background", "shaded"));
         }
         editor.markText({line: this.afterMainSec, ch: 0}, {line: editor.lineCount(), ch: 0}, {
-            readOnly: true
+            readOnly: true,
+            inclusiveLeft: true,
+            inclusiveRight: true,
+            atomic: true
         });
     }
 
