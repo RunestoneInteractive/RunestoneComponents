@@ -129,7 +129,10 @@ class RunestoneIdDirective(RunestoneDirective):
     def run(self):
         # Make sure the runestone directive at least requires an ID.
         assert self.required_arguments >= 1
-        id_ = self.options['divid'] = self.arguments[0]
+        if 'divid' not in self.options:
+            id_ = self.options['divid'] = self.arguments[0]
+        else:
+            id_ = self.options['divid']
 
         # Get references to `runestone data`_.
         env = self.state.document.settings.env
