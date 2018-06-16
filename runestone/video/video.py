@@ -209,8 +209,9 @@ class Youtube(IframeVideo):
    :http: http
    """
     html = '''
+    <div class="runestone" style="margin-left: auto; margin-right:auto">
     <div id="%(divid)s_vid"></div>
-
+    </div>
     <script id="%(divid)s_script">
       // 2. This code loads the IFrame Player API code asynchronously.
       var tag = document.createElement('script');
