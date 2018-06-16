@@ -386,11 +386,13 @@ config values (conf.py):
                 available_files = self.options.get('available_files', "")
             ))
         else:
-            print("Unable to save to source_code table in activecode.py. Possible problems:")
-            print("  1. dburl or course_id are not set in conf.py for your book")
-            print("  2. unable to connect to the database using dburl")
-            print("")
-            print("This should only affect the grading interface. Everything else should be fine.")
+            if not hasattr(env, 'dberr_activecode_reported') or not env.dberr_activecode_reported:
+                env.dberr_activecode_reported = True
+                print("Unable to save to source_code table in activecode.py. Possible problems:")
+                print("  1. dburl or course_id are not set in conf.py for your book")
+                print("  2. unable to connect to the database using dburl")
+                print("")
+                print("This should only affect the grading interface. Everything else should be fine.")
 
 
         acnode = ActivcodeNode(self.options, rawsource=self.block_text)
