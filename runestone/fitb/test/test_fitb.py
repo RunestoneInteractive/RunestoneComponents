@@ -12,8 +12,7 @@ class FITB_Error_Tests(TestCase):
             (46, 'Not enough feedback for the number of blanks supplied.'),
         )
         for error_line, error_string in directive_level_errors:
-            # The rst_prolog in conf.py confuses line numbers. Adjust for it.
-            self.assertIn(':{}: WARNING: {}'.format(error_line + 4, error_string), mf.build_stderr_data)
+            self.assertIn(':{}: WARNING: {}'.format(error_line, error_string), mf.build_stderr_data)
 
         # Check for the following error inside the directive.
         inside_directive_errors = (
@@ -23,8 +22,7 @@ class FITB_Error_Tests(TestCase):
             (44, 'each list item in a fill-in-the-blank problems must contain only one item, a field list.'),
         )
         for error_line, error_string in inside_directive_errors:
-            # The rst_prolog in conf.py confuses line numbers. Adjust for it.
-            self.assertIn(': WARNING: On line {}, {}'.format(error_line + 4, error_string), mf.build_stderr_data)
+            self.assertIn(': WARNING: On line {}, {}'.format(error_line, error_string), mf.build_stderr_data)
 
         # Make sure we saw all errors.
         self.assertEqual(len(directive_level_errors) + len(inside_directive_errors), mf.build_stderr_data.count('WARNING'))

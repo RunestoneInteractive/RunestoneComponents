@@ -20,7 +20,7 @@ rm dist/*
 #source ~/.virtualenvs/runedev/bin/activate
 python setup.py sdist
 pip wheel --no-index --no-deps --global-option bdist_wheel  --wheel-dir dist dist/*.tar.gz
-pip3 wheel --no-index --no-deps --global-option bdist_wheel  --wheel-dir dist dist/*.tar.gz
+#pip3 wheel --no-index --no-deps --global-option bdist_wheel  --wheel-dir dist dist/*.tar.gz
 
 #python setup.py register -r pypi
 twine upload dist/*

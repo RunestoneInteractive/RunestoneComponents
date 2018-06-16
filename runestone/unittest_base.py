@@ -69,7 +69,7 @@ def module_fixture_maker(module_path, return_mf=False):
 class RunestoneTestCase(unittest.TestCase):
     def setUp(self):
         # `PyVirtualDisplay <http://pyvirtualdisplay.readthedocs.io/en/latest/>`_ only runs on X-windows, meaning Linux. Mac seems to have `some support <https://support.apple.com/en-us/HT201341>`_. Windows is out of the question.
-        if os.name != 'nt':
+        if os.uname()[0] == 'Linux':
             self.display = Display(visible=0, size=(1280, 1024))
             self.display.start()
         else:

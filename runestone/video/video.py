@@ -19,13 +19,14 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common.runestonedirective import RunestoneIdDirective
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneDirective
 
 def setup(app):
     app.add_directive('video',Video)
     app.add_directive('youtube', Youtube)
     app.add_directive('vimeo', Vimeo)
     app.add_stylesheet('video.css')
+    app.add_javascript('runestonevideo.js')
 
 CODE = """\
 <div id="%(divid)s" class="video_popup runestone" >
@@ -162,7 +163,7 @@ def httpOption(argument):
     return directives.choice(argument, ('http', 'https'))
 
 
-class IframeVideo(Directive):
+class IframeVideo(RunestoneIdDirective):
     has_content = False
     required_arguments = 1
     optional_arguments = 0
@@ -172,11 +173,13 @@ class IframeVideo(Directive):
         'width': directives.nonnegative_int,
         'align': align,
         'http': httpOption,
+        'divid': directives.unchanged
     }
     default_width = 500
     default_height = 281
 
     def run(self):
+        super(IframeVideo, self).run()
         self.options['video_id'] = directives.uri(self.arguments[0])
         if not self.options.get('width'):
             self.options['width'] = self.default_width
@@ -186,24 +189,61 @@ class IframeVideo(Directive):
             self.options['align'] = 'left'
         if not self.options.get('http'):
             self.options['http'] = 'https'
-        raw_node = nodes.raw(self.block_text, self.html % self.options, format='html')
+        if not self.options.get('divid'):
+            self.options['divid'] = self.arguments[0]
+        
+        res = self.html % self.options
+        addHTMLToDB(self.options['divid'], self.options['basecourse'], res)
+        raw_node = nodes.raw(self.block_text, res, format='html')
         raw_node.source, raw_node.line = self.state_machine.get_source_and_line(self.lineno)
         return [raw_node]
 
-
+# TODO - I'm pretty sure this breaks for the case of multiple youtubes on one page.
+# we should push players to an array.
+# There should probably be only one function called onYouTubeIframeAPIReady
+# this function should iterate over all the various videos creating players
+#
 class Youtube(IframeVideo):
     """
 .. youtube:: YouTubeID
+   :divid: the runestone id for this video
    :height: 315
    :width: 560
    :align: left
    :http: http
-    """
-    html = '<iframe src="%(http)s://www.youtube.com/embed/%(video_id)s" \
-    width="%(width)u" height="%(height)u" frameborder="0" \
-    webkitAllowFullScreen mozallowfullscreen allowfullscreen \
-    class="align-%(align)s" seamless ></iframe>'
+   """
+    html = '''
+    <div class="runestone" style="margin-left: auto; margin-right:auto">
+    <div id="%(divid)s_vid"></div>
+    </div>
+    <script id="%(divid)s_script">
+      // 2. This code loads the IFrame Player API code asynchronously.
+      var tag = document.createElement('script');
 
+      tag.src = "https://www.youtube.com/iframe_api";
+      var ytScriptTag = document.getElementById('%(divid)s_script');
+      ytScriptTag.parentNode.insertBefore(tag, ytScriptTag);
+
+      // 3. This function creates an <iframe> (and YouTube player)
+      //    after the API code downloads.
+      var player;
+      function onYouTubeIframeAPIReady() {
+        player = new YT.Player('%(divid)s_vid', {
+          height: '%(height)u',
+          width: '%(width)u',
+          videoId: '%(video_id)s',
+          events: {
+            'onStateChange': onPlayerStateChange
+          }
+        });
+      }
+    </script>
+    '''
+
+    def run(self):
+        raw_node = super(Youtube, self).run()
+        addQuestionToDB(self)
+        return raw_node
 
 class Vimeo(IframeVideo):
     """

@@ -22,8 +22,7 @@ class MultipleChoiceQuestion_Error_Tests(TestCase):
             (102, 'No correct answer specified.'),
         )
         for error_line, error_string in directive_level_errors:
-            # The rst_prolog in conf.py confuses line numbers. Adjust for it.
-            self.assertIn(':{}: WARNING: {}'.format(error_line + 4, error_string), mf.build_stderr_data)
+            self.assertIn(':{}: WARNING: {}'.format(error_line, error_string), mf.build_stderr_data)
 
         # Check for the following error inside the directive.
         inside_directive_lines = (
@@ -35,8 +34,7 @@ class MultipleChoiceQuestion_Error_Tests(TestCase):
             95,
         )
         for error_line in inside_directive_lines:
-            # The rst_prolog in conf.py confuses line numbers. Adjust for it.
-            self.assertIn(': WARNING: On line {}, a single-item list must be nested under each answer.'.format(error_line + 4), mf.build_stderr_data)
+            self.assertIn(': WARNING: On line {}, a single-item list must be nested under each answer.'.format(error_line), mf.build_stderr_data)
 
         # Make sure we saw all errors.
         self.assertEqual(len(directive_level_errors) + len(inside_directive_lines), mf.build_stderr_data.count('WARNING'))
