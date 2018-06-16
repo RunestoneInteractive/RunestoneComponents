@@ -19,7 +19,7 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common.runestonedirective import RunestoneIdDirective
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneDirective
 
 def setup(app):
     app.add_directive('video',Video)
@@ -163,7 +163,7 @@ def httpOption(argument):
     return directives.choice(argument, ('http', 'https'))
 
 
-class IframeVideo(Directive):
+class IframeVideo(RunestoneIdDirective):
     has_content = False
     required_arguments = 1
     optional_arguments = 0
@@ -179,6 +179,7 @@ class IframeVideo(Directive):
     default_height = 281
 
     def run(self):
+        super(IframeVideo, self).run()
         self.options['video_id'] = directives.uri(self.arguments[0])
         if not self.options.get('width'):
             self.options['width'] = self.default_width
@@ -190,7 +191,10 @@ class IframeVideo(Directive):
             self.options['http'] = 'https'
         if not self.options.get('divid'):
             self.options['divid'] = self.arguments[0]
-        raw_node = nodes.raw(self.block_text, self.html % self.options, format='html')
+        
+        res = self.html % self.options
+        addHTMLToDB(self.options['divid'], self.options['basecourse'], res)
+        raw_node = nodes.raw(self.block_text, res, format='html')
         raw_node.source, raw_node.line = self.state_machine.get_source_and_line(self.lineno)
         return [raw_node]
 
@@ -235,6 +239,11 @@ class Youtube(IframeVideo):
       }
     </script>
     '''
+
+    def run(self):
+        raw_node = super(Youtube, self).run()
+        addQuestionToDB(self)
+        return raw_node
 
 class Vimeo(IframeVideo):
     """
