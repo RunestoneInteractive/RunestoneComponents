@@ -8,6 +8,7 @@ function presentToggle() {
   let bottomClass = 'bottom';
   if(bod.hasClass(presentClass)){
     $('.section *').not('.runestone, .runestone *').removeClass('hidden'); //show everything
+    $('#completionButton').removeClass('hidden');
     bod.removeClass(presentClass);
     $('.'+fullHeightClass).removeClass(fullHeightClass);
     $('.'+bottomClass).removeClass(bottomClass);
@@ -16,6 +17,7 @@ function presentToggle() {
   }
   else{
     $('.section *').not('.runestone, .runestone *').addClass('hidden'); // hide extraneous stuff
+    $('#completionButton').addClass('hidden');
     bod.addClass(presentClass);
     bod.addClass(fullHeightClass);
     $('html').addClass(fullHeightClass);
@@ -86,6 +88,7 @@ function configure() {
   });
 
   codelensListener(500);
+  $('.section img').wrap('<div class="runestone">')
   codeExercises = $('.runestone').not('.runestone .runestone');
   codeExercises.each(function(){
     $(this).prepend(

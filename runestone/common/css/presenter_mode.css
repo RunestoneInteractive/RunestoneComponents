@@ -247,10 +247,21 @@ div.ExecutionVisualizer table.visualizer {
   background: grey;
 }
 
-.col-md-12 {
+body.present .ac_section>* {
+  max-width: none;
+}
+body.present iframe {
+  width: 100%;
+}
+
+body.present {
+  /* font-size: 2.0em; */
+}
+
+/* .col-md-12 {
   width: 58.333333333333336%;
 }
 
 .card-mode .col-md-7 {
   width: 50%;
-}
+} */
