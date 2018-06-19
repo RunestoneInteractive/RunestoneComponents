@@ -467,7 +467,9 @@ var languageExtensions = { python:     'py',
                            javascript: 'js',
                            java:       'java',
                            python2:    'py',
-                           python3:    'py'};
+                           python3:    'py',
+                           cpp:        'cpp',
+                           c:          'c'};
 
 ActiveCode.prototype.downloadFile = function (lang) {
   var fnb = this.divid;
