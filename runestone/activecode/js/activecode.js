@@ -56,6 +56,52 @@ ActiveCode.prototype.init = function(opts) {
     this.playtask = $(orig).data('playtask');
     this.passivecode = $(orig).data('passivecode');
     this.modaloutput = $(orig).data('modaloutput');
+    this.includesrc = $(orig).data('includesrc');
+    this.includehsrc = $(orig).data('includehsrc');
+    this.includexsrc = $(orig).data('includexsrc');
+    
+    if (this.includesrc) {
+        this.code = this.includesrc + this.code;
+    }
+    else if (this.includehsrc) {
+        this.code = this.code + "====\n" + this.includehsrc;
+    } 
+    else if (this.includexsrc) {
+        var tmp = this.includexsrc.split('\n');
+        var c = 0;
+        var insertBefore = "";
+        var insertAfter = "";
+        var generalInitSec = -1;
+        var varInitSec     = -1;
+        var mainSec        = -1;
+        var afterMainSec   = -1;
+        for (var i = 0; i < tmp.length; i++) {
+            if (tmp[i].indexOf('acsection: general-init') > -1) {
+                generalInitSec = c;
+            }
+            if (tmp[i].indexOf('acsection: var-init') > -1) {
+                varInitSec = c;
+            }
+            if (tmp[i].indexOf('acsection: main') > -1) {
+                mainSec = c;
+                insertBefore += tmp[i] + "\n";
+            }
+            if (tmp[i].indexOf('acsection: after-main') > -1) {
+                afterMainSec = c;
+            }
+            if (this.varInitSec == -1 && this.generalInitSec > -1) {
+                this.generalInitContent += tmp[i] + "\n";
+            }
+            if (mainSec == -1) {
+                insertBefore += tmp[i] + "\n";
+            }
+            else if (afterMainSec > -1) {
+                insertAfter += tmp[i] + "\n";
+            }
+            c++;
+        }
+        this.code = insertBefore + this.code + insertAfter + "====\n" + this.includexsrc;
+    }
 
     if(this.chatcodes && eBookConfig.enable_chatcodes) {
         if(!socket) {
@@ -860,7 +906,8 @@ ActiveCode.prototype.setTimeLimit = function (timer) {
     if (this.code.indexOf('ontimer') > -1 ||
         this.code.indexOf('onclick') > -1 ||
         this.code.indexOf('onkey') > -1  ||
-        this.code.indexOf('setDelay') > -1 ) {
+        this.code.indexOf('setDelay') > -1 ||
+        this.code.indexOf('display.set_mode') > -1) {
         Sk.execLimit = null;
     } else {
         if (timelimit === "off") {
