@@ -1692,7 +1692,9 @@ LiveCode.prototype.init = function(opts) {
     this.USE_API_KEY = true;
 
     this.JOBE_SERVER = eBookConfig.jobehost || eBookConfig.host;
-    this.resource = eBookConfig.proxyuri_runs ||  '/runestone/proxy/jobeRun'
+    this.resource = eBookConfig.proxyuri_runs ||  '/runestone/proxy/jobeRun';
+    this.jobePutFiles = eBookConfig.proxy_uri_files || '/runestone/proxy/jobePushFile/';
+    this.jobeCheckFiles = eBookConfig.proxy_uri_files || '/runestone/proxy/jobeCheckFile/';
 
     this.div2id = {};
     if (this.stdin) {
@@ -1924,7 +1926,7 @@ LiveCode.prototype.addJobeErrorMessage = function (err) {
  */
 LiveCode.prototype.checkFile = function(file, resolve, reject) {
     var file_id = this.div2id[file.name];
-    var resource = eBookConfig.proxyuri_files + file_id;
+    var resource = this.jobeCheckFiles + file_id;
     var host = this.JOBE_SERVER + resource;
 
     var xhr = new XMLHttpRequest();
@@ -1983,7 +1985,7 @@ LiveCode.prototype.pushDataFile = function (file, resolve, reject) {
 
     var data = JSON.stringify({ 'file_contents' : contentsb64 });
 
-    var resource = eBookConfig.proxyuri_files + file_id;
+    var resource = this.jobePutFiles + file_id;
     var host = this.JOBE_SERVER + resource;
 
     var xhr = new XMLHttpRequest();
