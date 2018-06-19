@@ -1691,8 +1691,8 @@ LiveCode.prototype.init = function(opts) {
     this.API_KEY = "67033pV7eUUvqo07OJDIV8UZ049aLEK1";
     this.USE_API_KEY = true;
 
-    this.JOBE_SERVER = eBookConfig.jobehost;
-    this.resource = eBookConfig.proxyuri_runs;
+    this.JOBE_SERVER = eBookConfig.jobehost || eBookConfig.host;
+    this.resource = eBookConfig.proxyuri_runs ||  '/runestone/proxy/jobeRun'
 
     this.div2id = {};
     if (this.stdin) {
