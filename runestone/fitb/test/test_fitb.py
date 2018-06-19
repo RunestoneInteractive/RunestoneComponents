@@ -61,6 +61,7 @@ class FITBtests(RunestoneTestCase):
         self.click_checkme()
         feedback = self.find_feedback("fill1412")
         self.assertIn('Correct', feedback.text)
+        self.assertIn('No answer provided', feedback.text)
 
     # No answers yet -- no answer provided feedback.
     def test_fitb2(self):
