@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 from __future__ import print_function
+import os.path
 
 __author__ = 'bmiller'
 
@@ -69,11 +70,24 @@ TEMPLATE_END = """
 <textarea data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s
     %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s %(chatcodes)s
     data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s
-    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(runortest)s %(playtask)s %(passivecode)s %(modaloutput)s %(hidehistory)s>
+    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(runortest)s %(playtask)s %(passivecode)s %(modaloutput)s %(hidehistory)s
+    %(includesrc)s %(includehsrc)s %(includexsrc)s>
 %(initialcode)s
 </textarea>
 </div>
 """
+
+html_escape_table = {
+    "&": "&amp;",
+    '"': "&quot;",
+    "'": "&apos;",
+    ">": "&gt;",
+    "<": "&lt;",
+    }
+
+def html_escape(text):
+    """Produce entities within text."""
+    return "".join(html_escape_table.get(c,c) for c in text)
 
 class ActivcodeNode(nodes.General, nodes.Element, RunestoneNode):
     def __init__(self, content, **kwargs):
@@ -157,6 +171,9 @@ class ActiveCode(RunestoneIdDirective):
    :playtask:  -- run hidden code
    :passivecode: -- used for just showing incomplete pieces of code without interaction
    :modaloutput: -- show output in modal window (used for drawing)
+   :includesrc: -- include source code from file
+   :includehsrc: -- include hidden source code from file 
+   :includexsrc: -- include source code from file with magic comments
 
     If this is a homework problem instead of an example in the text
     then the assignment text should go here.  The assignment text ends with
@@ -206,7 +223,10 @@ config values (conf.py):
         'runortest': directives.unchanged,
         'playtask': directives.flag,
         'passivecode': directives.flag,
-        'modaloutput': directives.flag
+        'modaloutput': directives.flag,
+        'includesrc': directives.unchanged,
+        'includehsrc': directives.unchanged,
+        'includexsrc': directives.unchanged
     })
 
 
@@ -365,6 +385,33 @@ config values (conf.py):
             self.options['hidehistory'] = 'data-hidehistory=true'
         else:
             self.options['hidehistory'] = ''
+
+        if 'includesrc' in self.options:
+            fname = self.options['includesrc']
+            cwd = os.path.abspath(os.getcwd())
+            path = os.path.join(cwd, fname)
+            with open(path) as f:
+                self.options['includesrc'] = 'data-includesrc="%s"' % html_escape(f.read())        
+        else:
+            self.options['includesrc'] = ""
+
+        if 'includehsrc' in self.options:
+            fname = self.options['includehsrc']
+            cwd = os.path.abspath(os.getcwd())
+            path = os.path.join(cwd, fname)
+            with open(path) as f:
+                self.options['includehsrc'] = 'data-includehsrc="%s"' % html_escape(f.read())
+        else:
+            self.options['includehsrc'] = ""
+
+        if 'includexsrc' in self.options:
+            fname = self.options['includexsrc']
+            cwd = os.path.abspath(os.getcwd())
+            path = os.path.join(cwd, fname)
+            with open(path) as f:
+                self.options['includexsrc'] = 'data-includexsrc="%s"' % html_escape(f.read())
+        else:
+            self.options['includexsrc'] = ""
 
         if self.content:
             if '====' in self.content:
