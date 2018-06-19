@@ -55,6 +55,7 @@ ActiveCode.prototype.init = function(opts) {
     this.runortest = this.testParameters ? true : false;
     this.playtask = $(orig).data('playtask');
     this.passivecode = $(orig).data('passivecode');
+    this.modaloutput = $(orig).data('modaloutput');
 
     if(this.chatcodes && eBookConfig.enable_chatcodes) {
         if(!socket) {
@@ -538,6 +539,12 @@ ActiveCode.prototype.createOutput = function () {
     $(clearDiv).css("clear","both");  // needed to make parent div resize properly
     this.outerDiv.appendChild(clearDiv);
 
+    if (this.modaloutput) {
+        var canvasDiv = document.createElement("div");
+        document.body.appendChild(canvasDiv);
+        this.canvasDiv = canvasDiv;
+        this.canvasDiv.id = this.divid + "_canvas";
+    }
 };
 
 ActiveCode.prototype.disableSaveLoad = function() {
@@ -1029,8 +1036,8 @@ ActiveCode.prototype.runProg = function (params = [0]) {
     });
     Sk.divid = this.divid;
     this.setTimeLimit();
-    (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = this.graphics;
-    Sk.canvas = this.graphics.id; //todo: get rid of this here and in image
+    (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = this.modaloutput ? this.canvasDiv : this.graphics;
+    Sk.canvas = this.modaloutput ? this.canvasDiv.id : this.graphics.id; //todo: get rid of this here and in image
     switch (params[0]) {
         case 0:
             $(this.runButton).attr('disabled', 'disabled');
@@ -1044,9 +1051,10 @@ ActiveCode.prototype.runProg = function (params = [0]) {
     } 
     $(this.historyScrubber).off("slidechange");
     $(this.historyScrubber).slider("disable");
-    $(this.codeDiv).switchClass("col-md-12", "col-md-7", {duration: 500, queue: false});
-    $(this.outDiv).show({duration: 700, queue: false});
-
+    if (!this.modaloutput) {
+        $(this.codeDiv).switchClass("col-md-12", "col-md-7", {duration: 500, queue: false});
+        $(this.outDiv).show({duration: 700, queue: false});
+    }
     // var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
     // history_dfd = __ret.history_dfd;
     // saveCode = __ret.saveCode;
@@ -1075,6 +1083,10 @@ ActiveCode.prototype.runProg = function (params = [0]) {
                     $(this.playTaskButton).removeAttr('disabled');
                     break;      
             } 
+
+            if (this.modaloutput) {
+                $('.modal').modal('hide');
+            }
             // if (this.slideit) {
             //     $(this.historyScrubber).on("slidechange", this.slideit.bind(this));
             // }

@@ -41,7 +41,7 @@ def setup(app):
     app.add_config_value('activecode_hide_load_history', False, 'html')
 
     app.add_stylesheet('activecode.css')
-
+    
     app.add_javascript('jquery.highlight.js')
     app.add_javascript('bookfuncs.js')
     add_codemirror_css_and_js(app,'xml','css','python','htmlmixed','javascript')
@@ -69,7 +69,7 @@ TEMPLATE_END = """
 <textarea data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s
     %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s %(chatcodes)s
     data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s
-    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(runortest)s %(playtask)s %(passivecode)s %(hidehistory)s>
+    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(runortest)s %(playtask)s %(passivecode)s %(modaloutput)s %(hidehistory)s>
 %(initialcode)s
 </textarea>
 </div>
@@ -156,7 +156,8 @@ class ActiveCode(RunestoneIdDirective):
    :runortest:  -- run activecode or run unit tests within activecode
    :playtask:  -- run hidden code
    :passivecode: -- used for just showing incomplete pieces of code without interaction
-   
+   :modaloutput: -- show output in modal window (used for drawing)
+
     If this is a homework problem instead of an example in the text
     then the assignment text should go here.  The assignment text ends with
     the line containing four tilde ~
@@ -204,7 +205,8 @@ config values (conf.py):
         'runargs': directives.unchanged,
         'runortest': directives.unchanged,
         'playtask': directives.flag,
-        'passivecode': directives.flag
+        'passivecode': directives.flag,
+        'modaloutput': directives.flag
     })
 
 
@@ -320,6 +322,11 @@ config values (conf.py):
             self.options['passivecode'] = ''
         else:
             self.options['passivecode'] = 'data-passivecode="true"'
+
+        if 'modaloutput' not in self.options:
+            self.options['modaloutput'] = ''
+        else:
+            self.options['modaloutput'] = 'data-modaloutput="true"'
 
         if 'coach' in self.options:
             self.options['coach'] = 'data-coach="true"'
