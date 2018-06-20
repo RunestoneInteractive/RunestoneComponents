@@ -5,7 +5,7 @@ Testing: ShowEval Questions
 ShowEval Trace Mode
 -------------------
 
-.. showeval:: showEval_0
+.. showeval:: showEval_3
    :trace_mode: true
 
    eggs = ['dogs', 'cats', 'moose']
