@@ -11,16 +11,11 @@
     '_static'+'/processing-1.4.1.min.js',
     '_static'+'/jquery.hotkey.js',
     '_static'+'/jquery-migrate-1.2.1.min.js',
-    '_static'+'/presenter_mode.js',    
+    '_static'+'/presenter_mode.js',
   ]
 %}
 
 {% set css_files = ['_static/bootstrap-3.0.0/css/bootstrap.min.css', '_static/presenter_mode.css'] + css_files %}
-{% if theme_bootswatch_theme %}
-  {% set css_files = css_files +
-    ['http://netdna.bootstrapcdn.com/bootswatch/2.3.1/' + theme_bootswatch_theme + '/bootstrap.min.css']
-  %}
-{% endif %}
 
 {% set css_files = css_files + [
     '_static'+'/jquery-ui-1.10.3.custom.min.css',
