@@ -258,6 +258,16 @@ body.present {
   /* font-size: 2.0em; */
 }
 
+body.present #relations-prev, body.present #relations-next, body.present .navLinkBg {
+  display: none;
+}
+
+body.present .btn-presenter {
+  position: absolute;
+}
+body.present .btn-presenter.prev-exercise { left: 0px; }
+body.present .btn-presenter.next-exercise { right: 0px; }
+
 /* .col-md-12 {
   width: 58.333333333333336%;
 }
