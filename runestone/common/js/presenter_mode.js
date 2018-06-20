@@ -101,7 +101,8 @@ function configure() {
 }
 
 function codelensListener(duration) {
-  $(".ExecutionVisualizer").length ? configureCodelens() : setTimeout(codelensListener, duration);
+  // $(".ExecutionVisualizer").length ? configureCodelens() : setTimeout(codelensListener, duration);
+  // configureCodelens();
 }
 
 function configureCodelens() {
