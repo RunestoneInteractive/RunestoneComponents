@@ -59,7 +59,8 @@ ActiveCode.prototype.init = function(opts) {
     this.includesrc = $(orig).data('includesrc');
     this.includehsrc = $(orig).data('includehsrc');
     this.includexsrc = $(orig).data('includexsrc');
-    
+    this.enablecopy = $(orig).data('enablecopy');
+
     if (this.includesrc) {
         this.code = this.includesrc + this.code;
     }
@@ -167,10 +168,8 @@ ActiveCode.prototype.init = function(opts) {
     this.history = [this.code];
     this.createEditor();
     this.createOutput();
-    if (!this.passivecode) {
-        this.createControls();
-    }
-
+    this.createControls();
+    
     if ($(orig).data('caption')) {
         this.caption = $(orig).data('caption');
     } else {
@@ -272,177 +271,189 @@ ActiveCode.prototype.createControls = function () {
     var ctrlDiv = document.createElement("div");
     $(ctrlDiv).addClass("ac_actions");
     $(ctrlDiv).addClass("col-md-12");
+    if (!this.passivecode) {
     // Run
-    var butt = document.createElement("button");
-    $(butt).text($.i18n("msg_activecode_run_code"));
-    $(butt).addClass("btn btn-success run-button");
-    ctrlDiv.appendChild(butt);
-    if (this.runortest) {
-        var testButton = document.createElement("button");
-        $(testButton).text("Test");
-        $(testButton).addClass("btn btn-success test-button");
-        ctrlDiv.appendChild(testButton);
-        this.testButton = testButton;
-        $(testButton).click(this.runProg.bind(this, [1]));
-        $(testButton).attr("type", "button");
-    }
-    if (this.playtask) {
-        var playTaskButton = document.createElement("button");
-        $(playTaskButton).text($.i18n("msg_activecode_play_task"));
-        $(playTaskButton).addClass("btn btn-success test-button")
-        ctrlDiv.appendChild(playTaskButton);
-        this.plaTaskButton = playTaskButton;
-        $(playTaskButton).click(this.runProg.bind(this, [2]));
-        $(playTaskButton).attr("type", "button");
-    }
-    this.runButton = butt;
-    $(butt).click(this.runProg.bind(this, [false]));
-    $(butt).attr("type","button")    
-
-
-
-    if (this.enabledownload || eBookConfig.downloadsEnabled) {
-      var butt = document.createElement("button");
-      $(butt).text("Download");
-      $(butt).addClass("btn save-button");
-      ctrlDiv.appendChild(butt);
-      this.downloadButton = butt;
-      $(butt).click(this.downloadFile.bind(this, this.language));
-      $(butt).attr("type","button")
-    }
-
-    if (!this.hidecode && !this.hidehistory) {
         var butt = document.createElement("button");
-        $(butt).text($.i18n("msg_activecode_load_history"));
-        $(butt).addClass("btn btn-default");
-        $(butt).attr("type","button")
+        $(butt).text($.i18n("msg_activecode_run_code"));
+        $(butt).addClass("btn btn-success run-button");
         ctrlDiv.appendChild(butt);
-        this.histButton = butt;
-        $(butt).click(this.addHistoryScrubber.bind(this));
-        if (this.graderactive) {
-            this.addHistoryScrubber(true);
+        if (this.runortest) {
+            var testButton = document.createElement("button");
+            $(testButton).text("Test");
+            $(testButton).addClass("btn btn-success test-button");
+            ctrlDiv.appendChild(testButton);
+            this.testButton = testButton;
+            $(testButton).click(this.runProg.bind(this, [1]));
+            $(testButton).attr("type", "button");
+        }
+        if (this.playtask) {
+            var playTaskButton = document.createElement("button");
+            $(playTaskButton).text($.i18n("msg_activecode_play_task"));
+            $(playTaskButton).addClass("btn btn-success test-button")
+            ctrlDiv.appendChild(playTaskButton);
+            this.plaTaskButton = playTaskButton;
+            $(playTaskButton).click(this.runProg.bind(this, [2]));
+            $(playTaskButton).attr("type", "button");
+        }
+        this.runButton = butt;
+        $(butt).click(this.runProg.bind(this, [false]));
+        $(butt).attr("type","button")    
+
+        if (this.enabledownload || eBookConfig.downloadsEnabled) {
+        var butt = document.createElement("button");
+        $(butt).text("Download");
+        $(butt).addClass("btn save-button");
+        ctrlDiv.appendChild(butt);
+        this.downloadButton = butt;
+        $(butt).click(this.downloadFile.bind(this, this.language));
+        $(butt).attr("type","button")
+        }
+
+        if (!this.hidecode && !this.hidehistory) {
+            var butt = document.createElement("button");
+            $(butt).text($.i18n("msg_activecode_load_history"));
+            $(butt).addClass("btn btn-default");
+            $(butt).attr("type","button")
+            ctrlDiv.appendChild(butt);
+            this.histButton = butt;
+            $(butt).click(this.addHistoryScrubber.bind(this));
+            if (this.graderactive) {
+                this.addHistoryScrubber(true);
+            }
+        }
+
+        if ($(this.origElem).data('gradebutton') && ! this.graderactive) {
+            butt = document.createElement("button");
+            $(butt).addClass("ac_opt btn btn-default");
+            $(butt).text($.i18n("msg_activecode_show_feedback"));
+            $(butt).css("margin-left","10px");
+            $(butt).attr("type","button")
+            this.gradeButton = butt;
+            ctrlDiv.appendChild(butt);
+            $(butt).click(this.createGradeSummary.bind(this))
+        }
+        // Show/Hide Code
+        if (this.hidecode) {
+            $(this.runButton).attr('disabled', 'disabled');
+            butt = document.createElement("button");
+            $(butt).addClass("ac_opt btn btn-default");
+            $(butt).text($.i18n("msg_activecode_show_code"));
+            $(butt).css("margin-left", "10px");
+            $(butt).attr("type","button")
+            this.showHideButt = butt;
+            ctrlDiv.appendChild(butt);
+            $(butt).click( (function() {
+                $(this.codeDiv).toggle();
+                if (this.historyScrubber == null) {
+                    this.addHistoryScrubber(true);
+                } else {
+                    $(this.historyScrubber.parentElement).toggle();
+                }
+                if ($(this.showHideButt).text() == $.i18n("msg_activecode_show_code")) {
+                    $(this.showHideButt).text($.i18n("msg_activecode_hide_code"));
+                } else {
+                    $(this.showHideButt).text($.i18n("msg_activecode_show_code"));
+                }
+                if ($(this.runButton).attr('disabled')) {
+                    $(this.runButton).removeAttr('disabled');
+                } else {
+                    $(this.runButton).attr('disabled', 'disabled');
+                }
+            }).bind(this));
+        }
+
+        // CodeLens
+        if ($(this.origElem).data("codelens") && ! this.graderactive) {
+            butt = document.createElement("button");
+            $(butt).addClass("ac_opt btn btn-default");
+            $(butt).text($.i18n("msg_activecode_show_codelens"));
+            $(butt).css("margin-left", "10px");
+            this.clButton = butt;
+            ctrlDiv.appendChild(butt);
+            $(butt).click(this.showCodelens.bind(this));
+        }
+        // CodeCoach
+        // bnm - disable code coach until it is revamped  2017-7-22
+        // if (this.useRunestoneServices && $(this.origElem).data("coach")) {
+        //     butt = document.createElement("button");
+        //     $(butt).addClass("ac_opt btn btn-default");
+        //     $(butt).text("Code Coach");
+        //     $(butt).css("margin-left", "10px");
+        //     this.coachButton = butt;
+        //     ctrlDiv.appendChild(butt);
+        //     $(butt).click(this.showCodeCoach.bind(this));
+        // }
+
+        // Audio Tour
+        if ($(this.origElem).data("audio")) {
+            butt = document.createElement("button");
+            $(butt).addClass("ac_opt btn btn-default");
+            $(butt).text($.i18n("msg_activecode_audio_tour"));
+            $(butt).css("margin-left", "10px");
+            this.atButton = butt;
+            ctrlDiv.appendChild(butt);
+            $(butt).click((function() {new AudioTour(this.divid, this.code, 1, $(this.origElem).data("audio"))}).bind(this));
+        }
+
+        if(this.chatcodes && eBookConfig.enable_chatcodes) {
+            var chatBar = document.createElement("div");
+            var channels = document.createElement("span");
+            var topic = window.location.host+'-'+this.divid;
+            ctrlDiv.appendChild(chatBar);
+            $(chatBar).text("Chat: ");
+            $(chatBar).append(channels);
+            butt = document.createElement("a");
+            $(butt).addClass("ac_opt btn btn-default");
+            $(butt).text("Create Channel");
+            $(butt).css("margin-left","10px");
+            $(butt).attr("type","button")
+            $(butt).attr("target","_blank")
+            $(butt).attr("href", 'http://'+chatcodesServer+"/new?"+$.param({
+                topic: window.location.host+'-'+this.divid,
+                code: this.editor.getValue(),
+                lang: 'Python'
+            }));
+            this.chatButton = butt;
+            chatBar.appendChild(butt);
+            var updateChatCodesChannels = function() {
+                var data = doc.data;
+                var i = 1;
+                $(channels).html('');
+                data['channels'].forEach(function(channel) {
+                    if(!channel.archived && topic === channel.topic) {
+                        var link = $('<a />');
+                        var href = 'http://'+chatcodesServer+"/"+channel.channelName;
+                        link.attr({
+                            'href': href,
+                            'target': '_blank'
+                        });
+                        link.text(' ' + channel.channelName + '('+i+') ');
+                        $(channels).append(link);
+                        i++;
+                    }
+                });
+                if(i===1) {
+                    $(channels).text('(no active converstations on this problem)');
+                }
+            };
+            doc.subscribe(updateChatCodesChannels);
+            doc.on('op', updateChatCodesChannels);
         }
     }
 
-    if ($(this.origElem).data('gradebutton') && ! this.graderactive) {
-        butt = document.createElement("button");
-        $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text($.i18n("msg_activecode_show_feedback"));
-        $(butt).css("margin-left","10px");
-        $(butt).attr("type","button")
-        this.gradeButton = butt;
-        ctrlDiv.appendChild(butt);
-        $(butt).click(this.createGradeSummary.bind(this))
-    }
-    // Show/Hide Code
-    if (this.hidecode) {
-        $(this.runButton).attr('disabled', 'disabled');
-        butt = document.createElement("button");
-        $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text($.i18n("msg_activecode_show_code"));
-        $(butt).css("margin-left", "10px");
-        $(butt).attr("type","button")
-        this.showHideButt = butt;
-        ctrlDiv.appendChild(butt);
-        $(butt).click( (function() {
-            $(this.codeDiv).toggle();
-            if (this.historyScrubber == null) {
-                this.addHistoryScrubber(true);
-            } else {
-                $(this.historyScrubber.parentElement).toggle();
-            }
-            if ($(this.showHideButt).text() == $.i18n("msg_activecode_show_code")) {
-                $(this.showHideButt).text($.i18n("msg_activecode_hide_code"));
-            } else {
-                $(this.showHideButt).text($.i18n("msg_activecode_show_code"));
-            }
-            if ($(this.runButton).attr('disabled')) {
-                $(this.runButton).removeAttr('disabled');
-            } else {
-                $(this.runButton).attr('disabled', 'disabled');
-            }
+    if (this.enablecopy) {
+        var button = document.createElement("button");
+        $(button).addClass("btn btn-xs btn-success btn-copy pull-right");
+        $(button).text($.i18n("msg_activecode_copy"));
+        $(button).on('click', (function() {
+            var $tempInput = $("<textarea>");
+            $("body").append($tempInput);
+            $tempInput.val(this.code).select();
+            document.execCommand("copy");
+            $tempInput.remove();
         }).bind(this));
+        ctrlDiv.appendChild(button);
     }
-
-    // CodeLens
-    if ($(this.origElem).data("codelens") && ! this.graderactive) {
-        butt = document.createElement("button");
-        $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text($.i18n("msg_activecode_show_codelens"));
-        $(butt).css("margin-left", "10px");
-        this.clButton = butt;
-        ctrlDiv.appendChild(butt);
-        $(butt).click(this.showCodelens.bind(this));
-    }
-    // CodeCoach
-    // bnm - disable code coach until it is revamped  2017-7-22
-    // if (this.useRunestoneServices && $(this.origElem).data("coach")) {
-    //     butt = document.createElement("button");
-    //     $(butt).addClass("ac_opt btn btn-default");
-    //     $(butt).text("Code Coach");
-    //     $(butt).css("margin-left", "10px");
-    //     this.coachButton = butt;
-    //     ctrlDiv.appendChild(butt);
-    //     $(butt).click(this.showCodeCoach.bind(this));
-    // }
-
-    // Audio Tour
-    if ($(this.origElem).data("audio")) {
-        butt = document.createElement("button");
-        $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text($.i18n("msg_activecode_audio_tour"));
-        $(butt).css("margin-left", "10px");
-        this.atButton = butt;
-        ctrlDiv.appendChild(butt);
-        $(butt).click((function() {new AudioTour(this.divid, this.code, 1, $(this.origElem).data("audio"))}).bind(this));
-    }
-
-    if(this.chatcodes && eBookConfig.enable_chatcodes) {
-        var chatBar = document.createElement("div");
-        var channels = document.createElement("span");
-        var topic = window.location.host+'-'+this.divid;
-        ctrlDiv.appendChild(chatBar);
-        $(chatBar).text("Chat: ");
-        $(chatBar).append(channels);
-        butt = document.createElement("a");
-        $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Create Channel");
-        $(butt).css("margin-left","10px");
-        $(butt).attr("type","button")
-        $(butt).attr("target","_blank")
-        $(butt).attr("href", 'http://'+chatcodesServer+"/new?"+$.param({
-            topic: window.location.host+'-'+this.divid,
-            code: this.editor.getValue(),
-            lang: 'Python'
-        }));
-        this.chatButton = butt;
-        chatBar.appendChild(butt);
-        var updateChatCodesChannels = function() {
-            var data = doc.data;
-            var i = 1;
-            $(channels).html('');
-            data['channels'].forEach(function(channel) {
-                if(!channel.archived && topic === channel.topic) {
-                    var link = $('<a />');
-                    var href = 'http://'+chatcodesServer+"/"+channel.channelName;
-                    link.attr({
-                        'href': href,
-                        'target': '_blank'
-                    });
-                    link.text(' ' + channel.channelName + '('+i+') ');
-                    $(channels).append(link);
-                    i++;
-                }
-            });
-            if(i===1) {
-                $(channels).text('(no active converstations on this problem)');
-            }
-        };
-        doc.subscribe(updateChatCodesChannels);
-        doc.on('op', updateChatCodesChannels);
-    }
-
-
     $(this.outerDiv).prepend(ctrlDiv);
     this.controlDiv = ctrlDiv;
 

@@ -71,7 +71,7 @@ TEMPLATE_END = """
     %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s %(chatcodes)s
     data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s
     %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(runortest)s %(playtask)s %(passivecode)s %(modaloutput)s %(hidehistory)s
-    %(includesrc)s %(includehsrc)s %(includexsrc)s>
+    %(includesrc)s %(includehsrc)s %(includexsrc)s %(enablecopy)s>
 %(initialcode)s
 </textarea>
 </div>
@@ -174,6 +174,7 @@ class ActiveCode(RunestoneIdDirective):
    :includesrc: -- include source code from file
    :includehsrc: -- include hidden source code from file 
    :includexsrc: -- include source code from file with magic comments
+   :enablecopy: -- add copy to clipboard button 
 
     If this is a homework problem instead of an example in the text
     then the assignment text should go here.  The assignment text ends with
@@ -226,7 +227,8 @@ config values (conf.py):
         'modaloutput': directives.flag,
         'includesrc': directives.unchanged,
         'includehsrc': directives.unchanged,
-        'includexsrc': directives.unchanged
+        'includexsrc': directives.unchanged,
+        'enablecopy': directives.flag
     })
 
 
@@ -347,6 +349,11 @@ config values (conf.py):
             self.options['modaloutput'] = ''
         else:
             self.options['modaloutput'] = 'data-modaloutput="true"'
+
+        if 'enablecopy' not in self.options:
+            self.options['enablecopy'] = ''
+        else:
+            self.options['enablecopy'] = 'data-enablecopy="true"'
 
         if 'coach' in self.options:
             self.options['coach'] = 'data-coach="true"'
