@@ -598,7 +598,7 @@ ActiveCode.prototype.createOutput = function () {
 
     if (this.modaloutput) {
         var canvasDiv = document.createElement("div");
-        document.body.appendChild(canvasDiv);
+        document.body.prepend(canvasDiv);
         this.canvasDiv = canvasDiv;
         this.canvasDiv.id = this.divid + "_canvas";
     }
