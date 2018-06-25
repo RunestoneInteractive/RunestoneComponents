@@ -397,7 +397,7 @@ config values (conf.py):
             fname = self.options['includesrc']
             cwd = os.path.abspath(os.getcwd())
             path = os.path.join(cwd, fname)
-            with open(path) as f:
+            with open(path, encoding='utf-8') as f:
                 self.options['includesrc'] = 'data-includesrc="%s"' % html_escape(f.read())        
         else:
             self.options['includesrc'] = ""
@@ -406,7 +406,7 @@ config values (conf.py):
             fname = self.options['includehsrc']
             cwd = os.path.abspath(os.getcwd())
             path = os.path.join(cwd, fname)
-            with open(path) as f:
+            with open(path, encoding='utf-8') as f:
                 self.options['includehsrc'] = 'data-includehsrc="%s"' % html_escape(f.read())
         else:
             self.options['includehsrc'] = ""
@@ -415,7 +415,7 @@ config values (conf.py):
             fname = self.options['includexsrc']
             cwd = os.path.abspath(os.getcwd())
             path = os.path.join(cwd, fname)
-            with open(path) as f:
+            with open(path, encoding='utf-8') as f:
                 self.options['includexsrc'] = 'data-includexsrc="%s"' % html_escape(f.read())
         else:
             self.options['includexsrc'] = ""

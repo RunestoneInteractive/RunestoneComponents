@@ -1120,7 +1120,6 @@ ActiveCode.prototype.runProg = function (params = [0]) {
     saveCode = false;
 
     skulpt_run_dfd = Sk.misceval.asyncToPromise(function () {
-
         return Sk.importMainWithBody("<stdin>", false, prog, true);
     });
 
@@ -1143,7 +1142,7 @@ ActiveCode.prototype.runProg = function (params = [0]) {
             } 
 
             if (this.modaloutput) {
-                $('.modal').modal('hide');
+                PygameLib.endProgram();
             }
             // if (this.slideit) {
             //     $(this.historyScrubber).on("slidechange", this.slideit.bind(this));
@@ -1163,6 +1162,9 @@ ActiveCode.prototype.runProg = function (params = [0]) {
             $(self.runButton).removeAttr('disabled');
             // $(self.historyScrubber).on("slidechange", self.slideit.bind(self));
             // $(self.historyScrubber).slider("enable");
+            if (this.modaloutput) {
+                PygameLib.endProgram();
+            }
             self.logRunEvent({
                 'div_id': self.divid,
                 'code': self.editor.getValue(),
@@ -1173,7 +1175,7 @@ ActiveCode.prototype.runProg = function (params = [0]) {
                 'suffix': self.suffix
             }); // Log the run event
             self.addErrorMessage(err);
-        }));
+        }).bind(this));
 
     if (typeof(allVisualizers) != "undefined") {
         $.each(allVisualizers, function (i, e) {
@@ -1181,9 +1183,6 @@ ActiveCode.prototype.runProg = function (params = [0]) {
         });
     }
 };
-
-
-
 
 JSActiveCode.prototype = new ActiveCode();
 
