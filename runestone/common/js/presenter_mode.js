@@ -7,7 +7,8 @@ function presentToggle() {
   let fullHeightClass = 'full-height';
   let bottomClass = 'bottom';
   if(bod.hasClass(presentClass)){
-    $('.section *').not('.runestone, .runestone *').removeClass('hidden'); //show everything
+    $('.section *').not('h1, .presentation-title, .btn-presenter, .runestone, .runestone *, .section').removeClass('hidden'); //show everything
+    $('#completionButton').removeClass('hidden');
     bod.removeClass(presentClass);
     $('.'+fullHeightClass).removeClass(fullHeightClass);
     $('.'+bottomClass).removeClass(bottomClass);
@@ -15,7 +16,8 @@ function presentToggle() {
     codeExercises.removeClass('hidden');
   }
   else{
-    $('.section *').not('.runestone, .runestone *').addClass('hidden'); // hide extraneous stuff
+    $('.section *').not('h1, .presentation-title, .btn-presenter, .runestone, .runestone *, .section').addClass('hidden'); // hide extraneous stuff
+    $('#completionButton').addClass('hidden');
     bod.addClass(presentClass);
     bod.addClass(fullHeightClass);
     $('html').addClass(fullHeightClass);
@@ -86,19 +88,21 @@ function configure() {
   });
 
   codelensListener(500);
+  $('.section img').wrap('<div class="runestone">')
   codeExercises = $('.runestone').not('.runestone .runestone');
-  codeExercises.each(function(){
-    $(this).prepend(
+  // codeExercises.each(function(){
+    $('h1').before(
       "<div class='presentation-title'> \
         <button class='prev-exercise btn-presenter btn-grey-outline' onclick='prevExercise()'>Back</button> \
         <button class='next-exercise btn-presenter btn-grey-solid' onclick='nextExercise()'>Next</button> \
       </div>"
     );
-  });
+  // });
 }
 
 function codelensListener(duration) {
-  $(".ExecutionVisualizer").length ? configureCodelens() : setTimeout(codelensListener, duration);
+  // $(".ExecutionVisualizer").length ? configureCodelens() : setTimeout(codelensListener, duration);
+  // configureCodelens();
 }
 
 function configureCodelens() {
