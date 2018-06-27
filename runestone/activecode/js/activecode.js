@@ -1095,6 +1095,12 @@ ActiveCode.prototype.runProg = function (params = [0]) {
     Sk.divid = this.divid;
     this.setTimeLimit();
     (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = this.modaloutput ? this.canvasDiv : this.graphics;
+    if (this.modaloutput) {
+        PygameLib.showModal();
+    }
+    else {
+        PygameLib.hideModal();
+    }
     Sk.canvas = this.modaloutput ? this.canvasDiv.id : this.graphics.id; //todo: get rid of this here and in image
     switch (params[0]) {
         case 0:
