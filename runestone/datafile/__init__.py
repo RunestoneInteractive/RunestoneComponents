@@ -33,9 +33,9 @@ def setup(app):
 
 
 TEMPLATE = """
-<div class="%(outer_class)s">
+<div class="runestone datafile %(hidden_class)s">
 <div class="datafile_caption">Data file: <code>%(divid)s</code></div>
-<pre id=%(divid)s class="datafile" contenteditable="%(edit)s" style="%(width)s %(height)s">
+<pre id=%(divid)s contenteditable="%(edit)s" style="%(width)s %(height)s">
 %(filecontent)s</pre>
 </div>
 """
@@ -120,9 +120,9 @@ class DataFile(RunestoneIdDirective):
         self.options['filecontent'] = source
 
         if 'hide' in self.options:
-            self.options['outer_class'] = "datafile_hidden"
+            self.options['hidden_class'] = "datafile_hidden"
         else:
-            self.options['outer_class'] = ""
+            self.options['hidden_class'] = ""
 
         if 'edit' in self.options:
             self.options['edit'] = "true"

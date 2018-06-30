@@ -11,7 +11,7 @@
     background: none;
     border: none;
 }
-.datafile {
+.datafile pre {
     /* for ease of setting height based on #rows */
     line-height: 1.5em;
     max-width: 100%;
