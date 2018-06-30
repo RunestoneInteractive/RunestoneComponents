@@ -21,26 +21,25 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from sqlalchemy import Table
 from runestone.server.componentdb import engine, meta
-from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode, add_skulpt_js
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
+
 
 def setup(app):
     app.add_directive('datafile',DataFile)
-    add_skulpt_js(app)
-
-    app.add_javascript('datafile.js')
 
     app.add_stylesheet('datafile.css')
 
-    app.add_node(DataFileNode, html=(visit_df_node, depart_df_node))
-
-    app.connect('doctree-resolved',process_datafile_nodes)
-    app.connect('env-purge-doc', purge_datafiles)
+    app.add_node(DataFileNode, html=(visit_df_node, None))
 
 
 TEMPLATE = """
-<pre data-component="datafile" id=%(divid)s %(hidden)s data-edit="%(edit)s" data-rows="%(rows)s" data-cols="%(cols)s">
+<div class="%(outer_class)s">
+<div class="datafile_caption">Data file: <code>%(divid)s</code></div>
+<pre id=%(divid)s class="datafile" contenteditable="%(edit)s" style="%(width)s %(height)s">
 %(filecontent)s</pre>
+</div>
 """
+
 
 class DataFileNode(nodes.General, nodes.Element, RunestoneNode):
     def __init__(self,content, **kwargs):
@@ -52,39 +51,25 @@ class DataFileNode(nodes.General, nodes.Element, RunestoneNode):
         super(DataFileNode,self).__init__(**kwargs)
         self.df_content = content
 
+
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
-def visit_df_node(self,node):
-    res = TEMPLATE
-    res = res % node.df_content
-
-    res = res.replace("u'","'")  # hack:  there must be a better way to include the list and avoid unicode strings
+def visit_df_node(self, node):
+    res = TEMPLATE % node.df_content
 
     self.body.append(res)
 
-def depart_df_node(self,node):
-    ''' This is called at the start of processing an datafile node.  If datafile had recursive nodes
-        etc and did not want to do all of the processing in visit_ac_node any finishing touches could be
-        added here.
-    '''
-    pass
-
-
-def process_datafile_nodes(app,env,docname):
-    pass
-
-
-def purge_datafiles(app,env,docname):
-    pass
+    # Content fully processed, don't need a depart_...() call:
+    raise nodes.SkipNode
 
 
 class DataFile(RunestoneIdDirective):
     """
 .. datafile:: identifier
    :edit: Option that makes the datafile editable
-   :cols: If editable, number of columns--default is 20
-   :rows: If editable, number of rows--default is 40
+   :cols: Number of columns--default is full width of page content
+   :rows: Number of rows--default is to size to content
    :hide: Flag that sets a non-editable datafile to be hidden
    """
     required_arguments = 1
@@ -105,8 +90,8 @@ class DataFile(RunestoneIdDirective):
             :return:
             .. datafile:: identifier
                 :edit: Option that makes the datafile editable
-                :cols: If editable, number of columns--default is 20
-                :rows: If editable, number of rows--default is 40
+                :cols: Number of columns--default is full width of page content
+                :rows: Number of rows--default is to size to content
                 :hide: Flag that sets a non-editable datafile to be hidden
         """
         super(DataFile, self).run()
@@ -116,30 +101,28 @@ class DataFile(RunestoneIdDirective):
             env.datafilecounter = 0
         env.datafilecounter += 1
 
-        #if 'cols' not in self.options:
-        #    self.options['cols'] = min(65,max([len(x) for x in self.content]))
-        #if 'rows'not in self.options:
-        #    self.options['rows'] = 20
-
         if 'cols' in self.options:
-            self.options['cols'] = self.options['cols']
+            # 1ch char width plus buffer = (cols*2+2)ch width
+            self.options['width'] = "width: %dch;" % (self.options['cols'] + 2)
         else:
-            self.options['cols'] = min(65,max([len(x) for x in self.content]))
+            self.options['width'] = ''
+
         if 'rows' in self.options:
-            self.options['rows'] = self.options['rows']
+            # 1.5em linehight plus buffer = (rows*1.5+2)em height
+            self.options['height'] = "height: %dem;" % (self.options['rows'] * 1.5 + 2)
         else:
-            self.options['rows'] = 20
+            self.options['height'] = ''
 
         if self.content:
-            source = "\n".join(self.content)+"\n"
+            source = "\n".join(self.content)
         else:
-            source = '\n'
+            source = ''
         self.options['filecontent'] = source
 
         if 'hide' in self.options:
-            self.options['hidden'] = 'data-hidden'
+            self.options['outer_class'] = "datafile_hidden"
         else:
-            self.options['hidden'] = ''
+            self.options['outer_class'] = ""
 
         if 'edit' in self.options:
             self.options['edit'] = "true"
@@ -153,9 +136,9 @@ class DataFile(RunestoneIdDirective):
 
             engine.execute(Source_code.delete().where(Source_code.c.acid == divid).where(Source_code.c.course_id == course_name))
             engine.execute(Source_code.insert().values(
-                acid = divid,
-                course_id = course_name,
-                main_code= source,
+                acid=divid,
+                course_id=course_name,
+                main_code=source,
             ))
         else:
             print("Unable to save to source_code table in datafile__init__.py. Possible problems:")
@@ -163,7 +146,6 @@ class DataFile(RunestoneIdDirective):
             print("  2. unable to connect to the database using dburl")
             print()
             print("This should only affect the grading interface. Everything else should be fine.")
-
 
         data_file_node = DataFileNode(self.options, rawsource=self.block_text)
         data_file_node.source, data_file_node.line = self.state_machine.get_source_and_line(self.lineno)
