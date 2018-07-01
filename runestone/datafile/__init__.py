@@ -42,21 +42,14 @@ TEMPLATE = """
 
 
 class DataFileNode(nodes.General, nodes.Element, RunestoneNode):
-    def __init__(self,content, **kwargs):
-        """
-        Arguments:
-        - `self`:
-        - `content`:
-        """
-        super(DataFileNode,self).__init__(**kwargs)
-        self.df_content = content
+    pass
 
 
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
 def visit_df_node(self, node):
-    res = TEMPLATE % node.df_content
+    res = TEMPLATE % node['df_content']
 
     self.body.append(res)
 
@@ -147,6 +140,6 @@ class DataFile(RunestoneIdDirective):
             print()
             print("This should only affect the grading interface. Everything else should be fine.")
 
-        data_file_node = DataFileNode(self.options, rawsource=self.block_text)
+        data_file_node = DataFileNode(df_content=self.options, rawsource=self.block_text)
         data_file_node.source, data_file_node.line = self.state_machine.get_source_and_line(self.lineno)
         return [data_file_node]
