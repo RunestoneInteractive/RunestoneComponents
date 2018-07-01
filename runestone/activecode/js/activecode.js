@@ -1695,8 +1695,8 @@ LiveCode.prototype.init = function(opts) {
 
     this.JOBE_SERVER = eBookConfig.jobehost || eBookConfig.host;
     this.resource = eBookConfig.proxyuri_runs ||  '/runestone/proxy/jobeRun';
-    this.jobePutFiles = eBookConfig.proxy_uri_files || '/runestone/proxy/jobePushFile/';
-    this.jobeCheckFiles = eBookConfig.proxy_uri_files || '/runestone/proxy/jobeCheckFile/';
+    this.jobePutFiles = eBookConfig.proxyuri_files || '/runestone/proxy/jobePushFile/';
+    this.jobeCheckFiles = eBookConfig.proxyuri_files || '/runestone/proxy/jobeCheckFile/';
 
     this.div2id = {};
     if (this.stdin) {
