@@ -7,10 +7,12 @@ script:
 - unzip chromedriver_linux64.zip
 - sudo apt-get install python3.4-venv
 - export PATH=.:$PATH
+- wget https://bootstrap.pypa.io/get-pip.py
 - python3 -m venv rune3
 - . rune3/bin/activate
 - echo $PATH
 - ./rune3/bin/python -m ensurepip
+- ./rune3/bin/python get-pip.py
 - ./rune3/bin/pip install -e .
 - ./rune3/bin/pip install -r requirements.txt
 - ./rune3/bin/pip install pyvirtualdisplay
