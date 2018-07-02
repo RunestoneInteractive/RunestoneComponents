@@ -9,6 +9,7 @@ script:
 - export PATH=.:$PATH
 - python3 -m venv rune3
 - . rune3/bin/activate
+- echo $PATH
 - python3 -m ensurepip
 - pip install -e .
 - pip install -r requirements.txt
