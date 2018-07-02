@@ -6,6 +6,10 @@ script:
 - wget https://chromedriver.storage.googleapis.com/2.40/chromedriver_linux64.zip
 - unzip chromedriver_linux64.zip
 - sudo apt-get install python3.4-venv
+- sudo curl -sS -o - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add
+- sudo echo "deb [arch=amd64]  http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list
+- sudo apt-get -y update
+- sudo apt-get -y install google-chrome-stable
 - export PATH=.:$PATH
 - wget https://bootstrap.pypa.io/get-pip.py
 - python3.4 -m venv rune3
