@@ -10,10 +10,10 @@ script:
 - python3 -m venv rune3
 - . rune3/bin/activate
 - echo $PATH
-- python3 -m ensurepip
-- pip install -e .
-- pip install -r requirements.txt
-- pip install pyvirtualdisplay
+- ./rune3/bin/python -m ensurepip
+- ./rune3/bin/pip install -e .
+- ./rune3/bin/pip install -r requirements.txt
+- ./rune3/bin/pip install pyvirtualdisplay
 - "./runTests.sh"
 notifications:
   slack:
