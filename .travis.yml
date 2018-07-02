@@ -10,6 +10,7 @@ script:
 - wget https://bootstrap.pypa.io/get-pip.py
 - python3.4 -m venv rune3
 - . rune3/bin/activate
+- cp chromedriver rune3/bin
 - echo $PATH
 - ls rune3/bin
 - ./rune3/bin/python -m ensurepip
