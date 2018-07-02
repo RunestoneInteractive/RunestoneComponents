@@ -6,6 +6,8 @@ script:
 - wget https://chromedriver.storage.googleapis.com/2.40/chromedriver_linux64.zip
 - unzip chromedriver_linux64.zip
 - export PATH=.$PATH
+- python3 -m venv rune3
+- . rune3/bin/activate
 - pip install -e .
 - pip install -r requirements.txt
 - pip install pyvirtualdisplay
