@@ -80,11 +80,12 @@ def build(options):
     print('Building into ', options.build.outdir)
     rc = paverutils.run_sphinx(options,'build')
 
-    if rc == 0:
+    if rc == 0 or rc is None:
         print("Done, {} build successful".format(options.build.project_name))
     else:
-        print("Error in building {}".format(options.build.project_name) )
+        print("Error in building {} code {}".format(options.build.project_name, rc))
 
+    return rc
 
 cmap = {'activecode': ActiveCode,
         'mchoice': MChoice,
