@@ -455,7 +455,7 @@ ActiveCode.prototype.createControls = function () {
         $(button).on('click', (function() {
             var $tempInput = $("<textarea>");
             $("body").append($tempInput);
-            $tempInput.val(this.code).select();
+            $tempInput.val(this.editor.getValue()).select();
             document.execCommand("copy");
             $tempInput.remove();
         }).bind(this));
