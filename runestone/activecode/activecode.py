@@ -223,7 +223,7 @@ config values (conf.py):
         'runargs': directives.unchanged,
         'runortest': directives.unchanged,
         'playtask': directives.flag,
-        'passivecode': directives.flag,
+        'passivecode': directives.unchanged,
         'modaloutput': directives.flag,
         'includesrc': directives.unchanged,
         'includehsrc': directives.unchanged,
@@ -343,7 +343,7 @@ config values (conf.py):
         if 'passivecode' not in self.options:
             self.options['passivecode'] = ''
         else:
-            self.options['passivecode'] = 'data-passivecode="true"'
+            self.options['passivecode'] = 'data-passivecode="%s"' %self.options['passivecode']
 
         if 'modaloutput' not in self.options:
             self.options['modaloutput'] = ''

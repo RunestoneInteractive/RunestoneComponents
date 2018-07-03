@@ -54,7 +54,8 @@ ActiveCode.prototype.init = function(opts) {
     this.testParameters = $(orig).data('runortest');
     this.runortest = this.testParameters ? true : false;
     this.playtask = $(orig).data('playtask');
-    this.passivecode = $(orig).data('passivecode');
+    this.passivecodestr = $(orig).data('passivecode');
+    this.passivecode = this.passivecodestr ? true : false;
     this.modaloutput = $(orig).data('modaloutput');
     this.includesrc = $(orig).data('includesrc');
     this.includehsrc = $(orig).data('includehsrc');
@@ -139,6 +140,9 @@ ActiveCode.prototype.init = function(opts) {
         this.generalInitContent = "";
         this.generalInitSec = -1;
         this.varInitSec     = -1;
+        this.mainSec        = -1;
+        this.afterMainSec   = -1;
+        this.mainSecContent = "";
         for (var i = 0; i < tmp.length; i++) {
             if (tmp[i].indexOf('acsection: general-init') > -1) {
                 this.generalInitSec = c;
@@ -160,6 +164,9 @@ ActiveCode.prototype.init = function(opts) {
             if (this.varInitSec == -1 && this.generalInitSec > -1) {
                 this.generalInitContent += tmp[i] + "\n";
             }
+            if (this.mainSec != -1 && this.afterMainSec == -1) {
+                this.mainSecContent += tmp[i] + "\n";
+            }
             c++;
         }
         this.code = replacement;
@@ -178,7 +185,7 @@ ActiveCode.prototype.init = function(opts) {
     this.addCaption();
 
     if (this.autorun) {
-        $(document).ready(this.runProg.bind(this, [false]));
+        $(document).ready(this.runProg.bind(this));
     }
 };
 
@@ -200,14 +207,14 @@ ActiveCode.prototype.createEditor = function (index) {
     }
     this.containerDiv.appendChild(codeDiv);
     var editor = CodeMirror(codeDiv, {
-        value: this.code, lineNumbers: true,
+        value: this.passivecodestr == 'onlymain' ? this.mainSecContent : this.code, lineNumbers: true,
         mode: this.containerDiv.lang, indentUnit: 4,
         matchBrackets: true, autoMatchParens: true,
         extraKeys: {"Tab": "indentMore", "Shift-Tab": "indentLess"},
         readOnly: this.passivecode 
     });
     
-    if (this.markedText) {
+    if (this.markedText && !this.passivecode) {
         this.lineHandles = [];
         for (var i  = this.generalInitSec; i < this.mainSec; i++) {
             this.lineHandles.push(editor.addLineClass(i, "background", "shaded"));
@@ -296,7 +303,7 @@ ActiveCode.prototype.createControls = function () {
             $(playTaskButton).attr("type", "button");
         }
         this.runButton = butt;
-        $(butt).click(this.runProg.bind(this, [false]));
+        $(butt).click(this.runProg.bind(this, [0]));
         $(butt).attr("type","button")    
 
         if (this.enabledownload || eBookConfig.downloadsEnabled) {
@@ -988,7 +995,7 @@ ActiveCode.prototype.outputfun = function(text) {
 ActiveCode.prototype.buildProg = function(buildType = 0) {
     // assemble code from prefix, suffix, and editor for running.
     var pretext;
-    var prog = buildType > 0 ? "" : this.editor.getValue() + "\n";
+    var prog = buildType > 0 ? "" : (this.passivecodestr == 'onlymain' ? this.code : this.editor.getValue() + "\n");
     
     this.pretext = "";
     if (this.includes !== undefined) {
@@ -999,7 +1006,7 @@ ActiveCode.prototype.buildProg = function(buildType = 0) {
             pretext = pretext + edList[this.includes[x]].editor.getValue();
         }
         this.pretext = pretext;
-        prog = pretext + prog
+        prog = pretext + progprog
     }
 
     if (this.runortest) {
