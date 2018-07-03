@@ -294,7 +294,7 @@ Timed.prototype.renderSubmitButton = function () {
     this.finishButton = document.createElement("button");
     $(this.finishButton).attr({
         "id": "finish",
-        "class": "btn btn-inverse"
+        "class": "btn btn-primary"
     });
     this.finishButton.textContent = "Finish Exam";
     this.finishButton.addEventListener("click", function () {
