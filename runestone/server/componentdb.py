@@ -78,7 +78,11 @@ def addQuestionToDB(self):
 
         autograde = self.options.get('autograde', None)
         practice = self.options.get('practice', None)
-        topics = self.options.get('topics', "{}/{}".format(self.chapter, self.subchapter))
+        if ('topics' in self.options) and  (self.options['topics'] != ''):
+            topics = self.options['topics']
+        else:
+            topics = "{}/{}".format(self.chapter, self.subchapter)
+#        topics = self.options.get('topics', "{}/{}".format(self.chapter, self.subchapter))
 
         id_ = self.options['divid']
         sel = select([questions]).where(and_(questions.c.name == id_,
