@@ -143,6 +143,11 @@ ActiveCode.prototype.init = function(opts) {
         this.mainSec        = -1;
         this.afterMainSec   = -1;
         this.mainSecContent = "";
+        var i = tmp.length - 1;
+        while (tmp[i].length == 0) {
+            tmp.splice(i, 1);
+            i--;
+        }
         for (var i = 0; i < tmp.length; i++) {
             if (tmp[i].indexOf('acsection: general-init') > -1) {
                 this.generalInitSec = c;
