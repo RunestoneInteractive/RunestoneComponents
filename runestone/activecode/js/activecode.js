@@ -1944,6 +1944,7 @@ LiveCode.prototype.checkFile = function(file, resolve, reject) {
     xhr.onload = (function () {
         switch(xhr.status) {
             case 208:
+            case 404:
                 // console.log("File not on Server");
                 this.pushDataFile(file, resolve, reject);
                 break;

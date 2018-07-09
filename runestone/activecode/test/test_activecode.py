@@ -71,6 +71,7 @@ class ActiveCodeTests(RunestoneTestCase):
 
         count = 0
         # Give it some time run
+        print(output.text)
         while output.text.strip() != "Width: 25.0" and count < 20:
             count += 1
             time.sleep(.5)
