@@ -56,7 +56,7 @@ class ActiveCodeTests(RunestoneTestCase):
         self.assertEqual(output.text.strip(), "Hello World")
 
 
-    def xxtest_datafile(self):
+    def test_datafile(self):
         '''
         Runs test2 example
         Code is dependent on supplementary file
@@ -76,4 +76,4 @@ class ActiveCodeTests(RunestoneTestCase):
             count += 1
             time.sleep(.5)
 
-        self.assertLess(count, 20)  # This is not a good way to test this.
+        self.assertLess(count, 20)
