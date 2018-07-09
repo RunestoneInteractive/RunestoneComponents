@@ -183,7 +183,7 @@ FITB.prototype.startEvaluation = function (logFlag) {
     this.evaluateAnswers();
     this.renderFITBFeedback();
     if (logFlag) {   // Sometimes we don't want to log the answer--for example, when timed exam questions are re-loaded
-        var answer = this.given_arr.join(",");
+        var answer = JSON.stringify(this.given_arr);
         this.logBookEvent({"event": "fillb", "act": answer, "answer":answer, "correct": (this.correct ? "T" : "F"), "div_id": this.divid});
     }
     if (this.useRunestoneServices) {
@@ -191,13 +191,23 @@ FITB.prototype.startEvaluation = function (logFlag) {
     }
 };
 
+// Inputs:
+//
+// - Strings entered by the student in ``this.blankArray[i].value``.
+// - Feedback in ``this.feedbackArray``.
+//
+// Outputs:
+//
+// - ``this.displayFeed`` is an array ot HTML feedback.
+// - ``this.isCorrectArray`` is an array of true, false, or null (the question wasn't answered).
+// - ``this.correct`` is true, false, or null (the question wasn't answered).
 FITB.prototype.evaluateAnswers = function () {
     for (var i = 0; i < this.blankArray.length; i++) {
         var given = this.blankArray[i].value;
 
         // If this blank is empty, provide no feedback for it.
         if (given === "") {
-            this.isCorrectArray.push("");
+            this.isCorrectArray.push(null);
             this.displayFeed.push('No answer provided.');
         } else {
             // Look through all feedback for this blank. The last element in the array always matches.
@@ -219,7 +229,7 @@ FITB.prototype.evaluateAnswers = function () {
                     // This is a number.
                     console.assert('number' in fbl[j]);
                     var [min, max] = fbl[j]['number'];
-                    // Convert the given string to a number. While there are `lots of ways <https://coderwall.com/p/5tlhmw/converting-strings-to-number-in-javascript-pitfalls>`_ to do this,, this version supports other bases (hex/binary/octal) as well as floats.
+                    // Convert the given string to a number. While there are `lots of ways <https://coderwall.com/p/5tlhmw/converting-strings-to-number-in-javascript-pitfalls>`_ to do this; this version supports other bases (hex/binary/octal) as well as floats.
                     var actual = +given;
                     if (actual >= min && actual <= max) {
                         this.displayFeed.push(fbl[j]['feedback']);
@@ -232,7 +242,7 @@ FITB.prototype.evaluateAnswers = function () {
         }
     }
 
-    if ($.inArray("", this.isCorrectArray) < 0 && $.inArray(false, this.isCorrectArray) < 0) {
+    if ($.inArray(null, this.isCorrectArray) < 0 && $.inArray(false, this.isCorrectArray) < 0) {
         this.correct = true;
     } else if (this.isCompletelyBlank()) {
         this.correct = null;
@@ -263,7 +273,7 @@ FITB.prototype.renderFITBFeedback = function () {
             this.displayFeed = "";
         }
         for (var j = 0; j < this.blankArray.length; j++) {
-            if (!this.isCorrectArray[j]) {
+            if (this.isCorrectArray[j] !== true) {
                 $(this.blankArray[j]).addClass("input-validation-error");
             } else {
                 $(this.blankArray[j]).removeClass("input-validation-error");

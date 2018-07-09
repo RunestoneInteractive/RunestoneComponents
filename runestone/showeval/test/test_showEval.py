@@ -1,26 +1,29 @@
-import unittest
 import time
-from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.keys import Keys
+from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
-class ShowEvalTest_TraceMode(unittest.TestCase):
+__author__ = 'wayne brown'
+
+mf, setUpModule, tearDownModule = module_fixture_maker(__file__, True)
+
+
+class ShowEvalTest_TraceMode(RunestoneTestCase):
 
     def setUp(self):
-        self.driver = webdriver.Firefox()
-        self.driver.get("http://127.0.0.1:8000/trace.html")
+        super(ShowEvalTest_TraceMode, self).setUp()
+        print(vars(self))
+        self.driver.get(self.host + "/trace.html")
 
     def test_Next_Step(self):
         driver = self.driver
         self.assertIn("ShowEval", driver.title)
-        evalDiv = driver.find_element_by_id("showEval_0")
+        evalDiv = driver.find_element_by_id("showEval_3")
 
         prevList = driver.find_elements_by_class_name("previousStep")
         prevListLen = len(prevList)
         assert prevListLen == 0
         assert len(evalDiv.find_elements_by_tag_name("span")) == 3
 
-        driver.find_element_by_id("showEval_0_nextStep").click()
+        driver.find_element_by_id("showEval_3_nextStep").click()
         time.sleep(3)
         assert len(evalDiv.find_elements_by_tag_name("span")) == 3
         assert len(driver.find_elements_by_class_name("previousStep")) > prevListLen
@@ -28,35 +31,33 @@ class ShowEvalTest_TraceMode(unittest.TestCase):
     def test_Reset_Step(self):
         driver = self.driver
         self.assertIn("ShowEval", driver.title)
-        evalDiv = driver.find_element_by_id("showEval_0")
+        evalDiv = driver.find_element_by_id("showEval_3")
 
         for i in range(3):
-            driver.find_element_by_id("showEval_0_nextStep").click()
+            driver.find_element_by_id("showEval_3_nextStep").click()
             time.sleep(3)
 
         assert len(evalDiv.find_elements_by_class_name("previousStep")) > 0
-        driver.find_element_by_id("showEval_0_reset").click()
+        driver.find_element_by_id("showEval_3_reset").click()
         assert len(evalDiv.find_elements_by_class_name("previousStep")) == 0
 
-    def tearDown(self):
-        self.driver.close()
 
-class ShowEvalTest_ReplaceMode(unittest.TestCase):
+class ShowEvalTest_ReplaceMode(RunestoneTestCase):
 
     def setUp(self):
-        self.driver = webdriver.Firefox()
-        self.driver.get("http://127.0.0.1:8000/replace.html")
+        super(ShowEvalTest_ReplaceMode, self).setUp()
+        self.driver.get(self.host + "/replace.html")
 
     def test_Next_Step(self):
         driver = self.driver
         self.assertIn("ShowEval", driver.title)
-        evalDiv = driver.find_element_by_id("showEval_0")
+        evalDiv = driver.find_element_by_id("showEval_2")
 
         assert len(evalDiv.find_elements_by_tag_name("span")) == 3
         evalText = driver.find_element_by_class_name("eval").text
         assert evalText != ""
 
-        driver.find_element_by_id("showEval_0_nextStep").click()
+        driver.find_element_by_id("showEval_2_nextStep").click()
         time.sleep(3)
         assert len(evalDiv.find_elements_by_tag_name("span")) == 3
         assert driver.find_element_by_class_name("eval").text != evalText
@@ -64,20 +65,12 @@ class ShowEvalTest_ReplaceMode(unittest.TestCase):
     def test_Reset_Step(self):
         driver = self.driver
         self.assertIn("ShowEval", driver.title)
-        evalDiv = driver.find_element_by_id("showEval_0")
         evalText1 = driver.find_element_by_class_name("eval").text
 
         for i in range(4):
-            driver.find_element_by_id("showEval_0_nextStep").click()
+            driver.find_element_by_id("showEval_2_nextStep").click()
             time.sleep(3)
 
         assert driver.find_element_by_class_name("eval").text != evalText1
-        driver.find_element_by_id("showEval_0_reset").click()
+        driver.find_element_by_id("showEval_2_reset").click()
         assert driver.find_element_by_class_name("eval").text == evalText1
-
-    def tearDown(self):
-        self.driver.close()
-
-
-if __name__ == "__main__":
-    unittest.main()
