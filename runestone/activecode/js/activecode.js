@@ -561,7 +561,7 @@ ActiveCode.prototype.createOutput = function () {
     // to hold turtle graphics output.  We use a div in case the turtle changes from
     // using a canvas to using some other element like svg in the future.
     var outDiv = document.createElement("div");
-    $(outDiv).addClass("ac_output col-md-5");
+    $(outDiv).addClass("ac_output col-md-12");
     this.outDiv = outDiv;
     this.output = document.createElement('pre');
     this.output.id = this.divid+'_stdout';
@@ -1123,7 +1123,7 @@ ActiveCode.prototype.runProg = function (params = [0]) {
     $(this.historyScrubber).off("slidechange");
     $(this.historyScrubber).slider("disable");
     if (!this.modaloutput) {
-        $(this.codeDiv).switchClass("col-md-12", "col-md-7", {duration: 500, queue: false});
+        //$(this.codeDiv).switchClass("col-md-12", "col-md-7", {duration: 500, queue: false});
         $(this.outDiv).show({duration: 700, queue: false});
     }
     // var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
