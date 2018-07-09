@@ -32,7 +32,7 @@
 }
 
 div.ExecutionVisualizer #dataViz{
-  margin: 0;
+  margin: 0;  
 }
 
 div.ExecutionVisualizer div#stackHeader {
@@ -80,9 +80,11 @@ div.ExecutionVisualizer div#heap {
   margin: 0 auto;
 }
 
+/*  bnm -- comment this out for now as it breaks codelens indentation and arrows
 .visualizer tr{
   display: flex;
 }
+*/
 
 #vizLayoutTd{
   flex: 1;
