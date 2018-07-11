@@ -193,6 +193,10 @@ def add_skulpt_js(app):
     if first_time(app, 'add_skulpt_js'):
         app.add_javascript('skulpt.min.js')
         app.add_javascript('skulpt-stdlib.js')
+        app.add_javascript("https://cdn.jsdelivr.net/npm/vega@4.0.0-rc.2/build/vega.js")
+        app.add_javascript("https://cdn.jsdelivr.net/npm/vega-lite@2.5.0/build/vega-lite.js")
+        app.add_javascript("https://cdn.jsdelivr.net/npm/vega-embed@3.14.0/build/vega-embed.js")
+
 
 # Some nodes have a line number of None. Look through their children to find the node's line number.
 def get_node_line(node):
