@@ -13,7 +13,8 @@ SECTION 1: Parsons Problem
 .. parsonsprob:: Test1
    :adaptive:
    :order: 0 1 2 3 4
-
+   
+   need some text ?
    -----
    def fib(num):
    =====
@@ -38,6 +39,7 @@ Section 2: Labeling
    :order: 0 1 2 3 4
    :numbered: right
 
+   need some text ?
    -----
    def fib(num):
    =====
@@ -57,6 +59,7 @@ Section 2: Labeling
    :order: 0 1 2 3 4
    :numbered: left
 
+   need some text ?
    -----
    def fib(num):
    =====
@@ -75,6 +78,7 @@ Section 2: Labeling
 .. parsonsprob:: Test2c
    :order: 0 1 2 3 4
 
+   need some text ?
    -----
    def fib(num):
    =====
