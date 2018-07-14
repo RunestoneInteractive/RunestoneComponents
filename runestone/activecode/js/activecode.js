@@ -339,12 +339,12 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
         $(scrubberDiv).width("180px");
         var scrubber = document.createElement("div");
         this.slideit = function() {
-            console.log("slideit was called");
             this.editor.setValue(this.history[$(scrubber).slider("value")]);
             var curVal = this.timestamps[$(scrubber).slider("value")];
             var tooltip = '<div class="sltooltip"><div class="sltooltip-inner">' +
                 curVal + '</div><div class="sltooltip-arrow"></div></div>';
             $(scrubber).find(".ui-slider-handle").html(tooltip);
+            this.logBookEvent({'event': 'activecode', 'act': 'slide:'+curVal, 'div_id': this.divid})
             setTimeout(function () {
                 $(scrubber).find(".sltooltip").fadeOut()
             }, 4000);
@@ -384,7 +384,6 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
         this.histButton = null;
         this.historyScrubber = scrubber;
         $(scrubberDiv).insertAfter(this.runButton);
-        console.log("resoving deferred in addHistoryScrubber");
         deferred.resolve();
     }.bind(this)
     if (eBookConfig.practice_mode){
@@ -397,7 +396,6 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
                 for (t in data.timestamps) {
                     this.timestamps.push( (new Date(data.timestamps[t])).toLocaleString() )
                 }
-                console.log("gethist successful history updated")
             }
         }.bind(this))
             .always(helper); // For an explanation, please look at https://stackoverflow.com/questions/336859/var-functionname-function-vs-function-functionname
@@ -862,7 +860,6 @@ ActiveCode.prototype.buildProg = function() {
 
 ActiveCode.prototype.manage_scrubber = function (scrubber_dfd, history_dfd, saveCode) {
     if (this.historyScrubber === null && !this.autorun) {
-        console.log("Need a new scrubber");
         scrubber_dfd = this.addHistoryScrubber();
     } else {
         scrubber_dfd = jQuery.Deferred();
@@ -872,14 +869,12 @@ ActiveCode.prototype.manage_scrubber = function (scrubber_dfd, history_dfd, save
     history_dfd = jQuery.Deferred();
     scrubber_dfd.done((function () {
         if (this.historyScrubber && (this.history[$(this.historyScrubber).slider("value")] != this.editor.getValue())) {
-            console.log("updating scrubber with changed code");
             saveCode = "True";
             this.history.push(this.editor.getValue());
             this.timestamps.push((new Date()).toLocaleString());
             $(this.historyScrubber).slider("option", "max", this.history.length - 1);
             $(this.historyScrubber).slider("option", "value", this.history.length - 1);
             this.slideit();
-            console.log("finished scrubber update")
         } else {
             saveCode = "False";
         }
@@ -901,7 +896,6 @@ ActiveCode.prototype.runProg = function () {
     var prog = this.buildProg();
     var saveCode = "True";
     var scrubber_dfd, history_dfd, skulpt_run_dfd;
-    console.log("starting a new run of " + this.divid);
     $(this.output).text('');
 
     $(this.eContainer).remove();
