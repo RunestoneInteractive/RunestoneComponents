@@ -16,8 +16,13 @@ RunestoneComponents
 .. image:: http://bnmnetp.me:8088/buildStatus/icon?job=RunestoneComponents&build=9
 
 Packaging of the Runestone components for publishing educational materials using Sphinx and restructuredText. Check out the `Overview <http://interactivepython.org/runestone/static/overview/overview.html>`_ To see all of the extensions in action.
-**NOTE** -- If you have used an older version of this repo, please know this is a total restart.  I think much better, and it WILL stay up to date as this is now the master copy of the components not just a copy.
-Check out the `Development Roadmap <https://github.com/bnmnetp/runestone/wiki>`_ to get an understanding of our migration towards webcomponents.
+
+Documentation
+-------------
+
+Summer 2018 has brought some great updates to our documentation.  You will find the new docs on runestoneinteractive.org `here <http://runestoneinteractive.org/build/html/index.html>`_  
+
+If you want to report any issues with the docs or submit PRs to improve them please do so on `github <https://github.com/RunestoneInteractive/runestoneinteractive.github.io/issues>`_
 
 
 Quick Start
@@ -93,7 +98,7 @@ link on `Using Python with Windows <https://docs.python.org/3.4/using/windows.ht
 Developing and Hacking
 ----------------------
 
-So, you would like to help out with developing the Runestone Components.  What do you need to know?
+So, you would like to help out with developing the Runestone Components.  What do you need to know?  Check out the `Development Roadmap <https://github.com/bnmnetp/runestone/wiki>`_ to get an understanding of our migration towards webcomponents.
 
 1.  Make a Fork of this repository. 
 2.  Set up your environment on your development machine
