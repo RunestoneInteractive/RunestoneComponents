@@ -46,3 +46,11 @@ Internationalization
 --------------------
 
 It is recomended to implement internationalization as described in [I18N.md](I18N.md) even if you plan to support only English currently. Besides making easy to support other languages in the future, internationalization helps you to better separate natural language text fragments from the rest of your code.
+
+
+## Major Feature Contributions
+
+There are many ways that we can continue to improve and make the Runestone platform great, and I am exctied to see the platform evolve.  What I would ask is that if you have a large new feature that you would like to propose / contribute please start by creating an issue.  This will allow us to discuss it together up front, consider the design implications, and make it more likely that the PR will be accepted with a minimum of fuss.
+
+Runestone has grown organically over the years but that has led to duplicated tables in the database duplicated code and lots of inconsistency.  We need to start working to change all of that if we are going to continue to grow runestone efficiently.
+
