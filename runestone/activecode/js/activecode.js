@@ -1799,7 +1799,8 @@ LiveCode.prototype.runProg = function() {
         runspec['file_list'] = [];
         var promises = [];
         var instance = this;
-        $.getScript('http://cdn.rawgit.com/killmenot/webtoolkit.md5/master/md5.js', function()
+        //todo: Not sure why this is loaded like this. It could be loaded once.
+        $.getScript('https://cdn.rawgit.com/killmenot/webtoolkit.md5/master/md5.js', function()
         {
             for(var i = 0; i < files.length; i++) {
                 var fileName = files[i].name;
