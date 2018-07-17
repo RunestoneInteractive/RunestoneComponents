@@ -215,7 +215,7 @@ MultipleChoice.prototype.renderMCFormButtons = function () {
     // submit and compare me buttons
     // Create submit button
     this.submitButton = document.createElement("button");
-    this.submitButton.textContent = "Check Me";
+    this.submitButton.textContent = $.i18n("msg_mchoice_check_me");
     $(this.submitButton).attr({
         "class": "btn btn-success",
         "name": "do answer",
@@ -235,18 +235,18 @@ MultipleChoice.prototype.renderMCFormButtons = function () {
 
     // Create compare button
     if (this.useRunestoneServices) {
-        this.compareButton = document.createElement("button");
-        $(this.compareButton).attr({
-            "class": "btn btn-default",
-            "id": this.divid + "_bcomp",
-            "disabled": "",
-            "name": "compare"
-        });
-        this.compareButton.textContent = "Compare me";
-        this.compareButton.addEventListener("click", function () {
-            this.compareAnswers(this.divid);
-        }.bind(this), false);
-        this.optsForm.appendChild(this.compareButton);
+        // this.compareButton = document.createElement("button");
+        // $(this.compareButton).attr({
+        //     "class": "btn btn-default",
+        //     "id": this.divid + "_bcomp",
+        //     "disabled": "",
+        //     "name": "compare"
+        // });
+        // this.compareButton.textContent = "Compare me";
+        // this.compareButton.addEventListener("click", function () {
+        //     this.compareAnswers(this.divid);
+        // }.bind(this), false);
+        // this.optsForm.appendChild(this.compareButton);
     }
 };
 

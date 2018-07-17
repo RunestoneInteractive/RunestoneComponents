@@ -81,7 +81,7 @@ FITB.prototype.renderFITBInput = function () {
 FITB.prototype.renderFITBButtons = function () {
     // "submit" button and "compare me" button
     this.submitButton = document.createElement("button");
-    this.submitButton.textContent = "Check Me";
+    this.submitButton.textContent = $.i18n("msg_fitb_check_me");
     $(this.submitButton).attr({
         "class": "btn btn-success",
         "name": "do answer",
