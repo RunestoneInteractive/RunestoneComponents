@@ -235,17 +235,17 @@ MultipleChoice.prototype.renderMCFormButtons = function () {
 
     // Create compare button
     if (this.useRunestoneServices) {
-        // this.compareButton = document.createElement("button");
-        // $(this.compareButton).attr({
-        //     "class": "btn btn-default",
-        //     "id": this.divid + "_bcomp",
-        //     "disabled": "",
-        //     "name": "compare"
-        // });
-        // this.compareButton.textContent = "Compare me";
-        // this.compareButton.addEventListener("click", function () {
-        //     this.compareAnswers(this.divid);
-        // }.bind(this), false);
+        this.compareButton = document.createElement("button");
+        $(this.compareButton).attr({
+            "class": "btn btn-default",
+            "id": this.divid + "_bcomp",
+            "disabled": "",
+            "name": "compare"
+        });
+        this.compareButton.textContent = "Compare me";
+        this.compareButton.addEventListener("click", function () {
+            this.compareAnswers(this.divid);
+        }.bind(this), false);
         // this.optsForm.appendChild(this.compareButton);
     }
 };

@@ -105,7 +105,7 @@ FITB.prototype.renderFITBButtons = function () {
         this.compareButton.addEventListener("click", function () {
             this.compareFITBAnswers();
         }.bind(this), false);
-        this.containerDiv.appendChild(this.compareButton);
+        //this.containerDiv.appendChild(this.compareButton);
     }
 
     this.containerDiv.appendChild(document.createElement("div"));
