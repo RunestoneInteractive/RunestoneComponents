@@ -147,6 +147,11 @@ class FillInTheBlank(RunestoneIdDirective):
         fitbNode.template_start = TEMPLATE_START
         fitbNode.template_end = TEMPLATE_END
 
+        if self.content[0][:2] == '..':  # first line is a directive
+            self.content[0] = self.options['qnumber'] + ': \n\n' + self.content[0]
+        else:
+            self.content[0] = self.options['qnumber'] + ': ' + self.content[0]
+
         self.state.nested_parse(self.content, self.content_offset, fitbNode)
         env = self.state.document.settings.env
         self.options['divclass'] = env.config.fitb_div_class

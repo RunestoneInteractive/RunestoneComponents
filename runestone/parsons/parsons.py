@@ -142,7 +142,6 @@ Example:
         addQuestionToDB(self)
 
         env = self.state.document.settings.env
-        self.options['qnumber'] = self.getNumber()
         self.options['instructions'] = ""
         self.options['code'] = self.content
         self.options['divclass'] = env.config.parsons_div_class

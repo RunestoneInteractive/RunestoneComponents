@@ -36,7 +36,7 @@ def setup(app):
 TEMPLATE_START = """
 <div class="%(divclass)s">
 <ul data-component="dragndrop" id="%(divid)s">
-    <span data-component="question">%(question)s</span>
+    <span data-component="question">%(qnumber)s: %(question)s</span>
 	%(feedback)s
 """
 

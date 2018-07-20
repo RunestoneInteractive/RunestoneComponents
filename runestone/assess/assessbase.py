@@ -51,35 +51,10 @@ def escapejs(value):
 class Assessment(RunestoneIdDirective):
     """Base Class for assessments"""
 
-    def getNumber(self):
-        env = self.state.document.settings.env
-        if not hasattr(env,'assesscounter'):
-            env.assesscounter = 0
-        env.assesscounter += 1
-
-        res = "Q-%d"
-
-        if hasattr(env,'assessprefix'):
-            res = env.assessprefix + "%d"
-
-        res = res % env.assesscounter
-
-        if hasattr(env, 'assesssuffix'):
-            res += env.assesssuffix
-
-        return res
-
-
     def run(self):
         super(Assessment, self).run()
-        self.options['qnumber'] = self.getNumber()
 
         if self.content:
-            if self.content[0][:2] == '..':  # first line is a directive
-                self.content[0] = self.options['qnumber'] + ': \n\n' + self.content[0]
-            else:
-                self.content[0] = self.options['qnumber'] + ': ' + self.content[0]
-
             if 'iscode' in self.options:
                 self.options['bodytext'] = '<pre>' + "\n".join(self.content) + '</pre>'
             else:
