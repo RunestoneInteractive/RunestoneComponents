@@ -23,7 +23,7 @@ from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from docutils.utils import get_source_line
 
-UNNUMBERED_DIRECTIVES = ['activecode', 'reveal', 'video', 'youtube', 'vimeo', 'codelens', 'showeval', 'poll', 'tabbed', 'tab']
+UNNUMBERED_DIRECTIVES = ['activecode', 'reveal', 'video', 'youtube', 'vimeo', 'codelens', 'showeval', 'poll', 'tabbed', 'tab', 'timed', 'disqus']
 
 # Provide a class which all Runestone nodes will inherit from.
 class RunestoneNode(nodes.Node):
