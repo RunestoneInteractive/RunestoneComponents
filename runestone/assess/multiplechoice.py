@@ -202,11 +202,7 @@ class MChoice(Assessment):
         mcNode.template_end = TEMPLATE_END
 
         # For MChoice its better to insert the qnum into the content before further processing.
-        if self.content:
-            if self.content[0][:2] == '..':  # first line is a directive
-                self.content[0] = self.options['qnumber'] + ': \n\n' + self.content[0]
-            else:
-                self.content[0] = self.options['qnumber'] + ': ' + self.content[0]
+        self.updateContent()
 
         self.state.nested_parse(self.content, self.content_offset, mcNode)
         env = self.state.document.settings.env

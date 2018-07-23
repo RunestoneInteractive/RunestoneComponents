@@ -151,6 +151,13 @@ class RunestoneIdDirective(RunestoneDirective):
 
         return res
 
+    def updateContent(self):
+        if self.content:
+            if self.content[0][:2] == '..':  # first line is a directive
+                self.content[0] = self.options['qnumber'] + ': \n\n' + self.content[0]
+            else:
+                self.content[0] = self.options['qnumber'] + ': ' + self.content[0]
+
     def run(self):
         # Make sure the runestone directive at least requires an ID.
         assert self.required_arguments >= 1
