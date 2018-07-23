@@ -23,6 +23,8 @@ from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from docutils.utils import get_source_line
 
+UNNUMBERED_DIRECTIVES = ['activecode', 'reveal', 'video', 'youtube', 'vimeo', 'codelens', 'showeval', 'poll', 'tabbed', 'tab', 'timed', 'disqus']
+
 # Provide a class which all Runestone nodes will inherit from.
 class RunestoneNode(nodes.Node):
     pass
@@ -126,6 +128,36 @@ class RunestoneDirective(Directive):
 
 # This is a base class for all Runestone directives which require a divid as their first parameter.
 class RunestoneIdDirective(RunestoneDirective):
+
+    def getNumber(self):
+        
+        if self.name in UNNUMBERED_DIRECTIVES:
+            return ""
+
+        env = self.state.document.settings.env
+        if not hasattr(env,'assesscounter'):
+            env.assesscounter = 0
+        env.assesscounter += 1
+
+        res = "Q-%d"
+
+        if hasattr(env,'assessprefix'):
+            res = env.assessprefix + "%d"
+
+        res = res % env.assesscounter
+
+        if hasattr(env, 'assesssuffix'):
+            res += env.assesssuffix
+
+        return res
+
+    def updateContent(self):
+        if self.content:
+            if self.content[0][:2] == '..':  # first line is a directive
+                self.content[0] = self.options['qnumber'] + ': \n\n' + self.content[0]
+            else:
+                self.content[0] = self.options['qnumber'] + ': ' + self.content[0]
+
     def run(self):
         # Make sure the runestone directive at least requires an ID.
         assert self.required_arguments >= 1
@@ -133,6 +165,8 @@ class RunestoneIdDirective(RunestoneDirective):
             id_ = self.options['divid'] = self.arguments[0]
         else:
             id_ = self.options['divid']
+
+        self.options['qnumber'] = self.getNumber()
 
         # Get references to `runestone data`_.
         env = self.state.document.settings.env

@@ -201,6 +201,9 @@ class MChoice(Assessment):
         mcNode.template_option = OPTION
         mcNode.template_end = TEMPLATE_END
 
+        # For MChoice its better to insert the qnum into the content before further processing.
+        self.updateContent()
+
         self.state.nested_parse(self.content, self.content_offset, mcNode)
         env = self.state.document.settings.env
         self.options['divclass'] = env.config.mchoice_div_class

@@ -32,7 +32,7 @@ def setup(app):
 
 TEXT = """
 <div class="runestone">
-<p data-component="shortanswer" class="%(divclass)s" id=%(divid)s %(optional)s>%(qnum)s: %(content)s</p>
+<p data-component="shortanswer" class="%(divclass)s" id=%(divid)s %(optional)s>%(qnumber)s: %(content)s</p>
 </div>
 """
 
@@ -83,7 +83,6 @@ config values (conf.py):
 
         self.options['optional'] = 'data-optional' if 'optional' in self.options else ''
         self.options['content'] = "<p>".join(self.content)
-        self.options['qnum'] = self.getNumber()
         journal_node = JournalNode(self.options, rawsource=self.block_text)
         journal_node.source, journal_node.line = self.state_machine.get_source_and_line(self.lineno)
 

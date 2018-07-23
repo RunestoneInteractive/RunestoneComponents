@@ -34,7 +34,7 @@ def setup(app):
 TEMPLATE = """
 <div class="runestone">
 <div data-component="clickablearea" class="%(divclass)s" id="%(divid)s" %(table)s %(correct)s %(incorrect)s>
-<span data-question>%(question)s</span>%(feedback)s%(clickcode)s
+<span data-question>%(qnumber)s: %(question)s</span>%(feedback)s%(clickcode)s
 """
 TEMPLATE_END = """
 </div>

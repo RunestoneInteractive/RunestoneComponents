@@ -147,6 +147,8 @@ class FillInTheBlank(RunestoneIdDirective):
         fitbNode.template_start = TEMPLATE_START
         fitbNode.template_end = TEMPLATE_END
 
+        self.updateContent()
+
         self.state.nested_parse(self.content, self.content_offset, fitbNode)
         env = self.state.document.settings.env
         self.options['divclass'] = env.config.fitb_div_class
@@ -263,6 +265,7 @@ class FillInTheBlank(RunestoneIdDirective):
             fitbNode.feedbackArray.append(blankArray)
 
         return [fitbNode]
+
 
 
 # BlankRole
