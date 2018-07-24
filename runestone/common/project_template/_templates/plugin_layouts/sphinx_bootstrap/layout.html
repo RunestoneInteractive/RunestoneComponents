@@ -11,11 +11,16 @@
     '_static'+'/processing-1.4.1.min.js',
     '_static'+'/jquery.hotkey.js',
     '_static'+'/jquery-migrate-1.2.1.min.js',
-    '_static'+'/presenter_mode.js',
+    '_static'+'/presenter_mode.js',    
   ]
 %}
 
 {% set css_files = ['_static/bootstrap-3.0.0/css/bootstrap.min.css', '_static/presenter_mode.css'] + css_files %}
+{% if theme_bootswatch_theme %}
+  {% set css_files = css_files +
+    ['http://netdna.bootstrapcdn.com/bootswatch/2.3.1/' + theme_bootswatch_theme + '/bootstrap.min.css']
+  %}
+{% endif %}
 
 {% set css_files = css_files + [
     '_static'+'/jquery-ui-1.10.3.custom.min.css',
@@ -37,7 +42,7 @@
 
   <div class="container">
 
-    <div class="navbar-header" style="width:20%">
+    <div class="navbar-header">
       <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
       <button type='button' class='navbar-toggle' data-toggle="collapse" data-target=".navbar-ex1-collapse">
         <span class="icon-bar"></span>
@@ -50,7 +55,10 @@
         <a class="navbar-brand" href="{{ pathto(master_doc) }}">{% if theme_navbar_title -%}{{ theme_navbar_title|e }}{%- else -%}{{ project|e }}{%- endif -%}</a>
       </div>
     </div>
-      <div id="links" style="float:right; width:22%">
+
+     
+
+    <div class="navbar-collapse collapse navbar-ex1-collapse">
       <ul class="nav navbar-nav navbar-right" >
 
         <li class="divider-vertical"></li>
@@ -183,6 +191,11 @@
       </ul>
       </div>
 
+
+
+
+
+
       <ul class="nav navbar-nav">
         <li class="divider-vertical"></li>
         <!--{% block sidebartoc %}
@@ -196,7 +209,7 @@
           <li>{% include "sourcelink.html" %}</li>
         {% endif %}
       </ul>
-      {% include "progress.html" %}
+      
     </div>
   </div>
 </div>
