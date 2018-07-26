@@ -2,14 +2,16 @@ from unittest import TestCase
 from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
 mf, setUpModule, tearDownModule = module_fixture_maker(__file__, True)
-# Look for errors producted by invalid questions.
-class FITB_Error_Tests(TestCase):
+
+
+class FITB_MISC_Tests(TestCase):
+    # Look for errors producted by invalid questions.
     def test_1(self):
         # Check for the following directive-level errors.
-        directive_level_errors =  (
+        directive_level_errors = (
             # Produced my fitb id error1_no_content,
-            (34, 'Content block expected for the "fillintheblank" directive; none found.'),
-            (46, 'Not enough feedback for the number of blanks supplied.'),
+            (38, 'Content block expected for the "fillintheblank" directive; none found.'),
+            (50, 'Not enough feedback for the number of blanks supplied.'),
         )
         for error_line, error_string in directive_level_errors:
             self.assertIn(':{}: WARNING: {}'.format(error_line, error_string), mf.build_stderr_data)
@@ -17,15 +19,21 @@ class FITB_Error_Tests(TestCase):
         # Check for the following error inside the directive.
         inside_directive_errors = (
             # error2,
-            (38, 'the last item in a fill-in-the-blank question must be a bulleted list.'),
+            (42, 'the last item in a fill-in-the-blank question must be a bulleted list.'),
             # error3,
-            (44, 'each list item in a fill-in-the-blank problems must contain only one item, a field list.'),
+            (48, 'each list item in a fill-in-the-blank problems must contain only one item, a field list.'),
         )
         for error_line, error_string in inside_directive_errors:
             self.assertIn(': WARNING: On line {}, {}'.format(error_line, error_string), mf.build_stderr_data)
 
         # Make sure we saw all errors.
-        self.assertEqual(len(directive_level_errors) + len(inside_directive_errors), mf.build_stderr_data.count('WARNING'))
+        self.assertEqual(len(directive_level_errors) + len(inside_directive_errors),
+                         mf.build_stderr_data.count('WARNING'))
+
+    # Check that numbering works correctly.
+    def test_2(self):
+        with open('build/testfitb/index.html') as f:
+            self.assertIn('Before-5-After: Fill in the blanks', f.read())
 
 
 class FITBtests(RunestoneTestCase):
@@ -70,7 +78,6 @@ class FITBtests(RunestoneTestCase):
         feedback = self.find_feedback("fill1412")
         self.assertIsNotNone(feedback.text)
         self.assertIn("No answer provided.", feedback.text)
-
 
     # Both correct answers
     def test_fitb3(self):
@@ -139,4 +146,3 @@ class FITBtests(RunestoneTestCase):
         self.click_checkme()
         feedback = self.find_feedback("regexescapes2")
         self.assertIn('Correct.', feedback.text)
-

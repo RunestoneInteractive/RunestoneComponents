@@ -1,7 +1,9 @@
-
-=====================
-This Is A New Project
-=====================
+qnum testing
+------------
+.. qnum::
+    :prefix: Before-
+    :suffix: -After
+    :start: 5
 
 Fill in the Blank
 -----------------
@@ -19,6 +21,8 @@ Fill in the Blank
 Test 2.
 
 .. fillintheblank:: fill_2pi
+
+    .. If this isn't treated as a comment, then it will cause a **syntax error, thus producing a test failure.
 
     What is the solution to the following:
 
@@ -68,7 +72,7 @@ Regex testing
 .. fillintheblank:: regexescapes1
    :casei:
 
-   Windows system files are stored in: |blank|. 
+   Windows system files are stored in: |blank|.
 
    -   :C\:\\Windows\\system: Correct.
        :program files: Third party applications are stored here, not system files.
@@ -77,7 +81,7 @@ Regex testing
 .. fillintheblank:: regexescapes2
    :casei:
 
-   Python lists are declared using: |blank|. 
+   Python lists are declared using: |blank|.
 
    -   :\[\]: Correct.
        :x: Try again.
