@@ -16,14 +16,15 @@
 __author__ = 'bmiller'
 
 
-import os
 from collections import defaultdict
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from docutils.utils import get_source_line
+from docutils.statemachine import ViewList
 
 UNNUMBERED_DIRECTIVES = ['activecode', 'reveal', 'video', 'youtube', 'vimeo', 'codelens', 'showeval', 'poll', 'tabbed', 'tab', 'timed', 'disqus']
+
 
 # Provide a class which all Runestone nodes will inherit from.
 class RunestoneNode(nodes.Node):
@@ -38,6 +39,7 @@ class RunestoneNode(nodes.Node):
 #env.activecodecounter += 1
 # similar trick for assessments using getNumber()
 
+
 # Easily create and initialize an object with named methods from the object's constructor. Taken from http://stackoverflow.com/a/3652937. While a collections.namedtuple could probably be forced to do this, the following approach seems fairly straightforward.
 class Struct:
     def __init__(self, **kwargs):
@@ -46,6 +48,7 @@ class Struct:
     def __repr__(self):
         args = ['{}={}'.format(k, repr(v)) for (k,v) in vars(self).items()]
         return 'Struct({})'.format(', '.join(args))
+
 
 # Get a data structure which holds Runestone data from the environment. Create one if it doesn't exist.
 def _get_runestone_data(
@@ -86,6 +89,7 @@ def _get_runestone_data(
         )
     return env.runestone_data
 
+
 # When a source file is modified, clear all accumulated Runestone data from it.
 def _purge_runestone_data(app, env, docname):
     runestone_data = _get_runestone_data(env)
@@ -93,6 +97,10 @@ def _purge_runestone_data(app, env, docname):
     for id_ in runestone_data.page_to_id[docname]:
         runestone_data.id_to_page.pop(id_)
     runestone_data.page_to_id.pop(docname)
+
+    # Reset the problem numbering for each page.
+    env.assesscounter = 0
+
 
 def setup(app):
     # See http://www.sphinx-doc.org/en/stable/extdev/appapi.html#event-env-purge-doc.
@@ -128,20 +136,16 @@ class RunestoneDirective(Directive):
 
 # This is a base class for all Runestone directives which require a divid as their first parameter.
 class RunestoneIdDirective(RunestoneDirective):
-
     def getNumber(self):
-        
         if self.name in UNNUMBERED_DIRECTIVES:
             return ""
 
         env = self.state.document.settings.env
-        if not hasattr(env,'assesscounter'):
-            env.assesscounter = 0
         env.assesscounter += 1
 
         res = "Q-%d"
 
-        if hasattr(env,'assessprefix'):
+        if hasattr(env, 'assessprefix'):
             res = env.assessprefix + "%d"
 
         res = res % env.assesscounter
@@ -153,8 +157,14 @@ class RunestoneIdDirective(RunestoneDirective):
 
     def updateContent(self):
         if self.content:
-            if self.content[0][:2] == '..':  # first line is a directive
-                self.content[0] = self.options['qnumber'] + ': \n\n' + self.content[0]
+            # If the first line is a directive, then put the numbering on a separate line.
+            if self.content[0][:2] == '..':
+                # Per the `docs <http://www.sphinx-doc.org/en/stable/extdev/markupapi.html#viewlists>`_, ``self.content`` is a ``ViewList``, so we can't just insert strings. Instead, create a viewlist the combine the two.
+                self.content = (
+                    # Use the source file from the existing ViewList when creating a new one.
+                    ViewList([self.options['qnumber'] + ':', ''], self.content.source(0)) +
+                    self.content
+                )
             else:
                 self.content[0] = self.options['qnumber'] + ': ' + self.content[0]
 
