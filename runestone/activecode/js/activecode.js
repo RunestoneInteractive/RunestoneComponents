@@ -899,6 +899,8 @@ ActiveCode.prototype.runProg = function () {
     $(this.output).text('');
 
     $(this.eContainer).remove();
+    this.codelens.style.display = 'none';
+    this.clButton.innerText = $.i18n("msg_activecode_show_in_codelens");
     Sk.configure({
         output: this.outputfun.bind(this),
         read: this.fileReader,
