@@ -700,13 +700,13 @@ ActiveCode.prototype.addErrorMessage = function (err) {
     let errorOutside = false;
     if (err.traceback.length >= 1) {
         errorLine = err.traceback[0].lineno;
-    }
-    if (errorLine <= this.pretextLines || errorLine > (this.progLines + this.pretextLines)) {
-        errorOutside = true;
-    } else {
-        if (this.pretextLines > 0) {
-            err.traceback[0].lineno = err.traceback[0].lineno - this.pretextLines + 1;
-        } 
+        if (errorLine <= this.pretextLines || errorLine > (this.progLines + this.pretextLines)) {
+            errorOutside = true;
+        } else {
+            if (this.pretextLines > 0) {
+                err.traceback[0].lineno = err.traceback[0].lineno - this.pretextLines + 1;
+            } 
+        }
     }
     var errHead = $('<h3>').html('Error');
     this.eContainer = this.outerDiv.appendChild(document.createElement('div'));
