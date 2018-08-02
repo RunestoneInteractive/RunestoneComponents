@@ -11,16 +11,16 @@ script:
 - export PATH=.:$PATH
 - wget https://bootstrap.pypa.io/get-pip.py
 - python3.4 -m venv rune3
-- . rune3/bin/activate
+- ". rune3/bin/activate"
 - cp chromedriver rune3/bin
 - echo $PATH
 - ls rune3/bin
-- ./rune3/bin/python -m ensurepip
-- ./rune3/bin/python get-pip.py
-- ./rune3/bin/pip install -e .
-- ./rune3/bin/pip install -r requirements.txt
-- ./rune3/bin/pip install pyvirtualdisplay
+- "./rune3/bin/python -m ensurepip"
+- "./rune3/bin/python get-pip.py"
+- "./rune3/bin/pip install -e ."
+- "./rune3/bin/pip install -r requirements.txt"
+- "./rune3/bin/pip install pyvirtualdisplay"
 - "./runTests.sh"
 notifications:
   slack:
-    secure: OfeZ/+YHpSl7GNFkzEKu0uObuMdymKmDEeDyfB++RaglalcgkDQAqrCPx+YVw6brXOHGeC6BkGJe/Fs143Ai8/yf38nMmZg/dej5nLgZNST67jWaapIydx5QeuCrsRKvUP+z6yEYoBkYXTsYPyTiKGGsyzvX6dimZRT4nD8qrv0=
+    secure: ZM7WB8p85i+sZXQYqlm7M/Eu1ZL5UptFw3ZRpzWuBMnC/OLw721eGaY1GsbyLhqtBUMbMnaStwptz/mHEZfEv36ARSnyOZdhl+g5ckQKUB+ECULk7HkyjiU4kPJ5U/yyGUFBZUFlZfhY76EBOqtGU6IhXw8TqWOfD8CZDXXvICE=
