@@ -431,7 +431,7 @@ MultipleChoice.prototype.renderMCMAFeedBack = function () {
         $(this.feedBackDiv).html('✔️ <ol type="A">' + feedbackText + "</ul>");
         $(this.feedBackDiv).attr("class", "alert alert-info");
     } else {
-        $(this.feedBackDiv).html("Not quite.    " + "You gave " + numGiven +
+        $(this.feedBackDiv).html("✖️ " + "You gave " + numGiven +
             " " + answerStr + " and got " + numCorrect + " correct of " +
             numNeeded + ' needed.<ol type="A">' + feedbackText + "</ul>");
         $(this.feedBackDiv).attr("class", "alert alert-danger");
@@ -477,7 +477,7 @@ MultipleChoice.prototype.renderMCMFFeedback = function (correct, feedbackText) {
         if (feedbackText == null) {
             feedbackText = "";
         }
-        $(this.feedBackDiv).html(feedbackText);
+        $(this.feedBackDiv).html("✖️ " + feedbackText);
         $(this.feedBackDiv).attr("class", "alert alert-danger");
     }
 };

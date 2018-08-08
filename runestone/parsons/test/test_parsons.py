@@ -52,7 +52,7 @@ class ParsonsTests(RunestoneTestCase):
         self.wait_for_animation("#parsons-1-block-0")
         checkme.click()
         message = self.driver.find_element_by_id("parsons-1-message")
-        self.assertEquals(message.get_attribute("class"), "alert alert-success")
+        self.assertEquals(message.get_attribute("class"), "alert alert-info")
 
         # check that reset works
         reset.click()

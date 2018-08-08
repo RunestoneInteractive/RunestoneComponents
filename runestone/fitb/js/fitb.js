@@ -264,7 +264,7 @@ FITB.prototype.isCompletelyBlank = function () {
 
 FITB.prototype.renderFITBFeedback = function () {
     if (this.correct) {
-        $(this.feedBackDiv).attr("class", "alert alert-success");
+        $(this.feedBackDiv).attr("class", "alert alert-info");
         for (var j = 0; j < this.blankArray.length; j++) {
             $(this.blankArray[j]).removeClass("input-validation-error");
         }
