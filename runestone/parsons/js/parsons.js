@@ -117,7 +117,7 @@ LineBasedGrader.prototype.grade = function() {
 				state = "correct";
 				answerArea.addClass("correct");
 				feedbackArea.fadeIn(100);
-				feedbackArea.attr("class", "alert alert-success");
+				feedbackArea.attr("class", "alert alert-info");
 				if (problem.checkCount > 1)
 				{
 				   feedbackArea.html("Perfect!  It took you " + problem.checkCount + " tries to solve this.  Click Reset to try to solve it in one attempt.");

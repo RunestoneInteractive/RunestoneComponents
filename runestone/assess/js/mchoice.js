@@ -428,10 +428,10 @@ MultipleChoice.prototype.renderMCMAFeedBack = function () {
     var feedbackText = this.feedbackString;
 
     if (this.correct) {
-        $(this.feedBackDiv).html('Correct.<ol type="A">' + feedbackText + "</ul>");
-        $(this.feedBackDiv).attr("class", "alert alert-success");
+        $(this.feedBackDiv).html('✔️ <ol type="A">' + feedbackText + "</ul>");
+        $(this.feedBackDiv).attr("class", "alert alert-info");
     } else {
-        $(this.feedBackDiv).html("Incorrect.    " + "You gave " + numGiven +
+        $(this.feedBackDiv).html("✖️ " + "You gave " + numGiven +
             " " + answerStr + " and got " + numCorrect + " correct of " +
             numNeeded + ' needed.<ol type="A">' + feedbackText + "</ul>");
         $(this.feedBackDiv).attr("class", "alert alert-danger");
@@ -471,13 +471,13 @@ MultipleChoice.prototype.logMCMFsubmission = function () {
 
 MultipleChoice.prototype.renderMCMFFeedback = function (correct, feedbackText) {
     if (correct) {
-        $(this.feedBackDiv).html(feedbackText);
-        $(this.feedBackDiv).attr("class", "alert alert-success");
+        $(this.feedBackDiv).html("✔️ " + feedbackText);
+        $(this.feedBackDiv).attr("class", "alert alert-info"); // use blue for better red/green blue color blindness
     } else {
         if (feedbackText == null) {
             feedbackText = "";
         }
-        $(this.feedBackDiv).html(feedbackText);
+        $(this.feedBackDiv).html("✖️ " + feedbackText);
         $(this.feedBackDiv).attr("class", "alert alert-danger");
     }
 };
