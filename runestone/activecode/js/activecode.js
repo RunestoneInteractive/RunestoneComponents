@@ -693,13 +693,31 @@ ActiveCode.prototype.toggleEditorVisibility = function () {
 };
 
 ActiveCode.prototype.addErrorMessage = function (err) {
-    //logRunEvent({'div_id': this.divid, 'code': this.prog, 'errinfo': err.toString()}); // Log the run event
+    // Add the error message
+    // But, adjust the line numbers.  If the line number is <= pretextLines then it is in included code
+    // if it is greater than the number of included lines but less than the pretext + current editor then it is in the student code.
+    // adjust the line number we display by eliminating the pre-included code.
+    let errorOutside = false;
+    if (err.traceback.length >= 1) {
+        errorLine = err.traceback[0].lineno;
+        if (errorLine <= this.pretextLines || errorLine > (this.progLines + this.pretextLines)) {
+            errorOutside = true;
+        } else {
+            if (this.pretextLines > 0) {
+                err.traceback[0].lineno = err.traceback[0].lineno - this.pretextLines + 1;
+            } 
+        }
+    }
     var errHead = $('<h3>').html('Error');
     this.eContainer = this.outerDiv.appendChild(document.createElement('div'));
     this.eContainer.className = 'error alert alert-danger';
     this.eContainer.id = this.divid + '_errinfo';
     this.eContainer.appendChild(errHead[0]);
     var errText = this.eContainer.appendChild(document.createElement('pre'));
+    if (errorOutside) {
+        errText.innerHTML = "An error occurred but it was outside of your code";
+        return;
+    }
     var errString = err.toString();
     var to = errString.indexOf(":");
     var errName = errString.substring(0, to);
@@ -840,6 +858,9 @@ ActiveCode.prototype.buildProg = function() {
     var pretext;
     var prog = this.editor.getValue() + "\n";
     this.pretext = "";
+    this.pretextLines = 0
+    this.progLines = prog.match(/\n/g).length + 1
+
     if (this.includes !== undefined) {
         // iterate over the includes, in-order prepending to prog
 
@@ -848,6 +869,9 @@ ActiveCode.prototype.buildProg = function() {
             pretext = pretext + edList[this.includes[x]].editor.getValue();
         }
         this.pretext = pretext;
+        if(this.pretext) {
+            this.pretextLines = (this.pretext.match(/\n/g) || '').length + 1
+        }
         prog = pretext + prog
     }
 
