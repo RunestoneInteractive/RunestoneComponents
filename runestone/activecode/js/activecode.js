@@ -809,10 +809,24 @@ ActiveCode.prototype.builtinRead = function (x) {
 ActiveCode.prototype.fileReader = function(divid) {
     let elem = document.getElementById(divid);
     let data = ""
+    let result = ""
     if (elem == null && Sk.builtinFiles["files"][divid]) {
         return Sk.builtinFiles["files"][divid];
+    } else {
+        // try remote file
+        $.ajax({async: false,
+                url: `/runestone/ajax/get_datafile?course_id=${eBookConfig.course}&acid=${divid}`,
+                success: function(data) {
+                    result = JSON.parse(data).data;
+                    },
+                error: function(err) {
+                     result = null;
+                    }})
+        if (result) {
+            return result
+        }
     }
-    if (elem == null) {
+    if (elem == null && result === null) {
         throw new Sk.builtin.IOError($.i18n("msg_activecode_no_file_or_dir",divid));
     } else {
         if (elem.nodeName.toLowerCase() == "textarea") {
@@ -923,8 +937,12 @@ ActiveCode.prototype.runProg = function () {
     $(this.output).text('');
 
     $(this.eContainer).remove();
-    this.codelens.style.display = 'none';
-    this.clButton.innerText = $.i18n("msg_activecode_show_in_codelens");
+    if (this.codelens) {
+        this.codelens.style.display = 'none';
+    }
+    if (this.clButton) {
+        this.clButton.innerText = $.i18n("msg_activecode_show_in_codelens");
+    }
     Sk.configure({
         output: this.outputfun.bind(this),
         read: this.fileReader,
