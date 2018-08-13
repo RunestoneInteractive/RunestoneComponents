@@ -66,7 +66,7 @@ class DragAndDropQuestion_Tests(RunestoneTestCase):
         fb = t1.find_element_by_id("question3_feedback")
         self.assertIsNotNone(fb)
         cnamestr = fb.get_attribute("class")
-        self.assertIn("alert-success", cnamestr)
+        self.assertIn("alert-info", cnamestr)
 
 
     def test_dnd3(self):
@@ -131,4 +131,4 @@ class DragAndDropQuestion_Tests(RunestoneTestCase):
         fb = t1.find_element_by_id("question3_feedback")
         self.assertIsNotNone(fb)
         cnamestr = fb.get_attribute("class")
-        self.assertIn("alert-success", cnamestr)
+        self.assertIn("alert-info", cnamestr)

@@ -45,7 +45,7 @@ class ClickableAreaQuestion_Tests(RunestoneTestCase):
         fb = t1.find_element_by_class_name("alert")
         self.assertIsNotNone(fb)
         cnamestr = fb.get_attribute("class")
-        self.assertIn("alert-success", cnamestr)
+        self.assertIn("alert-info", cnamestr)
 
 
     def test_ca3(self):
@@ -149,7 +149,7 @@ class ClickableAreaQuestion_Tests(RunestoneTestCase):
         fb = t1.find_element_by_class_name("alert")
         self.assertIsNotNone(fb)
         cnamestr = fb.get_attribute("class")
-        self.assertIn("alert-success", cnamestr)
+        self.assertIn("alert-info", cnamestr)
 
 
     def test_ca8(self):
