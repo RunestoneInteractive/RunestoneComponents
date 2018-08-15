@@ -34,7 +34,7 @@ def setup(app):
     app.connect('env-updated', env_updated)
 
 
-def update_database(chaptitles, subtitles, app):
+def update_database(chaptitles, subtitles, skips, app):
     """
     When the build is completely finished output the information gathered about
     chapters and subchapters into the database.
@@ -53,6 +53,7 @@ def update_database(chaptitles, subtitles, app):
     engine.execute(chapters.delete().where(chapters.c.course_id == course_id))
 
     print("Populating the database with Chapter information")
+
     for chap in chaptitles:
         # insert row for chapter in the chapter table and get the id
         print(u"Adding chapter subchapter info for {}".format(chap))
@@ -61,11 +62,17 @@ def update_database(chaptitles, subtitles, app):
         res = engine.execute(ins)
         currentRowId = res.inserted_primary_key[0]
         for sub in subtitles[chap]:
+            if (chap,sub) in skips:
+                skipreading = 'T'
+            else:
+                skipreading = 'F'
             # insert row for subchapter
+            # todo: check if this chapter/subchapter is in the non-reading list
             q_name = u"{}/{}".format(chaptitles.get(chap,chap), subtitles[chap][sub])
             ins = sub_chapters.insert().values(sub_chapter_name=subtitles[chap][sub],
                                                chapter_id=str(currentRowId),
-                                               sub_chapter_label=sub)
+                                               sub_chapter_label=sub,
+                                               skipreading=skipreading)
             engine.execute(ins)
             # Three possibilities:
             # 1) The chapter and subchapter labels match existing, but the q_name doesn't match; because you changed
@@ -114,6 +121,7 @@ def env_updated(app, env):
 
     chap_titles = OrderedDict()
     subchap_titles = OrderedDict()
+    skips = OrderedDict()
 
     for docname in included_docs:
         doctree = env.get_doctree(docname)
@@ -125,6 +133,10 @@ def env_updated(app, env):
             # If the docname is ``'index'``, then set ``chap_id`` to an empty string.
             chap_id = splits[-2] if len(splits) > 1 else ''
             subchap_id = splits[-1]
+
+            if docname in env.skipreading:
+                skips[(chap_id,subchap_id)] = True
+
             if chap_id in ignored_chapters or subchap_id == "index" :
                 continue
             if chap_id not in chap_titles:
@@ -139,6 +151,6 @@ def env_updated(app, env):
             if subchap_id not in subchap_titles[chap_id] and subchap_id != 'toctree':
                 subchap_titles[chap_id][subchap_id] = title.astext()
 
-    update_database(chap_titles, subchap_titles, app)
+    update_database(chap_titles, subchap_titles, skips, app)
 
     return []
