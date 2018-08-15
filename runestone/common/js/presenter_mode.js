@@ -7,7 +7,7 @@ function presentToggle() {
   let fullHeightClass = 'full-height';
   let bottomClass = 'bottom';
   if(bod.hasClass(presentClass)){
-    $('.section *').not('h1, .presentation-title, .btn-presenter, .runestone, .runestone *, .section').removeClass('hidden'); //show everything
+    $('.section *').not('h1, .presentation-title, .btn-presenter, .runestone, .runestone *, .section, .pre, code').removeClass('hidden'); //show everything
     $('#completionButton').removeClass('hidden');
     bod.removeClass(presentClass);
     $('.'+fullHeightClass).removeClass(fullHeightClass);
@@ -16,7 +16,7 @@ function presentToggle() {
     codeExercises.removeClass('hidden');
   }
   else{
-    $('.section *').not('h1, .presentation-title, .btn-presenter, .runestone, .runestone *, .section').addClass('hidden'); // hide extraneous stuff
+    $('.section *').not('h1, .presentation-title, .btn-presenter, .runestone, .runestone *, .section, .pre, code').addClass('hidden'); // hide extraneous stuff
     $('#completionButton').addClass('hidden');
     bod.addClass(presentClass);
     bod.addClass(fullHeightClass);
