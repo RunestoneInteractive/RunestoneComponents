@@ -134,7 +134,7 @@ def env_updated(app, env):
             chap_id = splits[-2] if len(splits) > 1 else ''
             subchap_id = splits[-1]
 
-            if docname in env.skipreading:
+            if hasattr(env, 'skipreading') and docname in env.skipreading:
                 skips[(chap_id,subchap_id)] = True
 
             if chap_id in ignored_chapters or subchap_id == "index" :
