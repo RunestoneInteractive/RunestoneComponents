@@ -365,7 +365,7 @@ ClickableArea.prototype.renderFeedback = function () {
 
     if (this.correct) {
         $(this.feedBackDiv).html("You are Correct!");
-        $(this.feedBackDiv).attr("class", "alert alert-success");
+        $(this.feedBackDiv).attr("class", "alert alert-info");
 
     } else {
         $(this.feedBackDiv).html("Incorrect. You clicked on " + this.correctNum + " of the " + this.correctArray.length.toString() + " correct elements and " + this.incorrectNum + " of the " + this.incorrectArray.length.toString() + " incorrect elements. " + this.feedback);

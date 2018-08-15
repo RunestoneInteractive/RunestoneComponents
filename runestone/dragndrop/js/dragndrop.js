@@ -361,7 +361,7 @@ DragNDrop.prototype.renderFeedback = function () {
     this.feedBackDiv.style.display = "block";
     if (this.correct) {
         $(this.feedBackDiv).html("You are correct!");
-        $(this.feedBackDiv).attr("class", "alert alert-success draggable-feedback");
+        $(this.feedBackDiv).attr("class", "alert alert-info draggable-feedback");
     } else {
         $(this.feedBackDiv).html("Incorrect. " + "You got " + this.correctNum + " correct and " + this.incorrectNum + " incorrect out of " + this.dragNum + ". You left " + this.unansweredNum + " blank. " + this.feedback);
         $(this.feedBackDiv).attr("class", "alert alert-danger draggable-feedback");
