@@ -105,7 +105,7 @@ def _purge_runestone_data(app, env, docname):
 def setup(app):
     # See http://www.sphinx-doc.org/en/stable/extdev/appapi.html#event-env-purge-doc.
     app.connect('env-purge-doc', _purge_runestone_data)
-
+    app.add_role('skipreading', SkipReading)
 
 # A base class for all Runestone directives.
 class RunestoneDirective(Directive):
@@ -246,3 +246,32 @@ def add_skulpt_js(app):
 def get_node_line(node):
     # This returns source, line. Pick just the line.
     return get_source_line(node)[1]
+
+
+
+def SkipReading(
+  # _`roleName`: the local name of the interpreted role, the role name actually used in the document.
+  roleName,
+  # _`rawtext` is a string containing the enitre interpreted text input, including the role and markup. Return it as a problematic node linked to a system message if a problem is encountered.
+  rawtext,
+  # The interpreted _`text` content.
+  text,
+  # The line number (_`lineno`) where the interpreted text begins.
+  lineno,
+  # _`inliner` is the docutils.parsers.rst.states.Inliner object that called this function. It contains the several attributes useful for error reporting and document tree access.
+  inliner,
+  # A dictionary of directive _`options` for customization (from the "role" directive), to be interpreted by this function. Used for additional attributes for the generated elements and other functionality.
+  options={},
+  # A list of strings, the directive _`content` for customization (from the "role" directive). To be interpreted by the role function.
+  content=[]):
+
+    docname = inliner.document.settings.env.docname
+
+    if not hasattr(inliner.document.settings.env, 'skipreading'):
+        inliner.document.settings.env.skipreading = set()
+
+    print("ADDING {} to skipreading".format(docname))
+    inliner.document.settings.env.skipreading.add(docname)
+
+    return ([],[])
+
