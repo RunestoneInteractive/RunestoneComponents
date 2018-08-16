@@ -1,5 +1,6 @@
 from unittest import TestCase
 import codecs
+from selenium.webdriver.common.alert import Alert
 from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
 mf, setUpModule, tearDownModule = module_fixture_maker(__file__, True)
@@ -147,3 +148,20 @@ class FITBtests(RunestoneTestCase):
         self.click_checkme()
         feedback = self.find_feedback("regexescapes2")
         self.assertIn('Correct.', feedback.text)
+
+    def test_timed(self):
+        # The question we want isn't visible yet. Load the page first.
+        self.driver.get(self.host + "/index.html")
+        # Start the assessment to show it.
+        self.driver.find_element_by_id('start').click()
+        # Now find the first fitb.
+        self.fitb = self.driver.find_element_by_id('timed-fitb-1')
+        # Fill it in.
+        self.find_blank(0).send_keys("red")
+        self.find_blank(1).send_keys("away")
+        # Finish the exam and click OK.
+        self.driver.find_element_by_id('finish').click()
+        Alert(self.driver).accept()
+        # Check the results. TODO: check the second fitb as well.
+        timed_results = self.driver.find_element_by_id('timed-exam-testresults').text
+        self.assertIn('Num Correct: 2', timed_results)
