@@ -1,4 +1,5 @@
 from unittest import TestCase
+import codecs
 from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
 mf, setUpModule, tearDownModule = module_fixture_maker(__file__, True)
@@ -32,7 +33,7 @@ class FITB_MISC_Tests(TestCase):
 
     # Check that numbering works correctly.
     def test_2(self):
-        with open('build/testfitb/index.html') as f:
+        with codecs.open('build/testfitb/index.html', encoding='utf-8') as f:
             self.assertIn('Before-5-After: Fill in the blanks', f.read())
 
 
