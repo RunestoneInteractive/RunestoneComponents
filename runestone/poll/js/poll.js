@@ -25,6 +25,8 @@ Poll.prototype.init = function (opts) {
     if ($(this.origElem).is("[data-comment]")) {
         this.comment = true;
     }
+    this.resultsViewer = $(orig).data('results');
+
     console.log(this.comment);
         
     this.getQuestionText();
@@ -69,7 +71,7 @@ Poll.prototype.renderPoll = function() {
     this.containerDiv.id = this.divid + "_container";
     $(this.containerDiv).addClass(this.origElem.getAttribute("class"));
 
-    $(this.pollForm).text(this.question);
+    $(this.pollForm).html(`<span style='font-size: Large'>${this.question}</span>`);
     $(this.pollForm).attr({
         "id":this.divid +"_form",
         "method" : "get",
@@ -110,7 +112,7 @@ Poll.prototype.renderPoll = function() {
     });
 
     this.resultsDiv.id = this.divid + "_results";
-
+    this.completeButton = button;
 
     this.pollForm.appendChild(button);
     this.containerDiv.appendChild(this.pollForm);
@@ -160,6 +162,7 @@ Poll.prototype.submitPoll = function() {
 
     // log the fact that the user has answered the poll to local storage
     localStorage.setItem(this.divid, "true");
+    $(this.completeButton).attr('disabled','disabled')
 
     // show the results of the poll
     var data = {};
@@ -176,19 +179,24 @@ Poll.prototype.showPollResults = function(data) {
     var count_list = results[2];
     var div_id = results[3];
 
-    $(this.resultsDiv).html("<b>Results:</b><br><br>");
-
-    var list = $(document.createElement("ol"));
-    for(var i=0; i<opt_list.length; i++) {
-        var count = count_list[i];
-        var percent = (count / total) * 100;
-        var text = Math.round(10*percent)/10 + "%";   // round percent to 10ths
-
-        var html = "<li value='"+opt_list[i]+"'><div class='progress'><div class='progress-bar progress-bar-success' style=width:"+percent+"%;><span class='poll-text'>"+text+"</span></div></div></li>";
-        var el = $(html);
-        list.append(el);
+    if (localStorage.getItem(this.divid) === "true") {
+        $(this.completeButton).attr('disabled','disabled');
     }
+    if (this.resultsViewer === "all" && localStorage.getItem(this.divid === "true") || eBookConfig.isInstructor ) {
+        $(this.resultsDiv).html("<b>Results:</b><br><br>");
+
+        var list = $(document.createElement("ol"));
+        for(var i=0; i<opt_list.length; i++) {
+            var count = count_list[i];
+            var percent = (count / total) * 100;
+            var text = Math.round(10*percent)/10 + "%";   // round percent to 10ths
+
+            var html = "<li value='"+opt_list[i]+"'><div class='progress'><div class='progress-bar progress-bar-success' style=width:"+percent+"%;><span class='poll-text'>"+text+"</span></div></div></li>";
+            var el = $(html);
+            list.append(el);
+        }
     $(this.resultsDiv).append(list);
+    }
 };
 
 Poll.prototype.disableOptions = function() {
@@ -208,9 +216,8 @@ Poll.prototype.checkPollStorage = function() {
 };
 
 
-
-
-$(document).ready(function() {
+// Do not render poll data until login-complete event so we know instructor status
+$(document).bind("runestone:login-complete", function () {
     $("[data-component=poll]").each(function(index) {
         pollList[this.id] = new Poll({"orig":this});
     });

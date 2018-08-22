@@ -33,7 +33,8 @@ def setup(app):
 
 
 TEMPLATE_START = """
-<ul data-component="poll" id=%(divid)s %(comment)s class='%(divclass)s'>%(question)s
+<ul data-component="poll" id=%(divid)s %(comment)s class='%(divclass)s' data-results='%(results)s'>
+%(question)s
 """
 
 TEMPLATE_OPTION = """
@@ -84,12 +85,12 @@ def depart_poll_node(self,node):
 class Poll(RunestoneIdDirective):
     """
 .. poll:: identifier
-    :scale: Mode 1--Implements the "On a scale of 1 to x" type method of poll--x is provided by author
+    :scale: <X>  Setting the scale creates an "On a scale of 1 to <X>" type of question
     :allowcomment: Boolean--provides comment box
-    :option_1: Mode 2--Implements the "Choose one of these options" type method of poll.
+    :option_1: Providing Question text for each option creates a "Choose one of these options" type of poll.
     :option_2: Option 2
     :option_3: Option 3    ...etc...(Up to 10 options in mode 2)
-
+    :results: One of all, instructor, superuser - who should see results?
 
 
 config values (conf.py): 
@@ -119,13 +120,13 @@ config values (conf.py):
             process the multiplechoice directive and generate html for output.
             :param self:
             :return:
-            .. poll:: identifier
-                :scale: Mode 1--Implements the "On a scale of 1 to x" type method of poll--x is provided by author
+            .. poll:: id
+                :scale: <X>  Setting the scale creates an "On a scale of 1 to <X>" type of question
                 :allowcomment: Boolean--provides comment box
-                :option_1: Mode 2--Implements the "Choose one of these options" type method of poll.
+                :option_1: Providing Question text for each option creates a "Choose one of these options" type of poll.
                 :option_2: Option 2
-                :option_3: Option 3
-                ...etc...(Up to 10 options in mode 2)
+                :option_3: Option 3    ...etc...(Up to 10 options in mode 2)
+                :results: One of all, instructor, superuser - who should see results?
         """
         super(Poll, self).run()
         addQuestionToDB(self)
@@ -142,6 +143,9 @@ config values (conf.py):
             self.options["comment"] = "data-comment"
         else:
             self.options["comment"] = ""
+
+        if not "results" in self.options:
+            self.options['results'] = "instructor"
 
         env = self.state.document.settings.env
         self.options['divclass'] = env.config.poll_div_class
