@@ -151,7 +151,7 @@ Poll.prototype.submitPoll = function() {
 
     // log the fact that the user has answered the poll to local storage
     localStorage.setItem(this.divid, "true");
-    $(this.pollForm).append("<span><strong>Thanks, your response has been recorded</strong></span>");
+    $(this.pollForm).append(`<span id=${this.divid}_sent><strong>Thanks, your response has been recorded</strong></span>`);
 
     // show the results of the poll
     if (this.resultsViewer === "all") {
