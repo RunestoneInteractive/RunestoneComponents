@@ -27,8 +27,6 @@ Poll.prototype.init = function (opts) {
     }
     this.resultsViewer = $(orig).data('results');
 
-    console.log(this.comment);
-        
     this.getQuestionText();
     this.getOptionText(); //populates optionList
     this.renderPoll();  //generates HTML
@@ -172,7 +170,9 @@ Poll.prototype.showPollResults = function(data) {
     var my_vote = results[4];
 
     // resture current users vote
-    this.optsArray[my_vote].checked = 'checked';
+    if (my_vote > -1) {
+        this.optsArray[my_vote].checked = 'checked';
+    }
 
     // show results summary if appropriate
     if (this.resultsViewer === "all" && localStorage.getItem(this.divid === "true") || eBookConfig.isInstructor ) {
