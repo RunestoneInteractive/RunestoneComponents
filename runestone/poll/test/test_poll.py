@@ -17,9 +17,7 @@ class PollTests(RunestoneTestCase):
         # just choose option 4
         poll_div.find_element_by_id('pollid1_opt_4').click()
 
-        # submit
-        poll_div.find_element_by_name('Submit Poll').click()
-
+        el = poll_div.find_elements_by_css_selector('span') # check for results span
 
         # just make sure we can find the results div - an exception will be raised if the div cannot be found
         poll_div.find_element_by_id('pollid1_results')
