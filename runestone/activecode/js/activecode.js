@@ -813,17 +813,20 @@ ActiveCode.prototype.fileReader = function(divid) {
     if (elem == null && Sk.builtinFiles["files"][divid]) {
         return Sk.builtinFiles["files"][divid];
     } else {
-        // try remote file
-        $.ajax({async: false,
-                url: `/runestone/ajax/get_datafile?course_id=${eBookConfig.course}&acid=${divid}`,
-                success: function(data) {
-                    result = JSON.parse(data).data;
-                    },
-                error: function(err) {
-                     result = null;
-                    }})
-        if (result) {
-            return result
+        // try remote file unless it ends with .js or .py -- otherwise we'll ask the server for all
+        // kinds of modules that we are trying to import
+        if ( ! (divid.endsWith('.js') || divid.endsWith('.py')) ) {
+            $.ajax({async: false,
+                    url: `/runestone/ajax/get_datafile?course_id=${eBookConfig.course}&acid=${divid}`,
+                    success: function(data) {
+                        result = JSON.parse(data).data;
+                        },
+                    error: function(err) {
+                        result = null;
+                        }})
+            if (result) {
+                return result
+            }
         }
     }
     if (elem == null && result === null) {
