@@ -24,7 +24,9 @@
     max-width: 100%;
     overflow: auto;
     white-space: pre;
+    height: 30em;
 }
 .datafile_hidden {
     display: none;
 }
+
