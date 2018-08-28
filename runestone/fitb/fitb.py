@@ -18,9 +18,12 @@ __author__ = 'isaiahmayerchak'
 import json
 import ast
 from numbers import Number
+import re
+
 from docutils import nodes
 from docutils.parsers.rst import directives
 from sphinx.util import logging
+
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 from runestone.common import RunestoneIdDirective, RunestoneNode, get_node_line
 
@@ -76,14 +79,21 @@ def depart_fitb_node(self, node):
         logger.warning('Not enough feedback for the number of blanks supplied.', location=node)
 
     # Generate the HTML.
-    node.fitb_options['json'] = json.dumps(node.feedbackArray)
+    json_feedback = json.dumps(node.feedbackArray)
+    # Some nodes (for example, those in a timed node) have their ``document == None``. Find a valid ``document``.
+    node_with_document = node
+    while not node_with_document.document:
+        node_with_document = node_with_document.parent
+    # Supply client-side grading info if we're not grading on the server.
+    node.fitb_options['json'] = 'false' if node_with_document.document.settings.env.config.runestone_server_side_grading else json_feedback
     res = node.template_end % node.fitb_options
     self.body.append(res)
 
     # add HTML to the Database and clean up
     addHTMLToDB(node.fitb_options['divid'],
                 node.fitb_options['basecourse'],
-                "".join(self.body[self.body.index(node.delimiter) + 1:]))
+                "".join(self.body[self.body.index(node.delimiter) + 1:]),
+                json_feedback)
 
     self.body.remove(node.delimiter)
 
@@ -102,7 +112,7 @@ class FillInTheBlank(RunestoneIdDirective):
             :2 1: Close.... (The second number is a tolerance, so this matches 1 or 3.)
             :x: Nope. (As earlier, this matches anything.)
 
-    config values (conf.py): 
+    config values (conf.py):
 
     - fitb_div_class - custom CSS class of the component's outermost div
     """
@@ -241,22 +251,29 @@ class FillInTheBlank(RunestoneIdDirective):
                     blankFeedbackDict = {"number": [num - tol, num + tol]}
                 except (SyntaxError, ValueError, AssertionError):
                     # We can't parse this as a number, so assume it's a regex.
+                    regex = (
+                        # The given regex must match the entire string, from the beginning (which may be preceeded by spaces) ...
+                        '^ *' +
+                        # ... to the contents (where a single space in the provided pattern is treated as one or more spaces in the student's anwer) ...
+                        feedback_field_name.rawsource.replace(' ', ' +')
+                        # ... to the end (also with optional spaces).
+                        + ' *$'
+                    )
                     blankFeedbackDict = {
-                        'regex':
-                            # The given regex must match the entire string, from the beginning (which may be preceeded by spaces) ...
-                            '^ *' +
-                            # ... to the contents (where a single space in the provided pattern is treated as one or more spaces in the student's anwer) ...
-                            feedback_field_name.rawsource.replace(' ', ' +')
-                            # ... to the end (also with optional whitespace).
-                            + ' *$',
+                        'regex': regex,
                         'regexFlags':
                             'i' if 'casei' in self.options else '',
                     }
+                    # Test out the regex to make sure it compiles without an error.
+                    try:
+                        re.compile(regex)
+                    except Exception as ex:
+                        raise self.error('Error when compiling regex "{}": {}.'.format(regex, str(ex)))
                 blankArray.append(blankFeedbackDict)
 
                 feedback_field_body = feedback_field[1]
                 assert isinstance(feedback_field_body, nodes.field_body)
-                # Append feedback for this asnwer to the end of the fitbNode.
+                # Append feedback for this answer to the end of the fitbNode.
                 ffn = FITBFeedbackNode(feedback_field_body.rawsource, *feedback_field_body.children, **feedback_field_body.attributes)
                 ffn.blankFeedbackDict = blankFeedbackDict
                 fitbNode += ffn
