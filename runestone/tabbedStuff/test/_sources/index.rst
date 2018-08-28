@@ -20,6 +20,14 @@ Testing: Tabbed Questions
 
         Hello!
 
+        .. fillintheblank: fitb-label
+
+            |blank|, a needle pulling thread.
+
+            -   :so: Correct.
+                :sew: Wrong word, correct sound.
+                :x: Watch the Sound of Music again!
+
     .. tab:: Tab 2
 
         Goodbye!

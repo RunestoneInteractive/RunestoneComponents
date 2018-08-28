@@ -18,7 +18,7 @@ Fill in the Blank
     -   :away: Correct.
         :x: Incorrect. Try 'away'.
 
-Test 2.
+Test 2 - test a numeric range.
 
 .. fillintheblank:: fill_2pi
 
