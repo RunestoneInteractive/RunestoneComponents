@@ -135,7 +135,7 @@ FITB.prototype.checkLocalStorage = function () {
     // Loads previous answers from local storage if they exist
     var len = localStorage.length;
     if (len > 0) {
-        var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
+        var ex = localStorage.getItem(this.localStorageKey());
         if (ex !== null) {
             try {
                 var storedData = JSON.parse(ex);
@@ -143,7 +143,7 @@ FITB.prototype.checkLocalStorage = function () {
             } catch (err) {
                 // error while parsing; likely due to bad value stored in storage
                 console.log(err.message);
-                localStorage.removeItem(eBookConfig.email + ":" + this.divid + "-given");
+                localStorage.removeItem(this.localStorageKey());
                 return;
             }
 
@@ -168,7 +168,7 @@ FITB.prototype.setLocalStorage = function (data) {
     var now = new Date();
     var correct = data.correct;
     var storageObject = {"answer": this.given_arr, "correct": correct, "timestamp": now};
-    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", JSON.stringify(storageObject));
+    localStorage.setItem(this.localStorageKey(), JSON.stringify(storageObject));
 };
 
 /*==============================

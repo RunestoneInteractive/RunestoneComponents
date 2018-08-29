@@ -383,7 +383,7 @@ DragNDrop.prototype.checkLocalStorage = function () {
     this.hasStoredDropzones = false;
     var len = localStorage.length;
     if (len > 0) {
-        var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
+        var ex = localStorage.getItem(this.localStorageKey());
         if (ex !== null) {
             this.hasStoredDropzones = true;
             try {
@@ -392,7 +392,7 @@ DragNDrop.prototype.checkLocalStorage = function () {
             } catch (err) {
                 // error while parsing; likely due to bad value stored in storage
                 console.log(err.message);
-                localStorage.removeItem(eBookConfig.email + ":" + this.divid + "-given");
+                localStorage.removeItem(this.localStorageKey());
                 this.hasStoredDropzones = false;
                 this.finishSettingUp();
                 return;
@@ -427,7 +427,7 @@ DragNDrop.prototype.setLocalStorage = function (data) {
     var timeStamp = new Date();
     var correct = data.correct;
     var storageObj = {"answer": this.pregnantIndexArray.join(";"), "minHeight": this.minheight, "timestamp": timeStamp, "correct": correct};
-    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", JSON.stringify(storageObj));
+    localStorage.setItem(this.localStorageKey(), JSON.stringify(storageObj));
 };
 /*=================================
 == Find the custom HTML tags and ==

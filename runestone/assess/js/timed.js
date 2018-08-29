@@ -444,7 +444,7 @@ Timed.prototype.startAssessment = function () {
             this.logBookEvent({"event": "timedExam", "act": "start", "div_id": this.divid});
             var timeStamp = new Date();
             var storageObj = {"answer": [0,0,this.renderedQuestionArray.length,0], "timestamp": timeStamp};
-            localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", JSON.stringify(storageObj));
+            localStorage.setItem(this.localStorageKey(), JSON.stringify(storageObj));
         }
         $(window).on('beforeunload', function(){
             // this actual value gets ignored by newer browsers
@@ -496,7 +496,7 @@ Timed.prototype.resetExam = function (result,status,ignore) {
             localStorage.clear(); // Clear records of exam from localStorage
 
             /* Prevent using server's record of the reset as the exam results when the page reloads */
-            localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given",JSON.stringify({"answer":[-1],"timestamp":new Date()}));
+            localStorage.setItem(this.localStorageKey(),JSON.stringify({"answer":[-1],"timestamp":new Date()}));
 
             location.reload();
         };
@@ -689,7 +689,7 @@ Timed.prototype.storeScore = function () {
     storage_arr.push(this.score, this.correctStr, this.incorrect, this.incorrectStr, this.skipped, this.skippedStr, this.timeTaken);
     var timeStamp = new Date();
     var storageObj = JSON.stringify({"answer": storage_arr, "timestamp": timeStamp});
-    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", storageObj);
+    localStorage.setItem(this.localStorageKey(), storageObj);
 };
 
 Timed.prototype.logScore = function () {
@@ -701,7 +701,7 @@ Timed.prototype.shouldUseServer = function (data) {
     // --we also want to default to local storage because it contains more information
     if (localStorage.length === 0)
         return true;
-    var storageObj = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
+    var storageObj = localStorage.getItem(this.localStorageKey());
     if (storageObj === null)
         return true;
     try {
@@ -718,7 +718,7 @@ Timed.prototype.shouldUseServer = function (data) {
     } catch (err) {
         // error while parsing; likely due to bad value stored in storage
         console.log(err.message);
-        localStorage.removeItem(eBookConfig.email + ":" + this.divid + "-given");
+        localStorage.removeItem(this.localStorageKey());
         return;
     }
     var serverDate = new Date(data.timestamp);
@@ -732,7 +732,7 @@ Timed.prototype.shouldUseServer = function (data) {
 Timed.prototype.checkLocalStorage = function () {
     var len = localStorage.length;
     if (len > 0) {
-        if (localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given") !== null) {
+        if (localStorage.getItem(this.localStorageKey()) !== null) {
             this.taken = 1;
             this.restoreAnswers("");
         } else {
@@ -748,11 +748,11 @@ Timed.prototype.restoreAnswers = function (data) {
     var tmpArr;
     if (data === "") {
         try {
-            tmpArr = JSON.parse(localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given")).answer;
+            tmpArr = JSON.parse(localStorage.getItem(this.localStorageKey())).answer;
         } catch (err) {
             // error while parsing; likely due to bad value stored in storage
             console.log(err.message);
-            localStorage.removeItem(eBookConfig.email + ":" + this.divid + "-given");
+            localStorage.removeItem(this.localStorageKey());
             this.taken = 0;
             return;
         }
@@ -809,7 +809,7 @@ Timed.prototype.restoreAnswers = function (data) {
 Timed.prototype.setLocalStorage = function (parsedData) {
     var timeStamp = new Date();
     var storageObj = {"answer": parsedData, "timestamp": timeStamp};
-    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", JSON.stringify(storageObj));
+    localStorage.setItem(this.localStorageKey(), JSON.stringify(storageObj));
 };
 
 Timed.prototype.displayScore = function () {
