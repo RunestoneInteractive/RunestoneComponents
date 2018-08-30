@@ -28,9 +28,9 @@ from runestone.common import RunestoneIdDirective, RunestoneNode, get_node_line
 def setup(app):
     app.add_directive('fillintheblank', FillInTheBlank)
     app.add_role('blank', BlankRole)
-    app.add_stylesheet('fitb.css')
-    app.add_javascript('fitb.js')
-    app.add_javascript('timedfitb.js')
+    app.add_autoversioned_stylesheet('fitb.css')
+    app.add_autoversioned_javascript('fitb.js')
+    app.add_autoversioned_javascript('timedfitb.js')
     app.add_node(FITBNode, html=(visit_fitb_node, depart_fitb_node))
     app.add_node(BlankNode, html=(visit_blank_node, depart_blank_node))
     app.add_node(FITBFeedbackNode, html=(visit_fitb_feedback_node, depart_fitb_feedback_node))

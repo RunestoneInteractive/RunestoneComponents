@@ -28,9 +28,9 @@ def setup(app):
     app.add_directive('datafile',DataFile)
     add_skulpt_js(app)
 
-    app.add_javascript('datafile.js')
+    app.add_autoversioned_javascript('datafile.js')
 
-    app.add_stylesheet('datafile.css')
+    app.add_autoversioned_stylesheet('datafile.css')
 
     app.add_node(DataFileNode, html=(visit_df_node, depart_df_node))
 

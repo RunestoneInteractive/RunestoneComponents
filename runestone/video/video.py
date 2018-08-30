@@ -25,8 +25,8 @@ def setup(app):
     app.add_directive('video',Video)
     app.add_directive('youtube', Youtube)
     app.add_directive('vimeo', Vimeo)
-    app.add_stylesheet('video.css')
-    app.add_javascript('runestonevideo.js')
+    app.add_autoversioned_stylesheet('video.css')
+    app.add_autoversioned_javascript('runestonevideo.js')
 
 CODE = """\
 <div id="%(divid)s" class="video_popup runestone" >

@@ -25,8 +25,8 @@ from runestone.server.componentdb import addQuestionToDB
 
 def setup(app):
     app.add_directive('poll',Poll)
-    app.add_javascript('poll.js')
-    app.add_stylesheet('poll.css')
+    app.add_autoversioned_javascript('poll.js')
+    app.add_autoversioned_stylesheet('poll.css')
     app.add_node(PollNode, html=(visit_poll_node, depart_poll_node))
 
     app.add_config_value('poll_div_class', 'alert alert-warning', 'html')

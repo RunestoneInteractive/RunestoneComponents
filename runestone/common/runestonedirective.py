@@ -272,34 +272,34 @@ def first_time(app, *keys):
 # An internationalized component should call add_i18n_javascript() from its setup() function
 def add_i18n_js(app, supported_langs, *i18n_resources):
     if first_time(app, 'add_i18n_js'):
-        app.add_javascript('jquery_i18n/CLDRPluralRuleParser.js')
-        app.add_javascript('jquery_i18n/jquery.i18n.js')
-        app.add_javascript('jquery_i18n/jquery.i18n.messagestore.js')
-        app.add_javascript('jquery_i18n/jquery.i18n.fallbacks.js')
-        app.add_javascript('jquery_i18n/jquery.i18n.language.js')
-        app.add_javascript('jquery_i18n/jquery.i18n.parser.js')
-        app.add_javascript('jquery_i18n/jquery.i18n.emitter.js')
-        app.add_javascript('jquery_i18n/jquery.i18n.emitter.bidi.js')
+        app.add_autoversioned_javascript('jquery_i18n/CLDRPluralRuleParser.js')
+        app.add_autoversioned_javascript('jquery_i18n/jquery.i18n.js')
+        app.add_autoversioned_javascript('jquery_i18n/jquery.i18n.messagestore.js')
+        app.add_autoversioned_javascript('jquery_i18n/jquery.i18n.fallbacks.js')
+        app.add_autoversioned_javascript('jquery_i18n/jquery.i18n.language.js')
+        app.add_autoversioned_javascript('jquery_i18n/jquery.i18n.parser.js')
+        app.add_autoversioned_javascript('jquery_i18n/jquery.i18n.emitter.js')
+        app.add_autoversioned_javascript('jquery_i18n/jquery.i18n.emitter.bidi.js')
     for res in i18n_resources:
         if(first_time(app,'add_i18n_js',res)):
-            app.add_javascript(res + ".en.js")
+            app.add_autoversioned_javascript(res + ".en.js")
             if app.config.language and app.config.language != "en" and app.config.language in supported_langs:
-                app.add_javascript(res + "." + app.config.language + ".js")
+                app.add_autoversioned_javascript(res + "." + app.config.language + ".js")
 
 # Adds CSS and JavaScript for the CodeMirror text editor
 def add_codemirror_css_and_js(app, *mods):
     if first_time(app, 'add_codemirror_css_and_js'):
-        app.add_stylesheet('codemirror.css')
-        app.add_javascript('codemirror.js')
+        app.add_autoversioned_stylesheet('codemirror.css')
+        app.add_autoversioned_javascript('codemirror.js')
     for mod in mods:
         if first_time(app, 'add_codemirror_css_and_js',mod):
-            app.add_javascript(mod + '.js')
+            app.add_autoversioned_javascript(mod + '.js')
 
 # Adds JavaScript for the Sculpt in-browser implementation of Python
 def add_skulpt_js(app):
     if first_time(app, 'add_skulpt_js'):
-        app.add_javascript('skulpt.min.js')
-        app.add_javascript('skulpt-stdlib.js')
+        app.add_autoversioned_javascript('skulpt.min.js')
+        app.add_autoversioned_javascript('skulpt-stdlib.js')
         app.add_javascript("https://cdn.jsdelivr.net/npm/vega@4.0.0-rc.2/build/vega.js")
         app.add_javascript("https://cdn.jsdelivr.net/npm/vega-lite@2.5.0/build/vega-lite.js")
         app.add_javascript("https://cdn.jsdelivr.net/npm/vega-embed@3.14.0/build/vega-embed.js")
