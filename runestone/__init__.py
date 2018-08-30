@@ -39,6 +39,8 @@ def runestone_extensions():
     module_paths = [ x for x in os.listdir(basedir) if os.path.isdir(os.path.join(basedir,x))]
     modules = [ 'runestone.{}'.format(x) for x in module_paths if os.path.exists('{}/__init__.py'.format(os.path.join(basedir,x)))]
     modules.remove('runestone.server')
+    # Place ``runestone.common`` first, so it can run init code needed by all other modules. This assumes that the first module in the list is run first. An alternative to this to guarantee this ordering is to call ``app.setup_extension('runestone.common')`` in every extension.
+    modules.insert(0, modules.pop(modules.index('runestone.common')))
     return modules
 
 from paver.easy import task, cmdopts, sh

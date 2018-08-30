@@ -17,11 +17,17 @@ __author__ = 'bmiller'
 
 
 from collections import defaultdict
+import binascii
+import os
+
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from docutils.utils import get_source_line
 from docutils.statemachine import ViewList
+
+from sphinx import application
+from sphinx.errors import ExtensionError
 
 UNNUMBERED_DIRECTIVES = ['activecode', 'reveal', 'video', 'youtube', 'vimeo', 'codelens', 'showeval', 'poll', 'tabbed', 'tab', 'timed', 'disqus']
 
@@ -100,6 +106,63 @@ def _purge_runestone_data(app, env, docname):
 
     # Reset the problem numbering for each page.
     env.assesscounter = 0
+
+
+# Give the name of a file in the ``html_static_path``, append a version number after it based on its 32-bit CRC.
+def _add_autoversion(self,
+    # The file to find in the ``html_static_path``
+    filename):
+
+    # TODO: Cache the path and CRC to speed computing it.
+    #
+    # Search for this file by looking through all HTML static paths. The HTML builder hasn't been initilized, so the ``html_static_path`` doesn't show up yet as ``config.html_static_path``.
+    for path in self.config._raw_config['html_static_path']:
+        full_path = path
+        # Transform a relative path into an absolute path if necessary.
+        if not os.path.isabs(full_path):
+            full_path = os.path.join(self.confdir, full_path)
+        # Distinguish between files and directories.
+        if os.path.isdir(path):
+            # Append the path to a directory.
+            full_path = os.path.join(path, filename)
+        # If it's not a directory, assume it's a file. See if these match.
+        else:
+            if os.path.normpath(path).endswith(os.path.normpath(filename)):
+                full_path = path
+            else:
+                continue
+
+        # See if we can open it.
+        try:
+            f = open(os.path.join(path, filename), 'rb')
+        except IOError:
+            continue
+        else:
+            # Read the file and compute a CRC.
+            with f:
+                crc_str = '{:02X}'.format(binascii.crc32(f.read()))
+
+            # Append the CRC to the JavaScript reference.
+            return '{}?v={}'.format(filename, crc_str)
+
+    # No match was found.
+    raise ExtensionError('Unable to find {} in html_static_path.'.format(filename))
+
+
+# Convenience method to call ``add_javascript`` using ``add_autoversion``.
+def _add_autoversioned_javascript(self, filename):
+    return self.add_javascript(self.add_autoversion(filename))
+
+
+# Convenience method for calling ``add_stylesheet`` using ``add_autoversion``.
+def _add_autoversioned_stylesheet(self, filename, *args, **kwargs):
+    return self.add_stylesheet(self.add_autoversion(filename), *args, **kwargs)
+
+
+# Add these methods to the Sphinx application object.
+application.Sphinx.add_autoversion = _add_autoversion
+application.Sphinx.add_autoversioned_javascript = _add_autoversioned_javascript
+application.Sphinx.add_autoversioned_stylesheet = _add_autoversioned_stylesheet
 
 
 def setup(app):
