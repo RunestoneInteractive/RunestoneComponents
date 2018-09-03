@@ -6,6 +6,7 @@ import os, sys
 from runestone.server import get_dburl
 from sphinxcontrib import paverutils
 import pkg_resources
+from socket import gethostname
 
 sys.path.append(os.getcwd())
 
@@ -42,6 +43,12 @@ options(
                         }
     )
 )
+
+# if we are on runestone-deploy then use the proxy server not canterbury
+if gethostname() == 'runestone-deploy':
+    del options.build.template_args['jobe_server']
+    del options.build.template_args['proxy_uri_runs']
+    del options.build.template_args['proxy_uri_files']
 
 version = pkg_resources.require("runestone")[0].version
 options.build.template_args['runestone_version'] = version
