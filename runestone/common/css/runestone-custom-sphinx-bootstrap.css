@@ -725,3 +725,12 @@ span.caption-text {
     width: auto;
     white-space: inherit;
 }
+
+
+.blockquote {
+    text-align: center;
+    font-size: large;
+    font-style: italic;
+    padding-left: 2em;
+    padding-right: 2em;
+}
