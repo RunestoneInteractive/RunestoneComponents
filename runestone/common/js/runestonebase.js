@@ -32,6 +32,7 @@ RunestoneBase.prototype.init = function(opts) {
 
 RunestoneBase.prototype.logBookEvent = function (eventInfo) {
     eventInfo.course = eBookConfig.course;
+    eventInfo.timezoneoffset = (new Date()).getTimezoneOffset()/60
     if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
         jQuery.get(eBookConfig.ajaxURL + 'hsblog', eventInfo); // Log the run event
     }
@@ -40,6 +41,7 @@ RunestoneBase.prototype.logBookEvent = function (eventInfo) {
 
 RunestoneBase.prototype.logRunEvent = function (eventInfo) {
     eventInfo.course = eBookConfig.course;
+    eventInfo.timezoneoffset = (new Date()).getTimezoneOffset()/60    
     if ( this.forceSave || (! 'to_save' in eventInfo) ) {
         eventInfo.save_code = "True"
     }
