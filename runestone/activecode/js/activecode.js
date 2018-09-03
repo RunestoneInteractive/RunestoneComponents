@@ -984,6 +984,7 @@ ActiveCode.prototype.runProg = function () {
         python3: this.python3,
         imageProxy: 'http://image.runestone.academy:8080/320x',
         inputfunTakesPrompt: true,
+        jsonpSites : ['https://itunes.apple.com'],
     });
     Sk.divid = this.divid;
     this.setTimeLimit();
@@ -1770,6 +1771,7 @@ LiveCode.prototype.init = function(opts) {
     this.resource = eBookConfig.proxyuri_runs ||  '/runestone/proxy/jobeRun';
     this.jobePutFiles = eBookConfig.proxyuri_files || '/runestone/proxy/jobePushFile/';
     this.jobeCheckFiles = eBookConfig.proxyuri_files || '/runestone/proxy/jobeCheckFile/';
+    // TODO:  should add a proper put/check in pavement.tmpl as this is misleading and will break on runestone
 
     this.div2id = {};
     if (this.stdin) {
