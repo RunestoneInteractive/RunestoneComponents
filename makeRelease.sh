@@ -7,7 +7,7 @@ if [ $# -eq 0 ]
 fi
 
 while true; do
-read -p "Did you update/commit the version in setup.py" yn
+read -p "Did you update/commit the version in setup.py " yn
     case $yn in
         [Yy]* ) break;;
         [Nn]* ) exit;;
