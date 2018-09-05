@@ -198,7 +198,11 @@ class IframeVideo(RunestoneIdDirective):
         raw_node.source, raw_node.line = self.state_machine.get_source_and_line(self.lineno)
         return [raw_node]
 
-
+# TODO - I'm pretty sure this breaks for the case of multiple youtubes on one page.
+# we should push players to an array.
+# There should probably be only one function called onYouTubeIframeAPIReady
+# this function should iterate over all the various videos creating players
+#
 class Youtube(IframeVideo):
     """
 .. youtube:: YouTubeID
@@ -210,17 +214,36 @@ class Youtube(IframeVideo):
    """
     html = '''
     <div class="runestone" style="margin-left: auto; margin-right:auto">
-	<iframe id="%(divid)s_vid" type="text/html" width="%(width)u" height="%(height)u"
-  src="https://www.youtube.com/embed/%(video_id)s?autoplay=0"
-  frameborder="0"></iframe>
+    <div id="%(divid)s_vid"></div>
     </div>
+    <script id="%(divid)s_script">
+      // 2. This code loads the IFrame Player API code asynchronously.
+      var tag = document.createElement('script');
+
+      tag.src = "https://www.youtube.com/iframe_api";
+      var ytScriptTag = document.getElementById('%(divid)s_script');
+      ytScriptTag.parentNode.insertBefore(tag, ytScriptTag);
+
+      // 3. This function creates an <iframe> (and YouTube player)
+      //    after the API code downloads.
+      var player;
+      function onYouTubeIframeAPIReady() {
+        player = new YT.Player('%(divid)s_vid', {
+          height: '%(height)u',
+          width: '%(width)u',
+          videoId: '%(video_id)s',
+          events: {
+            'onStateChange': onPlayerStateChange
+          }
+        });
+      }
+    </script>
     '''
 
     def run(self):
         raw_node = super(Youtube, self).run()
         addQuestionToDB(self)
         return raw_node
-
 
 class Vimeo(IframeVideo):
     """
