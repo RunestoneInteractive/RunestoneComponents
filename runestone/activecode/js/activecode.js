@@ -613,7 +613,7 @@ ActiveCode.prototype.showCodelens = function () {
     if (cl) {
         this.codelens.removeChild(cl)
     }
-    var code = this.editor.getValue();
+    var code = this.buildProg(false);
     var myVars = {};
     myVars.code = code;
     myVars.origin = "opt-frontend.js";
@@ -901,7 +901,7 @@ ActiveCode.prototype.filewriter = function(bytes, name, pos) {
     return current.length;
 }
 
-ActiveCode.prototype.buildProg = function() {
+ActiveCode.prototype.buildProg = function(useSuffix) {
     // assemble code from prefix, suffix, and editor for running.
     var pretext;
     var prog = this.editor.getValue() + "\n";
@@ -923,7 +923,7 @@ ActiveCode.prototype.buildProg = function() {
         prog = pretext + prog
     }
 
-    if(this.suffix) {
+    if(useSuffix && this.suffix) {
         prog = prog + this.suffix;
 }
 
@@ -965,7 +965,7 @@ ActiveCode.prototype.manage_scrubber = function (scrubber_dfd, history_dfd, save
 
 
 ActiveCode.prototype.runProg = function () {
-    var prog = this.buildProg();
+    var prog = this.buildProg(true);
     var saveCode = "True";
     var scrubber_dfd, history_dfd, skulpt_run_dfd;
     $(this.output).text('');
@@ -1090,7 +1090,7 @@ JSActiveCode.prototype.outputfun = function (a) {
 
 JSActiveCode.prototype.runProg = function() {
     var _this = this;
-    var prog = this.buildProg();
+    var prog = this.buildProg(true);
     var einfo;
     var scrubber_dfd, history_dfd;
     var saveCode = "True";
@@ -1143,7 +1143,7 @@ function HTMLActiveCode (opts) {
 }
 
 HTMLActiveCode.prototype.runProg = function () {
-    var prog = this.buildProg();
+    var prog = this.buildProg(true);
     var scrubber_dfd, history_dfd, saveCode;
 
     var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
@@ -1812,7 +1812,7 @@ LiveCode.prototype.runProg = function() {
     var saveCode = "True";
     var sfilemap = {java: '', cpp: 'test.cpp', c: 'test.c', python3: 'test.py', python2: 'test.py'};
     var source = this.editor.getValue();
-    source = this.buildProg();
+    source = this.buildProg(true);
 
     var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
     history_dfd = __ret.history_dfd;
