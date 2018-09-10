@@ -776,14 +776,19 @@ errorText.NotImplementedErrorFix = $.i18n("msg_activecode_not_implemented_error_
 
 
 ActiveCode.prototype.addJSONLibrary = function () {
-    Sk.externalLibraries = {
-    json : {
-        path : '_static/json.sk-master/__init__.js',
-        dependencies : [
-        '_static/json.sk-master/stringify.js'
-        ]
+    var jsonExternalLibInfo = {
+            path : '_static/json.sk-master/__init__.js',
+            dependencies : [
+            '_static/json.sk-master/stringify.js'
+            ]
+        };
+    if (Sk.externalLibraries) {
+        Sk.externalLibraries.json = jsonExternalLibInfo;
+    } else {
+        Sk.externalLibraries = {
+            json: jsonExternalLibInfo
+        };
     }
-    };
 };
 
 ActiveCode.prototype.setTimeLimit = function (timer) {
