@@ -38,7 +38,7 @@ def setup(app):
     app.connect('env-purge-doc', purge_datafiles)
 
 
-TEMPLATE = """
+TEMPLATE = u"""
 <div class="runestone datafile">
 <div class="datafile_caption">Data file: <code>%(divid)s</code></div>
 <pre data-component="datafile" id=%(divid)s %(hidden)s data-edit="%(edit)s" data-rows="%(rows)s" data-cols="%(cols)s">
@@ -126,8 +126,8 @@ class DataFile(RunestoneIdDirective):
             ffpath = os.path.dirname(self.srcpath)
             print(self.srcpath, os.getcwd())
             filename = os.path.join(env.srcdir, ffpath, self.options['fromfile'])
-            with open(filename, 'r') as f:
-                self.content = [x[:-1] for x in f.readlines()]
+            with open(filename, 'rb') as f:
+                self.content = [x[:-1].decode('utf8') for x in f.readlines()]
 
         if 'cols' in self.options:
             self.options['cols'] = self.options['cols']
