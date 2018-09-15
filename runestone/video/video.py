@@ -198,11 +198,7 @@ class IframeVideo(RunestoneIdDirective):
         raw_node.source, raw_node.line = self.state_machine.get_source_and_line(self.lineno)
         return [raw_node]
 
-# TODO - I'm pretty sure this breaks for the case of multiple youtubes on one page.
-# we should push players to an array.
-# There should probably be only one function called onYouTubeIframeAPIReady
-# this function should iterate over all the various videos creating players
-#
+
 class Youtube(IframeVideo):
     """
 .. youtube:: YouTubeID
@@ -211,39 +207,32 @@ class Youtube(IframeVideo):
    :width: 560
    :align: left
    :http: http
+   :start: None
+   :end: None
    """
     html = '''
     <div class="runestone" style="margin-left: auto; margin-right:auto">
-    <div id="%(divid)s_vid"></div>
+        <div id="%(divid)s_vid" class="align-%(align)s youtube-video" data-video-height="%(height)d" data-video-width="%(width)d" data-video-videoid="%(video_id)s" data-video-divid="%(divid)s_vid" data-video-start="%(start)d" data-video-end="%(end)s" ></div>
     </div>
-    <script id="%(divid)s_script">
-      // 2. This code loads the IFrame Player API code asynchronously.
-      var tag = document.createElement('script');
-
-      tag.src = "https://www.youtube.com/iframe_api";
-      var ytScriptTag = document.getElementById('%(divid)s_script');
-      ytScriptTag.parentNode.insertBefore(tag, ytScriptTag);
-
-      // 3. This function creates an <iframe> (and YouTube player)
-      //    after the API code downloads.
-      var player;
-      function onYouTubeIframeAPIReady() {
-        player = new YT.Player('%(divid)s_vid', {
-          height: '%(height)u',
-          width: '%(width)u',
-          videoId: '%(video_id)s',
-          events: {
-            'onStateChange': onPlayerStateChange
-          }
-        });
-      }
-    </script>
     '''
-
+    
+    option_spec = IframeVideo.option_spec
+    option_spec.update({
+        'start': directives.nonnegative_int,
+        'end': directives.nonnegative_int
+    })
+    
     def run(self):
+        if not self.options.get('start'):
+            self.options['start'] = 0
+            
+        if not self.options.get('end'):
+            self.options['end'] = -1
+            
         raw_node = super(Youtube, self).run()
         addQuestionToDB(self)
         return raw_node
+        
 
 class Vimeo(IframeVideo):
     """

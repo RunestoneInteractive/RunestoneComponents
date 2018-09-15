@@ -17,3 +17,32 @@ function onPlayerStateChange(event) {
     }
     rb.logBookEvent(data);
   }
+   
+//Callback function to load youtube videos once IFrame Player loads
+function onYouTubeIframeAPIReady() {
+	let videolist = $(".youtube-video");
+	videolist.each( function(i, video) {
+        let playerVars = {}
+        playerVars['start'] = $(video).data("video-start");
+        if($(video).data("video-end") != -1)
+        playerVars['end'] = $(video).data("video-end");
+		let player = new YT.Player($(video).data("video-divid"), {
+			'height': $(video).data("video-height"),
+			'width': $(video).data("video-width"),
+			'videoId': $(video).data("video-videoid"),
+			'playerVars': playerVars,
+			'events': {
+				'onStateChange': onPlayerStateChange
+			}
+		});
+	});
+}
+
+
+//Need to make sure the YouTube IFrame Player API is not loaded until after
+// all YouTube videos are in the DOM. Add a script tag with it after document is loaded
+$(function(){
+   let script = document.createElement("script"); 
+   script.src = 'https://www.youtube.com/player_api'; 
+   document.body.appendChild(script); 
+});
