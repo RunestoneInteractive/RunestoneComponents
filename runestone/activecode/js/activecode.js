@@ -88,6 +88,7 @@ ActiveCode.prototype.init = function(opts) {
         this.caption = ""
     }
     this.addCaption();
+    this.addJSONLibrary();
 
     if (this.autorun) {
         $(document).ready(this.runProg.bind(this));
@@ -774,7 +775,21 @@ errorText.NotImplementedError = $.i18n("msg_activecode_not_implemented_error");
 errorText.NotImplementedErrorFix = $.i18n("msg_activecode_not_implemented_error_fix");
 
 
-
+ActiveCode.prototype.addJSONLibrary = function () {
+    var jsonExternalLibInfo = {
+            path : '_static/json.sk-master/__init__.js',
+            dependencies : [
+            '_static/json.sk-master/stringify.js'
+            ]
+        };
+    if (Sk.externalLibraries) {
+        Sk.externalLibraries.json = jsonExternalLibInfo;
+    } else {
+        Sk.externalLibraries = {
+            json: jsonExternalLibInfo
+        };
+    }
+};
 
 ActiveCode.prototype.setTimeLimit = function (timer) {
     var timelimit = this.timelimit;
@@ -795,7 +810,7 @@ ActiveCode.prototype.setTimeLimit = function (timer) {
             Sk.execLimit = timelimit;
         } else {
             Sk.execLimit = 25000;
-    }
+        }
     }
 
 };
