@@ -1,7 +1,13 @@
 
 var codeExercises;
+var presenterCssLink
+var presentModeInitialized = false;
 
 function presentToggle() {
+  if (! presentModeInitialized ) {
+    presentModeSetup();
+    presentModeInitialized = true;
+  }
   let bod = $('body');
   let presentClass = 'present';
   let fullHeightClass = 'full-height';
@@ -14,6 +20,7 @@ function presentToggle() {
     $('.'+bottomClass).removeClass(bottomClass);
     localStorage.setItem("presentMode", 'text');
     codeExercises.removeClass('hidden');
+    presenterCssLink.disabled = true;  // disable present_mode.css
   }
   else{
     $('.section *').not('h1, .presentation-title, .btn-presenter, .runestone, .runestone *, .section, .pre, code').addClass('hidden'); // hide extraneous stuff
@@ -24,10 +31,46 @@ function presentToggle() {
     $('.section .runestone').addClass(fullHeightClass);
     $('.ac-caption').addClass(bottomClass);
     localStorage.setItem("presentMode", presentClass);
-    activateExercise()
+    loadPresenterCss(); // present_mode.css should only apply when in presenter mode.
+    activateExercise();
   }
 }
 
+function loadPresenterCss() {
+  presenterCssLink = document.createElement('link');
+  presenterCssLink.type='text/css';
+  presenterCssLink.href='../_static/presenter_mode.css';
+  presenterCssLink.rel='stylesheet';
+  document.getElementsByTagName('head')[0].appendChild(presenterCssLink);
+}
+
+function presentModeSetup() {
+  // moved this out of configure
+  let dataComponent = $("[data-childcomponent]");
+
+  // this still leaves some things semi-messed up when you exit presenter mode.
+  // but instructors will probably just learn to refresh the page.
+  dataComponent.addClass('runestone');
+  dataComponent.parent().closest('div').not('.section').addClass('runestone')
+  dataComponent.parent().closest('div').css("max-width", 'none');
+
+  dataComponent.each(function(index) {
+    let me = $(this);
+    $(this).find('.ac_code_div, .ac_output').wrapAll("<div class='ac-block'></div>");
+  });
+
+  codelensListener(500);
+  $('.section img').wrap('<div class="runestone">')
+  codeExercises = $('.runestone').not('.runestone .runestone');
+  // codeExercises.each(function(){
+    $('h1').before(
+      "<div class='presentation-title'> \
+        <button class='prev-exercise btn-presenter btn-grey-outline' onclick='prevExercise()'>Back</button> \
+        <button class='next-exercise btn-presenter btn-grey-solid' onclick='nextExercise()'>Next</button> \
+      </div>"
+    );
+
+}
 function getActiveExercise() {
   return active = codeExercises.filter('.active');
 }
@@ -76,28 +119,7 @@ function configure() {
     </li>");
 
   let modeSelect = $('.mode-select').change(presentToggle);
-  let dataComponent = $("[data-childcomponent]");
 
-  dataComponent.addClass('runestone');
-  dataComponent.parent().closest('div').not('.section').addClass('runestone')
-  dataComponent.parent().closest('div').css("max-width", 'none');
-
-  dataComponent.each(function(index) {
-    let me = $(this);
-    $(this).find('.ac_code_div, .ac_output').wrapAll("<div class='ac-block'></div>");
-  });
-
-  codelensListener(500);
-  $('.section img').wrap('<div class="runestone">')
-  codeExercises = $('.runestone').not('.runestone .runestone');
-  // codeExercises.each(function(){
-    $('h1').before(
-      "<div class='presentation-title'> \
-        <button class='prev-exercise btn-presenter btn-grey-outline' onclick='prevExercise()'>Back</button> \
-        <button class='next-exercise btn-presenter btn-grey-solid' onclick='nextExercise()'>Next</button> \
-      </div>"
-    );
-  // });
 }
 
 function codelensListener(duration) {
