@@ -825,7 +825,7 @@ ActiveCode.prototype.fileReader = function(divid) {
     let elem = document.getElementById(divid);
     let data = ""
     let result = ""
-    if (elem == null && Sk.builtinFiles["files"][divid]) {
+    if (elem == null && Sk.builtinFiles.files.hasOwnProperty(divid)) {
         return Sk.builtinFiles["files"][divid];
     } else {
         // try remote file unless it ends with .js or .py -- otherwise we'll ask the server for all
