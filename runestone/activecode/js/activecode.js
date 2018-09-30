@@ -37,6 +37,7 @@ ActiveCode.prototype.init = function(opts) {
     this.hidecode = $(orig).data('hidecode');
     this.chatcodes = $(orig).data('chatcodes');
     this.hidehistory = $(orig).data('hidehistory');
+    this.tie = $(orig).data('tie')
     this.runButton = null;
     this.enabledownload = $(orig).data('enabledownload');
     this.downloadButton = null;
@@ -242,6 +243,15 @@ ActiveCode.prototype.createControls = function () {
         this.clButton = butt;
         ctrlDiv.appendChild(butt);
         $(butt).click(this.showCodelens.bind(this));
+    }
+
+    // TIE
+    if(this.tie) {
+        butt = document.createElement("button");
+        $(butt).addClass("ac_opt btn btn-default");
+        $(butt).text("Use TIE");
+        ctrlDiv.appendChild(butt);
+        $(butt).click(this.showTIE.bind(this))
     }
     // CodeCoach
     // bnm - disable code coach until it is revamped  2017-7-22
@@ -688,6 +698,45 @@ ActiveCode.prototype.showCodeCoach = function () {
     });
 };
 
+ActiveCode.prototype.showTIE = function() {
+    var tieDiv = document.createElement("div");
+    $(tieDiv).addClass("tie-container")
+    $(tieDiv).data("tie-id", this.divid)
+    var ifm = document.createElement('iframe')
+    $(ifm).addClass("tie-frame")
+    ifm.src = `https://tech-interview-exercises.appspot.com/client/question.html?qid=${this.tie}`
+
+    setIframeDimensions = function() {
+        $('.tie-container').css('width', $('.tie-container').parent().width());
+        $('.tie-frame').css('width', $('.tie-frame').parent().width() - 120);
+    };
+    ifm.onload = setIframeDimensions;
+    
+    $(function() {
+        $(window).resize(setIframeDimensions);
+      });
+
+    window.addEventListener('message', (function(evt) {
+        if (evt.origin != 'https://tech-interview-exercises.appspot.com') {
+          return;
+        }
+        // Handle the event accordingly.
+        // evt.data contains the code
+        this.logRunEvent({
+            'div_id': this.divid,
+            'code': evt.data,
+            'lang': this.language,
+            'errinfo': 'success',
+            'to_save': saveCode,
+            'prefix': this.pretext,
+            'suffix': this.suffix
+        });
+      }).bind(this), false)
+      this.logBookEvent({'event': 'tie', 'act': 'save', 'div_id': this.divid}); 
+
+    tieDiv.appendChild(ifm)
+    this.outerDiv.appendChild(tieDiv)
+}
 
 ActiveCode.prototype.toggleEditorVisibility = function () {
 

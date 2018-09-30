@@ -68,7 +68,7 @@ TEMPLATE_START = """
 TEMPLATE_END = """
 <textarea data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s
     %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s %(chatcodes)s
-    data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s
+    data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(tie)s
     %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(hidehistory)s>
 %(initialcode)s
 </textarea>
@@ -199,6 +199,7 @@ config values (conf.py):
         'linkargs': directives.unchanged,
         'interpreterargs': directives.unchanged,
         'runargs': directives.unchanged,
+        'tie': directives.unchanged,
     })
 
 
@@ -316,6 +317,11 @@ config values (conf.py):
             self.options['sourcefile'] = ""
         else:
             self.options['sourcefile'] = "data-sourcefile='%s'" % self.options['sourcefile']
+
+        if 'tie' in self.options:
+            self.options['tie'] = "data-tie='{}'".format(self.options['tie'])
+        else:
+            self.options['tie'] = ""
 
         for opt,tp in [('compileargs','cargs'),('linkargs','largs'),('runargs','rargs'),('interpreterargs','iargs')]:
             if opt in self.options:
