@@ -18,7 +18,7 @@ Fill in the Blank
     -   :away: Correct.
         :x: Incorrect. Try 'away'.
 
-Test 2.
+Test 2 - test a numeric range.
 
 .. fillintheblank:: fill_2pi
 
@@ -86,3 +86,29 @@ Regex testing
    -   :\[\]: Correct.
        :x: Try again.
 
+Timed exam testing
+------------------
+.. timed:: timed-exam-test
+
+    .. fillintheblank:: timed-fitb-1
+
+
+        Fill in the blanks to make the following sentence: "The red car drove away."
+
+        The |blank| car drove |blank|.
+
+        -   :red: Correct.
+            :x: Incorrect. Try 'red'.
+        -   :away: Correct.
+            :x: Incorrect. Try 'away'.
+
+    .. fillintheblank:: timed-fitb-2
+
+        What is the solution to the following:
+
+        :math:`2 * \pi =` |blank|.
+
+        - :6.28 0.005: Good job.
+          :3.27 3: Try higher.
+          :9.29 3: Try lower.
+          :.*: Incorrect. Try again.

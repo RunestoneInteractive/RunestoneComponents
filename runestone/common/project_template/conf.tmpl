@@ -107,6 +107,16 @@ rst_prolog = (
 """
 )
 
+# Select whether to use server-side grading where possible. Server-side grading
+# requires **all** the following:
+#
+# - The use of Runestone services (``eBookConfig.useRunestoneServices === true``)
+# - A valid login (``eBookConfig.loginRequired === true``)
+# - Logging enabled (``eBookConfig.logLevel  > 0``)
+#
+# The first two conditions cause the ``RunestoneBase.logBookEvent`` in ``runestonebase.js`` to post a student response to the server. The last conditions ensures that ``hsblog`` in ``ajax.py`` on the server will return a response containing grading information.
+runestone_server_side_grading = %(server_side_grading)s
+
 # -- Options for HTML output ---------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -231,7 +241,7 @@ html_show_sourcelink = False
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'PythonCoursewareProjectdoc'
 
-# 'accessibility_style' config value is defined in the 'accessibility' extension. 
+# 'accessibility_style' config value is defined in the 'accessibility' extension.
 # By this config value you can select what accessibility stylesheet
 # you want to add ('normal', 'light', 'darkest' or 'none')
 #accessibility_style = 'normal'
@@ -251,7 +261,3 @@ htmlhelp_basename = 'PythonCoursewareProjectdoc'
 #shortanswer_optional_div_class = 'journal alert alert-success'
 #showeval_div_class = 'runestone explainer alert alert-warning'
 #tabbed_div_class = 'alert alert-warning'
-
-
-
-
