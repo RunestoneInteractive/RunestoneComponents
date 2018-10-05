@@ -45,9 +45,10 @@ If you are completely new to pip and github text editors, I have written a more 
     $ source /path/to/home/MyEnv/bin/activate
      
 * You will need to do the last command **every time** you want to work on RunestoneComponents.  If you have not used Python virtual environments before I strongly recommend reading the docs or watching the video
- 
-With the virtual environment installed and configured you can continue.
 
+* *Note:* You might need to install ``pip`` based on how you have installed `python <https://packaging.python.org/tutorials/installing-packages/#ensure-you-can-run-pip-from-the-command-line>`_.
+
+With the virtual environment installed and configured you can continue.
 ::
 
     pip install runestone
@@ -70,7 +71,7 @@ To start a project, create a new folder and then run the following command (inst
     runestone init
 
 
-The init command will ask you some questions and setup a default project for you.
+The init command will ask you some questions and setup a default project for you. The default response is in square brackets, example ``[false]``. 
 
 To build the included default project run
 
@@ -79,6 +80,8 @@ To build the included default project run
     runestone build
 
 You will now have a build folder with a file index.html in it, along with some default content.  The contents of the build folder are suitable for hosting anywhere that you can serve static web content from!  For a small class you could even serve the content using the builtin Python webserver.
+
+*Note:* If you come across version conflict with ``six`` library while building the project, ``pip install --ignore-installed six`` command might be useful. 
 
 ::
 
