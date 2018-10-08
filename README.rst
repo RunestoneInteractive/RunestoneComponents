@@ -88,7 +88,8 @@ You will now have a build folder with a file index.html in it, along with some d
 Now from your browser you can open up ``http://localhost:8000/index.html``  You should see the table of contents for a sample page like this:
 
 .. image:: images/runeCompo-index.png
-    :width: 400px
+    :width: 300
+    :height: 350
     :alt: index.html
 
 
