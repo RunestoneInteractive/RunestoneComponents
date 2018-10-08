@@ -87,11 +87,9 @@ You will now have a build folder with a file index.html in it, along with some d
 
 Now from your browser you can open up ``http://localhost:8000/index.html``  You should see the table of contents for a sample page like this:
 
-.. image:: images/runeCompo-index.png
-    :width: 300
-    :height: 350
-    :scale: 50
-    :alt: index.html
+.. raw:: html
+
+    <img src="images/runeCompo-index.png" height="200" width="150">
 
 
 If you edit ``_sources/index.html`` or ``_sources/overview.rst`` and then rebuild and serve again you will see your changes.  The best documentation is probably the overview.rst file itself, as it demonstrates how to use all of the common components and shows most of their options.
