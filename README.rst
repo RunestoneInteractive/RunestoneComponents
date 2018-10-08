@@ -90,6 +90,7 @@ Now from your browser you can open up ``http://localhost:8000/index.html``  You 
 .. image:: images/runeCompo-index.png
     :width: 300
     :height: 350
+    :scale: 50
     :alt: index.html
 
 
