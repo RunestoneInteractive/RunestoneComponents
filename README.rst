@@ -89,7 +89,7 @@ Now from your browser you can open up ``http://localhost:8000/index.html``  You 
 
 .. raw:: html
 
-    <img src="images/runeCompo-index.png" height="200" width="150">
+    <img src="images/runeCompo-index.png" height="400" width="370">
 
 
 If you edit ``_sources/index.html`` or ``_sources/overview.rst`` and then rebuild and serve again you will see your changes.  The best documentation is probably the overview.rst file itself, as it demonstrates how to use all of the common components and shows most of their options.
