@@ -85,7 +85,14 @@ You will now have a build folder with a file index.html in it, along with some d
     $ runestone serve
 
 
-Now from your browser you can open up ``http://localhost:8000/index.html``  You should see the table of contents for a sample page.  If you edit ``_sources/index.html`` or ``_sources/overview.rst`` and then rebuild and serve again you will see your changes.  The best documentation is probably the overview.rst file itself, as it demonstrates how to use all of the common components and shows most of their options.
+Now from your browser you can open up ``http://localhost:8000/index.html``  You should see the table of contents for a sample page like this:
+
+.. image:: images/runeCompo-index.png
+    :width: 400px
+    :alt: index.html
+
+
+If you edit ``_sources/index.html`` or ``_sources/overview.rst`` and then rebuild and serve again you will see your changes.  The best documentation is probably the overview.rst file itself, as it demonstrates how to use all of the common components and shows most of their options.
 
 
 **Windows Users** I have tested the installation, along with init, build, and serve on Windows 8.1.
