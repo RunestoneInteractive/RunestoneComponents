@@ -249,7 +249,8 @@ ActiveCode.prototype.createControls = function () {
     if(this.tie) {
         butt = document.createElement("button");
         $(butt).addClass("ac_opt btn btn-default");
-        $(butt).text("Use TIE");
+        $(butt).text("Open Code Coach");
+        this.tieButt = butt;
         ctrlDiv.appendChild(butt);
         $(butt).click(this.showTIE.bind(this))
     }
@@ -700,7 +701,8 @@ ActiveCode.prototype.showCodeCoach = function () {
 
 ActiveCode.prototype.showTIE = function() {
     var tieDiv = document.createElement("div");
-    $(tieDiv).addClass("tie-container")
+    $(this.tieButt).attr("disabled","disabled");
+    $(tieDiv).addClass("tie-container");
     $(tieDiv).data("tie-id", this.divid)
     var ifm = document.createElement('iframe')
     $(ifm).addClass("tie-frame")
@@ -708,7 +710,7 @@ ActiveCode.prototype.showTIE = function() {
 
     setIframeDimensions = function() {
         $('.tie-container').css('width', $('.tie-container').parent().width());
-        $('.tie-frame').css('width', $('.tie-frame').parent().width() - 120);
+    //    $('.tie-frame').css('width', $('.tie-frame').parent().width() - 120);
     };
     ifm.onload = setIframeDimensions;
     
@@ -724,10 +726,10 @@ ActiveCode.prototype.showTIE = function() {
         // evt.data contains the code
         this.logRunEvent({
             'div_id': this.divid,
-            'code': evt.data,
+            'code': JSON.parse(evt.data),
             'lang': this.language,
-            'errinfo': 'success',
-            'to_save': saveCode,
+            'errinfo': 'TIEresult',
+            'to_save': true,
             'prefix': this.pretext,
             'suffix': this.suffix
         });
