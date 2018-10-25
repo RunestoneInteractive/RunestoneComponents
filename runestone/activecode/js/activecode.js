@@ -967,6 +967,26 @@ ActiveCode.prototype.filewriter = function(bytes, name, pos) {
     return current.length;
 }
 
+ActiveCode.prototype.getIncludedCode = function(divid) {
+    var wresult;
+    if(edList[divid]) {
+        return edList[divid].editor.getValue();
+    } else {
+        wresult = $.ajax({
+            async: false,
+            url: `/runestone/ajax/get_datafile?course_id=${eBookConfig.course}&acid=${divid}`,
+            success: function(data) {
+                result = JSON.parse(data).data;
+                },
+            error: function(err) {
+                result = null;
+            }})
+
+        return result;
+    }
+}
+
+
 ActiveCode.prototype.buildProg = function(useSuffix) {
     // assemble code from prefix, suffix, and editor for running.
     var pretext;
@@ -980,7 +1000,8 @@ ActiveCode.prototype.buildProg = function(useSuffix) {
 
         pretext = "";
         for (var x=0; x < this.includes.length; x++) {
-            pretext = pretext + edList[this.includes[x]].editor.getValue();
+            let iCode = this.getIncludedCode(this.includes[x]);
+            pretext = pretext + iCode;
         }
         this.pretext = pretext;
         if(this.pretext) {
