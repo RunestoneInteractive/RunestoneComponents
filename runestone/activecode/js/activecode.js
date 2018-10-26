@@ -1999,7 +1999,8 @@ LiveCode.prototype.runProg_callback = function(data) {
         var host, source, editor;
         var saveCode = "True";
         var sfilemap = {java: '', cpp: 'test.cpp', c: 'test.c', python3: 'test.py', python2: 'test.py'};
-
+        source = this.editor.getValue();
+        
         xhr = new XMLHttpRequest();
 
         host = this.JOBE_SERVER + this.resource;
