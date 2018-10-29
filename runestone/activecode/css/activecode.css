@@ -115,5 +115,16 @@
 		overflow: hidden;
 	}
 
+	  .ac_code_div {
+        padding: 0;
+    }
+
+    .ac_section.alert {
+        padding: 3px;
+    }
+
+    .pager {
+        margin: 0;
+    }
 
 }
