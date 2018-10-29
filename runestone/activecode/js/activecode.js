@@ -734,8 +734,8 @@ ActiveCode.prototype.showTIE = function() {
             'suffix': this.suffix
         });
       }).bind(this), false)
-      this.logBookEvent({'event': 'tie', 'act': 'save', 'div_id': this.divid}); 
 
+    this.logBookEvent({'event': 'tie', 'act': 'open', 'div_id': this.divid}); 
     tieDiv.appendChild(ifm)
     this.outerDiv.appendChild(tieDiv)
 }
@@ -2000,7 +2000,7 @@ LiveCode.prototype.runProg_callback = function(data) {
         var saveCode = "True";
         var sfilemap = {java: '', cpp: 'test.cpp', c: 'test.c', python3: 'test.py', python2: 'test.py'};
         source = this.editor.getValue();
-        
+
         xhr = new XMLHttpRequest();
 
         host = this.JOBE_SERVER + this.resource;
