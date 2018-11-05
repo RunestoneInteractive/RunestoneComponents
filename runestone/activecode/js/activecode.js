@@ -207,7 +207,7 @@ ActiveCode.prototype.createEditor = function (index) {
     }
     this.containerDiv.appendChild(codeDiv);
     var editor = CodeMirror(codeDiv, {
-        value: this.passivecodestr == 'onlymain' ? this.mainSecContent : this.code, lineNumbers: true,
+        value: this.passivecodestr == 'onlymain' ? this.mainSecContent : this.code, lineNumbers: false,
         mode: this.containerDiv.lang, indentUnit: 4,
         matchBrackets: true, autoMatchParens: true,
         extraKeys: {"Tab": "indentMore", "Shift-Tab": "indentLess"},
@@ -276,7 +276,7 @@ ActiveCode.prototype.createEditor = function (index) {
 
 ActiveCode.prototype.createControls = function () {
     var ctrlDiv = document.createElement("div");
-    $(ctrlDiv).addClass("ac_actions");
+    $(ctrlDiv).addClass("ac_actions mb-2");
     $(ctrlDiv).addClass("col-md-12");
     if (!this.passivecode) {
     // Run
@@ -374,7 +374,6 @@ ActiveCode.prototype.createControls = function () {
             butt = document.createElement("button");
             $(butt).addClass("ac_opt btn btn-default");
             $(butt).text($.i18n("msg_activecode_show_codelens"));
-            $(butt).css("margin-left", "10px");
             this.clButton = butt;
             ctrlDiv.appendChild(butt);
             $(butt).click(this.showCodelens.bind(this));
@@ -450,7 +449,7 @@ ActiveCode.prototype.createControls = function () {
 
     if (this.enablecopy) {
         var button = document.createElement("button");
-        $(button).addClass("btn btn-xs btn-success btn-copy pull-right");
+        $(button).addClass("btn btn-success btn-copy float-right");
         $(button).text($.i18n("msg_activecode_copy"));
         $(button).on('click', (function() {
             var $tempInput = $("<textarea>");
@@ -1131,7 +1130,6 @@ ActiveCode.prototype.runProg = function (params = [0]) {
     // saveCode = __ret.saveCode;
     history_dfd = null;
     saveCode = false;
-
     skulpt_run_dfd = Sk.misceval.asyncToPromise(function () {
         return Sk.importMainWithBody("<stdin>", false, prog, true);
     });
