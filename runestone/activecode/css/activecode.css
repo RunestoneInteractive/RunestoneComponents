@@ -107,3 +107,24 @@
 .ac-feedback {
 	border: 1px solid black;
 }
+
+
+
+@media only screen and (max-width: 500px) {
+	.ac_actions {
+		overflow: hidden;
+	}
+
+	  .ac_code_div {
+        padding: 0;
+    }
+
+    .ac_section.alert {
+        padding: 3px;
+    }
+
+    .pager {
+        margin: 0;
+    }
+
+}
