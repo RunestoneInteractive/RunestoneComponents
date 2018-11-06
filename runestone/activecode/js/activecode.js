@@ -1077,7 +1077,7 @@ ActiveCode.prototype.manage_scrubber = function (scrubber_dfd, history_dfd, save
     return {history_dfd: history_dfd, saveCode: saveCode};
 };
 
-
+var pygameModalUse = true;
 ActiveCode.prototype.runProg = function (params = [0]) {
     var prog = this.buildProg(params[0]);
     var saveCode = "True";
@@ -1103,11 +1103,11 @@ ActiveCode.prototype.runProg = function (params = [0]) {
     this.setTimeLimit();
     (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = this.modaloutput ? this.canvasDiv : this.graphics;
     if (this.modaloutput) {
-        PygameLib.showModal();
+        pygameModalUse = true;
         
     }
     else {
-        PygameLib.hideModal();
+        pygameModalUse = false;
     }
     runCode();
     Sk.canvas = this.modaloutput ? this.canvasDiv.id : this.graphics.id; //todo: get rid of this here and in image
@@ -1157,7 +1157,8 @@ ActiveCode.prototype.runProg = function (params = [0]) {
             } 
 
             if (this.modaloutput) {
-                PygameLib.endProgram();
+                PygameLib.running = false;
+                $('.modal').modal('hide');
             }
             // if (this.slideit) {
             //     $(this.historyScrubber).on("slidechange", this.slideit.bind(this));
@@ -1178,7 +1179,8 @@ ActiveCode.prototype.runProg = function (params = [0]) {
             // $(self.historyScrubber).on("slidechange", self.slideit.bind(self));
             // $(self.historyScrubber).slider("enable");
             if (this.modaloutput) {
-                PygameLib.endProgram();
+                PygameLib.running = false;
+                $('.modal').modal('hide');
             }
             self.logRunEvent({
                 'div_id': self.divid,
@@ -2512,7 +2514,7 @@ function runCode() {
 
 function openModal() {
     var currentTarget = resetTarget();
-    if (PygameLib.useModal) {
+    if (pygameModalUse) {
         var div1 = document.createElement("div");
         currentTarget.appendChild(div1);
         $(div1).addClass("modal");
@@ -2532,18 +2534,27 @@ function openModal() {
         var div2 = document.createElement("div");
         $(div2).addClass("modal-dialog modal-lg");
         $(div2).css("display", "inline-block");
-        $(div2).width(self.width + 42);
+        if (screen.width >= 900)
+            $(div2).width(self.width + 42);
+        else {
+            $(div2).attr("style", "display: inline-block; width: 98%; height: 98%; margin: 1px 1px 1px 1%;");
+        }
         $(div2).attr("role", "document");
         div1.appendChild(div2);
 
         var div3 = document.createElement("div");
         $(div3).addClass("modal-content");
+        if (screen.width < 900) 
+                $(div3).height("100%");
         div2.appendChild(div3);
 
         var div4 = document.createElement("div");
         $(div4).addClass("modal-header d-flex justify-content-between");
         var div5 = document.createElement("div");
         $(div5).addClass("modal-body");
+        if (screen.width < 900) {
+           $(div5).attr("style", "padding: 0");
+        }
         var div6 = document.createElement("div");
         $(div6).addClass("modal-footer");
         var div7 = document.createElement("div");
