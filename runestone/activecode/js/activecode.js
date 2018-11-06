@@ -1109,7 +1109,7 @@ ActiveCode.prototype.runProg = function (params = [0]) {
     else {
         pygameModalUse = false;
     }
-    runCode();
+    createPyCanvas();
     Sk.canvas = this.modaloutput ? this.canvasDiv.id : this.graphics.id; //todo: get rid of this here and in image
     switch (params[0]) {
         case 0:
@@ -2495,24 +2495,16 @@ $(document).bind("runestone:logout",function() {
     }
 });
 
-function runCode() {
-        Sk.main_canvas = document.createElement("canvas");
-        Sk.quitHandler = function () {
-            $('.modal').modal('hide');
-        };
-        openModal();
-        //var prog = ace.edit("editor").getValue();
-       /* Sk.misceval.asyncToPromise(function () {
-            try {
-                return Sk.importMainWithBody("<stdin>", false, prog, true);
-            } catch (e) {
-                alert(e)
-            }
-        }); */
-    }
+function createPyCanvas() {
+    Sk.main_canvas = document.createElement("canvas");
+    Sk.quitHandler = function () {
+        $('.modal').modal('hide');
+    };
+    openPyCanvas();
+}
 
 
-function openModal() {
+function openPyCanvas() {
     var currentTarget = resetTarget();
     if (pygameModalUse) {
         var div1 = document.createElement("div");
@@ -2571,13 +2563,9 @@ function openModal() {
 
         div4.appendChild(header);
         div4.appendChild(btn1);
-        // div7.appendChild(header);
-        // div8.appendChild(btn1);
 
         div5.appendChild(Sk.main_canvas);
-
         createArrows(div6);
-
         $(div1).modal({
             backdrop: 'static',
             keyboard: false
@@ -2599,6 +2587,8 @@ function resetTarget() {
     }
     return target;
 }
+
+
 function createArrows(div) {
     var arrows = new Array(4);
     var direction = ["left", "right", "up", "down"];
@@ -2678,3 +2668,4 @@ function createArrows(div) {
         }
     });
 };
+
