@@ -1076,7 +1076,7 @@ ActiveCode.prototype.manage_scrubber = function (scrubber_dfd, history_dfd, save
     return {history_dfd: history_dfd, saveCode: saveCode};
 };
 
-
+var pygameModalUse = true;
 ActiveCode.prototype.runProg = function (params = [0]) {
     var prog = this.buildProg(params[0]);
     var saveCode = "True";
@@ -1102,11 +1102,13 @@ ActiveCode.prototype.runProg = function (params = [0]) {
     this.setTimeLimit();
     (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = this.modaloutput ? this.canvasDiv : this.graphics;
     if (this.modaloutput) {
-        PygameLib.showModal();
+        pygameModalUse = true;
+        
     }
     else {
-        PygameLib.hideModal();
+        pygameModalUse = false;
     }
+    createPyCanvas();
     Sk.canvas = this.modaloutput ? this.canvasDiv.id : this.graphics.id; //todo: get rid of this here and in image
     switch (params[0]) {
         case 0:
@@ -1153,7 +1155,8 @@ ActiveCode.prototype.runProg = function (params = [0]) {
             } 
 
             if (this.modaloutput) {
-                PygameLib.endProgram();
+                PygameLib.running = false;
+                $('.modal').modal('hide');
             }
             // if (this.slideit) {
             //     $(this.historyScrubber).on("slidechange", this.slideit.bind(this));
@@ -1174,7 +1177,8 @@ ActiveCode.prototype.runProg = function (params = [0]) {
             // $(self.historyScrubber).on("slidechange", self.slideit.bind(self));
             // $(self.historyScrubber).slider("enable");
             if (this.modaloutput) {
-                PygameLib.endProgram();
+                PygameLib.running = false;
+                $('.modal').modal('hide');
             }
             self.logRunEvent({
                 'div_id': self.divid,
@@ -2488,3 +2492,178 @@ $(document).bind("runestone:logout",function() {
         }
     }
 });
+
+function createPyCanvas() {
+    Sk.main_canvas = document.createElement("canvas");
+    Sk.quitHandler = function () {
+        $('.modal').modal('hide');
+    };
+    openPyCanvas();
+}
+
+
+function openPyCanvas() {
+    var currentTarget = resetTarget();
+    if (pygameModalUse) {
+        var div1 = document.createElement("div");
+        currentTarget.appendChild(div1);
+        $(div1).addClass("modal");
+        $(div1).css("text-align", "center");
+
+        var btn1 = document.createElement("span");
+        $(btn1).addClass("btn btn-primary btn-sm float-right");
+        var ic = document.createElement("i");
+        $(ic).addClass("fas fa-times");
+        btn1.appendChild(ic);
+
+        $(btn1).on('click', function(e) {
+            var e = [PygameLib.constants.QUIT, { key: "Escape" }];
+            PygameLib.eventQueue.unshift(e);
+        });
+
+        var div2 = document.createElement("div");
+        $(div2).addClass("modal-dialog modal-lg");
+        $(div2).css("display", "inline-block");
+        if (screen.width >= 900)
+            $(div2).width(self.width + 42);
+        else {
+            $(div2).attr("style", "display: inline-block; width: 98%; height: 98%; margin: 1px 1px 1px 1%;");
+        }
+        $(div2).attr("role", "document");
+        div1.appendChild(div2);
+
+        var div3 = document.createElement("div");
+        $(div3).addClass("modal-content");
+        if (screen.width < 900) 
+                $(div3).height("100%");
+        div2.appendChild(div3);
+
+        var div4 = document.createElement("div");
+        $(div4).addClass("modal-header d-flex justify-content-between");
+        var div5 = document.createElement("div");
+        $(div5).addClass("modal-body");
+        if (screen.width < 900) {
+           $(div5).attr("style", "padding: 0");
+        }
+        var div6 = document.createElement("div");
+        $(div6).addClass("modal-footer");
+        var div7 = document.createElement("div");
+        $(div7).addClass("col-md-8");
+        var div8 = document.createElement("div");
+        $(div8).addClass("col-md-4");
+        var header = document.createElement("h5");
+        $(header).addClass("modal-title");
+        $(header).html(PygameLib.caption);
+
+        div3.appendChild(div4);
+        div3.appendChild(div5);
+        div3.appendChild(div6);
+
+        div4.appendChild(header);
+        div4.appendChild(btn1);
+
+        div5.appendChild(Sk.main_canvas);
+        createArrows(div6);
+        $(div1).modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+    }
+    else {
+        currentTarget.appendChild(Sk.main_canvas);
+    }
+}
+
+
+
+function resetTarget() {
+    var selector = Sk.TurtleGraphics.target;
+    var target = typeof selector === "string" ? document.getElementById(selector) : selector;
+    // clear canvas container
+    while (target.firstChild) {
+        target.removeChild(target.firstChild);
+    }
+    return target;
+}
+
+
+function createArrows(div) {
+    var arrows = new Array(4);
+    var direction = ["left", "right", "up", "down"];
+    $(div).addClass("d-flex justify-content-center");
+    for (var i = 0; i < 4; i++) {
+        arrows[i] = document.createElement("span");
+        div.appendChild(arrows[i]);
+        $(arrows[i]).addClass("btn btn-primary btn-arrow");
+        var ic = document.createElement("i");
+        $(ic).addClass("fas fa-arrow-" + direction[i]);
+        arrows[i].appendChild(ic);
+    }
+    var swapIcon = function (id) {
+        $(arrows[id].firstChild).removeClass("fa-arrow-" + direction[id]).addClass("fa-arrow-circle-" + direction[id]);
+    }
+    var returnIcon = function (id) {
+        $(arrows[id].firstChild).removeClass("fa-arrow-circle-" + direction[id]).addClass("fa-arrow-" + direction[id]);
+    }
+    $(arrows[0]).on('mousedown', function () {
+        Sk.insertEvent("left");
+        swapIcon(0);
+    });
+    $(arrows[0]).on('mouseup', function () {
+        returnIcon(0);
+    });
+    $(arrows[1]).on('mousedown', function () {
+        Sk.insertEvent("right");
+        swapIcon(1);
+    });
+    $(arrows[1]).on('mouseup', function () {
+        returnIcon(1);
+    });
+    $(arrows[2]).on('mousedown', function () {
+        Sk.insertEvent("up");
+        swapIcon(2);
+    });
+    $(arrows[2]).on('mouseup', function () {
+        returnIcon(2);
+    });
+    $(arrows[3]).on('mousedown', function () {
+        Sk.insertEvent("down");
+        swapIcon(3);
+    });
+    $(arrows[3]).on('mouseup', function () {
+        returnIcon(3);
+    });
+    $(document).keydown(function (e) {
+        switch (e.which) {
+            case 37:
+                swapIcon(0);
+                break;
+            case 38:
+                swapIcon(2);
+                break;
+            case 39:
+                swapIcon(1);
+                break;
+            case 40:
+                swapIcon(3);
+                break;
+        }
+    });
+    $(document).keyup(function (e) {
+        switch (e.which) {
+            case 37:
+                returnIcon(0);
+                break;
+            case 38:
+                returnIcon(2);
+                break;
+            case 39:
+                returnIcon(1);
+                break;
+            case 40:
+                returnIcon(3);
+                break;
+        }
+    });
+};
+

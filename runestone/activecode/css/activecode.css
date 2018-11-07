@@ -109,22 +109,24 @@
 }
 
 
-
-@media only screen and (max-width: 500px) {
+@media only screen and (max-width: 900px) {
 	.ac_actions {
 		overflow: hidden;
 	}
-
-	  .ac_code_div {
+	.ac_actions.col-md-12 {
+		padding: 0;
+	}
+	 .ac_code_div {
         padding: 0;
     }
 
-    .ac_section.alert {
+    .ac_code_div.col-md-12 {
+    	padding: 0;
+    }
+     .ac_section.alert {
         padding: 3px;
     }
-
-    .pager {
+     .pager {
         margin: 0;
     }
-
-}
+} 
