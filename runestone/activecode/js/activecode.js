@@ -2553,7 +2553,7 @@ function openPyCanvas() {
         $(div8).addClass("col-md-4");
         var header = document.createElement("h5");
         $(header).addClass("modal-title");
-        $(header).html(PygameLib.caption);
+        Sk.title_container = header;
 
         div3.appendChild(div4);
         div3.appendChild(div5);
