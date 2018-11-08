@@ -14,6 +14,58 @@ h5 {
     padding: 10px 0;
 }
 
+/* table-of-contents related styles for color-contrast in compliance to AA */
+#table-of-contents a {
+    color: #0645ad;
+}
+
+#table-of-contents a:hover {
+    color: #0645ad;
+    text-decoration: underline;
+}
+
+#table-of-contents.section {
+    font-size: 16px;
+}
+
+/* navbar-brand color contrast in compliance to AA */
+.navbar-default .navbar-nav>li>a{
+    color: #6B6B6B;
+
+}
+
+.navbar-default .navbar-brand{
+    color: #6B6B6B;
+}
+
+/* acknowledgement related styles for color-contrast in compliance to AA */
+.toctree-wrapper{
+    font-size: 16px;
+}
+
+.toctree-wrapper a {
+    color: #0645ad;
+}
+
+.toctree-wrapper a:hover {
+    color: #0645ad;
+    text-decoration: underline;
+}
+
+/* index and search related styles for color-contrast in compliance to AA */
+#index-and-search.section {
+    font-size: 16px;
+}
+
+#index-and-search.section a {
+    color: #0645ad;
+}
+
+#index-and-search.section a:hover {
+    color: #0645ad;
+    text-decoration: underline;
+}
+
 /* navbar and menu related styles */
 @media (max-width: 768px) {
     /* Remove top padding when top navbar goes collapsed in narrow viewports */
@@ -25,6 +77,7 @@ h5 {
     .navbar-fixed-top {
         position: static;
     }
+
 }
 
 @media (min-width: 768px) {
@@ -82,6 +135,9 @@ div.section {
 
 .footer>.container {
     background-color: #eeeeee;
+}
+.footer>.container p>a {
+    color: #0645ad;
 }
 
 .brand-logo {
@@ -142,9 +198,9 @@ div.section {
 }
 
 .CodeMirror-scroll {
-    /* this allows CM elements to be resized to (almost) any 
-     * height while still relying on max-height (which keeps 
-     * the CM editors to no more than the size needed 
+    /* this allows CM elements to be resized to (almost) any
+     * height while still relying on max-height (which keeps
+     * the CM editors to no more than the size needed
      * unless resized) */
     max-height: 30em;
     min-width: 30em;
@@ -454,19 +510,19 @@ div.flash {
 	ul#top-relations-console,
 	ul#bottom-relations-console {
 		list-style: none;
-		text-align: center; 
+		text-align: center;
 		width: 100%;
 		margin: 0 auto;
 		padding: 40px 0 20px 0;
 	}
-	#top-relations-next, 
+	#top-relations-next,
 	#top-relations-prev,
-	#bottom-relations-next, 
+	#bottom-relations-next,
 	#bottom-relations-prev {
 		width: 25%;
 		padding: 0 20px;
 		display: inline;
-	}	
+	}
 }
 
 .navLink a{
@@ -595,13 +651,13 @@ ul#pageNums, ul#pageNums li {
 
 .pagination > .active > a,
 .pagination > .active > span {
-background-color: #428bca !important; 
+background-color: #428bca !important;
 color: #fff !important;
 }
 
 .col-md-6-override {
 	text-align: center !important;
-	max-width: 100% !important;	
+	max-width: 100% !important;
 }
 
 /* end */
@@ -610,27 +666,27 @@ color: #fff !important;
 
 .pagination > .answered > a,
 .pagination > .answered > span {
-background-color: #eee; 
+background-color: #eee;
 color: #000;
 }
 
 .pagination > .correctCount > a,
 .pagination > .correctCount > span {
-background-color: #dff0d8; 
+background-color: #dff0d8;
 color: #000000;
 border-color: #000000;
 }
 
 .pagination > .skippedCount > a,
 .pagination > .skippedCount > span {
-background-color: #fcf8e3; 
+background-color: #fcf8e3;
 color: #000000;
 border-color: #000000;
 }
 
 .pagination > .incorrectCount > a,
 .pagination > .incorrectCount > span {
-background-color: #f2dede; 
+background-color: #f2dede;
 color: #000000;
 border-color: #000000;
 }
