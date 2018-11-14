@@ -66,6 +66,14 @@ h5 {
     text-decoration: underline;
 }
 
+/*
+`a` tag color-contrast in compliance to AA & `lighthouse` auditor
+*/
+
+a {
+    color: #0645ad;
+}
+
 /* navbar and menu related styles */
 @media (max-width: 768px) {
     /* Remove top padding when top navbar goes collapsed in narrow viewports */
