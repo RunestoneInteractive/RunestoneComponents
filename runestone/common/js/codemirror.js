@@ -134,7 +134,7 @@
     // If border: 0; -- iOS fails to open keyboard (issue #1287)
     if (ios) input.style.border = "1px solid black";
     input.setAttribute("autocorrect", "off"); input.setAttribute("autocapitalize", "off"); input.setAttribute("spellcheck", "false");
-
+    input.setAttribute("aria-label", "textarea");
     // Wraps and hides input textarea
     d.inputDiv = elt("div", [input], null, "overflow: hidden; position: relative; width: 3px; height: 0px;");
     // The fake scrollbar elements.
