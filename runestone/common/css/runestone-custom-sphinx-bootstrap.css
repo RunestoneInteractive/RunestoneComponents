@@ -1,3 +1,14 @@
+/* ActiveCode gutter custom modification for AA compliance */
+
+.CodeMirror-linenumber{
+    color: #6B6B6B;
+}
+
+/* Python code output custom modification for AA compliance */
+div.ExecutionVisualizer table#pyCodeOutput .lineNo {
+    color: #6b6b6b;
+}
+
 /* Runestone custom modifications */
 
 body {
