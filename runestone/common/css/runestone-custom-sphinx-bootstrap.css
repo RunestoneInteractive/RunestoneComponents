@@ -1,3 +1,18 @@
+/* custom modification of prettify.css for AA compliance */
+.str {
+    color: #006b00;
+}
+
+/* custom modification of parsons.css for AA compliance */
+.parsons .block {
+    background-color: #fafafa;
+}
+
+/* custom modification of pygments.css for AA compliance */
+.highlight .c1{
+    color: #376A7B;
+}
+
 /* `Search` functionality's result custom modification for AA compliance */
 ul.search li div.context {
     color: #6b6b6b;
