@@ -124,7 +124,7 @@ FITB.prototype.renderFITBFeedbackDiv = function () {
 
 FITB.prototype.restoreAnswers = function (data) {
     // Restore answers from storage retrieval done in RunestoneBase
-    var arr = data.answer.split(",");
+    var arr = JSON.parse(data.answer)
     for (var i = 0; i < this.blankArray.length; i++) {
         $(this.blankArray[i]).attr("value", arr[i]);
     }
