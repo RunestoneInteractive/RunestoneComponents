@@ -124,7 +124,13 @@ FITB.prototype.renderFITBFeedbackDiv = function () {
 
 FITB.prototype.restoreAnswers = function (data) {
     // Restore answers from storage retrieval done in RunestoneBase
-    var arr = data.answer.split(",");
+    try {
+        // The new encoding is JSON. Try that first.
+        var arr = JSON.parse(data.answer);
+    } catch (err) {
+        // Otherwise, fall back to the old comma encoding.
+        arr = data.answer.split(",");
+    }
     for (var i = 0; i < this.blankArray.length; i++) {
         $(this.blankArray[i]).attr("value", arr[i]);
     }
@@ -151,7 +157,7 @@ FITB.prototype.checkLocalStorage = function () {
                 $(this.blankArray[i]).attr("value", arr[i]);
             }
             if (this.useRunestoneServices) {
-                var answer = storedData.answer.join(",")
+                var answer = JSON.stringify(storedData.answer)
                 this.logBookEvent({"event": "fillb", "act": answer, "answer": answer, "correct": storedData.correct, "div_id": this.divid});
                 this.enableCompareButton();
             }
