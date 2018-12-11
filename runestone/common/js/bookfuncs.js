@@ -211,27 +211,24 @@ function setupNavbarLoggedOut() {
 }
 $(document).bind("runestone:logout",setupNavbarLoggedOut);
 
-function getNumUsers() {
-    if (eBookConfig.useRunestoneServices) {
-        $.getJSON(eBookConfig.ajaxURL + 'getnumusers', setNumUsers)
-    }
-}
-
 function getOnlineUsers() {
+    let MSCACHE = 60 * 1000 * 10;
     if (eBookConfig.useRunestoneServices) {
-        $.getJSON(eBookConfig.ajaxURL + 'getnumonline', setOnlineUsers)
+        let cacheValue = JSON.parse(localStorage.getItem("users_online"));
+        if(cacheValue == null || cacheValue.timestamp < (Date.now() - MSCACHE) ) {
+            $.getJSON(eBookConfig.ajaxURL + 'getnumonline', setOnlineUsers)            
+        } else  {
+            $("#numuserspan").text(cacheValue.onlineCount);
+        }
     }
 }
 
 function setOnlineUsers(data) {
     var d = data[0];
     $("#numuserspan").text(d.online);
+    localStorage.setItem("users_online", JSON.stringify({onlineCount: d.online, timestamp: Date.now()}))
 }
 
-function setNumUsers(data) {
-    var d = data[0];
-    $("#totalusers").html(d.numusers);
-}
 
 function notifyRunestoneComponents() {
 	// Runestone components wait until login process is over to load components because of storage issues
@@ -286,7 +283,6 @@ function addDelay(directive, action, delay) {
 $(document).ready(function() {
     if (eBookConfig && eBookConfig.useRunestoneServices) {
         $(document).ready(handleLoginLogout);
-        $(document).ready(getNumUsers);
         $(document).ready(getOnlineUsers);
     } else {
         if (typeof eBookConfig === 'undefined') {
