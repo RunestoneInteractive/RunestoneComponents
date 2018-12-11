@@ -19,6 +19,14 @@
     color: #0F6C95;
 }
 
+.highlight .gp{
+    color: #A14C08;
+}
+
+.highlight .si{
+    color: #3C773D;
+}
+
 /* `Search` functionality's result custom modification for AA compliance */
 ul.search li div.context {
     color: #6b6b6b;
