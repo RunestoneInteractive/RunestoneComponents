@@ -77,6 +77,7 @@ ShortAnswer.prototype.renderHTML = function() {
 
     this.jTextArea = document.createElement("textarea");
     this.jTextArea.id = this.divid + "_solution";
+    $(this.jTextArea).attr("aria-label", "textarea");
     $(this.jTextArea).css("display:inline, width:530px");
     $(this.jTextArea).addClass("form-control");
     this.jTextArea.rows = 4;
@@ -101,7 +102,7 @@ ShortAnswer.prototype.renderHTML = function() {
         this.submitJournal();
     }.bind(this);
     this.buttonDiv.appendChild(this.submitButton);
-  
+
     // barb - removed since we aren't really giving instructor feedback here
     /* this.randomSpan = document.createElement("span");
     this.randomSpan.innerHTML = "Instructor's Feedback";
