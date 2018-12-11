@@ -9,7 +9,7 @@ from pyvirtualdisplay import Display
 # Select an unused port for serving web pages to the test suite.
 PORT = '8081'
 
-# Define `module modules fixtures <https://docs.python.org/2/library/unittest.html#setupmodule-and-teardownmodule>`_ to build the test Runestone project, run the server, then shut it down when the tests complete.
+# Define `module fixtures <https://docs.python.org/2/library/unittest.html#setupmodule-and-teardownmodule>`_ to build the test Runestone project, run the server, then shut it down when the tests complete.
 class ModuleFixture(unittest.TestCase):
     def __init__(self,
         # The path to the Python module in which the test resides. This provides a simple way to determine the path in which to run runestone build/serve.
@@ -44,7 +44,7 @@ class ModuleFixture(unittest.TestCase):
     #   .. code::
     #       :number-lines:
     #
-    #       python -m unitest discover
+    #       python -m unittest discover
     #
     #       ImportError: Failed to import test module: runestone.tabbedStuff.test.test_tabbedStuff
     #       Traceback (most recent call last):  (omitted)
