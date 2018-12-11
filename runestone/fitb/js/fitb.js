@@ -75,6 +75,7 @@ FITB.prototype.renderFITBInput = function () {
     // Set the class for the text inputs, then store references to them.
     let ba = $(this.containerDiv).find(':input');
     ba.attr('class', 'form form-control selectwidthauto');
+    ba.attr("aria-label", "input area");
     this.blankArray = ba.toArray();
 };
 
