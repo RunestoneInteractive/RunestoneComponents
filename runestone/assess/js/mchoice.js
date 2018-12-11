@@ -310,7 +310,7 @@ MultipleChoice.prototype.checkLocalStorage = function () {
     }
     var len = localStorage.length;
     if (len > 0) {
-        var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
+        var ex = localStorage.getItem(this.localStorageKey());
         if (ex !== null) {
             try {
                 var storedData = JSON.parse(ex);
@@ -318,7 +318,7 @@ MultipleChoice.prototype.checkLocalStorage = function () {
             } catch (err) {
                 // error while parsing; likely due to bad value stored in storage
                 console.log(err.message);
-                localStorage.removeItem(eBookConfig.email + ":" + this.divid + "-given");
+                localStorage.removeItem(this.localStorageKey());
                 return;
             }
             for (var a = 0; a < answers.length; a++) {
@@ -345,7 +345,7 @@ MultipleChoice.prototype.checkLocalStorage = function () {
 MultipleChoice.prototype.setLocalStorage = function (data) {
     var timeStamp = new Date();
     var storageObj = {"answer": data.answer, "timestamp": timeStamp, "correct": data.correct};
-    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", JSON.stringify(storageObj));
+    localStorage.setItem(this.localStorageKey(), JSON.stringify(storageObj));
 };
 
 /*===============================

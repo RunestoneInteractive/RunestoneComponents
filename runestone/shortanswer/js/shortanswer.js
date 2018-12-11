@@ -101,7 +101,7 @@ ShortAnswer.prototype.renderHTML = function() {
         this.submitJournal();
     }.bind(this);
     this.buttonDiv.appendChild(this.submitButton);
-  
+
     // barb - removed since we aren't really giving instructor feedback here
     /* this.randomSpan = document.createElement("span");
     this.randomSpan.innerHTML = "Instructor's Feedback";
@@ -141,7 +141,7 @@ ShortAnswer.prototype.submitJournal = function () {
 
 ShortAnswer.prototype.setLocalStorage = function(data) {
     if (! this.graderactive ) {
-        let key = eBookConfig.email + ":" + this.divid + "-given"
+        let key = this.localStorageKey()
         localStorage.setItem(key, JSON.stringify(data));
     }
 };
@@ -151,7 +151,7 @@ ShortAnswer.prototype.checkLocalStorage = function () {
     // which was stored into local storage.
     var len = localStorage.length;
     if (len > 0) {
-        var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
+        var ex = localStorage.getItem(this.localStorageKey());
         if (ex !== null) {
             try {
                 var storedData = JSON.parse(ex);
@@ -159,7 +159,7 @@ ShortAnswer.prototype.checkLocalStorage = function () {
             } catch (err) {
                 // error while parsing; likely due to bad value stored in storage
                 console.log(err.message);
-                localStorage.removeItem(eBookConfig.email + ":" + this.divid + "-given");
+                localStorage.removeItem(this.localStorageKey());
                 return;
             }
             let solution = $("#" + this.divid + "_solution");
