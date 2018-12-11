@@ -1494,6 +1494,8 @@ Parsons.prototype.initializeAreas = function(sourceBlocks, answerBlocks, options
 		for (i = 0; i < pairedBins.length; i++) {
 			var pairedDiv = document.createElement("div");
 			$(pairedDiv).addClass("paired");
+			$(pairedDiv).html("<span id= 'st' style = 'vertical-align: middle; font-weight: bold'>or{</span>");
+			
 			pairedDivs.push(pairedDiv);
 			this.sourceArea.appendChild(pairedDiv);
 		}
@@ -2973,7 +2975,10 @@ Parsons.prototype.updateView = function() {
 			if (matching.length == 0) {
 				$(div).hide();
 			} else {
-				$(div).show();
+				$(div).show();     
+
+
+				
 				var height = -5;
 				height += parseInt($(matching[matching.length - 1].view).css("top"));
 				height -= parseInt($(matching[0].view).css("top"));
@@ -2983,8 +2988,18 @@ Parsons.prototype.updateView = function() {
 					"top" : $(matching[0].view).css("top"),
 					"width" : baseWidth + 34,
 					"height" : height,
-					"z-index" : 1
+					"z-index" : 1,
+					"text-indent" : -30,
+					"padding-top": (height-70)/2,
+					"overflow": "visible",
+					"font-size": 43,
+					"vertical-align": "middle",
+					"color": "#7e7ee7"
 				});
+				$(div).html("<span id= 'st' style = 'vertical-align: middle; font-weight: bold; font-size: 15px'>or</span>{");
+			}
+			if (matching.length == 1) {
+				$(div).html("");
 			}
 		}
 	}
