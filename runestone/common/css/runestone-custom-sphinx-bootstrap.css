@@ -1,5 +1,7 @@
-
-
+/* custom modification of basic.css for AA compliance */
+td.linenos pre {
+    color: #6b6b6b;
+}
 /* custom modification of prettify.css for AA compliance */
 .str {
     color: #006b00;
