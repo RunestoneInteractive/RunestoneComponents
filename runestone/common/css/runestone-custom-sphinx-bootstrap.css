@@ -1,3 +1,5 @@
+
+
 /* custom modification of prettify.css for AA compliance */
 .str {
     color: #006b00;
@@ -11,6 +13,10 @@
 /* custom modification of pygments.css for AA compliance */
 .highlight .c1{
     color: #376A7B;
+}
+
+.highlight .nn{
+    color: #0F6C95;
 }
 
 /* `Search` functionality's result custom modification for AA compliance */
