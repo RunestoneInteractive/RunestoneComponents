@@ -29,6 +29,10 @@ td.linenos pre {
     color: #3C773D;
 }
 
+.highlight .nc{
+    color: #0B719D;
+}
+
 /* `Search` functionality's result custom modification for AA compliance */
 ul.search li div.context {
     color: #6b6b6b;
