@@ -98,7 +98,7 @@ RunestoneBase.prototype.shouldUseServer = function (data) {
     if (data.correct === "T" || localStorage.length === 0 || this.graderactive === true) {
         return true;
     }
-    let ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
+    let ex = localStorage.getItem(this.localStorageKey());
     if (ex === null) {
         return true;
     }
@@ -108,7 +108,7 @@ RunestoneBase.prototype.shouldUseServer = function (data) {
     } catch (err){
         // error while parsing; likely due to bad value stored in storage
         console.log(err.message);
-        localStorage.removeItem(eBookConfig.email + ":" + this.divid + "-given");
+        localStorage.removeItem(this.localStorageKey());
         // definitely don't want to use local storage here
         return true;
     }
@@ -120,3 +120,9 @@ RunestoneBase.prototype.shouldUseServer = function (data) {
     return serverDate >= storageDate;
 
 };
+
+
+// Return the key which to be used when accessing local storage.
+RunestoneBase.prototype.localStorageKey = function () {
+    return eBookConfig.email + ":" + this.divid + "-given";
+}
