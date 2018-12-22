@@ -27,9 +27,9 @@ def setup(app):
     app.add_node(TabNode, html=(visit_tab_node, depart_tab_node))
     app.add_node(TabbedStuffNode, html=(visit_tabbedstuff_node, depart_tabbedstuff_node))
 
-    app.add_javascript('tabbedstuff.js')
+    app.add_autoversioned_javascript('tabbedstuff.js')
 
-    app.add_stylesheet('tabbedstuff.css')
+    app.add_autoversioned_stylesheet('tabbedstuff.css')
 
     app.add_config_value('tabbed_div_class', 'alert alert-warning', 'html')
 

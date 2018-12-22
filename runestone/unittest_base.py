@@ -13,10 +13,13 @@ PORT = '8081'
 class ModuleFixture(unittest.TestCase):
     def __init__(self,
         # The path to the Python module in which the test resides. This provides a simple way to determine the path in which to run runestone build/serve.
-        module_path):
+        module_path,
+        # True if the sphinx-build process must exit with status of 0 (success)
+        exit_status_success=True):
 
         super(ModuleFixture, self).__init__()
         self.base_path = os.path.dirname(module_path)
+        self.exit_status_success = exit_status_success
         # Windows Compatability
         if platform.system() is 'Windows' and self.base_path is '':
             self.base_path = '.'
@@ -29,7 +32,8 @@ class ModuleFixture(unittest.TestCase):
         p = subprocess.Popen(['runestone', 'build', '--all'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         self.build_stdout_data, self.build_stderr_data = p.communicate()
         print(self.build_stdout_data + self.build_stderr_data)
-        self.assertFalse(p.returncode)
+        if self.exit_status_success:
+            self.assertFalse(p.returncode)
         # Run the server. Simply calling ``runestone serve`` fails, since the process killed isn't the actual server, but probably a setuptools-created launcher.
         self.runestone_server = subprocess.Popen(['python', '-m', 'runestone', 'serve', '--port', PORT])
 
@@ -59,8 +63,8 @@ class ModuleFixture(unittest.TestCase):
 #
 #   from unittest_base import module_fixture_maker
 #   setUpModule, tearDownModule = module_fixture_maker(__file__)
-def module_fixture_maker(module_path, return_mf=False):
-    mf = ModuleFixture(module_path)
+def module_fixture_maker(module_path, return_mf=False, exit_status_success=True):
+    mf = ModuleFixture(module_path, exit_status_success)
     if return_mf:
         return mf, mf.setUpModule, mf.tearDownModule
     else:

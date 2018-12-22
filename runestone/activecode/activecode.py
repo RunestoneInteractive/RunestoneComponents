@@ -40,16 +40,16 @@ def setup(app):
     app.add_config_value('activecode_div_class', "runestone explainer ac_section alert alert-warning", 'html')
     app.add_config_value('activecode_hide_load_history', False, 'html')
 
-    app.add_stylesheet('activecode.css')
+    app.add_autoversioned_stylesheet('activecode.css')
 
-    app.add_javascript('jquery.highlight.js')
-    app.add_javascript('bookfuncs.js')
+    app.add_autoversioned_javascript('jquery.highlight.js')
+    app.add_autoversioned_javascript('bookfuncs.js')
     add_codemirror_css_and_js(app,'xml','css','python','htmlmixed','javascript')
     add_i18n_js(app, {"en","sr-Cyrl"},"activecode-i18n")
     add_skulpt_js(app)
-    app.add_javascript('activecode.js')
-    app.add_javascript('clike.js')
-    app.add_javascript('timed_activecode.js')
+    app.add_autoversioned_javascript('activecode.js')
+    app.add_autoversioned_javascript('clike.js')
+    app.add_autoversioned_javascript('timed_activecode.js')
 
 
 

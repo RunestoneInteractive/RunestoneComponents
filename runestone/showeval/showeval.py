@@ -23,8 +23,8 @@ from runestone.common.runestonedirective import RunestoneIdDirective
 
 def setup(app):
     app.add_directive('showeval', ShowEval)
-    app.add_javascript('showEval.js')
-    app.add_stylesheet('showEval.css')
+    app.add_autoversioned_javascript('showEval.js')
+    app.add_autoversioned_stylesheet('showEval.css')
 
     app.add_config_value('showeval_div_class', 'runestone explainer alert alert-warning', 'html')
 
