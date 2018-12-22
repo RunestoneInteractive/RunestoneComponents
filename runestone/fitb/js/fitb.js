@@ -151,7 +151,7 @@ FITB.prototype.checkLocalStorage = function () {
                 $(this.blankArray[i]).attr("value", arr[i]);
             }
             if (this.useRunestoneServices) {
-                var answer = storedData.answer.join(",")
+                var answer = JSON.stringify(storedData.answer)
                 this.logBookEvent({"event": "fillb", "act": answer, "answer": answer, "correct": storedData.correct, "div_id": this.divid});
                 this.enableCompareButton();
             }
