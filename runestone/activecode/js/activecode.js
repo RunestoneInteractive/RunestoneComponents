@@ -44,6 +44,8 @@ ActiveCode.prototype.init = function(opts) {
     this.saveButton = null;
     this.loadButton = null;
     this.outerDiv = null;
+    this.partner = ""
+    this.enablePartner = false
     this.output = null; // create pre for output
     this.graphics = null; // create div for turtle graphics
     this.codecoach = null;
@@ -276,6 +278,36 @@ ActiveCode.prototype.createControls = function () {
         ctrlDiv.appendChild(butt);
         $(butt).click((function() {new AudioTour(this.divid, this.code, 1, $(this.origElem).data("audio"))}).bind(this));
     }
+
+    var checkPartner = document.createElement("input");
+    checkPartner.type = 'checkbox'
+    checkPartner.id = `${this.divid}_part`    
+    ctrlDiv.appendChild(checkPartner);
+    var plabel = document.createElement('label');
+    plabel.for = `${this.divid}_part`;
+    $(plabel).text("Pair?");
+    ctrlDiv.appendChild(plabel);
+    $(checkPartner).click((function () {
+        if (this.partner) {
+            this.partner = false;
+            $(partnerTextBox).hide()
+            this.partner = ''
+            partnerTextBox.value = ''
+            $(plabel).text("Pair?");            
+        } else {
+            this.partner = true;
+            $(plabel).text('with: ');
+            $(partnerTextBox).show();
+        }
+    }).bind(this))
+    var partnerTextBox = document.createElement("input")
+    partnerTextBox.type = 'text'
+    ctrlDiv.appendChild(partnerTextBox);
+    $(partnerTextBox).hide()
+    $(partnerTextBox).change((function () {
+        this.partner = partnerTextBox.value;
+    }).bind(this))
+
 
     if(this.chatcodes && eBookConfig.enable_chatcodes) {
         var chatBar = document.createElement("div");
@@ -1110,7 +1142,8 @@ ActiveCode.prototype.runProg = function () {
                 'errinfo': 'success',
                 'to_save': saveCode,
                 'prefix': this.pretext,
-                'suffix': this.suffix
+                'suffix': this.suffix,
+                'partner': this.partner
             }); // Log the run event
         }).bind(this),
         (function (err) {  // fail
