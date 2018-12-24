@@ -1177,7 +1177,6 @@ ActiveCode.prototype.runProg = function (params = [0]) {
             // $(self.historyScrubber).on("slidechange", self.slideit.bind(self));
             // $(self.historyScrubber).slider("enable");
             if (this.modaloutput) {
-                PygameLib.running = false;
                 $('.modal').modal('hide');
             }
             self.logRunEvent({
@@ -2517,8 +2516,14 @@ function openPyCanvas() {
         btn1.appendChild(ic);
 
         $(btn1).on('click', function(e) {
-            var e = [PygameLib.constants.QUIT, { key: "Escape" }];
-            PygameLib.eventQueue.unshift(e);
+            PygameLib.running = false;
+            PygameLib.eventQueue = [];
+            PygameLib.eventTimer = {};
+            delete PygameLib.eventQueue;
+            delete PygameLib.eventTimer;
+
+            $('.run-button').removeAttr('disabled');
+            Sk.quitHandler();
         });
 
         var div2 = document.createElement("div");
