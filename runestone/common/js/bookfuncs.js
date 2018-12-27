@@ -110,6 +110,28 @@ function gotUser(data, status, whatever) {
             }
         }
     }
+    if (d.readings){
+        cur_path_parts = window.location.pathname.split('/');
+        name = cur_path_parts[cur_path_parts.length-2] + '/' + cur_path_parts[cur_path_parts.length-1];
+        position = d.readings.indexOf(name);
+        num_readings = d.readings.length
+        if (position == (d.readings.length-1)){
+            // no more readings
+            l = $("<div />", {text: `Finished reading assignment. Page ${num_readings} of ${num_readings}.`});
+        }
+        else if(position >= 0){
+            // get next name
+            nxt = d.readings[position+1];
+            path_parts = cur_path_parts.slice(0,cur_path_parts.length-2 );
+            path_parts.push(nxt);
+            nxt_link = path_parts.join('/');
+            l = $("<a />", {name : "link", class: "btn btn-lg ' + 'buttonConfirmCompletion'", href : nxt_link, text : `Continue to page ${position+1} of ${num_readings} in the reading assignment.`});
+        }
+        else{
+            l = $("<div />", {text: "This page is not part of the last reading assignment you visited."});
+        }
+        $("#main-content").append(l);
+    }
     if (d.redirect) {
         if (eBookConfig.loginRequired) {
             window.location.href = eBookConfig.app + '/default/user/login?_next=' + window.location.href
