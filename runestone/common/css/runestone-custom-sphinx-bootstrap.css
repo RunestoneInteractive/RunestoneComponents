@@ -1,5 +1,7 @@
-
-
+/* custom modification of basic.css for AA compliance */
+td.linenos pre {
+    color: #6b6b6b;
+}
 /* custom modification of prettify.css for AA compliance */
 .str {
     color: #006b00;
@@ -17,6 +19,18 @@
 
 .highlight .nn{
     color: #0F6C95;
+}
+
+.highlight .gp{
+    color: #A14C08;
+}
+
+.highlight .si{
+    color: #3C773D;
+}
+
+.highlight .nc{
+    color: #0B719D;
 }
 
 /* `Search` functionality's result custom modification for AA compliance */
