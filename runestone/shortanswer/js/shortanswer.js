@@ -77,6 +77,7 @@ ShortAnswer.prototype.renderHTML = function() {
 
     this.jTextArea = document.createElement("textarea");
     this.jTextArea.id = this.divid + "_solution";
+    $(this.jTextArea).attr("aria-label", "textarea");
     $(this.jTextArea).css("display:inline, width:530px");
     $(this.jTextArea).addClass("form-control");
     this.jTextArea.rows = 4;
