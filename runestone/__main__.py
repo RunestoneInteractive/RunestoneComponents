@@ -76,9 +76,13 @@ def init():
 
 @cli.command()
 @click.option('--all/--not-all', default=False, help="build all")
-def build(all):
+@click.option('--wd', default=None, help="change working directory before build")
+def build(all, wd):
     from paver.tasks import main as paver_main
-    os.chdir(findProjectRoot())
+    if wd:
+        os.chdir(wd)
+    else:
+        os.chdir(findProjectRoot())
     sys.path.insert(0, os.getcwd())
     version = require("runestone")[0].version
     print("Building with Runestone {}".format(version))
