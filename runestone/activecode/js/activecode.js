@@ -746,29 +746,33 @@ ActiveCode.prototype.toggleEditorVisibility = function () {
 
 ActiveCode.prototype.addErrorMessage = function (err) {
     // Add the error message
-    // But, adjust the line numbers.  If the line number is <= pretextLines then it is in included code
-    // if it is greater than the number of included lines but less than the pretext + current editor then it is in the student code.
-    // adjust the line number we display by eliminating the pre-included code.
-    let errorOutside = false;
-    if (err.traceback.length >= 1) {
-        errorLine = err.traceback[0].lineno;
-        if (errorLine <= this.pretextLines || errorLine > (this.progLines + this.pretextLines)) {
-            errorOutside = true;
-        } else {
-            if (this.pretextLines > 0) {
-                err.traceback[0].lineno = err.traceback[0].lineno - this.pretextLines + 1;
-            } 
-        }
-    }
     var errHead = $('<h3>').html('Error');
     this.eContainer = this.outerDiv.appendChild(document.createElement('div'));
     this.eContainer.className = 'error alert alert-danger';
     this.eContainer.id = this.divid + '_errinfo';
     this.eContainer.appendChild(errHead[0]);
     var errText = this.eContainer.appendChild(document.createElement('pre'));
-    if (errorOutside) {
-        errText.innerHTML = "An error occurred but it was outside of your code";
-        return;
+
+    // But, adjust the line numbers.  If the line number is <= pretextLines then it is in included code
+    // if it is greater than the number of included lines but less than the pretext + current editor then it is in the student code.
+    // adjust the line number we display by eliminating the pre-included code.
+    let errorBefore = false;
+    let errorAfter = false;
+    if (err.traceback.length >= 1) {
+        errorLine = err.traceback[0].lineno;
+        if (errorLine <= this.pretextLines){
+            errText.innerHTML = "An error occurred in the hidden, included code. Sorry we can't give you a more helpful error message";
+            return;
+        }
+        else if (errorLine > (this.progLines + this.pretextLines)) {
+            errText.innerHTML = "An error occurred after the end of your code. One possible reason is that you have an unclosed parenthesis or string. Another possibility is that there is an error in the hidden test code.";
+            return;
+        }
+        else {
+            if (this.pretextLines > 0) {
+                err.traceback[0].lineno = err.traceback[0].lineno - this.pretextLines + 1;
+            }
+        }
     }
     var errString = err.toString();
     var to = errString.indexOf(":");
