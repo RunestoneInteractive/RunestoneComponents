@@ -125,7 +125,7 @@ function gotUser(data, status, whatever) {
             path_parts = cur_path_parts.slice(0,cur_path_parts.length-2 );
             path_parts.push(nxt);
             nxt_link = path_parts.join('/');
-            l = $("<a />", {name : "link", class: "btn btn-lg ' + 'buttonConfirmCompletion'", href : nxt_link, text : `Continue to page ${position+1} of ${num_readings} in the reading assignment.`});
+            l = $("<a />", {name : "link", class: "btn btn-lg ' + 'buttonConfirmCompletion'", href : nxt_link, text : `Continue to page ${position+2} of ${num_readings} in the reading assignment.`});
         }
         else{
             l = $("<div />", {text: "This page is not part of the last reading assignment you visited."});
