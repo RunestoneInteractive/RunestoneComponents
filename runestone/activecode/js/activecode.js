@@ -756,8 +756,6 @@ ActiveCode.prototype.addErrorMessage = function (err) {
     // But, adjust the line numbers.  If the line number is <= pretextLines then it is in included code
     // if it is greater than the number of included lines but less than the pretext + current editor then it is in the student code.
     // adjust the line number we display by eliminating the pre-included code.
-    let errorBefore = false;
-    let errorAfter = false;
     if (err.traceback.length >= 1) {
         errorLine = err.traceback[0].lineno;
         if (errorLine <= this.pretextLines){
