@@ -220,7 +220,7 @@ def addAssignmentToDB(name = None, course_id = None, assignment_type_id = None, 
 
     return a_id
 
-def addHTMLToDB(divid, basecourse, htmlsrc):
+def addHTMLToDB(divid, basecourse, htmlsrc, feedback=None):
     if dburl:
         last_changed = datetime.now()
         sel = select([questions]).where(and_(questions.c.name == divid,
@@ -228,8 +228,8 @@ def addHTMLToDB(divid, basecourse, htmlsrc):
         res = engine.execute(sel).first()
         try:
             if res:
-                if res['htmlsrc'] != htmlsrc:
-                    stmt = questions.update().where(questions.c.id == res['id']).values(htmlsrc = htmlsrc, timestamp=last_changed)
+                if res['htmlsrc'] != htmlsrc or res['feedback'] != feedback:
+                    stmt = questions.update().where(questions.c.id == res['id']).values(htmlsrc = htmlsrc, feedback=feedback, timestamp=last_changed)
                     engine.execute(stmt)
         except UnicodeEncodeError:
             print("Bad character in directive {}".format(divid))

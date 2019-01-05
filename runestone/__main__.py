@@ -44,6 +44,11 @@ def init():
         conf_dict['log_level'] = 10 if conf_dict['logging'] else 0
         conf_dict['dburl'] = click.prompt("DataBase Connection URL", default="postgresql://user:password@localhost/runestone")
         conf_dict['enable_chatcodes'] = click.prompt("Enable Enable the chatcode feature)",type=bool, default=False)
+        # See the comments in ``conf.tmpl`` on server-side grading for an explanation of these conditions.
+        if conf_dict['logging'] and conf_dict['login_req']:
+            conf_dict['server_side_grading'] = click.prompt("Grade questions on the server where possible?", type=bool, default=False)
+        else:
+            conf_dict['server_side_grading'] = False
     else:
         conf_dict['login_req'] = "false"
         conf_dict['master_url'] = "http://127.0.0.1:8000"
@@ -51,6 +56,7 @@ def init():
         conf_dict['log_level'] = 0
         conf_dict['dburl'] = ""
         conf_dict['enable_chatcodes'] = 'false'
+        conf_dict['server_side_grading'] = False
     conf_dict['downloads_enabled'] = click.prompt("Enable inline Activecode downloads by default (single activecode downloads may be enabled with the :enabledownload: flag)", default="false")
 
     shutil.copytree(os.path.join(template_base_dir,'_sources'),'_sources')

@@ -169,6 +169,9 @@ def setup(app):
     # See http://www.sphinx-doc.org/en/stable/extdev/appapi.html#event-env-purge-doc.
     app.connect('env-purge-doc', _purge_runestone_data)
     app.add_role('skipreading', SkipReading)
+    # See http://www.sphinx-doc.org/en/stable/extdev/appapi.html#sphinx.application.Sphinx.add_config_value.
+    app.add_config_value('runestone_server_side_grading', False, 'env')
+
 
 # A base class for all Runestone directives.
 class RunestoneDirective(Directive):
