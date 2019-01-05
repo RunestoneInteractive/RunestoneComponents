@@ -1003,11 +1003,11 @@ ActiveCode.prototype.buildProg = function(useSuffix) {
         pretext = "";
         for (var x=0; x < this.includes.length; x++) {
             let iCode = this.getIncludedCode(this.includes[x]);
-            pretext = pretext + iCode;
+            pretext = pretext + iCode + "\n";
         }
         this.pretext = pretext;
         if(this.pretext) {
-            this.pretextLines = (this.pretext.match(/\n/g) || '').length + 1
+            this.pretextLines = (this.pretext.match(/\n/g) || '').length
         }
         prog = pretext + prog
     }
