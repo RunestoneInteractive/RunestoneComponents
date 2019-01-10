@@ -11,7 +11,7 @@
     '_static'+'/processing-1.4.1.min.js',
     '_static'+'/jquery.hotkey.js',
     '_static'+'/jquery-migrate-1.2.1.min.js',
-    '_static'+'/presenter_mode.js',    
+    '_static'+'/presenter_mode.js',
   ]
 %}
 
@@ -52,11 +52,11 @@
 
       <div>
         <a class="brand-logo" style='background: transparent url("{{pathto('_static/img/logo_small.png', 1)}}") no-repeat 0px 0px;' href="/{{appname}}/default/user/login">&nbsp; </a>
-        <a class="navbar-brand" href="{{ pathto(master_doc) }}">{% if theme_navbar_title -%}{{ theme_navbar_title|e }}{%- else -%}{{ project|e }}{%- endif -%}</a>
+        <a class="navbar-brand" href="{{ pathto(master_doc) }}" aria-label="index-page">{% if theme_navbar_title -%}{{ theme_navbar_title|e }}{%- else -%}{{ project|e }}{%- endif -%}</a>
       </div>
     </div>
 
-     
+
 
     <div class="navbar-collapse collapse navbar-ex1-collapse">
       <ul class="nav navbar-nav navbar-right" >
@@ -209,7 +209,7 @@
           <li>{% include "sourcelink.html" %}</li>
         {% endif %}
       </ul>
-      
+
     </div>
   </div>
 </div>
