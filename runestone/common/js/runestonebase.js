@@ -41,13 +41,19 @@ RunestoneBase.prototype.logBookEvent = function (eventInfo) {
 
 RunestoneBase.prototype.logRunEvent = function (eventInfo) {
     eventInfo.course = eBookConfig.course;
-    eventInfo.timezoneoffset = (new Date()).getTimezoneOffset()/60    
+    eventInfo.timezoneoffset = (new Date()).getTimezoneOffset()/60
     if ( this.forceSave || (! 'to_save' in eventInfo) ) {
         eventInfo.save_code = "True"
     }
     if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
         jQuery.post(eBookConfig.ajaxURL + 'runlog', eventInfo) // Log the run event
-            .done((function() {this.forceSave = false; }).bind(this))
+            .done((function(data, status, whatever) {
+                data = JSON.parse(data);
+                if (data.message) {
+                    alert(data.message);
+                }
+                this.forceSave = false;
+            }).bind(this))
             .fail((function() {alert("WARNING:  Your code was not saved!  Please Try again.");
                 this.forceSave = true; }).bind(this))
     }

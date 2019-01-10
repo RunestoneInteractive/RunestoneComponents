@@ -11,7 +11,7 @@
     '_static'+'/processing-1.4.1.min.js',
     '_static'+'/jquery.hotkey.js',
     '_static'+'/jquery-migrate-1.2.1.min.js',
-    '_static'+'/presenter_mode.js',    
+    '_static'+'/presenter_mode.js',
   ]
 %}
 
@@ -56,7 +56,7 @@
       </div>
     </div>
 
-     
+
 
     <div class="navbar-collapse collapse navbar-ex1-collapse">
       <ul class="nav navbar-nav navbar-right" >
@@ -209,7 +209,7 @@
           <li>{% include "sourcelink.html" %}</li>
         {% endif %}
       </ul>
-      
+
     </div>
   </div>
 </div>
@@ -241,6 +241,7 @@
   eBookConfig.proxyuri_files = '{{proxy_uri_files}}';
   eBookConfig.downloadsEnabled = {{downloads_enabled}};
   eBookConfig.enable_chatcodes = {{enable_chatcodes}} ? {{ enable_chatcodes }} : false;
+  eBookConfig.allow_pairs = {{allow_pairs}} ? {{allow_pairs}} : false;
 </script>
 
 <div id="fb-root"></div>

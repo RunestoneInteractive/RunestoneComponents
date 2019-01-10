@@ -45,7 +45,12 @@ ActiveCode.prototype.init = function(opts) {
     this.loadButton = null;
     this.outerDiv = null;
     this.partner = ""
-    this.enablePartner = false
+    if ((! eBookConfig.allow_pairs) || $(orig).data('nopair')) {
+        this.enablePartner = false;
+    } else {
+        this.enablePartner = true;
+    }
+
     this.output = null; // create pre for output
     this.graphics = null; // create div for turtle graphics
     this.codecoach = null;
@@ -279,35 +284,48 @@ ActiveCode.prototype.createControls = function () {
         $(butt).click((function() {new AudioTour(this.divid, this.code, 1, $(this.origElem).data("audio"))}).bind(this));
     }
 
-    var checkPartner = document.createElement("input");
-    checkPartner.type = 'checkbox'
-    checkPartner.id = `${this.divid}_part`    
-    ctrlDiv.appendChild(checkPartner);
-    var plabel = document.createElement('label');
-    plabel.for = `${this.divid}_part`;
-    $(plabel).text("Pair?");
-    ctrlDiv.appendChild(plabel);
-    $(checkPartner).click((function () {
-        if (this.partner) {
-            this.partner = false;
-            $(partnerTextBox).hide()
-            this.partner = ''
-            partnerTextBox.value = ''
-            $(plabel).text("Pair?");            
-        } else {
-            this.partner = true;
-            $(plabel).text('with: ');
-            $(partnerTextBox).show();
-        }
-    }).bind(this))
-    var partnerTextBox = document.createElement("input")
-    partnerTextBox.type = 'text'
-    ctrlDiv.appendChild(partnerTextBox);
-    $(partnerTextBox).hide()
-    $(partnerTextBox).change((function () {
-        this.partner = partnerTextBox.value;
-    }).bind(this))
-
+    if (this.enablePartner) {
+        var checkPartner = document.createElement("input");
+        checkPartner.type = 'checkbox'
+        checkPartner.id = `${this.divid}_part`
+        ctrlDiv.appendChild(checkPartner);
+        var plabel = document.createElement('label');
+        plabel.for = `${this.divid}_part`;
+        $(plabel).text("Pair?");
+        ctrlDiv.appendChild(plabel);
+        $(checkPartner).click((function () {
+            if (this.partner) {
+                this.partner = false;
+                $(partnerTextBox).hide()
+                this.partner = ''
+                partnerTextBox.value = ''
+                $(plabel).text("Pair?");
+            } else {
+                let didAgree = localStorage.getItem("partnerAgree")
+                if( ! didAgree) {
+                    didAgree = confirm("Pair Programming should only be used with the consent of your instructor." +
+                      "Your partner must be a registered member of the class and have agreed to pair with you." +
+                      "By clicking OK you certify that both of these conditions have been met."
+                      );
+                    if (didAgree) {
+                        localStorage.setItem("partnerAgree", "true");
+                    } else {
+                        return;
+                    }
+                }
+                this.partner = true;
+                $(plabel).text('with: ');
+                $(partnerTextBox).show();
+            }
+        }).bind(this))
+        var partnerTextBox = document.createElement("input")
+        partnerTextBox.type = 'text'
+        ctrlDiv.appendChild(partnerTextBox);
+        $(partnerTextBox).hide()
+        $(partnerTextBox).change((function () {
+            this.partner = partnerTextBox.value;
+        }).bind(this))
+    }
 
     if(this.chatcodes && eBookConfig.enable_chatcodes) {
         var chatBar = document.createElement("div");
@@ -745,7 +763,7 @@ ActiveCode.prototype.showTIE = function() {
     //    $('.tie-frame').css('width', $('.tie-frame').parent().width() - 120);
     };
     ifm.onload = setIframeDimensions;
-    
+
     $(function() {
         $(window).resize(setIframeDimensions);
       });
@@ -767,7 +785,7 @@ ActiveCode.prototype.showTIE = function() {
         });
       }).bind(this), false)
 
-    this.logBookEvent({'event': 'tie', 'act': 'open', 'div_id': this.divid}); 
+    this.logBookEvent({'event': 'tie', 'act': 'open', 'div_id': this.divid});
     tieDiv.appendChild(ifm)
     this.outerDiv.appendChild(tieDiv)
 }
@@ -789,7 +807,7 @@ ActiveCode.prototype.addErrorMessage = function (err) {
         } else {
             if (this.pretextLines > 0) {
                 err.traceback[0].lineno = err.traceback[0].lineno - this.pretextLines + 1;
-            } 
+            }
         }
     }
     var errHead = $('<h3>').html('Error');
@@ -1498,7 +1516,7 @@ function AudioTour (divid, code, bnum, audio_text) {
     $(this.prev_audio).click((function () {
         this.prevAudio();
     }).bind(this));
-    
+
     // handle the click to pause or play the audio
     $(this.pause_audio).click((function () {
         this.pauseAndPlayAudio(divid);
@@ -1585,7 +1603,7 @@ AudioTour.prototype.tour = function (divid, audio_type, bcount) {
     }
     $(this.audio_code).html(str);
     this.len = this.aname.length; // set the number of audio file in the tour
-    
+
     this.currIndex = 0;
     this.playCurrIndexAudio();
 };
