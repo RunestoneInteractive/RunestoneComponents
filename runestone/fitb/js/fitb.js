@@ -179,7 +179,7 @@ FITB.prototype.checkLocalStorage = function () {
 };
 
 FITB.prototype.setLocalStorage = function (data) {
-    let key = eBookConfig.email + ":" + this.divid + "-given";
+    let key = this.localStorageKey();
     localStorage.setItem(key, JSON.stringify(data));
 };
 
