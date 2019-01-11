@@ -49,6 +49,7 @@ def init():
             conf_dict['server_side_grading'] = click.prompt("Grade questions on the server where possible?", type=bool, default=False)
         else:
             conf_dict['server_side_grading'] = False
+        conf_dict['allow_pairs'] = click.prompt("Enable Pair Programming feature(s)", type=bool, default=False)
     else:
         conf_dict['login_req'] = "false"
         conf_dict['master_url'] = "http://127.0.0.1:8000"
@@ -57,6 +58,7 @@ def init():
         conf_dict['dburl'] = ""
         conf_dict['enable_chatcodes'] = 'false'
         conf_dict['server_side_grading'] = False
+        conf_dict['allow_pairs'] = 'false'
     conf_dict['downloads_enabled'] = click.prompt("Enable inline Activecode downloads by default (single activecode downloads may be enabled with the :enabledownload: flag)", default="false")
 
     shutil.copytree(os.path.join(template_base_dir,'_sources'),'_sources')
