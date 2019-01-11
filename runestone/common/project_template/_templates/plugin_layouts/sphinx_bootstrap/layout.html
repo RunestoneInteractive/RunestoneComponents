@@ -106,9 +106,9 @@
           </a>
           <ul class='dropdown-menu'>
             {% if 'overview' in course_id %}
-                <li><a href='/{{appname}}/static/{{course_id}}/overview.html'>Table of Contents</a></li>
+                <li><a href='/{{appname}}/static/{{course_id}}/overview.html' aria-label="index-page">Table of Contents</a></li>
             {% else: %}
-                <li><a href='{{ pathto(master_doc) }}'>Table of Contents</a></li>
+                <li><a href='{{ pathto(master_doc) }}' aria-label="index-page">Table of Contents</a></li>
             {% endif %}
             <li><a href='/{{appname}}/static/{{course_id}}/genindex.html'>Book Index</a></li>
             <li class="divider"></li>
@@ -218,7 +218,7 @@
 {%- block extrahead %}
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
-<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+<meta content='width=device-width, initial-scale=1.0' name='viewport' />
 <link rel="shortcut icon" href="/{{appname}}/static/favicon.ico" type="image/ico" />
 
 <script type="text/javascript">
