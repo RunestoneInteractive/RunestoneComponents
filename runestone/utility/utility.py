@@ -1,3 +1,4 @@
+# extract text from html format
 def extractText(blob):
     # checking for inner <code> tag
     if "<code" in blob:
@@ -5,11 +6,11 @@ def extractText(blob):
 
     return blob
 
+
 def extractTextHelper(title, blob):
     if "<code" not in blob:
         title += blob
         return title
-
 
     idx0 = blob.find("<code")
 
@@ -35,6 +36,7 @@ def extractTextHelper(title, blob):
 
     return extractTextHelper(title, thirdSub)
 
+
 def spareBlobHelper(title, spareBlob):
     if "<span" not in spareBlob:
         return title
@@ -53,6 +55,7 @@ def spareBlobHelper(title, spareBlob):
 
 
 def extractTextII(blob):
+    # checking for <strong> tag
     if "<strong>" in blob:
         title = ""
         idx0 = blob.find("<strong>")
@@ -74,6 +77,7 @@ def extractTextII(blob):
 
 
 def setup(app):
+    # adding custom filter functions to jinja2's global FILTERS dictionary
     import jinja2
     jinja2.filters.FILTERS['extractText'] = extractText
     jinja2.filters.FILTERS['extractTextII'] = extractTextII
