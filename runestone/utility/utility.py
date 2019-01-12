@@ -71,3 +71,9 @@ def extractTextII(blob):
         return title
 
     return blob
+
+
+def setup(app):
+    import jinja2
+    jinja2.filters.FILTERS['extractText'] = extractText
+    jinja2.filters.FILTERS['extractTextII'] = extractTextII
