@@ -194,6 +194,7 @@ ActiveCode.prototype.createEditor = function (index) {
     var linkdiv = document.createElement('div');
     linkdiv.id = this.divid.replace(/_/g,'-').toLowerCase();  // :ref: changes _ to - so add this as a target
     $(this.containerDiv).addClass("ac_section alert alert-warning");
+    $(this.containerDiv).attr("style", "padding: 0 !important; margin-top: 15px;");
     var codeDiv = document.createElement("div");
     $(codeDiv).addClass("ac_code_div col-md-12");
     this.codeDiv = codeDiv;
