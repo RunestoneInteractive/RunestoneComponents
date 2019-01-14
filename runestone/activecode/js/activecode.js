@@ -792,11 +792,12 @@ ActiveCode.prototype.showCodelens = function () {
     myIframe.setAttribute("id", this.divid + '_codelens');
     myIframe.setAttribute("width", "800");
     myIframe.setAttribute("height", "500");
-    myIframe.setAttribute("style", "display:block");
+    myIframe.setAttribute("style", "display:block; max-width: 100%; max-height: 100%;");
     myIframe.style.background = '#fff';
     //myIframe.setAttribute("src",srcURL)
     myIframe.src = embedUrlStr;
     this.codelens.appendChild(myIframe);
+    this.codelens.style.maxWidth = "100%";
     this.logBookEvent({
         'event': 'codelens',
         'act': 'view',
