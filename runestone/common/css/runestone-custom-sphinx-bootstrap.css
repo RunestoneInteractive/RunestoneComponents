@@ -1,18 +1,18 @@
-/* custom modification of basic.css for AA compliance */
+/* custom modification of basic.css for color-contrast (AA compliant) */
 td.linenos pre {
     color: #6b6b6b;
 }
-/* custom modification of prettify.css for AA compliance */
+/* custom modification of prettify.css for color-contrast (AA compliant) */
 .str {
     color: #006b00;
 }
 
-/* custom modification of parsons.css for AA compliance */
+/* custom modification of parsons.css for color-contrast (AA compliant) */
 .parsons .block {
     background-color: #fafafa;
 }
 
-/* custom modification of pygments.css for AA compliance */
+/* custom modification of pygments.css for color-contrast (AA compliant) */
 .highlight .c1{
     color: #376A7B;
 }
@@ -33,7 +33,7 @@ td.linenos pre {
     color: #0B719D;
 }
 
-/* `Search` functionality's result custom modification for AA compliance */
+/* `Search` functionality's result custom modification for color-contrast (AA compliant) */
 ul.search li div.context {
     color: #6b6b6b;
 }
@@ -42,13 +42,13 @@ span.highlighted {
     color: #4d4d4d;
 }
 
-/* ActiveCode gutter custom modification for AA compliance */
+/* ActiveCode gutter custom modification for color-contrast (AA compliant) */
 
 .CodeMirror-linenumber{
     color: #6b6b6b;
 }
 
-/* Python code output custom modification for AA compliance */
+/* Python code output custom modification for color-contrast (AA compliant) */
 div.ExecutionVisualizer table#pyCodeOutput .lineNo {
     color: #6b6b6b;
 }
@@ -69,7 +69,7 @@ h5 {
     padding: 10px 0;
 }
 
-/* table-of-contents related styles for color-contrast in compliance to AA */
+/* table-of-contents related styles for color-contrast (AA compliant) */
 #table-of-contents a {
     color: #0645ad;
 }
@@ -83,7 +83,7 @@ h5 {
     font-size: 16px;
 }
 
-/* navbar-brand color contrast in compliance to AA */
+/* navbar-brand color contrast (AA compliant) */
 .navbar-default .navbar-nav>li>a{
     color: #6B6B6B;
 
@@ -93,7 +93,7 @@ h5 {
     color: #6B6B6B;
 }
 
-/* acknowledgement related styles for color-contrast in compliance to AA */
+/* acknowledgement related styles for color-contrast (AA compliant) */
 .toctree-wrapper{
     font-size: 16px;
 }
@@ -107,7 +107,7 @@ h5 {
     text-decoration: underline;
 }
 
-/* index and search related styles for color-contrast in compliance to AA */
+/* index and search related styles for color-contrast (AA compliant) */
 #index-and-search.section {
     font-size: 16px;
 }
@@ -121,9 +121,7 @@ h5 {
     text-decoration: underline;
 }
 
-/*
-`a` tag color-contrast in compliance to AA & `lighthouse` auditor
-*/
+/* custom style for `a` tag for color-contrast (AA compliant) */
 
 a {
     color: #0645ad;
