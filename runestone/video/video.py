@@ -24,7 +24,9 @@ from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneD
 def setup(app):
     app.add_directive('video',Video)
     app.add_directive('youtube', Youtube)
+    app.add_directive('ytpopup', YtPopUp)
     app.add_directive('vimeo', Vimeo)
+    app.add_stylesheet('https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css')
     app.add_stylesheet('video.css')
     app.add_javascript('runestonevideo.js')
 
@@ -82,6 +84,7 @@ class Video(RunestoneIdDirective):
    :loop: loop the video
    :thumb: url to thumbnail image
    :preload: set the video to preload in the bg
+   :popup:
 
    url to video format 1
    url to video format 2
@@ -287,3 +290,41 @@ if __name__ == '__main__':
             writer_name="html")
 
     print(doc_parts['html_body'])
+
+
+class YtPopUp(IframeVideo):
+    """
+.. youtube:: YouTubeID
+   :divid: the runestone id for this video
+   :height: 315
+   :width: 560
+   :align: left
+   :http: http
+   """
+    html = '''
+    <div  onclick="javascript:toggleYTVideo();"  style="text-align: center; margin: 15px; cursor:pointer;">
+        <img src="https://img.youtube.com/vi/%(video_id)s/0.jpg"/>
+        <div style=" position: relative; width: 0; height: 0; top: -220px; left: 30vw; border-style: solid; border-width: 2.5em 0 2.5em 5em; border-color: transparent transparent transparent white; opacity: .85; "></div>
+    </div>
+    <div id="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(128, 182, 128, 0.3); z-index: 10000;" onclick="javascript:toggleYTVideo();">
+        <div style="background-color: white; position: fixed; top: 4vh; left: 5vw; width:  90vw; height:  90vh; z-index: 100;" id="YTmodal">
+        </div>
+    </div>
+    <script>
+        function toggleYTVideo(){
+            if ($('#modal').css("display") == "none") {
+                document.getElementById("YTmodal").innerHTML = "<iframe id='ytplayer' style='height: 90vh; width: 90vw;' src='https://www.youtube.com/embed/%(video_id)s?autoplay=1' allowfullscreen></iframe>";
+                document.getElementById("modal").setAttribute("style", "position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(140, 140, 140, 0.3); z-index: 10000;");
+            } else {
+                document.getElementById("YTmodal").innerHTML = "";
+                document.getElementById("modal").setAttribute("style", "display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(140, 140, 140, 0.3); z-index: 10000;");
+            }
+        }
+    </script>
+    
+    '''
+
+    def run(self):
+        raw_node = super(YtPopUp, self).run()
+        addQuestionToDB(self)
+        return raw_node
