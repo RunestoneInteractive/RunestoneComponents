@@ -302,18 +302,22 @@ class YtPopUp(IframeVideo):
    :http: http
    """
     html = '''
-    <div  onclick="javascript:toggleYTVideo();"  style="text-align: center; margin: 15px; cursor:pointer;">
-        <img src="https://img.youtube.com/vi/%(video_id)s/0.jpg"/>
-        <div style=" position: relative; width: 0; height: 0; top: -220px; left: 49%%; border-style: solid; border-width: 2.5em 0 2.5em 5em; border-color: transparent transparent transparent red; opacity: .85; "></div>
-    </div>
+    <div  onclick="javascript:toggleYTVideo('%(video_id)s\');"  style="text-align: center; margin: 15px; cursor:pointer;">
+        <div style="background-image: url('https://img.youtube.com/vi/%(video_id)s/mqdefault.jpg'); background-repeat: no-repeat;background-position: center; height: 210px; width: 310px; margin: 0 auto; border: 1px solid #20c997">
+            <img src="_static/images/play_button.svg" style="margin-top: 78px;" /> 
+        </div>
+      
+
+        </div>
     <div id="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(128, 182, 128, 0.3); z-index: 10000;" onclick="javascript:toggleYTVideo();">
         <div style="background-color: white; position: fixed; top: 4vh; left: 5vw; width:  90vw; height:  90vh; z-index: 100;" id="YTmodal">
         </div>
     </div>
     <script>
-        function toggleYTVideo(){
+        function toggleYTVideo(videoId){
+            var srcValue = "https://www.youtube.com/embed/" + videoId + "?autoplay=1";
             if ($('#modal').css("display") == "none") {
-                document.getElementById("YTmodal").innerHTML = "<iframe id='ytplayer' style='height: 90vh; width: 90vw;' src='https://www.youtube.com/embed/%(video_id)s?autoplay=1' allowfullscreen></iframe>";
+                document.getElementById("YTmodal").innerHTML = "<iframe id='ytplayer' style='height: 90vh; width: 90vw;' src='" + srcValue + "' allowfullscreen></iframe>";
                 document.getElementById("modal").setAttribute("style", "position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(140, 140, 140, 0.3); z-index: 10000;");
             } else {
                 document.getElementById("YTmodal").innerHTML = "";
