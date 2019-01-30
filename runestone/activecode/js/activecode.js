@@ -1164,6 +1164,8 @@ ActiveCode.prototype.runProg = function (params = [0]) {
             //     $(this.historyScrubber).on("slidechange", this.slideit.bind(this));
             // }
             // $(this.historyScrubber).slider("enable");
+            $(this.output).css("visibility", "visible");
+            $(this.output).parent().show({ duration: 700, queue: false });
             this.logRunEvent({
                 'div_id': this.divid,
                 'code': this.editor.getValue(),
@@ -2298,7 +2300,7 @@ LiveCode.prototype.pushDataFile = function (file, resolve, reject) {
          } else if(char === '(') {
              var pCount = 1;
              i++;
-         	while(pCount > 0 && i < text.length){
+            while(pCount > 0 && i < text.length){
                 if(text.charAt(i) === '(') {
                     pCount++;
                 } else if(text.charAt(i) === ')') {
