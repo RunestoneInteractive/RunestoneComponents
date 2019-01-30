@@ -304,7 +304,7 @@ class YtPopUp(IframeVideo):
     html = '''
     <div  onclick="javascript:toggleYTVideo();"  style="text-align: center; margin: 15px; cursor:pointer;">
         <img src="https://img.youtube.com/vi/%(video_id)s/0.jpg"/>
-        <div style=" position: relative; width: 0; height: 0; top: -220px; left: 30vw; border-style: solid; border-width: 2.5em 0 2.5em 5em; border-color: transparent transparent transparent white; opacity: .85; "></div>
+        <div style=" position: relative; width: 0; height: 0; top: -220px; left: 49%%; border-style: solid; border-width: 2.5em 0 2.5em 5em; border-color: transparent transparent transparent red; opacity: .85; "></div>
     </div>
     <div id="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(128, 182, 128, 0.3); z-index: 10000;" onclick="javascript:toggleYTVideo();">
         <div style="background-color: white; position: fixed; top: 4vh; left: 5vw; width:  90vw; height:  90vh; z-index: 100;" id="YTmodal">
