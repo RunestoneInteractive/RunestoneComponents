@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg [
+	<!ENTITY ns_extend "http://ns.adobe.com/Extensibility/1.0/">
+	<!ENTITY ns_ai "http://ns.adobe.com/AdobeIllustrator/10.0/">
+	<!ENTITY ns_graphs "http://ns.adobe.com/Graphs/1.0/">
+	<!ENTITY ns_vars "http://ns.adobe.com/Variables/1.0/">
+	<!ENTITY ns_imrep "http://ns.adobe.com/ImageReplacement/1.0/">
+	<!ENTITY ns_sfw "http://ns.adobe.com/SaveForWeb/1.0/">
+	<!ENTITY ns_custom "http://ns.adobe.com/GenericCustomNamespace/1.0/">
+	<!ENTITY ns_adobe_xpath "http://ns.adobe.com/XPath/1.0/">
+]>
+<svg version="1.2" baseProfile="tiny" id="レイヤー_1" xmlns:x="&ns_extend;" xmlns:i="&ns_ai;" xmlns:graph="&ns_graphs;"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="70px" height="55px"
+	 viewBox="0 0 500 350" xml:space="preserve">
+<switch>
+	<g i:extraneous="self">
+		<g>
+			<path fill="#C91924" d="M3.255,68.255C5.916,35.288,35.067,6.435,68.037,4.137c0,0,59.375-4.137,178.973-4.137
+				c119.599,0,184.852,4.333,184.852,4.333c32.977,2.189,62.275,30.943,65.108,63.896c0,0,2.947,34.287,2.947,103.593
+				s-3.255,109.636-3.255,109.636c-2.661,32.969-31.812,61.824-64.781,64.125c0,0-59.382,4.143-178.979,4.143
+				c-119.598,0-184.852-4.339-184.852-4.339c-32.977-2.192-62.273-30.948-65.104-63.902c0,0-2.945-34.286-2.945-103.593
+				C0,108.586,3.255,68.255,3.255,68.255z"/>
+			<polygon fill="#FFFFFF" points="195.751,105.307 328.892,174.857 195.751,244.419 			"/>
+		</g>
+	</g>
+</switch>
+
+</svg>
+
