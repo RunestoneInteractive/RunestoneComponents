@@ -239,7 +239,7 @@ ActiveCode.prototype.createEditor = function (index) {
     // Make the editor resizable
     $(editor.getWrapperElement()).resizable({
         resize: function() {
-            editor.setSize($(this).width(), $(this).height());
+            editor.setSize($(this).outerWidth() + event.movementX, $(this).outerHeight() + event.movementY);
             editor.refresh();
         }
     });
@@ -575,6 +575,7 @@ ActiveCode.prototype.createOutput = function () {
     // canvas can be styled in CSS.  Which a the moment means just adding a border.
     $(this.graphics).on("DOMNodeInserted", 'canvas', (function(e) {
         $(this.graphics).addClass("visible-ac-canvas");
+        $(outDiv).css("height", "400px");
     }).bind(this));
 
     outDiv.appendChild(this.output);
@@ -1080,6 +1081,8 @@ ActiveCode.prototype.manage_scrubber = function (scrubber_dfd, history_dfd, save
 
 var pygameModalUse = true;
 ActiveCode.prototype.runProg = function (params = [0]) {
+    Sk.hardInterrupt = false;
+    Sk.builtin.KeyboardInterrupt = null;
     var prog = this.buildProg(params[0]);
     var saveCode = "True";
     var scrubber_dfd, history_dfd, skulpt_run_dfd;
@@ -1125,23 +1128,41 @@ ActiveCode.prototype.runProg = function (params = [0]) {
     } 
     $(this.historyScrubber).off("slidechange");
     $(this.historyScrubber).slider("disable");
-    if (!this.modaloutput) {
+    //if (!this.modaloutput) {
         //$(this.codeDiv).switchClass("col-md-12", "col-md-7", {duration: 500, queue: false});
         $(this.outDiv).show({duration: 700, queue: false});
-    }
+    //}
     // var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
     // history_dfd = __ret.history_dfd;
     // saveCode = __ret.saveCode;
     history_dfd = null;
     saveCode = false;
+
+    Sk.builtin.KeyboardInterrupt = function (args) {
+        var o;
+        if (!(this instanceof Sk.builtin.KeyboardInterrupt)) {
+            o = Object.create(Sk.builtin.KeyboardInterrupt.prototype);
+            o.constructor.apply(o, arguments);
+            return o;
+        }
+        Sk.builtin.BaseException.apply(this, arguments);
+    };
+    Sk.abstr.setUpInheritance("KeyboardInterrupt", Sk.builtin.KeyboardInterrupt, Sk.builtin.BaseException);
+    var interruptHandler = function (susp) {
+        if (Sk.hardInterrupt === true) {
+            throw new Sk.builtin.KeyboardInterrupt('force-quit');
+        } else {
+            return null; // should perform default action
+        }
+    };
     skulpt_run_dfd = Sk.misceval.asyncToPromise(function () {
+        
         return Sk.importMainWithBody("<stdin>", false, prog, true);
-    });
+    }, { "*": interruptHandler });
 
     // Make sure that the history scrubber is fully initialized AND the code has been run
     // before we start logging stuff.
     var self = this;
-
     Promise.all([skulpt_run_dfd, history_dfd]).then((function (mod) { // success
             $(this.runButton).removeAttr('disabled');
             switch (params[0]) {
@@ -1153,8 +1174,8 @@ ActiveCode.prototype.runProg = function (params = [0]) {
                     break;
                 case 2:
                     $(this.playTaskButton).removeAttr('disabled');
-                    break;      
-            } 
+                    break;
+            }
 
             if (this.modaloutput) {
                 PygameLib.running = false;
@@ -1166,6 +1187,10 @@ ActiveCode.prototype.runProg = function (params = [0]) {
             // $(this.historyScrubber).slider("enable");
             $(this.output).css("visibility", "visible");
             $(this.output).parent().show({ duration: 700, queue: false });
+
+
+            Sk.builtin.KeyboardInterrupt = null;
+            Sk.hardInterrupt = false;
             this.logRunEvent({
                 'div_id': this.divid,
                 'code': this.editor.getValue(),
@@ -1192,14 +1217,19 @@ ActiveCode.prototype.runProg = function (params = [0]) {
                 'prefix': self.pretext,
                 'suffix': self.suffix
             }); // Log the run event
-            self.addErrorMessage(err);
-        }).bind(this));
+            if (err.toString().indexOf("force-quit") == -1)
+                self.addErrorMessage(err);
+            Sk.builtin.KeyboardInterrupt = null;
+            Sk.hardInterrupt = false;
 
-    if (typeof(allVisualizers) != "undefined") {
+        }).bind(this));
+    
+    if (typeof (allVisualizers) != "undefined") {
         $.each(allVisualizers, function (i, e) {
             e.redrawConnectors();
         });
     }
+   
 };
 
 JSActiveCode.prototype = new ActiveCode();
@@ -2300,7 +2330,7 @@ LiveCode.prototype.pushDataFile = function (file, resolve, reject) {
          } else if(char === '(') {
              var pCount = 1;
              i++;
-            while(pCount > 0 && i < text.length){
+         	while(pCount > 0 && i < text.length){
                 if(text.charAt(i) === '(') {
                     pCount++;
                 } else if(text.charAt(i) === ')') {
@@ -2500,6 +2530,7 @@ function createPyCanvas() {
     Sk.main_canvas = document.createElement("canvas");
     Sk.quitHandler = function () {
         $('.modal').modal('hide');
+        PygameLib.running = false;
     };
     openPyCanvas();
 }
@@ -2513,21 +2544,39 @@ function openPyCanvas() {
         $(div1).addClass("modal");
         $(div1).css("text-align", "center");
 
+      
+        
+
         var btn1 = document.createElement("span");
-        $(btn1).addClass("btn btn-primary btn-sm float-right");
+        $(btn1).addClass("btn btn-primary btn-sm float-right mr-1 mt-1");
         var ic = document.createElement("i");
         $(ic).addClass("fas fa-times");
         btn1.appendChild(ic);
 
-        $(btn1).on('click', function(e) {
-            PygameLib.running = false;
-            PygameLib.eventQueue = [];
-            PygameLib.eventTimer = {};
-            delete PygameLib.eventQueue;
-            delete PygameLib.eventTimer;
+        $(btn1).on('click', function (e) {
+            Sk.insertEvent('quit');
+            $(forceQBtn).css("display", "block");
+            //PygameLib.running = false;
+            //PygameLib.eventQueue = [];
+            //PygameLib.eventTimer = {};
+            //delete PygameLib.eventQueue;
+            //delete PygameLib.eventTimer;
+            //Sk.hardInterrupt = true;
+            //Sk.quitHandler();
+            //$('.run-button').removeAttr('disabled');
+        });
 
-            $('.run-button').removeAttr('disabled');
+        var forceQBtn = document.createElement("span");
+        $(forceQBtn).addClass("btn btn-primary btn-sm float-right mr-1 mt-1");
+        $(forceQBtn).css("display","none");
+        var ic = document.createElement("i");
+        $(ic).addClass("fas fa-sign-out-alt");
+        forceQBtn.appendChild(ic);
+
+        $(forceQBtn).on('click', function (e) {
+            Sk.hardInterrupt = true;
             Sk.quitHandler();
+            $('.run-button').removeAttr('disabled');
         });
 
         var div2 = document.createElement("div");
@@ -2548,7 +2597,7 @@ function openPyCanvas() {
         div2.appendChild(div3);
 
         var div4 = document.createElement("div");
-        $(div4).addClass("modal-header d-flex justify-content-between");
+        $(div4).addClass("modal-heade justify-content-between");
         var div5 = document.createElement("div");
         $(div5).addClass("modal-body");
         if (screen.width < 900) {
@@ -2561,7 +2610,7 @@ function openPyCanvas() {
         var div8 = document.createElement("div");
         $(div8).addClass("col-md-4");
         var header = document.createElement("h5");
-        $(header).addClass("modal-title");
+        $(header).addClass("modal-title float-left");
         Sk.title_container = header;
 
         div3.appendChild(div4);
@@ -2570,6 +2619,7 @@ function openPyCanvas() {
 
         div4.appendChild(header);
         div4.appendChild(btn1);
+        div4.appendChild(forceQBtn);
 
         div5.appendChild(Sk.main_canvas);
         createArrows(div6);
