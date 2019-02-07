@@ -10,26 +10,26 @@ from socket import gethostname
 
 sys.path.append(os.getcwd())
 
-home_dir = os.getcwd()
-master_url = '%(master_url)s'
-master_app = 'runestone'
-serving_dir = "%(build_dir)s/%(project_name)s"
+# The project name, for use below.
+project_name = "%(project_name)s"
+# The root directory for ``runestone serve``.
+serving_dir = "%(build_dir)s/" + project_name
+# The destination directory for ``runestone deploy``.
 dest = "%(dest)s"
 
 options(
     sphinx = Bunch(docroot=".",),
 
     build = Bunch(
-        builddir="%(build_dir)s/%(project_name)s",
+        builddir=serving_dir,
         sourcedir="_sources",
-        outdir="%(build_dir)s/%(project_name)s",
+        outdir=serving_dir,
         confdir=".",
-        project_name = "%(project_name)s",
-        template_args={'course_id': '%(project_name)s',
+        template_args={'course_id': project_name,
                        'login_required':'%(login_req)s',
-                       'appname':master_app,
+                       'appname': 'runestone',
                        'loglevel': %(log_level)d,
-                       'course_url':master_url,
+                       'course_url': '%(master_url)s',
                        'use_services': '%(use_services)s',
                        'python3': '%(python3)s',
                        'dburl': '%(dburl)s',
