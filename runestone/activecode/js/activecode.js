@@ -1008,7 +1008,7 @@ ActiveCode.prototype.buildProg = function(buildType = 0) {
             pretext = pretext + edList[this.includes[x]].editor.getValue();
         }
         this.pretext = pretext;
-        prog = pretext + progprog
+        prog = pretext + prog;
     }
 
     if (this.runortest) {
