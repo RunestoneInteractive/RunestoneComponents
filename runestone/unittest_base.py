@@ -4,10 +4,16 @@ import sys
 import platform
 import subprocess
 from selenium import webdriver
+from selenium.webdriver.remote import webelement
 from pyvirtualdisplay import Display
 
 # Select an unused port for serving web pages to the test suite.
 PORT = '8081'
+
+
+# Provide access to the currently-active ModuleFixture object.
+mf = None
+
 
 # Define `module fixtures <https://docs.python.org/2/library/unittest.html#setupmodule-and-teardownmodule>`_ to build the test Runestone project, run the server, then shut it down when the tests complete.
 class ModuleFixture(unittest.TestCase):
@@ -37,11 +43,37 @@ class ModuleFixture(unittest.TestCase):
         # Run the server. Simply calling ``runestone serve`` fails, since the process killed isn't the actual server, but probably a setuptools-created launcher.
         self.runestone_server = subprocess.Popen(['python', '-m', 'runestone', 'serve', '--port', PORT])
 
+        # Testing time in dominated by browser startup/shutdown. So, simply run all tests in a module in a single browser instance to speed things up. See ``RunestoneTestCase.setUp`` for additional code to (mostly) clear the browser between tests.
+        #
+        # `PyVirtualDisplay <http://pyvirtualdisplay.readthedocs.io/en/latest/>`_ only runs on X-windows, meaning Linux. Mac seems to have `some support <https://support.apple.com/en-us/HT201341>`_. Windows is out of the question.
+        if sys.platform.startswith('linux'):
+            self.display = Display(visible=0, size=(1280, 1024))
+            self.display.start()
+        else:
+            self.display = None
+        #self.driver = webdriver.PhantomJS() # use this for Jenkins auto testing
+        # options = webdriver.ChromeOptions()
+        # options.add_argument("headless")
+        # options.add_argument("window-size=1200x800")
+        #self.driver = webdriver.Chrome(chrome_options=options)  # good for development.
+        self.driver = webdriver.Chrome()  # good for development.
+
+        # Make this accessible
+        global mf
+        mf = self
+
     def tearDownModule(self):
+        # Shut down Selenium.
+        self.driver.quit()
+        if self.display:
+            self.display.stop()
         # Shut down the server.
         self.runestone_server.kill()
         # Restore the directory.
         os.chdir(self.old_cwd)
+
+        global mf
+        mf = None
 
     # Without this, Python 2.7 produces errors when running unit tests:
     #
@@ -70,26 +102,16 @@ def module_fixture_maker(module_path, return_mf=False, exit_status_success=True)
     else:
         return mf.setUpModule, mf.tearDownModule
 
+
 # Provide a base test case which sets up the `Selenium <http://selenium-python.readthedocs.io/>`_ driver.
 class RunestoneTestCase(unittest.TestCase):
     def setUp(self):
-        # `PyVirtualDisplay <http://pyvirtualdisplay.readthedocs.io/en/latest/>`_ only runs on X-windows, meaning Linux. Mac seems to have `some support <https://support.apple.com/en-us/HT201341>`_. Windows is out of the question.
-        if sys.platform.startswith('linux'):
-            self.display = Display(visible=0, size=(1280, 1024))
-            self.display.start()
-        else:
-            self.display = None
-        #self.driver = webdriver.PhantomJS() # use this for Jenkins auto testing
-        # options = webdriver.ChromeOptions()
-        # options.add_argument("headless")
-        # options.add_argument("window-size=1200x800")
-        #self.driver = webdriver.Chrome(chrome_options=options)  # good for development.
-        self.driver = webdriver.Chrome()  # good for development.
-        self.driver.implicitly_wait(10)
-
+        # Use the shared module-wide driver.
+        self.driver = mf.driver
         self.host = 'http://127.0.0.1:' + PORT
 
     def tearDown(self):
-        self.driver.quit()
-        if self.display:
-            self.display.stop()
+        # Clear as much as possible, to present an almost-fresh instance of a browser for the next test. (Shutting down then starting up a browswer is very slow.)
+        self.driver.execute_script('window.localStorage.clear();')
+        self.driver.execute_script('window.sessionStorage.clear();')
+        self.driver.delete_all_cookies()

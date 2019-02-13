@@ -14,7 +14,7 @@ class Matrixeq_Tests(RunestoneTestCase):
 
     def test_ma1(self):
         ''' matrixeq - test the click of a mutliplication operator '''
-        # self.driver.get(self.host + "/test02.html")
+        self.driver.get(self.host + "/index.html")
         # t1 = self.driver.find_element_by_id("question1")
         #
         # btn_check = t1.find_element_by_tag_name('button')
@@ -24,11 +24,11 @@ class Matrixeq_Tests(RunestoneTestCase):
         # self.assertIsNotNone(fb)
         # cnamestr = fb.get_attribute("class")
         # self.assertIn("alert-danger", cnamestr)
-        pass
 
     # Testing time in dominated by browser startup/shutdown. So, simply run all tests in a single browser instance to speed things up. On failures, uncomment test functions to diagnose.
     def test_ma2(self):
         '''
         matrixeq - test the click of an equal operator
         '''
-        pass
+        self.driver.get(self.host + "/index.html")
+

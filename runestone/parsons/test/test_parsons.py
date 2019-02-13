@@ -6,27 +6,23 @@ __author__ = 'cabowers'
 
 import unittest
 import time
-from unittest import TestCase
 from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 from selenium.webdriver import ActionChains
-from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.common.by import By
-import selenium.webdriver.support.ui as ui
 
 mf, setUpModule, tearDownModule = module_fixture_maker(__file__, True)
 
 
 class ParsonsTests(RunestoneTestCase):
-     
+
     def test_general(self):
-        
+
         self.driver.get(self.host + "/index.html")
         self.driver.execute_script('window.localStorage.clear();')
-        
+
         # Source has correct number of blocks and each block has a label
         source = self.driver.find_element_by_id("parsons-1-source")
         answer = self.driver.find_element_by_id("parsons-1-answer")
@@ -34,7 +30,7 @@ class ParsonsTests(RunestoneTestCase):
         blocks = source.find_elements_by_class_name("block")
         self.assertIsNotNone(source)
         self.assertEquals(len(blocks), 5)
-        
+
         # check that messages appear correctly
         checkme = self.driver.find_element_by_id('parsons-1-check')
         reset = self.driver.find_element_by_id('parsons-1-reset')
@@ -59,7 +55,6 @@ class ParsonsTests(RunestoneTestCase):
         blocks = source.find_elements_by_class_name("block")
         self.assertEquals(len(blocks), 5)
 
-
     def test_help(self):
         self.driver.get(self.host + "/index.html")
         self.driver.execute_script('window.localStorage.clear();')
@@ -73,7 +68,7 @@ class ParsonsTests(RunestoneTestCase):
         helpBtn = self.driver.find_element_by_id('parsons-1-help')
         helpBtn.click()
         self.assertTrue(self.wait_and_close_alert())
-    
+
         # try three distinct full attempts => help should casue pop up then cause stuff to happen
         ActionChains(self.driver).drag_and_drop(source.find_element_by_id("parsons-1-block-4"), answer).perform()
         ActionChains(self.driver).drag_and_drop(source.find_element_by_id("parsons-1-block-2"), answer.find_element_by_id("parsons-1-block-4")).perform()
@@ -96,9 +91,9 @@ class ParsonsTests(RunestoneTestCase):
         self.wait_for_animation("#parsons-1-block-1")
         checkme.click()
         self.assertTrue(self.wait_and_close_alert())
-        helpBtn.click()     
+        helpBtn.click()
         print('Help 1')
-        self.assertTrue(self.wait_and_close_alert())    
+        self.assertTrue(self.wait_and_close_alert())
         self.wait_for_animation("#parsons-1-block-4")
         b4 = source.find_element_by_id("parsons-1-block-4")
         self.assertEquals(b4.get_attribute("class"), "block disabled");
@@ -109,6 +104,8 @@ class ParsonsTests(RunestoneTestCase):
         self.assertTrue(self.wait_and_close_alert())
         self.wait_for_animation("#parsons-1-block-1")
         l6 = source.find_element_by_id("parsons-1-line-6")
+        # There seems to be a timing issue -- a bit of delay makes this pass.
+        time.sleep(0.1)
         self.assertEquals(l6.get_attribute("class"), "prettyprint lang-py indent1")
         self.assertFalse(self.f_exists("parsons-1-block-1"))
         b0 = answer.find_element_by_id("parsons-1-block-0")
@@ -118,17 +115,16 @@ class ParsonsTests(RunestoneTestCase):
         self.assertIsNotNone(l2)
 
         # Help is finished helping
-        self.wait_for_animation("#parsons-1-block-0") 
+        self.wait_for_animation("#parsons-1-block-0")
         parsons_problem = self.driver.find_element_by_id("parsons-1")
         answer_initial = answer.get_attribute('innerHTML')
         source_initial = source.get_attribute('innerHTML')
-        helpBtn.click() 
+        helpBtn.click()
         self.assertTrue(self.wait_and_close_alert())
         answer_after = answer.get_attribute('innerHTML')
         self.assertEquals(answer_initial, answer_after)
         source_after = source.get_attribute('innerHTML')
         self.assertEquals(source_initial, source_after)
-
 
     def test_numbering(self):
         self.driver.get(self.host + "/index.html")
@@ -154,17 +150,14 @@ class ParsonsTests(RunestoneTestCase):
         self.assertEquals(len(nlb.find_elements_by_class_name("labels")), 0) # no label
         self.assertEquals(len(nlb.find_elements_by_class_name("lines")), 1) # has lines
 
-
     def wait_for_animation(self, selector):
         is_animation_in_progress = self.is_element_animated(selector)
         while is_animation_in_progress is True:
             time.sleep(.5)
             is_animation_in_progress = self.is_element_animated(selector)
 
-
     def is_element_animated(self, selector):
         return self.driver.execute_script("return jQuery('" + selector + "').is(':animated');")
-
 
     def f_exists(self, selector_id):
         try:
@@ -172,7 +165,6 @@ class ParsonsTests(RunestoneTestCase):
         except NoSuchElementException:
             return False
         return True
-
 
     def wait_and_close_alert(self, timeout = 3):
         try:
@@ -184,7 +176,7 @@ class ParsonsTests(RunestoneTestCase):
             return True
         except TimeoutException:
             return False
-        
-        
+
+
 if __name__ == '__main__':
     unittest.main()
