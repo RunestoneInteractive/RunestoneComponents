@@ -876,8 +876,8 @@ ActiveCode.prototype.addErrorMessage = function (err) {
 
 var errorText = {};
 
-errorText.ParseError = $.i18n("msg_sctivecode_parse_error");
-errorText.ParseErrorFix = $.i18n( "msg_sctivecode_parse_error_fix");
+errorText.ParseError = $.i18n("msg_activecode_parse_error");
+errorText.ParseErrorFix = $.i18n( "msg_activecode_parse_error_fix");
 errorText.TypeError = $.i18n("msg_activecode_type_error");
 errorText.TypeErrorFix = $.i18n("msg_activecode_type_error_fix");
 errorText.NameError = $.i18n("msg_activecode_name_error");

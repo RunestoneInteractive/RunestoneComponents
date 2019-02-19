@@ -1,5 +1,8 @@
 $.i18n().load({
     "en": {
+        "msg_activecode_error_title": "Error",
+        "msg_activecode_description_title": "Description",
+        "msg_activecode_to_fix_title": "To Fix",
         "msg_activecode_load_history": "Load History",
         "msg_activecode_audio_tour": "Audio Tour",
         "msg_activecode_loaded_code": "Loaded your saved code.",
