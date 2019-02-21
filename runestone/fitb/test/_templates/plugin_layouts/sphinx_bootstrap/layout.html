@@ -6,18 +6,16 @@
     '_static'+'/bootstrap-3.0.0/js/bootstrap.min.js',
     '_static'+'/bootstrap-sphinx.js',
     '_static'+'/waypoints.min.js',
-    '_static'+'/rangy-core.js',
-    '_static'+'/rangy-textrange.js',
-    '_static'+'/rangy-cssclassapplier.js',
     '_static'+'/user-highlights.js',
     '_static'+'/jquery.idle-timer.js',
     '_static'+'/processing-1.4.1.min.js',
     '_static'+'/jquery.hotkey.js',
-    '_static'+'/jquery-migrate-1.2.1.min.js'
+    '_static'+'/jquery-migrate-1.2.1.min.js',
+    '_static'+'/presenter_mode.js',
   ]
 %}
 
-{% set css_files = ['_static/bootstrap-3.0.0/css/bootstrap.min.css'] + css_files %}
+{% set css_files = ['_static/bootstrap-3.0.0/css/bootstrap.min.css', '_static/presenter_mode.css'] + css_files %}
 {% if theme_bootswatch_theme %}
   {% set css_files = css_files +
     ['http://netdna.bootstrapcdn.com/bootswatch/2.3.1/' + theme_bootswatch_theme + '/bootstrap.min.css']
@@ -54,20 +52,21 @@
 
       <div>
         <a class="brand-logo" style='background: transparent url("{{pathto('_static/img/logo_small.png', 1)}}") no-repeat 0px 0px;' href="/{{appname}}/default/user/login">&nbsp; </a>
-        <a class="navbar-brand" href="{{ pathto(master_doc) }}">{% if theme_navbar_title -%}{{ theme_navbar_title|e }}{%- else -%}{{ project|e }}{%- endif -%}</a>
+        <a class="navbar-brand" href="{{ pathto(master_doc) }}" aria-label="index-page">{% if theme_navbar_title -%}{{ theme_navbar_title|e }}{%- else -%}{{ project|e }}{%- endif -%}</a>
       </div>
     </div>
 
-    <div class="navbar-collapse collapse navbar-ex1-collapse">
 
-      <ul class="nav navbar-nav navbar-right">
+
+    <div class="navbar-collapse collapse navbar-ex1-collapse">
+      <ul class="nav navbar-nav navbar-right" >
 
         <li class="divider-vertical"></li>
 
         <!-- social media dropdown -->
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
-            <i class="glyphicon glyphicon-share-alt" style="opacity: 0.9"></i>
+            <i class="glyphicon glyphicon-globe" style="opacity: 0.9"></i>
           </a>
           <ul class="dropdown-menu social-menu">
               <li>
@@ -107,13 +106,11 @@
           </a>
           <ul class='dropdown-menu'>
             {% if 'overview' in course_id %}
-                <li><a href='/{{appname}}/static/{{course_id}}/overview.html'>Table of Contents</a></li>
+                <li><a href='/{{appname}}/static/{{course_id}}/overview.html' aria-label="index-page">Table of Contents</a></li>
             {% else: %}
-                <li><a href='{{ pathto(master_doc) }}'>Table of Contents</a></li>
+                <li><a href='{{ pathto(master_doc) }}' aria-label="index-page">Table of Contents</a></li>
             {% endif %}
             <li><a href='/{{appname}}/static/{{course_id}}/genindex.html'>Book Index</a></li>
-            <li class="divider"></li>
-            <li id="scratch_ac_link"><a href="javascript:ACFactory.toggleScratchActivecode()">Scratch ActiveCode</a></li>
             <li class="divider"></li>
             <li style="width: 240px;">
               <form class="navbar-search" style="margin:10px;" action="{{ pathto('search') }}" method="get">
@@ -144,6 +141,8 @@
           <ul class="dropdown-menu user-menu">
             <li><span class='loggedinuser'></span></li>
             <li class="divider"></li>
+            <li><a href='{{course_url}}/{{appname}}/assignments/practice'>Practice</a></li>
+            <li class="divider"></li>
             <li><a href='/{{appname}}/default/courses'>Change Course</a></li>
             <li class="divider"></li>
             <li><a href='{{course_url}}/{{appname}}/mygroup/initiateGroup' id="joinGroupLink">Join a Study Group</a></li>
@@ -162,6 +161,14 @@
         </li>
         <!-- end user account dropdown -->
         {% endif %}
+        <li class="divider-vertical"></li>
+        <!-- <li id="scratch_ac_link"><a href="javascript:ACFactory.toggleScratchActivecode()">Scratch ActiveCode</a></li> -->
+
+        <!-- <li class="dropdown">             -->
+          <li id="scratch_ac_link" class="dropdown"><a href="javascript:ACFactory.toggleScratchActivecode()">
+              <i class="glyphicon glyphicon-pencil" style="opacity:0.9;"></i></a></li>
+        <!-- </li> -->
+
         <li class="divider-vertical"></li>
 
         <!-- help menu dropdown -->
@@ -182,6 +189,12 @@
         <li class="divider-vertical"></li>
 
       </ul>
+      </div>
+
+
+
+
+
 
       <ul class="nav navbar-nav">
         <li class="divider-vertical"></li>
@@ -205,7 +218,7 @@
 {%- block extrahead %}
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
-<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+<meta content='width=device-width, initial-scale=1.0' name='viewport' />
 <link rel="shortcut icon" href="/{{appname}}/static/favicon.ico" type="image/ico" />
 
 <script type="text/javascript">
@@ -221,7 +234,14 @@
   eBookConfig.useRunestoneServices = {{ use_services }};
   eBookConfig.python3 = {{ python3 }};
   eBookConfig.basecourse = '{{ basecourse }}';
+  eBookConfig.acDefaultLanguage = '{{ default_ac_lang }}' ? '{{ default_ac_lang }}' : 'python'
   eBookConfig.runestone_version = '{{ runestone_version }}';
+  eBookConfig.jobehost = '{{jobe_server}}';
+  eBookConfig.proxyuri_runs = '{{proxy_uri_runs}}';
+  eBookConfig.proxyuri_files = '{{proxy_uri_files}}';
+  eBookConfig.downloadsEnabled = {{downloads_enabled}};
+  eBookConfig.enable_chatcodes = {{enable_chatcodes}} ? {{ enable_chatcodes }} : false;
+  eBookConfig.allow_pairs = {{allow_pairs}} ? {{allow_pairs}} : false;
 </script>
 
 <div id="fb-root"></div>
@@ -234,7 +254,6 @@
     fjs.parentNode.insertBefore(js, fjs);
   }(document, 'script', 'facebook-jssdk'));
 </script>
-
 
 {% endblock %}
 

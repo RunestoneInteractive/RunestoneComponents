@@ -38,14 +38,13 @@ def init():
     conf_dict['default_ac_lang'] = click.prompt("Default ActiveCode language", default="python")
     conf_dict['basecourse'] = conf_dict['project_name']
     if conf_dict['use_services'] == "true":
-        conf_dict['login_req'] = click.prompt("Require login  ", default="false")
+        conf_dict['login_req'] = click.prompt("Require login ", default="false")
         conf_dict['master_url'] = click.prompt("URL for ajax server ", default="http://127.0.0.1:8000")
-        conf_dict['logging'] = click.prompt("Log student actions? ", type=bool, default=True)
-        conf_dict['log_level'] = 10 if conf_dict['logging'] else 0
+        conf_dict['log_level'] = 10 if click.prompt("Log student actions? ", type=bool, default=True) else 0
         conf_dict['dburl'] = click.prompt("DataBase Connection URL", default="postgresql://user:password@localhost/runestone")
         conf_dict['enable_chatcodes'] = click.prompt("Enable Enable the chatcode feature)",type=bool, default=False)
         # See the comments in ``conf.tmpl`` on server-side grading for an explanation of these conditions.
-        if conf_dict['logging'] and conf_dict['login_req']:
+        if conf_dict['log_level'] and conf_dict['login_req']:
             conf_dict['server_side_grading'] = click.prompt("Grade questions on the server where possible?", type=bool, default=False)
         else:
             conf_dict['server_side_grading'] = False
@@ -53,7 +52,6 @@ def init():
     else:
         conf_dict['login_req'] = "false"
         conf_dict['master_url'] = "http://127.0.0.1:8000"
-        conf_dict['logging'] = False
         conf_dict['log_level'] = 0
         conf_dict['dburl'] = ""
         conf_dict['enable_chatcodes'] = 'false'
@@ -80,7 +78,7 @@ def init():
     with codecs.open('conf.py','w',encoding='utf8') as pvf:
         pvf.write(config_final)
 
-    print("Done.  Type runestone build to build your project")
+    print("Done. Type runestone build to build your project")
 
 @cli.command()
 @click.option('--all/--not-all', default=False, help="build all")

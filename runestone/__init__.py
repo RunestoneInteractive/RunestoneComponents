@@ -83,9 +83,9 @@ def build(options):
     rc = paverutils.run_sphinx(options,'build')
 
     if rc == 0 or rc is None:
-        print("Done, {} build successful".format(options.build.project_name))
+        print("Done, build successful")
     else:
-        print("Error in building {} code {}".format(options.build.project_name, rc))
+        print("Error in building code {}".format(rc))
 
     return rc
 
