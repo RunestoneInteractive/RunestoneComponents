@@ -2592,6 +2592,7 @@ function openPyCanvas() {
 
         var div3 = document.createElement("div");
         $(div3).addClass("modal-content");
+        $(div3).css("background-color", "#E8E8E8");
         if (screen.width < 900) 
                 $(div3).height("100%");
         div2.appendChild(div3);
@@ -2605,12 +2606,13 @@ function openPyCanvas() {
         }
         var div6 = document.createElement("div");
         $(div6).addClass("modal-footer");
+        $(div6).css("border-top: none !important;")
         var div7 = document.createElement("div");
         $(div7).addClass("col-md-8");
         var div8 = document.createElement("div");
         $(div8).addClass("col-md-4");
         var header = document.createElement("h5");
-        $(header).addClass("modal-title float-left");
+        $(header).addClass("modal-title float-left ml-1");
         Sk.title_container = header;
 
         div3.appendChild(div4);
@@ -2656,6 +2658,7 @@ function createArrows(div) {
         $(arrows[i]).addClass("btn btn-primary btn-arrow");
         var ic = document.createElement("i");
         $(ic).addClass("fas fa-arrow-" + direction[i]);
+        $(ic).width(11);
         arrows[i].appendChild(ic);
     }
     var swapIcon = function (id) {
