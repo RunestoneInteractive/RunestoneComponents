@@ -1084,6 +1084,15 @@ ActiveCode.prototype.runProg = function (params = [0]) {
     Sk.hardInterrupt = false;
     Sk.builtin.KeyboardInterrupt = null;
     var prog = this.buildProg(params[0]);
+    
+
+    if (prog.indexOf("???") != -1) {
+        if (!confirm('Treba da umesto ??? otkucas svoj kod. \nAko si namerno stavio ??? mozes da izvrsis kod. Da li zelis da izvrsis kod?')) {
+            return;
+        }
+        
+    }
+   
     var saveCode = "True";
     var scrubber_dfd, history_dfd, skulpt_run_dfd;
     console.log("starting a new run of " + this.divid);
@@ -1108,7 +1117,7 @@ ActiveCode.prototype.runProg = function (params = [0]) {
     (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = this.modaloutput ? this.canvasDiv : this.graphics;
     if (this.modaloutput) {
         pygameModalUse = true;
-        
+
     }
     else {
         pygameModalUse = false;
@@ -1124,13 +1133,13 @@ ActiveCode.prototype.runProg = function (params = [0]) {
             break;
         case 2:
             $(this.playTaskButton).attr('disabled', 'disabled');
-            break;      
-    } 
+            break;
+    }
     $(this.historyScrubber).off("slidechange");
     $(this.historyScrubber).slider("disable");
     //if (!this.modaloutput) {
-        //$(this.codeDiv).switchClass("col-md-12", "col-md-7", {duration: 500, queue: false});
-        $(this.outDiv).show({duration: 700, queue: false});
+    //$(this.codeDiv).switchClass("col-md-12", "col-md-7", {duration: 500, queue: false});
+    $(this.outDiv).show({ duration: 700, queue: false });
     //}
     // var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
     // history_dfd = __ret.history_dfd;
@@ -1156,7 +1165,7 @@ ActiveCode.prototype.runProg = function (params = [0]) {
         }
     };
     skulpt_run_dfd = Sk.misceval.asyncToPromise(function () {
-        
+
         return Sk.importMainWithBody("<stdin>", false, prog, true);
     }, { "*": interruptHandler });
 
@@ -1164,43 +1173,43 @@ ActiveCode.prototype.runProg = function (params = [0]) {
     // before we start logging stuff.
     var self = this;
     Promise.all([skulpt_run_dfd, history_dfd]).then((function (mod) { // success
-            $(this.runButton).removeAttr('disabled');
-            switch (params[0]) {
-                case 0:
-                    $(this.runButton).removeAttr('disabled');
-                    break;
-                case 1:
-                    $(this.testButton).removeAttr('disabled');
-                    break;
-                case 2:
-                    $(this.playTaskButton).removeAttr('disabled');
-                    break;
-            }
+        $(this.runButton).removeAttr('disabled');
+        switch (params[0]) {
+            case 0:
+                $(this.runButton).removeAttr('disabled');
+                break;
+            case 1:
+                $(this.testButton).removeAttr('disabled');
+                break;
+            case 2:
+                $(this.playTaskButton).removeAttr('disabled');
+                break;
+        }
 
-            if (this.modaloutput) {
-                PygameLib.running = false;
-                $('.modal').modal('hide');
-            }
-            // if (this.slideit) {
-            //     $(this.historyScrubber).on("slidechange", this.slideit.bind(this));
-            // }
-            // $(this.historyScrubber).slider("enable");
-            $(this.output).css("visibility", "visible");
-            $(this.output).parent().show({ duration: 700, queue: false });
+        if (this.modaloutput) {
+            PygameLib.running = false;
+            $('.modal').modal('hide');
+        }
+        // if (this.slideit) {
+        //     $(this.historyScrubber).on("slidechange", this.slideit.bind(this));
+        // }
+        // $(this.historyScrubber).slider("enable");
+        $(this.output).css("visibility", "visible");
+        $(this.output).parent().show({ duration: 700, queue: false });
 
 
-            Sk.builtin.KeyboardInterrupt = null;
-            Sk.hardInterrupt = false;
-            this.logRunEvent({
-                'div_id': this.divid,
-                'code': this.editor.getValue(),
-                'lang': this.language,
-                'errinfo': 'success',
-                'to_save': saveCode,
-                'prefix': this.pretext,
-                'suffix': this.suffix
-            }); // Log the run event
-        }).bind(this),
+        Sk.builtin.KeyboardInterrupt = null;
+        Sk.hardInterrupt = false;
+        this.logRunEvent({
+            'div_id': this.divid,
+            'code': this.editor.getValue(),
+            'lang': this.language,
+            'errinfo': 'success',
+            'to_save': saveCode,
+            'prefix': this.pretext,
+            'suffix': this.suffix
+        }); // Log the run event
+    }).bind(this),
         (function (err) {  // fail
             $(self.runButton).removeAttr('disabled');
             // $(self.historyScrubber).on("slidechange", self.slideit.bind(self));
@@ -1223,13 +1232,14 @@ ActiveCode.prototype.runProg = function (params = [0]) {
             Sk.hardInterrupt = false;
 
         }).bind(this));
-    
+
     if (typeof (allVisualizers) != "undefined") {
         $.each(allVisualizers, function (i, e) {
             e.redrawConnectors();
         });
     }
-   
+    
+    
 };
 
 JSActiveCode.prototype = new ActiveCode();
