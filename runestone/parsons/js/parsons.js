@@ -1438,7 +1438,7 @@ Parsons.prototype.initializeAreas = function(sourceBlocks, answerBlocks, options
 				addition = 2.1;
 			areaHeight += (item.outerHeight(true)+height_add*addition);
 			areaWidth = Math.max(areaWidth, item.outerWidth(true));
-			console.log(item.outerHeight(true));
+			
 		};
 	}
 	for (i = 0; i < blocks.length; i++) {
