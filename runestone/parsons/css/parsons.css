@@ -178,6 +178,11 @@
     background-color: transparent;
 }
 
+.parsons-text code {
+	float: none;
+}
+
+
 .parsons .block p {
 	margin: 0;
 }
@@ -264,8 +269,8 @@
 
 .block-label {
 	font-family: "Courier";
-	font-size: 10px;
-	color: #b0b0b0;
+	font-size: 90%;
+	color: #7e7ee7;
 	vertical-align: top;
 	white-space: pre;
 }
