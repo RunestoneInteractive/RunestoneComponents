@@ -71,6 +71,7 @@ class RevealDirective(RunestoneIdDirective):
    :hidetitle: Text on the 'hide' button--default is "Hide"
    :modal: Boolean--if included, revealed display will be a modal
    :modaltitle: Title of modal dialog window--default is "Message from the author"
+   :instructoronly: Only show button and contents to instructors
 
    Content  everything here will be hidden until revealed
    Content  It can be a lot...
