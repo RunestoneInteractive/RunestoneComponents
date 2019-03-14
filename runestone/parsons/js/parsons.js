@@ -1416,17 +1416,29 @@ Parsons.prototype.initializeAreas = function(sourceBlocks, answerBlocks, options
 	// Establish the width and height of the droppable areas
 	var item, maxFunction;
 	areaHeight = 6;
+	var height_add = 0;
+	if(this.options.numbered != undefined) {
+		height_add = 1;
+	}
 	if (this.options.language == "natural") {
 		areaWidth = 300;
 		maxFunction = function(item) {
 			item.width(areaWidth - 22);
-			areaHeight += item.outerHeight(true);
+			var addition = 3.8;
+			if (item.outerHeight(true) != 38)
+				addition = 2.1*(item.outerHeight(true)-38)/21;
+			areaHeight += (item.outerHeight(true)+height_add*addition);
+
 		};
 	} else {
 		areaWidth = 0;
 		maxFunction = function(item) {
-			areaHeight += item.outerHeight(true);
+			var addition = 3.8;
+			if (item.outerHeight(true) != 38)
+				addition = 2.1;
+			areaHeight += (item.outerHeight(true)+height_add*addition);
 			areaWidth = Math.max(areaWidth, item.outerWidth(true));
+			
 		};
 	}
 	for (i = 0; i < blocks.length; i++) {
@@ -1435,6 +1447,7 @@ Parsons.prototype.initializeAreas = function(sourceBlocks, answerBlocks, options
 	this.areaWidth = areaWidth;
 	if(this.options.numbered != undefined) {
 		this.areaWidth += 25;
+		//areaHeight += (blocks.length);
 	}
 	this.areaHeight = areaHeight;
 	$(this.sourceArea).css({
