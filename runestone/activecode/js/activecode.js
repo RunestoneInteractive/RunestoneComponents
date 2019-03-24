@@ -988,33 +988,34 @@ ActiveCode.prototype.outputfun = function(text) {
         $(this.output).append(text);
     };
 
-ActiveCode.prototype.filewriter = function(bytes, name, pos) {
-    let filecomponent = document.getElementById(name);
+ActiveCode.prototype.filewriter = function(fobj, bytes) {
+    let filecomponent = document.getElementById(fobj.name);
     if (! filecomponent) {
         let container = document.createElement('div')
         $(container).addClass('runestone')
         let tab = document.createElement('div');
         $(tab).addClass('datafile_caption');
-        tab.innerHTML = `Data file: <code>${name}</code>`;
+        tab.innerHTML = `Data file: <code>${fobj.name}</code>`;
         filecomponent = document.createElement('textarea')
         filecomponent.rows = 10;
         filecomponent.cols = 50;
-        filecomponent.id = name;
+        filecomponent.id = fobj.name;
         $(filecomponent).css('margin-bottom','5px');
         $(filecomponent).addClass('ac_output');
         container.appendChild(tab);
         container.appendChild(filecomponent);
         this.outerDiv.appendChild(container)
     } else {
-        if (pos == 0) {
+        if (fobj.pos$ == 0) {
             $(filecomponent).val("")
         }
     }
 
     let current = $(filecomponent).val()
-    current = current + bytes;
+    current = current + bytes.v;
     $(filecomponent).val(current);
     $(filecomponent).css('display', 'block');
+    fobj.pos$ = current.length;
 
     return current.length;
 }
@@ -1119,8 +1120,10 @@ ActiveCode.prototype.runProg = function () {
     Sk.configure({
         output: this.outputfun.bind(this),
         read: this.fileReader,
-        filewriter: this.filewriter.bind(this),
-        python3: this.python3,
+        filewrite: this.filewriter.bind(this),
+        __future__: Sk.python3,
+        nonreadopen : true,
+//        python3: this.python3,
         imageProxy: 'http://image.runestone.academy:8080/320x',
         inputfunTakesPrompt: true,
         jsonpSites : ['https://itunes.apple.com'],
