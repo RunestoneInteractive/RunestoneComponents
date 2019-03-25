@@ -4,8 +4,8 @@
  */
 
 var isMouseDown = false;
-document.onmousedown = function() { isMouseDown = true };
-document.onmouseup   = function() { isMouseDown = false };
+document.onmousedown = function () { isMouseDown = true };
+document.onmouseup = function () { isMouseDown = false };
 var edList = {};
 
 ActiveCode.prototype = new RunestoneBase();
@@ -17,11 +17,11 @@ var chatcodesServer = 'chat.codes';
 function ActiveCode(opts) {
     if (opts) {
         this.init(opts);
-        }
     }
+}
 
-ActiveCode.prototype.init = function(opts) {
-    RunestoneBase.apply( this, arguments );  // call parent constructor
+ActiveCode.prototype.init = function (opts) {
+    RunestoneBase.apply(this, arguments);  // call parent constructor
     RunestoneBase.prototype.init.apply(this, arguments);
     var suffStart;
     var orig = opts.orig;
@@ -67,16 +67,16 @@ ActiveCode.prototype.init = function(opts) {
     }
     else if (this.includehsrc) {
         this.code = this.code + "====\n" + this.includehsrc;
-    } 
+    }
     else if (this.includexsrc) {
         var tmp = this.includexsrc.split('\n');
         var c = 0;
         var insertBefore = "";
         var insertAfter = "";
         var generalInitSec = -1;
-        var varInitSec     = -1;
-        var mainSec        = -1;
-        var afterMainSec   = -1;
+        var varInitSec = -1;
+        var mainSec = -1;
+        var afterMainSec = -1;
         for (var i = 0; i < tmp.length; i++) {
             if (tmp[i].indexOf('acsection: general-init') > -1) {
                 generalInitSec = c;
@@ -105,30 +105,30 @@ ActiveCode.prototype.init = function(opts) {
         this.code = insertBefore + this.code + insertAfter + "====\n" + this.includexsrc;
     }
 
-    if(this.chatcodes && eBookConfig.enable_chatcodes) {
-        if(!socket) {
-            socket = new WebSocket('wss://'+chatcodesServer);
+    if (this.chatcodes && eBookConfig.enable_chatcodes) {
+        if (!socket) {
+            socket = new WebSocket('wss://' + chatcodesServer);
         }
-        if(!connection) {
+        if (!connection) {
             connection = new sharedb.Connection(socket);
         }
-        if(!doc) {
+        if (!doc) {
             doc = connection.get('chatcodes', 'channels');
         }
     }
 
-    if(this.graderactive) {
+    if (this.graderactive) {
         this.hidecode = false;
     }
 
-    if(this.includes !== undefined) {
+    if (this.includes !== undefined) {
         this.includes = this.includes.split(/\s+/);
     }
 
     suffStart = this.code.indexOf('====');
     if (suffStart > -1) {
-        this.suffix = this.code.substring(suffStart+5);
-        this.code = this.code.substring(0,suffStart);
+        this.suffix = this.code.substring(suffStart + 5);
+        this.code = this.code.substring(0, suffStart);
     }
     var re = /#\s-\*-.+(acsection:).+-\*-/
     this.markedText = false;
@@ -139,9 +139,9 @@ ActiveCode.prototype.init = function(opts) {
         var replacement = "";
         this.generalInitContent = "";
         this.generalInitSec = -1;
-        this.varInitSec     = -1;
-        this.mainSec        = -1;
-        this.afterMainSec   = -1;
+        this.varInitSec = -1;
+        this.mainSec = -1;
+        this.afterMainSec = -1;
         this.mainSecContent = "";
         for (var i = 0; i < tmp.length; i++) {
             if (tmp[i].indexOf('acsection: general-init') > -1) {
@@ -176,7 +176,7 @@ ActiveCode.prototype.init = function(opts) {
     this.createEditor();
     this.createOutput();
     this.createControls();
-    
+
     if ($(orig).data('caption')) {
         this.caption = $(orig).data('caption');
     } else {
@@ -192,7 +192,7 @@ ActiveCode.prototype.init = function(opts) {
 ActiveCode.prototype.createEditor = function (index) {
     this.containerDiv = document.createElement('div');
     var linkdiv = document.createElement('div');
-    linkdiv.id = this.divid.replace(/_/g,'-').toLowerCase();  // :ref: changes _ to - so add this as a target
+    linkdiv.id = this.divid.replace(/_/g, '-').toLowerCase();  // :ref: changes _ to - so add this as a target
     $(this.containerDiv).addClass("ac_section alert alert-warning");
     $(this.containerDiv).attr("style", "padding: 0 !important; margin-top: 15px;");
     var codeDiv = document.createElement("div");
@@ -211,24 +211,24 @@ ActiveCode.prototype.createEditor = function (index) {
         value: this.passivecodestr == 'onlymain' ? this.mainSecContent : this.code, lineNumbers: true,
         mode: this.containerDiv.lang, indentUnit: 4,
         matchBrackets: true, autoMatchParens: true,
-        extraKeys: {"Tab": "indentMore", "Shift-Tab": "indentLess"},
-        readOnly: this.passivecode 
+        extraKeys: { "Tab": "indentMore", "Shift-Tab": "indentLess" },
+        readOnly: this.passivecode
     });
-    
+
     if (this.markedText && !this.passivecode) {
         this.lineHandles = [];
-        for (var i  = this.generalInitSec; i < this.mainSec; i++) {
+        for (var i = this.generalInitSec; i < this.mainSec; i++) {
             this.lineHandles.push(editor.addLineClass(i, "background", "shaded"));
         }
-        editor.markText({line: 0, ch: 0}, {line: this.mainSec, ch: 0}, {
+        editor.markText({ line: 0, ch: 0 }, { line: this.mainSec, ch: 0 }, {
             readOnly: true,
             inclusiveLeft: true,
             atomic: true
         });
-        for (var i  = this.afterMainSec; i < editor.lineCount() + 1; i++) {
+        for (var i = this.afterMainSec; i < editor.lineCount() + 1; i++) {
             this.lineHandles.push(editor.addLineClass(i, "background", "shaded"));
         }
-        editor.markText({line: this.afterMainSec, ch: 0}, {line: editor.lineCount(), ch: 0}, {
+        editor.markText({ line: this.afterMainSec, ch: 0 }, { line: editor.lineCount(), ch: 0 }, {
             readOnly: true,
             inclusiveLeft: true,
             inclusiveRight: true,
@@ -238,7 +238,7 @@ ActiveCode.prototype.createEditor = function (index) {
 
     // Make the editor resizable
     $(editor.getWrapperElement()).resizable({
-        resize: function() {
+        resize: function () {
             editor.setSize($(this).outerWidth() + event.movementX, $(this).outerHeight() + event.movementY);
             editor.refresh();
         }
@@ -249,7 +249,7 @@ ActiveCode.prototype.createEditor = function (index) {
         if (editor.acEditEvent == false || editor.acEditEvent === undefined) {
             $(editor.getWrapperElement()).css('border-top', '2px solid #b43232');
             $(editor.getWrapperElement()).css('border-bottom', '2px solid #b43232');
-            this.logBookEvent({'event': 'activecode', 'act': 'edit', 'div_id': this.divid});
+            this.logBookEvent({ 'event': 'activecode', 'act': 'edit', 'div_id': this.divid });
         }
         editor.acEditEvent = true;
     }).bind(this));  // use bind to preserve *this* inside the on handler.
@@ -259,10 +259,10 @@ ActiveCode.prototype.createEditor = function (index) {
         var code = (e.keyCode ? e.keyCode : e.which);
         if (code == 9 && $('textarea:focus').length === 0) {
             editor.setOption("extraKeys", {
-                "Tab": function(cm) {
+                "Tab": function (cm) {
                     $(document.activeElement).closest('.tab-content').nextSibling.focus();
                 },
-                "Shift-Tab": function(cm) {
+                "Shift-Tab": function (cm) {
                     $(document.activeElement).closest('.tab-content').previousSibling.focus();
                 }
             });
@@ -271,7 +271,7 @@ ActiveCode.prototype.createEditor = function (index) {
 
     this.editor = editor;
     if (this.hidecode) {
-        $(this.codeDiv).css("display","none");
+        $(this.codeDiv).css("display", "none");
     }
 };
 
@@ -280,7 +280,7 @@ ActiveCode.prototype.createControls = function () {
     $(ctrlDiv).addClass("ac_actions mb-2");
     $(ctrlDiv).addClass("col-md-12");
     if (!this.passivecode) {
-    // Run
+        // Run
         var butt = document.createElement("button");
         $(butt).text($.i18n("msg_activecode_run_code"));
         $(butt).addClass("btn btn-success run-button");
@@ -305,23 +305,23 @@ ActiveCode.prototype.createControls = function () {
         }
         this.runButton = butt;
         $(butt).click(this.runProg.bind(this, [0]));
-        $(butt).attr("type","button")    
+        $(butt).attr("type", "button")
 
         if (this.enabledownload || eBookConfig.downloadsEnabled) {
-        var butt = document.createElement("button");
-        $(butt).text("Download");
-        $(butt).addClass("btn save-button");
-        ctrlDiv.appendChild(butt);
-        this.downloadButton = butt;
-        $(butt).click(this.downloadFile.bind(this, this.language));
-        $(butt).attr("type","button")
+            var butt = document.createElement("button");
+            $(butt).text("Download");
+            $(butt).addClass("btn save-button");
+            ctrlDiv.appendChild(butt);
+            this.downloadButton = butt;
+            $(butt).click(this.downloadFile.bind(this, this.language));
+            $(butt).attr("type", "button")
         }
 
         if (!this.hidecode && !this.hidehistory) {
             var butt = document.createElement("button");
             $(butt).text($.i18n("msg_activecode_load_history"));
             $(butt).addClass("btn btn-default");
-            $(butt).attr("type","button")
+            $(butt).attr("type", "button")
             ctrlDiv.appendChild(butt);
             this.histButton = butt;
             $(butt).click(this.addHistoryScrubber.bind(this));
@@ -330,12 +330,12 @@ ActiveCode.prototype.createControls = function () {
             }
         }
 
-        if ($(this.origElem).data('gradebutton') && ! this.graderactive) {
+        if ($(this.origElem).data('gradebutton') && !this.graderactive) {
             butt = document.createElement("button");
             $(butt).addClass("ac_opt btn btn-default");
             $(butt).text($.i18n("msg_activecode_show_feedback"));
-            $(butt).css("margin-left","10px");
-            $(butt).attr("type","button")
+            $(butt).css("margin-left", "10px");
+            $(butt).attr("type", "button")
             this.gradeButton = butt;
             ctrlDiv.appendChild(butt);
             $(butt).click(this.createGradeSummary.bind(this))
@@ -347,10 +347,10 @@ ActiveCode.prototype.createControls = function () {
             $(butt).addClass("ac_opt btn btn-default");
             $(butt).text($.i18n("msg_activecode_show_code"));
             $(butt).css("margin-left", "10px");
-            $(butt).attr("type","button")
+            $(butt).attr("type", "button")
             this.showHideButt = butt;
             ctrlDiv.appendChild(butt);
-            $(butt).click( (function() {
+            $(butt).click((function () {
                 $(this.codeDiv).toggle();
                 if (this.historyScrubber == null) {
                     this.addHistoryScrubber(true);
@@ -371,7 +371,7 @@ ActiveCode.prototype.createControls = function () {
         }
 
         // CodeLens
-        if ($(this.origElem).data("codelens") && ! this.graderactive) {
+        if ($(this.origElem).data("codelens") && !this.graderactive) {
             butt = document.createElement("button");
             $(butt).addClass("ac_opt btn btn-default");
             $(butt).text($.i18n("msg_activecode_show_codelens"));
@@ -379,17 +379,6 @@ ActiveCode.prototype.createControls = function () {
             ctrlDiv.appendChild(butt);
             $(butt).click(this.showCodelens.bind(this));
         }
-        // CodeCoach
-        // bnm - disable code coach until it is revamped  2017-7-22
-        // if (this.useRunestoneServices && $(this.origElem).data("coach")) {
-        //     butt = document.createElement("button");
-        //     $(butt).addClass("ac_opt btn btn-default");
-        //     $(butt).text("Code Coach");
-        //     $(butt).css("margin-left", "10px");
-        //     this.coachButton = butt;
-        //     ctrlDiv.appendChild(butt);
-        //     $(butt).click(this.showCodeCoach.bind(this));
-        // }
 
         // Audio Tour
         if ($(this.origElem).data("audio")) {
@@ -399,47 +388,47 @@ ActiveCode.prototype.createControls = function () {
             $(butt).css("margin-left", "10px");
             this.atButton = butt;
             ctrlDiv.appendChild(butt);
-            $(butt).click((function() {new AudioTour(this.divid, this.code, 1, $(this.origElem).data("audio"))}).bind(this));
+            $(butt).click((function () { new AudioTour(this.divid, this.code, 1, $(this.origElem).data("audio")) }).bind(this));
         }
 
-        if(this.chatcodes && eBookConfig.enable_chatcodes) {
+        if (this.chatcodes && eBookConfig.enable_chatcodes) {
             var chatBar = document.createElement("div");
             var channels = document.createElement("span");
-            var topic = window.location.host+'-'+this.divid;
+            var topic = window.location.host + '-' + this.divid;
             ctrlDiv.appendChild(chatBar);
             $(chatBar).text("Chat: ");
             $(chatBar).append(channels);
             butt = document.createElement("a");
             $(butt).addClass("ac_opt btn btn-default");
             $(butt).text("Create Channel");
-            $(butt).css("margin-left","10px");
-            $(butt).attr("type","button")
-            $(butt).attr("target","_blank")
-            $(butt).attr("href", 'http://'+chatcodesServer+"/new?"+$.param({
-                topic: window.location.host+'-'+this.divid,
+            $(butt).css("margin-left", "10px");
+            $(butt).attr("type", "button")
+            $(butt).attr("target", "_blank")
+            $(butt).attr("href", 'http://' + chatcodesServer + "/new?" + $.param({
+                topic: window.location.host + '-' + this.divid,
                 code: this.editor.getValue(),
                 lang: 'Python'
             }));
             this.chatButton = butt;
             chatBar.appendChild(butt);
-            var updateChatCodesChannels = function() {
+            var updateChatCodesChannels = function () {
                 var data = doc.data;
                 var i = 1;
                 $(channels).html('');
-                data['channels'].forEach(function(channel) {
-                    if(!channel.archived && topic === channel.topic) {
+                data['channels'].forEach(function (channel) {
+                    if (!channel.archived && topic === channel.topic) {
                         var link = $('<a />');
-                        var href = 'http://'+chatcodesServer+"/"+channel.channelName;
+                        var href = 'http://' + chatcodesServer + "/" + channel.channelName;
                         link.attr({
                             'href': href,
                             'target': '_blank'
                         });
-                        link.text(' ' + channel.channelName + '('+i+') ');
+                        link.text(' ' + channel.channelName + '(' + i + ') ');
                         $(channels).append(link);
                         i++;
                     }
                 });
-                if(i===1) {
+                if (i === 1) {
                     $(channels).text('(no active converstations on this problem)');
                 }
             };
@@ -452,7 +441,7 @@ ActiveCode.prototype.createControls = function () {
         var button = document.createElement("button");
         $(button).addClass("btn btn-success btn-copy float-right");
         $(button).text($.i18n("msg_activecode_copy"));
-        $(button).on('click', (function() {
+        $(button).on('click', (function () {
             var $tempInput = $("<textarea>");
             $("body").append($tempInput);
             $tempInput.val(this.editor.getValue()).select();
@@ -473,22 +462,22 @@ ActiveCode.prototype.createControls = function () {
 
 ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
 
-    var data = {acid: this.divid};
+    var data = { acid: this.divid };
     var deferred = jQuery.Deferred();
 
     if (this.sid !== undefined) {
         data['sid'] = this.sid;
     }
     console.log("before get hist");
-    var helper = function() {
+    var helper = function () {
         console.log("making a new scrubber");
         var scrubberDiv = document.createElement("div");
-        $(scrubberDiv).css("display","inline-block");
-        $(scrubberDiv).css("margin-left","10px");
-        $(scrubberDiv).css("margin-right","10px");
+        $(scrubberDiv).css("display", "inline-block");
+        $(scrubberDiv).css("margin-left", "10px");
+        $(scrubberDiv).css("margin-right", "10px");
         $(scrubberDiv).width("180px");
         var scrubber = document.createElement("div");
-        this.slideit = function() {
+        this.slideit = function () {
             console.log("slideit was called");
             this.editor.setValue(this.history[$(scrubber).slider("value")]);
             var curVal = this.timestamps[$(scrubber).slider("value")];
@@ -500,11 +489,11 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
             }, 4000);
         };
         $(scrubber).slider({
-            max: this.history.length-1,
-            value: this.history.length-1,
+            max: this.history.length - 1,
+            value: this.history.length - 1,
         });
-        $(scrubber).on("slide",this.slideit.bind(this));
-        $(scrubber).on("slidechange",this.slideit.bind(this));
+        $(scrubber).on("slide", this.slideit.bind(this));
+        $(scrubber).on("slidechange", this.slideit.bind(this));
         scrubberDiv.appendChild(scrubber);
 
         // If there is a deadline set then position the scrubber at the last submission
@@ -512,7 +501,7 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
         if (this.deadline) {
             let i = 0;
             let done = false;
-            while (i < this.history.length && ! done) {
+            while (i < this.history.length && !done) {
                 if ((new Date(this.timestamps[i])) > this.deadline) {
                     done = true;
                 } else {
@@ -520,11 +509,11 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
                 }
             }
             i = i - 1;
-            scrubber.value = Math.max(i,0);
+            scrubber.value = Math.max(i, 0);
             this.editor.setValue(this.history[scrubber.value]);
         }
         else if (pos_last) {
-            scrubber.value = this.history.length-1;
+            scrubber.value = this.history.length - 1;
             this.editor.setValue(this.history[scrubber.value]);
         } else {
             scrubber.value = 0;
@@ -537,21 +526,21 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
         console.log("resoving deferred in addHistoryScrubber");
         deferred.resolve();
     }.bind(this)
-    if (eBookConfig.practice_mode){
+    if (eBookConfig.practice_mode) {
         helper();
-        }
-    else{
-        jQuery.getJSON(eBookConfig.ajaxURL + 'gethist.json', data, function(data, status, whatever) {
+    }
+    else {
+        jQuery.getJSON(eBookConfig.ajaxURL + 'gethist.json', data, function (data, status, whatever) {
             if (data.history !== undefined) {
                 this.history = this.history.concat(data.history);
                 for (t in data.timestamps) {
-                    this.timestamps.push( (new Date(data.timestamps[t])).toLocaleString() )
+                    this.timestamps.push((new Date(data.timestamps[t])).toLocaleString())
                 }
                 console.log("gethist successful history updated")
             }
         }.bind(this))
             .always(helper); // For an explanation, please look at https://stackoverflow.com/questions/336859/var-functionname-function-vs-function-functionname
-        }
+    }
     return deferred;
 };
 
@@ -564,8 +553,8 @@ ActiveCode.prototype.createOutput = function () {
     $(outDiv).addClass("ac_output col-md-12");
     this.outDiv = outDiv;
     this.output = document.createElement('pre');
-    this.output.id = this.divid+'_stdout';
-    $(this.output).css("visibility","hidden");
+    this.output.id = this.divid + '_stdout';
+    $(this.output).css("visibility", "hidden");
 
     this.graphics = document.createElement('div');
     this.graphics.id = this.divid + "_graphics";
@@ -573,7 +562,7 @@ ActiveCode.prototype.createOutput = function () {
     // This bit of magic adds an event which waits for a canvas child to be created on our
     // newly created div.  When a canvas child is added we add a new class so that the visible
     // canvas can be styled in CSS.  Which a the moment means just adding a border.
-    $(this.graphics).on("DOMNodeInserted", 'canvas', (function(e) {
+    $(this.graphics).on("DOMNodeInserted", 'canvas', (function (e) {
         $(this.graphics).addClass("visible-ac-canvas");
         $(outDiv).css("height", "400px");
     }).bind(this));
@@ -583,25 +572,25 @@ ActiveCode.prototype.createOutput = function () {
     this.outerDiv.appendChild(outDiv);
 
     var clearDiv = document.createElement("div");
-    $(clearDiv).css("clear","both");  // needed to make parent div resize properly
+    $(clearDiv).css("clear", "both");  // needed to make parent div resize properly
     this.outerDiv.appendChild(clearDiv);
 
 
     var lensDiv = document.createElement("div");
     $(lensDiv).addClass("col-md-6");
-    $(lensDiv).css("display","none");
+    $(lensDiv).css("display", "none");
     this.codelens = lensDiv;
     this.outerDiv.appendChild(lensDiv);
 
     var coachDiv = document.createElement("div");
     $(coachDiv).addClass("col-md-12");
-    $(coachDiv).css("display","none");
+    $(coachDiv).css("display", "none");
     this.codecoach = coachDiv;
     this.outerDiv.appendChild(coachDiv);
 
 
     var clearDiv = document.createElement("div");
-    $(clearDiv).css("clear","both");  // needed to make parent div resize properly
+    $(clearDiv).css("clear", "both");  // needed to make parent div resize properly
     this.outerDiv.appendChild(clearDiv);
 
     if (this.modaloutput) {
@@ -612,50 +601,52 @@ ActiveCode.prototype.createOutput = function () {
     }
 };
 
-ActiveCode.prototype.disableSaveLoad = function() {
+ActiveCode.prototype.disableSaveLoad = function () {
     $(this.saveButton).addClass('disabled');
-    $(this.saveButton).attr('title','Login to save your code');
+    $(this.saveButton).attr('title', 'Login to save your code');
     $(this.loadButton).addClass('disabled');
-    $(this.loadButton).attr('title','Login to load your code');
+    $(this.loadButton).attr('title', 'Login to load your code');
 };
 
-var languageExtensions = { python:     'py',
-                           html:       'html',
-                           javascript: 'js',
-                           java:       'java',
-                           python2:    'py',
-                           python3:    'py'};
+var languageExtensions = {
+    python: 'py',
+    html: 'html',
+    javascript: 'js',
+    java: 'java',
+    python2: 'py',
+    python3: 'py'
+};
 
 ActiveCode.prototype.downloadFile = function (lang) {
-  var fnb = this.divid;
-  var d = new Date();
-  var fileName = fnb + '_' + d.toJSON()
-                              .substring(0,10) // reverse date format
-                              .split('-')
-                              .join('') + '.' + languageExtensions[lang];
-  var code = this.editor.getValue();
+    var fnb = this.divid;
+    var d = new Date();
+    var fileName = fnb + '_' + d.toJSON()
+        .substring(0, 10) // reverse date format
+        .split('-')
+        .join('') + '.' + languageExtensions[lang];
+    var code = this.editor.getValue();
 
-  if ('Blob' in window) {
-      var textToWrite = code.replace(/\n/g, '\r\n');
-      var textFileAsBlob = new Blob([textToWrite], { type: 'text/plain' });
+    if ('Blob' in window) {
+        var textToWrite = code.replace(/\n/g, '\r\n');
+        var textFileAsBlob = new Blob([textToWrite], { type: 'text/plain' });
 
-      if ('msSaveOrOpenBlob' in navigator) {
-        navigator.msSaveOrOpenBlob(textFileAsBlob, fileName);
-      } else {
-        var downloadLink = document.createElement('a');
-        downloadLink.download = fileName;
-        downloadLink.innerHTML = 'Download File';
-        downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
-        downloadLink.style.display = 'none';
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-      }
-  } else {
-    alert('Your browser does not support the HTML5 Blob.');
-  }
+        if ('msSaveOrOpenBlob' in navigator) {
+            navigator.msSaveOrOpenBlob(textFileAsBlob, fileName);
+        } else {
+            var downloadLink = document.createElement('a');
+            downloadLink.download = fileName;
+            downloadLink.innerHTML = 'Download File';
+            downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+            downloadLink.style.display = 'none';
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+        }
+    } else {
+        alert('Your browser does not support the HTML5 Blob.');
+    }
 };
 
-ActiveCode.prototype.addCaption = function() {
+ActiveCode.prototype.addCaption = function () {
     //someElement.parentNode.insertBefore(newElement, someElement.nextSibling);
     var capDiv = document.createElement('p');
     $(capDiv).html(this.caption + " (" + this.divid + ")");
@@ -673,18 +664,20 @@ ActiveCode.prototype.loadEditor = function () {
         var res = eval(data)[0];
         if (res.source) {
             this.editor.setValue(res.source);
-            setTimeout(function() {
+            setTimeout(function () {
                 this.editor.refresh();
-            }.bind(this),500);
-            $(this.loadButton).tooltip({'placement': 'bottom',
-                             'title': $.i18n("msg_activecode_loaded_code"),
-                             'trigger': 'manual'
-                            });
+            }.bind(this), 500);
+            $(this.loadButton).tooltip({
+                'placement': 'bottom',
+                'title': $.i18n("msg_activecode_loaded_code"),
+                'trigger': 'manual'
+            });
         } else {
-            $(this.loadButton).tooltip({'placement': 'bottom',
-                             'title': $.i18n("msg_activecode_no_saved_code"),
-                             'trigger': 'manual'
-                            });
+            $(this.loadButton).tooltip({
+                'placement': 'bottom',
+                'title': $.i18n("msg_activecode_no_saved_code"),
+                'trigger': 'manual'
+            });
         }
         $(this.loadButton).tooltip('show');
         setTimeout(function () {
@@ -692,15 +685,15 @@ ActiveCode.prototype.loadEditor = function () {
         }.bind(this), 4000);
     }).bind(this);
 
-    var data = {acid: this.divid};
+    var data = { acid: this.divid };
     if (this.sid !== undefined) {
         data['sid'] = this.sid;
     }
     // This function needs to be chainable for when we want to do things like run the activecode
     // immediately after loading the previous input (such as in a timed exam)
     var dfd = jQuery.Deferred();
-    this.logBookEvent({'event': 'activecode', 'act': 'load', 'div_id': this.divid}); // Log the run event
-    jQuery.get(eBookConfig.ajaxURL + 'getprog', data, loadEditor).done(function () {dfd.resolve();});
+    this.logBookEvent({ 'event': 'activecode', 'act': 'load', 'div_id': this.divid }); // Log the run event
+    jQuery.get(eBookConfig.ajaxURL + 'getprog', data, loadEditor).done(function () { dfd.resolve(); });
     return dfd;
 
 };
@@ -713,18 +706,18 @@ ActiveCode.prototype.createGradeSummary = function () {
         var report = eval(data)[0];
         // check for report['message']
         if (report) {
-            if (report['version'] == 2){
+            if (report['version'] == 2) {
                 // new version; would be better to embed this in HTML for the activecode
                 var body = "<h4>Grade Report</h4>" +
-                       "<p>This question: " + report['grade'] + " out of " + report['max'] + "</p>" +
-                       "<p>" + report['comment'] + "</p>"
+                    "<p>This question: " + report['grade'] + " out of " + report['max'] + "</p>" +
+                    "<p>" + report['comment'] + "</p>"
             }
-            else{
+            else {
                 var body = "<h4>Grade Report</h4>" +
-                       "<p>This assignment: " + report['grade'] + "</p>" +
-                       "<p>" + report['comment'] + "</p>" +
-                       "<p>Number of graded assignments: " + report['count'] + "</p>" +
-                       "<p>Average score: " +  report['avg'] + "</p>"
+                    "<p>This assignment: " + report['grade'] + "</p>" +
+                    "<p>" + report['comment'] + "</p>" +
+                    "<p>Number of graded assignments: " + report['count'] + "</p>" +
+                    "<p>Average score: " + report['avg'] + "</p>"
             }
 
         } else {
@@ -747,7 +740,7 @@ ActiveCode.prototype.createGradeSummary = function () {
         var el = $(html);
         el.modal();
     };
-    var data = {'div_id': this.divid};
+    var data = { 'div_id': this.divid };
     jQuery.get(eBookConfig.ajaxURL + 'getassignmentgrade', data, showGradeSummary);
 };
 
@@ -877,7 +870,7 @@ ActiveCode.prototype.addErrorMessage = function (err) {
 var errorText = {};
 
 errorText.ParseError = $.i18n("msg_activecode_parse_error");
-errorText.ParseErrorFix = $.i18n( "msg_activecode_parse_error_fix");
+errorText.ParseErrorFix = $.i18n("msg_activecode_parse_error_fix");
 errorText.TypeError = $.i18n("msg_activecode_type_error");
 errorText.TypeErrorFix = $.i18n("msg_activecode_type_error_fix");
 errorText.NameError = $.i18n("msg_activecode_name_error");
@@ -887,7 +880,7 @@ errorText.ValueErrorFix = $.i18n("msg_activecode_value_error_fix");
 errorText.AttributeError = $.i18n("msg_activecode_attribute_error");
 errorText.AttributeErrorFix = $.i18n("msg_activecode_attribute_error_fix");
 errorText.TokenError = $.i18n("msg_activecode_token_error");
-errorText.TokenErrorFix =  $.i18n("msg_activecode_token_error_fix");
+errorText.TokenErrorFix = $.i18n("msg_activecode_token_error_fix");
 errorText.TimeLimitError = $.i18n("msg_activecode_time_limit_error");
 errorText.TimeLimitErrorFix = $.i18n("msg_activecode_time_limit_error_fix");
 errorText.Error = $.i18n("msg_activecode_general_error");
@@ -918,14 +911,14 @@ errorText.NotImplementedErrorFix = $.i18n("msg_activecode_not_implemented_error_
 
 ActiveCode.prototype.setTimeLimit = function (timer) {
     var timelimit = this.timelimit;
-    if (timer !== undefined ) {
+    if (timer !== undefined) {
         timelimit = timer
     }
     // set execLimit in milliseconds  -- for student projects set this to
     // 25 seconds -- just less than Chrome's own timer.
     if (this.code.indexOf('ontimer') > -1 ||
         this.code.indexOf('onclick') > -1 ||
-        this.code.indexOf('onkey') > -1  ||
+        this.code.indexOf('onkey') > -1 ||
         this.code.indexOf('setDelay') > -1 ||
         this.code.indexOf('display.set_mode') > -1) {
         Sk.execLimit = null;
@@ -936,25 +929,25 @@ ActiveCode.prototype.setTimeLimit = function (timer) {
             Sk.execLimit = timelimit;
         } else {
             Sk.execLimit = 25000;
-    }
+        }
     }
 
 };
 
 ActiveCode.prototype.builtinRead = function (x) {
-        if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
-            throw $.i18n("msg_activecode_file_not_found",x);
-        return Sk.builtinFiles["files"][x];
+    if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
+        throw $.i18n("msg_activecode_file_not_found", x);
+    return Sk.builtinFiles["files"][x];
 };
 
-ActiveCode.prototype.fileReader = function(divid) {
+ActiveCode.prototype.fileReader = function (divid) {
     let elem = document.getElementById(divid);
     let data = ""
     if (elem == null && Sk.builtinFiles["files"][divid]) {
         return Sk.builtinFiles["files"][divid];
     }
     if (elem == null) {
-        throw new Sk.builtin.IOError($.i18n("msg_activecode_no_file_or_dir",divid));
+        throw new Sk.builtin.IOError($.i18n("msg_activecode_no_file_or_dir", divid));
     } else {
         if (elem.nodeName.toLowerCase() == "textarea") {
             data = elem.value;
@@ -965,9 +958,9 @@ ActiveCode.prototype.fileReader = function(divid) {
     return data;
 }
 
-ActiveCode.prototype.outputfun = function(text) {
+ActiveCode.prototype.outputfun = function (text) {
     // bnm python 3
-    pyStr = function(x) {
+    pyStr = function (x) {
         if (x instanceof Array) {
             return '[' + x.join(", ") + ']';
         } else {
@@ -976,7 +969,7 @@ ActiveCode.prototype.outputfun = function(text) {
     };
 
     var x = text;
-    if (! this.python3 ) {
+    if (!this.python3) {
         if (x.charAt(0) == '(') {
             x = x.slice(1, -1);
             x = '[' + x + ']';
@@ -988,23 +981,23 @@ ActiveCode.prototype.outputfun = function(text) {
             }
         }
     }
-    $(this.output).css("visibility","visible");
+    $(this.output).css("visibility", "visible");
     text = x;
     text = text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br/>");
-        $(this.output).append(text);
-    };
+    $(this.output).append(text);
+};
 
-ActiveCode.prototype.buildProg = function(buildType = 0) {
+ActiveCode.prototype.buildProg = function (buildType = 0) {
     // assemble code from prefix, suffix, and editor for running.
     var pretext;
     var prog = buildType > 0 ? "" : (this.passivecodestr == 'onlymain' ? this.code : this.editor.getValue() + "\n");
-    
+
     this.pretext = "";
     if (this.includes !== undefined) {
         // iterate over the includes, in-order prepending to prog
 
         pretext = "";
-        for (var x=0; x < this.includes.length; x++) {
+        for (var x = 0; x < this.includes.length; x++) {
             pretext = pretext + edList[this.includes[x]].editor.getValue();
         }
         this.pretext = pretext;
@@ -1016,27 +1009,27 @@ ActiveCode.prototype.buildProg = function(buildType = 0) {
             var tmp = this.editor.getValue().split('\n');
             var readOnlyLines = [];
             var main = "";
-            for (var i = 0; i < this.lineHandles.length; i++) 
+            for (var i = 0; i < this.lineHandles.length; i++)
                 readOnlyLines.push(this.editor.getLineNumber(this.lineHandles[i]));
             for (var i = 0; i < tmp.length; i++) {
                 if (readOnlyLines.includes(i)) continue;
                 main += "\t" + tmp[i] + "\n";
             }
             var parameters = this.testParameters.trim().split(' ');
-            
+
             var parametersString = "";
-            var returnString     = "";
+            var returnString = "";
             for (var i = 0; i < parameters.length; i++) {
                 parametersString += parameters[i] + "=None" + (i < parameters.length - 1 ? ',' : '');
-                returnString     += parameters[i] + "=" + parameters[i] + (i < parameters.length - 1 ? ',' : '');
+                returnString += parameters[i] + "=" + parameters[i] + (i < parameters.length - 1 ? ',' : '');
             }
             pretext = this.generalInitContent + "def acMainSection(" + parametersString + "):\n";
-            returnString = "\treturn dict(" + returnString + ")\n"; 
+            returnString = "\treturn dict(" + returnString + ")\n";
             prog += pretext + main + returnString;
         }
-    } 
+    }
 
-    if(this.suffix) {
+    if (this.suffix) {
         if (!this.runortest && !this.playtask || (this.runortest && buildType == 1) || (this.playtask && buildType == 2)) prog = prog + this.suffix;
     }
 
@@ -1076,7 +1069,7 @@ ActiveCode.prototype.manage_scrubber = function (scrubber_dfd, history_dfd, save
             console.log("Scrubber deferred failed - this should not happen");
             history_dfd.resolve();
         });
-    return {history_dfd: history_dfd, saveCode: saveCode};
+    return { history_dfd: history_dfd, saveCode: saveCode };
 };
 
 var pygameModalUse = true;
@@ -1084,15 +1077,15 @@ ActiveCode.prototype.runProg = function (params = [0]) {
     Sk.hardInterrupt = false;
     Sk.builtin.KeyboardInterrupt = null;
     var prog = this.buildProg(params[0]);
-    
+
 
     if (prog.indexOf("???") != -1) {
         if (!confirm('Treba da umesto ??? otkucas svoj kod. \nAko si namerno stavio ??? mozes da izvrsis kod. Da li zelis da izvrsis kod?')) {
             return;
         }
-        
+
     }
-   
+
     var saveCode = "True";
     var scrubber_dfd, history_dfd, skulpt_run_dfd;
     console.log("starting a new run of " + this.divid);
@@ -1212,9 +1205,8 @@ ActiveCode.prototype.runProg = function (params = [0]) {
     }).bind(this),
         (function (err) {  // fail
             $(self.runButton).removeAttr('disabled');
-            // $(self.historyScrubber).on("slidechange", self.slideit.bind(self));
-            // $(self.historyScrubber).slider("enable");
             if (this.modaloutput) {
+                PygameLib.running = false;
                 $('.modal').modal('hide');
             }
             self.logRunEvent({
@@ -1238,8 +1230,8 @@ ActiveCode.prototype.runProg = function (params = [0]) {
             e.redrawConnectors();
         });
     }
-    
-    
+
+
 };
 
 JSActiveCode.prototype = new ActiveCode();
@@ -1247,35 +1239,35 @@ JSActiveCode.prototype = new ActiveCode();
 function JSActiveCode(opts) {
     if (opts) {
         this.init(opts)
-        }
     }
+}
 
-JSActiveCode.prototype.init = function(opts) {
-    ActiveCode.prototype.init.apply(this,arguments)
-    };
+JSActiveCode.prototype.init = function (opts) {
+    ActiveCode.prototype.init.apply(this, arguments)
+};
 
 JSActiveCode.prototype.outputfun = function (a) {
-    $(this.output).css("visibility","visible");
+    $(this.output).css("visibility", "visible");
     var str = "[";
-    if (typeof(a) == "object" && a.length) {
+    if (typeof (a) == "object" && a.length) {
         for (var i = 0; i < a.length; i++)
-            if (typeof(a[i]) == "object" && a[i].length) {
+            if (typeof (a[i]) == "object" && a[i].length) {
                 str += (i == 0 ? "" : " ") + "[";
                 for (var j = 0; j < a[i].length; j++)
                     str += a[i][j] + (j == a[i].length - 1 ?
-                    "]" + (i == a.length - 1 ? "]" : ",") + "\n" : ", ");
+                        "]" + (i == a.length - 1 ? "]" : ",") + "\n" : ", ");
             } else str += a[i] + (i == a.length - 1 ? "]" : ", ");
-        } else {
-    try {
+    } else {
+        try {
             str = JSON.stringify(a);
-    } catch (e) {
+        } catch (e) {
             str = a;
-    }
+        }
     }
     return str;
 };
 
-JSActiveCode.prototype.runProg = function() {
+JSActiveCode.prototype.runProg = function () {
     var _this = this;
     var prog = this.buildProg();
     var einfo;
@@ -1283,14 +1275,14 @@ JSActiveCode.prototype.runProg = function() {
     var saveCode = "True";
 
 
-    var write = function(str) {
+    var write = function (str) {
         _this.output.innerHTML += _this.outputfun(str);
     };
 
-    var writeln = function(str) {
-        if (!str) str="";
-        _this.output.innerHTML += _this.outputfun(str)+"<br />";
-            };
+    var writeln = function (str) {
+        if (!str) str = "";
+        _this.output.innerHTML += _this.outputfun(str) + "<br />";
+    };
 
     var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
     history_dfd = __ret.history_dfd;
@@ -1298,24 +1290,24 @@ JSActiveCode.prototype.runProg = function() {
 
     $(this.eContainer).remove();
     $(this.output).text('');
-    $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
-    $(this.outDiv).show({duration:700,queue:false});
+    $(this.codeDiv).switchClass("col-md-12", "col-md-6", { duration: 500, queue: false });
+    $(this.outDiv).show({ duration: 700, queue: false });
 
     try {
         eval(prog)
         einfo = "success";
-    } catch(e) {
+    } catch (e) {
         this.addErrorMessage(e);
         einfo = e;
     }
 
     this.logRunEvent({
-    'div_id': this.divid,
-    'code': this.editor.getValue(),
-    'errinfo': einfo,
-    'to_save': saveCode,
-    'prefix': this.pretext,
-    'suffix': this.suffix
+        'div_id': this.divid,
+        'code': this.editor.getValue(),
+        'errinfo': einfo,
+        'to_save': saveCode,
+        'prefix': this.pretext,
+        'suffix': this.suffix
     }); // Log the run event
 
 
@@ -1323,7 +1315,7 @@ JSActiveCode.prototype.runProg = function() {
 
 HTMLActiveCode.prototype = new ActiveCode();
 
-function HTMLActiveCode (opts) {
+function HTMLActiveCode(opts) {
     if (opts) {
         this.init(opts);
     }
@@ -1336,33 +1328,28 @@ HTMLActiveCode.prototype.runProg = function () {
     var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
     history_dfd = __ret.history_dfd;
     saveCode = __ret.saveCode;
-
-//    $('#'+myDiv+'_iframe').remove();
-//    $('#'+myDiv+'_htmlout').show();
-//    $('#'+myDiv+'_htmlout').append('<iframe class="activehtml" id="' + myDiv + '_iframe" srcdoc="' +
-//        prog.replace(/"/g,"'") + '">' + '</iframe>');
     $(this.output).text('');
-    if (! this.alignVertical ) {
-        $(this.codeDiv).switchClass("col-md-12", "col-md-6", {duration: 500, queue: false});
+    if (!this.alignVertical) {
+        $(this.codeDiv).switchClass("col-md-12", "col-md-6", { duration: 500, queue: false });
     }
-    $(this.outDiv).show({duration:700,queue:false});
+    $(this.outDiv).show({ duration: 700, queue: false });
     prog = "<script type=text/javascript>window.onerror = function(msg,url,line) {alert(msg+' on line: '+line);};</script>" + prog;
     this.output.srcdoc = prog;
 
     this.logRunEvent({
-    'div_id': this.divid,
-    'code': this.editor.getValue(),
-    'errinfo': 'success',
-    'to_save': saveCode,
-    'prefix': this.pretext,
-    'suffix': this.suffix
+        'div_id': this.divid,
+        'code': this.editor.getValue(),
+        'errinfo': 'success',
+        'to_save': saveCode,
+        'prefix': this.pretext,
+        'suffix': this.suffix
     }); // Log the run event
 
 
 };
 
-HTMLActiveCode.prototype.init = function(opts) {
-    ActiveCode.prototype.init.apply(this,arguments);
+HTMLActiveCode.prototype.init = function (opts) {
+    ActiveCode.prototype.init.apply(this, arguments);
     this.code = $('<textarea />').html(this.origElem.innerHTML).text();
     $(this.runButton).text('Render');
     this.editor.setValue(this.code);
@@ -1371,22 +1358,22 @@ HTMLActiveCode.prototype.init = function(opts) {
 HTMLActiveCode.prototype.createOutput = function () {
     var outDiv = document.createElement("div");
     $(outDiv).addClass("ac_output");
-    if(this.alignVertical) {
+    if (this.alignVertical) {
         $(outDiv).addClass("col-md-12");
     } else {
         $(outDiv).addClass("col-md-5");
     }
     this.outDiv = outDiv;
     this.output = document.createElement('iframe');
-    $(this.output).css("background-color","white");
-    $(this.output).css("position","relative");
-    $(this.output).css("height","400px");
-    $(this.output).css("width","100%");
+    $(this.output).css("background-color", "white");
+    $(this.output).css("position", "relative");
+    $(this.output).css("height", "400px");
+    $(this.output).css("width", "100%");
     outDiv.appendChild(this.output);
     this.outerDiv.appendChild(outDiv);
 
     var clearDiv = document.createElement("div");
-    $(clearDiv).css("clear","both");  // needed to make parent div resize properly
+    $(clearDiv).css("clear", "both");  // needed to make parent div resize properly
     this.outerDiv.appendChild(clearDiv);
 
 };
@@ -1399,7 +1386,7 @@ String.prototype.replaceAll = function (target, replacement) {
 AudioTour.prototype = new RunestoneBase();
 
 // function to display the audio tours
-function AudioTour (divid, code, bnum, audio_text) {
+function AudioTour(divid, code, bnum, audio_text) {
     this.audio_tour = null;
     this.audio_code = null;
     this.windowcode = null;
@@ -1459,7 +1446,7 @@ function AudioTour (divid, code, bnum, audio_text) {
     for (var i = 0; i < audio_type.length - 1; i++) {
         var newButton = document.createElement("button");
         newButton.className = "btn btn-success";
-        newButton.innerHTML = bval[i].replace(/\"/g,"");
+        newButton.innerHTML = bval[i].replace(/\"/g, "");
         this.tourButtons.push(newButton);
         bcount++;
     }
@@ -1523,21 +1510,21 @@ function AudioTour (divid, code, bnum, audio_text) {
     this.stop_button.innerHTML = "Stop tour";
 
     $(this.audio_tour).append(this.audio_code, this.windowcode, document.createElement("br"), this.first_audio, this.prev_audio, this.pause_audio, this.next_audio, this.last_audio, document.createElement("br"), this.status, document.createElement("br"), this.tourButtons, this.stop_button);
-    $("#"+divid+" .ac_code_div").append(this.audio_tour);
-    $("#"+divid+" .ac_code_div").css("width", "50%");
-    $('#'+divid+' .CodeMirror.cm-s-default.ui-resizable').hide();
-    $('#'+divid+' .ac_opt.btn.btn-default:last-child').hide();
+    $("#" + divid + " .ac_code_div").append(this.audio_tour);
+    $("#" + divid + " .ac_code_div").css("width", "50%");
+    $('#' + divid + ' .CodeMirror.cm-s-default.ui-resizable').hide();
+    $('#' + divid + ' .ac_opt.btn.btn-default:last-child').hide();
 
-    $(this.stop_button).click( (function () {
+    $(this.stop_button).click((function () {
         if (this.playing) {
             this.elem.pause();
         }
         //log change to db
-        this.logBookEvent({'event': 'Audio', 'act': 'closeWindow', 'div_id': divid});
+        this.logBookEvent({ 'event': 'Audio', 'act': 'closeWindow', 'div_id': divid });
         $(this.audio_tour).remove();
-        $('#'+divid+' .CodeMirror.cm-s-default.ui-resizable').show();
-        $('#'+divid+' .ac_opt.btn.btn-default:last-child').show();
-        $("#"+divid+" .ac_code_div").css("width", "");
+        $('#' + divid + ' .CodeMirror.cm-s-default.ui-resizable').show();
+        $('#' + divid + ' .ac_opt.btn.btn-default:last-child').show();
+        $("#" + divid + " .ac_code_div").css("width", "");
     }).bind(this));
 
     $(this.tourButtons[0]).click((function () {
@@ -1565,7 +1552,7 @@ function AudioTour (divid, code, bnum, audio_text) {
     $(this.prev_audio).click((function () {
         this.prevAudio();
     }).bind(this));
-    
+
     // handle the click to pause or play the audio
     $(this.pause_audio).click((function () {
         this.pauseAndPlayAudio(divid);
@@ -1619,7 +1606,7 @@ AudioTour.prototype.tour = function (divid, audio_type, bcount) {
     $(this.status).html($.i18n("msg_activecode_starting", name));
 
     //log tour type to db
-    this.logBookEvent({'event': 'Audio', 'act': name, 'div_id': divid});
+    this.logBookEvent({ 'event': 'Audio', 'act': name, 'div_id': divid });
 
     var max = atype.length;
     var str = "";
@@ -1633,31 +1620,24 @@ AudioTour.prototype.tour = function (divid, audio_type, bcount) {
         var akey = temp_aname.substring(1, temp_aname.length);
         var lnums = temp_line.substring(1, temp_line.length);
 
-        //alert("akey:"+akey+"lnum:"+lnums);
-
-        // str+="<audio id="+akey+" preload='auto'><source src='http://ice-web.cc.gatech.edu/ce21/audio/"+
-        // akey+".mp3' type='audio/mpeg'><source src='http://ice-web.cc.gatech.edu/ce21/audio/"+akey+
-        // ".ogg' type='audio/ogg'>Your browser does not support the audio tag</audio>";
-
         var dir = "http://media.interactivepython.org/" + eBookConfig.basecourse.toLowerCase() + "/audio/";
-        //var dir = "../_static/audio/"
         str += "<audio id=" + akey + " preload='auto' >";
         str += "<source src='" + dir + akey + ".wav' type='audio/wav'>";
         str += "<source src='" + dir + akey + ".mp3' type='audio/mpeg'>";
         str += "<source src='" + dir + akey + ".wav' type='audio/wav'>";
         str += "<source src='" + dir + akey + ".mp3' type='audio/mpeg'>";
-        str +=  "<br />Your browser does not support the audio tag</audio>";
+        str += "<br />Your browser does not support the audio tag</audio>";
         this.ahash[akey] = lnums;
         this.aname.push(akey);
     }
     $(this.audio_code).html(str);
     this.len = this.aname.length; // set the number of audio file in the tour
-    
+
     this.currIndex = 0;
     this.playCurrIndexAudio();
 };
 
-AudioTour.prototype.handlePlaying = function() {
+AudioTour.prototype.handlePlaying = function () {
     this.elem.pause();
     // unbind current ended
     $('#' + this.afile).unbind('ended');
@@ -1671,7 +1651,7 @@ AudioTour.prototype.firstAudio = function () {
     this.handlePlaying();
 
     //log change to db
-    this.logBookEvent({'event': 'Audio', 'act': 'first', 'div_id': this.theDivid});
+    this.logBookEvent({ 'event': 'Audio', 'act': 'first', 'div_id': this.theDivid });
 
 
     // move to the first audio
@@ -1691,7 +1671,7 @@ AudioTour.prototype.prevAudio = function () {
         this.handlePlaying();
 
         //log change to db
-        this.logBookEvent({'event': 'Audio', 'act': 'prev', 'div_id': this.theDivid});
+        this.logBookEvent({ 'event': 'Audio', 'act': 'prev', 'div_id': this.theDivid });
 
 
         // move to previous to the current (but the current index has moved to the next)
@@ -1709,7 +1689,7 @@ AudioTour.prototype.nextAudio = function () {
     this.handlePlaying();
 
     //log change to db
-    this.logBookEvent({'event': 'Audio', 'act': 'next', 'div_id': this.theDivid});
+    this.logBookEvent({ 'event': 'Audio', 'act': 'next', 'div_id': this.theDivid });
 
     // if not at the end
     if (this.currIndex < (this.len - 1)) {
@@ -1728,7 +1708,7 @@ AudioTour.prototype.lastAudio = function () {
     this.handlePlaying();
 
     //log change to db
-    this.logBookEvent({'event': 'Audio', 'act': 'last', 'div_id': this.theDivid});
+    this.logBookEvent({ 'event': 'Audio', 'act': 'last', 'div_id': this.theDivid });
 
     // move to the last audio
     this.currIndex = this.len - 1;
@@ -1812,13 +1792,13 @@ AudioTour.prototype.playWhenReady = function (afile, divid, ahash) {
     if (this.pause_audio.className === "btn-default glyphicon glyphicon-pause") {
         $(this.status).html($.i18n("msg_activecode_playing", this.tourName));
         $('#' + afile).bind('ended', (function () {
-        this.outerAudio();
+            this.outerAudio();
         }).bind(this));
         this.elem.play();
     }
     else {
         $('#' + afile).bind('ended', (function () {
-        this.outerAudio();
+            this.outerAudio();
         }).bind(this));
     }
 };
@@ -1830,7 +1810,6 @@ AudioTour.prototype.playaudio = function (i, aname, divid, ahash) {
     this.elem = document.getElementById(this.afile);
 
     // if this isn't ready to play yet - no duration yet then wait
-    //console.log("in playaudio " + elem.duration);
     if (isNaN(this.elem.duration) || this.elem.duration == 0) {
         // set the status
         $(this.status).html($.i18n("msg_activecode_loading_audio"));
@@ -1858,7 +1837,7 @@ AudioTour.prototype.pauseAndPlayAudio = function (divid) {
         this.pause_audio.setAttribute("aria-label", $.i18n("msg_activecode_pause_audio"));
         $(this.status).html($.i18n("msg_activecode_playing", this.tourName));
         //log change to db
-        this.logBookEvent({'event': 'Audio', 'act': 'play', 'div_id': this.theDivid});
+        this.logBookEvent({ 'event': 'Audio', 'act': 'play', 'div_id': this.theDivid });
     }
 
     // if audio was this.playing pause it
@@ -1869,7 +1848,7 @@ AudioTour.prototype.pauseAndPlayAudio = function (divid) {
         this.pause_audio.setAttribute("aria-label", $.i18n("msg_activecode_play_paused_audio"));
         $(this.status).html($.i18n("msg_activecode_audio_paused", this.tourName));
         //log change to db
-        this.logBookEvent({'event': 'Audio', 'act': 'pause', 'div_id': this.theDivid});
+        this.logBookEvent({ 'event': 'Audio', 'act': 'pause', 'div_id': this.theDivid });
     }
 
 };
@@ -1907,19 +1886,15 @@ AudioTour.prototype.setBackgroundForLines = function (divid, lnum, color) {
         var start = parseInt(hyphen[0]);
         var end = parseInt(hyphen[1]) + 1;
         for (var k = start; k < end; k++) {
-            //alert(k);
             var str = "#" + divid + "_l" + k;
             if ($(str).text() != "") {
                 $(str).css('background-color', color);
             }
-            //$(str).effect("highlight",{},(dur*1000)+4500);
         }
     }
     else {
-        //alert(lnum);
         var str = "#" + divid + "_l" + lnum;
         $(str).css('background-color', color);
-        //$(str).effect("highlight",{},(dur*1000)+4500);
     }
 };
 
@@ -1929,8 +1904,8 @@ LiveCode.prototype = new ActiveCode();
 function LiveCode(opts) {
     if (opts) {
         this.init(opts)
-        }
     }
+}
 function unescapeHtml(safe) {
     if (safe) {
         return safe.replace(/&amp;/g, '&')
@@ -1940,8 +1915,8 @@ function unescapeHtml(safe) {
             .replace(/&#x27;/g, "'");
     }
 }
-LiveCode.prototype.init = function(opts) {
-    ActiveCode.prototype.init.apply(this,arguments);
+LiveCode.prototype.init = function (opts) {
+    ActiveCode.prototype.init.apply(this, arguments);
 
     var orig = opts.orig;
     this.stdin = $(orig).data('stdin');
@@ -1962,9 +1937,9 @@ LiveCode.prototype.init = function(opts) {
         this.createInputElement();
     }
     this.createErrorOutput();
-    };
+};
 
-LiveCode.prototype.outputfun = function (a) {};
+LiveCode.prototype.outputfun = function (a) { };
 
 LiveCode.prototype.createInputElement = function () {
 
@@ -1990,11 +1965,11 @@ LiveCode.prototype.createErrorOutput = function () {
  * In order to check for supplemental files in java and deal with asynchronicity
  * I split the original runProg into two functions: runProg and runProg_callback
  */
-LiveCode.prototype.runProg = function() {
+LiveCode.prototype.runProg = function () {
     var stdin;
     var scrubber_dfd, history_dfd;
     var saveCode = "True";
-    var sfilemap = {java: '', cpp: 'test.cpp', c: 'test.c', python3: 'test.py', python2: 'test.py'};
+    var sfilemap = { java: '', cpp: 'test.cpp', c: 'test.c', python3: 'test.py', python2: 'test.py' };
     var source = this.editor.getValue();
     source = this.buildProg();
 
@@ -2002,7 +1977,7 @@ LiveCode.prototype.runProg = function() {
     history_dfd = __ret.history_dfd;
     saveCode = __ret.saveCode;
 
-    var paramlist = ['compileargs','linkargs','runargs','interpreterargs'];
+    var paramlist = ['compileargs', 'linkargs', 'runargs', 'interpreterargs'];
     var paramobj = {}
     for (param of paramlist) {
         if (this[param]) {
@@ -2014,20 +1989,19 @@ LiveCode.prototype.runProg = function() {
         stdin = $(this.stdin_el).val();
     }
 
-    if (! this.sourcefile ) {
+    if (!this.sourcefile) {
         this.sourcefile = sfilemap[this.language];
     }
 
     $(this.output).html($.i18n("msg_activecode_compiling_running"));
 
     var files = [];
-    if(this.language === "java") {
+    if (this.language === "java") {
         if (this.datafile != undefined) {
             var ids = this.datafile.split(",");
             for (var i = 0; i < ids.length; i++) {
                 file = document.getElementById(ids[i].trim());
                 if (file === null || file === undefined) {
-                    // console.log("No file with given id");
                 } else if (file.className === "javaFiles") {
                     files = files.concat(this.parseJavaClasses(file.textContent));
                 } else if (file.className === "image") {
@@ -2035,21 +2009,21 @@ LiveCode.prototype.runProg = function() {
                     var extension = fileName.substring(fileName.indexOf('.') + 1);
                     var base64 = file.toDataURL('image/' + extension);
                     base64 = base64.substring(base64.indexOf(',') + 1);
-                    files.push({name: fileName, content: base64});
+                    files.push({ name: fileName, content: base64 });
                 } else {
                     // if no className or un recognized className it is treated as an individual file
                     // this could be any type of file, .txt, .java, .csv, etc
-                    files.push({name: file.id, content: file.textContent});
+                    files.push({ name: file.id, content: file.textContent });
                 }
             }
         }
     }
 
     runspec = {
-            language_id: this.language,
-            sourcecode: source,
-            parameters: paramobj,
-            sourcefilename: this.sourcefile
+        language_id: this.language,
+        sourcecode: source,
+        parameters: paramobj,
+        sourcefilename: this.sourcefile
     };
 
     if (stdin) {
@@ -2057,125 +2031,121 @@ LiveCode.prototype.runProg = function() {
     }
 
 
-    if(this.language !== "java" || files.length === 0) {
-        data = JSON.stringify({'run_spec': runspec});
+    if (this.language !== "java" || files.length === 0) {
+        data = JSON.stringify({ 'run_spec': runspec });
         this.runProg_callback(data);
     } else {
         runspec['file_list'] = [];
         var promises = [];
         var instance = this;
-        $.getScript('http://cdn.rawgit.com/killmenot/webtoolkit.md5/master/md5.js', function()
-        {
-            for(var i = 0; i < files.length; i++) {
+        $.getScript('http://cdn.rawgit.com/killmenot/webtoolkit.md5/master/md5.js', function () {
+            for (var i = 0; i < files.length; i++) {
                 var fileName = files[i].name;
                 var fileContent = files[i].content;
                 instance.div2id[fileName] = "runestone" + MD5(fileName + fileContent);
                 runspec['file_list'].push([instance.div2id[fileName], fileName]);
                 promises.push(new Promise((resolve, reject) => {
-                     instance.checkFile(files[i], resolve, reject);
+                    instance.checkFile(files[i], resolve, reject);
                 }));
             }
-            data = JSON.stringify({'run_spec': runspec});
+            data = JSON.stringify({ 'run_spec': runspec });
             this.div2id = instance.div2id;
-            Promise.all(promises).then(function() {
-                // console.log("All files on Server");
+            Promise.all(promises).then(function () {
                 instance.runProg_callback(data);
-            }).catch(function(err) {
-                // console.log("Error: " + err);
+            }).catch(function (err) {
             });
         });
     }
 
 }
-LiveCode.prototype.runProg_callback = function(data) {
+LiveCode.prototype.runProg_callback = function (data) {
 
-        var xhr, stdin;
-        var runspec = {};
-        var scrubber_dfd, history_dfd;
-        var host, source, editor;
-        var saveCode = "True";
-        var sfilemap = {java: '', cpp: 'test.cpp', c: 'test.c', python3: 'test.py', python2: 'test.py'};
+    var xhr, stdin;
+    var runspec = {};
+    var scrubber_dfd, history_dfd;
+    var host, source, editor;
+    var saveCode = "True";
+    var sfilemap = { java: '', cpp: 'test.cpp', c: 'test.c', python3: 'test.py', python2: 'test.py' };
 
-        xhr = new XMLHttpRequest();
+    xhr = new XMLHttpRequest();
 
-        host = this.JOBE_SERVER + this.resource;
+    host = this.JOBE_SERVER + this.resource;
 
-        var odiv = this.output;
-        $(this.runButton).attr('disabled', 'disabled');
-        $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
-        $(this.outDiv).show({duration:700,queue:false});
-        $(this.errDiv).remove();
-        $(this.output).css("visibility","visible");
+    var odiv = this.output;
+    $(this.runButton).attr('disabled', 'disabled');
+    $(this.codeDiv).switchClass("col-md-12", "col-md-6", { duration: 500, queue: false });
+    $(this.outDiv).show({ duration: 700, queue: false });
+    $(this.errDiv).remove();
+    $(this.output).css("visibility", "visible");
 
-        xhr.open("POST", host, true);
-        xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
-        xhr.setRequestHeader('Accept', 'application/json');
-        xhr.setRequestHeader('X-API-KEY', this.API_KEY);
+    xhr.open("POST", host, true);
+    xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+    xhr.setRequestHeader('Accept', 'application/json');
+    xhr.setRequestHeader('X-API-KEY', this.API_KEY);
 
-        xhr.onload = (function () {
-            var logresult;
-            $(this.runButton).removeAttr('disabled');
-            try {
-                var result = JSON.parse(xhr.responseText);
-            } catch (e) {
-                result = {};
-                result.outcome = -1;
-            }
+    xhr.onload = (function () {
+        var logresult;
+        $(this.runButton).removeAttr('disabled');
+        try {
+            var result = JSON.parse(xhr.responseText);
+        } catch (e) {
+            result = {};
+            result.outcome = -1;
+        }
 
-            if (result.outcome === 15) {
-                logresult = 'success';
-            } else {
-                logresult = result.outcome;
-            }
-            this.logRunEvent({'div_id': this.divid, 'code': source, 'errinfo': logresult, 'to_save':saveCode, 'event':'livecode'});
-            switch (result.outcome) {
-                case 15:
-                    $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
-                    break;
-                case 11: // compiler error
-                    $(odiv).html($.i18n("msg_activecode_were_compiling_err"));
-                    this.addJobeErrorMessage(result.cmpinfo);
-                    break;
-                case 12:  // run time error
-                    $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
-                    if (result.stderr) {
-                        this.addJobeErrorMessage(result.stderr);
-                    }
-                    break;
-                case 13:  // time limit
-                    $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
-                    this.addJobeErrorMessage($.i18n("msg_activecode_time_limit_exc"));
-                    break;
-                default:
-                    if(result.stderr){
-                        $(odiv).html(result.stderr.replace(/\n/g, "<br>"));
-                    } else {
-                        this.addJobeErrorMessage($.i18n("msg_activecode_server_err", xhr.status, xhr.statusText));
-                    }
-            }
-            // todo: handle server busy and timeout errors too
-        }).bind(this);
+        if (result.outcome === 15) {
+            logresult = 'success';
+        } else {
+            logresult = result.outcome;
+        }
+        this.logRunEvent({ 'div_id': this.divid, 'code': source, 'errinfo': logresult, 'to_save': saveCode, 'event': 'livecode' });
+        switch (result.outcome) {
+            case 15:
+                $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
+                break;
+            case 11: // compiler error
+                $(odiv).html($.i18n("msg_activecode_were_compiling_err"));
+                this.addJobeErrorMessage(result.cmpinfo);
+                break;
+            case 12:  // run time error
+                $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
+                if (result.stderr) {
+                    this.addJobeErrorMessage(result.stderr);
+                }
+                break;
+            case 13:  // time limit
+                $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
+                this.addJobeErrorMessage($.i18n("msg_activecode_time_limit_exc"));
+                break;
+            default:
+                if (result.stderr) {
+                    $(odiv).html(result.stderr.replace(/\n/g, "<br>"));
+                } else {
+                    this.addJobeErrorMessage($.i18n("msg_activecode_server_err", xhr.status, xhr.statusText));
+                }
+        }
+        // todo: handle server busy and timeout errors too
+    }).bind(this);
+    
 
-        ///$("#" + divid + "_errinfo").remove();
+    xhr.onerror = (function () {
+        this.addJobeErrorMessage($.i18n("msg_activecode_server_comm_err"));
+        $(this.runButton).removeAttr('disabled');
+    }).bind(this);
 
-        xhr.onerror = (function () {
-            this.addJobeErrorMessage($.i18n("msg_activecode_server_comm_err"));
-            $(this.runButton).removeAttr('disabled');
-        }).bind(this);
+    xhr.send(data);
 
-        xhr.send(data);
-
-    };
+};
 LiveCode.prototype.addJobeErrorMessage = function (err) {
-        var errHead = $('<h3>').html('Error');
-        var eContainer = this.outerDiv.appendChild(document.createElement('div'));
-        this.errDiv = eContainer;
-        eContainer.className = 'error alert alert-danger';
-        eContainer.id = this.divid + '_errinfo';
-        eContainer.appendChild(errHead[0]);
-        var errText = eContainer.appendChild(document.createElement('pre'));
-        errText.innerHTML = err;
-    };
+    var errHead = $('<h3>').html('Error');
+    var eContainer = this.outerDiv.appendChild(document.createElement('div'));
+    this.errDiv = eContainer;
+    eContainer.className = 'error alert alert-danger';
+    eContainer.id = this.divid + '_errinfo';
+    eContainer.appendChild(errHead[0]);
+    var errText = eContainer.appendChild(document.createElement('pre'));
+    errText.innerHTML = err;
+};
 
 
 /**
@@ -2185,7 +2155,7 @@ LiveCode.prototype.addJobeErrorMessage = function (err) {
  * @param  {function} resolve promise resolve function
  * @param  {function} reject  promise reject function
  */
-LiveCode.prototype.checkFile = function(file, resolve, reject) {
+LiveCode.prototype.checkFile = function (file, resolve, reject) {
     var file_id = this.div2id[file.name];
     var resource = eBookConfig.proxyuri_files + file_id;
     var host = this.JOBE_SERVER + resource;
@@ -2201,23 +2171,19 @@ LiveCode.prototype.checkFile = function(file, resolve, reject) {
     };
 
     xhr.onload = (function () {
-        switch(xhr.status) {
+        switch (xhr.status) {
             case 208:
-                // console.log("File not on Server");
                 this.pushDataFile(file, resolve, reject);
                 break;
             case 400:
-                // console.log("Bad Request");
                 reject();
                 break;
             case 204:
-                // console.log("File already on Server");
                 resolve();
                 break;
             default:
-                //console.log("This case should never happen");
                 reject();
-            }
+        }
     }).bind(this);
 
     xhr.send();
@@ -2244,7 +2210,7 @@ LiveCode.prototype.pushDataFile = function (file, resolve, reject) {
         contentsb64 = contents;
     }
 
-    var data = JSON.stringify({ 'file_contents' : contentsb64 });
+    var data = JSON.stringify({ 'file_contents': contentsb64 });
 
     var resource = eBookConfig.proxyuri_files + file_id;
     var host = this.JOBE_SERVER + resource;
@@ -2257,28 +2223,22 @@ LiveCode.prototype.pushDataFile = function (file, resolve, reject) {
     xhr.setRequestHeader('X-API-KEY', this.API_KEY);
 
     xhr.onload = (function () {
-        switch(xhr.status) {
+        switch (xhr.status) {
             case 403:
-                // console.log("Forbidden");
                 reject();
                 break;
             case 400:
-                // console.log("Bad Request");
                 reject();
                 break;
             case 204:
-                //console.log("successfully sent file " + xhr.responseText);
-                //console.log("File " + fileName +", " + file_id +" placed on server");
                 resolve();
                 break;
             default:
-                // console.log("This case should never happen");
                 reject();
-            }
+        }
     }).bind(this);
 
     xhr.onerror = function () {
-        // console.log("error sending file" + xhr.responseText);
         reject();
     };
 
@@ -2292,106 +2252,106 @@ LiveCode.prototype.pushDataFile = function (file, resolve, reject) {
  * @return {array of objects}  .name gives the name of the java file with .java extension
  *                   .content gives the contents of the file
  */
- LiveCode.prototype.parseJavaClasses = function(text) {
+LiveCode.prototype.parseJavaClasses = function (text) {
 
-     text = text.trim();
+    text = text.trim();
 
-     var found = false;
-     var stack = 0;
-     var startIndex = 0;
-     var classes = [];
-     var importIndex = 0;
+    var found = false;
+    var stack = 0;
+    var startIndex = 0;
+    var classes = [];
+    var importIndex = 0;
 
-     var endOfLastCommentBeforeClassBegins = 0;
+    var endOfLastCommentBeforeClassBegins = 0;
 
-     for(var i = 0; i < text.length; i++) {
+    for (var i = 0; i < text.length; i++) {
 
-         var char = text.charAt(i);
-         if(char === '/') {
-             i++;
-             if(text.charAt(i) === '/') {
-                 i++;
-                 while(text.charAt(i) !== '\n' && i < text.length) {
-                     i++;
-                 }
-                 if(!found) {
-                     endOfLastCommentBeforeClassBegins = i;
-                 }
-             } else if(text.charAt(i) == '*') {
-                 i++;
-                 while((text.charAt(i) !== '*' || text.charAt(i+1) !== '/') && i + 1 < text.length) {
-                     i++;
-                 }
-                 if(!found) {
-                     endOfLastCommentBeforeClassBegins = i;
-                 }
-             }
+        var char = text.charAt(i);
+        if (char === '/') {
+            i++;
+            if (text.charAt(i) === '/') {
+                i++;
+                while (text.charAt(i) !== '\n' && i < text.length) {
+                    i++;
+                }
+                if (!found) {
+                    endOfLastCommentBeforeClassBegins = i;
+                }
+            } else if (text.charAt(i) == '*') {
+                i++;
+                while ((text.charAt(i) !== '*' || text.charAt(i + 1) !== '/') && i + 1 < text.length) {
+                    i++;
+                }
+                if (!found) {
+                    endOfLastCommentBeforeClassBegins = i;
+                }
+            }
 
-         } else if(char === '"') {
+        } else if (char === '"') {
 
-             i++;
-             while(text.charAt(i) !== '"' && i < text.length) {
-                 i++;
-             }
-         } else if(char === '\'') {
-             while(text.charAt(i) !== '\'' && i < text.length) {
-                 i++;
-             }
-         } else if(char === '(') {
-             var pCount = 1;
-             i++;
-         	while(pCount > 0 && i < text.length){
-                if(text.charAt(i) === '(') {
+            i++;
+            while (text.charAt(i) !== '"' && i < text.length) {
+                i++;
+            }
+        } else if (char === '\'') {
+            while (text.charAt(i) !== '\'' && i < text.length) {
+                i++;
+            }
+        } else if (char === '(') {
+            var pCount = 1;
+            i++;
+            while (pCount > 0 && i < text.length) {
+                if (text.charAt(i) === '(') {
                     pCount++;
-                } else if(text.charAt(i) === ')') {
+                } else if (text.charAt(i) === ')') {
                     pCount--;
                 }
-                 i++;
-             }
-         }
+                i++;
+            }
+        }
 
 
-         if(!found && text.charAt(i) === '{') {
-             startIndex = i;
-             found = true;
-             stack = 1;
-         } else if(found) {
-             if(text.charAt(i) === '{') {
-                 stack++;
-             }
-             if(text.charAt(i) === '}') {
-                 stack--;
-             }
-         }
-         if(found && stack === 0) {
-             endIndex = i+1;
+        if (!found && text.charAt(i) === '{') {
+            startIndex = i;
+            found = true;
+            stack = 1;
+        } else if (found) {
+            if (text.charAt(i) === '{') {
+                stack++;
+            }
+            if (text.charAt(i) === '}') {
+                stack--;
+            }
+        }
+        if (found && stack === 0) {
+            endIndex = i + 1;
 
-             var words = text.substring(endOfLastCommentBeforeClassBegins, startIndex).trim().split(" ");
-             var className = "";
-             for (var w = 0; w < words.length; w++) {
-                 className = words[w];
-                 if(words[w] === "extends" || words[w] === "implements") {
-                     className = words[w-1];
-                     w = words.length;
-                 }
-             }
-             className = className.trim() + ".java";
+            var words = text.substring(endOfLastCommentBeforeClassBegins, startIndex).trim().split(" ");
+            var className = "";
+            for (var w = 0; w < words.length; w++) {
+                className = words[w];
+                if (words[w] === "extends" || words[w] === "implements") {
+                    className = words[w - 1];
+                    w = words.length;
+                }
+            }
+            className = className.trim() + ".java";
 
-             classes.push({name: className, content: text.substring(importIndex, endIndex)});
-             found = false;
-             importIndex = endIndex;
-             endOfLastCommentBeforeClassBegins = endIndex;
-         }
+            classes.push({ name: className, content: text.substring(importIndex, endIndex) });
+            found = false;
+            importIndex = endIndex;
+            endOfLastCommentBeforeClassBegins = endIndex;
+        }
 
-     }
-     return classes;
- }
+    }
+    return classes;
+}
 
 
 ACFactory = {};
 
 ACFactory.createActiveCode = function (orig, lang, addopts) {
-    var opts = {'orig' : orig, 'useRunestoneServices': eBookConfig.useRunestoneServices, 'python3' : eBookConfig.python3 };
+    var opts = { 'orig': orig, 'useRunestoneServices': eBookConfig.useRunestoneServices, 'python3': eBookConfig.python3 };
     if (addopts) {
         for (var attrname in addopts) {
             opts[attrname] = addopts[attrname];
@@ -2410,8 +2370,8 @@ ACFactory.createActiveCode = function (orig, lang, addopts) {
 };
 
 // used by web2py controller(s)
-ACFactory.addActiveCodeToDiv = function(outerdivid, acdivid, sid, initialcode, language) {
-    var  thepre, newac;
+ACFactory.addActiveCodeToDiv = function (outerdivid, acdivid, sid, initialcode, language) {
+    var thepre, newac;
 
     var acdiv = document.getElementById(acdivid);
     $(acdiv).empty();
@@ -2420,26 +2380,26 @@ ACFactory.addActiveCodeToDiv = function(outerdivid, acdivid, sid, initialcode, l
     thepre.id = outerdivid;
     $(thepre).data('lang', language);
     $(acdiv).append(thepre);
-    var opts = {'orig' : thepre, 'useRunestoneServices': true };
-    var addopts = {'sid': sid, 'graderactive':true};
-    if(language === 'htmlmixed') {
+    var opts = { 'orig': thepre, 'useRunestoneServices': true };
+    var addopts = { 'sid': sid, 'graderactive': true };
+    if (language === 'htmlmixed') {
         addopts['vertical'] = true;
     }
-    newac = ACFactory.createActiveCode(thepre,language,addopts);
+    newac = ACFactory.createActiveCode(thepre, language, addopts);
     var savediv = newac.divid;
     newac.divid = savediv;
-    newac.editor.setSize(500,300);
-    setTimeout(function() {
-            newac.editor.refresh();
-        },500);
+    newac.editor.setSize(500, 300);
+    setTimeout(function () {
+        newac.editor.refresh();
+    }, 500);
 
 };
 
-ACFactory.createActiveCodeFromOpts = function(opts) {
+ACFactory.createActiveCodeFromOpts = function (opts) {
     return ACFactory.createActiveCode(opts.orig, opts.lang, opts)
 }
 
-ACFactory.createScratchActivecode = function() {
+ACFactory.createScratchActivecode = function () {
     /* set up the scratch Activecode editor in the search menu */
     // use the URL to assign a divid - each page should have a unique Activecode block id.
     // Remove everything from the URL but the course and page name
@@ -2464,7 +2424,7 @@ ACFactory.createScratchActivecode = function() {
         '        <h4 class="modal-title">Scratch ActiveCode</h4>' +
         '      </div> ' +
         '      <div class="modal-body">' +
-        '      <textarea data-component="activecode" id="' + divid + '" data-lang="'+ lang +'">' +
+        '      <textarea data-component="activecode" id="' + divid + '" data-lang="' + lang + '">' +
         '\n' +
         '\n' +
         '\n' +
@@ -2482,11 +2442,7 @@ ACFactory.createScratchActivecode = function() {
             e.CodeMirror.focus();
         });
     });
-
-    //$(document).bind('keypress', '\\', function(evt) {
-    //    ACFactory.toggleScratchActivecode();
-    //    return false;
-    //});
+    
 };
 
 
@@ -2498,10 +2454,10 @@ ACFactory.toggleScratchActivecode = function () {
 
 };
 
-$(document).ready(function() {
+$(document).ready(function () {
     ACFactory.createScratchActivecode();
-    $('[data-component=activecode]').each( function(index ) {
-        if ($(this).closest('[data-component=timedAssessment]').length == 0 ) {   // If this element exists within a timed component, don't render it here
+    $('[data-component=activecode]').each(function (index) {
+        if ($(this).closest('[data-component=timedAssessment]').length == 0) {   // If this element exists within a timed component, don't render it here
             edList[this.id] = ACFactory.createActiveCode(this, $(this).data('lang'));
         }
     });
@@ -2518,7 +2474,6 @@ if (typeof component_factory === 'undefined') {
 }
 component_factory['activecode'] = ACFactory.createActiveCodeFromOpts;
 
-//$(document).bind("runestone:login", function() {
 $(document).ready(function () {
     $(".run-button").text($.i18n("msg_activecode_save_run"));
 });
@@ -2527,8 +2482,8 @@ $(document).ready(function () {
 // figure out the login/logout status of the user.  Sometimes its immediate, and sometimes its
 // long.  So to be safe we'll do it both ways..
 var loggedout;
-$(document).bind("runestone:logout",function() { loggedout=true;});
-$(document).bind("runestone:logout",function() {
+$(document).bind("runestone:logout", function () { loggedout = true; });
+$(document).bind("runestone:logout", function () {
     for (k in edList) {
         if (edList.hasOwnProperty(k)) {
             edList[k].disableSaveLoad();
@@ -2554,8 +2509,8 @@ function openPyCanvas() {
         $(div1).addClass("modal");
         $(div1).css("text-align", "center");
 
-      
-        
+
+
 
         var btn1 = document.createElement("span");
         $(btn1).addClass("btn btn-primary btn-sm float-right mr-1 mt-1");
@@ -2566,19 +2521,11 @@ function openPyCanvas() {
         $(btn1).on('click', function (e) {
             Sk.insertEvent('quit');
             $(forceQBtn).css("display", "block");
-            //PygameLib.running = false;
-            //PygameLib.eventQueue = [];
-            //PygameLib.eventTimer = {};
-            //delete PygameLib.eventQueue;
-            //delete PygameLib.eventTimer;
-            //Sk.hardInterrupt = true;
-            //Sk.quitHandler();
-            //$('.run-button').removeAttr('disabled');
         });
 
         var forceQBtn = document.createElement("span");
         $(forceQBtn).addClass("btn btn-primary btn-sm float-right mr-1 mt-1");
-        $(forceQBtn).css("display","none");
+        $(forceQBtn).css("display", "none");
         var ic = document.createElement("i");
         $(ic).addClass("fas fa-sign-out-alt");
         forceQBtn.appendChild(ic);
@@ -2603,8 +2550,8 @@ function openPyCanvas() {
         var div3 = document.createElement("div");
         $(div3).addClass("modal-content");
         $(div3).css("background-color", "#E8E8E8");
-        if (screen.width < 900) 
-                $(div3).height("100%");
+        if (screen.width < 900)
+            $(div3).height("100%");
         div2.appendChild(div3);
 
         var div4 = document.createElement("div");
@@ -2612,7 +2559,7 @@ function openPyCanvas() {
         var div5 = document.createElement("div");
         $(div5).addClass("modal-body");
         if (screen.width < 900) {
-           $(div5).attr("style", "padding: 0");
+            $(div5).attr("style", "padding: 0");
         }
         var div6 = document.createElement("div");
         $(div6).addClass("modal-footer");
