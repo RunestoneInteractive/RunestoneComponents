@@ -132,5 +132,5 @@ RunestoneBase.prototype.shouldUseServer = function (data) {
 
 // Return the key which to be used when accessing local storage.
 RunestoneBase.prototype.localStorageKey = function () {
-    return eBookConfig.email + ":" + this.divid + "-given";
+    return eBookConfig.email + ":" + eBookConfig.course + ":" + this.divid + "-given";
 }
