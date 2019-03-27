@@ -70,8 +70,12 @@ Reveal.prototype.adoptChildren = function () {
 Reveal.prototype.getButtonTitles = function () {     // to support old functionality
     this.showtitle = $(this.origElem).data("showtitle");
     if (this.showtitle === undefined) {
-        this.showtitle = "Show";     // default
+        this.showtitle = "Show" // default
     }
+    if (this.instructorOnly) {
+        this.showtitle += " IG";
+    }
+
     this.hidetitle = $(this.origElem).data("hidetitle");
     if (this.hidetitle === undefined) {
         this.hidetitle = "Hide";     // default
@@ -111,7 +115,12 @@ Reveal.prototype.createShowButton = function () {
 
 
     this.sbutt = document.createElement("button");
-    $(this.sbutt).addClass("btn btn-default reveal_button");
+    $(this.sbutt).addClass("btn reveal_button");
+    if (this.instructorOnly) {
+        $(this.sbutt).addClass("btn-info");
+    } else {
+        $(this.sbutt).addClass("btn-default");
+    }
     $(this.sbutt).css("margin-bottom","10px");
     this.sbutt.textContent = this.showtitle;
     this.sbutt.id = this.divid + "_show";

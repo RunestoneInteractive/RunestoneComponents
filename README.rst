@@ -20,7 +20,7 @@ Packaging of the Runestone components for publishing educational materials using
 Documentation
 -------------
 
-Summer 2018 has brought some great updates to our documentation.  You will find the new docs on runestoneinteractive.org `here <http://runestoneinteractive.org/build/html/index.html>`_  
+You will find the new Authors Guide `here <https://runestone.academy/runestone/static/authorguide/index.html>`_
 
 If you want to report any issues with the docs or submit PRs to improve them please do so on `github <https://github.com/RunestoneInteractive/runestoneinteractive.github.io/issues>`_
 
@@ -31,19 +31,19 @@ Quick Start
 If you are completely new to pip and github text editors, I have written a more thorough getting started
  tutorial `on my blog <http://reputablejournal.com/how-to-make-a-lab-in-three-easy-steps.html>`_
  Otherwise, you can install everything you need with one simple command! (Although I recommend that you first create a virtual environment for your work.)
- 
+
  **Install and make a Python virtualenv**
- 
+
 * Documentation here:  https://virtualenv.pypa.io/en/stable/
 * Video here:  https://www.youtube.com/watch?v=IX-v6yvGYFg
 * For the impatient:
 
 ::
-   
+
     $ sudo pip install virtualenv
     $ virtualenv /path/to/home/MyEnv
     $ source /path/to/home/MyEnv/bin/activate
-     
+
 * You will need to do the last command **every time** you want to work on RunestoneComponents.  If you have not used Python virtual environments before I strongly recommend reading the docs or watching the video
 
 * *Note:* You might need to install ``pip`` based on how you have installed `python <https://packaging.python.org/tutorials/installing-packages/#ensure-you-can-run-pip-from-the-command-line>`_.
@@ -71,7 +71,7 @@ To start a project, create a new folder and then run the following command (inst
     runestone init
 
 
-The init command will ask you some questions and setup a default project for you. The default response is in square brackets, example ``[false]``. 
+The init command will ask you some questions and setup a default project for you. The default response is in square brackets, example ``[false]``.
 
 To build the included default project run
 
@@ -81,7 +81,7 @@ To build the included default project run
 
 You will now have a build folder with a file index.html in it, along with some default content.  The contents of the build folder are suitable for hosting anywhere that you can serve static web content from!  For a small class you could even serve the content using the builtin Python webserver.
 
-*Note:* If you come across version conflict with ``six`` library while building the project, ``pip install --ignore-installed six`` command might be useful. 
+*Note:* If you come across version conflict with ``six`` library while building the project, ``pip install --ignore-installed six`` command might be useful.
 
 ::
 
@@ -110,7 +110,7 @@ Developing and Hacking
 
 So, you would like to help out with developing the Runestone Components.  What do you need to know?  Check out the `Development Roadmap <https://github.com/bnmnetp/runestone/wiki>`_ to get an understanding of our migration towards webcomponents.
 
-1.  Make a Fork of this repository. 
+1.  Make a Fork of this repository.
 2.  Set up your environment on your development machine
 
     1.  Make a virtual environment for testing and working  (I recommend pyvenv-3.4  as it is baked in to Python 3.4 and higher)
@@ -122,7 +122,7 @@ So, you would like to help out with developing the Runestone Components.  What d
 
 Writing Tests
 -------------
- 
+
 A great way to contribute to the Runestone Components repository is to add to our test suite.
 
 Our goal is to have unit tests which rely on Selenium (a library that helps simulate interactions in a web browser) for each directive, to see if the JavaScript that powers the directives is working correctly.
@@ -135,10 +135,10 @@ Our goal is to have unit tests which rely on Selenium (a library that helps simu
 * On linux you will need to install Xvfb ``apt-get install xvfb``
 
 * You'll also need to have done the above installation.
-  
-  * You should be using virtual environment, 
-    you'll need a clone of the RunestoneComponents repository, 
-    and you'll need to have done ``pip install -e .`` from 
+
+  * You should be using virtual environment,
+    you'll need a clone of the RunestoneComponents repository,
+    and you'll need to have done ``pip install -e .`` from
     the top level of the RunestoneComponents directory.
 
 * If you have installed RunestoneComponents in your virtualenv using ``pip install -e .``,
@@ -160,11 +160,11 @@ Our goal is to have unit tests which rely on Selenium (a library that helps simu
 
   * ``python -m unittest discover``
 
-.. note:: 
+.. note::
 
-  8081 is the default test port. 
+  8081 is the default test port.
   If you are running another server on this port, you may encounter an error.
-  See the Python files, e.g. ``test_question.py``, to see how this is set up. 
+  See the Python files, e.g. ``test_question.py``, to see how this is set up.
 
 You should then see some test output, showing a pass (``ok``), FAIL, or error(s).
 
