@@ -134,7 +134,7 @@ ShortAnswer.prototype.submitJournal = function () {
 
 
     this.setLocalStorage({answer: value, timestamp: new Date()})
-    this.logBookEvent({'event': 'shortanswer', 'act': JSON.stringify(value), 'div_id': this.divid});
+    this.logBookEvent({'event': 'shortanswer', 'act': value, 'div_id': this.divid});
     this.feedbackDiv.innerHTML = "Your answer has been saved.";
     $(this.feedbackDiv).removeClass("alert-danger");
     $(this.feedbackDiv).addClass("alert alert-success");
