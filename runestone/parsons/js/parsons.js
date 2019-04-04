@@ -1820,7 +1820,7 @@ Parsons.prototype.adaptBlocks = function(input) {
 	var nBlocksToCombine = 0;
 	var nDistractors = distractors.length;
 	var nToRemove = 0;
-	this.pairDistractors = false;
+	this.pairDistractors = true;
 
 	var giveIndentation = false;
 	if(lastestAttemptCount < 2) { // 1 Try
@@ -1828,6 +1828,7 @@ Parsons.prototype.adaptBlocks = function(input) {
 		this.limitDistractors = false;
 	} else if(lastestAttemptCount < 4) { // 2-3 Tries
 		// Do nothing they are doing normal
+		this.pairDistractors = true;
 	} else if(lastestAttemptCount < 6) { // 4-5 Tries
 		// pair distractors
 		this.pairDistractors = true;

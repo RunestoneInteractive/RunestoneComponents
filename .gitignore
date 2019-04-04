@@ -49,3 +49,5 @@ runestone/*/test/build_info
 # IDEs
 .vscode/
 **/sphinx-enki-info.txt
+runestone/.DS_Store
+runestone/parsons/.DS_Store
