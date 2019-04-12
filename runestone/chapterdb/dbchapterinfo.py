@@ -57,14 +57,16 @@ def update_database(chaptitles, subtitles, skips, app):
 
     logger.info("Populating the database with Chapter information")
 
-    for chap in chaptitles:
+    chapnum = 1
+    for chapnum, chap in enumerate(chaptitles, start=1):
         # insert row for chapter in the chapter table and get the id
         logger.info(u"Adding chapter subchapter info for {}".format(chap))
         ins = chapters.insert().values(chapter_name=chaptitles.get(chap, chap),
-                                       course_id=course_id, chapter_label=chap)
+                                       course_id=course_id, chapter_label=chap,
+                                       chapter_num=chapnum)
         res = engine.execute(ins)
         currentRowId = res.inserted_primary_key[0]
-        for sub in subtitles[chap]:
+        for subchapnum, sub in enumerate(subtitles[chap], start=1):
             if (chap,sub) in skips:
                 skipreading = 'T'
             else:
@@ -75,7 +77,8 @@ def update_database(chaptitles, subtitles, skips, app):
             ins = sub_chapters.insert().values(sub_chapter_name=subtitles[chap][sub],
                                                chapter_id=str(currentRowId),
                                                sub_chapter_label=sub,
-                                               skipreading=skipreading)
+                                               skipreading=skipreading,
+                                               sub_chapter_num=subchapnum)
             engine.execute(ins)
             # Three possibilities:
             # 1) The chapter and subchapter labels match existing, but the q_name doesn't match; because you changed
@@ -106,6 +109,7 @@ def update_database(chaptitles, subtitles, skips, app):
                                             timestamp=datetime.datetime.now(),
                                             base_course=basecourse)
                 engine.execute(ins)
+
 
 
 def env_updated(app, env):
