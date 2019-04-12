@@ -39,7 +39,7 @@ setup(
     long_description=open('README.rst').read(),
     entry_points = {
         'console_scripts': [
-            'runestone = runestone.__main__:main'
+            'runestone = runestone.__main__:cli'
         ]
         }
 )
