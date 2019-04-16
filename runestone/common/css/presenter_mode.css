@@ -166,7 +166,7 @@ div.ExecutionVisualizer table.visualizer {
   min-height: 60px;
 }
 
-.container .section > .runestone{
+.container .section > runestone:not(.ac_section){
   max-width:none;
   margin: 0;
 }
