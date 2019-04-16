@@ -52,6 +52,7 @@
 .ac_section{
 	position: relative;
 	clear:both;
+	max-width: 800px !important;
 }
 .ac_section>* {
 	max-width: 500pt;
