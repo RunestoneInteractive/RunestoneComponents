@@ -10,7 +10,7 @@ script:
 - sudo apt-get -y install google-chrome-stable
 - export PATH=.:$PATH
 - wget https://bootstrap.pypa.io/get-pip.py
-- python3.7 -m venv rune3
+- python3 -m venv rune3
 - ". rune3/bin/activate"
 - cp chromedriver rune3/bin
 - echo $PATH
