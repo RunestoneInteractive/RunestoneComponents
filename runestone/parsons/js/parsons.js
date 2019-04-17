@@ -1305,12 +1305,17 @@ Parsons.prototype.initializeLines = function(text) {
 		// Figure out options based on the #option and #option=value syntax
 		// Remove the options from the code
 		var options = {};
-		textBlock = textBlock.replace(/#(\w+)=(\w+)/, function(mystring, arg1, arg2) {
-			options[arg1] = arg2;
+		//textBlock = textBlock.replace(/#(\w+)=(\w+)/, function(mystring, arg1, arg2) {
+		//	options[arg1] = arg2;
+		//	return ""
+		//});
+		textBlock = textBlock.replace(/#(paired)/, function(mystring, arg1) {
+			options[arg1] = true;
 			return ""
 		});
-		textBlock = textBlock.replace(/#(\w+)/, function(mystring, arg1) {
+		textBlock = textBlock.replace(/#(distractor)/, function(mystring, arg1) {
 			options[arg1] = true;
+			alert(arg1)
 			return ""
 		});
 		// Create lines
