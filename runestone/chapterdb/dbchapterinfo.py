@@ -43,8 +43,8 @@ def update_database(chaptitles, subtitles, skips, app):
     chapters and subchapters into the database.
     """
     if not engine:
-        logger.warning("You need to install a DBAPI module - psycopg2 for Postgres")
-        logger.warning("Or perhaps you have not set your DBURL environment variable")
+        logger.info("You need to install a DBAPI module - psycopg2 for Postgres")
+        logger.info("Or perhaps you have not set your DBURL environment variable")
         return
 
     course_id = app.env.config.html_context.get('course_id', "unknown")
