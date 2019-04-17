@@ -1,6 +1,6 @@
 language: python
 python:
-- '3.6'
+- '3.7'
 script:
 - export LANG=en_US.UTF-8
 - wget https://chromedriver.storage.googleapis.com/2.40/chromedriver_linux64.zip
@@ -10,7 +10,7 @@ script:
 - sudo apt-get -y install google-chrome-stable
 - export PATH=.:$PATH
 - wget https://bootstrap.pypa.io/get-pip.py
-- python3.4 -m venv rune3
+- python3.7 -m venv rune3
 - ". rune3/bin/activate"
 - cp chromedriver rune3/bin
 - echo $PATH
