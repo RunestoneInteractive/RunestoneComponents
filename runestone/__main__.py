@@ -222,6 +222,20 @@ def update():
     shutil.copytree(os.path.join(template_base_dir, '_templates'), '_templates',)
 
 
+def main(args=None):
+    if not args:
+        args = sys.argv[1:]
+    if not args:
+        print("""Usage: runestone help for a list of commands""")
+        sys.exit(0)
+    cli.add_command(init)
+    cli.add_command(build)
+    cli.add_command(serve)
+    cli.add_command(deploy)
+    cli.add_command(doc)
+    cli.add_command(update)
+    cli()
+
 def findProjectRoot():
     start = os.getcwd()
     prevdir = ""
@@ -232,3 +246,5 @@ def findProjectRoot():
         start = os.path.dirname(start)
     raise IOError("You must be in a runestone project to run runestone")
 
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
