@@ -1302,14 +1302,11 @@ Parsons.prototype.initializeLines = function(text) {
 	for (var i = 0; i < textBlocks.length; i++) {
 		var textBlock = textBlocks[i];
 
-		// Figure out options based on the #option and #option=value syntax
+		// Figure out options based on the #option 
 		// Remove the options from the code
+		// only options are #paired or #distractor
 		var options = {};
-		textBlock = textBlock.replace(/#(\w+)=(\w+)/, function(mystring, arg1, arg2) {
-			options[arg1] = arg2;
-			return ""
-		});
-		textBlock = textBlock.replace(/#(\w+)/, function(mystring, arg1) {
+		textBlock = textBlock.replace(/#(paired|distractor)/, function(mystring, arg1) {
 			options[arg1] = true;
 			return ""
 		});
@@ -1820,7 +1817,7 @@ Parsons.prototype.adaptBlocks = function(input) {
 	var nBlocksToCombine = 0;
 	var nDistractors = distractors.length;
 	var nToRemove = 0;
-	this.pairDistractors = false;
+	this.pairDistractors = true;
 
 	var giveIndentation = false;
 	if(lastestAttemptCount < 2) { // 1 Try
@@ -1828,6 +1825,7 @@ Parsons.prototype.adaptBlocks = function(input) {
 		this.limitDistractors = false;
 	} else if(lastestAttemptCount < 4) { // 2-3 Tries
 		// Do nothing they are doing normal
+		this.pairDistractors = true;
 	} else if(lastestAttemptCount < 6) { // 4-5 Tries
 		// pair distractors
 		this.pairDistractors = true;
