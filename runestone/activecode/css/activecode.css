@@ -51,9 +51,12 @@
 }
 .ac_section{
 	position: relative;
+	margin-right: auto;
+	margin-left: auto;
+	max-width: 800px;
 	clear:both;
 }
-.ac_section>* {
+.ac_section >*:not(.ac_section){
 	max-width: 500pt;
 	margin-left: auto;
 	margin-right: auto;

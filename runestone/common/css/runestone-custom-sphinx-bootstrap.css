@@ -161,7 +161,7 @@ div.section {
 	padding-left:0;
 	padding-right:0;
 }
-.container  .section >*:not(.section) {
+.container  .section >*:not(.section):not(.ac_section) {
 	max-width: 500pt;
 	margin-left: auto;
 	margin-right: auto;
@@ -183,7 +183,7 @@ div.section {
 	margin-right: auto;
 }
 
-.container  .section .parsons, .container  .section .parsons .sortable-code-container, .container  .section .ac_section, .container  .section .cd_section{
+.container  .section .parsons, .container  .section .parsons .sortable-code-container, .container  .section .cd_section{
 	max-width: none;
 }
 .navbar>.container .navbar-brand {
