@@ -1,7 +1,7 @@
 click
 Paver>=1.2.4
 six
-Sphinx>=1.7.1
+Sphinx==1.8.4
 sphinxcontrib-paverutils>=1.17
 cogapp>=2.5
 SQLAlchemy>=1.0.13

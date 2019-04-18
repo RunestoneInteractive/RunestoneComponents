@@ -9,13 +9,24 @@ from paver.easy import sh
 from pkg_resources import resource_string, resource_filename, require
 import codecs
 
+if len(sys.argv) == 2:
+    if '--version' in sys.argv:
+        version = require("runestone")[0].version
+        print("Runestone version {}".format(version))
+        sys.exit()
+
+
 @click.group(chain=True)
-def cli():
+@click.option("--version", is_flag=True, help="More print version and exit")
+def cli(version):
     """
-    Usage: help for help
+    Usage: runestone [--version] subcommand
 
     """
-    pass
+    if version:
+        version = require("runestone")[0].version
+        print("Runestone version {}".format(version))
+        sys.exit()
 
 @cli.command()
 def init():
@@ -34,6 +45,7 @@ def init():
     conf_dict['use_services'] = click.prompt("Use Runestone Web Services ", type=click.Choice(['true', 'false']), default="false")
     conf_dict['author'] = click.prompt("Your Name ", default=getpass.getuser())
     conf_dict['project_title'] = click.prompt("Title for this project ", default="Runestone Default")
+    conf_dict['short_name'] = conf_dict['project_name']
     conf_dict['python3'] = click.prompt("Use Simple Python3 Semantics ", default="false")
     conf_dict['default_ac_lang'] = click.prompt("Default ActiveCode language", default="python")
     conf_dict['basecourse'] = conf_dict['project_name']
@@ -171,25 +183,22 @@ def deploy(dest):
 
 from runestone import cmap
 
-@cli.command(short_help="type runestone help for help")
-@click.argument('command', nargs=-1)
-def help(command=None):
-    if not command:
-        print("""Available Commands:
-build  [--all]   * build the current project
-deploy           * deploy the current proejct using rsync
-serve [--port]   * start a simple webserver for the current project
-help             * list all runestone directives
-update           * Get a new copy of the _templates folder
+@cli.command(short_help="type runestone doc directive to get help on directive")
+@click.option("--list", is_flag=True, help="List all commands")
+@click.argument('directive', nargs=-1)
+def doc(directive=None,list=None):
+    """
+    Show Format and all options for a runestone directive
+    """
+    if list:
+        print("Runestone Directives List")
+        print("  ", "\n   ".join(sorted(cmap.keys())))
+        return
 
-or type help <directive> for doc on a runestone directive""")
-    else:
-        command = command[0]
-        if command in cmap:
-            print(cmap[command].__doc__)
-        elif command == 'list':
-            print("Runestone Directives List")
-            print("  ", "\n   ".join(sorted(cmap.keys())))
+    if directive:
+        directive = directive[0]
+        if directive in cmap:
+            print(cmap[directive].__doc__)
         else:
             print("""Unknown Directive.  Possible values are""")
             print("  ", "\n   ".join(sorted(cmap.keys())))
@@ -223,7 +232,7 @@ def main(args=None):
     cli.add_command(build)
     cli.add_command(serve)
     cli.add_command(deploy)
-    cli.add_command(help)
+    cli.add_command(doc)
     cli.add_command(update)
     cli()
 
@@ -236,7 +245,6 @@ def findProjectRoot():
         prevdir = start
         start = os.path.dirname(start)
     raise IOError("You must be in a runestone project to run runestone")
-
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

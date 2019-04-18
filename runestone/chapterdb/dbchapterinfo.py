@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-from __future__ import print_function
 
 __author__ = 'bmiller'
 
@@ -23,6 +22,10 @@ from collections import OrderedDict
 import docutils
 from sqlalchemy import Table, select, and_, or_
 from runestone.server.componentdb import engine, meta
+from sphinx.util import logging
+
+logger = logging.getLogger(__name__)
+
 ignored_chapters = ["", "FrontBackMatter", "Appendices"]
 
 def setup(app):
@@ -40,8 +43,8 @@ def update_database(chaptitles, subtitles, skips, app):
     chapters and subchapters into the database.
     """
     if not engine:
-        print("You need to install a DBAPI module - psycopg2 for Postgres")
-        print("Or perhaps you have not set your DBURL environment variable")
+        logger.info("You need to install a DBAPI module - psycopg2 for Postgres")
+        logger.info("Or perhaps you have not set your DBURL environment variable")
         return
 
     course_id = app.env.config.html_context.get('course_id', "unknown")
@@ -49,19 +52,21 @@ def update_database(chaptitles, subtitles, skips, app):
     sub_chapters = Table('sub_chapters', meta, autoload=True, autoload_with=engine)
     questions = Table('questions', meta, autoload=True, autoload_with=engine)
     basecourse = app.config.html_context.get('basecourse',"unknown")
-    print("Cleaning up old chapters info")
+    logger.info("Cleaning up old chapters info")
     engine.execute(chapters.delete().where(chapters.c.course_id == course_id))
 
-    print("Populating the database with Chapter information")
+    logger.info("Populating the database with Chapter information")
 
-    for chap in chaptitles:
+    chapnum = 1
+    for chapnum, chap in enumerate(chaptitles, start=1):
         # insert row for chapter in the chapter table and get the id
-        print(u"Adding chapter subchapter info for {}".format(chap))
+        logger.info(u"Adding chapter subchapter info for {}".format(chap))
         ins = chapters.insert().values(chapter_name=chaptitles.get(chap, chap),
-                                       course_id=course_id, chapter_label=chap)
+                                       course_id=course_id, chapter_label=chap,
+                                       chapter_num=chapnum)
         res = engine.execute(ins)
         currentRowId = res.inserted_primary_key[0]
-        for sub in subtitles[chap]:
+        for subchapnum, sub in enumerate(subtitles[chap], start=1):
             if (chap,sub) in skips:
                 skipreading = 'T'
             else:
@@ -72,7 +77,8 @@ def update_database(chaptitles, subtitles, skips, app):
             ins = sub_chapters.insert().values(sub_chapter_name=subtitles[chap][sub],
                                                chapter_id=str(currentRowId),
                                                sub_chapter_label=sub,
-                                               skipreading=skipreading)
+                                               skipreading=skipreading,
+                                               sub_chapter_num=subchapnum)
             engine.execute(ins)
             # Three possibilities:
             # 1) The chapter and subchapter labels match existing, but the q_name doesn't match; because you changed
@@ -103,6 +109,7 @@ def update_database(chaptitles, subtitles, skips, app):
                                             timestamp=datetime.datetime.now(),
                                             base_course=basecourse)
                 engine.execute(ins)
+
 
 
 def env_updated(app, env):
@@ -144,7 +151,7 @@ def env_updated(app, env):
                     chap_titles[chap_id] = title.astext()
                 else:
                     chap_titles[chap_id] = chap_id
-                    env.warn(docname, "Using a substandard chapter title")
+                    logger.warning(docname + " Using a substandard chapter title")
 
             if chap_id not in subchap_titles:
                 subchap_titles[chap_id] = OrderedDict()
