@@ -110,6 +110,10 @@ function gotUser(data, status, whatever) {
             }
         }
     }
+    if (d.course_list && d.course_list.indexOf(eBookConfig.course) < 0) {
+        alert(`Hey there you appear to have wandered into ${eBookConfig.course} But you are not registered for this course. Sending you to safety.` )
+        window.location.href = eBookConfig.app + '/default/courses';
+    }
     if (d.readings){
         cur_path_parts = window.location.pathname.split('/');
         name = cur_path_parts[cur_path_parts.length-2] + '/' + cur_path_parts[cur_path_parts.length-1];
@@ -238,7 +242,7 @@ function getOnlineUsers() {
     if (eBookConfig.useRunestoneServices) {
         let cacheValue = JSON.parse(localStorage.getItem("users_online"));
         if(cacheValue == null || cacheValue.timestamp < (Date.now() - MSCACHE) ) {
-            $.getJSON(eBookConfig.ajaxURL + 'getnumonline', setOnlineUsers)            
+            $.getJSON(eBookConfig.ajaxURL + 'getnumonline', setOnlineUsers)
         } else  {
             $("#numuserspan").text(cacheValue.onlineCount);
         }
