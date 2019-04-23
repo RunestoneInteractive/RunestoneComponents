@@ -151,6 +151,10 @@ function gotUser(data, status, whatever) {
             eBookConfig.isLoggedIn = true;
             eBookConfig.cohortId = d.cohortId;
             eBookConfig.isInstructor = d.isInstructor;
+            // If the user is not an instructor then remove the link to the instructors page
+            if (! d.isInstructor) {
+                $("#ip_dropdown_link").remove()
+            }
             $(document).trigger("runestone:login")
             timedRefresh();
         }
