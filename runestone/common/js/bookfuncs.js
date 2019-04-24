@@ -235,6 +235,7 @@ function setupNavbarLoggedOut() {
     $('#registerlink').show();
     $('#profilelink').hide();
     $('#passwordlink').hide();
+    $('#ip_dropdown_link').hide();
     $('li.loginout').html('<a href="' + eBookConfig.app + '/default/user/login">Login</a>')
     $(".footer").html('user not logged in');
     rb.logBookEvent({'event': 'page', 'act': 'view', 'div_id': window.location.pathname})
