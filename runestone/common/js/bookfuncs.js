@@ -177,7 +177,7 @@ function timedRefresh() {
         // but its an easy way to make sure laptop users are properly logged in when they
         // take quizzes and save stuff.
         if (location.href.indexOf('index.html') < 0) {
-            location.href = eBookConfig.app + '/static/' + eBookConfig.course + '/index.html'
+            location.href = eBookConfig.app + '/books/published/' + eBookConfig.basecourse + '/index.html'
         }
     });
     $.idleTimer(timeoutPeriod);

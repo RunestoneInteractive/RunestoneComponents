@@ -37,21 +37,17 @@ def init():
     print("This will create a new Runestone project in your current directory.")
     click.confirm("Do you want to proceed? ", abort=True, default=True)
     print("Next we need to gather a few pieces of information to create your configuration files")
-    conf_dict['project_name'] = click.prompt("Project name: (one word, no spaces)")
-    while ' ' in conf_dict['project_name']:
-        conf_dict['project_name'] = click.prompt("Project name: (one word, NO SPACES)")
-    conf_dict['build_dir'] = click.prompt("Path to build dir ", default="./build")
-    conf_dict['dest'] = click.prompt("Path to deploy built site ", default="../../static")
-    conf_dict['use_services'] = click.prompt("Use Runestone Web Services ", type=click.Choice(['true', 'false']), default="false")
+    conf_dict['use_services'] = click.prompt("Use Runestone Web Services ", type=bool, default=False)
     conf_dict['author'] = click.prompt("Your Name ", default=getpass.getuser())
     conf_dict['project_title'] = click.prompt("Title for this project ", default="Runestone Default")
-    conf_dict['short_name'] = conf_dict['project_name']
     conf_dict['python3'] = click.prompt("Use Simple Python3 Semantics ", default="false")
     conf_dict['default_ac_lang'] = click.prompt("Default ActiveCode language", default="python")
-    conf_dict['basecourse'] = conf_dict['project_name']
-    if conf_dict['use_services'] == "true":
+    if conf_dict['use_services']:
+        conf_dict['project_name'] = 'os.path.basename(os.path.dirname(os.path.abspath(__file__)))'
+        conf_dict['build_dir'] = './build'
+        conf_dict['dest'] = './published'
         conf_dict['login_req'] = click.prompt("Require login ", default="false")
-        conf_dict['master_url'] = click.prompt("URL for ajax server ", default="http://127.0.0.1:8000")
+        conf_dict['master_url'] = ''
         conf_dict['log_level'] = 10 if click.prompt("Log student actions? ", type=bool, default=True) else 0
         conf_dict['dburl'] = click.prompt("DataBase Connection URL", default="postgresql://user:password@localhost/runestone")
         conf_dict['enable_chatcodes'] = click.prompt("Enable Enable the chatcode feature)",type=bool, default=False)
@@ -62,6 +58,13 @@ def init():
             conf_dict['server_side_grading'] = False
         conf_dict['allow_pairs'] = click.prompt("Enable Pair Programming feature(s)", type=bool, default=False)
     else:
+        conf_dict['project_name'] = click.prompt("Project name: (one word, no spaces)")
+        while ' ' in conf_dict['project_name']:
+            conf_dict['project_name'] = click.prompt("Project name: (one word, NO SPACES)")
+        # Add quotes around the project name for use in the template.
+        conf_dict['project_name'] = repr(conf_dict['project_name'])
+        conf_dict['build_dir'] = click.prompt("Path to build dir ", default="./build")
+        conf_dict['dest'] = click.prompt("Path to deploy built site ", default="../../static")
         conf_dict['login_req'] = "false"
         conf_dict['master_url'] = "http://127.0.0.1:8000"
         conf_dict['log_level'] = 0
@@ -69,6 +72,7 @@ def init():
         conf_dict['enable_chatcodes'] = 'false'
         conf_dict['server_side_grading'] = False
         conf_dict['allow_pairs'] = 'false'
+    conf_dict['short_name'] = conf_dict['project_name']
     conf_dict['downloads_enabled'] = click.prompt("Enable inline Activecode downloads by default (single activecode downloads may be enabled with the :enabledownload: flag)", default="false")
 
     shutil.copytree(os.path.join(template_base_dir,'_sources'),'_sources')
