@@ -29,7 +29,7 @@ options(
         confdir=".",
         template_args={'login_required':'%(login_req)s',
                        'loglevel': %(log_level)d,
-                       'course_title': '%(short_name)s',
+                       'course_title': project_name,
                        'python3': '%(python3)s',
                        'dburl': '%(dburl)s',
                        'default_ac_lang': '%(default_ac_lang)s',
@@ -39,7 +39,7 @@ options(
                        'downloads_enabled': '%(downloads_enabled)s',
                        'enable_chatcodes': '%(enable_chatcodes)s',
                        'allow_pairs': '%(allow_pairs)s',
-
+                       'dynamic_pages': %(dynamic_pages)s,
                        'use_services': use_services,
                        'basecourse': project_name,
                        # If ``use_services`` is 'true', then the following values are ignored, since they're provided by the server.

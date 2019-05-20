@@ -51,8 +51,15 @@ def update_database(chaptitles, subtitles, skips, app):
     sub_chapters = Table('sub_chapters', meta, autoload=True, autoload_with=engine)
     questions = Table('questions', meta, autoload=True, autoload_with=engine)
     basecourse = app.config.html_context.get('basecourse',"unknown")
-    logger.info("Cleaning up old chapters info")
+    dynamic_pages = app.config.html_context.get('dynamic_pages', False)
+    if dynamic_pages:
+        cname = basecourse
+    else:
+        cname = app.env.config.html_context.get('course_id', "unknown")
+
+    logger.info("Cleaning up old chapters info for {}".format(cname))
     engine.execute(chapters.delete().where(chapters.c.course_id == basecourse))
+
 
     logger.info("Populating the database with Chapter information")
 
@@ -61,7 +68,7 @@ def update_database(chaptitles, subtitles, skips, app):
         # insert row for chapter in the chapter table and get the id
         logger.info(u"Adding chapter subchapter info for {}".format(chap))
         ins = chapters.insert().values(chapter_name=chaptitles.get(chap, chap),
-                                       course_id=basecourse, chapter_label=chap,
+                                       course_id=cname, chapter_label=chap,
                                        chapter_num=chapnum)
         res = engine.execute(ins)
         currentRowId = res.inserted_primary_key[0]

@@ -177,7 +177,8 @@ function timedRefresh() {
         // but its an easy way to make sure laptop users are properly logged in when they
         // take quizzes and save stuff.
         if (location.href.indexOf('index.html') < 0) {
-            location.href = eBookConfig.app + '/books/published/' + eBookConfig.basecourse + '/index.html'
+            console.log("Idle timer - " + location.pathname)
+            location.href = eBookConfig.app + '/default/user/login?_next=' + location.pathname;
         }
     });
     $.idleTimer(timeoutPeriod);

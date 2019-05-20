@@ -37,7 +37,11 @@ def init():
     print("This will create a new Runestone project in your current directory.")
     click.confirm("Do you want to proceed? ", abort=True, default=True)
     print("Next we need to gather a few pieces of information to create your configuration files")
-    conf_dict['use_services'] = click.prompt("Use Runestone Web Services ", type=bool, default=False)
+    conf_dict['dynamic_pages'] = click.prompt("Build book for dynamic page service?", type=bool, default=False)
+    if conf_dict['dynamic_pages'] == False:
+        conf_dict['use_services'] = click.prompt("Use Runestone Web Services ", type=bool, default=False)
+    else:
+        conf_dict['use_services'] = True
     conf_dict['author'] = click.prompt("Your Name ", default=getpass.getuser())
     conf_dict['project_title'] = click.prompt("Title for this project ", default="Runestone Default")
     conf_dict['python3'] = click.prompt("Use Simple Python3 Semantics ", default="false")
