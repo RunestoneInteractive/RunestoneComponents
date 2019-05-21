@@ -17,12 +17,12 @@ __author__ = 'isaacdontjelindell'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
 
 
 DISQUS_BOX = """\
 <script type="text/javascript">
-    function %(identifier)s_disqus(source) { 
+    function %(identifier)s_disqus(source) {
         if (window.DISQUS) {
 
             $('#disqus_thread').insertAfter(source); //put the DIV for the Disqus box after the link
@@ -32,7 +32,7 @@ DISQUS_BOX = """\
                 reload: true,
                 config: function () {
                     this.page.identifier = '%(identifier)s_' + eBookConfig.course;
-                    this.page.url = 'http://%(identifier)s_'+eBookConfig.course+'.interactivepython.com/#!';
+                    this.page.url = 'https://%(identifier)s_'+eBookConfig.course+'.interactivepython.com/#!';
                 }
             });
 
@@ -41,13 +41,13 @@ DISQUS_BOX = """\
             $('<div id="disqus_thread"></div>').insertAfter(source);
 
             // set Disqus required vars
-            disqus_shortname = '%(shortname)s';    
+            disqus_shortname = '%(shortname)s';
             disqus_identifier = '%(identifier)s_' + eBookConfig.course;
             disqus_url = 'http://%(identifier)s_'+eBookConfig.course+'.interactivepython.com/#!';
 
             //append the Disqus embed script to HTML
             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-            dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+            dsq.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
             $('head').append(dsq);
 
         }
@@ -65,19 +65,19 @@ DISQUS_LINK = """
 
 def setup(app):
     app.add_directive('disqus', DisqusDirective)
-    
+
     app.add_node(DisqusNode, html=(visit_disqus_node, depart_disqus_node))
     app.connect('doctree-resolved' ,process_disqus_nodes)
     app.connect('env-purge-doc', purge_disqus_nodes)
 
-class DisqusNode(nodes.General, nodes.Element):
-    def __init__(self,content):
-        super(DisqusNode,self).__init__()
+class DisqusNode(nodes.General, nodes.Element, RunestoneNode):
+    def __init__(self,content, **kwargs):
+        super(DisqusNode,self).__init__(**kwargs)
         self.disqus_components = content
 
 
 def visit_disqus_node(self, node):
-    res = DISQUS_BOX   
+    res = DISQUS_BOX
     res += DISQUS_LINK
 
     res = res % node.disqus_components
@@ -94,7 +94,12 @@ def purge_disqus_nodes(app, env, docname):
     pass
 
 
-class DisqusDirective(Directive):
+class DisqusDirective(RunestoneDirective):
+    """
+.. disqus::
+   :shortname: Your registered disqus id
+   :identifier: unique id for this discussion
+    """
     required_arguments = 0
     optional_arguments = 0
     final_argument_whitespace = True
@@ -111,5 +116,6 @@ class DisqusDirective(Directive):
         :return:
         """
 
-        return [DisqusNode(self.options)]
-
+        disqus_node = DisqusNode(self.options, rawsource=self.block_text)
+        disqus_node.source, disqus_node.line = self.state_machine.get_source_and_line(self.lineno)
+        return [disqus_node]

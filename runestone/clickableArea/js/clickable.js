@@ -22,11 +22,14 @@ ClickableArea.prototype = new RunestoneBase();
 /*=============================================
 == Initialize basic ClickableArea attributes ==
 =============================================*/
+
 ClickableArea.prototype.init = function (opts) {
     RunestoneBase.apply(this, arguments);
+    RunestoneBase.prototype.init.apply(this, arguments);
     var orig = opts.orig;    // entire <div> element that will be replaced by new HTML
     this.origElem = orig;
     this.divid = orig.id;
+    this.useRunestoneServices = opts.useRunestoneServices;
 
     this.clickableArray = [];   // holds all clickable elements
     this.correctArray = [];   // holds the IDs of all correct clickable span elements, used for eval
@@ -79,16 +82,15 @@ ClickableArea.prototype.getFeedback = function () {
     }
 };
 
-/*============================================
-== Check local storage and replace old HTML ==
-==  with our new elements that don't have   ==
-==  data-correct/data-incorrect attributes  ==
-============================================*/
+/*===========================================
+====   Functions generating final HTML   ====
+===========================================*/
 
 ClickableArea.prototype.renderNewElements = function () {
+    // wrapper function for generating everything
     this.containerDiv = document.createElement("div");
     this.containerDiv.appendChild(this.question);
-    $(this.containerDiv).addClass("alert alert-warning");
+    $(this.containerDiv).addClass(this.origElem.getAttribute("class"));
 
     this.newDiv = document.createElement("div");
     var newContent = $(this.origElem).html();
@@ -98,24 +100,46 @@ ClickableArea.prototype.renderNewElements = function () {
     this.newDiv.innerHTML = newContent;
     this.containerDiv.appendChild(this.newDiv);
 
-    this.checkLocalStorage();
+    this.checkServer("clickableArea");
     this.createButtons();
     this.createFeedbackDiv();
 
     $(this.origElem).replaceWith(this.containerDiv);
-
 };
 
-ClickableArea.prototype.checkLocalStorage = function () {
-    this.hasStoredAnswers = false;
-    var len = localStorage.length;
-    if (len > 0) {
-        var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
-        if (ex !== null) {
-            this.hasStoredAnswers = true;
-            this.clickedIndexArray = ex.split(";");
-        }
+ClickableArea.prototype.createButtons = function () {
+    this.submitButton = document.createElement("button");    // Check me button
+    this.submitButton.textContent = "Check Me";
+    $(this.submitButton).attr({
+        "class": "btn btn-success",
+        "name": "do answer",
+        "type": "button",
+    });
+
+    this.submitButton.onclick = function () {
+        this.clickableEval(true);
+    }.bind(this);
+
+    this.containerDiv.appendChild(this.submitButton);
+};
+
+ClickableArea.prototype.createFeedbackDiv = function () {
+    this.feedBackDiv = document.createElement("div");
+    this.containerDiv.appendChild(document.createElement("br"));
+    this.containerDiv.appendChild(this.feedBackDiv);
+};
+
+/*===================================
+=== Checking/restoring from storage ===
+===================================*/
+
+ClickableArea.prototype.restoreAnswers = function (data) {
+    // Restore answers from storage retrieval done in RunestoneBase or from local storage
+    if (data.answer !== undefined) {   // if we got data from the server
+        this.hasStoredAnswers = true;
+        this.clickedIndexArray = data.answer.split(";");
     }
+
     if (this.ccArray === undefined) {
         this.modifyClickables(this.newDiv.childNodes);
     } else {   // For use with Sphinx-rendered HTML
@@ -130,7 +154,70 @@ ClickableArea.prototype.checkLocalStorage = function () {
     }
 };
 
+
+ClickableArea.prototype.checkLocalStorage = function () {
+    // Gets previous answer data from local storage if it exists
+    this.hasStoredAnswers = false;
+    var len = localStorage.length;
+    if (len > 0) {
+        var ex = localStorage.getItem(this.localStorageKey());
+        if (ex !== null) {
+            this.hasStoredAnswers = true;
+            try {
+                var storageObj = JSON.parse(ex);
+                this.clickedIndexArray = storageObj.answer.split(";");
+            } catch (err) {
+                // error while parsing; likely due to bad value stored in storage
+                console.log(err.message);
+                localStorage.removeItem(this.localStorageKey());
+                this.hasStoredAnswers = false;
+                this.restoreAnswers({});
+                return;
+            }
+            if (this.useRunestoneServices) {
+                // log answer to server
+                this.givenIndexArray = [];
+                for (var i = 0; i < this.clickableArray.length; i++) {
+                    if ($(this.clickableArray[i]).hasClass("clickable-clicked")) {
+                        this.givenIndexArray.push(i);
+                    }
+                }
+                this.logBookEvent({"event": "clickableArea", "act": this.clickedIndexArray.join(";"), "div_id": this.divid, "correct": storageObj.correct});
+            }
+        }
+    }
+    this.restoreAnswers({});   // pass empty object
+};
+
+
+ClickableArea.prototype.setLocalStorage = function (data) {
+    // Array of the indices of clicked elements is passed to local storage
+    var answer;
+    if (data.answer !== undefined) {   // If we got data from the server, we can just use that
+        answer = this.clickedIndexArray.join(";");
+    } else {
+        this.givenIndexArray = [];
+        for (var i = 0; i < this.clickableArray.length; i++) {
+            if ($(this.clickableArray[i]).hasClass("clickable-clicked")) {
+                this.givenIndexArray.push(i);
+            }
+        }
+        answer = this.givenIndexArray.join(";");
+    }
+
+
+    var timeStamp = new Date();
+    var correct = data.correct;
+    var storageObject = {"answer": answer, "correct": correct, "timestamp": timeStamp};
+    localStorage.setItem(this.localStorageKey(), JSON.stringify(storageObject));
+};
+
+/*==========================
+=== Auxilliary functions ===
+==========================*/
+
 ClickableArea.prototype.modifyClickables = function (childNodes) {
+    // Strips the data-correct/data-incorrect labels and updates the correct/incorrect arrays
     for (var i = 0; i < childNodes.length; i++) {
         if ($(childNodes[i]).is("[data-correct]") || $(childNodes[i]).is("[data-incorrect]")) {
 
@@ -170,6 +257,7 @@ ClickableArea.prototype.modifyViaCC = function (children) {
 };
 
 ClickableArea.prototype.modifyTableViaCC = function (children) {
+    // table version of modifyViaCC
     var tComponentArr = [];
     for (var i = 0; i < children.length; i++) {
         if (children[i].nodeName === "TABLE") {
@@ -217,6 +305,7 @@ ClickableArea.prototype.modifyTableViaCC = function (children) {
 };
 
 ClickableArea.prototype.manageNewClickable = function (clickable) {
+    // adds the "clickable" functionality
     $(clickable).addClass("clickable");
 
     if (this.hasStoredAnswers) {   // Check if the element we're about to append to the pre was in local storage as clicked via its index
@@ -240,34 +329,12 @@ ClickableArea.prototype.manageNewClickable = function (clickable) {
     this.clickableCounter++;
 };
 
-ClickableArea.prototype.createButtons = function () {
-    this.submitButton = document.createElement("button");    // Check me button
-    this.submitButton.textContent = "Check Me";
-    $(this.submitButton).attr({
-        "class": "btn btn-success",
-        "name": "do answer"
-    });
+/*======================================
+== Evaluation and displaying feedback ==
+======================================*/
 
-    this.submitButton.onclick = function () {
-        this.clickableEval();
-    }.bind(this);
-
-    this.containerDiv.appendChild(this.submitButton);
-};
-
-ClickableArea.prototype.createFeedbackDiv = function () {
-    this.feedBackDiv = document.createElement("div");
-    this.containerDiv.appendChild(document.createElement("br"));
-    this.containerDiv.appendChild(this.feedBackDiv);
-};
-
-/*========================================
-== Evaluation and setting local storage ==
-========================================*/
-
-ClickableArea.prototype.clickableEval = function () {
+ClickableArea.prototype.clickableEval = function (logFlag) {
     // Evaluation is done by iterating over the correct/incorrect arrays and checking by class
-    this.setLocalStorage();
     this.correct = true;
     this.correctNum = 0;
     this.incorrectNum = 0;
@@ -287,27 +354,18 @@ ClickableArea.prototype.clickableEval = function () {
             $(this.incorrectArray[i]).removeClass("clickable-incorrect");
         }
     }
-    var answerInfo = "clicked:" + this.givenIndexArray + ";" + (this.correct ? "correct" : "incorrect");
-    this.logBookEvent({"event": "clickableArea", "act": answerInfo, "div_id": this.divid});
-    this.renderFeedback();
-};
-
-ClickableArea.prototype.setLocalStorage = function () {
-    // Array of the indices of clicked elements is passed to local storage
-    this.givenIndexArray = [];
-    for (var i = 0; i < this.clickableArray.length; i++) {
-        if ($(this.clickableArray[i]).hasClass("clickable-clicked")) {
-            this.givenIndexArray.push(i);
-        }
+    this.setLocalStorage({"correct": (this.correct ? "T" : "F")});
+    if (logFlag) {   // Sometimes we don't want to log the answer; for example, on reload of timed exam questions
+        this.logBookEvent({"event": "clickableArea", "act": this.givenIndexArray.join(";"), "div_id": this.divid, "correct": (this.correct ? "T" : "F")});
     }
-    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", this.givenIndexArray.join(";"));
+    this.renderFeedback();
 };
 
 ClickableArea.prototype.renderFeedback = function () {
 
     if (this.correct) {
         $(this.feedBackDiv).html("You are Correct!");
-        $(this.feedBackDiv).attr("class", "alert alert-success");
+        $(this.feedBackDiv).attr("class", "alert alert-info");
 
     } else {
         $(this.feedBackDiv).html("Incorrect. You clicked on " + this.correctNum + " of the " + this.correctArray.length.toString() + " correct elements and " + this.incorrectNum + " of the " + this.incorrectArray.length.toString() + " incorrect elements. " + this.feedback);
@@ -320,10 +378,15 @@ ClickableArea.prototype.renderFeedback = function () {
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
 =================================*/
-$(document).ready(function () {
+$(document).bind("runestone:login-complete", function () {
     $("[data-component=clickablearea]").each(function (index) {
-        if ($(this.parentNode).data("component") !== "timedAssessment") { // If this element exists within a timed component, don't render it here
-            CAList[this.id] = new ClickableArea({"orig": this});
+        if ($(this).closest('[data-component=timedAssessment]').length == 0) { // If this element exists within a timed component, don't render it here
+            CAList[this.id] = new ClickableArea({"orig": this, "useRunestoneServices":eBookConfig.useRunestoneServices});
         }
     });
 });
+
+if (typeof component_factory === 'undefined') {
+    component_factory = {}
+}
+component_factory['clickablearea'] = function(opts) { return new ClickableArea(opts)}

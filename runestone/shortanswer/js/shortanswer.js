@@ -25,8 +25,9 @@ ShortAnswer.prototype = new RunestoneBase();
 ========================================*/
 ShortAnswer.prototype.init = function (opts) {
     RunestoneBase.apply(this, arguments);
+    RunestoneBase.prototype.init.apply(this, arguments);
     var orig = opts.orig;    // entire <p> element that will be replaced by new HTML
-    this.useRunestoneServies = opts.useRunestoneServices || eBookConfig.useRunestoneServices;
+    this.useRunestoneServices = opts.useRunestoneServices || eBookConfig.useRunestoneServices;
     this.origElem = orig;
     this.divid = orig.id;
     this.question = this.origElem.innerHTML;
@@ -37,18 +38,13 @@ ShortAnswer.prototype.init = function (opts) {
     }
 
     this.renderHTML();
-    this.loadJournal();
+    this.checkServer("shortanswer");
 };
 
 ShortAnswer.prototype.renderHTML = function() {
     this.containerDiv = document.createElement("div");
     this.containerDiv.id = this.divid;
-    if (this.optional) {
-        $(this.containerDiv).addClass("journal alert alert-success");
-                            } else {
-        $(this.containerDiv).addClass("journal alert alert-warning");
-                            }
-
+    $(this.containerDiv).addClass(this.origElem.getAttribute("class"));
     this.newForm = document.createElement("form");
     this.newForm.id = this.divid + "_journal";
     this.newForm.name = this.newForm.id;
@@ -81,11 +77,17 @@ ShortAnswer.prototype.renderHTML = function() {
 
     this.jTextArea = document.createElement("textarea");
     this.jTextArea.id = this.divid + "_solution";
+    $(this.jTextArea).attr("aria-label", "textarea");
     $(this.jTextArea).css("display:inline, width:530px");
     $(this.jTextArea).addClass("form-control");
     this.jTextArea.rows = 4;
     this.jTextArea.cols = 50;
     this.jLabel.appendChild(this.jTextArea);
+    this.jTextArea.oninput = function () {
+       this.feedbackDiv.innerHTML = "Your answer has not been saved yet!";
+       $(this.feedbackDiv).removeClass("alert-success");
+       $(this.feedbackDiv).addClass("alert alert-danger");
+    }.bind(this);
 
     this.fieldSet.appendChild(document.createElement("br"));
 
@@ -93,7 +95,7 @@ ShortAnswer.prototype.renderHTML = function() {
     this.fieldSet.appendChild(this.buttonDiv);
 
     this.submitButton = document.createElement("button");
-    $(this.submitButton).addClass("btn btn-default");
+    $(this.submitButton).addClass("btn btn-success");
     this.submitButton.type = "button";
     this.submitButton.textContent = "Save";
     this.submitButton.onclick = function () {
@@ -101,77 +103,91 @@ ShortAnswer.prototype.renderHTML = function() {
     }.bind(this);
     this.buttonDiv.appendChild(this.submitButton);
 
-    this.randomSpan = document.createElement("span");
+    // barb - removed since we aren't really giving instructor feedback here
+    /* this.randomSpan = document.createElement("span");
     this.randomSpan.innerHTML = "Instructor's Feedback";
-    this.fieldSet.appendChild(this.randomSpan);
+    this.fieldSet.appendChild(this.randomSpan); */
 
-    this.otherOptionsDiv = document.createElement("div");
+    /* this.otherOptionsDiv = document.createElement("div");
     $(this.otherOptionsDiv).css("padding-left:20px");
     $(this.otherOptionsDiv).addClass("journal-options");
-    this.fieldSet.appendChild(this.otherOptionsDiv);
+    this.fieldSet.appendChild(this.otherOptionsDiv); */
 
+    // add a feedback div to give user feedback
     this.feedbackDiv = document.createElement("div");
-    $(this.feedbackDiv).addClass("bg-info form-control");
-    $(this.feedbackDiv).css("width:530px, background-color:#eee, font-style:italic");
+    //$(this.feedbackDiv).addClass("bg-info form-control");
+    //$(this.feedbackDiv).css("width:530px, background-color:#eee, font-style:italic");
+    $(this.feedbackDiv).css("width:530px, font-style:italic");
     this.feedbackDiv.id = this.divid + "_feedback";
-    this.feedbackDiv.innerHTML = "There is no feedback yet.";
-    this.otherOptionsDiv.appendChild(this.feedbackDiv);
+    this.feedbackDiv.innerHTML = "You have not answered this question yet.";
+    $(this.feedbackDiv).addClass("alert alert-danger");
+    //this.otherOptionsDiv.appendChild(this.feedbackDiv);
+    this.fieldSet.appendChild(this.feedbackDiv);
 
-    this.fieldSet.appendChild(document.createElement("br"));
+    //this.fieldSet.appendChild(document.createElement("br"));
 
     $(this.origElem).replaceWith(this.containerDiv);
 };
 
 ShortAnswer.prototype.submitJournal = function () {
     var value = $("#"+this.divid+"_solution").val();
-    localStorage.setItem(this.divid, value);
-    /*
-    directiveRemoteCommand("set_journal_entry",  this.divid, {"solution": value},
-                      function(data) {
-                        storage.remove(this.divid);
-                      },
-                      function(data) {
-                        console.log(data.message);
-                      });  */
+
+
+    this.setLocalStorage({answer: value, timestamp: new Date()})
     this.logBookEvent({'event': 'shortanswer', 'act': JSON.stringify(value), 'div_id': this.divid});
+    this.feedbackDiv.innerHTML = "Your answer has been saved.";
+    $(this.feedbackDiv).removeClass("alert-danger");
+    $(this.feedbackDiv).addClass("alert alert-success");
 };
 
-ShortAnswer.prototype.loadJournal = function () {
-
-    // Ask the server to send the latest
-    var loadAnswer = function(data,status,whatever) {
-        var len = localStorage.length;
-        var answer = {};
-        if (! jQuery.isEmptyObject(data)) {
-            answer = data;
-        }  else {
-            answer.answer = "";
-        }
-        var solution = $("#" + this.divid + "_solution");
-        if (len > 0) {
-            var ex = storage.get(this.divid);
-            if (ex !== null ) {
-                if (! storage.is_new(answer.divid, new Date(answer.timestamp))) {
-                    solution.text(storage.get(this.divid));
-                // now send the newer answer to the server...
-                } else {
-                    solution.text(answer.answer);
-                }
-            } else {
-                solution.text(answer.answer);
-            }
-        } else {
-            solution.text(answer.answer);
-        }
-    }.bind(this);
-    var data = {'div_id' : this.divid};
-    if (this.useRunestoneServies) {
-        jQuery.get(eBookConfig.ajaxURL + 'getlastanswer', data, loadAnswer);
-    } else {
-        loadAnswer({},null,null);
+ShortAnswer.prototype.setLocalStorage = function(data) {
+    if (! this.graderactive ) {
+        let key = this.localStorageKey()
+        localStorage.setItem(key, JSON.stringify(data));
     }
 };
 
+ShortAnswer.prototype.checkLocalStorage = function () {
+    // Repopulates the short answer text
+    // which was stored into local storage.
+    var len = localStorage.length;
+    if (len > 0) {
+        var ex = localStorage.getItem(this.localStorageKey());
+        if (ex !== null) {
+            try {
+                var storedData = JSON.parse(ex);
+                var answer = storedData.answer;
+            } catch (err) {
+                // error while parsing; likely due to bad value stored in storage
+                console.log(err.message);
+                localStorage.removeItem(this.localStorageKey());
+                return;
+            }
+            let solution = $("#" + this.divid + "_solution");
+            solution.text(answer);
+            this.feedbackDiv.innerHTML = "Your current saved answer is shown above.";
+            $(this.feedbackDiv).removeClass("alert-danger");
+            $(this.feedbackDiv).addClass("alert alert-success");
+
+        }
+    }
+};
+
+ShortAnswer.prototype.restoreAnswers = function (data) {
+    // Restore answers from storage retrieval done in RunestoneBase
+    // sometimes data.answer can be null
+    if (!data.answer) {
+        data.answer = "";
+    }
+
+    let solution = $("#" + this.divid + "_solution");
+    solution.text(data.answer);
+    this.feedbackDiv.innerHTML = "Your current saved answer is shown above.";
+    $(this.feedbackDiv).removeClass("alert-danger");
+    $(this.feedbackDiv).addClass("alert alert-success");
+
+
+};
 
 /*=================================
 == Find the custom HTML tags and ==
@@ -179,7 +195,14 @@ ShortAnswer.prototype.loadJournal = function () {
 =================================*/
 $(document).ready(function () {
     $("[data-component=shortanswer]").each(function (index) {
-        saList[this.id] = new ShortAnswer({"orig": this, 'useRunestoneServices': eBookConfig.useRunestoneServices});
+        if ($(this).closest('[data-component=timedAssessment]').length == 0) { // If this element exists within a timed component, don't render it here
+            saList[this.id] = new ShortAnswer({"orig": this, 'useRunestoneServices': eBookConfig.useRunestoneServices});
+        }
     });
 
 });
+
+if (typeof component_factory === 'undefined') {
+    component_factory = {}
+}
+component_factory['shortanswer'] = function(opts) { return new ShortAnswer(opts)}

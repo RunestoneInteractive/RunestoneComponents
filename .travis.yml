@@ -1,0 +1,20 @@
+dist: xenial
+language: python
+python:
+- '3.7'
+script:
+- export LANG=en_US.UTF-8
+- wget https://chromedriver.storage.googleapis.com/73.0.3683.68/chromedriver_linux64.zip
+- unzip chromedriver_linux64.zip
+- sudo apt-get -y update
+- sudo apt-get -y install google-chrome-stable
+- export PATH=$TRAVIS_BUILD_DIR:$PATH
+- "python -m pip install -U pip"
+- "pip install -e ."
+- "pip install pyvirtualdisplay"
+- "./runTests.sh"
+notifications:
+  slack:
+    secure: ZM7WB8p85i+sZXQYqlm7M/Eu1ZL5UptFw3ZRpzWuBMnC/OLw721eGaY1GsbyLhqtBUMbMnaStwptz/mHEZfEv36ARSnyOZdhl+g5ckQKUB+ECULk7HkyjiU4kPJ5U/yyGUFBZUFlZfhY76EBOqtGU6IhXw8TqWOfD8CZDXXvICE=
+    rooms:
+    - runestoneteam:aKSajF6qfp9WpgisFH8mocs6#builds

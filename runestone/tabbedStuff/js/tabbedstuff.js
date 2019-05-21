@@ -74,7 +74,7 @@ TabbedStuff.prototype.findActiveTab = function () {     // Checks to see if user
 TabbedStuff.prototype.createTabContainer = function () {     // First create a container div
     this.replacementDiv = document.createElement("div");
     this.replacementDiv.id = this.divid;
-    $(this.replacementDiv).addClass("alert alert-warning");
+    $(this.replacementDiv).addClass(this.origElem.getAttribute("class"));
     $(this.replacementDiv).attr({"role": "tabpanel"});
 
     this.tabsUL = document.createElement("ul");

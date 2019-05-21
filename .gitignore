@@ -1,4 +1,6 @@
 *.py[cod]
+*.log
+.venv
 
 # C extensions
 *.so
@@ -16,8 +18,8 @@ dist/*
 develop-eggs
 .installed.cfg
 __pycache__
+.cache
 _deploy
-conf.py
 
 # Installer logs
 pip-log.txt
@@ -36,4 +38,16 @@ nosetests.xml
 .pydevproject
 .idea
 bower_componenets/
-test/
+.venv
+*~
+
+# Files produced by runestone builds.
+runestone/*/test/build_info
+**/sphinx_settings.json
+build_info
+
+# IDEs
+.vscode/
+**/sphinx-enki-info.txt
+# Mac stuff
+.DS_Store

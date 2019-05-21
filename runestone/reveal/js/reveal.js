@@ -31,6 +31,12 @@ Reveal.prototype.init = function (opts) {
     if ($(this.origElem).is("[data-modal]")) {
         this.dataModal = true;
     }
+    if ($(this.origElem).is("[data-instructoronly]")) {
+        this.instructorOnly = true;
+    } else {
+        this.instructorOnly = false;
+    }
+
     this.modalTitle = null;
     this.showtitle = null;     // Title of button that shows the concealed data
     this.hidetitle = null;
@@ -41,10 +47,13 @@ Reveal.prototype.init = function (opts) {
     this.checkForTitle();
 
     this.getButtonTitles();
-    this.createShowButton();
 
-    if (!this.dataModal) {
-        this.createHideButton();     // Hide button is already implemented in modal dialog
+    // Delay creating instructoronly buttons until login
+    if (! this.instructorOnly) {
+        this.createShowButton();
+        if (!this.dataModal) {
+            this.createHideButton();     // Hide button is already implemented in modal dialog
+        }
     }
 };
 
@@ -61,8 +70,12 @@ Reveal.prototype.adoptChildren = function () {
 Reveal.prototype.getButtonTitles = function () {     // to support old functionality
     this.showtitle = $(this.origElem).data("showtitle");
     if (this.showtitle === undefined) {
-        this.showtitle = "Show";     // default
+        this.showtitle = "Show" // default
     }
+    if (this.instructorOnly) {
+        this.showtitle += " IG";
+    }
+
     this.hidetitle = $(this.origElem).data("hidetitle");
     if (this.hidetitle === undefined) {
         this.hidetitle = "Hide";     // default
@@ -96,9 +109,18 @@ Reveal.prototype.createShowButton = function () {
         this.wrapDiv.appendChild(this.revealDiv);
     }
 
+    if (this.instructorOnly) {
+        $(this.revealDiv).addClass('iguide');
+    }
+
 
     this.sbutt = document.createElement("button");
-    $(this.sbutt).addClass("btn btn-default reveal_button");
+    $(this.sbutt).addClass("btn reveal_button");
+    if (this.instructorOnly) {
+        $(this.sbutt).addClass("btn-info");
+    } else {
+        $(this.sbutt).addClass("btn-default");
+    }
     $(this.sbutt).css("margin-bottom","10px");
     this.sbutt.textContent = this.showtitle;
     this.sbutt.id = this.divid + "_show";
@@ -132,6 +154,13 @@ Reveal.prototype.createHideButton = function () {
     this.wrapDiv.appendChild(this.hbutt);
 
 };
+
+Reveal.prototype.createInstructorButtons = function () {
+    this.createShowButton();
+    if (!this.dataModal) {
+        this.createHideButton();
+    }
+}
 
 /*=================
 === Modal logic ===
@@ -218,4 +247,14 @@ $(document).ready(function () {
     $("[data-component=reveal]").each(function (index) {
         RevealList[this.id] = new Reveal({"orig": this});
     });
+});
+
+$(document).bind("runestone:login-complete",function () {
+    if (eBookConfig.isInstructor) {
+        for (const divid of Object.keys(RevealList)) {
+            if (RevealList[divid].instructorOnly) {
+                RevealList[divid].createInstructorButtons();
+            }
+        }
+    }
 });

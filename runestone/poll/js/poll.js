@@ -14,6 +14,7 @@ function Poll(opts) {
 
 Poll.prototype.init = function (opts) {
     RunestoneBase.apply(this, arguments);
+    RunestoneBase.prototype.init.apply(this, arguments);
     var orig = opts.orig;  //entire <p> element
     this.origElem = orig;
     this.divid = orig.id;
@@ -24,8 +25,8 @@ Poll.prototype.init = function (opts) {
     if ($(this.origElem).is("[data-comment]")) {
         this.comment = true;
     }
-    console.log(this.comment);
-        
+    this.resultsViewer = $(orig).data('results');
+
     this.getQuestionText();
     this.getOptionText(); //populates optionList
     this.renderPoll();  //generates HTML
@@ -66,9 +67,9 @@ Poll.prototype.renderPoll = function() {
     this.resultsDiv = document.createElement("div");
 
     this.containerDiv.id = this.divid + "_container";
-    $(this.containerDiv).addClass("alert alert-warning");
+    $(this.containerDiv).addClass(this.origElem.getAttribute("class"));
 
-    $(this.pollForm).text(this.question);
+    $(this.pollForm).html(`<span style='font-size: Large'>${this.question}</span>`);
     $(this.pollForm).attr({
         "id":this.divid +"_form",
         "method" : "get",
@@ -85,6 +86,7 @@ Poll.prototype.renderPoll = function() {
             "type":"radio",
             "value":i
         });
+        $(radio).click(this.submitPoll.bind(this))
         var label = document.createElement("label");
         $(label).attr("for", tmpid);
         $(label).text(this.optionList[i]);
@@ -98,20 +100,8 @@ Poll.prototype.renderPoll = function() {
         this.renderTextField();
     }
 
-    var button = document.createElement("button");
-    button.onclick = function() {
-        _this.submitPoll();
-    };
-    button.textContent = "Complete";
-    $(button).attr({
-        "class" : "btn btn-success",
-        "name" : "Submit Poll",
-    });
-
     this.resultsDiv.id = this.divid + "_results";
 
-
-    this.pollForm.appendChild(button);
     this.containerDiv.appendChild(this.pollForm);
     this.containerDiv.appendChild(this.resultsDiv);
     $(this.origElem).replaceWith(this.containerDiv);
@@ -159,13 +149,16 @@ Poll.prototype.submitPoll = function() {
 
     // log the fact that the user has answered the poll to local storage
     localStorage.setItem(this.divid, "true");
+    $(this.pollForm).append(`<span id=${this.divid}_sent><strong>Thanks, your response has been recorded</strong></span>`);
 
     // show the results of the poll
-    var data = {};
-    data.div_id = this.divid;
-    data.course = eBookConfig.course;
-    jQuery.get(eBookConfig.ajaxURL+"getpollresults", data, this.showPollResults);
-};
+    if (this.resultsViewer === "all") {
+        var data = {};
+        data.div_id = this.divid;
+        data.course = eBookConfig.course;
+        jQuery.get(eBookConfig.ajaxURL+"getpollresults", data, this.showPollResults);
+    }
+}
 
 Poll.prototype.showPollResults = function(data) {
     //displays the results returned by the server
@@ -174,20 +167,29 @@ Poll.prototype.showPollResults = function(data) {
     var opt_list = results[1];
     var count_list = results[2];
     var div_id = results[3];
+    var my_vote = results[4];
 
-    $(this.resultsDiv).html("<b>Results:</b><br><br>");
-
-    var list = $(document.createElement("ol"));
-    for(var i=0; i<opt_list.length; i++) {
-        var count = count_list[i];
-        var percent = (count / total) * 100;
-        var text = Math.round(10*percent)/10 + "%";   // round percent to 10ths
-
-        var html = "<li value='"+opt_list[i]+"'><div class='progress'><div class='progress-bar progress-bar-success' style=width:"+percent+"%;><span class='poll-text'>"+text+"</span></div></div></li>";
-        var el = $(html);
-        list.append(el);
+    // resture current users vote
+    if (my_vote > -1) {
+        this.optsArray[my_vote].checked = 'checked';
     }
+
+    // show results summary if appropriate
+    if (this.resultsViewer === "all" && localStorage.getItem(this.divid === "true") || eBookConfig.isInstructor ) {
+        $(this.resultsDiv).html("<b>Results:</b><br><br>");
+
+        var list = $(document.createElement("ol"));
+        for(var i=0; i<opt_list.length; i++) {
+            var count = count_list[i];
+            var percent = (count / total) * 100;
+            var text = Math.round(10*percent)/10 + "%";   // round percent to 10ths
+
+            var html = "<li value='"+opt_list[i]+"'><div class='progress'><div class='progress-bar progress-bar-success' style=width:"+percent+"%;><span class='poll-text'>"+text+"</span></div></div></li>";
+            var el = $(html);
+            list.append(el);
+        }
     $(this.resultsDiv).append(list);
+    }
 };
 
 Poll.prototype.disableOptions = function() {
@@ -207,9 +209,8 @@ Poll.prototype.checkPollStorage = function() {
 };
 
 
-
-
-$(document).ready(function() {
+// Do not render poll data until login-complete event so we know instructor status
+$(document).bind("runestone:login-complete", function () {
     $("[data-component=poll]").each(function(index) {
         pollList[this.id] = new Poll({"orig":this});
     });

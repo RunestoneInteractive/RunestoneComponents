@@ -17,10 +17,9 @@ __author__ = 'bmiller'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneIdDirective
 from .assessbase import Assessment
 from .multiplechoice import *
-from .fitb import *
 from .timedassessment import *
 
 
@@ -29,29 +28,28 @@ def setup(app):
     app.add_directive('mchoicemf', MChoiceMF)
     app.add_directive('mchoicema', MChoiceMA)
     app.add_directive('mchoicerandommf', MChoiceRandomMF)
-    app.add_directive('fillintheblank', FillInTheBlank)
-    app.add_directive('blank', Blank)
     app.add_directive('addbutton', AddButton)
     app.add_directive('qnum', QuestionNumber)
     app.add_directive('timed', TimedDirective)
 
-    app.add_stylesheet('fitb.css')
-    #app.add_javascript('assess.js')
-    app.add_javascript('mchoice.js')
-    app.add_javascript('timedmc.js')
-    app.add_javascript('fitb.js')
-    app.add_javascript('timedfitb.js')
-    app.add_javascript('timed.js')
+    app.add_config_value('mchoice_div_class', 'runestone alert alert-warning', 'html')
+
+    app.add_autoversioned_javascript('mchoice.js')
+    app.add_autoversioned_javascript('timedmc.js')
+    app.add_autoversioned_javascript('timed.js')
 
     app.add_node(TimedNode, html=(visit_timed_node, depart_timed_node))
     app.add_node(MChoiceNode, html=(visit_mc_node, depart_mc_node))
-    app.add_node(FITBNode, html=(visit_fitb_node, depart_fitb_node))
-    app.add_node(BlankNode, html=(visit_blank_node, depart_blank_node))
+
+    app.add_node(AnswersBulletList, html=(visit_answers_bullet_node, depart_answers_bullet_node))
+    app.add_node(AnswerListItem, html=(visit_answer_list_item, depart_answer_list_item))
+    app.add_node(FeedbackBulletList, html=(visit_feedback_bullet_node, depart_feedback_bullet_node))
+    app.add_node(FeedbackListItem, html=(visit_feedback_list_item, depart_feedback_list_item))
 
 
 
 
-class AddButton(Directive):
+class AddButton(RunestoneIdDirective):
     required_arguments = 1
     optional_arguments = 1
     final_argument_whitespace = True
@@ -65,6 +63,7 @@ class AddButton(Directive):
 
             ...
             """
+        super(AddButton, self).run()
 
         TEMPLATE_START = '''
             <div id="%(divid)s" class="alert alert-warning">
@@ -77,17 +76,26 @@ class AddButton(Directive):
             </div>
             '''
 
-        self.options['divid'] = self.arguments[0]
-
         res = ""
         res = TEMPLATE_START % self.options
 
         res += TEMPLATE_END % self.options
-        return [nodes.raw('', res, format='html')]
+        rawnode = nodes.raw(self.block_text, res, format='html')
+        rawnode.source, rawnode.line = self.state_machine.get_source_and_line(self.lineno)
+        return [rawnode]
 
 
-class QuestionNumber(Directive):
-    """Set Parameters for Question Numbering"""
+class QuestionNumber(RunestoneDirective):
+    """Set Parameters for Question Numbering
+.. qnum::
+   'prefix': character prefix before the number
+   'suffix': character prefix after the number
+   'start': start numbering with this value
+
+.. qnum::
+   :prefix: turtle-
+   :start: 10
+    """
     required_arguments = 0
     optional_arguments = 3
     has_content = False

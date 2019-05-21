@@ -36,17 +36,24 @@ TimedDragNDrop.prototype.checkCorrectTimed = function () {
     if (this.unansweredNum === this.dragPairArray.length) {
         this.correct = null;
     }
-
-    return this.correct;
+    switch (this.correct) {
+        case (true):
+            return "T";
+        case (false):
+            return "F";
+        default:
+            return null;
+    }
 };
 
 TimedDragNDrop.prototype.hideFeedback = function () {
     $(this.feedBackDiv).hide();
 };
 
-TimedDragNDrop.prototype.processTimedSubmission = function () {
+TimedDragNDrop.prototype.processTimedSubmission = function (logFlag) {
+    // Disable input & evaluate component
     $(this.resetButton).hide();
-    this.dragEval();
+    this.dragEval(logFlag);
     for (var i = 0; i < this.dragPairArray.length; i++) {   // No more dragging
         $(this.dragPairArray[i][0]).attr("draggable", "false");
         $(this.dragPairArray[i][0]).css("cursor", "initial");

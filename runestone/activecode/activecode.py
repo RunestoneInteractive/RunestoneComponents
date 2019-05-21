@@ -19,35 +19,41 @@ __author__ = 'bmiller'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
 from .textfield import *
-from sqlalchemy import create_engine, Table, MetaData, select, delete
+from sqlalchemy import Table
+from runestone.server.componentdb import addQuestionToDB, addHTMLToDB, engine, meta
+from runestone.common.runestonedirective import (RunestoneIdDirective, RunestoneNode,
+    add_i18n_js, add_codemirror_css_and_js, add_skulpt_js)
 
 try:
     from html import escape  # py3
 except ImportError:
     from cgi import escape  # py2
 
+if engine:
+    Source_code = Table('source_code', meta, autoload=True, autoload_with=engine)
+
 def setup(app):
     app.add_directive('activecode', ActiveCode)
     app.add_directive('actex', ActiveExercise)
     app.add_role('textfield',textfield_role)
-    app.add_stylesheet('codemirror.css')
-    app.add_stylesheet('activecode.css')
+    app.add_config_value('activecode_div_class', "runestone explainer ac_section alert alert-warning", 'html')
+    app.add_config_value('activecode_hide_load_history', False, 'html')
 
-    app.add_javascript('jquery.highlight.js')
-    app.add_javascript('bookfuncs.js')
-    app.add_javascript('codemirror.js')
-    app.add_javascript('xml.js')
-    app.add_javascript('css.js')
-    app.add_javascript('htmlmixed.js')
-    app.add_javascript('python.js')
-    app.add_javascript('javascript.js')
-    app.add_javascript('rune_cljs/rune_cljs.js')
-    app.add_javascript('activecode.js')
-    app.add_javascript('skulpt.min.js')
-    app.add_javascript('skulpt-stdlib.js')
-    app.add_javascript('clike.js')
+    app.add_autoversioned_stylesheet('activecode.css')
+
+    app.add_autoversioned_javascript('jquery.highlight.js')
+    app.add_autoversioned_javascript('bookfuncs.js')
+    add_codemirror_css_and_js(app,'xml','css','python','htmlmixed','javascript')
+    add_i18n_js(app, {"en","sr-Cyrl"},"activecode-i18n")
+    add_skulpt_js(app)
+    app.add_autoversioned_javascript('activecode.js')
+    app.add_autoversioned_javascript('clike.js')
+    app.add_autoversioned_javascript('timed_activecode.js')
+
+
+
+
 
     app.add_node(ActivcodeNode, html=(visit_ac_node, depart_ac_node))
 
@@ -55,22 +61,29 @@ def setup(app):
     app.connect('env-purge-doc', purge_activecodes)
 
 
-
-TEMPLATE = """
-<textarea data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(gradebutton)s %(caption)s>
-%(initialcode)s
-</textarea>
+TEMPLATE_START = """
+<div data-childcomponent="%(divid)s" class="%(divclass)s">
 """
 
-class ActivcodeNode(nodes.General, nodes.Element):
-    def __init__(self, content):
+TEMPLATE_END = """
+<textarea data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s
+    %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s %(chatcodes)s
+    data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(tie)s %(nopair)s
+    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(hidehistory)s>
+%(initialcode)s
+</textarea>
+</div>
+"""
+
+class ActivcodeNode(nodes.General, nodes.Element, RunestoneNode):
+    def __init__(self, content, **kwargs):
         """
 
         Arguments:
         - `self`:
         - `content`:
         """
-        super(ActivcodeNode, self).__init__(name=content['name'])
+        super(ActivcodeNode, self).__init__(name=content['name'], **kwargs)
         self.ac_components = content
 
 
@@ -79,14 +92,16 @@ class ActivcodeNode(nodes.General, nodes.Element):
 # The node that is passed as a parameter is an instance of our node class.
 def visit_ac_node(self, node):
     # print self.settings.env.activecodecounter
-    res = TEMPLATE
+
     #todo:  handle above in node.ac_components
     #todo handle  'hidecode' not in node.ac_components:
     # todo:  handle if 'gradebutton' in node.ac_components: res += GRADES
 
-    res = res % node.ac_components
-    res = res.replace("u'", "'")  # hack:  there must be a better way to include the list and avoid unicode strings
+    node.delimiter = "_start__{}_".format(node.ac_components['divid'])
 
+    self.body.append(node.delimiter)
+
+    res = TEMPLATE_START % node.ac_components
     self.body.append(res)
 
 
@@ -95,7 +110,15 @@ def depart_ac_node(self, node):
         etc and did not want to do all of the processing in visit_ac_node any finishing touches could be
         added here.
     '''
-    pass
+    res = TEMPLATE_END % node.ac_components
+    self.body.append(res)
+
+
+    addHTMLToDB(node.ac_components['divid'],
+                node.ac_components['basecourse'],
+                "".join(self.body[self.body.index(node.delimiter) + 1:]))
+
+    self.body.remove(node.delimiter)
 
 
 def process_activcode_nodes(app, env, docname):
@@ -105,12 +128,51 @@ def process_activcode_nodes(app, env, docname):
 def purge_activecodes(app, env, docname):
     pass
 
+class ActiveCode(RunestoneIdDirective):
+    """
+.. activecode:: uniqueid
+   :nocanvas:  -- do not create a canvas
+   :autograde: unittest
+   :nopre: -- do not create an output component
+   :above: -- put the canvas above the code
+   :autorun: -- run this activecode as soon as the page is loaded
+   :caption: this is the caption
+   :include: div1,div2 -- invisibly include code from another activecode
+   :hidecode: -- Don't show the editor initially
+   :nocodelens: -- Do not show the codelens button
+   :timelimit: -- set the time limit for this program in seconds
+   :language: python, html, javascript, java, python2, python3
+   :chatcodes: -- Enable users to talk about this code snippet with others
+   :tour_1: audio tour track
+   :tour_2: audio tour track
+   :tour_3: audio tour track
+   :tour_4: audio tour track
+   :tour_5: audio tour track
+   :stdin: : A file to simulate stdin (java, python2, python3)
+   :datafile: : A datafile for the program to read (java, python2, python3)
+   :sourcefile: : source files (java, python2, python3)
+   :available_files: : other additional files (java, python2, python3)
+   :enabledownload: -- allow textfield contents to be downloaded as *.py file
+   :nopair: -- disable pair programming features
 
-class ActiveCode(Directive):
+    If this is a homework problem instead of an example in the text
+    then the assignment text should go here.  The assignment text ends with
+    the line containing four tilde ~
+    ~~~~
+    print("hello world")
+    ====
+    print("Hidden code, such as unit tests come after the four = signs")
+
+config values (conf.py):
+
+- activecode_div_class - custom CSS class of the component's outermost div
+- activecode_hide_load_history - if True, hide the load history button
+    """
     required_arguments = 1
     optional_arguments = 1
     has_content = True
-    option_spec = {
+    option_spec = RunestoneIdDirective.option_spec.copy()
+    option_spec.update({
         'nocanvas': directives.flag,
         'nopre': directives.flag,
         'above': directives.flag,  # put the canvas above the code
@@ -119,6 +181,7 @@ class ActiveCode(Directive):
         'include': directives.unchanged,
         'hidecode': directives.flag,
         'language': directives.unchanged,
+        'chatcodes': directives.flag,
         'tour_1': directives.unchanged,
         'tour_2': directives.unchanged,
         'tour_3': directives.unchanged,
@@ -126,26 +189,42 @@ class ActiveCode(Directive):
         'tour_5': directives.unchanged,
         'nocodelens': directives.flag,
         'coach': directives.flag,
+        'gradebutton': directives.flag,
         'timelimit': directives.unchanged,
         'stdin' : directives.unchanged,
         'datafile' : directives.unchanged,
         'sourcefile' : directives.unchanged,
-        'available_files' : directives.unchanged
-    }
+        'available_files' : directives.unchanged,
+        'enabledownload' : directives.flag,
+        'compileargs': directives.unchanged,
+        'linkargs': directives.unchanged,
+        'interpreterargs': directives.unchanged,
+        'runargs': directives.unchanged,
+        'tie': directives.unchanged,
+        'nopair': directives.flag
+    })
+
+
 
     def run(self):
+        super(ActiveCode, self).run()
+
+        addQuestionToDB(self)
+
         env = self.state.document.settings.env
-        # keep track of how many activecodes we have.... could be used to automatically make a unique id for them.
+        # keep track of how many activecodes we have....
+        # could be used to automatically make a unique id for them.
         if not hasattr(env, 'activecodecounter'):
             env.activecodecounter = 0
         env.activecodecounter += 1
         self.options['name'] = self.arguments[0].strip()
 
-        self.options['divid'] = self.arguments[0]
-        if not self.options['divid']:
-            raise Exception("No divid for ..activecode or ..actex in activecode.py")
-
+        explain_text = None
         if self.content:
+            if '~~~~' in self.content:
+                idx = self.content.index('~~~~')
+                explain_text = self.content[:idx]
+                self.content = self.content[idx+1:]
             source = "\n".join(self.content)
         else:
             source = '\n'
@@ -181,12 +260,22 @@ class ActiveCode(Directive):
         else:
             lst = self.options['include'].split(',')
             lst = [x.strip() for x in lst]
-            self.options['include'] = 'data-include=' + " ".join(lst)
+            self.options['include'] = 'data-include="' + " ".join(lst) + '"'
 
         if 'hidecode' in self.options:
             self.options['hidecode'] = 'data-hidecode="true"'
         else:
             self.options['hidecode'] = ''
+
+        if 'enabledownload' in self.options:
+            self.options['enabledownload'] = 'data-enabledownload="true"'
+        else:
+            self.options['enabledownload'] = ''
+
+        if 'chatcodes' in self.options:
+            self.options['chatcodes'] = 'data-chatcodes="true"'
+        else:
+            self.options['chatcodes'] = ''
 
         if 'language' not in self.options:
             self.options['language'] = 'python'
@@ -199,6 +288,11 @@ class ActiveCode(Directive):
             self.options['codelens'] = ''
         else:
             self.options['codelens'] = 'data-codelens="true"'
+
+        if 'nopair' in self.options:
+            self.options['nopair'] = 'data-nopair="true"'
+        else:
+            self.options['nopair'] = ''
 
         if 'timelimit' not in self.options:
             self.options['timelimit'] = 'data-timelimit=25000'
@@ -231,8 +325,27 @@ class ActiveCode(Directive):
         else:
             self.options['sourcefile'] = "data-sourcefile='%s'" % self.options['sourcefile']
 
+        if 'tie' in self.options:
+            self.options['tie'] = "data-tie='{}'".format(self.options['tie'])
+        else:
+            self.options['tie'] = ""
+
+        for opt,tp in [('compileargs','cargs'),('linkargs','largs'),('runargs','rargs'),('interpreterargs','iargs')]:
+            if opt in self.options:
+                self.options[tp] = 'data-{}="{}"'.format(opt, escape(self.options[opt]))
+            else:
+                self.options[tp] = ""
+
         if 'gradebutton' not in self.options:
             self.options['gradebutton'] = ''
+        else:
+            self.options['gradebutton'] = "data-gradebutton=true"
+
+        self.options['divclass'] = env.config.activecode_div_class
+        if env.config.activecode_hide_load_history:
+            self.options['hidehistory'] = 'data-hidehistory=true'
+        else:
+            self.options['hidehistory'] = ''
 
         if self.content:
             if '====' in self.content:
@@ -245,13 +358,12 @@ class ActiveCode(Directive):
         else:
             source = '\n'
             suffix = '\n'
-        try:
-            engine = create_engine(env.config.html_context['dburl'])
-            meta = MetaData()
-            course_name = env.config.html_context['course_id']
-            Source_code = Table('source_code', meta, autoload=True, autoload_with=engine)
-            divid = self.options['divid']
 
+
+        course_name = env.config.html_context['course_id']
+        divid = self.options['divid']
+
+        if engine:
             engine.execute(Source_code.delete().where(Source_code.c.acid == divid).where(Source_code.c.course_id == course_name))
             engine.execute(Source_code.insert().values(
                 acid = divid,
@@ -261,37 +373,23 @@ class ActiveCode(Directive):
                 includes = self.options['include'],
                 available_files = self.options.get('available_files', "")
             ))
-            try:
-                ch, sub_ch = env.docname.split('/')
-            except:
-                ch, sub_ch = (env.docname, 'null subchapter')
-            Div = Table('div_ids', meta, autoload=True, autoload_with=engine)
-            engine.execute(Div.delete()\
-                           .where(Div.c.course_name == course_name)\
-                           .where(Div.c.chapter == ch)\
-                           .where(Div.c.subchapter==sub_ch)\
-                           .where(Div.c.div_id==divid))
-            engine.execute(Div.insert().values(
-                course_name = course_name,
-                chapter = ch,
-                subchapter = sub_ch,
-                div_id = divid,
-                div_type = 'activecode'
-            ))
+        else:
+            if not hasattr(env, 'dberr_activecode_reported') or not env.dberr_activecode_reported:
+                env.dberr_activecode_reported = True
+                print("Unable to save to source_code table in activecode.py. Possible problems:")
+                print("  1. dburl or course_id are not set in conf.py for your book")
+                print("  2. unable to connect to the database using dburl")
+                print("")
+                print("This should only affect the grading interface. Everything else should be fine.")
 
 
-        except Exception as e:
-            print("The exception is ", e)
-            print(env.config.html_context['course_id'])
-            print("Unable to save to source_code table in activecode.py. Possible problems:")
-            print("  1. dburl or course_id are not set in conf.py for your book")
-            print("  2. unable to connect to the database using dburl")
-            print("")
-            print("This should only affect the grading interface. Everything else should be fine.")
-
-
-        acnode = ActivcodeNode(self.options)
+        acnode = ActivcodeNode(self.options, rawsource=self.block_text)
+        acnode.source, acnode.line = self.state_machine.get_source_and_line(self.lineno)
         self.add_name(acnode)    # make this divid available as a target for :ref:
+
+        if explain_text:
+            self.state.nested_parse(explain_text, self.content_offset, acnode)
+
         return [acnode]
 
 
