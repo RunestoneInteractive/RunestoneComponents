@@ -17,19 +17,20 @@ from __future__ import print_function
 
 __author__ = 'isaiahmayerchak'
 
+import os.path
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
-from sqlalchemy import create_engine, Table, MetaData, select, delete
-
+from sqlalchemy import Table
+from runestone.server.componentdb import engine, meta
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode, add_skulpt_js
 
 def setup(app):
     app.add_directive('datafile',DataFile)
-    app.add_javascript('skulpt.min.js')
-    app.add_javascript('skulpt-stdlib.js')
-    app.add_javascript('datafile.js')
+    add_skulpt_js(app)
 
-    app.add_stylesheet('datafile.css')
+    app.add_autoversioned_javascript('datafile.js')
+
+    app.add_autoversioned_stylesheet('datafile.css')
 
     app.add_node(DataFileNode, html=(visit_df_node, depart_df_node))
 
@@ -37,20 +38,21 @@ def setup(app):
     app.connect('env-purge-doc', purge_datafiles)
 
 
-TEMPLATE = """
+TEMPLATE = u"""
+<div class="runestone datafile">
+<div class="datafile_caption">Data file: <code>%(divid)s</code></div>
 <pre data-component="datafile" id=%(divid)s %(hidden)s data-edit="%(edit)s" data-rows="%(rows)s" data-cols="%(cols)s">
-%(filecontent)s
- </pre>
+%(filecontent)s</pre></div>
 """
 
-class DataFileNode(nodes.General, nodes.Element):
-    def __init__(self,content):
+class DataFileNode(nodes.General, nodes.Element, RunestoneNode):
+    def __init__(self,content, **kwargs):
         """
         Arguments:
         - `self`:
         - `content`:
         """
-        super(DataFileNode,self).__init__()
+        super(DataFileNode,self).__init__(**kwargs)
         self.df_content = content
 
 # self for these functions is an instance of the writer class.  For example
@@ -80,16 +82,26 @@ def purge_datafiles(app,env,docname):
     pass
 
 
-class DataFile(Directive):
+class DataFile(RunestoneIdDirective):
+    """
+.. datafile:: identifier
+   :edit: Option that makes the datafile editable
+   :cols: If editable, number of columns--default is 20
+   :rows: If editable, number of rows--default is 40
+   :hide: Flag that sets a non-editable datafile to be hidden
+   :fromfile: path to file that contains the data
+   """
     required_arguments = 1
     optional_arguments = 0
     has_content = True
-    option_spec = {
+    option_spec = RunestoneIdDirective.option_spec.copy()
+    option_spec.update({
         'hide':directives.flag,
         'edit':directives.flag,
         'rows':directives.positive_int,
-        'cols':directives.positive_int
-    }
+        'cols':directives.positive_int,
+        'fromfile': directives.unchanged
+    })
 
     def run(self):
         """
@@ -101,17 +113,21 @@ class DataFile(Directive):
                 :cols: If editable, number of columns--default is 20
                 :rows: If editable, number of rows--default is 40
                 :hide: Flag that sets a non-editable datafile to be hidden
+                :fromfile: path to file that contains the data
         """
+        super(DataFile, self).run()
         env = self.state.document.settings.env
 
         if not hasattr(env,'datafilecounter'):
             env.datafilecounter = 0
         env.datafilecounter += 1
-
-        #if 'cols' not in self.options:
-        #    self.options['cols'] = min(65,max([len(x) for x in self.content]))
-        #if 'rows'not in self.options:
-        #    self.options['rows'] = 20
+        import os
+        if 'fromfile' in self.options:
+            ffpath = os.path.dirname(self.srcpath)
+            print(self.srcpath, os.getcwd())
+            filename = os.path.join(env.srcdir, ffpath, self.options['fromfile'])
+            with open(filename, 'rb') as f:
+                self.content = [x[:-1].decode('utf8') for x in f.readlines()]
 
         if 'cols' in self.options:
             self.options['cols'] = self.options['cols']
@@ -122,7 +138,6 @@ class DataFile(Directive):
         else:
             self.options['rows'] = 20
 
-        self.options['divid'] = self.arguments[0]
         if self.content:
             source = "\n".join(self.content)+"\n"
         else:
@@ -139,9 +154,7 @@ class DataFile(Directive):
         else:
             self.options['edit'] = "false"
 
-        try:
-            engine = create_engine(env.config.html_context['dburl'])
-            meta = MetaData()
+        if engine:
             Source_code = Table('source_code', meta, autoload=True, autoload_with=engine)
             course_name = env.config.html_context['course_id']
             divid = self.options['divid']
@@ -152,8 +165,7 @@ class DataFile(Directive):
                 course_id = course_name,
                 main_code= source,
             ))
-        except Exception as e:
-            print("the error is ", e)
+        else:
             print("Unable to save to source_code table in datafile__init__.py. Possible problems:")
             print("  1. dburl or course_id are not set in conf.py for your book")
             print("  2. unable to connect to the database using dburl")
@@ -161,4 +173,6 @@ class DataFile(Directive):
             print("This should only affect the grading interface. Everything else should be fine.")
 
 
-        return [DataFileNode(self.options)]
+        data_file_node = DataFileNode(self.options, rawsource=self.block_text)
+        data_file_node.source, data_file_node.line = self.state_machine.get_source_and_line(self.lineno)
+        return [data_file_node]

@@ -28,6 +28,9 @@ TimedMC.prototype.renderTimedIcon = function (component) {
 };
 
 TimedMC.prototype.hideButtons = function () {
+    //Just hiding the buttons doesn't prevent submitting the form when entering is clicked
+    //We need to completely disable the buttons
+    $(this.submitButton).attr("disabled","true");
     $(this.submitButton).hide();
     $(this.compareButton).hide();
 };
@@ -84,8 +87,11 @@ TimedMC.prototype.renderMCFormOpts = function () {
 
         // Create the label for the input
         var label = document.createElement("label");
-        $(label).attr("for", optid);
-        $(label).html(this.answerList[k].content);
+        var labelspan = document.createElement("span");
+        label.appendChild(input);
+        label.appendChild(labelspan);
+        $(labelspan).html(String.fromCharCode(65 + j) + '. ' + this.answerList[k].content);
+
 
         // create the object to store in optionArray
         var optObj = {
@@ -95,7 +101,6 @@ TimedMC.prototype.renderMCFormOpts = function () {
         this.optionArray.push(optObj);
 
         // add the option to the form
-        this.optsForm.appendChild(input);
         this.optsForm.appendChild(label);
         this.optsForm.appendChild(document.createElement("br"));
 
@@ -111,12 +116,29 @@ TimedMC.prototype.checkCorrectTimedMCMA = function () {
         this.correct = true;
     } else if (this.givenArray.length !== 0) {
         this.correct = false;
+    } else {   // question was skipped
+        this.correct = null;
     }
-    return this.correct;
+    switch (this.correct) {
+        case (true):
+            return "T";
+        case (false):
+            return "F";
+        default:
+            return null;
+    }
 };
 
 TimedMC.prototype.checkCorrectTimedMCMF = function () {
-    return this.correct;
+    // Returns if the question was correct, incorrect, or skipped (return null in the last case)
+    switch (this.correct) {
+        case (true):
+            return "T";
+        case (false):
+            return "F";
+        default:
+            return null;
+    }
 };
 
 TimedMC.prototype.checkCorrectTimed = function () {
@@ -134,6 +156,7 @@ TimedMC.prototype.hideFeedback = function () {
 };
 
 TimedMC.prototype.processTimedSubmission = function (logFlag) {
+    // Disable input, then evaluate component
     for (var i = 0; i < this.optionArray.length; i++) {
         this.optionArray[i]["input"].disabled = true;
     }

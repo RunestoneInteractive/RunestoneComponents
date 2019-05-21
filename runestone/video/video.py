@@ -18,16 +18,18 @@ __author__ = 'bmiller'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
-
+from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneDirective
 
 def setup(app):
     app.add_directive('video',Video)
     app.add_directive('youtube', Youtube)
     app.add_directive('vimeo', Vimeo)
-    app.add_stylesheet('video.css')
+    app.add_autoversioned_stylesheet('video.css')
+    app.add_autoversioned_javascript('runestonevideo.js')
 
 CODE = """\
-<div id="%(divid)s" class="video_popup" >
+<div id="%(divid)s" class="video_popup runestone" >
 <video %(controls)s %(preload)s %(loop)s poster="%(thumb)s">
     %(sources)s
     No supported video types
@@ -73,7 +75,18 @@ INLINE = """\
 SOURCE = """<source src="%s" type="video/%s"></source>"""
 
 
-class Video(Directive):
+class Video(RunestoneIdDirective):
+    """
+.. video:: id
+   :controls:  Show the controls or not
+   :loop: loop the video
+   :thumb: url to thumbnail image
+   :preload: set the video to preload in the bg
+
+   url to video format 1
+   url to video format 2
+   ...
+    """
     required_arguments = 1
     optional_arguments = 1
     final_argument_whitespace = True
@@ -90,10 +103,12 @@ class Video(Directive):
         :param self:
         :return:
         """
+        super(Video, self).run()
+        addQuestionToDB(self)
+
         mimeMap = {'mov':'mp4','webm':'webm', 'm4v':'m4v'}
 
         sources = [SOURCE % (directives.uri(line),mimeMap[line[line.rindex(".")+1:]]) for line in self.content]
-        self.options['divid'] = self.arguments[0]
         if 'controls' in self.options:
             self.options['controls'] = 'controls'
         if 'loop' in self.options:
@@ -112,7 +127,9 @@ class Video(Directive):
             res += POPUP % self.options
         else:
             res += INLINE % self.options
-        return [nodes.raw('',res , format='html')]
+
+        addHTMLToDB(self.options['divid'], self.options['basecourse'], res)
+        return [nodes.raw(self.block_text, res, format='html')]
 
 
 """
@@ -121,8 +138,9 @@ class Video(Directive):
     There are two directives added: ``youtube`` and ``vimeo``. The only
     argument is the video id of the video to include.
 
-    Both directives have three optional arguments: ``height``, ``width``
+    Both directives have four optional arguments: ``height``, ``width``
     and ``align``. Default height is 281 and default width is 500.
+    The default transport is HTTP although HTTPS can be specified.
 
     Example::
 
@@ -130,6 +148,7 @@ class Video(Directive):
             :height: 315
             :width: 560
             :align: left
+            :http: http
 
     :copyright: (c) 2012 by Danilo Bargen.
     :license: BSD 3-clause
@@ -139,8 +158,12 @@ def align(argument):
     """Conversion function for the "align" option."""
     return directives.choice(argument, ('left', 'center', 'right'))
 
+def httpOption(argument):
+    """Conversion function for the "http" option."""
+    return directives.choice(argument, ('http', 'https'))
 
-class IframeVideo(Directive):
+
+class IframeVideo(RunestoneIdDirective):
     has_content = False
     required_arguments = 1
     optional_arguments = 0
@@ -149,11 +172,14 @@ class IframeVideo(Directive):
         'height': directives.nonnegative_int,
         'width': directives.nonnegative_int,
         'align': align,
+        'http': httpOption,
+        'divid': directives.unchanged
     }
     default_width = 500
     default_height = 281
 
     def run(self):
+        super(IframeVideo, self).run()
         self.options['video_id'] = directives.uri(self.arguments[0])
         if not self.options.get('width'):
             self.options['width'] = self.default_width
@@ -161,18 +187,62 @@ class IframeVideo(Directive):
             self.options['height'] = self.default_height
         if not self.options.get('align'):
             self.options['align'] = 'left'
-        return [nodes.raw('', self.html % self.options, format='html')]
+        if not self.options.get('http'):
+            self.options['http'] = 'https'
+        if not self.options.get('divid'):
+            self.options['divid'] = self.arguments[0]
+        
+        res = self.html % self.options
+        addHTMLToDB(self.options['divid'], self.options['basecourse'], res)
+        raw_node = nodes.raw(self.block_text, res, format='html')
+        raw_node.source, raw_node.line = self.state_machine.get_source_and_line(self.lineno)
+        return [raw_node]
 
 
 class Youtube(IframeVideo):
-    html = '<iframe src="http://www.youtube.com/embed/%(video_id)s" \
-    width="%(width)u" height="%(height)u" frameborder="0" \
-    webkitAllowFullScreen mozallowfullscreen allowfullscreen \
-    class="align-%(align)s" seamless ></iframe>'
-
+    """
+.. youtube:: YouTubeID
+   :divid: the runestone id for this video
+   :height: 315
+   :width: 560
+   :align: left
+   :http: http
+   :start: None
+   :end: None
+   """
+    html = '''
+    <div class="runestone" style="margin-left: auto; margin-right:auto">
+        <div id="%(divid)s_vid" class="align-%(align)s youtube-video" data-video-height="%(height)d" data-video-width="%(width)d" data-video-videoid="%(video_id)s" data-video-divid="%(divid)s_vid" data-video-start="%(start)d" data-video-end="%(end)s" ></div>
+    </div>
+    '''
+    
+    option_spec = IframeVideo.option_spec
+    option_spec.update({
+        'start': directives.nonnegative_int,
+        'end': directives.nonnegative_int
+    })
+    
+    def run(self):
+        if not self.options.get('start'):
+            self.options['start'] = 0
+            
+        if not self.options.get('end'):
+            self.options['end'] = -1
+            
+        raw_node = super(Youtube, self).run()
+        addQuestionToDB(self)
+        return raw_node
+        
 
 class Vimeo(IframeVideo):
-    html = '<iframe src="http://player.vimeo.com/video/%(video_id)s" \
+    """
+.. vimeo:: vimeoID
+   :height: 315
+   :width: 560
+   :align: left
+   :http: http
+    """
+    html = '<iframe src="%(http)s://player.vimeo.com/video/%(video_id)s" \
     width="%(width)u" height="%(height)u" frameborder="0" \
     webkitAllowFullScreen mozallowfullscreen allowFullScreen \
     class="align-%(align)s" seamless ></iframe>'

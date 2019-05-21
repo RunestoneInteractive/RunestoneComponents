@@ -1,1447 +1,3214 @@
-(function($, _) { // wrap in anonymous function to not show some helper variables
-
-   // regexp used for trimming
-   var trimRegexp = /^\s*(.*?)\s*$/;
-   var translations = {
-     fi: {
-       trash_label: 'Raahaa rivit ohjelmaasi tästä',
-       solution_label: 'Muodosta ratkaisusi tähän',
-       order: function() {
-         return "Ohjelma sisältää vääriä palasia tai palasten järjestys on väärä. Tämä on mahdollista korjata siirtämällä, poistamalla tai vaihtamalla korostettuja palasia.";},
-       lines_missing: function() {
-         return "Ohjelmassasi on liian vähän palasia, jotta se toimisi oikein.";},
-       lines_too_many: function() {
-         return "Ohjelmassasi on liian monta palasta, jotta se toimisi oikein.";},
-       no_matching: function(lineNro) {
-         return "Korostettu palanen (" + lineNro + ") on sisennetty kieliopin vastaisesti."; },
-       no_matching_open: function(lineNro, block) {
-         return "Rivillä " + lineNro + " päätettävää " + block +
-                 " lohkoa ei ole aloitettu."; },
-       no_matching_close: function(lineNro, block) {
-         return block + " lohkoa riviltä " + lineNro + " ei ole päätetty."; },
-       block_close_mismatch: function(closeLine, closeBlock, openLine, inBlock) {
-         return "Ei voi päättää lohkoa " + closeBlock + " rivillä " + closeLine +
-                " oltaessa vielä lohkossa " + inBlock + " riviltä " + openLine; },
-       block_structure: function(lineNro) {
-         return "Korostettu palanen (" + lineNro + ") on sisennetty väärään koodilohkoon."; },
-       unittest_error: function(errormsg) {
-         return "<span class='msg'>Virhe ohjelman jäsentämisessä/suorituksessa</span><br/> <span class='errormsg'>" + errormsg + "</span>";
-       },
-       unittest_output_assertion: function(expected, actual) {
-        return "Odotettu tulostus: <span class='expected output'>" + expected + "</span>" +
-              "Ohjelmasi tulostus: <span class='actual output'>" + actual + "</span>";
-       },
-       unittest_assertion: function(expected, actual) {
-        return "Odotettu arvo: <span class='expected'>" + expected + "</span><br>" +
-              "Ohjelmasi antama arvo: <span class='actual'>" + actual + "</span>";
-       },
-       variabletest_assertion: function(varname, expected, actual) {
-        return "Muuttujan " + varname + " odotettu arvo: <span class='expected'>" + expected + "</span> " +
-              "Ohjelmasi antama arvo: <span class='actual'>" + actual + "</span>";
-       }
-     },
-     en: {
-       trash_label: 'Drag from here',
-       solution_label: 'Construct your solution here',
-       order: function() {
-         return "Code fragments in your program are wrong, or in wrong order. This can be fixed by moving, removing, or replacing highlighted fragments.";},
-       lines_missing: function() {
-         return "Your program has too few code fragments.";},
-       lines_too_many: function() {
-         return "Your program has too many code fragments.";},
-       no_matching: function(lineNro) {
-         return "Based on language syntax, the highlighted fragment (" + lineNro + ") is not correctly indented."; },
-       no_matching_open: function(lineNro, block) {
-         return "The " + block + " ended on line " + lineNro + " never started."; },
-       no_matching_close: function(lineNro, block) {
-         return "Block " + block + " defined on line " + lineNro + " not ended properly";
-       },
-       block_close_mismatch: function(closeLine, closeBlock, openLine, inBlock) {
-         return "Cannot end block " + closeBlock + " on line " + closeLine + " when still inside block " + inBlock + " started on line " + openLine;
-       },
-       block_structure: function(lineNro) { return "The highlighted fragment " + lineNro + " belongs to a wrong block (i.e. indentation)."; },
-       unittest_error: function(errormsg) {
-         return "<span class='msg'>Error in parsing/executing your program</span><br/> <span class='errormsg'>" + errormsg + "</span>";
-       },
-       unittest_output_assertion: function(expected, actual) {
-        return "Expected output: <span class='expected output'>" + expected + "</span>" +
-              "Output of your program: <span class='actual output'>" + actual + "</span>";
-       },
-       unittest_assertion: function(expected, actual) {
-        return "Expected value: <span class='expected'>" + expected + "</span><br>" +
-              "Actual value: <span class='actual'>" + actual + "</span>";
-       },
-       variabletest_assertion: function(varname, expected, actual) {
-        return "Expected value of variable " + varname + ": <span class='expected'>" + expected + "</span><br>" +
-              "Actual value: <span class='actual'>" + actual + "</span>";
-       }
-     }
-   };
-
-  // Different graders
-
-  var graders = {};
-  // Grader that will execute the code and check variable values after that
-  // Expected and supported options:
-  //  - vartests (required): array of variable test objects
-  // Each variable test object can/must have the following properties:
-  //  - initcode: code that will be prepended before the learner solution code
-  //  - code: code that will be appended after the learner solution code
-  //  - message (required): a textual description of the test, shown to learner
-  // Properties specifying what is tested:
-  //  - variables: an object with properties for each variable name to
-  //                          be tested; the value of the property is the expected
-  //                          value
-  // or
-  //  - variable: a variable name to be tested
-  //  - expected: expected value of the variable after code execution
-  var VariableCheckGrader = function(parson) {
-    this.parson = parson;
-  };
-  graders.VariableCheckGrader = VariableCheckGrader;
-  // Executes the given Python code and returns an object with two properties:
-  //  mainmod: the result of Skulpt importMainWithBody call with the given code
-  //  output: the output of the program
-  // Note, that the Skulpt execution can throw an exception, which will not be handled
-  // by this function, so the caller should take care of that.
-  VariableCheckGrader.prototype._python_exec = function(code) {
-      var output = "";
-      // function for reading python imports with skulpt
-      function builtinRead(x) {
-        if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
-          throw "File not found: '" + x + "'";
-        return Sk.builtinFiles["files"][x];
-      }
-      // configure Skulpt
-      Sk.execLimit = this.parson.options.exec_limit || 2500; // time limit for the code to run
-      Sk.configure({
-          output: function(str) { output += str; },
-          python3: this.parson.options.python3 || false,
-          read: builtinRead
-      });
-      return {mainmod: Sk.importMainWithBody("<stdin>", false, code), output: output};
-  };
-  // Executes the given code using Skulpt and returns an object with variable
-  // values of the variables given in the variables array.
-  // Possible errors will be in the _error property of the returned object.
-  // Output of the code will be in _output property of the result.
-  // Example: this._variablesAfterExecution("x=0\ny=2\nprint x", ["x", "y"])
-  //    will return object {"x": 0, "y": 2, "_output": "0"}
-  VariableCheckGrader.prototype._variablesAfterExecution = function(code, variables) {
-    var output = "",
-      execResult, mainmod,
-      result = {'variables': {}},
-      varname;
-    try {
-      execResult = this._python_exec(code);
-    } catch (e) {
-      return {"_output": output, "_error": "" + e};
-    }
-    mainmod = execResult.mainmod;
-    for (var i = 0; i < variables.length; i++) {
-      varname = variables[i];
-      result.variables[varname] = mainmod.tp$getattr(varname);
-    }
-    result._output = execResult.output;
-    return result;
-  };
-  // Formats a JavaScript variable to the corresponding Python value *and*
-  // formats a Skulpt variable to the corresponding Python value
-  VariableCheckGrader.prototype.formatVariableValue = function(varValue) {
-    var varType = typeof varValue;
-    if (varType === "undefined" || varValue === null) {
-      return "None";
-    } else if (varType === "string") { // show strings in quotes
-      return '"' + varValue + '"';
-    } else if (varType === "boolean") { // Python booleans with capital first letter
-      return varValue?"True":"False";
-    } else if ($.isArray(varValue)) { // JavaScript arrays
-      return '[' + varValue.join(', ') + ']';
-    } else if (varType === "object" && varValue.tp$name === "number") { // Python numbers
-      return varValue.v;
-    } else if (varType === "object" && varValue.tp$name === "NoneType") { // None
-      return "None";
-    } else if (varType === "object" && varValue.tp$name === "bool") { // Python strings
-      return varValue.v?"True":"False";
-    } else if (varType === "object" && varValue.tp$name === "str") { // Python strings
-      return '"' + varValue.v + '"';
-    } else if (varType === "object" && varValue.tp$name === "list") { // Python lists
-      return '[' + varValue.v.join(', ') + ']';
-    } else {
-      return varValue;
-    }
-  };
-  // Fix or strip line numbers in the (error) message
-  // Basically removes the number of lines in prependCode from the line number shown.
-  VariableCheckGrader.prototype.stripLinenumberIfNeeded = function(msg, prependCode, studentCode) {
-    var lineNbrRegexp = /.*on line ([0-9]+).*/;
-    // function that fixes the line numbers in student feedback
-    var match = msg.match(lineNbrRegexp);
-    if (match) {
-      var lineNo = parseInt(match[1], 10),
-          lowerLimit = prependCode?
-                          prependCode.split('\n').length
-                          :0,
-          upperLimit = lowerLimit + studentCode.split('\n').length - 1;
-      // if error in prepended code or tests, remove the line number
-      if (lineNo <= lowerLimit || lineNo > upperLimit) {
-        return msg.replace(' on line ' + lineNo, '');
-      } else if (lowerLimit > 0) {
-        // if error in student code, make sure the line number matches student lines
-        return msg.replace(' on line ' + lineNo, ' on line ' + (lineNo - lowerLimit));
-      }
-    }
-    return msg;
-  };
-  //Return executable code in one string
-  VariableCheckGrader.prototype._codelinesAsString = function() {
-    var student_code = this.parson.getModifiedCode("#ul-" + this.parson.options.sortableId);
-    var executableCode = "";
-    $.each(student_code, function(index, item) {
-      // split codeblocks on br elements
-      var lines = $("#" + item.id).html().split(/<br\s*\/?>/);
-      // go through all the lines
-      for (var i = 0; i < lines.length; i++) {
-        // add indents and get the text for the line (to remove the syntax highlight html elements)
-        executableCode += python_indents[item.indent] + $("<span>" + lines[i] + "</span>").text() + "\n";
-      }
-    });
-    return executableCode;
-  };
-  VariableCheckGrader.prototype.grade = function(studentcode) {
-    var parson = this.parson,
-        that = this,
-        feedback = "",
-        log_errors = [],
-        all_passed = true;
-    $.each(parson.options.vartests, function(index, testdata) {
-      var student_code = studentcode || that._codelinesAsString();
-      var executableCode = (testdata.initcode || "") + "\n" + student_code + "\n" + (testdata.code || "");
-      var variables, expectedVals;
-
-      if ('variables' in testdata) {
-        variables = _.keys(testdata.variables);
-        expectedVals = testdata.variables;
-      } else {
-        variables = [testdata.variable];
-        expectedVals = {};
-        expectedVals[testdata.variable] = testdata.expected;
-      }
-      var res = that._variablesAfterExecution(executableCode, variables);
-      var testcaseFeedback = "",
-          success = true,
-          log_entry = {'code': testdata.code, 'msg': testdata.message},
-          expected_value,
-          actual_value;
-      if ("_error" in res) {
-        testcaseFeedback += parson.translations.unittest_error(that.stripLinenumberIfNeeded(res._error,
-                                                                                      testdata.initcode,
-                                                                                      student_code));
-        success = false;
-        log_entry.type = "error";
-        log_entry.errormsg = res._error;
-      } else {
-        log_entry.type = "assertion";
-        log_entry.variables = {};
-        for (var j = 0; j < variables.length; j++) {
-          var variable = variables[j],
-              variableSuccess;
-          if (variable === "__output") { // checking output of the program
-            expected_value = expectedVals[variable];
-            actual_value = res._output;
-            variableSuccess = (actual_value == expected_value); // should we do a strict test??
-            testcaseFeedback += "<div class='" + (variableSuccess?"pass":"fail") + "'>";
-            testcaseFeedback += parson.translations.unittest_output_assertion(expected_value, actual_value) +
-                                "</div>";
-          } else {
-            expected_value = that.formatVariableValue(expectedVals[variable]);
-            actual_value = that.formatVariableValue(res.variables[variable]);
-            variableSuccess = (actual_value == expected_value);  // should we do a strict test??
-            testcaseFeedback += "<div class='" + (variableSuccess?"pass":"fail") + "'>";
-            testcaseFeedback += parson.translations.variabletest_assertion(variable, expected_value, actual_value) +
-                                "</div>";
-          }
-          log_entry.variables[variable] = {expected: expected_value, actual: actual_value};
-          if (!variableSuccess) {
-            success = false;
-          }
-        }
-      }
-      all_passed = all_passed && success;
-      log_entry.success = success;
-      log_errors.push(log_entry);
-      feedback += "<div class='testcase " + (success?"pass":"fail") +
-                  "'><span class='msg'>" + testdata.message + "</span><br>" +
-                  testcaseFeedback + "</div>";
-    });
-    return { html: feedback, tests: log_errors, success: all_passed };
-  };
-
-  // A grader to be used for exercises which draw turtle graphics.
-  // Required options:
-  //  - turtleModelCode: The code constructing the model drawing. The turtle is initialized
-  //                    to modelTurtle variable, so your code should use that variable.
-  //
-  // Options that can be specified (that is, optional):
-  //  - turtlePenDown: a boolean specifying whether or not the pen should be put down
-  //                   initially for the student constructed code
-  //  - turtleModelCanvas: ID of the canvas DOM element where the model solution will be drawn.
-  //                  Defaults to modelCanvas.
-  //  - turtleStudentCanvas: ID of the canvas DOM element where student turtle will draw.
-  //                  Defaults to studentCanvas.
-  //
-  // Grading is based on comparing the commands executed by the model and student turtle.
-  // If the executable_code option is also specified, the code on each line of that option will
-  // be executed instead of the code in the student constructed lines. Note, that the student
-  // code should use the variable myTurtle for commands to control the turtle in order for the
-  // grading to work.
-  var TurtleGrader = function(p) {
-    this.parson = p;
-    // execute the model solution turtlet path to have the target "picture" visible in the
-    // beginning
-    var modelCommands = this._executeTurtleModel();
-
-    // specify variable tests for the commands executed by the student turtlet and the model
-    var penDown = typeof p.options.turtlePenDown === "boolean"?p.options.turtlePenDown:true;
-    var vartests = [
-      {initcode: "import parsonturtle\nmyTurtle = parsonturtle.ParsonTurtle()\n" +
-        "myTurtle.speed(0.3)\nmyTurtle.pensize(3, False)\n" +
-        (penDown ? "" : "myTurtle.up()\n"), // set the state of the pen
-        code: (p.options.turtleTestCode?p.options.turtleTestCode:"") + "\ncommands = myTurtle.commands()",
-        message: "", variables: {commands: modelCommands}}
-    ];
-    // set the vartests in the parson options
-    p.options.vartests = vartests;
-  };
-  // expose the grader to ParsonsWidget._graders
-  graders.TurtleGrader = TurtleGrader;
-  // copy the python execution functions from VariableCheckGrader
-  TurtleGrader.prototype._python_exec = VariableCheckGrader.prototype._python_exec;
-  TurtleGrader.prototype._variablesAfterExecution = VariableCheckGrader.prototype._variablesAfterExecution;
-  // Execute the model turtlet code
-  TurtleGrader.prototype._executeTurtleModel = function() {
-    var code = "import parsonturtle\nmodelTurtle = parsonturtle.ParsonTurtle()\n" +
-               "modelTurtle.color(160, 160, 160, False)\n" +
-                this.parson.options.turtleModelCode +
-               "\ncommands = modelTurtle.commands()\n";
-    Sk.canvas = this.parson.options.turtleModelCanvas || "modelCanvas";
-    var result = this._variablesAfterExecution(code, ["commands"]);
-    if (!result.variables || !result.variables.commands || !result.variables.commands.v) {
-      return "None";
-    }
-    return result.variables.commands.v;
-  };
-  // grade the student solution
-  TurtleGrader.prototype.grade = function() {
-    // set the correct canvas where the turtle should draw
-    Sk.canvas = this.parson.options.turtleStudentCanvas || "studentCanvas";
-    // Pass the grading on to either the LangTranslationGrader or VariableChecker
-    if (this.parson.options.executable_code) {
-      return new LanguageTranslationGrader(this.parson).grade();
-    } else {
-      return new VariableCheckGrader(this.parson).grade();
-    }
-  };
-
-  // Grader that will execute student code and Skulpt unittests
-  var UnitTestGrader = function(parson) {
-    this.parson = parson;
-  };
-  graders.UnitTestGrader = UnitTestGrader;
-  // copy the line number fixer and code-construction from VariableCheckGrader
-  UnitTestGrader.prototype.stripLinenumberIfNeeded = VariableCheckGrader.prototype.stripLinenumberIfNeeded;
-  UnitTestGrader.prototype._codelinesAsString = VariableCheckGrader.prototype._codelinesAsString;
-  // copy the python executor from VariableCheckGrager
-  UnitTestGrader.prototype._python_exec = VariableCheckGrader.prototype._python_exec;
-  // do the grading
-  UnitTestGrader.prototype.grade = function(studentcode) {
-    var success = true,
-        parson = this.parson,
-        unittests = parson.options.unittests,
-        studentCode = studentcode || this._codelinesAsString(),
-        feedbackHtml = "", // HTML to be returned as feedback
-        result, mainmod;
-
-    var executableCode = studentCode + "\n" + unittests;
-
-    // if there is code to add before student code, add it
-    if (parson.options.unittest_code_prepend) {
-      executableCode = parson.options.unittest_code_prepend + "\n" + executableCode;
-    }
-
-    try {
-      mainmod = this._python_exec(executableCode).mainmod;
-      result = JSON.parse(mainmod.tp$getattr("_test_result").v);
-    } catch (e) {
-      result = [{status: "error", _error: e.toString() }];
-    }
-
-    // go through the results and generate HTML feedback
-    for (var i = 0, l = result.length; i < l; i++) {
-      var res = result[i];
-      feedbackHtml += '<div class="testcase ' + res.status + '">';
-      if (res.status === "error") { // errors in execution
-        feedbackHtml += parson.translations.unittest_error(this.stripLinenumberIfNeeded(res._error,
-                                                                    parson.options.unittest_code_prepend,
-                                                                    studentCode));
-        success = false;
-      } else { // passed or failed tests
-        feedbackHtml += '<span class="msg">' + this.stripLinenumberIfNeeded(res.feedback) + '</span><br />';
-        feedbackHtml += 'Expected <span class="expected">' + res.expected +
-                  '</span>' + res.test + '<span class="actual">' + res.actual +
-                  '</span>';
-        if (res.status === "fail") {
-          success = false;
-        }
-      }
-      feedbackHtml += '</div>';
-    }
-
-    return { html: feedbackHtml, tests: result, success: success };
-  };
-
-  // Code "Translating" grader
-  var LanguageTranslationGrader = function(parson) {
-    this.parson = parson;
-  };
-  // Add the grader to the list of graders
-  graders.LanguageTranslationGrader = LanguageTranslationGrader;
-  // add open/close block definitions for pseudocode
-  var langBlocks = {};
-  LanguageTranslationGrader._languageBlocks = langBlocks;
-  // specify the blocks for the pseudo language as a simple example case
-  langBlocks.pseudo = {
-    open: {
-      "^\s*IF.*THEN\s*$": "IF", "^\s*ELSE\s*$":"IF", // IF
-      "^\s*WHILE.*DO\s*$": "WHILE", // WHILE
-      "^\s*REPEAT.*TIMES\s*$": "REPEAT..TIMES",
-      "^\s*REPEAT\s*$": "REPEAT",   // REPEAT ... UNTIL
-      "^\s*FOR.*DO\s*$": "FOR",
-      "^\s*FOR.*TO.*\s*$": "FOR",
-      "^\s*MODULE.*\\)\s*$": "MODULE", "^\s*MODULE.*RETURNS.*$": "MODULE",
-      "^\s*DO\s*$": "DO..WHILE"
-    },
-    close: {
-      "^\s*ELSE\s*$": "IF", "^\s*ENDIF\s*$": "IF", // ENDIF
-      "^\s*ENDWHILE\s*$": "WHILE",
-      "^\s*ENDREPEAT\s*$": "REPEAT..TIMES",
-      "^\s*UNTIL.*\s*$": "REPEAT",
-      "^\s*ENDFOR\s*$": "FOR",
-      "^\s*ENDMODULE\s*$": "MODULE",
-      "^\s*WHILE(?!.*DO)": "DO..WHILE"
-    }
-  };
-  langBlocks.java = {
-    open: {
-      "^.*\{\s*$": "block"
-    },
-    close: {
-      "^.*\}\s*$": "block"
-    }
-  };
-  LanguageTranslationGrader.prototype.grade = function() {
-    var student_code = this.parson.normalizeIndents(
-                          this.parson.getModifiedCode("#ul-" + this.parson.options.sortableId));
-
-    // Check opening and closing blocks.
-    // The block_open and block_close are expected to be maps with regexps as properties and
-    // names of blocks as the property values. For example, a pseudocode IF..THEN..ELSE..ENDIF
-    // blocks can be defined like this:
-    //    open = {"^\s*IF.*THEN\s*$": "IF", "^\s*ELSE\s*$":"IF"};
-    //    close = {"^s*ELSE\s*$": "IF", "^\s*ENDIF\s*$": "IF"};
-    var open = this.parson.options.block_open,
-        close = this.parson.options.block_close,
-        blockErrors = [],
-        i;
-    var progLang = this.parson.options.programmingLang;
-    if (progLang && LanguageTranslationGrader._languageBlocks[progLang]) {
-      open = $.extend({}, open, LanguageTranslationGrader._languageBlocks[progLang].open);
-      close = $.extend({}, close, LanguageTranslationGrader._languageBlocks[progLang].close);
-    }
-
-    if (open && close) { // check blocks only if block definitions are given
-      var blocks = [],
-          prevIndent = 0, // keep track of previous indent inside blocks
-          minIndent = 0; // minimum indent needed inside newly opened blocks
-      // go through all student code lines
-      for (i = 0; i < student_code.length; i++) {
-        var isClose = false, // was a new blocks opened on this line
-            isOpen = false,  // was a block closed on this line
-            item = student_code[i],
-            line = $("#" + item.id).text(), // code of the line
-            topBlock, bO;
-
-        // Check if a proper indentation or the line was found in normalizeIndents
-        // -1 will mean no matching indent was found
-        if (item.indent < 0) {
-          blockErrors.push(this.parson.translations.no_matching(i + 1));
-          $("#" + item.id).addClass("incorrectIndent");
-          break; // break on error
-        }
-
-        // Go through all block closing regexps and test if they match
-        // Some lines can both close and open a block (such as else), so the
-        // closing blocks need to be handled first
-        for (var blockClose in close) {
-          if (new RegExp(blockClose).test(line)) {
-            isClose = true;
-            topBlock = blocks.pop();
-            if (!topBlock) {
-              blockErrors.push(this.parson.translations.no_matching_open(i + 1, close[blockClose]));
-              $("#" + item.id).addClass("incorrectPosition");
-            } else if (close[blockClose] !== topBlock.name) { // incorrect closing block
-              blockErrors.push(this.parson.translations.block_close_mismatch(i + 1, close[blockClose], topBlock.line, topBlock.name));
-              $("#" + item.id).addClass("incorrectPosition");
-            } else if (student_code[i].indent !== topBlock.indent) { // incorrect indent
-              blockErrors.push(this.parson.translations.no_matching(i + 1));
-              $("#" + item.id).addClass("incorrectIndent");
-            }
-            prevIndent = topBlock?topBlock.indent:0;
-            minIndent = 0;
-            break; // only one block can be closed on a single line
-          }
-        }
-        // Go through all block opening regexps and test if they match
-        for (var blockOpen in open) {
-          if (new RegExp(blockOpen).test(line)) {
-            isOpen = true;
-            bO = {name: open[blockOpen], indent: student_code[i].indent, line: i + 1, item: item};
-            blocks.push(bO);
-            prevIndent = 0;
-            minIndent = bO.indent;
-            break; // only one block can be opened on a single line
-          }
-        }
-        // if not opening or closing a block, check block indentation
-        if (!isClose && !isOpen && blocks.length > 0) {
-          // indentation should match previous indent if inside block
-          // and be greater than the indent of the block opening the block (minIndent)
-          if ((prevIndent && student_code[i].indent !== prevIndent) ||
-              student_code[i].indent <= minIndent) {
-            blockErrors.push(this.parson.translations.no_matching(i + 1));
-            $("#" + item.id).addClass("incorrectIndent");
-          }
-          prevIndent = student_code[i].indent;
-        }
-        // if we have errors, clear the blocks and exit from the loop
-        if (blockErrors.length > 0) {
-          blocks = [];
-          break;
-        }
-      }
-      // create errors for all blocks opened but not closed
-      for (i = 0; i < blocks.length; i++) {
-        blockErrors.push(this.parson.translations.no_matching_close(blocks[i].line, blocks[i].name));
-        $("#" + blocks[i].item.id).addClass("incorrectPosition");
-      }
-    }
-    // if there were errors in the blocks, give feedback and don't execute the code
-    if (blockErrors.length > 0) {
-      var feedback = "<div class='testcase fail'>",
-          fbmsg = "";
-      for (i = 0; i < blockErrors.length; i++) {
-        fbmsg += blockErrors[i] + "</br>";
-      }
-      feedback += this.parson.translations.unittest_error(fbmsg);
-      feedback += "</div>";
-      return { html: feedback, success: false };
-    }
-
-    // Replace codelines show with codelines to be executed
-    var code = this._replaceCodelines();
-    // run unit tests or variable check grader
-    if (this.parson.options.unittests) {
-      return new UnitTestGrader(this.parson).grade(code);
-    } else {
-      return new VariableCheckGrader(this.parson).grade(code);
-    }
-  };
-  // Replaces codelines in the student's solution with the codelines
-  // specified in the executable_code option of the parsons widget.
-  // The executable_code option can be an array of lines or a string (in
-  // which case it will be split on newline.
-  // For each line in the model solution, there should be a matching line
-  // in the executable_code.
-  LanguageTranslationGrader.prototype._replaceCodelines = function() {
-    var student_code = this.parson.normalizeIndents(this.parson.getModifiedCode("#ul-" +
-                          this.parson.options.sortableId)),
-        executableCodeString = "",
-        parson = this.parson,
-        executableCode = parson.options.executable_code;
-    if (typeof executableCode === "string") {
-      executableCode = executableCode.split("\n");
-    }
-    // replace each line with in solution with the corresponding line in executable code
-    var toggleRegexp = new RegExp("\\$\\$toggle(" + parson.options.toggleSeparator + ".*?)?\\$\\$", "g");
-    $.each(student_code, function(index, item) {
-      var ind = parseInt(item.id.replace(parson.id_prefix, ''), 10);
-
-      // Handle toggle elements. Expects the toggle areas in executable code to be marked
-      // with $$toggle$$ and there to be as many toggles in executable code than in the
-      // code shown to learner.
-      var execline = executableCode[ind];
-      var toggles = execline.match(toggleRegexp);
-      if (toggles) {
-        for (var i = 0; i < toggles.length; i++) {
-          var opts = toggles[i].substring(10, toggles[i].length - 2).split(parson.options.toggleSeparator);
-          if (opts.length >= 1 && opts[0] !== "$$") {
-            // replace the toggle content with Python executable version as well
-            execline = execline.replace(toggles[i], opts[item.selectedToggleIndex(i)]);
-          } else { // use the same content for the toggle in Python
-            execline = execline.replace(toggles[i], item.toggleValue(i));
-          }
-        }
-      }
-      var execlines = execline.split(/<br\s*\/?>/);
-      for (i = 0; i < execlines.length; i++) {
-        // add the modified codeline to the executable code
-        executableCodeString += python_indents[item.indent] + execlines[i] + "\n";
-      }
-    });
-    return executableCodeString;
-  };
-
-  // The "original" grader for giving line based feedback.
-  var LineBasedGrader = function(parson) {
-    this.parson = parson;
-  };
-  graders.LineBasedGrader = LineBasedGrader;
-  LineBasedGrader.prototype.grade = function(elementId) {
-    var parson = this.parson;
-    var elemId = elementId || parson.options.sortableId;
-    var student_code = parson.normalizeIndents(parson.getModifiedCode("#ul-" + elemId));
-    var lines_to_check = Math.min(student_code.length, parson.model_solution.length);
-    var errors = [], log_errors = [];
-    var incorrectLines = [], studentCodeLineObjects = [];
-    var i;
-    var wrong_order = false;
-
-    // Find the line objects for the student's code
-    for (i = 0; i < student_code.length; i++) {
-      studentCodeLineObjects.push($.extend(true, 
-    	                                   {},
-    	                                   parson.getLineById(student_code[i].id)));
-    }
-
-    // This maps codeline strings to the index, at which starting from 0, we have last
-    // found this codeline. This is used to find the best indices for each 
-    // codeline in the student's code for the LIS computation and, for example,
-    // assigns appropriate indices for duplicate lines.
-    var lastFoundCodeIndex = {};
-    $.each(studentCodeLineObjects, function(index, lineObject) {
-    	// find the first matching line in the model solution
-    	// starting from where we have searched previously
-    	for (var i = (typeof(lastFoundCodeIndex[lineObject.code]) !== 'undefined') ? lastFoundCodeIndex[lineObject.code]+1 : 0; 
-    	     i < parson.model_solution.length;
-    	     i++) {
-    	  if (parson.model_solution[i].code === lineObject.code) {
-    		  // found a line in the model solution that matches the student's line
-    		  lastFoundCodeIndex[lineObject.code] = i;
-              lineObject.lisIgnore = false;
-              // This will be used in LIS computation
-        	  lineObject.position = i;
-        	  break;
-    	  }
-    	}
-    	if (i === parson.model_solution.length) {
-    	  if (typeof(lastFoundCodeIndex[lineObject.code]) === 'undefined') {
-	    	// Could not find the line in the model solution at all,
-	    	// it must be a distractor
-	    	// => add to feedback, log, and ignore in LIS computation
-	        wrong_order = true;
-	        lineObject.markIncorrectPosition();
-	    	incorrectLines.push(lineObject.orig);
-	        lineObject.lisIgnore = true;
-	      } else {
-	        // The line is part of the solution but there are now
-	    	// too many instances of the same line in the student's code
-	        // => Let's just have their correct position to be the same
-	    	// as the last one actually found in the solution.
-	        // LIS computation will handle such duplicates properly and
-	    	// choose only one of the equivalent positions to the LIS and
-	        // extra duplicates are left in the inverse and highlighted as
-	    	// errors.
-	        // TODO This method will not always give the most intuitive 
-	    	// highlights for lines to supposed to be moved when there are 
-	        // several extra duplicates in the student's code.
-            lineObject.lisIgnore = false;
-            lineObject.position = lastFoundCodeIndex[lineObject.code];
-	      }
-	      
-    	}
-      });
-    
-    var lisStudentCodeLineObjects = 
-      studentCodeLineObjects.filter(function (lineObject) { return !lineObject.lisIgnore; });
-    var inv = 
-      LIS.best_lise_inverse_indices(lisStudentCodeLineObjects
-    			 				    .map(function (lineObject) { return lineObject.position; }));
-    $.each(inv, function(_index, lineObjectIndex) {
-    	// Highlight the lines that could be moved to fix code as defined by the LIS computation
-        lisStudentCodeLineObjects[lineObjectIndex].markIncorrectPosition();
-        incorrectLines.push(lisStudentCodeLineObjects[lineObjectIndex].orig);
-      });
-    if (inv.length > 0 || incorrectLines.length > 0) {
-      wrong_order = true;
-      log_errors.push({type: "incorrectPosition", lines: incorrectLines});
-    }
-
-    if (wrong_order) {
-      errors.push(parson.translations.order());
-    }
-
-    // Check the number of lines in student's code
-    if (parson.model_solution.length < student_code.length) {
-      $("#ul-" + elemId).addClass("incorrect");
-      errors.push(parson.translations.lines_too_many());
-      log_errors.push({type: "tooManyLines", lines: student_code.length});
-    } else if (parson.model_solution.length > student_code.length){
-      $("#ul-" + elemId).addClass("incorrect");
-      errors.push(parson.translations.lines_missing());
-      log_errors.push({type: "tooFewLines", lines: student_code.length});
-    }
-
-    // Finally, check indent if no other errors
-    if (errors.length === 0) {
-      for (i = 0; i < lines_to_check; i++) {
-        var code_line = student_code[i];
-        var model_line = parson.model_solution[i];
-        if (code_line.indent !== model_line.indent &&
-             ((!parson.options.first_error_only) || errors.length === 0)) {
-          code_line.markIncorrectIndent();
-          errors.push(parson.translations.block_structure(i+1));
-          log_errors.push({type: "incorrectIndent", line: (i+1)});
-        }
-        if (code_line.code == model_line.code &&
-             code_line.indent == model_line.indent &&
-             errors.length === 0) {
-          code_line.markCorrect();
-        }
-      }
-    }
-
-    return {errors: errors, log_errors: log_errors, success: (errors.length === 0)};
-  };
-
-
-   var python_indents = [],
-        spaces = "";
-   for (var counter = 0; counter < 20; counter++) {
-    python_indents[counter] = spaces;
-    spaces += "  ";
-   }
-
-   var defaultToggleTypeHandlers = {
-      boolean: ["True", "False"],
-      compop: ["<", ">", "<=", ">=", "==", "!="],
-      mathop: ["+", "-", "*", "/"],
-      boolop: ["and", "or"],
-      range: function($item) {
-         var min = parseFloat($item.data("min") || "0"),
-             max = parseFloat($item.data("max") || "10"),
-             step = parseFloat($item.data("step") || "1"),
-             opts = [],
-             curr = min;
-         while (curr <= max) {
-            opts.push("" + curr);
-            curr += step;
-         }
-         return opts;
-      }
-   };
-   var addToggleableElements = function(widget) {
-      for (var i = 0; i < widget.modified_lines.length; i++) {
-        widget.modified_lines[i]._addToggles();
-      }
-      // toggleable elements are only enabled for unit tests
-      if (!widget.options.unittests && !widget.options.vartests) { return; }
-      var handlers = $.extend(defaultToggleTypeHandlers, widget.options.toggleTypeHandlers),
-          context = $("#" + widget.options.sortableId + ", #" + widget.options.trashId);
-      $(".jsparson-toggle", context).each(function(index, item) {
-         var type = $(item).data("type");
-         if (!type) { return; }
-         var handler = handlers[type],
-             jspOptions;
-         if ($.isFunction(handler)) {
-            jspOptions = handler($(item));
-         } else {
-            jspOptions = handler;
-         }
-         if (jspOptions && $.isArray(jspOptions)) {
-            $(item).attr("data-jsp-options", JSON.stringify(jspOptions));
-         }
-      });
-      // register a click handler for all the toggleable elements (and unregister existing)
-      context.off("click", ".jsparson-toggle").on("click", ".jsparson-toggle", function() {
-         var $this = $(this),
-             curVal = $this.text(),
-             choices = $this.data("jsp-options"),
-             newVal = choices[(choices.indexOf(curVal) + 1)%choices.length],
-             $parent = $this.parent("li");
-         // clear existing feedback
-         widget.clearFeedback();
-         // change the shown toggle element
-         $this.text(newVal);
-         // log the event
-         widget.addLogEntry({type: "toggle", oldvalue: curVal, newvalue: newVal,
-                           target: $parent[0].id,
-                           toggleindex: $parent.find(".jsparson-toggle").index($this)});
-      });
-   };
-
-  // Create a line object skeleton with only code and indentation from
-  // a code string of an assignment definition string (see parseCode)
-  var ParsonsCodeline = function(codestring, widget) {
-    this.widget = widget;
-    this.code = "";
-    this.indent = 0;
-    this._toggles = [];
-    if (codestring) {
-      // Consecutive lines to be dragged as a single block of code have strings "\\n" to
-      // represent newlines => replace them with actual new line characters "\n"
-      //codestring = codestring.replace(/\\n\s+/g,"\\n"); // remove leading spaced if more than one line in a code block - added in below to not change the codestring
-      this.code = codestring.replace(/#distractor\s*$/, "").replace(trimRegexp, "$1").replace(/\\n\s+/g,"\\n").replace(/\\n+/g,"\n");
-      this.indent = codestring.length - codestring.replace(/^\s+/, "").length;
-    }
-  };
-  ParsonsCodeline.prototype.elem = function() {
-    // the element will change on shuffle, so we should re-fetch it every time
-    return $("#" + this.id);
-  };
-  ParsonsCodeline.prototype.markCorrect = function() {
-    this.elem().addClass(this.widget.FEEDBACK_STYLES.correctPosition);
-  };
-  ParsonsCodeline.prototype.markIncorrectPosition = function() {
-    this.elem().addClass(this.widget.FEEDBACK_STYLES.incorrectPosition);
-  };
-  ParsonsCodeline.prototype.markIncorrectIndent = function() {
-    this.elem().addClass(this.widget.FEEDBACK_STYLES.incorrectIndent);
-  };
-  //
-  ParsonsCodeline.prototype._addToggles = function() {
-    var toggleRegexp = new RegExp("\\$\\$toggle(" + this.widget.options.toggleSeparator + ".*?)?\\$\\$", "g");
-    var toggles = this.code.match(toggleRegexp);
-    var that = this;
-    this._toggles = [];
-    if (toggles) {
-      var html = this.code;
-      for (var i = 0; i < toggles.length; i++) {
-        var opts = toggles[i].substring(10, toggles[i].length - 2).split(this.widget.options.toggleSeparator);
-        html = html.replace(toggles[i], "<span class='jsparson-toggle' data-jsp-options='" +
-                      JSON.stringify(opts).replace("<", "&lt;") + "'></span>");
-
-      }
-      this.elem().html(html);
-      this.elem().find(".jsparson-toggle").each(function(index, item) {
-        that._toggles.push(item);
-      });
-    }
-  };
-  // Returns the number of toggleable elements in this code block
-  ParsonsCodeline.prototype.toggleCount = function() {
-    return this._toggles.length;
-  };
-  // Returns the index of the currently selected toggle option for the
-  // toggle element at given index
-  ParsonsCodeline.prototype.selectedToggleIndex = function(index) {
-    if (index < 0 || index >= this._toggles.length) { return -1; }
-    var elem = this._toggles[index];
-    var opts = $(elem).data("jsp-options");
-    return opts.indexOf(elem.textContent);
-  };
-  // Returns the value of the toggleable element at the given index (0-based)
-  ParsonsCodeline.prototype.toggleValue = function(index) {
-    if (index < 0 || index >= this._toggles.length) { return undefined; }
-    return this._toggles[index].textContent;
-  };
-  // expose the type for testing, extending etc
-  window.ParsonsCodeline = ParsonsCodeline;
-
-  // Creates a parsons widget. Init must be called after creating an object.
-   var ParsonsWidget = function(options) {
-	 // Contains line objects of the user-draggable code.
-	 // The order is not meaningful (unchanged from the initial state) but
-	 // indent property for each line object is updated as the user moves
-	 // codelines around. (see parseCode for line object description)
-     this.modified_lines = [];
-     // contains line objects of distractors (see parseCode for line object description)
-     this.extra_lines = [];
-     // contains line objects (see parseCode for line object description)
-     this.model_solution = [];
-     
-     //To collect statistics, feedback should not be based on this
-     this.user_actions = [];
-     
-     //State history for feedback purposes
-     this.state_path = [];
-     this.states = {};
-     
-     var defaults = {
-       'incorrectSound': false,
-       'x_indent': 50,
-       'can_indent': true,
-       'feedback_cb': false,
-       'first_error_only': true,
-       'max_wrong_lines': 10,
-       'lang': 'en',
-       'toggleSeparator': '::'
-     };
-     
-     this.options = jQuery.extend({}, defaults, options);
-     this.feedback_exists = false;
-     this.id_prefix = options['sortableId'] + 'codeline';
-     if (translations.hasOwnProperty(this.options.lang)) {
-       this.translations = translations[this.options.lang];
-     } else {
-       this.translations = translations['en'];
-     }
-
-     // translate trash_label and solution_label
-     if (!this.options.hasOwnProperty("trash_label")) {
-         this.options.trash_label = this.translations.trash_label;
-     }
-     if (!this.options.hasOwnProperty("solution_label")) {
-         this.options.solution_label = this.translations.solution_label;
-     }
-     this.FEEDBACK_STYLES = { 'correctPosition' : 'correctPosition',
-                              'incorrectPosition' : 'incorrectPosition',
-                              'correctIndent' : 'correctIndent',
-                              'incorrectIndent' : 'incorrectIndent'};
-
-    // use grader passed as an option if defined and is a function
-    if (this.options.grader && _.isFunction(this.options.grader)) {
-      this.grader = new this.options.grader(this);
-    } else {
-      // initialize the grader
-      if (typeof(this.options.unittests) !== "undefined") { /// unittests are specified
-        this.grader = new UnitTestGrader(this);
-      } else if (typeof(this.options.vartests) !== "undefined") { /// tests for variable values
-        this.grader = new VariableCheckGrader(this);
-      } else { // "traditional" parson feedback
-        this.grader = new LineBasedGrader(this);
-      }
-    }
-   };
-  ParsonsWidget._graders = graders;
-      
-   ////Public methods
-
-   // Parses an assignment definition given as a string and returns and 
-   // transforms this into an object defining the assignment with line objects.
-   //
-   // lines: A string that defines the solution to the assignment and also 
-   //   any possible distractors
-   // max_distractrors: The number of distractors allowed to be included with
-   //   the lines required in the solution
-   ParsonsWidget.prototype.parseCode = function(lines, max_distractors) {
-     var distractors = [],
-         indented = [],
-         widgetData = [],
-         lineObject,
-         errors = [],
-         that = this;
-     // Create line objects out of each codeline and separate
-     // lines belonging to the solution and distractor lines
-     // Fields in line objects:
-     //   code: a string of the code, may include newline characters and 
-     //     thus in fact represents a block of consecutive lines
-     //   indent: indentation level, -1 for distractors
-     //   distractor: boolean whether this is a distractor
-     //   orig: the original index of the line in the assignment definition string,
-     //     for distractors this is not meaningful but for lines belonging to the 
-     //     solution, this is their expected position
-     $.each(lines, function(index, item) {
-       lineObject = new ParsonsCodeline(item, that);
-       lineObject.orig = index;
-        if (item.search(/#distractor\s*$/) >= 0) {
-          // This line is a distractor
-          lineObject.indent = -1;
-          lineObject.distractor = true;
-          if (lineObject.code.length > 0) {
-            // The line is non-empty, not just whitespace
-            distractors.push(lineObject);
-          }
-        } else {
-          // This line is part of the solution
-          // Initialize line object with code and indentation properties
-          if (lineObject.code.length > 0) {
-            // The line is non-empty, not just whitespace
-            lineObject.distractor = false;
-            indented.push(lineObject);
-          }
-        }
-     });
-     
-     var normalized = this.normalizeIndents(indented);
-     
-     $.each(normalized, function(index, item) {
-              if (item.indent < 0) {
-                // Indentation error
-                errors.push(this.translations.no_matching(normalized.orig));
-              }
-              widgetData.push(item);
-            });
-     
-     // Remove extra distractors if there are more alternative distrators 
-     // than should be shown at a time
-     var permutation = this.getRandomPermutation(distractors.length);
-     var selected_distractors = [];
-     for (var i = 0; i < max_distractors; i++) {
-       selected_distractors.push(distractors[permutation[i]]);
-       widgetData.push(distractors[permutation[i]]);
-     }
-     
-     return {
-       // an array of line objects specifying  the solution
-       solution:  $.extend(true, [], normalized),
-       // an array of line objects specifying the requested number 
-       // of distractors (not all possible alternatives)
-       distractors: $.extend(true, [], selected_distractors),
-       // an array of line objects specifying the initial code arrangement 
-       // given to the user to use in constructing the solution 
-       widgetInitial: $.extend(true, [], widgetData),
-       errors: errors};
-   };
-
-   ParsonsWidget.prototype.init = function(text) {
-  	 // TODO: Error handling, parseCode may return errors in an array in property named errors.
-     var initial_structures = this.parseCode(text.split("\n"), this.options.max_wrong_lines);
-     this.model_solution = initial_structures.solution;
-     this.extra_lines = initial_structures.distractors;
-     this.modified_lines = initial_structures.widgetInitial;
-     var id_prefix = this.id_prefix;
-     
-     // Add ids to the line objects in the user-draggable lines
-     $.each(this.modified_lines, function(index, item) {
-       item.id = id_prefix + index;
-       item.indent = 0;
-     });
-   };
-
-   ParsonsWidget.prototype.getHash = function(searchString) {
-     var hash = [],
-         ids = $(searchString).sortable('toArray'),
-         line;
-     for (var i = 0; i < ids.length; i++) {
-       line = this.getLineById(ids[i]);
-       hash.push(line.orig + "_" + line.indent);
-     }
-     //prefix with something to handle empty output situations
-     if (hash.length === 0) {
-       return "-";
-     } else {
-       return hash.join("-");
-     }
-   };
-   
-   ParsonsWidget.prototype.solutionHash = function() {
-       return this.getHash("#ul-" + this.options.sortableId);
-   };
-
-   ParsonsWidget.prototype.trashHash = function() {
-       return this.getHash("#ul-" + this.options.trashId);
-   };
-
-   ParsonsWidget.prototype.whatWeDidPreviously = function() {
-     var hash = this.solutionHash();
-     var previously = this.states[hash];
-     if (!previously) { return undefined; }
-     var visits = _.filter(this.state_path, function(state) {
-                             return state == hash;
-                           }).length - 1;
-     var i, stepsToLast = 0, s,
-        outputStepTypes = ['removeOutput', 'addOutput', 'moveOutput'];
-     for (i = this.state_path.length - 2; i > 0; i--) {
-       s = this.states[this.state_path[i]];
-       if (s && outputStepTypes.indexOf(s.type) != -1) {
-         stepsToLast++;
-       }
-       if (hash === this.state_path[i]) { break; }
-     }
-     return $.extend(false, {'visits': visits, stepsToLast: stepsToLast}, previously);
-   };
-
-  /**
-    * Returns states of the toggles for logging purposes
-    */
-  ParsonsWidget.prototype._getToggleStates = function() {
-    var context = $("#" + this.options.sortableId + ", #" + this.options.trashId),
-        toggles = $(".jsparson-toggle", context),
-        toggleStates = {};
-    $("#" + this.options.sortableId + " .jsparson-toggle").each(function() {
-      if (!toggleStates.output) {
-        toggleStates.output = [];
-      }
-      toggleStates.output.push($(this).text());
-    });
-    if (this.options.trashId) {
-      toggleStates.input = [];
-      $("#" + this.options.trashId + " .jsparson-toggle").each(function() {
-        toggleStates.input.push($(this).text());
-      });
-    }
-    if ((toggleStates.output && toggleStates.output.length > 0) ||
-                  (toggleStates.input && toggleStates.input.length > 0)) {
-      return toggleStates;
-    } else {
-      return undefined;
-    }
-  };
-
-   ParsonsWidget.prototype.addLogEntry = function(entry) {
-     var state, previousState;
-     var logData = {
-       time: new Date(),
-       output: this.solutionHash(),
-       type: "action"
-     };
-
-     if (this.options.trashId) {
-       logData.input = this.trashHash();
-     }
-
-     if (entry.target) {
-       entry.target = entry.target.replace(this.id_prefix, "");
-     }
-
-     // add toggle states to log data if there are toggles
-     var toggles = this._getToggleStates();
-     if (toggles) {
-       logData.toggleStates = toggles;
-     }
-
-     state = logData.output;
-
-     jQuery.extend(logData, entry);
-     this.user_actions.push(logData);
-
-     //Updating the state history
-     if(this.state_path.length > 0) {
-       previousState = this.state_path[this.state_path.length - 1];
-       this.states[previousState] = logData;
-     }
-
-     //Add new item to the state path only if new and previous states are not equal
-     if (this.state_path[this.state_path.length - 1] !== state) {
-       this.state_path.push(state);
-     }
-     // callback for reacting to actions
-     if ($.isFunction(this.options.action_cb)) {
-       this.options.action_cb.call(this, logData);
-     }
-   };
-
-   /**
-    * Update indentation of a line based on new coordinates
-    * leftDiff horizontal difference from (before and after drag) in px
-    ***/
-   ParsonsWidget.prototype.updateIndent = function(leftDiff, id) {
-
-     var code_line = this.getLineById(id);
-     var new_indent = this.options.can_indent ? code_line.indent + Math.floor(leftDiff / this.options.x_indent) : 0;
-     new_indent = Math.max(0, new_indent);
-     code_line.indent = new_indent;
-
-     return new_indent;
-   };
-
-   // Get a line object by the full id including id prefix
-   // (see parseCode for description of line objects)
-   ParsonsWidget.prototype.getLineById = function(id) {
-     var index = -1;
-     for (var i = 0; i < this.modified_lines.length; i++) {
-       if (this.modified_lines[i].id == id) {
-         index = i;
-         break;
-       }
-     }
-     return this.modified_lines[index];
-   };
-
-   // Check and normalize code indentation.
-   // Does not use the current object (this) ro make changes to 
-   // the parameter.
-   // Returns a new array of line objects whose indent fields' values 
-   // may be different from the argument. If indentation does not match,
-   // i.e. code is malformed, value of indent may be -1.
-   // For example, the first line may not be indented.
-   ParsonsWidget.prototype.normalizeIndents = function(lines) {
-
-     var normalized = [];
-     var new_line;
-     var match_indent = function(index) {
-       //return line index from the previous lines with matching indentation
-       for (var i = index-1; i >= 0; i--) {
-         if (lines[i].indent == lines[index].indent) {
-           return normalized[i].indent;
-         }
-       }
-       return -1;
-     };
-     for ( var i = 0; i < lines.length; i++ ) {
-       //create shallow copy from the line object
-       new_line = jQuery.extend({}, lines[i]);
-       if (i === 0) {
-         new_line.indent = 0;
-         if (lines[i].indent !== 0) {
-           new_line.indent = -1;
-         }
-       } else if (lines[i].indent == lines[i-1].indent) {
-         new_line.indent = normalized[i-1].indent;
-       } else if (lines[i].indent > lines[i-1].indent) {
-         new_line.indent = normalized[i-1].indent + 1;
-       } else {
-         // indentation can be -1 if no matching indentation exists, i.e. IndentationError in Python
-         new_line.indent = match_indent(i);
-       }
-       normalized[i] = new_line;
-     }
-     return normalized;
-   };
-
-   /**
-    * Retrieve the code lines based on what is in the DOM
-    *
-    * TODO(petri) refactor to UI
-    * */
-   ParsonsWidget.prototype.getModifiedCode = function(search_string) {
-     //ids of the the modified code
-     var lines_to_return = [],
-          solution_ids = $(search_string).sortable('toArray'),
-          i, item;
-     for (i = 0; i < solution_ids.length; i++) {
-       item = this.getLineById(solution_ids[i]);
-       lines_to_return.push($.extend(new ParsonsCodeline(), item));
-     }
-     return lines_to_return;
-   };
-
-   ParsonsWidget.prototype.hashToIDList = function(hash) {
-     var lines = [];
-     var lineValues;
-     var lineObject;
-     var h;
-
-     if (hash === "-" || hash === "" || hash === null) {
-       h = [];
-     } else {
-       h = hash.split("-");
-     }
-     
-     var ids = [];
-     for (var i = 0; i < h.length; i++) {
-       lineValues = h[i].split("_");
-       ids.push(this.modified_lines[lineValues[0]].id);
-     }
-     return ids;
-   };
-
-   ParsonsWidget.prototype.updateIndentsFromHash = function(hash) {
-     var lineValues;
-     var h;
-
-     if (hash === "-" || hash === "" || hash === null) {
-       h = [];
-     } else {
-       h = hash.split("-");
-     }
-     
-     var ids = [];
-     for (var i = 0; i < h.length; i++) {
-         lineValues = h[i].split("_");
-         this.modified_lines[lineValues[0]].indent = Number(lineValues[1]);
-         this.updateHTMLIndent(this.modified_lines[lineValues[0]].id);
-     }
-     return ids;
-   };
-
-
-   /**
-    * TODO(petri) refoctor to UI
-    */
-   ParsonsWidget.prototype.displayError = function(message) {
-     if (this.options.incorrectSound && $.sound) {
-       $.sound.play(this.options.incorrectSound);
-     }
-     alert(message);
-   };
-
-   ParsonsWidget.prototype.colorFeedback = function(elemId) {
-     return new LineBasedGrader(this).grade(elemId);
-   };
-
-
-
-
-   /**
-    * @return
-    * TODO(petri): Separate UI from here
-    */
-   ParsonsWidget.prototype.getFeedback = function() {
-     this.feedback_exists = true;
-     var fb = this.grader.grade();
-     if (this.options.feedback_cb) {
-       this.options.feedback_cb(fb); //TODO(petri): what is needed?
-     }
-     // if answer is correct, mark it in the UI
-     if (fb.success) {
-       $("#ul-" + this.options.sortableId).addClass("correct");
-     }
-     // log the feedback and return; based on the type of grader
-     if ('html' in fb) { // unittest/vartests type feedback
-       this.addLogEntry({type: "feedback", tests: fb.tests, success: fb.success});
-       return { feedback: fb.html, success: fb.success };
-     } else {
-       this.addLogEntry({type: "feedback", errors: fb.log_errors, success: fb.success});
-       return fb.errors;
-     }
-   };
-
-   ParsonsWidget.prototype.clearFeedback = function() {
-     if (this.feedback_exists) {
-       $("#ul-" + this.options.sortableId).removeClass("incorrect correct");
-       var li_elements = $("#ul-" + this.options.sortableId + " li");
-       $.each(this.FEEDBACK_STYLES, function(index, value) {
-                li_elements.removeClass(value);
-              });
-     }
-     this.feedback_exists = false;
-   };
-
-
-   ParsonsWidget.prototype.getRandomPermutation = function(n) {
-     var permutation = [];
-     var i;
-     for (i = 0; i < n; i++) {
-       permutation.push(i);
-     }
-     var swap1, swap2, tmp;
-     for (i = 0; i < n; i++) {
-       swap1 = Math.floor(Math.random() * n);
-       swap2 = Math.floor(Math.random() * n);
-       tmp = permutation[swap1];
-       permutation[swap1] = permutation[swap2];
-       permutation[swap2] = tmp;
-     }
-     return permutation;
-   };
-
-
-   ParsonsWidget.prototype.shuffleLines = function() {
-       var permutation = (this.options.permutation?this.options.permutation:this.getRandomPermutation)(this.modified_lines.length);
-       var idlist = [];
-       for(var i in permutation) {
-           idlist.push(this.modified_lines[permutation[i]].id);
-       }
-       if (this.options.trashId) {
-           this.createHTMLFromLists([],idlist);
-       } else {
-           this.createHTMLFromLists(idlist,[]);
-       }
-       addToggleableElements(this);
-   };
-
-   ParsonsWidget.prototype.createHTMLFromHashes = function(solutionHash, trashHash) {
-       var solution = this.hashToIDList(solutionHash);
-       var trash = this.hashToIDList(trashHash);
-       this.createHTMLFromLists(solution, trash);
-       this.updateIndentsFromHash(solutionHash);
-   };
-
-    ParsonsWidget.prototype.updateHTMLIndent = function(codelineID) {
-        var line = this.getLineById(codelineID);
-        $('#' + codelineID).css("margin-left", this.options.x_indent * line.indent + "px");
-    };
-
-
-    ParsonsWidget.prototype.codeLineToHTML = function(codeline) {
-        return '<li id="' + codeline.id + '" class="prettyprint lang-py">' + codeline.code + '<\/li>';
-    };
-
-    ParsonsWidget.prototype.codeLinesToHTML = function(codelineIDs, destinationID) {
-        var lineHTML = [];
-        for(var id in codelineIDs) {
-            var line = this.getLineById(codelineIDs[id]);
-            lineHTML.push(this.codeLineToHTML(line));
-        }
-        return '<ul id="ul-' + destinationID + '">'+lineHTML.join('')+'</ul>';
-    };
-
-   /** modifies the DOM by inserting exercise elements into it */
-   ParsonsWidget.prototype.createHTMLFromLists = function(solutionIDs, trashIDs) {
-     var html;
-     if (this.options.trashId) {
-       html = (this.options.trash_label?'<p>'+this.options.trash_label+'</p>':'') +
-         this.codeLinesToHTML(trashIDs, this.options.trashId);
-       $("#" + this.options.trashId).html(html);
-       html = (this.options.solution_label?'<p>'+this.options.solution_label+'</p>':'') +
-         this.codeLinesToHTML(solutionIDs, this.options.sortableId);
-       $("#" + this.options.sortableId).html(html);
-     } else {
-       html = this.codeLinesToHTML(solutionIDs, this.options.sortableId);
-       $("#" + this.options.sortableId).html(html);
-     }
-
-     if (window.prettyPrint && (typeof(this.options.prettyPrint) === "undefined" || this.options.prettyPrint)) {
-       prettyPrint();
-     }
-
-     var that = this;
-     var sortable = $("#ul-" + this.options.sortableId).sortable(
-       {
-         start : function() { that.clearFeedback(); },
-         stop : function(event, ui) {
-           if ($(event.target)[0] != ui.item.parent()[0]) {
-             return;
-           }
-           that.updateIndent(ui.position.left - ui.item.parent().position().left,
-                                       ui.item[0].id);
-           that.updateHTMLIndent(ui.item[0].id);
-           that.addLogEntry({type: "moveOutput", target: ui.item[0].id}, true);
-         },
-         receive : function(event, ui) {
-           var ind = that.updateIndent(ui.position.left - ui.item.parent().position().left,
-                                       ui.item[0].id);
-           that.updateHTMLIndent(ui.item[0].id);
-           that.addLogEntry({type: "addOutput", target: ui.item[0].id}, true);
-         },
-         grid : that.options.can_indent ? [that.options.x_indent, 1 ] : false
-       });
-     sortable.addClass("output");
-     if (this.options.trashId) {
-       var trash = $("#ul-" + this.options.trashId).sortable(
-         {
-           connectWith: sortable,
-           start: function() { that.clearFeedback(); },
-           receive: function(event, ui) {
-             that.getLineById(ui.item[0].id).indent = 0;
-             that.updateHTMLIndent(ui.item[0].id);
-             that.addLogEntry({type: "removeOutput", target: ui.item[0].id}, true);
-           },
-           stop: function(event, ui) {
-             if ($(event.target)[0] != ui.item.parent()[0]) {
-               // line moved to output and logged there
-               return;
-             }
-             that.addLogEntry({type: "moveInput", target: ui.item[0].id}, true);
-           }
-         });
-       sortable.sortable('option', 'connectWith', trash);
-     }
-     // Log the original codelines in the exercise in order to be able to
-     // match the input/output hashes to the code later on. We need only a
-     // few properties of the codeline objects
-     var bindings = [];
-     for (var i = 0; i < this.modified_lines.length; i++) {
-       var line = this.modified_lines[i];
-       bindings.push({code: line.code, distractor: line.distractor})
-     }
-     this.addLogEntry({type: 'init', time: new Date(), bindings: bindings});
-   };
-
-
-   window['ParsonsWidget'] = ParsonsWidget;
- }
-// allows _ and $ to be modified with noconflict without changing the globals
-// that parsons uses
-)($,_);
+/* =====================================================================
+==== Parsons Runestone Directive Javascript ============================
+======== Renders a Parsons problem based on the HTML created by the
+======== parsons.py script and the RST file.
+==== CONTRIBUTORS ======================================================
+======== Isaiah Mayerchak
+======== Jeff Rick
+======== Barbara Ericson
+======== Cole Bowers
+==== Adapted form the original JS Parsons by ===========================
+======== Ville Karavirta
+======== Petri Ihantola
+======== Juha Helminen
+======== Mike Hewner
+===================================================================== */
+
+/* =====================================================================
+==== LineBasedGrader Object ============================================
+======== Used for grading a Parsons problem.
+==== PROPERTIES ========================================================
+======== problem: the Parsons problem
+===================================================================== */
+
+// Initialize
+var LineBasedGrader = function(problem) {
+	this.problem = problem;
+};
+
+// Use a LIS (Longest Increasing Subsequence) algorithm to return the indexes
+// that are not part of that subsequence.
+LineBasedGrader.prototype.inverseLISIndices = function(arr) {
+	// Get all subsequences
+	var allSubsequences = [];
+	for (var i = 0; i < arr.length; i++){
+		var subsequenceForCurrent = [arr[i]],
+			current = arr[i],
+			lastElementAdded = -1;
+		for (var j = i; j < arr.length; j++) {
+			var subsequent = arr[j];
+			if ((subsequent > current) && (lastElementAdded < subsequent)) {
+				subsequenceForCurrent.push(subsequent);
+				lastElementAdded = subsequent;
+			}
+		}
+		allSubsequences.push(subsequenceForCurrent);
+	}
+	// Figure out the longest one
+	var longestSubsequenceLength = -1;
+	var longestSubsequence;
+	for (var i in allSubsequences) {
+		var subs = allSubsequences[i];
+		if (subs.length > longestSubsequenceLength) {
+			longestSubsequenceLength = subs.length;
+	        longestSubsequence = subs;
+	    }
+	}
+	// Create the inverse indexes
+	var indexes = [];
+	var lIndex = 0;
+	for (var i = 0; i < arr.length; i++) {
+		if (lIndex > longestSubsequence.length) {
+			indexes.push(i);
+		} else {
+			if (arr[i] == longestSubsequence[lIndex]) {
+				lIndex += 1;
+			} else {
+				indexes.push(i);
+			}
+		}
+	}
+	return indexes;
+};
+
+// grade that element, returning the state
+LineBasedGrader.prototype.grade = function() {
+	var problem = this.problem;
+	problem.clearFeedback();
+	var correct = false;
+	var answerArea = $(problem.answerArea);
+	var feedbackArea = $(problem.messageDiv);
+	var solutionLines = problem.solution;
+	var answerLines = problem.answerLines();
+	var i;
+	var state;
+
+	if (answerLines.length < solutionLines.length) {
+		state = "incorrectTooShort";
+		// too little code
+		answerArea.addClass("incorrect");
+		feedbackArea.fadeIn(500);
+		feedbackArea.attr("class", "alert alert-danger");
+		feedbackArea.html("Your program is too short.  Add more blocks.");
+	} else {
+		// Determine whether the code is in the correct order
+		var isCorrectOrder = false;
+		if (answerLines.length == solutionLines.length) {
+			isCorrectOrder = true;
+			for (i = 0; i < solutionLines.length; i++) {
+				if (answerLines[i].text !== solutionLines[i].text) {
+					isCorrectOrder = false;
+				}
+			}
+		}
+		if (isCorrectOrder) {
+			// Determine whether it is the correct indention
+			var indentLeft = [];
+			var indentRight = [];
+			for (i = 0; i < solutionLines.length; i++) {
+				if (answerLines[i].viewIndent() < solutionLines[i].indent) {
+					indentRight.push(answerLines[i]);
+				} else if (answerLines[i].viewIndent() > solutionLines[i].indent) {
+					indentLeft.push(answerLines[i]);
+				}
+			}
+			if (indentLeft.length + indentRight.length == 0) {
+				// Perfect
+				state = "correct";
+				answerArea.addClass("correct");
+				feedbackArea.fadeIn(100);
+				feedbackArea.attr("class", "alert alert-info");
+				if (problem.checkCount > 1)
+				{
+				   feedbackArea.html("Perfect!  It took you " + problem.checkCount + " tries to solve this.  Click Reset to try to solve it in one attempt.");
+			    }
+			    else
+			    {
+			       feedbackArea.html("Perfect!  It took you only one try to solve this.  Great job!");
+			    }
+				correct = true;
+			} else {
+				// Incorrect Indention
+				state = "incorrectIndent";
+				var incorrectBlocks = [];
+				for (i = 0; i < indentLeft.length; i++) {
+					block = indentLeft[i].block();
+					if (incorrectBlocks.indexOf(block) == -1) {
+						incorrectBlocks.push(block);
+						$(block.view).addClass("indentLeft");
+					}
+				}
+				for (i = 0; i < indentRight.length; i++) {
+					block = indentRight[i].block();
+					if (incorrectBlocks.indexOf(block) == -1) {
+						incorrectBlocks.push(block);
+						$(block.view).addClass("indentRight");
+					}
+				}
+				feedbackArea.fadeIn(500);
+				feedbackArea.attr("class", "alert alert-danger");
+				if (incorrectBlocks.length == 1) {
+					feedbackArea.html("This block is not indented correctly. Either indent it more by dragging it right or reduce the indention by dragging it left.");
+				} else {
+					feedbackArea.html("These blocks are not indented correctly. To indent a block more, drag it to the right. To reduce the indention, drag it to the left.");
+				}
+			}
+		} else {
+			// Incorrect: indicate which blocks to move
+			state = "incorrectMoveBlocks";
+			var answerBlocks = problem.answerBlocks();
+			var inSolution = [];
+			var inSolutionIndexes = [];
+			var notInSolution = [];
+			for (i = 0; i < answerBlocks.length; i++) {
+				var block = answerBlocks[i];
+				var index = solutionLines.indexOf(block.lines[0]);
+				if (index == -1) {
+					notInSolution.push(block);
+				} else {
+					inSolution.push(block);
+					inSolutionIndexes.push(index);
+				}
+			}
+			var lisIndexes = this.inverseLISIndices(inSolutionIndexes);
+			for (i = 0; i < lisIndexes.length; i++) {
+				notInSolution.push(inSolution[lisIndexes[i]]);
+			}
+			answerArea.addClass("incorrect");
+			feedbackArea.fadeIn(500);
+			feedbackArea.attr("class", "alert alert-danger");
+			for (i = 0; i < notInSolution.length; i++) {
+				$(notInSolution[i].view).addClass("incorrectPosition");
+			}
+			feedbackArea.html("Highlighted blocks in your program are wrong or are in the wrong order. This can be fixed by moving, removing, or replacing highlighted blocks.");
+		}
+	}
+	return state;
+};
+
+/* =====================================================================
+==== ParsonsLine Object ================================================
+======== The model and view of a line of code.
+======== Based on what is specified in the problem.
+======== ParsonBlock objects have one or more of these.
+==== PROPERTIES ========================================================
+======== problem: the Parsons problem
+======== index: the index of the line in the problem
+======== text: the text of the code line
+======== indent: the indent level
+======== view: an element for viewing this object
+======== distractor: whether it is a distractor
+======== paired: whether it is a paired distractor
+======== groupWithNext: whether it is grouped with the following line
+======== width: the pixel width when rendered
+============ in the initial grouping
+===================================================================== */
+
+// Initialize from codestring
+var ParsonsLine = function(problem, codestring) {
+	this.problem = problem;
+	this.index = problem.lines.length;
+	var trimmed = codestring.replace(/\s*$/, "");
+	this.text = trimmed.replace(/^\s*/, "");
+	this.indent = trimmed.length - this.text.length;
+	// Create the View
+	var view;
+	if (problem.options.language == "natural") {
+		view = document.createElement("p");
+	} else {
+		view = document.createElement("code");
+		$(view).addClass(problem.options.prettifyLanguage);
+	}
+	view.id = problem.counterId + "-line-" + this.index;
+	view.innerHTML += this.text;
+	this.view = view;
+	problem.lines.push(this);
+};
+
+// Initialize what width the line would naturally have (without indent)
+ParsonsLine.prototype.initializeWidth = function() {
+	this.width = $(this.view).outerWidth(true) - this.problem.options.pixelsPerIndent * this.indent;
+};
+
+// Answer the block that this line is currently in
+ParsonsLine.prototype.block = function() {
+	for (var i = 0; i < this.problem.blocks.length; i++) {
+		var block = this.problem.blocks[i];
+		for (var j = 0; j < block.lines.length; j++) {
+			if (block.lines[j] === this) {
+				return block;
+			}
+		}
+	}
+	return undefined;
+};
+
+// Answer the indent based on the view
+ParsonsLine.prototype.viewIndent = function() {
+	if (this.problem.noindent) {
+		return this.indent;
+	} else {
+		var block = this.block();
+		return this.indent - block.solutionIndent() + block.indent;
+	}
+};
+
+/* =====================================================================
+==== ParsonsBlock Object ===============================================
+======== The model and view of a code block.
+==== PROPERTIES ========================================================
+======== problem: the Parsons problem
+======== lines: an array of ParsonsLine in this block
+======== indent: indent based on movement
+======== view: an element for viewing this object
+======== labels: [label, line] the labels numbering the block and the lines they go on
+======== hammer: the controller based on hammer.js
+===================================================================== */
+
+// Initialize based on the problem and the lines
+var ParsonsBlock = function(problem, lines) {
+	this.problem = problem;
+	this.lines = lines;
+	this.indent = 0;
+	this.labels = [];
+	// Create view, adding view of lines and updating indent
+	var view = document.createElement("div");
+	view.id = problem.counterId + "-block-" + problem.blockIndex;
+	problem.blockIndex += 1;
+	$(view).addClass("block");
+	var sharedIndent = lines[0].indent;
+	for (var i = 1; i < lines.length; i++) {
+		sharedIndent = Math.min(sharedIndent, lines[i].indent);
+	}
+	var lineDiv = document.createElement("div");
+	$(lineDiv).addClass("lines");
+	$(view).append(lineDiv);
+
+	for (i = 0; i < lines.length; i++) {
+		var line = lines[i];
+		var lineIndent;
+		if (problem.noindent) {
+			lineIndent = line.indent;
+		} else {
+			lineIndent = line.indent - sharedIndent;
+		}
+		$(line.view).removeClass("indent1 indent2 indent3 indent4");
+		if (lineIndent > 0) {
+			$(line.view).addClass("indent" + lineIndent);
+		}
+		lineDiv.appendChild(line.view);
+	}
+	var labelDiv = document.createElement("div");
+	$(labelDiv).addClass("labels");
+	if(this.problem.options.numbered == "left") {
+		$(lineDiv).addClass("border_left");
+		$(view).prepend(labelDiv);
+		$(view).css({
+			"justify-content": "flex-start"
+		});
+	} else if(this.problem.options.numbered == "right") {
+		$(labelDiv).addClass("border_left");
+		$(labelDiv).css({
+			"float" : "right"
+		});
+		$(view).css({
+			"justify-content": "space-between"
+		});
+		$(view).append(labelDiv);
+	}
+	this.view = view;
+};
+
+// Add a line (from another block) to this block
+ParsonsBlock.prototype.addLine = function(line) {
+	$(line.view).removeClass("indent1 indent2 indent3 indent4");
+	if (this.problem.noindent) {
+		if (line.indent > 0) {
+			$(line.view).addClass("indent" + line.indent);
+		}
+	} else {
+		var lines = this.lines;
+		var sharedIndent = lines[0].indent;
+		for (var i = 1; i < lines.length; i++) {
+			sharedIndent = Math.min(sharedIndent, lines[i].indent);
+		}
+		if (sharedIndent < line.indent) {
+			$(line.view).addClass("indent" + (line.indent - sharedIndent));
+		} else if (sharedIndent > line.indent) {
+			for (var i = 0; i < lines.length; i++) {
+				$(lines[i].view).removeClass("indent1 indent2 indent3 indent4");
+				$(lines[i].view).addClass("indent" + (lines[i].indent - line.indent));
+			}
+		}
+	}
+	this.lines.push(line);
+	$(this.view).children(".lines")[0].appendChild(line.view);
+};
+
+// Add the contents of that block to myself and then delete that block
+ParsonsBlock.prototype.consumeBlock = function(block) {
+	for (var i = 0; i < block.lines.length; i++) {
+		this.addLine(block.lines[i]);
+	}
+	if ($(block.view).attr("tabindex") == "0") {
+		this.makeTabIndex();
+	}
+	$(block.view).detach();
+	var newBlocks = [];
+	for (var i = 0; i < this.problem.blocks.length; i++) {
+		if (this.problem.blocks[i] !== block) {
+			newBlocks.push(this.problem.blocks[i]);
+		}
+	}
+	for (var i = 0; i < block.labels.length; i++) {
+		this.addLabel(block.labels[i][0], this.lines.length - block.lines.length + block.labels[i][1]);
+	}
+	
+	this.problem.blocks = newBlocks;
+	this.problem.state = undefined;
+	this.problem.updateView();
+};
+
+// Update the model and view when block is converted to contain indent
+ParsonsBlock.prototype.addIndent = function() {
+	// Update the lines model / view
+	for (var i = 0; i < this.lines.length; i++) {
+		var line = this.lines[i];
+		if (line.indent > 0) {
+			$(line.view).removeClass("indent1 indent2 indent3 indent4");
+			$(line.view).addClass("indent" + line.indent);
+		}
+	}
+	// Update the block model / view
+	this.indent = 0;
+	$(this.view).css({
+		'padding-left' : '',
+		'width' : this.problem.areaWidth - 22
+	});
+};
+
+// Add a label to block and update its view
+ParsonsBlock.prototype.addLabel = function(label, line) {
+	var div = document.createElement("div");
+	$(div).addClass("block-label");
+	
+	if(this.problem.options.numbered == "right") {
+		$(div).addClass("right-label");
+	}
+	if(this.problem.options.numbered == "left") {
+		$(div).addClass("left-label");
+	}
+
+	$(div).append(document.createTextNode(label));
+	$(this.view).children(".labels")[0].append(div);
+	if(this.labels.length != 0) {
+		$(div).css("margin-top", (line - this.labels[this.labels.length - 1][1] - 1) * this.lines[line].view.offsetHeight);
+	}
+	
+	this.labels.push([label, line]);
+}
+
+// Initialize Interactivity
+ParsonsBlock.prototype.initializeInteractivity = function() {
+	if ($(this.view).hasClass("disabled")) {
+		return this;
+	}
+	$(this.view).attr("tabindex", "-1");
+	this.hammer = new Hammer.Manager(this.view, {
+		"recognizers" : [
+			[Hammer.Pan, {
+				"direction" : Hammer.DIRECTION_ALL,
+				"threshold" : 0,
+				"pointers" : 1
+			}]
+		]
+	});
+	var that = this;
+	this.hammer.on("panstart", function (event) {that.panStart(event)});
+	this.hammer.on("panend", function (event) {that.panEnd(event)});
+	this.hammer.on("panmove", function (event) {that.panMove(event)});
+};
+
+// Return a boolean as to whether this block is able to be selected
+ParsonsBlock.prototype.enabled = function() {
+	return $(this.view).attr("tabindex") !== undefined;
+};
+
+// Return a boolean as to whether this block is a distractor
+ParsonsBlock.prototype.isDistractor = function() {
+	return this.lines[0].distractor;
+};
+
+// Return a boolean as to whether this block is in the source area
+ParsonsBlock.prototype.inSourceArea = function() {
+	var children = this.problem.sourceArea.childNodes;
+	for (i = 0; i < children.length; i++) {
+		var item = children[i];
+		if (item.id == this.view.id) {
+			return true;
+		}
+	}
+	return false;
+};
+
+// Return the page X position of the center of the view
+ParsonsBlock.prototype.pageXCenter = function() {
+	var boundingRect = this.view.getBoundingClientRect();
+	var pageXCenter = window.pageXOffset + boundingRect.left + boundingRect.width / 2;
+	return pageXCenter;
+};
+
+// Return the page Y position of the center of the view
+ParsonsBlock.prototype.pageYCenter = function() {
+	var boundingRect = this.view.getBoundingClientRect();
+	var pageYCenter = window.pageYOffset + boundingRect.top + boundingRect.height / 2;
+	return pageYCenter;
+};
+
+// Of all the line indents, return the minimum value
+ParsonsBlock.prototype.minimumLineIndent = function() {
+	var minimumLineIndent = this.lines[0].indent;
+	for (var i = 1; i < this.lines.length; i++) {
+		minimumLineIndent = Math.min(this.lines[i].indent, minimumLineIndent);
+	}
+	return minimumLineIndent;
+};
+
+// Return the last block in the source area that matches the paired bin it is in
+ParsonsBlock.prototype.slideUnderBlock = function() {
+	var sourceBlocks = this.problem.sourceBlocks();
+	if (sourceBlocks.length == 0) {
+		return undefined;
+	}
+	var pairedBin = this.pairedBin();
+	if (pairedBin == -1) {
+		return sourceBlocks[sourceBlocks.length - 1];
+	}
+	for (var i = sourceBlocks.length - 1; i >= 0; i--) {
+		var block = sourceBlocks[i];
+		if (block.pairedBin() == pairedBin) {
+			return block;
+		}
+	}
+	return sourceBlocks[sourceBlocks.length - 1];
+};
+
+// Return which paired bin it is in (-1) if not
+ParsonsBlock.prototype.pairedBin = function() {
+	var pairedBins = this.problem.pairedBins;
+	for (var i = 0; i < pairedBins.length; i++) {
+		if (this.matchesBin(pairedBins[i])) {
+			return i;
+		}
+	}
+	return -1;
+};
+
+// Return true if all lines are in that bin
+ParsonsBlock.prototype.matchesBin = function(bin) {
+	for (var i = 0; i < this.lines.length; i++) {
+		var test = this.lines[i].index;
+		if (bin.indexOf(test) == -1) {
+			return false;
+		}
+	}
+	return true;
+};
+
+// Return a list of indexes where this block could be inserted before
+ParsonsBlock.prototype.validSourceIndexes = function() {
+	var blocks = this.problem.sourceBlocks();
+	var indexes = [];
+	var pairedBin = this.pairedBin();
+	var i;
+	if (pairedBin >= 0) {
+		var lastBin = undefined;
+		for (i = 0; i < blocks.length; i++) {
+			var block = blocks[i];
+			if (block.view.id !== this.view.id) {
+				var blockBin = block.pairedBin();
+				if (blockBin == pairedBin) {
+					indexes.push(i);
+				} else if (lastBin == pairedBin) {
+					indexes.push(i);
+				}
+				lastBin = blockBin;
+			}
+		}
+		if (lastBin == pairedBin) {
+			indexes.push(blocks.length);
+		}
+		if (indexes.length > 0) {
+			return indexes;
+		}
+	}
+	lastBin = undefined;
+	for (i = 0; i < blocks.length; i++) {
+		block = blocks[i];
+		if (block.view.id !== this.view.id) {
+			blockBin = block.pairedBin();
+			if (blockBin !== lastBin) {
+				indexes.push(i);
+			} else if (blockBin == -1) {
+				indexes.push(i);
+			}
+			lastBin = blockBin;
+		}
+	}
+	indexes.push(blocks.length);
+	return indexes;
+};
+
+// A measure of how far the middle of this block is vertically positioned
+ParsonsBlock.prototype.verticalOffset = function() {
+	var verticalOffset;
+	if (this.inSourceArea()) {
+		verticalOffset = this.problem.sourceArea.getBoundingClientRect().top;
+	} else {
+		verticalOffset = this.problem.answerArea.getBoundingClientRect().top;
+	}
+	verticalOffset = this.view.getBoundingClientRect().top + this.view.getBoundingClientRect().bottom - verticalOffset * 2;
+	return verticalOffset;
+};
+
+// This block just gained textual focus
+ParsonsBlock.prototype.newFocus = function() {
+	if (this.problem.textFocus == undefined) {
+		this.problem.enterKeyboardMode();
+		this.problem.textFocus = this;
+		this.problem.textMove = false;
+		$(this.view).addClass("down");
+	} else if (this.problem.textFocus == this) {
+		if (this.problem.textMove) {
+			$(this.view).addClass("up");
+		} else {
+			$(this.view).addClass("down");
+		}
+	} else {
+		// already in keyboard mode
+		this.problem.textFocus = this;
+		this.problem.textMove = false;
+		$(this.view).addClass("down");
+	}
+	this.problem.textMoving = false;
+};
+
+// This block just lost textual focus
+ParsonsBlock.prototype.releaseFocus = function() {
+	$(this.view).removeClass("down up");
+	if (this.problem.textFocus == this) {
+		if (!this.problem.textMoving) {
+			// exit out of problem but stay way into problem
+			this.problem.textFocus = undefined;
+			if (this.problem.textMove) {
+				this.problem.logMove("kmove");
+				this.problem.textMove = false;
+			}
+			this.problem.exitKeyboardMode();
+		}
+	} else {
+		// become selectable, but not active
+		$(this.view).attr("tabindex", "-1");
+		$(this.view).unbind("focus");
+		$(this.view).unbind("blur");
+		$(this.view).unbind("keydown");
+	}
+};
+
+// Make this block into the keyboard entry point
+ParsonsBlock.prototype.makeTabIndex = function() {
+	$(this.view).attr("tabindex", "0");
+	var that = this;
+	$(this.view).focus(function() {
+		that.newFocus();
+	});
+	$(this.view).blur(function() {
+		that.releaseFocus();
+	});
+	$(this.view).keydown(function(event) {
+		that.keyDown(event);
+	});
+};
+
+// Called to disable interaction for the future
+ParsonsBlock.prototype.disable = function() {
+	if (this.hammer !== undefined) {
+		this.hammer.set({ enable: false });
+	}
+	if ($(this.view).attr("tabindex") == "0") {
+		this.releaseFocus();
+		$(this.view).removeAttr("tabindex");
+		this.problem.initializeTabIndex();
+	} else {
+		$(this.view).removeAttr("tabindex");
+	}
+};
+
+// Enable functionality after reset button has been pressed
+ParsonsBlock.prototype.resetView = function() {
+	if (this.hammer !== undefined) {
+		this.hammer.set({ enable: true });
+	}
+	if (!$(this.view)[0].hasAttribute("tabindex")) {
+		$(this.view).attr("tabindex", "-1");
+	}
+	$(this.view).css({ opacity : "" });
+};
+
+// Called to destroy interaction for the future
+ParsonsBlock.prototype.destroy = function() {
+	if (this.hammer !== undefined) {
+		this.hammer.destroy();
+		delete this.hammer;
+	}
+	if ($(this.view).attr("tabindex") == "0") {
+		this.releaseFocus();
+	}
+	$(this.view).removeAttr("tabindex");
+};
+
+// Called when a block is picked up
+ParsonsBlock.prototype.panStart = function(event) {
+	this.problem.clearFeedback();
+	if (this.problem.started == undefined) {
+		// log the first time that something gets moved
+		this.problem.started = true;
+		this.problem.logMove("start");
+	}
+	if (this.problem.textFocus !== undefined) {
+		// stop text focus when dragging
+		this.problem.textFocus.releaseFocus();
+	}
+	this.problem.moving = this;
+	// Update the view
+	this.problem.movingX = event.srcEvent.pageX;
+	this.problem.movingY = event.srcEvent.pageY;
+	this.problem.updateView();
+};
+
+// Called when a block is dropped
+ParsonsBlock.prototype.panEnd = function(event) {
+	delete this.problem.moving;
+	delete this.problem.movingX;
+	delete this.problem.movingY;
+	this.problem.updateView();
+	this.problem.logMove("move");
+};
+
+// Called when a block is moved
+ParsonsBlock.prototype.panMove = function(event) {
+	// Update the view
+	this.problem.movingX = event.srcEvent.pageX;
+	this.problem.movingY = event.srcEvent.pageY;
+	this.problem.updateView();
+};
+
+// Handle a keypress event when in focus
+ParsonsBlock.prototype.keyDown = function(event) {
+	if (this.problem.started == undefined) {
+		// log the first time that something gets moved
+		this.problem.started = true;
+		this.problem.logMove("kstart");
+	}
+	switch(event.keyCode) {
+		case 37: // left
+			if (this.problem.textMove) {
+				this.moveLeft();
+			} else {
+				this.selectLeft();
+			}
+
+			break;
+		case 38: // up
+			if (this.problem.textMove) {
+				this.moveUp();
+			} else {
+				this.selectUp();
+			}
+			event.preventDefault();
+			break;
+		case 39: // right
+			if (this.problem.textMove) {
+				this.moveRight();
+			} else {
+				this.selectRight();
+			}
+			event.preventDefault();
+			break;
+		case 40: // down
+			if (this.problem.textMove) {
+				this.moveDown();
+			} else {
+				this.selectDown();
+			}
+			event.preventDefault();
+			break;
+		case 32: // space
+			this.toggleMove();
+			event.preventDefault();
+			break;
+		case 13: // enter
+			this.toggleMove();
+			event.preventDefault();
+			break;
+	}
+};
+
+// Move block left
+ParsonsBlock.prototype.moveLeft = function() {
+	if (!this.inSourceArea()) {
+		if (this.indent == 0) {
+			// move to source area
+			var blocks = this.problem.sourceBlocks();
+			var offset = this.verticalOffset();
+			var validSourceIndexes = this.validSourceIndexes();
+			for (var i = 0; i < validSourceIndexes.length; i++) {
+				index = validSourceIndexes[i];
+				if (index == blocks.length) {
+					this.problem.textMoving = true;
+					this.problem.sourceArea.appendChild(this.view);
+					$(this.view).focus();
+					this.problem.state = undefined;
+					this.problem.updateView();
+					return this;
+				} else {
+					var block = blocks[index];
+					if (block.verticalOffset() >= offset) {
+						break;
+					}
+				}
+			}
+			this.problem.textMoving = true;
+			this.problem.sourceArea.insertBefore(this.view, block.view);
+			$(this.view).focus();
+		} else {
+			// reduce indent
+			this.indent = this.indent - 1;
+		}
+		this.problem.state = undefined;
+		this.problem.updateView();
+	}
+};
+
+// Move block up
+ParsonsBlock.prototype.moveUp = function() {
+	if (this.inSourceArea()) {
+		var blocks = this.problem.sourceBlocks();
+		var offset = this.verticalOffset();
+		var validSourceIndexes = this.validSourceIndexes();
+		for (var i = 0; i < validSourceIndexes.length; i++) {
+			var index = validSourceIndexes[validSourceIndexes.length - 1 - i];
+			if (index < blocks.length) {
+				var block = blocks[index];
+				if (block.verticalOffset() < offset) {
+					this.problem.textMoving = true;
+					this.problem.sourceArea.insertBefore(this.view, block.view);
+					$(this.view).focus();
+					this.problem.state = undefined;
+					this.problem.updateView();
+					return this;
+				}
+			}
+		}
+	} else {
+		var insert = false;
+		var blocks = this.problem.answerBlocks();
+		for (var i = 0; i < blocks.length; i++) {
+			if (blocks[i].view.id == this.view.id) {
+				if (i == 0) {
+					return this;
+				}
+				this.problem.textMoving = true;
+				this.problem.answerArea.insertBefore(this.view, blocks[i - 1].view);
+				$(this.view).focus();
+				this.problem.state = undefined;
+				this.problem.updateView();
+			}
+		}
+	}
+};
+
+// Move block right
+ParsonsBlock.prototype.moveRight = function() {
+	if (this.inSourceArea()) {
+		// move to answer area
+		this.indent = 0;
+		var offset = this.verticalOffset();
+		var answerBlocks = this.problem.answerBlocks();
+		for (var i = 0; i < answerBlocks.length; i++) {
+			var item = answerBlocks[i];
+			var itemOffset = item.verticalOffset();
+			if (itemOffset >= offset) {
+				this.problem.textMoving = true;
+				this.problem.answerArea.insertBefore(this.view, item.view);
+				$(this.view).focus();
+				this.problem.state = undefined;
+				this.problem.updateView();
+				return this;
+			}
+		}
+		this.problem.textMoving = true;
+		this.problem.answerArea.appendChild(this.view);
+		$(this.view).focus();
+		this.problem.state = undefined;
+		this.problem.updateView();
+	} else {
+		// in answer area: increase the indent
+		if (this.indent !== this.problem.indent) {
+			this.indent = this.indent + 1;
+			this.problem.state = undefined;
+			this.problem.updateView();
+		}
+	}
+};
+
+// Move block down
+ParsonsBlock.prototype.moveDown = function() {
+	if (this.inSourceArea()) {
+		var blocks = this.problem.sourceBlocks();
+		var offset = this.verticalOffset();
+		var validSourceIndexes = this.validSourceIndexes();
+		for (var i = 0; i < blocks.length; i++) {
+			if (blocks[i].view.id == this.view.id) {
+				var myIndex = i;
+			}
+		}
+		for (var i = 0; i < validSourceIndexes.length; i++) {
+			var index = validSourceIndexes[i];
+			if (index == blocks.length) {
+				this.problem.textMoving = true;
+				this.problem.sourceArea.appendChild(this.view);
+				$(this.view).focus();
+				this.problem.state = undefined;
+				this.problem.updateView();
+				return this;
+			} else if (index - myIndex > 1) {
+				this.problem.textMoving = true;
+				this.problem.sourceArea.insertBefore(this.view, blocks[index].view);
+				$(this.view).focus();
+				this.problem.state = undefined;
+				this.problem.updateView();
+				return this;
+			}
+		}
+	} else {
+		var insert = false;
+		var blocks = this.problem.answerBlocks();
+		for (var i = 0; i < blocks.length; i++) {
+			if (blocks[i].view.id == this.view.id) {
+				if (i == blocks.length - 1) {
+					return this;
+				} else if (i == blocks.length - 2) {
+					this.problem.textMoving = true;
+					this.problem.answerArea.appendChild(this.view);
+				} else {
+					this.problem.textMoving = true;
+					this.problem.answerArea.insertBefore(this.view, blocks[i + 2].view);
+				}
+				$(this.view).focus();
+				this.problem.state = undefined;
+				this.problem.updateView();
+			}
+		}
+	}
+};
+
+// Move selection left
+ParsonsBlock.prototype.selectLeft = function() {
+	if (!this.inSourceArea()) {
+		var offset = this.verticalOffset();
+		var sourceBlocks = this.problem.enabledSourceBlocks();
+		if (sourceBlocks.length == 0) {
+			return this;
+		}
+		var chooseNext = sourceBlocks[0];
+		var chooseOffset = chooseNext.verticalOffset() - offset;
+		for (var i = 1; i < sourceBlocks.length; i++) {
+			var item = sourceBlocks[i];
+			var itemOffset = item.verticalOffset() - offset;
+			if (Math.abs(itemOffset) < Math.abs(chooseOffset)) {
+				chooseNext = item;
+				chooseOffset = itemOffset;
+			}
+		}
+		this.problem.textFocus = chooseNext;
+		chooseNext.makeTabIndex();
+		$(chooseNext.view).focus();
+	}
+};
+
+// Move selection up
+ParsonsBlock.prototype.selectUp = function() {
+	var chooseNext = false;
+	var blocks;
+	if (this.inSourceArea()) {
+		blocks = this.problem.enabledSourceBlocks();
+	} else {
+		blocks = this.problem.enabledAnswerBlocks();
+	}
+	for (var i = blocks.length - 1; i >= 0; i--) {
+		var item = blocks[i];
+		if (chooseNext) {
+			this.problem.textFocus = item;
+			item.makeTabIndex();
+			$(item.view).focus();
+			return this;
+		} else {
+			if (item.view.id == this.view.id) {
+				chooseNext = true;
+			}
+		}
+	}
+};
+
+// Move selection right
+ParsonsBlock.prototype.selectRight = function() {
+	if (this.inSourceArea()) {
+		var offset = this.verticalOffset();
+		var blocks = this.problem.enabledAnswerBlocks();
+		if (blocks.length == 0) {
+			return this;
+		}
+		var chooseNext = blocks[0];
+		var chooseOffset = chooseNext.verticalOffset() - offset;
+		for (var i = 1; i < blocks.length; i++) {
+			var item = blocks[i];
+			var itemOffset = item.verticalOffset() - offset;
+			if (Math.abs(itemOffset) < Math.abs(chooseOffset)) {
+				chooseNext = item;
+				chooseOffset = itemOffset;
+			}
+		}
+		this.problem.textFocus = chooseNext;
+		chooseNext.makeTabIndex();
+		$(chooseNext.view).focus();
+	}
+};
+
+// Move selection down
+ParsonsBlock.prototype.selectDown = function() {
+	var chooseNext = false;
+	var blocks;
+	if (this.inSourceArea()) {
+		blocks = this.problem.enabledSourceBlocks();
+	} else {
+		blocks = this.problem.enabledAnswerBlocks();
+	}
+	for (var i = 0; i < blocks.length; i++) {
+		var item = blocks[i];
+		if (chooseNext) {
+			this.problem.textFocus = item;
+			item.makeTabIndex();
+			$(item.view).focus();
+			return this;
+		} else {
+			if (item.view.id == this.view.id) {
+				chooseNext = true;
+			}
+		}
+	}
+};
+
+// Toggle whether to move this block
+ParsonsBlock.prototype.toggleMove = function() {
+	if (this.problem.textMove) {
+		$(this.view).removeClass("up");
+		$(this.view).addClass("down");
+		this.problem.textMove = false;
+		this.problem.logMove("kmove");
+	} else {
+		$(this.view).removeClass("down");
+		$(this.view).addClass("up");
+		this.problem.textMove = true;
+	}
+};
+
+// Answer a string that represents this codeblock for saving
+ParsonsBlock.prototype.hash = function() {
+	var hash = "";
+	for (var i = 0; i < this.lines.length; i++) {
+		hash += this.lines[i].index + "_"
+	}
+	hash += this.indent;
+	return hash;
+};
+
+// Answer what the indent should be for the solution
+ParsonsBlock.prototype.solutionIndent = function() {
+	var sharedIndent = this.lines[0].indent;
+	for (var i = 1; i < this.lines.length; i++) {
+		sharedIndent = Math.min(sharedIndent, this.lines[i].indent);
+	}
+	return sharedIndent;
+};
+
+/* =====================================================================
+==== Parsons Object ====================================================
+======== The model and view of a Parsons problem based on what is
+======== specified in the HTML, which is based on what is specified
+======== in the RST file
+==== PROPERTIES ========================================================
+======== options: options largely specified from the HTML
+======== grader: a LineGrader for grading the problem
+======== lines: an array of all ParsonsLine as specified in the problem
+======== solution: an array of ParsonsLine in the solution
+======== blocks: the current blocks
+======== sourceArea: the element that contains the source blocks
+======== answerArea: the element that contains the answer blocks
+===================================================================== */
+
+/* =====================================================================
+==== INITIALIZATION ====================================================
+===================================================================== */
+
+var prsList = {};    // Parsons dictionary
+function Parsons (opts) {
+	if (opts) {
+	    this.init(opts);
+	}
+}
+Parsons.prototype = new RunestoneBase();
+Parsons.counter = 0;
+
+// Initialize based on what is specified in the HTML file
+Parsons.prototype.init = function (opts) {
+	RunestoneBase.apply(this, arguments);
+    RunestoneBase.prototype.init.apply(this, arguments);
+	var orig = opts.orig;     // entire <pre> element that will be replaced by new HTML
+	this.origElem = orig;
+	this.useRunestoneServices = opts.useRunestoneServices;
+	this.divid = orig.id;
+	// Set the storageId (key for storing data)
+	var storageId = eBookConfig.email;
+	if (storageId == undefined) {
+		storageId = this.divid;
+	} else {
+		storageId += this.divid;
+	}
+	this.storageId = storageId;
+
+	this.children = this.origElem.childNodes;     // this contains all of the child elements of the entire tag...
+	this.contentArray = [];
+	Parsons.counter++;     //    Unique identifier
+	this.counterId = "parsons-" + Parsons.counter;
+	// Find the question text and store it in .question
+	this.question = null;
+	for (var i = 0; i < this.children.length; i++) {
+		if ($(this.children[i]).is("[data-question]")) {
+			this.question = this.children[i];
+			break;
+		}
+	}
+
+	this.initializeOptions();
+	this.grader = new LineBasedGrader(this);
+	var fulltext = $(this.origElem).html();
+	var delimiter = this.question.outerHTML;
+	var temp = fulltext.split(delimiter);
+	var content = temp[1];
+	this.blockIndex = 0;
+	this.checkCount = 0;
+	this.numDistinct = 0;
+	this.hasSolved = false;
+	this.initializeLines(content);
+	this.initializeView();
+	// Check the server for an answer to complete things
+	if (this.useRunestoneServices) {
+		this.checkServer("parsons");
+	} else {
+		this.checkLocalStorage();
+	}
+};
+
+// Based on the data-fields in the original HTML, initialize options
+Parsons.prototype.initializeOptions = function() {
+	var options = {
+		"pixelsPerIndent" : 30
+	};
+	// add maxdist and order if present
+	var maxdist = $(this.origElem).data('maxdist');
+	var order = $(this.origElem).data('order');
+	var noindent = $(this.origElem).data('noindent');
+	var adaptive = $(this.origElem).data('adaptive');
+
+	var numbered = $(this.origElem).data('numbered');
+	options["numbered"] = numbered;
+ 
+	if (maxdist !== undefined) {
+	    options["maxdist"] = maxdist;
+	}
+	if (order !== undefined) {
+		// convert order string to array of numbers
+		order = order.match(/\d+/g);
+		for (var i = 0; i < order.length; i++) {
+			order[i] = parseInt(order[i]);
+		}
+		options["order"] = order;
+	}
+	if (noindent == undefined) {
+		noindent = false;
+	}
+	options["noindent"] = noindent;
+	this.noindent = noindent;
+	if (adaptive == undefined) {
+		adaptive = false;
+	} else if (adaptive) {
+		this.initializeAdaptive();
+	}
+	options["adaptive"] = adaptive;
+	// add locale and language
+	var locale = eBookConfig.locale;
+	if (locale == undefined) {
+		locale = "en";
+	}
+	options["locale"] = locale;
+	var language = $(this.origElem).data('language');
+	if (language == undefined) {
+		language = eBookConfig.language;
+		if (language == undefined) {
+			language = "python";
+		}
+	}
+	options["language"] = language;
+	var prettifyLanguage = {
+		"python" : "prettyprint lang-py",
+		"java" : "prettyprint lang-java",
+		"javascript" : "prettyprint lang-js",
+		"html" : "prettyprint lang-html",
+		"c" : "prettyprint lang-c",
+		"c++" : "prettyprint lang-cpp",
+		"ruby" : "prettyprint lang-rb"
+	}[language];
+	if (prettifyLanguage == undefined) {
+		prettifyLanguage = "";
+	}
+	options["prettifyLanguage"] = prettifyLanguage;
+	this.options = options;
+};
+
+// Based on what is specified in the original HTML, create the HTML view
+Parsons.prototype.initializeView = function () {
+	this.containerDiv = document.createElement("div");
+	$(this.containerDiv).addClass("parsons alert alert-warning");
+	this.containerDiv.id = this.counterId;
+
+	this.parsTextDiv = document.createElement("div");
+	$(this.parsTextDiv).addClass("parsons-text");
+	this.parsTextDiv.innerHTML = this.question.innerHTML;
+	this.containerDiv.appendChild(this.parsTextDiv);
+
+	this.keyboardTip = document.createElement("div");
+	$(this.keyboardTip).attr("role", "tooltip");
+	this.keyboardTip.id = this.counterId + "-tip";
+	this.keyboardTip.innerHTML = "Arrow keys to navigate. Space to select / deselect block to move.";
+	this.containerDiv.appendChild(this.keyboardTip);
+	$(this.keyboardTip).hide();
+
+	this.sortContainerDiv = document.createElement("div");
+	$(this.sortContainerDiv).addClass("sortable-code-container");
+	$(this.sortContainerDiv).attr("aria-describedby", this.counterId + "-tip");
+	this.containerDiv.appendChild(this.sortContainerDiv);
+
+	this.sourceRegionDiv = document.createElement("div");
+	this.sourceRegionDiv.id = this.counterId + "-sourceRegion";
+	$(this.sourceRegionDiv).addClass("sortable-code");
+	this.sourceLabel = document.createElement("div");
+	$(this.sourceLabel).attr("role", "tooltip");
+	this.sourceLabel.id = this.counterId + "-sourceTip";
+	this.sourceLabel.innerHTML = "Drag from here";
+	this.sourceRegionDiv.appendChild(this.sourceLabel);
+	this.sortContainerDiv.appendChild(this.sourceRegionDiv);
+
+	this.sourceArea = document.createElement("div");
+	this.sourceArea.id = this.counterId + "-source";
+	$(this.sourceArea).addClass("source");
+	$(this.sourceArea).attr("aria-describedby", this.counterId + "-sourceTip");
+	this.sourceRegionDiv.appendChild(this.sourceArea);
+
+	this.answerRegionDiv = document.createElement("div");
+	this.answerRegionDiv.id = this.counterId + "-answerRegion";
+	$(this.answerRegionDiv).addClass("sortable-code");
+	this.answerLabel = document.createElement("div");
+	$(this.answerLabel).attr("role", "tooltip");
+	this.answerLabel.id = this.counterId + "-answerTip";
+	this.answerLabel.innerHTML = "Drop blocks here";
+	this.answerRegionDiv.appendChild(this.answerLabel);
+	this.sortContainerDiv.appendChild(this.answerRegionDiv);
+
+	this.answerArea = document.createElement("div");
+	this.answerArea.id = this.counterId + "-answer";
+	$(this.answerArea).attr("aria-describedby", this.counterId + "-answerTip");
+	this.answerRegionDiv.appendChild(this.answerArea);
+
+	this.parsonsControlDiv = document.createElement("div");
+	$(this.parsonsControlDiv).addClass("parsons-controls");
+	this.containerDiv.appendChild(this.parsonsControlDiv);
+
+	var that = this;
+	this.checkButton = document.createElement("button");
+	$(this.checkButton).attr("class", "btn btn-success");
+	this.checkButton.textContent = "Check Me";
+	this.checkButton.id = this.counterId + "-check";
+	this.parsonsControlDiv.appendChild(this.checkButton);
+	this.checkButton.type = "button";
+	this.checkButton.addEventListener('click', function(event) {
+		event.preventDefault();
+		that.checkMe();
+	});
+	this.resetButton = document.createElement("button");
+	$(this.resetButton).attr("class", "btn btn-default");
+	this.resetButton.textContent = "Reset";
+	this.resetButton.id = this.counterId + "-reset";
+	this.resetButton.type = "button";
+	this.parsonsControlDiv.appendChild(this.resetButton);
+	this.resetButton.addEventListener('click', function(event) {
+		event.preventDefault();
+		that.clearFeedback();
+		that.resetView();
+		that.logMove("reset");
+		that.setLocalStorage();
+	});
+	if (this.options.adaptive) {
+		this.helpButton = document.createElement("button");
+		$(this.helpButton).attr("class", "btn btn-primary");
+		this.helpButton.textContent = "Help Me";
+		this.helpButton.id = this.counterId + "-help";
+		this.helpButton.disabled = false; // bje
+		this.parsonsControlDiv.appendChild(this.helpButton);
+		this.helpButton.addEventListener('click', function(event) {
+			event.preventDefault();
+			that.helpMe();
+		});
+	}
+	this.messageDiv = document.createElement("div");
+	this.messageDiv.id = this.counterId + "-message";
+	this.parsonsControlDiv.appendChild(this.messageDiv);
+	$(this.messageDiv).hide();
+
+	$(this.origElem).replaceWith(this.containerDiv);
+};
+
+// Initialize lines and solution properties
+Parsons.prototype.initializeLines = function(text) {
+	this.lines = [];
+	// Create the initial blocks
+	var textBlocks = text.split("---");
+	if (textBlocks.length === 1) {
+		// If there are no ---, then every line is its own block
+	    textBlocks = text.split("\n");
+	}
+	var solution = [];
+	var indents = [];
+	for (var i = 0; i < textBlocks.length; i++) {
+		var textBlock = textBlocks[i];
+
+		// Figure out options based on the #option 
+		// Remove the options from the code
+		// only options are #paired or #distractor
+		var options = {};
+		textBlock = textBlock.replace(/#(paired|distractor)/, function(mystring, arg1) {
+			options[arg1] = true;
+			return ""
+		});
+		// Create lines
+		var lines = [];
+		var split = textBlock.split("\n");
+		for (var j = 0; j < split.length; j++) {
+			var code = split[j];
+			// discard blank rows
+			if (!/^\s*$/.test(code)) {
+				line = new ParsonsLine(this, code);
+				lines.push(line);
+				if (options["paired"]) {
+					line.distractor = true;
+					line.paired = true;
+				} else if (options["distractor"]) {
+					line.distractor = true;
+					line.paired = false;
+				} else {
+					line.distractor = false;
+					line.paired = false;
+					solution.push(line);
+				}
+				if ($.inArray(line.indent, indents) == -1) {
+					indents.push(line.indent);
+				}
+			}
+		}
+		if (lines.length > 0)
+		{
+			// Add groupWithNext
+			for (j = 0; j < lines.length - 1; j++) {
+				lines[j].groupWithNext = true;
+			}
+			lines[lines.length - 1].groupWithNext = false;
+		}
+	}
+
+	// Normalize the indents
+	indents = indents.sort(function(a, b){return a-b});
+	for (i = 0; i < this.lines.length; i++) {
+		line = this.lines[i];
+		line.indent = indents.indexOf(line.indent);
+	}
+	this.solution = solution;
+};
+
+// Based on the blocks, create the source and answer areas
+Parsons.prototype.initializeAreas = function(sourceBlocks, answerBlocks, options) {
+	// Create blocks property as the sum of the two
+	var blocks = [];
+	var i, block;
+	for (i = 0; i < sourceBlocks.length; i++) {
+		block = sourceBlocks[i];
+		blocks.push(block);
+		this.sourceArea.appendChild(block.view);
+	}
+	for (i = 0; i < answerBlocks.length; i++) {
+		block = answerBlocks[i];
+		blocks.push(block);
+		this.answerArea.appendChild(block.view);
+	}
+	this.blocks = blocks;
+
+	// If present, disable some blocks
+	var disabled = options.disabled;
+	if (disabled !== undefined) {
+		for (i = 0; i < blocks.length; i++) {
+			block = blocks[i];
+			if (disabled.includes(block.lines[0].index)) {
+				$(block.view).addClass("disabled");
+			}
+		}
+	}
+	// Determine how much indent should be possible in the answer area
+	var indent = 0;
+	if (!this.noindent) {
+		if (this.options.language == "natural") {
+			indent = this.solutionIndent();
+		} else {
+			indent = Math.max(0, this.solutionIndent());
+		}
+	}
+	this.indent = indent;
+
+	// For rendering, place in an onscreen position
+	var isHidden = this.containerDiv.offsetParent == null;
+	var replaceElement;
+	if (isHidden) {
+		replaceElement = document.createElement("div");
+		$(this.containerDiv).replaceWith(replaceElement);
+		document.body.appendChild(this.containerDiv);
+	}
+
+	if (this.options.prettifyLanguage !== "") {
+		prettyPrint();
+	}
+	for (var i = 0; i < this.lines.length; i++) {
+		this.lines[i].initializeWidth();
+	}
+
+	// Layout the areas
+	var areaWidth, areaHeight;
+	// Establish the width and height of the droppable areas
+	var item, maxFunction;
+	areaHeight = 6;
+	var height_add = 0;
+	if(this.options.numbered != undefined) {
+		height_add = 1;
+	}
+	if (this.options.language == "natural") {
+		areaWidth = 300;
+		maxFunction = function(item) {
+			item.width(areaWidth - 22);
+			var addition = 3.8;
+			if (item.outerHeight(true) != 38)
+				addition = 2.1*(item.outerHeight(true)-38)/21;
+			areaHeight += (item.outerHeight(true)+height_add*addition);
+
+		};
+	} else {
+		areaWidth = 0;
+		maxFunction = function(item) {
+			var addition = 3.8;
+			if (item.outerHeight(true) != 38)
+				addition = 2.1;
+			areaHeight += (item.outerHeight(true)+height_add*addition);
+			areaWidth = Math.max(areaWidth, item.outerWidth(true));
+			
+		};
+	}
+	for (i = 0; i < blocks.length; i++) {
+		maxFunction($(blocks[i].view));
+	}
+	this.areaWidth = areaWidth;
+	if(this.options.numbered != undefined) {
+		this.areaWidth += 25;
+		//areaHeight += (blocks.length);
+	}
+	this.areaHeight = areaHeight;
+	$(this.sourceArea).css({
+		'width' : this.areaWidth + 2,
+		'height' : areaHeight
+	});
+	$(this.answerArea).css({
+		'width' : this.options.pixelsPerIndent * indent + this.areaWidth + 2,
+		'height' : areaHeight
+	});
+	if (indent > 0 && indent <= 4) {
+		$(this.answerArea).addClass("answer" + indent);
+	} else {
+		$(this.answerArea).addClass("answer");
+	}
+	
+	// Initialize paired distractor decoration
+	var bins = [];
+	var bin = [];
+	for (i = 0; i < this.lines.length; i++) {
+		var line = this.lines[i];
+		if (line.block() == undefined) {
+			if (bin.length > 0) {
+				bins.push(bin);
+				bin = [];
+			}
+		} else {
+			bin.push(line);
+			if (!line.groupWithNext) {
+				bins.push(bin);
+				bin = [];
+			}
+		}
+	}
+	var pairedBins = [];
+	var lineNumbers = [];
+	var pairedDivs = [];
+	if(this.pairDistractors || !this.options.adaptive) {
+		for (i = bins.length - 1; i > -1; i--) {
+			bin = bins[i];
+			if (bin[0].paired) {
+				// Add all in bin to line numbers
+				for (j = bin.length - 1; j > -1; j--) {
+					lineNumbers.unshift(bin[j].index);
+				}
+			} else {
+				if (lineNumbers.length > 0) {
+					// Add all in bin to line numbers
+					for (j = bin.length - 1; j > -1; j--) {
+						lineNumbers.unshift(bin[j].index);
+					}
+					pairedBins.unshift(lineNumbers);
+					lineNumbers = [];
+				}
+			}
+		}
+		for (i = 0; i < pairedBins.length; i++) {
+			var pairedDiv = document.createElement("div");
+			$(pairedDiv).addClass("paired");
+			$(pairedDiv).html("<span id= 'st' style = 'vertical-align: middle; font-weight: bold'>or{</span>");
+			
+			pairedDivs.push(pairedDiv);
+			this.sourceArea.appendChild(pairedDiv);
+		}
+	} else {
+		pairedBins = [];
+	}
+	this.pairedBins = pairedBins;
+	this.pairedDivs = pairedDivs;
+
+	if(this.options.numbered != undefined) {
+		this.addBlockLabels(sourceBlocks.concat(answerBlocks));
+	}
+	
+	// Update the view
+	this.state = undefined; // needs to be here for loading from storage
+	this.updateView();
+
+	// Put back into the offscreen position
+	if (isHidden) {
+		$(replaceElement).replaceWith(this.containerDiv);
+	}
+};
+
+// Make blocks interactive (both drag-and-drop and keyboard)
+Parsons.prototype.initializeInteractivity = function() {
+	for (var i = 0; i < this.blocks.length; i++) {
+		this.blocks[i].initializeInteractivity();
+	}
+	this.initializeTabIndex();
+};
+
+// Make one block be keyboard accessible
+Parsons.prototype.initializeTabIndex = function() {
+	for (var i = 0; i < this.blocks.length; i++) {
+		var block = this.blocks[i];
+		if (block.enabled()) {
+			block.makeTabIndex();
+			return this;
+		}
+	}
+}
+
+/* =====================================================================
+==== SERVER COMMUNICATION ==============================================
+===================================================================== */
+
+// Return the argument that is newer based on the timestamp
+Parsons.prototype.newerData = function(dataA, dataB) {
+	var dateA = dataA.timestamp;
+	var dateB = dataB.timestamp;
+	if (dateA == undefined) {
+		return dataB;
+	}
+	if (dateB == undefined) {
+		return dataA;
+	}
+	dateA = this.dateFromTimestamp(dateA);
+	dateB = this.dateFromTimestamp(dateB);
+	if (dateA > dateB) {
+		return dataA;
+	} else {
+		return dataB;
+	}
+};
+
+// Based on the data, load
+Parsons.prototype.loadData = function(data) {
+	var sourceHash = data.source;
+	if (sourceHash == undefined) {
+		// maintain backwards compatibility
+		sourceHash = data.trash;
+	}
+	var answerHash = data.answer;
+	var adaptiveHash = data.adaptive;
+	var options;
+	if (adaptiveHash == undefined) {
+		options = {};
+	} else {
+		options = this.optionsFromHash(adaptiveHash);
+	}
+	if (options.noindent !== undefined) {
+		this.noindent = true;
+	}
+	if (options.checkCount !== undefined) {
+		this.checkCount = options.checkCount;
+	}
+	if (options.hasSolved !== undefined) {
+		this.hasSolved = options.hasSolved;
+	}
+	if ((sourceHash == undefined) || (answerHash == undefined) || (answerHash.length == 1)) {
+		this.initializeAreas(this.blocksFromSource(), [], options);
+	} else {
+		this.initializeAreas(this.blocksFromHash(sourceHash), this.blocksFromHash(answerHash), options);
+		this.grader.grade();
+	}
+	// Start the interface
+	if (this.needsReinitialization !== true) {
+		this.initializeInteractivity();
+	}
+};
+
+// Return what is stored in local storage
+Parsons.prototype.localData = function() {
+	var data = localStorage.getItem(this.storageId);
+	if (data !== null) {
+		if (data.charAt(0) == "{") {
+			data = JSON.parse(data);
+		} else {
+			data = {};
+		}
+	} else {
+		data = {};
+	}
+	return data;
+};
+
+// RunestoneBase: Sent when the server has data
+Parsons.prototype.restoreAnswers = function(serverData) {
+	this.loadData(this.newerData(this.localData(), serverData));
+};
+
+// RunestoneBase: Load what is in local storage
+Parsons.prototype.checkLocalStorage = function () {
+	this.loadData(this.localData());
+};
+
+// RunestoneBase: Set the state of the problem in local storage
+Parsons.prototype.setLocalStorage = function(data) {
+	var toStore;
+	if (data == undefined) {
+		toStore = {
+			"source" : this.sourceHash(),
+			"answer" : this.answerHash(),
+			"timestamp" : new Date()
+		};
+		var adaptiveHash = this.adaptiveHash();
+		if (adaptiveHash.length > 0) {
+			toStore.adaptive = adaptiveHash;
+		}
+	} else {
+		toStore = data;
+	}
+	localStorage.setItem(this.storageId, JSON.stringify(toStore));
+};
+
+/* =====================================================================
+==== LOGGING ===========================================================
+===================================================================== */
+
+// Log the interaction with the problem to the server:
+//   start: the user started interacting with this problem
+//   move: the user moved a block to a new position
+//   reset: the reset button was pressed
+//   removeDistractor: "Help Me" removed a distractor
+//   removeIndentation: "Help Me" removed indentation
+//   combineBlocks: "Help Me" combined blocks
+Parsons.prototype.logMove = function(activity) {
+	if (!this.useRunestoneServices) {
+		return this;
+	}
+	var event = {
+		"event" : "parsonsMove",
+		"div_id" : this.divid
+	};
+	var act = activity + "|" + this.sourceHash() + "|" + this.answerHash();
+	var adaptiveHash = this.adaptiveHash();
+	if (adaptiveHash !== "") {
+		act = act + "|" + adaptiveHash;
+	}
+	event.act = act;
+	this.logBookEvent(event);
+};
+
+// Log the answer to the problem
+//   correct: The answer given matches the solution
+//   incorrect*: The answer is wrong for various reasons
+Parsons.prototype.logAnswer = function(answer) {
+	if (!this.useRunestoneServices) {
+		return this;
+	}
+	var event = {
+		"event" : "parsons",
+		"div_id" : this.divid
+	};
+	var answerHash = this.answerHash();
+	event.answer = answerHash;
+	var sourceHash = this.sourceHash();
+	event.source = sourceHash;
+	var act = sourceHash + "|" + answerHash;
+	var adaptiveHash = this.adaptiveHash();
+	if (adaptiveHash !== "") {
+		event.adaptive = adaptiveHash;
+		act = act + "|" + adaptiveHash;
+	}
+	if (answer == "correct") {
+		act = "correct|" + act;
+		event.correct = "T";
+	} else {
+		act ="incorrect|" + act;
+		event.correct = "F";
+	}
+	event.act = act;
+	this.logBookEvent(event);
+};
+
+/* =====================================================================
+==== ACCESSING =========================================================
+===================================================================== */
+
+// Answer the hash of the adaptive state
+Parsons.prototype.adaptiveHash = function() {
+	if (!this.options.adaptive) {
+		return "";
+	}
+	var hash = [];
+	for (var i = 0; i < this.blocks.length; i++) {
+		var block = this.blocks[i];
+		if (!block.enabled()) {
+			hash.push("d" + block.lines[0].index);
+		}
+	}
+	if (this.noindent !== this.options.noindent) {
+		hash.push("i");
+	}
+	hash.push("c" + this.checkCount);
+	if (this.hasSolved) {
+		hash.push("s");
+	}
+	return hash.join("-");
+};
+
+// Create options for creating blocks based on a hash
+Parsons.prototype.optionsFromHash = function(hash) {
+	var split;
+	if (hash === "-" || hash === "" || hash === null) {
+		split = [];
+	} else {
+		split = hash.split("-");
+	}
+	var options = {};
+	var disabled = [];
+	for (var i = 0; i < split.length; i++) {
+		var key = split[i];
+		if (key[0] == "i") {
+			options.noindent = true;
+		} else if (key[0] == "d") {
+			disabled.push(parseInt(key.slice(1)));
+		} else if (key[0] == "s") {
+			options.hasSolved = true;
+		} else if (key[0] == "c") {
+			options.checkCount = parseInt(key.slice(1));
+		}
+	}
+	if (disabled.length > 0) {
+		options.disabled = disabled;
+	}
+	return options;
+};
+
+// Answer the hash of the answer area
+Parsons.prototype.answerHash = function() {
+	var hash = [];
+	var blocks = this.answerBlocks();
+	for (var i = 0; i < blocks.length; i++) {
+		hash.push(blocks[i].hash());
+	}
+	if (hash.length === 0) {
+		return "-";
+	} else {
+		return hash.join("-");
+	}
+};
+
+// Answer the hash of the source area
+Parsons.prototype.sourceHash = function() {
+	var hash = [];
+	var blocks = this.sourceBlocks();
+	for (var i = 0; i < blocks.length; i++) {
+		hash.push(blocks[i].hash());
+	}
+	if (hash.length === 0) {
+		return "-";
+	} else {
+		return hash.join("-");
+	}
+};
+
+// Inter-problem adaptive changes
+// Based on the recentAttempts, remove distractors, add indent, combine blocks
+Parsons.prototype.adaptBlocks = function(input) {
+	var blocks = [];
+	var distractors = [];
+	for (var i = 0; i < input.length; i++) {
+		var block = input[i];
+		if (block.isDistractor()) {
+			distractors.push(block)
+		} else {
+			blocks.push(block);
+		}
+	}
+	
+	this.recentAttempts = localStorage.getItem(this.adaptiveId + "recentAttempts");
+	if(this.recentAttempts == undefined || this.recentAttempts == "NaN") {
+		this.recentAttempts = 3;
+	}
+
+	var lastestAttemptCount = this.recentAttempts; 
+	var nBlocks = blocks.length;
+	var nBlocksToCombine = 0;
+	var nDistractors = distractors.length;
+	var nToRemove = 0;
+	this.pairDistractors = true;
+
+	var giveIndentation = false;
+	if(lastestAttemptCount < 2) { // 1 Try
+		this.pairDistractors = false;
+		this.limitDistractors = false;
+	} else if(lastestAttemptCount < 4) { // 2-3 Tries
+		// Do nothing they are doing normal
+		this.pairDistractors = true;
+	} else if(lastestAttemptCount < 6) { // 4-5 Tries
+		// pair distractors
+		this.pairDistractors = true;
+	} else if(lastestAttemptCount < 8) { // 6-7 Tries
+		// Remove 50% of distractors
+		nToRemove = .5 * nDistractors;
+		this.pairDistractors = true;
+	} else { // 8+ Tries
+		// Remove all of distractors
+		nToRemove = nDistractors;
+		this.pairDistractors = true;
+	} 
+	/*
+	else if(lastestAttemptCount < 12) { //10-11
+		// Remove all distractors and give indentation
+		nToRemove = nDistractors;
+		giveIndentation = true;
+		this.pairDistractors = true;
+	} else if(lastestAttemptCount < 14) { // 12-13 Tries
+		// Remove all of distractors
+		// give indentation
+		// reduce problem to 3/4 size
+		giveIndentation = true;
+		nToRemove = nDistractors;
+		nBlocksToCombine = .25 * nBlocks;
+		this.pairDistractors = true;
+	} else { // >= 14 Tries
+		// Remove all of distractors
+		// give indentation
+		// reduce problem to 1/2 size
+		giveIndentation = true;
+		nToRemove = nDistractors;
+		nBlocksToCombine = .5 * nBlocks;
+		this.pairDistractors = true;
+	}
+	*/
+	nBlocksToCombine = Math.min(nBlocksToCombine, nBlocks - 3);
+	// Never combine so where there are less than three blocks left
+
+	// Remove distractors
+	distractors = this.shuffled(distractors);
+	distractors = distractors.slice(0, nToRemove);
+	var output = [];
+	for (i = 0; i < input.length; i++) {
+		block = input[i];
+		if (!block.isDistractor()) {
+			output.push(block);
+		} else if ($.inArray(block, distractors) == -1) {
+			output.push(block);
+		}
+	}
+	//var output = input;
+	if (giveIndentation) {
+		for(var i = 0; i < output.length; i++) {
+			output[i].addIndent();
+		}
+		this.indent = 0;
+		this.noindent = true;
+	}
+
+	// combine blocks
+	var solution = [];
+	for (i = 0; i < this.lines.length; i++) {
+		for (var j = 0; j < output.length; j++) {
+			if (output[j].lines[0].index == i) {
+				solution.push(output[j]);
+			}
+		}
+	}
+	for (i = 0; i < nBlocksToCombine; i++) {
+		// combine one set of blocks
+		var best = -10;
+		var combineIndex = -10;
+		for (j = 0; j < solution.length - 1; j++) {
+			var block = solution[j];
+			var next = solution[j+1];
+			var rating = 10 - block.lines.length - next.lines.length;
+			var blockIndent = block.minimumLineIndent();
+			var nextIndent = next.minimumLineIndent();
+			if (blockIndent == nextIndent) {
+				rating += 2;
+			} else if (blockIndent > nextIndent) {
+				rating -= 1;
+			}
+			if (block.lines[block.lines.length-1].indent == next.lines[0].indent) {
+				rating += 1;
+			}
+			if (rating >= best) {
+				best = rating;
+				combineIndex = j;
+			}
+		}
+		block = solution[combineIndex];
+		next = solution[combineIndex+1];
+		for (j = 0; j < next.lines.length; j++) {
+			block.addLine(next.lines[j]);
+		}
+		var newSolution = [];
+		for (j = 0; j < solution.length; j++) {
+			if (j !== combineIndex + 1) {
+				newSolution.push(solution[j]);
+			}
+		}
+		var solution = newSolution;
+	}
+	// reorder
+	var combinedOutput = [];
+	for (i = 0; i < output.length; i++) {
+		for (j = 0; j < solution.length; j++) {
+			if (output[i].lines[0].index == solution[j].lines[0].index) {
+				combinedOutput.push(solution[j]);
+			}
+		}
+	}
+	return combinedOutput;
+}
+
+// Return an array of code blocks based on what is specified in the problem
+Parsons.prototype.blocksFromSource = function() {
+	var unorderedBlocks = [];
+	var originalBlocks = [];
+	var blocks = [];
+	var lines = [];
+	var block, line, i;
+	for (i = 0; i < this.lines.length; i++) {
+		line = this.lines[i];
+		lines.push(line);
+		if (!line.groupWithNext) {
+			unorderedBlocks.push(new ParsonsBlock(this, lines));
+			lines = [];
+		}
+	}
+	originalBlocks = unorderedBlocks;
+	// Trim the distractors
+	var removedBlocks = [];
+	if (this.options.maxdist !== undefined) {
+		var maxdist = this.options.maxdist;
+		var distractors = [];
+		for (i = 0; i < unorderedBlocks.length; i++) {
+			block = unorderedBlocks[i];
+			if (block.lines[0].distractor) {
+				distractors.push(block);
+			}
+		}
+		if (maxdist < distractors.length) {
+			distractors = this.shuffled(distractors);
+			distractors = distractors.slice(0, maxdist);
+			for (i = 0; i < unorderedBlocks.length; i++) {
+				block = unorderedBlocks[i];
+				if (block.lines[0].distractor) {
+					if ($.inArray(block, distractors) > -1) {
+						blocks.push(block);
+					}
+					else {
+						removedBlocks.push(i);
+					}
+				} else {
+					blocks.push(block);
+				}
+			}
+			unorderedBlocks = blocks;
+			blocks = [];
+		}
+	}
+	if (this.options.order === undefined) {
+		// Shuffle, respecting paired distractors
+		var chunks = [], chunk = [];
+		for (i = 0; i < unorderedBlocks.length; i++) {
+			block = unorderedBlocks[i];
+			if (block.lines[0].paired) {
+				chunk.push(block);
+			} else {
+				chunk = [];
+				chunk.push(block);
+				chunks.push(chunk);
+			}
+		}
+		chunks = this.shuffled(chunks);
+		for (i = 0; i < chunks.length; i++) {
+			chunk = chunks[i];
+			if (chunk.length > 1) {
+				// shuffle paired distractors
+				chunk = this.shuffled(chunk);
+				for (j = 0; j < chunk.length; j++) {
+					blocks.push(chunk[j]);
+				}
+			} else {
+				blocks.push(chunk[0]);
+			}
+		}
+	} else {
+		// Order according to order specified
+		for (i = 0; i < this.options.order.length; i++) {
+			block = originalBlocks[this.options.order[i]];
+			if (block !== undefined && $.inArray(this.options.order[i], removedBlocks) < 0) {
+				blocks.push(block);
+			}
+		}
+	}
+	this.pairDistractors = true;
+	if (this.options.adaptive) {
+		this.limitDistractors = true;
+		blocks = this.adaptBlocks(blocks);
+		if(!this.limitDistractors) {
+			for(i = 0; i < removedBlocks.length; i++) {
+				var index = this.options.order == undefined ? Math.random(0, blocks.length): $.inArray(removedBlocks[i], this.options.order);
+				blocks.splice(index, 0, originalBlocks[removedBlocks[i]]);
+			}
+		}
+	}
+	if(this.pairDistractors && this.options.order != undefined) {
+		//move pairs together
+		//Go through array looking for ditractor and its pair
+		for(i = 1; i < originalBlocks.length; i++) {
+			if(originalBlocks[i].lines[0].paired && $.inArray(originalBlocks[i], blocks) >= 0) { 
+				var j = i;
+				while($.inArray(originalBlocks[j - 1], blocks) < 0) { // find the paired distractor or solution block it will be next to
+					j--;
+				}
+				var indexTo = $.inArray(originalBlocks[j - 1], blocks);
+				var indexFrom = $.inArray(originalBlocks[i], blocks);
+				blocks.splice(indexFrom, 1);
+				blocks.splice(indexTo, 0, originalBlocks[i]);
+			}
+		}
+	} 
+	return blocks;
+};
+
+// Return a codeblock that corresponds to the hash
+Parsons.prototype.blockFromHash = function(hash) {
+	var split = hash.split("_");
+	var lines = [];
+	for (var i = 0; i < split.length - 1; i++) {
+		lines.push(this.lines[split[i]]);
+	}
+	var block = new ParsonsBlock(this, lines);
+	if (this.noindent) {
+		block.indent = 0;
+	} else {
+		block.indent = Number(split[split.length - 1]);
+	}
+	return block;
+};
+
+// Return an array of codeblocks that corresponds to the hash
+Parsons.prototype.blocksFromHash = function(hash) {
+	var split;
+	if (hash === "-" || hash === "" || hash === null) {
+		split = [];
+	} else {
+		split = hash.split("-");
+	}
+	var blocks = [];
+	for (var i = 0; i < split.length; i++) {
+		blocks.push(this.blockFromHash(split[i]));
+	}
+	if (this.options.adaptive) {
+		return this.adaptBlocks(blocks);
+	} else {
+		return blocks;
+	}
+};
+
+// Return a block object by the full id including id prefix
+Parsons.prototype.getBlockById = function(id) {
+	for (var i = 0; i < this.blocks.length; i++) {
+		var block = this.blocks[i];
+		if (block.view.id == id) {
+			return block;
+		}
+	}
+	return undefined;
+};
+
+// Return array of codeblocks that are the solution
+Parsons.prototype.solutionBlocks = function() {
+	var solutionBlocks = [];
+	var solutionLines = [];
+	for (var i = 0; i < this.lines.length; i++) {
+		if (!this.lines[i].distractor) {
+			solutionLines.push(this.lines[i]);
+		}
+	}
+	var block = solutionLines[0].block();
+	solutionBlocks.push(block);
+	for (var i = 1; i < solutionLines.length; i++) {
+		var nextBlock = solutionLines[i].block();
+		if (block !== nextBlock) {
+			block = nextBlock;
+			solutionBlocks.push(block);
+		}
+	}
+	return solutionBlocks;
+};
+
+// Return array of codeblocks based on what is in the source field
+Parsons.prototype.sourceBlocks = function() {
+	var sourceBlocks = [];
+	var children = this.sourceArea.childNodes;
+	for (var i = 0; i < children.length; i++) {
+		var child = children[i];
+		if ($(child).hasClass("block")) {
+			sourceBlocks.push(this.getBlockById(child.id));
+		}
+	}
+	return sourceBlocks;
+};
+
+// Return array of enabled codeblocks based on what is in the source field
+Parsons.prototype.enabledSourceBlocks = function() {
+	var all = this.sourceBlocks();
+	var enabled = [];
+	for (var i = 0; i < all.length; i++) {
+		var block = all[i];
+		if (block.enabled()) {
+			enabled.push(block);
+		}
+	}
+	return enabled;
+};
+
+// Return array of codeblocks based on what is in the answer field
+Parsons.prototype.answerBlocks = function() {
+	var answerBlocks = [];
+	var children = this.answerArea.childNodes;
+	for (var i = 0; i < children.length; i++) {
+		var block = this.getBlockById(children[i].id);
+		if (block !== undefined) {
+			answerBlocks.push(block)
+		}
+	}
+	return answerBlocks;
+};
+
+// Return array of enabled codeblocks based on what is in the answer field
+Parsons.prototype.enabledAnswerBlocks = function() {
+	var all = this.answerBlocks();
+	var enabled = [];
+	for (var i = 0; i < all.length; i++) {
+		var block = all[i];
+		if (block.enabled()) {
+			enabled.push(block);
+		}
+	}
+	return enabled;
+};
+
+// Return array of codelines based on what is in the answer field
+Parsons.prototype.answerLines = function() {
+	var answerLines = [];
+	var blocks = this.answerBlocks();
+	for (var i = 0; i < blocks.length; i++) {
+		var block = blocks[i];
+		for (var j = 0; j < block.lines.length; j++) {
+			answerLines.push(block.lines[j]);
+		}
+	}
+	return answerLines;
+};
+
+// Go up the hierarchy until you get to a block; return that block element
+Parsons.prototype.getBlockFor = function(element) {
+	var check = element;
+	while (!check.classList.contains("block")) {
+		check = check.parentElement;
+	}
+	return check;
+};
+
+// Return the maximum indent for the solution
+Parsons.prototype.solutionIndent = function() {
+	var indent = 0;
+	for (var i = 0; i < this.blocks.length; i++) {
+		var block = this.blocks[i];
+		indent = Math.max(indent, block.solutionIndent());
+	}
+	return indent;
+};
+
+/* =====================================================================
+==== ACTION ============================================================
+===================================================================== */
+
+// The "Check Me" button was pressed.
+Parsons.prototype.checkMe = function() {
+	if (!this.hasSolved)
+	{
+		this.checkCount++;
+	    this.clearFeedback();
+	    if (this.adaptiveId == undefined) {
+	    	this.adaptiveId = this.storageId;
+	    }
+		var grade = this.grader.grade();
+		if (grade == "correct") {
+			this.hasSolved = true;
+			localStorage.setItem(this.adaptiveId + "Solved", true);
+			this.recentAttempts = this.checkCount;
+			this.checkCount = 0;
+			localStorage.setItem(this.adaptiveId + "recentAttempts", this.recentAttempts);
+		} 
+		localStorage.setItem(this.adaptiveId + this.divid + "Count", this.checkCount); 
+
+		this.logAnswer(grade);
+		this.setLocalStorage();
+
+		// if not solved and not too short then check if should provide help
+		if (!this.hasSolved  && grade !== "incorrectTooShort")
+		{
+			if (this.canHelp) {
+				// only count the attempt if the answer is different (to prevent gaming)
+				var answerHash = this.answerHash();
+				if (this.lastAnswerHash !== answerHash) {
+					this.numDistinct++;
+					this.lastAnswerHash = answerHash;
+				}
+
+		        // if time to offer help
+				if (this.numDistinct == 3 && !this.gotHelp) {
+					// activate the help button and wiggle it
+					//this.helpButton.disabled = false;
+					//$(this.helpButton).css("position","relative");
+        			//for (var x = 1; x <= 3; x++) {
+        			//	$(this.helpButton)
+        			//		.animate({ left : -5 }, 60)
+        			//		.animate({ left : 5 }, 120)
+        			//		.animate({ left : 0 }, 60);
+        			alert("Click on the Help Me button if you want to make the problem easier");
+        			//} // end for
+    			} // end if
+			} // end if can help
+		} // end if not solved
+	} // end outer if not solved
+};
+
+/* =====================================================================
+==== ADAPTIVE ==========================================================
+===================================================================== */
+
+// Initialize this problem as adaptive
+//    helpCount = number of checks before help is given (negative)
+//    canHelp = boolean as to whether help can be provided
+//    checkCount = how many times it has been checked before correct
+//    userRating = 0..100 how good the person is at solving problems
+Parsons.prototype.initializeAdaptive = function() {
+	this.adaptiveId = eBookConfig.email;
+	if (this.adaptiveId == undefined) {
+		this.adaptiveId = "parsons";
+	} else {
+		this.adaptiveId = this.adaptiveId + "-parsons";
+	}
+	this.canHelp = true;
+	//this.helpCount = -3; // Number of checks before help is offered
+	this.checkCount = 0;
+	this.numDistinct = 0; // number of distinct solution attempts (different from previous)
+	this.gotHelp = false;
+	// Initialize the userRating
+	var storageProblem = localStorage.getItem(this.adaptiveId + "Problem");
+	if (storageProblem == this.divid) {
+		// Already in this problem
+		this.checkCount = localStorage.getItem(this.adaptiveId  + this.divid + "Count");
+		if (this.checkCount == undefined) {
+			this.checkCount = 0;
+		}
+		return this;
+	}
+	var count = localStorage.getItem(this.adaptiveId  + this.divid + "Count");
+	if (count == undefined || count == "NaN") {
+		count = 0;
+	}
+	this.checkCount = count;
+
+		
+	this.recentAttempts = localStorage.getItem(this.adaptiveId + "recentAttempts");
+	
+	if(this.recentAttempts == undefined || this.recentAttempts == "NaN") {
+		this.recentAttempts = 3;
+	}
+	localStorage.setItem(this.adaptiveId + "recentAttempts", this.recentAttempts);
+	localStorage.setItem(this.adaptiveId + "Problem", this.divid);
+	localStorage.setItem(this.adaptiveId + this.divid + "Count", this.checkCount);
+	localStorage.setItem(this.adaptiveId + "Solved", false);
+};
+
+// Return a boolean of whether the user must deal with indentation
+Parsons.prototype.usesIndentation = function() {
+	if ( this.noindent || this.solutionIndent() == 0) {
+	// was $(this.answerArea).hasClass("answer") - bje changed
+		return false;
+	} else {
+		return true;
+	}
+};
+
+// Find a distractor to remove to make the problem easier
+//  * try first in the answer area
+//  * if not, try the source area
+//  * if not, return undefined
+Parsons.prototype.distractorToRemove = function() {
+	var blocks = this.enabledAnswerBlocks();
+	var block;
+	for (var i = 0; i < blocks.length; i++) {
+		block = blocks[i];
+		if (block.isDistractor()) {
+			return block;
+		}
+	}
+	blocks = this.enabledSourceBlocks();
+	for (var i = 0; i < blocks.length; i++) {
+		block = blocks[i];
+		if (block.isDistractor()) {
+			return block;
+		}
+	}
+	return undefined;
+};
+
+// Return the number of blocks that exist
+Parsons.prototype.numberOfBlocks = function(fIncludeDistractors = true) {
+	var numberOfBlocks = 0;
+	for (var i = 0; i < this.blocks.length; i++) {
+		if (this.blocks[i].enabled() && (fIncludeDistractors || !this.blocks[i].isDistractor())) {
+			numberOfBlocks += 1;
+		}
+	}
+	return numberOfBlocks;
+};
+
+// Remove this distractors to make the problem easier
+Parsons.prototype.removeDistractor = function(block) {
+	// Alert the user to what is happening
+	var feedbackArea = $(this.messageDiv);
+	feedbackArea.fadeIn(500);
+	feedbackArea.attr("class", "alert alert-info");
+	feedbackArea.html("Disabled an unneeded code block (one that is not part of the solution).");
+	// Stop ability to select
+	block.disable();
+	// If in answer area, move to source area
+	if (!block.inSourceArea()) {
+		var sourceRect = this.sourceArea.getBoundingClientRect();
+		var startX = block.pageXCenter() - 1;
+		var startY = block.pageYCenter();
+		var endX = sourceRect.left + window.pageXOffset + sourceRect.width / 2;
+		var endY = sourceRect.top + window.pageYOffset + block.view.getBoundingClientRect().height / 2;
+
+		var slideUnderBlock = block.slideUnderBlock();
+		if (slideUnderBlock !== undefined) {
+			endY += slideUnderBlock.view.getBoundingClientRect().height + 20;
+			endY += parseInt($(slideUnderBlock.view).css("top"));
+		}
+		var that = this;
+		$(block.view).css({
+			"border-color" : "#000",
+			"background-color" : "#fff"
+		});
+		$(block.view).animate({
+			"opacity" : 1.0
+		}, {
+			"duration" : Math.sqrt(Math.pow(endY - startY, 2) + Math.pow(endX - startX, 2)) * 4 + 500,
+			"start" : function() {
+				that.moving = block;
+				that.movingX = startX;
+				that.movingY = startY;
+				that.updateView();
+			},
+			"progress" : function(a, p, c) {
+				that.movingX = startX * (1 - p) + endX * p;
+				that.movingY = startY * (1 - p) + endY * p;
+				that.updateView();
+			},
+			"complete" : function() {
+				delete that.moving;
+				delete that.movingX;
+				delete that.movingY;
+				that.updateView();
+				$(block.view).animate({
+					"opacity" : 0.3,
+					"border-color" : "#d3d3d3",
+					"background-color" : "#efefef"
+				}, {
+					"duration" : 1000,
+					"complete" : function() {
+						$(block.view).css({
+							"opacity" : "",
+							"border-color" : "",
+							"background-color" : ""
+						});
+						$(block.view).addClass("disabled");
+					}
+				});
+			}
+		});
+	} else {
+		$(block.view).css({
+			"border-color" : "#000",
+			"background-color" : "#fff"
+		});
+		$(block.view).animate({
+			"opacity" : 0.3,
+			"border-color" : "#d3d3d3",
+			"background-color" : "#efefef"
+		}, {
+			"duration" : 2000,
+			"complete" : function() {
+				$(block.view).css({
+					"border-color" : "",
+					"background-color" : ""
+				});
+			}
+		});
+	}
+};
+
+// Give the user the indentation
+Parsons.prototype.removeIndentation = function() {
+	// Alert the user to what is happening
+	var feedbackArea = $(this.messageDiv);
+	feedbackArea.fadeIn(500);
+	feedbackArea.attr("class", "alert alert-info");
+	feedbackArea.html("Provided the indentation.");
+	// Move and resize blocks
+	var blockWidth = 200;
+	for (var i = 0; i < this.lines.length; i++) {
+		var line = this.lines[i];
+		var expandedWidth = line.width + (line.indent * this.options.pixelsPerIndent) + 30;
+		blockWidth = Math.max(blockWidth, expandedWidth);
+	}
+	if (this.options.numbered != undefined) {
+		blockWidth += 25;
+	}
+	this.areaWidth = blockWidth + 22;
+	var block, indent;
+	var sourceBlocks = this.sourceBlocks();
+	for (var i = 0; i < sourceBlocks.length; i++) {
+		block = sourceBlocks[i];
+		indent = block.solutionIndent();
+		if (indent == 0) {
+			$(block.view).animate({
+				"width" : blockWidth
+			}, {
+				"duration" : 1000
+			});
+		} else {
+			$(block.view).animate({
+				"width" : blockWidth - indent * this.options.pixelsPerIndent,
+				"padding-left" : indent * this.options.pixelsPerIndent + 10
+			}, {
+				"duration" : 1000
+			});
+		}
+	}
+	for (var i = 0; i < this.pairedDivs.length; i++) {
+		$(this.pairedDivs[i]).animate({
+			"width" : blockWidth + 34
+		}, {
+			"duration" : 1000
+		});
+	}
+	var answerBlocks = this.answerBlocks();
+	for (var i = 0; i < answerBlocks.length; i++) {
+		block = answerBlocks[i];
+		indent = block.solutionIndent();
+		if (indent == 0) {
+			$(block.view).animate({
+				"left" : 0,
+				"width" : blockWidth
+			}, {
+				"duration" : 1000
+			});
+		} else {
+			$(block.view).animate({
+				"left" : 0,
+				"width" : blockWidth - indent * this.options.pixelsPerIndent,
+				"padding-left" : indent * this.options.pixelsPerIndent + 10
+			}, {
+				"duration" : 1000
+			});
+		}
+	}
+	// Resize answer and source area
+	$(this.answerArea).removeClass("answer1 answer2 answer3 answer4");
+	$(this.answerArea).addClass("answer");
+	this.indent = 0;
+	this.noindent = true;
+	$(this.sourceArea).animate({
+		"width" : this.areaWidth + 2
+	}, {
+		"duration" : 1000
+	});
+	$(this.answerArea).animate({
+		"width" : this.areaWidth + 2
+	}, {
+		"duration" : 1000
+	});
+	// Change the model (with view)
+	$(this.answerArea).animate({
+		"opacity" : 1.0
+	}, {
+		"duration" : 1100,
+		"complete" : function() {
+			$(this.answerArea).css({
+				"opacity" : ""
+			});
+			// Update the model
+			for (var i = 0; i < sourceBlocks.length; i++) {
+				sourceBlocks[i].addIndent();
+			}
+			for (var i = 0; i < answerBlocks.length; i++) {
+				answerBlocks[i].addIndent();
+			}
+		}
+	});
+};
+
+// Combine blocks together
+Parsons.prototype.combineBlocks = function() {
+	// Alert the user to what is happening
+	var feedbackArea = $(this.messageDiv);
+	feedbackArea.fadeIn(500);
+	feedbackArea.attr("class", "alert alert-info");
+	feedbackArea.html("Combined two code blocks into one.");
+	// Use heuristics to figure out which block to combine
+	var solutionBlocks = this.solutionBlocks();
+	var answerBlocks = this.answerBlocks();
+	var sourceBlocks = this.sourceBlocks();
+	var potentials = solutionBlocks.slice(0, solutionBlocks.length - 1);
+	ratings = [];
+	for (var i = 0; i < potentials.length; i++) {
+		var block = potentials[i];
+		var next = solutionBlocks[i+1];
+		var rating = (block.lines.length + next.lines.length) * -1;
+		if (answerBlocks.indexOf(next) > -1) {
+			rating += 1;
+		}
+		var indexOf = answerBlocks.indexOf(block);
+		if (indexOf == -1) {
+		} else if (indexOf == answerBlocks.length - 1) {
+			rating += 2;
+		} else {
+			if (block.lines[block.lines.length - 1].index + 1 == answerBlocks[indexOf + 1].lines[0].index) {
+				rating += 2;
+			} else {
+				rating += 3;
+			}
+		}
+		if (block.minimumLineIndent() == next.minimumLineIndent()) {
+			rating += 1;
+		}
+		ratings.push(rating);
+	}
+	var block1 = potentials[0];
+	rating = ratings[0];
+	for (var i = 1; i < potentials.length; i++) {
+		if (ratings[i] > rating) {
+			block1 = potentials[i];
+			rating = ratings[i];
+		}
+	}
+	var block2 = solutionBlocks[solutionBlocks.indexOf(block1) + 1];
+	// Combine blocks (after move)
+	var index1 = answerBlocks.indexOf(block1);
+	var index2, move, subtract;
+	if (index1 > -1) {
+		index2 = answerBlocks.indexOf(block2);
+	} else {
+		index1 = sourceBlocks.indexOf(block1);
+		index2 = sourceBlocks.indexOf(block2);
+	}
+	move = index1 + 1 !== index2;
+	subtract = (index2 > -1) && (index2 < index1);
+	if (move) {
+		// Move the block
+		var startX = block2.pageXCenter() - 1;
+		var startY = block2.pageYCenter();
+		var endX = block1.pageXCenter() - 1;
+		var endY = block1.pageYCenter() + block1.view.getBoundingClientRect().height / 2 + 5;
+		if (subtract) {
+			endY -= block2.view.getBoundingClientRect().height / 2;
+		} else {
+			endY += block2.view.getBoundingClientRect().height / 2;
+		}
+		var duration = Math.sqrt(Math.pow(endY - startY, 2) + Math.pow(endX - startX, 2)) * 4 + 500;
+		var that = this;
+		$(block2.view).animate({
+			"opacity" : 1
+		}, {
+			"duration" : duration,
+			"start" : function() {
+				$(block1.view).css({
+					"border-color" : "#000",
+					"background-color" : "#fff"
+				});
+				$(block2.view).css({
+					"border-color" : "#000",
+					"background-color" : "#fff"
+				});
+				block2.lines[0].index += 1000;
+				that.moving = block2;
+				that.movingX = startX;
+				that.movingY = startY;
+				that.updateView();
+			},
+			"progress" : function(a, p, c) {
+				that.movingX = startX * (1 - p) + endX * p;
+				that.movingY = startY * (1 - p) + endY * p;
+				that.updateView();
+			},
+			"complete" : function() {
+				delete that.moving;
+				delete that.movingX;
+				delete that.movingY;
+				that.updateView();
+				block2.lines[0].index -= 1000;
+				block1.consumeBlock(block2);
+				$(block1.view).animate({
+					"border-color" : "#d3d3d3",
+					"background-color" : "#efefef"
+				}, {
+					"duration" : 1000,
+					"complete" : function() {
+						$(block1.view).css({
+							"border-color" : "",
+							"background-color" : ""
+						});
+					}
+				});
+			}
+		});
+	} else {
+		$(block2.view).animate({
+			"opacity" : 1
+		}, {
+			"duration" : 1000,
+			"start" : function() {
+				$(block1.view).css({
+					"border-color" : "#000",
+					"background-color" : "#fff"
+				});
+				$(block2.view).css({
+					"border-color" : "#000",
+					"background-color" : "#fff"
+				});
+			},
+			"complete" : function() {
+				block1.consumeBlock(block2);
+				$(block1.view).animate({
+					"border-color" : "#d3d3d3",
+					"background-color" : "#efefef"
+				}, {
+					"duration" : 1000,
+					"complete" : function() {
+						$(block1.view).css({
+							"border-color" : "",
+							"background-color" : ""
+						});
+					}
+				});
+			}
+		});
+	}
+};
+
+// Adapt the problem to be easier
+//  * remove a distractor until none are present
+//  * provide indentation
+//  * combine blocks until 3 are left
+Parsons.prototype.makeEasier = function() {
+	var distractorToRemove = this.distractorToRemove();
+	if (distractorToRemove !== undefined && !distractorToRemove.inSourceArea()) {
+	    alert("Will remove an incorrect code block from answer area");
+		this.removeDistractor(distractorToRemove);
+		this.logMove("removedDistractor-" + distractorToRemove.hash());
+	} else if (this.usesIndentation()) {
+	    alert("Will provide indentation");
+		this.removeIndentation();
+		this.logMove("removedIndentation");
+	} else {
+		var numberOfBlocks = this.numberOfBlocks(false);
+		if (numberOfBlocks > 3) {
+		    alert("Will combine two blocks");
+			this.combineBlocks();
+			this.logMove("combinedBlocks");
+		} /*else if(this.numberOfBlocks(true) > 3 && distractorToRemove !==  undefined) {
+			alert("Will remove an incorrect code block from source area");
+			this.removeDistractor(distractorToRemove);
+			this.logMove("removedDistractor-" + distractorToRemove.hash());
+		} */else {
+			alert("There are only 3 correct blocks left.  You should be able to put them in order");
+			this.canHelp = false;
+		}
+		//if (numberOfBlocks < 5) {
+		//	this.canHelp = false;
+		//	this.helpButton.disabled = true;
+		//}
+	}
+};
+
+// The "Help Me" button was pressed and the problem should be simplified
+Parsons.prototype.helpMe = function() {
+	this.clearFeedback();
+
+	//this.helpCount = -1; // amount to allow for multiple helps in a row
+	//if (this.helpCount < 0) {
+	//	this.helpCount = Math.max(this.helpCount, -1); // min 1 attempt before more help
+		//this.helpButton.disabled = true;
+	//}
+	
+	// if less than 3 attempts
+	if (this.numDistinct < 3)
+	{
+	   alert("You must make at least three distinct full attempts at a solution before you can get help");
+	}
+	// otherwise give help
+    else
+    {
+     this.gotHelp = true;
+	 this.makeEasier();
+	}
+};
+
+/* =====================================================================
+==== UTILITY ===========================================================
+===================================================================== */
+
+// Return a date from a timestamp (either mySQL or JS format)
+Parsons.prototype.dateFromTimestamp = function(timestamp) {
+	var date = new Date(timestamp);
+	if (isNaN(date.getTime())) {
+		var t = timestamp.split(/[- :]/);
+		date = new Date(t[0], t[1]-1, t[2], t[3], t[4], t[5]);
+	}
+	return date;
+};
+
+// A function for returning a shuffled version of an array
+Parsons.prototype.shuffled = function(array) {
+	var currentIndex = array.length;
+	var returnArray = array.slice();
+	var temporaryValue, randomIndex;
+	// While there remain elements to shuffle...
+	while (0 !== currentIndex) {
+		// Pick a remaining element...
+		randomIndex = Math.floor(Math.random() * currentIndex);
+		currentIndex -= 1;
+		// And swap it with the current element.
+		temporaryValue = returnArray[currentIndex];
+		returnArray[currentIndex] = returnArray[randomIndex];
+		returnArray[randomIndex] = temporaryValue;
+	}
+	return returnArray;
+};
+
+/* =====================================================================
+==== KEYBOARD INTERACTION ==============================================
+===================================================================== */
+
+// When the user has entered the Parsons problem via keyboard mode
+Parsons.prototype.enterKeyboardMode = function() {
+	$(this.keyboardTip).show();
+	$(this.sourceLabel).hide();
+	$(this.answerLabel).hide();
+	this.clearFeedback();
+};
+
+// When the user leaves the Parsons problem via keyboard mode
+Parsons.prototype.exitKeyboardMode = function() {
+	$(this.keyboardTip).hide();
+	$(this.sourceLabel).show();
+	$(this.answerLabel).show();
+};
+
+/* =====================================================================
+==== VIEW ==============================================================
+===================================================================== */
+
+// Clear any feedback from the answer area
+Parsons.prototype.clearFeedback = function() {
+	$(this.answerArea).removeClass("incorrect correct");
+	var children = this.answerArea.childNodes;
+	for (var i = 0; i < children.length; i++) {
+		$(children[i]).removeClass("correctPosition incorrectPosition indentLeft indentRight");
+	}
+	$(this.messageDiv).hide();
+};
+
+// Disable the interface
+Parsons.prototype.disable = function () {
+	// Disable blocks
+	if (this.blocks !== undefined) {
+		for (var i = 0; i < this.blocks.length; i++) {
+			var block = this.blocks[i];
+			block.disable();
+		}
+	}
+	// Hide buttons
+	$(this.checkButton).hide();
+	$(this.resetButton).hide();
+};
+
+// Based on the moving element, etc., establish the moving state
+//   rest: not moving
+//   source: moving inside source area
+//   answer: moving inside answer area
+//   moving: moving outside areas
+Parsons.prototype.movingState = function() {
+	if (this.moving == undefined) {
+		return "rest";
+	}
+	var x = this.movingX - window.pageXOffset;
+	var y = this.movingY - window.pageYOffset;
+	// Check if in answer area
+	var bounds = this.answerArea.getBoundingClientRect();
+	if (x >= bounds.left && (x <= bounds.right) && (y >= bounds.top) && (y <= bounds.bottom)) {
+		return "answer";
+	}
+	// Check if in source area
+	bounds = this.sourceArea.getBoundingClientRect();
+	if (x >= bounds.left && (x <= bounds.right) && (y >= bounds.top) && (y <= bounds.bottom)) {
+		return "source";
+	}
+	return "moving";
+}
+
+// Update the Parsons view
+// This gets called when dragging a block
+Parsons.prototype.updateView = function() {
+	// Based on the new and the old state, figure out what to update
+	var state = this.state;
+	var newState = this.movingState();
+	var updateSource = true;
+	var updateAnswer = true;
+	var updateMoving = newState == "moving";
+	if (state == newState) {
+		if (newState == "rest") {
+			updateSource = false;
+			updateAnswer = false;
+		} else if (newState == "source") {
+			updateAnswer = false;
+		} else if (newState == "answer") {
+			updateSource = false;
+		} else if (newState == "moving") {
+			updateAnswer = false;
+			updateSource = false;
+		}
+	}
+	var movingHeight;
+	if (this.moving !== undefined) {
+		// Must get height here as detached items don't have height
+		movingHeight = $(this.moving.view).outerHeight(true);
+		$(this.moving.view).detach();
+	}
+
+	var positionTop, width;
+	var baseWidth = this.areaWidth - 22;
+
+	// Update the Source Area
+	if (updateSource) {
+		positionTop = 0;
+		var blocks = this.sourceBlocks();
+		if (newState == "source") {
+			var hasInserted = false;
+			var movingBin = this.moving.pairedBin();
+			var binForBlock = [];
+			for (i = 0; i < blocks.length; i++) {
+				binForBlock.push(blocks[i].pairedBin());
+			}
+			if (!binForBlock.includes(movingBin)) {
+				movingBin = -1;
+			}
+			var insertPositions = [];
+			if (binForBlock.length == 0) {
+				insertPositions.push(0);
+			} else {
+				if (movingBin == -1) {
+					insertPositions.push(0);
+				} else if (binForBlock[0] == movingBin) {
+					insertPositions.push(0);
+				}
+				for (i = 1; i < blocks.length; i++) {
+					if (binForBlock[i - 1] == movingBin) {
+						insertPositions.push(i);
+					} else if (binForBlock[i] == movingBin) {
+						insertPositions.push(i);
+					} else if (movingBin == -1 && (binForBlock[i - 1] != binForBlock[i])) {
+						insertPositions.push(i);
+					}
+				}
+				if (movingBin == -1) {
+					insertPositions.push(binForBlock.length);
+				} else if (binForBlock[binForBlock.length - 1] == movingBin) {
+					insertPositions.push(binForBlock.length);
+				}
+			}
+			var x = this.movingX - this.sourceArea.getBoundingClientRect().left - window.pageXOffset - baseWidth / 2 - 11;
+			var y = this.movingY - this.sourceArea.getBoundingClientRect().top - window.pageYOffset;
+			for (i = 0; i < blocks.length; i++) {
+				item = blocks[i];
+				if (!hasInserted && insertPositions.includes(i)) {
+					var testHeight = $(item.view).outerHeight(true);
+					for (j = i + 1; j < blocks.length; j++) {
+						if (insertPositions.includes(j)) {
+							break;
+						}
+						testHeight += $(blocks[j].view).outerHeight(true);
+					}
+					if ((y - positionTop < (movingHeight + testHeight / 2)) || (i == insertPositions[insertPositions.length - 1])) {
+						hasInserted = true;
+						this.sourceArea.insertBefore(this.moving.view, item.view);
+						$(this.moving.view).css({
+							"left" : x,
+							"top" : y - movingHeight / 2,
+							"width" : baseWidth,
+							"z-index" : 3
+						});
+						positionTop = positionTop + movingHeight;
+					}
+				}
+				$(item.view).css({
+					"left" : 0,
+					"top" : positionTop,
+					"width" : baseWidth,
+					"z-index" : 2
+				});
+				positionTop = positionTop + $(item.view).outerHeight(true);
+			}
+			if (!hasInserted) {
+				$(this.moving.view).appendTo("#" + this.counterId + "-source");
+				$(this.moving.view).css({
+					"left" : x,
+					"top" : y - $(this.moving.view).outerHeight(true) / 2,
+					"width" : baseWidth,
+					"z-index" : 3
+				});
+			}
+		} else {
+			for (var i = 0; i < blocks.length; i++) {
+				item =  blocks[i];
+				$(item.view).css({
+					"left" : 0,
+					"top" : positionTop,
+					"width" : baseWidth,
+					"z-index" : 2
+				});
+				positionTop = positionTop + $(item.view).outerHeight(true);
+			}
+		}
+		// Update the Paired Distractor Indicators
+		for (i = 0; i < this.pairedBins.length; i++) {
+			var bin = this.pairedBins[i];
+			var matching = [];
+			for (j = 0; j < blocks.length; j++) {
+				block = blocks[j];
+				if (block.matchesBin(bin)) {
+					matching.push(block);
+				}
+			}
+			var div = this.pairedDivs[i];
+			if (matching.length == 0) {
+				$(div).hide();
+			} else {
+				$(div).show();     
+
+
+				
+				var height = -5;
+				height += parseInt($(matching[matching.length - 1].view).css("top"));
+				height -= parseInt($(matching[0].view).css("top"));
+				height += $(matching[matching.length - 1].view).outerHeight(true);
+				$(div).css({
+					"left" : -6,
+					"top" : $(matching[0].view).css("top"),
+					"width" : baseWidth + 34,
+					"height" : height,
+					"z-index" : 1,
+					"text-indent" : -30,
+					"padding-top": (height-70)/2,
+					"overflow": "visible",
+					"font-size": 43,
+					"vertical-align": "middle",
+					"color": "#7e7ee7"
+				});
+				$(div).html("<span id= 'st' style = 'vertical-align: middle; font-weight: bold; font-size: 15px'>or</span>{");
+			}
+			if (matching.length == 1) {
+				$(div).html("");
+			}
+		}
+	}
+
+	// Update the Answer Area
+	if (updateAnswer) {
+		var block, indent;
+		positionTop = 0;
+		width = this.areaWidth + this.indent * this.options.pixelsPerIndent - 22;
+		var blocks = this.answerBlocks();
+		if (newState == "answer") {
+			var hasInserted = false;
+			var x = this.movingX - this.answerArea.getBoundingClientRect().left - window.pageXOffset - baseWidth / 2 - 11;
+			movingIndent = Math.round(x / this.options.pixelsPerIndent);
+			if (movingIndent < 0) {
+				movingIndent = 0;
+			} else if (movingIndent > this.indent) {
+				movingIndent = this.indent;
+			} else {
+				x = movingIndent * this.options.pixelsPerIndent;
+			}
+			var y = this.movingY - this.answerArea.getBoundingClientRect().top - window.pageYOffset;
+			this.moving.indent = movingIndent;
+			for (i = 0; i < blocks.length; i++) {
+				block = blocks[i];
+				if (!hasInserted) {
+					if (y - positionTop < (movingHeight + $(block.view).outerHeight(true)) / 2) {
+						hasInserted = true;
+						this.answerArea.insertBefore(this.moving.view, block.view);
+						$(this.moving.view).css({
+							"left" : x,
+							"top" : y - movingHeight / 2,
+							"width" : baseWidth,
+							"z-index" : 3
+						});
+						positionTop = positionTop + movingHeight;
+					}
+				}
+				indent = block.indent * this.options.pixelsPerIndent;
+				$(block.view).css({
+					"left" : indent,
+					"top" : positionTop,
+					"width" : width - indent,
+					"z-index" : 2
+				});
+				positionTop = positionTop + $(block.view).outerHeight(true);
+			}
+			if (!hasInserted) {
+				$(this.moving.view).appendTo("#" + this.counterId + "-answer");
+				$(this.moving.view).css({
+					"left" : x,
+					"top" : y - $(this.moving.view).outerHeight(true) / 2,
+					"width" : baseWidth,
+					"z-index" : 3
+				});
+			}
+		} else {
+			for (var i = 0; i < blocks.length; i++) {
+				block = blocks[i];
+				indent = block.indent * this.options.pixelsPerIndent;
+				$(block.view).css({
+					"left" : indent,
+					"top" : positionTop,
+					"width" : width - indent,
+					"z-index" : 2
+				});
+				positionTop = positionTop + $(block.view).outerHeight(true);
+			}
+		}
+	}
+
+	// Update the Moving Area
+	if (updateMoving) {
+		// Add it to the lowest place in the source area
+		movingBin = this.moving.pairedBin();
+		if (movingBin == -1) {
+			$(this.moving.view).appendTo("#" + this.counterId + "-source");
+		} else {
+			var before;
+			blocks = this.sourceBlocks;
+			for (i = 0; i < blocks.length; i++) {
+				block = blocks[i];
+				if (block.pairedBin() == movingBin) {
+					before = i + 1;
+				}
+			}
+			if (before == undefined || before == blocks.length) {
+				$(this.moving.view).appendTo("#" + this.counterId + "-source");
+			} else {
+				this.sourceArea.insertBefore(this.moving.view, blocks[before].view);
+			}
+		}
+		// Place in the middle of the mouse cursor
+		$(this.moving.view).css({
+			"left" : this.movingX - this.sourceArea.getBoundingClientRect().left - window.pageXOffset - ($(this.moving.view).outerWidth(true) / 2),
+			"top" : this.movingY - this.sourceArea.getBoundingClientRect().top - window.pageYOffset - (movingHeight / 2),
+			"width" : baseWidth,
+			"z-index" : 3
+		});
+	}
+
+	state = newState;
+	this.state = state;
+};
+
+Parsons.prototype.addBlockLabels = function(blocks) {
+	var bin = -1;
+	var binCount = 0;
+	var binChildren = 0;
+	var blocksNotInBins = 0;
+	for(var i = 0; i < blocks.length; i++) {
+		if(blocks[i].pairedBin() == -1) {
+			blocksNotInBins++;
+		}
+	}
+	for (var i = 0; i < blocks.length; i++) {
+		
+		var currentBin = blocks[i].pairedBin();
+		if(currentBin == -1 || currentBin != bin) {
+			bin = currentBin;
+			binChildren = 0;
+			binCount++;
+		}
+		var label = "" + binCount + ((currentBin != -1) ? String.fromCharCode(97 + binChildren) : " ");
+		if (binCount < 10 && blocksNotInBins + this.pairedBins.length >= 10) {
+			label += " ";
+		}
+		blocks[i].addLabel(label, 0);
+		binChildren++;
+	}
+	
+	if(blocksNotInBins + this.pairedBins.length >= 10) {
+		this.areaWidth += 5;
+		$(this.sourceArea).css({
+			'width' : $(this.sourceArea).width() + 5,
+		});
+		$(this.answerArea).css({
+			'width' : $(this.answerArea).width() + 5,
+		});
+	}	
+}
+
+// Put all the blocks back into the source area, reshuffling as necessary
+Parsons.prototype.resetView = function() {
+	// Clear everything
+	this.clearFeedback();
+	var scrollTop = document.body.scrollTop;
+	var block;
+	for (var i = 0; i < this.blocks.length; i++) {
+		block = this.blocks[i];
+		for(var j = 0; j < block.lines.length; j++) {
+			var children = $(block.lines[j].view).find(".block-label");
+			for(var c = 0; c < children.length; c++) {
+				children[c].remove();
+			}
+		}
+		block.destroy();
+		$(this.blocks[i].view).detach();
+	}
+	delete this.blocks;
+	this.blockIndex = 0;
+	for (var i = 0; i < this.pairedDivs.length; i++) {
+		$(this.pairedDivs[i]).detach();
+	}
+	$(this.sourceArea).attr("style", "");
+	$(this.answerArea).removeClass();
+	$(this.answerArea).attr("style", "");
+	this.noindent = this.options.noindent;
+	// Reinitialize
+	if(this.hasSolved) {
+
+		this.checkCount = 0;
+		this.numDistinct = 0;
+		this.hasSolved = false;
+		if (this.options.adaptive) {
+			this.canHelp = true;
+		}
+		//this.helpCount = -3; // enable after 3 failed attempts
+		//this.helpButton.disabled = true;
+		localStorage.setItem(this.adaptiveId + "Problem", this.divid);
+		localStorage.setItem(this.adaptiveId + this.divid + "Count", this.checkCount);
+		localStorage.setItem(this.adaptiveId + "Solved", false);
+	}
+
+	this.initializeAreas(this.blocksFromSource(), [], {});
+	this.initializeInteractivity();
+	document.body.scrollTop = scrollTop;
+};
+
+$(document).bind("runestone:login-complete", function () {
+	$("[data-component=parsons]").each(function (index) {
+		if ($(this).closest('[data-component=timedAssessment]').length == 0) {
+			prsList[this.id] = new Parsons({"orig": this, "useRunestoneServices": eBookConfig.useRunestoneServices});
+		}
+	});
+});
+
+if (typeof component_factory === 'undefined') {
+    component_factory = {}
+}
+component_factory['parsons'] = function(opts) { return new Parsons(opts)}

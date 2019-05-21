@@ -6,18 +6,18 @@ with open('requirements.txt', 'r') as fh:
 setup(
     name='runestone',
     description='Sphinx extensions for writing interactive documents.',
-    version='2.1.6',
+    version='3.4.5',
     author = 'Brad Miller',
     author_email = 'bonelake@mac.com',
-    packages= find_packages(),
+    packages= find_packages(exclude=['*.*.test']),
     install_requires=dependencies,
     include_package_data = True,
     zip_safe = False,
     package_dir = {'runestone' : 'runestone'},
     package_data = { '' : ['js/*.js', 'css/*.css', '*.txt']},
     license='GPL',
-    url = 'https://github.com/RunestoneInteractive/RunestoneTools',
-    download_url = 'https://github.com/RunestoneInteractive/RunestoneTools/tarball/2.1.6',
+    url = 'https://github.com/RunestoneInteractive/RunestoneComponents',
+    download_url = 'https://github.com/RunestoneInteractive/RunestoneComponents/tarball/3.4.5',
     keywords = ['runestone', 'sphinx', 'ebook'], # arbitrary keywords
     classifiers=('Development Status :: 5 - Production/Stable',
                    'Environment :: Console',
@@ -30,7 +30,7 @@ setup(
                    'Operating System :: Unix',
                    'Programming Language :: Python',
                    'Programming Language :: Python :: 2.7',
-                   'Programming Language :: Python :: 3.4',
+                   'Programming Language :: Python :: 3.6',
                    'Topic :: Education',
                    'Topic :: Text Processing :: Markup'),
     # data_files=[('common',['runestone/common/*']),
@@ -39,7 +39,7 @@ setup(
     long_description=open('README.rst').read(),
     entry_points = {
         'console_scripts': [
-            'runestone = runestone.__main__:main'
+            'runestone = runestone.__main__:cli'
         ]
         }
 )

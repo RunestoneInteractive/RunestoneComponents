@@ -1,3 +1,58 @@
+/* custom modification of basic.css for color-contrast (AA compliant) */
+td.linenos pre {
+    color: #6b6b6b;
+}
+/* custom modification of prettify.css for color-contrast (AA compliant) */
+.str {
+    color: #006b00;
+}
+
+/* custom modification of parsons.css for color-contrast (AA compliant) */
+.parsons .block {
+    background-color: #fafafa;
+}
+
+/* custom modification of pygments.css for color-contrast (AA compliant) */
+.highlight .c1{
+    color: #376A7B;
+}
+
+.highlight .nn{
+    color: #0F6C95;
+}
+
+.highlight .gp{
+    color: #A14C08;
+}
+
+.highlight .si{
+    color: #3C773D;
+}
+
+.highlight .nc{
+    color: #0B719D;
+}
+
+/* `Search` functionality's result custom modification for color-contrast (AA compliant) */
+ul.search li div.context {
+    color: #6b6b6b;
+}
+
+span.highlighted {
+    color: #4d4d4d;
+}
+
+/* ActiveCode gutter custom modification for color-contrast (AA compliant) */
+
+.CodeMirror-linenumber{
+    color: #6b6b6b;
+}
+
+/* Python code output custom modification for color-contrast (AA compliant) */
+div.ExecutionVisualizer table#pyCodeOutput .lineNo {
+    color: #6b6b6b;
+}
+
 /* Runestone custom modifications */
 
 body {
@@ -14,6 +69,64 @@ h5 {
     padding: 10px 0;
 }
 
+/* table-of-contents related styles for color-contrast (AA compliant) */
+#table-of-contents a {
+    color: #0645ad;
+}
+
+#table-of-contents a:hover {
+    color: #0645ad;
+    text-decoration: underline;
+}
+
+#table-of-contents.section {
+    font-size: 16px;
+}
+
+/* navbar-brand color contrast (AA compliant) */
+.navbar-default .navbar-nav>li>a{
+    color: #6B6B6B;
+
+}
+
+.navbar-default .navbar-brand{
+    color: #6B6B6B;
+}
+
+/* acknowledgement related styles for color-contrast (AA compliant) */
+.toctree-wrapper{
+    font-size: 16px;
+}
+
+.toctree-wrapper a {
+    color: #0645ad;
+}
+
+.toctree-wrapper a:hover {
+    color: #0645ad;
+    text-decoration: underline;
+}
+
+/* index and search related styles for color-contrast (AA compliant) */
+#index-and-search.section {
+    font-size: 16px;
+}
+
+#index-and-search.section a {
+    color: #0645ad;
+}
+
+#index-and-search.section a:hover {
+    color: #0645ad;
+    text-decoration: underline;
+}
+
+/* custom style for `a` tag for color-contrast (AA compliant) */
+
+a {
+    color: #0645ad;
+}
+
 /* navbar and menu related styles */
 @media (max-width: 768px) {
     /* Remove top padding when top navbar goes collapsed in narrow viewports */
@@ -25,12 +138,12 @@ h5 {
     .navbar-fixed-top {
         position: static;
     }
+
 }
 
 @media (min-width: 768px) {
     /* when navbar is collapsed we don't want any vertical dividers taking up space */
     .navbar .divider-vertical {
-        height: 50px;
         margin: 0 3px;
         border-left: 1px solid #f2f2f2;
     }
@@ -48,7 +161,7 @@ div.section {
 	padding-left:0;
 	padding-right:0;
 }
-.container  .section >*:not(.section) {
+.container  .section >*:not(.section):not(.ac_section) {
 	max-width: 500pt;
 	margin-left: auto;
 	margin-right: auto;
@@ -70,7 +183,7 @@ div.section {
 	margin-right: auto;
 }
 
-.container  .section .parsons, .container  .section .parsons .sortable-code-container, .container  .section .ac_section, .container  .section .cd_section{
+.container  .section .parsons, .container  .section .parsons .sortable-code-container, .container  .section .cd_section{
 	max-width: none;
 }
 .navbar>.container .navbar-brand {
@@ -83,6 +196,9 @@ div.section {
 
 .footer>.container {
     background-color: #eeeeee;
+}
+.footer>.container p>a {
+    color: #0645ad;
 }
 
 .brand-logo {
@@ -143,9 +259,9 @@ div.section {
 }
 
 .CodeMirror-scroll {
-    /* this allows CM elements to be resized to (almost) any 
-     * height while still relying on max-height (which keeps 
-     * the CM editors to no more than the size needed 
+    /* this allows CM elements to be resized to (almost) any
+     * height while still relying on max-height (which keeps
+     * the CM editors to no more than the size needed
      * unless resized) */
     max-height: 30em;
     min-width: 30em;
@@ -252,7 +368,7 @@ h2 {
 
 /* .alert-danger */
 .admonition.caution {
-    color: #b94a48;
+    color: #A33F3E;
     background-color: #f2dede;
     border-color: #eed3d7;
 }
@@ -455,19 +571,19 @@ div.flash {
 	ul#top-relations-console,
 	ul#bottom-relations-console {
 		list-style: none;
-		text-align: center; 
+		text-align: center;
 		width: 100%;
 		margin: 0 auto;
 		padding: 40px 0 20px 0;
 	}
-	#top-relations-next, 
+	#top-relations-next,
 	#top-relations-prev,
-	#bottom-relations-next, 
+	#bottom-relations-next,
 	#bottom-relations-prev {
 		width: 25%;
 		padding: 0 20px;
 		display: inline;
-	}	
+	}
 }
 
 .navLink a{
@@ -596,13 +712,13 @@ ul#pageNums, ul#pageNums li {
 
 .pagination > .active > a,
 .pagination > .active > span {
-background-color: #428bca !important; 
+background-color: #428bca !important;
 color: #fff !important;
 }
 
 .col-md-6-override {
 	text-align: center !important;
-	max-width: 100% !important;	
+	max-width: 100% !important;
 }
 
 /* end */
@@ -611,28 +727,124 @@ color: #fff !important;
 
 .pagination > .answered > a,
 .pagination > .answered > span {
-background-color: #eee; 
+background-color: #eee;
 color: #000;
 }
 
 .pagination > .correctCount > a,
 .pagination > .correctCount > span {
-background-color: #dff0d8; 
+background-color: #dff0d8;
 color: #000000;
 border-color: #000000;
 }
 
 .pagination > .skippedCount > a,
 .pagination > .skippedCount > span {
-background-color: #fcf8e3; 
+background-color: #fcf8e3;
 color: #000000;
 border-color: #000000;
 }
 
 .pagination > .incorrectCount > a,
 .pagination > .incorrectCount > span {
-background-color: #f2dede; 
+background-color: #f2dede;
 color: #000000;
 border-color: #000000;
 }
 /* END TIMED ASSESSMENT BUTTON STYLES */
+
+.sltooltip {
+    position: absolute;
+    z-index: 1020;
+    display: block;
+    padding-bottom: 5px;
+    font-size: 11px;
+    visibility: visible;
+    margin-top: -2px;
+    bottom:120%;
+    margin-left: -2em;
+}
+
+.sltooltip .sltooltip-arrow {
+    bottom: 0;
+    left: 50%;
+    margin-left: -5px;
+    border-top: 5px solid #000000;
+    border-right: 5px solid transparent;
+    border-left: 5px solid transparent;
+    position: absolute;
+    width: 0;
+    height: 0;
+}
+
+.sltooltip-inner {
+    max-width: 200px;
+    padding: 3px 8px;
+    color: #ffffff;
+    text-align: center;
+    text-decoration: none;
+    background-color: #000000;
+    -webkit-border-radius: 4px;
+       -moz-border-radius: 4px;
+            border-radius: 4px;
+}
+
+ul.dropdown-menu.globaltoc {
+    max-height: 700px;
+    overflow: auto;
+}
+
+
+.globaltoc span.caption-text {
+    display: inline-block;
+    font-weight: bold;
+    font-size: large;
+}
+
+
+/*
+ * Hide only visually, but have it available for screen readers:
+ * https://snook.ca/archives/html_and_css/hiding-content-for-accessibility
+ *
+ * 1. For long content, line feeds are not interpreted as spaces and small width
+ *    causes content to wrap 1 word per line:
+ *    https://medium.com/@jessebeach/beware-smushed-off-screen-accessible-text-5952a4c2cbfe
+ */
+
+ .visuallyhidden {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+    white-space: nowrap; /* 1 */
+}
+
+/*
+ * Extends the .visuallyhidden class to allow the element
+ * to be focusable when navigated to via the keyboard:
+ * https://www.drupal.org/node/897638
+ */
+
+.visuallyhidden.focusable:active,
+.visuallyhidden.focusable:focus {
+    clip: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    position: static;
+    width: auto;
+    white-space: inherit;
+}
+
+
+.blockquote {
+    text-align: center;
+    font-size: large;
+    font-style: italic;
+    padding-left: 2em;
+    padding-right: 2em;
+}
