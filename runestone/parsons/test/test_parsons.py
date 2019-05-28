@@ -29,16 +29,16 @@ class ParsonsTests(RunestoneTestCase):
         self.assertIsNotNone(source)
         blocks = source.find_elements_by_class_name("block")
         self.assertIsNotNone(source)
-        self.assertEquals(len(blocks), 5)
+        self.assertEqual(len(blocks), 5)
 
         # check that messages appear correctly
         checkme = self.driver.find_element_by_id('parsons-1-check')
         reset = self.driver.find_element_by_id('parsons-1-reset')
         message = self.driver.find_element_by_id("parsons-1-message")
         self.assertIsNotNone(message, None)
-        self.assertEquals(message.get_attribute("style"), "display: none;")
+        self.assertEqual(message.get_attribute("style"), "display: none;")
         checkme.click()
-        self.assertEquals(message.get_attribute("class"),"alert alert-danger")
+        self.assertEqual(message.get_attribute("class"),"alert alert-danger")
         reset.click()
         ActionChains(self.driver).drag_and_drop(source.find_element_by_id("parsons-1-block-3"), answer).perform()
         ActionChains(self.driver).drag_and_drop(source.find_element_by_id("parsons-1-block-2"), answer.find_element_by_id("parsons-1-block-3")).perform()
@@ -48,12 +48,12 @@ class ParsonsTests(RunestoneTestCase):
         self.wait_for_animation("#parsons-1-block-0")
         checkme.click()
         message = self.driver.find_element_by_id("parsons-1-message")
-        self.assertEquals(message.get_attribute("class"), "alert alert-info")
+        self.assertEqual(message.get_attribute("class"), "alert alert-info")
 
         # check that reset works
         reset.click()
         blocks = source.find_elements_by_class_name("block")
-        self.assertEquals(len(blocks), 5)
+        self.assertEqual(len(blocks), 5)
 
     def test_help(self):
         self.driver.get(self.host + "/index.html")
@@ -96,7 +96,7 @@ class ParsonsTests(RunestoneTestCase):
         self.assertTrue(self.wait_and_close_alert())
         self.wait_for_animation("#parsons-1-block-4")
         b4 = source.find_element_by_id("parsons-1-block-4")
-        self.assertEquals(b4.get_attribute("class"), "block disabled");
+        self.assertEqual(b4.get_attribute("class"), "block disabled");
         helpBtn.click() # provide Indentation
         self.assertTrue(self.wait_and_close_alert())
         self.wait_for_animation("#parsons-1-block-4")
@@ -106,7 +106,7 @@ class ParsonsTests(RunestoneTestCase):
         l6 = source.find_element_by_id("parsons-1-line-6")
         # There seems to be a timing issue -- a bit of delay makes this pass.
         time.sleep(0.1)
-        self.assertEquals(l6.get_attribute("class"), "prettyprint lang-py indent1")
+        self.assertEqual(l6.get_attribute("class"), "prettyprint lang-py indent1")
         self.assertFalse(self.f_exists("parsons-1-block-1"))
         b0 = answer.find_element_by_id("parsons-1-block-0")
         l1 = b0.find_element_by_id("parsons-1-line-1")
@@ -122,33 +122,33 @@ class ParsonsTests(RunestoneTestCase):
         helpBtn.click()
         self.assertTrue(self.wait_and_close_alert())
         answer_after = answer.get_attribute('innerHTML')
-        self.assertEquals(answer_initial, answer_after)
+        self.assertEqual(answer_initial, answer_after)
         source_after = source.get_attribute('innerHTML')
-        self.assertEquals(source_initial, source_after)
+        self.assertEqual(source_initial, source_after)
 
     def test_numbering(self):
         self.driver.get(self.host + "/index.html")
 
         # right label block
         rlb = self.driver.find_element_by_id('parsons-2-block-1')
-        self.assertEquals(len(rlb.find_elements_by_class_name("labels")), 1) # has label
-        self.assertEquals(len(rlb.find_elements_by_class_name("lines")), 1) # has lines
+        self.assertEqual(len(rlb.find_elements_by_class_name("labels")), 1) # has label
+        self.assertEqual(len(rlb.find_elements_by_class_name("lines")), 1) # has lines
         children = rlb.find_elements_by_xpath("*")
         self.assertTrue("lines" in children[0].get_attribute("class").split())
         self.assertTrue("labels" in children[1].get_attribute("class").split()) # label on right
 
         # left label block
         llb = self.driver.find_element_by_id('parsons-3-block-1')
-        self.assertEquals(len(llb.find_elements_by_class_name("labels")), 1) # has label
-        self.assertEquals(len(llb.find_elements_by_class_name("lines")), 1) # has lines
+        self.assertEqual(len(llb.find_elements_by_class_name("labels")), 1) # has label
+        self.assertEqual(len(llb.find_elements_by_class_name("lines")), 1) # has lines
         children = llb.find_elements_by_xpath("*")
         self.assertTrue("lines" in children[1].get_attribute("class").split())
         self.assertTrue("labels" in children[0].get_attribute("class").split()) # label on left
 
         # no label block
         nlb = self.driver.find_element_by_id('parsons-4-block-1')
-        self.assertEquals(len(nlb.find_elements_by_class_name("labels")), 0) # no label
-        self.assertEquals(len(nlb.find_elements_by_class_name("lines")), 1) # has lines
+        self.assertEqual(len(nlb.find_elements_by_class_name("labels")), 0) # no label
+        self.assertEqual(len(nlb.find_elements_by_class_name("lines")), 1) # has lines
 
     def wait_for_animation(self, selector):
         is_animation_in_progress = self.is_element_animated(selector)
