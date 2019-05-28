@@ -378,6 +378,10 @@ ActiveCode.prototype.createControls = function () {
 
 };
 
+ActiveCode.prototype.enableSaveLoad = function () {
+    $(this.runButton).text($.i18n("msg_activecode_save_run"));
+};
+
 // Activecode -- If the code has not changed wrt the scrubber position value then don't save the code or reposition the scrubber
 //  -- still call runlog, but add a parameter to not save the code
 // add an initial load history button
@@ -1346,6 +1350,11 @@ HTMLActiveCode.prototype.createOutput = function () {
     this.outerDiv.appendChild(clearDiv);
 
 };
+
+HTMLActiveCode.prototype.enableSaveLoad = function () {
+    $(this.runButton).text($.i18n("msg_activecode_render"));
+};
+
 
 
 String.prototype.replaceAll = function (target, replacement) {
@@ -2481,7 +2490,11 @@ if (typeof component_factory === 'undefined') {
 component_factory['activecode'] = ACFactory.createActiveCodeFromOpts;
 
 $(document).bind("runestone:login", function() {
-    $(".run-button").text($.i18n("msg_activecode_save_run"));
+    for (k in edList) {
+        if (edList.hasOwnProperty(k)) {
+            edList[k].enableSaveLoad();
+        }
+    }
 });
 
 // This seems a bit hacky and possibly brittle, but its hard to know how long it will take to

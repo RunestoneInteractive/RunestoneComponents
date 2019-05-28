@@ -64,9 +64,8 @@ $.i18n().load({
         "msg_activecode_server_err": "A server error occurred: $1 $2",
         "msg_activecode_compiling_running": "Compiling and Running your Code Now...",
         "msg_activecode_server_comm_err": "Error communicating with the server.",
-        "msg_activecode_save_run": "Save & Run"
-
-
+        "msg_activecode_save_run": "Save & Run",
+        "msg_activecode_render": "Save & Render"
 
     }
 });
