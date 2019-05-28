@@ -252,12 +252,12 @@ class FillInTheBlank(RunestoneIdDirective):
                 except (SyntaxError, ValueError, AssertionError):
                     # We can't parse this as a number, so assume it's a regex.
                     regex = (
-                        # The given regex must match the entire string, from the beginning (which may be preceeded by spaces) ...
-                        '^ *' +
-                        # ... to the contents (where a single space in the provided pattern is treated as one or more spaces in the student's anwer) ...
-                        feedback_field_name.rawsource.replace(' ', ' +')
+                        # The given regex must match the entire string, from the beginning (which may be preceeded by whitespaces) ...
+                        '^\s*' +
+                        # ... to the contents (where a single space in the provided pattern is treated as one or more whitespaces in the student's anwer) ...
+                        feedback_field_name.rawsource.replace(' ', '\s+')
                         # ... to the end (also with optional spaces).
-                        + ' *$'
+                        + '\s*$'
                     )
                     blankFeedbackDict = {
                         'regex': regex,

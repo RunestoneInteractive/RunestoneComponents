@@ -4,7 +4,6 @@ import sys
 import platform
 import subprocess
 from selenium import webdriver
-from selenium.webdriver.remote import webelement
 from pyvirtualdisplay import Display
 
 # Select an unused port for serving web pages to the test suite.
@@ -41,7 +40,7 @@ class ModuleFixture(unittest.TestCase):
         if self.exit_status_success:
             self.assertFalse(p.returncode)
         # Run the server. Simply calling ``runestone serve`` fails, since the process killed isn't the actual server, but probably a setuptools-created launcher.
-        self.runestone_server = subprocess.Popen(['python', '-m', 'runestone', 'serve', '--port', PORT])
+        self.runestone_server = subprocess.Popen([sys.executable, '-m', 'runestone', 'serve', '--port', PORT])
 
         # Testing time in dominated by browser startup/shutdown. So, simply run all tests in a module in a single browser instance to speed things up. See ``RunestoneTestCase.setUp`` for additional code to (mostly) clear the browser between tests.
         #
