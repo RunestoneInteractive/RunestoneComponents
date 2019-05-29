@@ -1,0 +1,3 @@
+selenium>=2.53.6
+pyvirtualdisplay
+pytest
