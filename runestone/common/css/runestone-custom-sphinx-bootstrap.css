@@ -802,6 +802,14 @@ ul.dropdown-menu.globaltoc {
 }
 
 
+/* Style lp textareas. */
+textarea#lp-result {
+    width: 100%;
+    height: 10em;
+    font-family: monospace;
+}
+
+
 /*
  * Hide only visually, but have it available for screen readers:
  * https://snook.ca/archives/html_and_css/hiding-content-for-accessibility

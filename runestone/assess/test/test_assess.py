@@ -36,8 +36,10 @@ class MultipleChoiceQuestion_Error_Tests(TestCase):
         for error_line in inside_directive_lines:
             self.assertIn(': WARNING: On line {}, a single-item list must be nested under each answer.'.format(error_line), mf.build_stderr_data)
 
+        self.assertIn("WARNING: while setting up extension runestone.lp: role 'docname' is already registered, it will be overridden", mf.build_stderr_data)
+
         # Make sure we saw all errors.
-        self.assertEqual(len(directive_level_errors) + len(inside_directive_lines), mf.build_stderr_data.count('WARNING'))
+        self.assertEqual(len(directive_level_errors) + len(inside_directive_lines) + 1, mf.build_stderr_data.count('WARNING'))
 
 class MultipleChoiceQuestion_Tests(RunestoneTestCase):
     def test_ma1(self):
