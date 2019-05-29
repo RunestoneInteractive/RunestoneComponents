@@ -105,6 +105,10 @@ rst_prolog = (
 
 .. |blank| replace:: :blank:`x`
 """
+
+# For literate programming files, provide a convenient way to refer to a source file's name. See `runestone.lp.lp._docname_role`.
+""".. |docname| replace:: :docname:`name`
+"""
 )
 
 # Select whether to use server-side grading where possible. Server-side grading
@@ -116,6 +120,33 @@ rst_prolog = (
 # The first two conditions cause the ``RunestoneBase.logBookEvent`` in ``runestonebase.js`` to post a student response to the server. The last conditions ensures that ``hsblog`` in ``ajax.py`` on the server will return a response containing grading information.
 runestone_server_side_grading = False
 
+# Extensions
+# ==========
+# CodeChat
+# --------
+# **CodeChat note:** A dict of {glob_, lexer_alias}, which uses lexer_alias
+# (e.g. a lexer's `short name <http://pygments.org/docs/lexers/>`_) to analyze
+# any file wihch matches the given `glob
+# <https://docs.python.org/2/library/glob.html>`_.
+CodeChat_lexer_for_glob = {
+    # Otherwise, Pygments picks the wrong lexer for CSS...
+    '*.css': 'CSS',
+    # ... and for JavaScript.
+    '*.js': 'JavaScript',
+}
+#
+# **CodeChat note::** This is a list of exclude_patterns_ which applies only to
+# source documents; exclude_patterns_ will exclude the given files from all of
+# Sphinx (for example, files here won't be included even if they're mentioned in
+# html_static_path_.
+CodeChat_excludes = []
+#
+# Inline syntax highlight
+# -----------------------
+# `inline_highlight_respect_highlight <https://sphinxcontrib-inlinesyntaxhighlight.readthedocs.io/en/latest/#confval-inline_highlight_respect_highlight>`_:
+# Use the language specified by the ``highlight`` directive to syntax highlight ``code`` role contents.
+inline_highlight_respect_highlight = True
+inline_highlight_literals = False
 
 # -- Options for HTML output ---------------------------------------------------
 
@@ -129,7 +160,7 @@ html_theme = 'sphinx_bootstrap'
 #html_theme_options = {'nosidebar': 'true'}
 html_theme_options = {
     # Navigation bar title. (Default: ``project`` value)
-    'navbar_title': "fitb_test",
+    'navbar_title': "Runestone Default",
 
     # Tab name for entire site. (Default: "Site")
     'navbar_site_name': "Chapters",

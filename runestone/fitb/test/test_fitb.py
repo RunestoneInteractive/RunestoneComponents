@@ -28,8 +28,10 @@ class FITB_MISC_Tests(TestCase):
         for error_line, error_string in inside_directive_errors:
             self.assertIn(': WARNING: On line {}, {}'.format(error_line, error_string), mf.build_stderr_data)
 
+        self.assertIn("WARNING: while setting up extension runestone.lp: role 'docname' is already registered, it will be overridden", mf.build_stderr_data)
+
         # Make sure we saw all errors.
-        self.assertEqual(len(directive_level_errors) + len(inside_directive_errors),
+        self.assertEqual(len(directive_level_errors) + len(inside_directive_errors) + 1,
                          mf.build_stderr_data.count('WARNING'))
 
     # Check that numbering works correctly.
