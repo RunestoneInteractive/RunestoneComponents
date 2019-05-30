@@ -47,3 +47,8 @@ class RevealQuestion_Tests(RunestoneTestCase):
 
         cnamestr = q1.get_attribute("style")
         self.assertEqual("display: none;", cnamestr)
+
+    def test_r4(self):
+        '''Check for is_instructor test '''
+        t1 = self.driver.find_element_by_id("reveal")
+        self.assertIn("{{ if is_instructor: }}", t1.get_attribute('innerHTML'))

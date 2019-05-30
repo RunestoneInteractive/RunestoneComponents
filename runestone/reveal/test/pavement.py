@@ -32,7 +32,8 @@ options(
                        'use_services': 'false',
                        'python3': 'false',
                        'dburl': '',
-                       'basecourse': 'reveal-test'
+                       'basecourse': 'reveal-test',
+                       'dynamic_pages': True
                         }
     )
 )

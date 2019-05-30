@@ -48,22 +48,35 @@ def visit_reveal_node(self, node):
     else:
         node.reveal_options['modaltitle'] = ''
 
-    res = TEMPLATE_START % node.reveal_options
+    if node.reveal_options['instructoronly'] and node.reveal_options['is_dynamic']:
+        res = DYNAMIC_PREFIX
+    else:
+        res = ""
+
+    res += TEMPLATE_START % node.reveal_options
     self.body.append(res)
 
 def depart_reveal_node(self,node):
 #Set options and format templates accordingly
     res = TEMPLATE_END % node.reveal_options
+    if node.reveal_options['instructoronly'] and node.reveal_options['is_dynamic']:
+        res += DYNAMIC_SUFFIX
 
     self.body.append(res)
 
 #Templates to be formatted by node options
+DYNAMIC_PREFIX = '''
+{{ if is_instructor: }}
+'''
 TEMPLATE_START = '''
     <div data-component="reveal" id="%(divid)s" %(modal)s %(modaltitle)s %(showtitle)s %(hidetitle)s %(instructoronly)s>
     '''
 TEMPLATE_END = '''
     </div>
     '''
+DYNAMIC_SUFFIX = '''
+{{ pass }}
+'''
 class RevealDirective(RunestoneIdDirective):
     """
 .. reveal:: identifier
@@ -104,6 +117,7 @@ class RevealDirective(RunestoneIdDirective):
             ...
             """
         super(RevealDirective, self).run()
+        env = self.state.document.settings.env
         self.assert_has_content() # make sure reveal has something in it
 
         if not 'showtitle' in self.options:
@@ -119,6 +133,9 @@ class RevealDirective(RunestoneIdDirective):
             self.options['instructoronly'] = '''data-instructoronly style="display: none;"'''
         else:
             self.options['instructoronly'] = ""
+
+        is_dynamic = env.config.html_context.get('dynamic_pages', False)
+        self.options['is_dynamic'] = is_dynamic
 
         reveal_node = RevealNode(self.options, rawsource=self.block_text)
         reveal_node.source, reveal_node.line = self.state_machine.get_source_and_line(self.lineno)
