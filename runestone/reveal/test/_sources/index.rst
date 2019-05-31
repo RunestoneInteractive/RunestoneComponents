@@ -23,3 +23,10 @@ Reveal
     :hidetitle: Hide Content
 
     This content starts out hidden.
+
+.. reveal:: question2
+    :showtitle: Reveal Content
+    :hidetitle: Hide Content
+    :instructoronly:
+
+    This content starts out hidden.
