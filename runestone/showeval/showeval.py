@@ -40,7 +40,11 @@ CODE = """\
 SCRIPT = """\
 <script>
     $(document).ready(function() {
-      steps = %(steps)s;
+      raw_steps = %(steps)s;
+      steps = []
+      for (let s of raw_steps) {
+          steps.push(s.replace(/\\\\/g, ''))
+      }
       %(divid)s_object = new SHOWEVAL.ShowEval($('#%(divid)s'), steps, %(trace_mode)s);
       %(divid)s_object.setNextButton('#%(divid)s_nextStep');
       %(divid)s_object.setResetButton('#%(divid)s_reset');
@@ -109,12 +113,18 @@ config values (conf.py):
         env = self.state.document.settings.env
         self.options['divclass'] = env.config.showeval_div_class
 
+        is_dynamic = env.config.html_context.get('dynamic_pages', False)
+        is_dynamic = True if is_dynamic == 'True' else False
         step = False
         count = 0
         for line in self.content:
             if step == True:
                 if line != '':
-                    self.options['steps'].append(str(line))
+                    if is_dynamic:
+                        esc_line = str(line).replace('{','\{')
+                    else:
+                        esc_line = str(line)
+                    self.options['steps'].append(esc_line)
             elif '~~~~' in line:
                 step = True
             else:
