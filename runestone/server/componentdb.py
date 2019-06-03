@@ -28,7 +28,8 @@ from runestone.common.runestonedirective import RunestoneDirective
 try:
     dburl = get_dburl()
     engine = create_engine(dburl, client_encoding='utf8', convert_unicode=True)
-except RuntimeError as e:
+    engine.connect()
+except Exception as e:  # psycopg2.OperationalError
     dburl = None
     engine = None
     meta = None
