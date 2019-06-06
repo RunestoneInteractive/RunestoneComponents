@@ -149,7 +149,6 @@ function gotUser(data, status, whatever) {
             mess = "username: " + d.nick;
             eBookConfig.email = d.email;
             eBookConfig.isLoggedIn = true;
-            eBookConfig.cohortId = d.cohortId;
             eBookConfig.isInstructor = d.isInstructor;
             // If the user is not an instructor then remove the link to the instructors page
             if (! d.isInstructor) {
@@ -213,17 +212,6 @@ function handleLoginLogout() {
 }
 
 function setupNavbarLoggedIn() {
-    if (eBookConfig.cohortId == null || eBookConfig.cohortId == "") {
-        $('#joinGroupLink').show();
-        $('#groupScheduleLink').hide();
-        $('#newChapterLink').hide();
-        $('#manageGroupLink').hide();
-    } else {
-        $('#joinGroupLink').hide();
-        $('#groupScheduleLink').show();
-        $('#newChapterLink').show();
-        $('#manageGroupLink').show();
-    }
     $('#profilelink').show();
     $('#passwordlink').show();
     $('#registerlink').hide();
