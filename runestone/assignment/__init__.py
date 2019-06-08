@@ -19,7 +19,7 @@ __author__ = 'Paul Resnick'
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from runestone.server.componentdb import addAssignmentToDB, addAssignmentQuestionToDB, getCourseID, getOrCreateAssignmentType, getQuestionID, get_HTML_from_DB
+from runestone.server.componentdb import addAssignmentToDB, addAssignmentQuestionToDB, getCourseID, getQuestionID, get_HTML_from_DB
 from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
 from datetime import datetime
 
@@ -111,32 +111,6 @@ class Assignment(RunestoneDirective):
         # self.options['basecourse'] = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
 
         name = self.options.get('name') # required; error if missing
-        # assignment_type_name = self.options.get('assignment_type')
-        # assignment_type_id = getOrCreateAssignmentType(assignment_type_name)
-        #
-        # deadline = None
-        #
-        # if 'deadline' in self.options:
-        #     try:
-        #         deadline = datetime.strptime(self.options['deadline'], '%Y-%m-%d %H:%M')
-        #     except:
-        #         try:
-        #             deadline = datetime.strptime(self.options['deadline'], '%Y-%m-%d %H:%M:%S')
-        #             self.state.document.settings.env.warn(self.state.document.settings.env.docname, "deadline not in preferred format %Y-%m-%d %H:%M but accepting alternate format with seconds")
-        #         except:
-        #             self.state.document.settings.env.warn(self.state.document.settings.env.docname, "deadline missing or incorrectly formatted; Omitting deadline")
-        #
-        # points = self.options.get('points', 0)
-        # threshold = self.options.get('threshold', None)
-        # if threshold:
-        #     threshold = int(threshold)
-        # autograde = self.options.get('autograde', None)
-        #
-        # assignment_id = addAssignmentToDB(name = name,
-        #                   course_id = course_id,
-        #                   assignment_type_id = assignment_type_id,
-        #                   deadline = deadline,
-        #                   points = points)
 
         unparsed = self.options.get('questions', None)
         question_names = []

@@ -38,7 +38,6 @@ else:
     # If no exceptions are raised, then set up the database.
     meta = MetaData()
     questions = Table('questions', meta, autoload=True, autoload_with=engine)
-    assignment_types = Table('assignment_types', meta, autoload=True, autoload_with=engine)
     assignment_questions = Table('assignment_questions', meta, autoload=True, autoload_with=engine)
     courses = Table('courses', meta, autoload=True, autoload_with=engine)
 
@@ -140,25 +139,6 @@ def getOrInsertQuestionForPage(base_course=None, name=None, is_private='F', ques
             author=author,
             difficulty=difficulty,
             chapter=chapter)
-        res = engine.execute(ins)
-        return res.inserted_primary_key[0]
-
-def getOrCreateAssignmentType(assignment_type_name, grade_type = None, points_possible = None, assignments_count = None, assignments_dropped = None):
-
-
-    # search for it in the DB
-    sel = select([assignment_types]).where(assignment_types.c.name == assignment_type_name)
-    res = engine.execute(sel).first()
-    if res:
-        return res['id']
-    else:
-        # create the assignment type
-        ins = assignment_types.insert().values(
-            name=assignment_type_name,
-            grade_type = grade_type,
-            points_possible = points_possible,
-            assignments_count = assignments_count,
-            assignments_dropped = assignments_dropped)
         res = engine.execute(ins)
         return res.inserted_primary_key[0]
 

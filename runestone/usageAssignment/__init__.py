@@ -22,7 +22,7 @@ from docutils.parsers.rst import directives
 from sqlalchemy import Table
 from sqlalchemy.orm import sessionmaker
 from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
-from runestone.server.componentdb import addAssignmentToDB, getOrCreateAssignmentType, getCourseID, addAssignmentQuestionToDB, getOrInsertQuestionForPage, engine, meta
+from runestone.server.componentdb import addAssignmentToDB, getCourseID, addAssignmentQuestionToDB, getOrInsertQuestionForPage, engine, meta
 from datetime import datetime
 from collections import OrderedDict
 
@@ -152,13 +152,6 @@ class usageAssignment(RunestoneDirective):
         # Questions = Table('questions', meta, autoload=True, autoload_with=engine)
         # AssignmentType = Table('assignment_types', meta, autoload=True, autoload_with=engine)
         # Section = Table('sections', meta, autoload=True, autoload_with=engine)
-
-        # assignment_type_id = getOrCreateAssignmentType("Lecture Prep",
-        #                           grade_type = 'use',
-        #                           points_possible = '50',
-        #                           assignments_count = 23,
-        #                           assignments_dropped = 3)
-
 
         course_name = self.state.document.settings.env.config.html_context['course_id']
         self.options['course_name'] = course_name
