@@ -13,7 +13,6 @@ sys.path.append(os.getcwd())
 # The project name, for use below.
 project_name = %(project_name)s
 # True if this project uses Runestone services.
-use_services = %(use_services)s
 # The root directory for ``runestone serve``.
 serving_dir = "%(build_dir)s/" + project_name
 # The destination directory for ``runestone deploy``.
@@ -40,7 +39,7 @@ options(
                        'enable_chatcodes': '%(enable_chatcodes)s',
                        'allow_pairs': '%(allow_pairs)s',
                        'dynamic_pages': %(dynamic_pages)s,
-                       'use_services': use_services,
+                       'use_services': %(use_services)s,
                        'basecourse': project_name,
                        # If ``dynamic_pages`` is 'True', then the following values are ignored, since they're provided by the server.
                        'course_id': project_name,
