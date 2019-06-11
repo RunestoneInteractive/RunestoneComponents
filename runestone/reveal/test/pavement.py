@@ -33,7 +33,7 @@ options(
                        'python3': 'false',
                        'dburl': '', 'downloads_enabled': 'true', 'enable_chatcodes': 'false', 'allow_pairs': 'false',
                        'basecourse': 'reveal-test',
-                       'dynamic_pages': True
+                       'dynamic_pages': False
                         }
     )
 )
