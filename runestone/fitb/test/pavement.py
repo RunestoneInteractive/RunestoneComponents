@@ -32,7 +32,7 @@ options(
                        'course_url': 'http://127.0.0.1:8000',
                        'use_services': 'false',
                        'python3': 'false',
-                       'dburl': '',
+                       'dburl': '', 'downloads_enabled': 'true', 'enable_chatcodes': 'false', 'allow_pairs': 'false',
                        'default_ac_lang': 'python',
                        'basecourse': 'testfitb',
                        'jobe_server': 'http://jobe2.cosc.canterbury.ac.nz',

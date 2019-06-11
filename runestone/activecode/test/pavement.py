@@ -31,7 +31,7 @@ options(
                        'course_url':master_url,
                        'use_services': 'false',
                        'python3': 'true',
-                       'dburl': '',
+                       'dburl': '', 'downloads_enabled': 'true', 'enable_chatcodes': 'false', 'allow_pairs': 'false',
                        'basecourse': 'activecodetest',
                        'jobe_server': 'http://jobe2.cosc.canterbury.ac.nz',
                        'proxy_uri_runs': '/jobe/index.php/restapi/runs/',
