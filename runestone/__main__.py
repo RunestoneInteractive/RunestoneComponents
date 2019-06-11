@@ -81,7 +81,6 @@ def init():
 
     shutil.copytree(os.path.join(template_base_dir,'_sources'),'_sources')
     shutil.copytree(os.path.join(template_base_dir,'_static'),'_static')
-    shutil.copytree(os.path.join(template_base_dir,'_templates'),'_templates')
     os.makedirs(conf_dict['build_dir'])
     paver_final = paver_stuff.decode('utf-8') % conf_dict
     config_final = config_stuff.decode('utf-8') % conf_dict
