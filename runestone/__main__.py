@@ -80,7 +80,6 @@ def init():
     conf_dict['downloads_enabled'] = click.prompt("Enable inline Activecode downloads by default (single activecode downloads may be enabled with the :enabledownload: flag)", default="false")
 
     shutil.copytree(os.path.join(template_base_dir,'_sources'),'_sources')
-    shutil.copytree(os.path.join(template_base_dir,'_static'),'_static')
     os.makedirs(conf_dict['build_dir'])
     paver_final = paver_stuff.decode('utf-8') % conf_dict
     config_final = config_stuff.decode('utf-8') % conf_dict
