@@ -1,10 +1,6 @@
 RunestoneComponents
 ===================
 
-.. image:: https://badges.gitter.im/Join%20Chat.svg
-   :alt: Join the chat at https://gitter.im/RunestoneInteractive/RunestoneComponents
-   :target: https://gitter.im/RunestoneInteractive/RunestoneComponents?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
-
 .. image:: https://img.shields.io/pypi/v/Runestone.svg
    :target: https://pypi.python.org/pypi/Runestone
    :alt: PyPI Version
@@ -13,7 +9,9 @@ RunestoneComponents
    :target: https://pypi.python.org/pypi/Runestone
    :alt: PyPI Monthly downloads
 
-.. image:: http://bnmnetp.me:8088/buildStatus/icon?job=RunestoneComponents&build=9
+.. image:: https://travis-ci.com/RunestoneInteractive/RunestoneComponents.svg?branch=master
+    :target: https://travis-ci.com/RunestoneInteractive/RunestoneComponents
+
 
 Packaging of the Runestone components for publishing educational materials using Sphinx and restructuredText. Check out the `Overview <http://interactivepython.org/runestone/static/overview/overview.html>`_ To see all of the extensions in action.
 
