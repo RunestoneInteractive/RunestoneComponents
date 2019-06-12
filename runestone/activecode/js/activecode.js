@@ -2415,15 +2415,8 @@ ACFactory.createScratchActivecode = function() {
     // use the URL to assign a divid - each page should have a unique Activecode block id.
     // Remove everything from the URL but the course and page name
     // todo:  this could probably be eliminated and simply moved to the template file
-    var divid = document.URL.split('#')[0];
-    if (divid.indexOf('static') > -1) {
-        divid = divid.split('static')[1];
-    } else {
-        divid = divid.split('/');
-        divid = divid.slice(-2).join("");
-    }
-    divid = divid.split('?')[0];  // remove any query string (e.g ?lastPosition)
-    divid = divid.replaceAll('/', '').replace('.html', '').replace(':', '');
+    var divid = eBookConfig.course + "_scratch_ac";
+    divid = divid.replace(/[#.]/g,''); // in case book title has characters that will mess up our selectors
     eBookConfig.scratchDiv = divid;
     var lang = eBookConfig.acDefaultLanguage ? eBookConfig.acDefaultLanguage : 'python'
     // generate the HTML
