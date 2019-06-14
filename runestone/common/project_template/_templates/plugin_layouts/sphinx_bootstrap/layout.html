@@ -239,7 +239,9 @@
     eBookConfig.basecourse = '{{= base_course }}';
     eBookConfig.isLoggedIn = {{= is_logged_in}};
     eBookConfig.email = '{{= user_email }}';
-    eBookConfig.isInstructor = {{= is_instructor }}
+    eBookConfig.isInstructor = {{= is_instructor }};
+    eBookConfig.username = '{{= user_id}}';
+    eBookConfig.readings = {{= readings}};
     {% endraw %}
   {% else %}
     eBookConfig.useRunestoneServices = {% if use_services -%}true{%- else -%}false{%- endif -%};
@@ -303,7 +305,7 @@
   <div class="container">
     <p class="pull-right">
       {% if use_services %}
-      <span id='numuserspan'></span> readers online now | <span class='loggedinuser'></span>
+      <span id='numuserspan'></span><span class='loggedinuser'></span>
       {% endif %}
       | <a href="#">Back to top</a>
       {% if theme_source_link_position == "footer" %}
