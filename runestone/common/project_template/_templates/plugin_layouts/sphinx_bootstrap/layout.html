@@ -237,6 +237,8 @@
     eBookConfig.app = eBookConfig.host + '/' + '{{= request.application }}';
     eBookConfig.course = '{{= course_name }}';
     eBookConfig.basecourse = '{{= base_course }}';
+    eBookConfig.isLoggedIn = {{= is_logged_in}};
+    eBookConfig.email = '{{= user_email }}';
     eBookConfig.isInstructor = {{= is_instructor }}
     {% endraw %}
   {% else %}
@@ -250,7 +252,6 @@
   eBookConfig.logLevel = {{loglevel}};
   eBookConfig.loginRequired = {{login_required}};
   eBookConfig.build_info = "{{build_info}}";
-  eBookConfig.isLoggedIn = false;
   eBookConfig.python3 = {{ python3 }};
   eBookConfig.acDefaultLanguage = '{{ default_ac_lang }}' ? '{{ default_ac_lang }}' : 'python'
   eBookConfig.runestone_version = '{{ runestone_version }}';

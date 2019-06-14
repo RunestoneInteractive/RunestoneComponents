@@ -147,11 +147,8 @@ function gotUser(data, status, whatever) {
     } else {
         if (!caughtErr) {
             mess = "username: " + d.nick;
-            eBookConfig.email = d.email;
-            eBookConfig.isLoggedIn = true;
-            eBookConfig.isInstructor = d.isInstructor;
             // If the user is not an instructor then remove the link to the instructors page
-            if (! d.isInstructor) {
+            if (! eBookConfig.isInstructor) {
                 $("#ip_dropdown_link").remove()
             }
             $(document).trigger("runestone:login")
