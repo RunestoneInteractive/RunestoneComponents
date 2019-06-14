@@ -4,6 +4,7 @@ import sys
 import platform
 import subprocess
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from pyvirtualdisplay import Display
 
 # Select an unused port for serving web pages to the test suite.
@@ -51,11 +52,9 @@ class ModuleFixture(unittest.TestCase):
         else:
             self.display = None
         #self.driver = webdriver.PhantomJS() # use this for Jenkins auto testing
-        # options = webdriver.ChromeOptions()
-        # options.add_argument("headless")
-        # options.add_argument("window-size=1200x800")
-        #self.driver = webdriver.Chrome(chrome_options=options)  # good for development.
-        self.driver = webdriver.Chrome()  # good for development.
+        options = Options()
+        options.add_argument("--window-size=1200,800")
+        self.driver = webdriver.Chrome(chrome_options=options)  # good for development.
 
         # Make this accessible
         global mf
