@@ -2375,8 +2375,13 @@ SQLActiveCode.prototype.init = function(opts) {
 
     ActiveCode.prototype.init.apply(this,arguments);
 
+    if (eBookConfig.useRunestoneServices) {
+        var fnprefix = '/runestone/books/published/' + eBookConfig.basecourse + '/_static';
+    } else {
+        var fnprefix = '/_static';
+    }
     this.config = {
-        locateFile: filename => `/_static/${filename}`
+        locateFile: filename => `${fnprefix}/${filename}`
     }
 
     var self = this;
@@ -2406,19 +2411,24 @@ SQLActiveCode.prototype.init = function(opts) {
 
 SQLActiveCode.prototype.runProg = function()  {
 
-      // Run a query without reading the results
-      //this.db.run("CREATE TABLE test (col1, col2);");
-      // Insert two rows: (1,111) and (2,222)
-      //this.db.run("INSERT INTO test VALUES (?,?), (?,?)", [1,111,2,222]);
-
+    // Clear any old results
     let divid = this.divid+'_sql_out';
     let respDiv = document.getElementById(divid);
     if (respDiv) {
         respDiv.parentElement.removeChild(respDiv)
     }
+    $(this.output).text("")
+    // Run this query
     let query = this.buildProg();
-    var res = this.db.exec(query);
-    console.log(res); //res is an array??
+    try {
+        var res = this.db.exec(query);
+    } catch(error) {
+        $(this.output).text(error)
+        $(this.outDiv).show()
+        return
+    }
+
+    //
     let table = createTable(res[0]);
     respDiv = document.createElement('div')
     respDiv.id = divid;
