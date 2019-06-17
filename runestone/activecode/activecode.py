@@ -50,6 +50,7 @@ def setup(app):
     app.add_autoversioned_javascript('activecode.js')
     app.add_autoversioned_javascript('clike.js')
     app.add_autoversioned_javascript('timed_activecode.js')
+    app.add_autoversioned_javascript('sql-wasm.js') # todo: only load if we need it
 
 
 
@@ -68,7 +69,7 @@ TEMPLATE_START = """
 TEMPLATE_END = """
 <textarea data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s
     %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s %(chatcodes)s
-    data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(tie)s %(nopair)s
+    data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(tie)s %(dburl)s %(nopair)s
     %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(hidehistory)s>
 %(initialcode)s
 </textarea>
@@ -154,6 +155,7 @@ class ActiveCode(RunestoneIdDirective):
    :available_files: : other additional files (java, python2, python3)
    :enabledownload: -- allow textfield contents to be downloaded as *.py file
    :nopair: -- disable pair programming features
+   :dburl: url to load database for sql mode
 
     If this is a homework problem instead of an example in the text
     then the assignment text should go here.  The assignment text ends with
@@ -201,7 +203,8 @@ config values (conf.py):
         'interpreterargs': directives.unchanged,
         'runargs': directives.unchanged,
         'tie': directives.unchanged,
-        'nopair': directives.flag
+        'nopair': directives.flag,
+        'dburl': directives.unchanged
     })
 
 
@@ -329,6 +332,11 @@ config values (conf.py):
             self.options['tie'] = "data-tie='{}'".format(self.options['tie'])
         else:
             self.options['tie'] = ""
+
+        if 'dburl' in self.options:
+            self.options['dburl'] = "data-dburl='{}'".format(self.options['dburl'])
+        else:
+            self.options['dburl'] = ""
 
         for opt,tp in [('compileargs','cargs'),('linkargs','largs'),('runargs','rargs'),('interpreterargs','iargs')]:
             if opt in self.options:

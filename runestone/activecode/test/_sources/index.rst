@@ -12,7 +12,7 @@ End of test1
 
 .. datafile:: Shape.java
     :hide:
-    
+
     public abstract class Shape {
         String name;
         public Shape(String name) {
@@ -1296,3 +1296,14 @@ End of test1
       }
 
     } // this } is the end of class Picture, put all new methods before this
+
+
+Support for SQL in the browser ?  Yes!
+--------------------------------------
+
+
+.. activecode:: sql1
+    :language: sql
+    :dburl: http://dev.runestoneinteractive.org:8080/_static/bikeshare.db
+
+    select * from trip_data limit 10;
