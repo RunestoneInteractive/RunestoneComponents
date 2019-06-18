@@ -1258,6 +1258,7 @@ JSActiveCode.prototype.runProg = function() {
 
     $(this.eContainer).remove();
     $(this.output).text('');
+    $(this.eContainer).remove();
     $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
     $(this.outDiv).show({duration:700,queue:false});
 
@@ -1280,6 +1281,143 @@ JSActiveCode.prototype.runProg = function() {
 
 
 };
+
+
+CljSActiveCode.prototype = new ActiveCode();
+
+function CljSActiveCode(opts) {
+    if (opts) {
+        this.init(opts)
+        }
+    }
+
+CljSActiveCode.prototype.iniit = function(opts) {
+    ActiveCode.prototype.init.apply(this,arguments)
+    }
+
+CljSActiveCode.prototype.buildProg = function() {
+    var prog = this.editor.getValue();
+    if (this.includes !== undefined) {
+        // iterate over the includes, in-order prepending to prog
+        pretext = "";
+        for (var x=0; x < this.includes.length; x++) {
+            pretext = pretext + edList[this.includes[x]].editor.getValue();
+            }
+        prog = pretext + prog
+    }
+
+    if (this.suffix) {
+        prog = prog + this.suffix;
+    }
+    return prog;
+}
+
+CljSActiveCode.prototype.addErrorMessage = function(err) {
+    var errString = (err.cause) ? err.cause.message : err.message;
+    var errName = (err.cause) ? err.cause.__proto__.name : "";
+    var errHead;
+    if (err.cause) {
+        errHead = $('<h3>').html('Error');
+    } else {
+        errHead = $('<h3>').html('Warning');
+    }
+    this.eContainer = this.outerDiv.appendChild(document.createElement('div'));
+    this.eContainer.className = 'error alert alert-danger';
+    this.eContainer.id = this.divid + '_errinfo';
+    this.eContainer.appendChild(errHead[0]);
+    var errText = this.eContainer.appendChild(document.createElement('pre'));
+    var description = "";
+    var toFix = "";
+    if (errName) {
+        errText.innerHTML = errName + ": " + errString;
+    }
+    else {
+        errText.innerHTML = errString;
+    }
+    var foundMatch = false;
+    for (var index = 0; index < cljsErrorList.length && (! foundMatch); index += 2) {
+        foundMatch = cljsErrorList[index].test(errString);
+        if (foundMatch) {
+            description = cljsErrorList[index + 1][0];
+            toFix = cljsErrorList[index + 1][1];
+        }
+    }
+
+    if (description !== "") {
+        $(this.eContainer).append('<h3>Description</h3>');
+        var errDesc = this.eContainer.appendChild(document.createElement('p'));
+        errDesc.innerHTML = description;
+    }
+    if (toFix !== "") {
+        $(this.eContainer).append('<h3>To Fix</h3>');
+        var errFix = this.eContainer.appendChild(document.createElement('p'));
+        errFix.innerHTML = toFix;
+    }
+    // var moreInfo = '../ErrorHelp/' + errName.toLowerCase() + '.html';
+    //console.log("Runtime Error: " + err.toString());
+};
+
+/*
+ * The ClojureScript error list is a array of regex patterns to match
+ * against an error message, followed by a list of description/fix
+ */
+cljsErrorList = [
+    /Unmatched delimiter/, ["This error means you may be missing an opening parenthesis.", ""],
+    /EOF while reading/, ["This error means you may be missing a closing parenthesis.", ""],
+    /identifier starts immediately after numeric literal/,
+        ["This error means that you started with a number rather than a function.",
+        "Remember, the function name has to be the first thing in the parentheses."],
+    /\.call is not a function/,
+        ["This error means the first thing in the parentheses is not the name of a function.", ""],
+    /missing ; before statement/, ["You might have an expression without any parentheses.", ""],
+    /cljs\.core\..* is not a function/, ["You might have an expression without any parentheses.", ""]
+];
+
+CljSActiveCode.prototype.outputfun = function(a) {
+    // console.log('Outputfun: ' + a);
+    $(this.output).css("visibility", "visible");
+    return a;
+};
+
+CljSActiveCode.prototype.runProg = function() {
+    var _this = this;
+    var prog = this.buildProg();
+    $(this.eContainer).remove();
+    $(this.output).text('');
+    $(this.codeDiv).switchClass("col-md-12", "col-md-6", {duration:500,queue:false});
+    $(this.outDiv).show({duration:700,queue:false});
+    
+    var result = rune_cljs.core.eval_source(prog);
+    
+    /*
+    console.log("---------run prog-------");
+    console.log(prog);
+    console.log("0 " + result[0]);
+    console.log("1 " + result[1]);
+    console.log("2 " + result[2]);
+    console.log("3 " + result[3]);
+    console.log("--------end run---------");
+    */
+    
+    if (result[0] != null || result[2] != null) {
+        if (result[0] == 'nil' && result[2] != null){
+            msg = result[2];
+        } else if (result[0] != null & result[2] != null) {
+            msg = result[0] + "\n" + result[2];
+        } else {
+            msg = result[0];
+        }
+        $(this.output).text(_this.outputfun(msg));
+    }
+    if (result[1] != null) {
+        this.addErrorMessage(result[1])
+    }
+    else if (result[3] != "") {
+        this.addErrorMessage(
+            { message: result[3], cause: null});
+    }
+}
+    
 
 HTMLActiveCode.prototype = new ActiveCode();
 
@@ -2370,6 +2508,8 @@ ACFactory.createActiveCode = function (orig, lang, addopts) {
     }
     if (lang === "javascript") {
         return new JSActiveCode(opts);
+    } else if (lang === 'clojurescript') {
+        return new CljSActiveCode(opts);
     } else if (lang === 'htmlmixed') {
         return new HTMLActiveCode(opts);
     } else if (['java', 'cpp', 'c', 'python3', 'python2'].indexOf(lang) > -1) {

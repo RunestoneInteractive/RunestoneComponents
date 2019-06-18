@@ -58,6 +58,7 @@ def depart_mc_node(self,node):
     # Add all of the possible answers
     okeys = list(node.mc_options.keys())
     okeys.sort()
+
     for k in okeys:
         if 'answer_' in k:
             x,label = k.split('_')
@@ -195,8 +196,14 @@ class MChoice(Assessment):
             '''
         addQuestionToDB(self)
 
+<<<<<<< HEAD
+        super(MChoice,self).run()
+
+        mcNode = MChoiceNode(self.options)
+=======
         mcNode = MChoiceNode(self.options, rawsource=self.block_text)
         mcNode.source, mcNode.line = self.state_machine.get_source_and_line(self.lineno)
+>>>>>>> upstream/master
         mcNode.template_start = TEMPLATE_START
         mcNode.template_option = OPTION
         mcNode.template_end = TEMPLATE_END
@@ -343,7 +350,11 @@ def depart_feedback_list_item(self, node):
 #backwards compatibility
 class MChoiceMF(MChoice):
     def run(self):
+<<<<<<< HEAD
+        print("This directive has been deprecated. Please convert to the new directive 'mchoice'")
+=======
         raise self.error("This directive has been depreciated. Please convert to the new directive 'mchoice'")
+>>>>>>> upstream/master
         mcmfNode = super(MChoiceMF,self).run()[0]
 
         return [mcmfNode]
@@ -351,7 +362,11 @@ class MChoiceMF(MChoice):
 class MChoiceMA(MChoice):
     def run(self):
         self.options['multiple_answers'] = 'multipleAnswers'
+<<<<<<< HEAD
+        print("This directive has been deprecated. Please convert to the new directive 'mchoice'")
+=======
         raise self.error("This directive has been depreciated. Please convert to the new directive 'mchoice'")
+>>>>>>> upstream/master
         mchoicemaNode = super(MChoiceMA,self).run()[0]
 
         return [mchoicemaNode]
@@ -359,7 +374,11 @@ class MChoiceMA(MChoice):
 class MChoiceRandomMF(MChoice):
     def run(self):
         self.options['random'] = 'random'
+<<<<<<< HEAD
+        print("This directive has been deprecated. Please convert to the new directive 'mchoice'")
+=======
         raise self.error("This directive has been depreciated. Please convert to the new directive 'mchoice'")
+>>>>>>> upstream/master
         mchoicerandommfNode = super(MChoiceRandomMF,self).run()[0]
 
         return[mchoicerandommfNode]
