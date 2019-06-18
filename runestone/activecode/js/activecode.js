@@ -2429,6 +2429,9 @@ SQLActiveCode.prototype.runProg = function()  {
     }
 
     //
+    if (res[0].values.length > 100) {
+        $(this.output).text("Result set is longer than 100 rows limiting output to first 100")
+    }
     let table = createTable(res[0]);
     respDiv = document.createElement('div')
     respDiv.id = divid;
@@ -2454,7 +2457,7 @@ function createTable(tableData) {
     });
     table.appendChild(head);
     head.appendChild(theads);
-    tableData.values.forEach(function(rowData) {
+    tableData.values.slice(0,100).forEach(function(rowData) {
       var row = document.createElement('tr');
 
       rowData.forEach(function(cellData) {
