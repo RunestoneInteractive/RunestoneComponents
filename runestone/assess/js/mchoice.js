@@ -194,7 +194,7 @@ MultipleChoice.prototype.renderMCFormOpts = function () {
 
         // create the object to store in optionArray
         var optObj = {
-            input: document.getElementById(optid),
+            input: $(label).find('input')[0],
             label: label
         };
         this.optionArray.push(optObj);
