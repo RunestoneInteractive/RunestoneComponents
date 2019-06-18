@@ -244,7 +244,7 @@
     eBookConfig.readings = {{= readings}};
     {% endraw %}
   {% else %}
-    eBookConfig.useRunestoneServices = {% if use_services -%}true{%- else -%}false{%- endif -%};
+    eBookConfig.useRunestoneServices = {% if use_services == 'True' -%}true{%- else -%}false{%- endif -%};
     eBookConfig.host = '{{course_url}}' ? '{{course_url}}' : 'http://127.0.0.1:8000';
     eBookConfig.app = eBookConfig.host+'/{{appname}}';
     eBookConfig.course = '{{course_id}}';

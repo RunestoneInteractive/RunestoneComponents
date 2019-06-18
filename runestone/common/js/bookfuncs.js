@@ -158,7 +158,7 @@ function notifyRunestoneComponents() {
 
 // initialize stuff
 $(document).ready(function() {
-    if (eBookConfig && eBookConfig.useRunestoneServices) {
+    if (eBookConfig ) {
         handlePageSetup();
     } else {
         if (typeof eBookConfig === 'undefined') {
