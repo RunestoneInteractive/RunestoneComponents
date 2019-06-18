@@ -29,7 +29,7 @@ options(
                        'appname':master_app,
                        'loglevel': 0,
                        'course_url':master_url,
-                       'use_services': 'false',
+                       'use_services': False,
                        'python3': 'true',
                        'dburl': '', 'downloads_enabled': 'true', 'enable_chatcodes': 'false', 'allow_pairs': 'false',
                        'basecourse': 'activecodetest',

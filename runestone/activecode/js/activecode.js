@@ -2410,8 +2410,10 @@ SQLActiveCode.prototype.init = function(opts) {
 
 
 SQLActiveCode.prototype.runProg = function()  {
-
+    var result_mess = "success"
+    var scrubber_dfd, history_dfd, saveCode
     // Clear any old results
+    saveCode = "True"
     let divid = this.divid+'_sql_out';
     let respDiv = document.getElementById(divid);
     if (respDiv) {
@@ -2423,12 +2425,37 @@ SQLActiveCode.prototype.runProg = function()  {
     try {
         var res = this.db.exec(query);
     } catch(error) {
-        $(this.output).text(error)
-        $(this.outDiv).show()
-        return
-    }
+        result_mess = error.toString();
+        $(this.output).text(error);
+        $(this.outDiv).show();
 
-    //
+    }
+    this.logRunEvent({
+        'div_id': this.divid,
+        'code': this.editor.getValue(),
+        'lang': this.language,
+        'errinfo': result_mess,
+        'to_save': saveCode,
+        'prefix': this.pretext,
+        'suffix': this.suffix,
+        'partner': this.partner
+    }); // Log the run event
+
+    var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
+    history_dfd = __ret.history_dfd;
+    saveCode = __ret.saveCode;
+
+    history_dfd.then(function() {
+        if (this.slideit) {
+            $(this.historyScrubber).on("slidechange", this.slideit.bind(this));
+        }
+        $(this.historyScrubber).slider("enable");
+    });
+
+    if (result_mess != "success") {
+        return;
+    }
+    // Create a nice table to show the result of the query
     if (res[0].values.length > 100) {
         $(this.output).text("Result set is longer than 100 rows limiting output to first 100")
     }
