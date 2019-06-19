@@ -191,7 +191,7 @@ class IframeVideo(RunestoneIdDirective):
             self.options['http'] = 'https'
         if not self.options.get('divid'):
             self.options['divid'] = self.arguments[0]
-        
+
         res = self.html % self.options
         addHTMLToDB(self.options['divid'], self.options['basecourse'], res)
         raw_node = nodes.raw(self.block_text, res, format='html')
@@ -212,27 +212,27 @@ class Youtube(IframeVideo):
    """
     html = '''
     <div class="runestone" style="margin-left: auto; margin-right:auto">
-        <div id="%(divid)s_vid" class="align-%(align)s youtube-video" data-video-height="%(height)d" data-video-width="%(width)d" data-video-videoid="%(video_id)s" data-video-divid="%(divid)s_vid" data-video-start="%(start)d" data-video-end="%(end)s" ></div>
+        <div id="%(divid)s" class="align-%(align)s youtube-video" data-video-height="%(height)d" data-video-width="%(width)d" data-video-videoid="%(video_id)s" data-video-divid="%(divid)s" data-video-start="%(start)d" data-video-end="%(end)s" ></div>
     </div>
     '''
-    
+
     option_spec = IframeVideo.option_spec
     option_spec.update({
         'start': directives.nonnegative_int,
         'end': directives.nonnegative_int
     })
-    
+
     def run(self):
         if not self.options.get('start'):
             self.options['start'] = 0
-            
+
         if not self.options.get('end'):
             self.options['end'] = -1
-            
+
         raw_node = super(Youtube, self).run()
         addQuestionToDB(self)
         return raw_node
-        
+
 
 class Vimeo(IframeVideo):
     """
