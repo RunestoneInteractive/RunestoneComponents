@@ -104,6 +104,38 @@ function timedRefresh() {
     $.idleTimer(timeoutPeriod);
 }
 
+function calculateProgress() {
+    let possible = 0;
+    let total = 1;
+    for (let k in eBookConfig.activities) {
+        if (k !== undefined) {
+            possible++;
+            if (eBookConfig.activities[k] > 0) {
+                total++;
+            }
+        }
+    }
+    return {possible: possible, total: total}
+}
+
+
+function addProgress() {
+    let {possible, total} = calculateProgress()
+    $("#scprogresstotal").text(total);
+    $("#scprogressposs").text(possible);
+    $( "#subchapterprogress" ).progressbar({
+        value: 100 * total/possible
+      });
+}
+
+function updateProgress(div_id) {
+    eBookConfig.activities[div_id]++;
+    let {possible, total} = calculateProgress();
+    let val = 100 * total / possible;
+    $("#scprogresstotal").text(total);
+    $("#scprogressposs").text(possible);
+    $("#subchapterprogress").progressbar("option","value", val)
+}
 
 function handlePageSetup() {
 
@@ -124,6 +156,7 @@ function handlePageSetup() {
     }
     $(".loggedinuser").html(mess);
 
+    addProgress();
     notifyRunestoneComponents();
 }
 

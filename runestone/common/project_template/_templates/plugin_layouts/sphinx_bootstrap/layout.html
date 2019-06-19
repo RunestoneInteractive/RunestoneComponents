@@ -242,6 +242,7 @@
     eBookConfig.isInstructor = {{= is_instructor }};
     eBookConfig.username = '{{= user_id}}';
     eBookConfig.readings = {{= readings}};
+    eBookConfig.activities = {{= XML(activity_info) }}
     {% endraw %}
   {% else %}
     eBookConfig.useRunestoneServices = {% if use_services == 'True' -%}true{%- else -%}false{%- endif -%};
@@ -294,7 +295,11 @@
 <div class="container" id="continue-reading"></div>
 
 <div class="container" id="main-content">
-  {% block body %}{% endblock %}
+  {% block body %}
+  {% endblock %}
+  <div id=scprogresscontainer>
+    You have attempted <span id=scprogresstotal></span> of <span id=scprogressposs></span> activities on this page <div id="subchapterprogress"></div>
+  </div>
   {% block nextprevious %}
       {% include "subchapter.html" %}
   {% endblock %}

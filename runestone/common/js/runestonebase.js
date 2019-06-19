@@ -38,6 +38,7 @@ RunestoneBase.prototype.logBookEvent = function (eventInfo) {
                                       null, 'json');
     }
     console.log("logging event " + JSON.stringify(eventInfo));
+    updateProgress(eventInfo.div_id);
     return post_return;
 };
 
