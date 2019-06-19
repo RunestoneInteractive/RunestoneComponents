@@ -121,8 +121,15 @@ ActiveCode.prototype.createEditor = function (index) {
         this.containerDiv.appendChild(linkdiv);
     }
     this.containerDiv.appendChild(codeDiv);
+    var edmode = this.containerDiv.lang;
+    if (edmode === 'sql')  {
+        edmode = 'text/x-sql'
+    } else if (edmode === 'java') {
+        edmode = 'text/x-java'
+    }
+
     var editor = CodeMirror(codeDiv, {value: this.code, lineNumbers: true,
-        mode: this.containerDiv.lang, indentUnit: 4,
+        mode: edmode, indentUnit: 4,
         matchBrackets: true, autoMatchParens: true,
         extraKeys: {"Tab": "indentMore", "Shift-Tab": "indentLess"}
     });
