@@ -109,7 +109,7 @@ class PageProgressBar {
     constructor(actDict) {
         this.possible = 0;
         this.total = 1;
-        this.activities = actDict;
+        this.activities = actDict || {};
         this.calculateProgress();
         this.renderProgress()
 
@@ -128,16 +128,22 @@ class PageProgressBar {
 
 
     renderProgress() {
+        let value = 0;
         $("#scprogresstotal").text(this.total);
         $("#scprogressposs").text(this.possible);
+        try {
+            value = 100 * this.total / this.possible;
+        } catch(e) {
+            value = 0;
+        }
         $( "#subchapterprogress" ).progressbar({
-            value: 100 * this.total/this.possible
+            value: value
         });
     }
 
     updateProgress(div_id) {
         this.activities[div_id]++;
-        // We only update the progress bar on the first interaction with an object.
+        // Only update the progress bar on the first interaction with an object.
         if (this.activities[div_id] === 1) {
             this.total++;
             let val = 100 * this.total / this.possible;
