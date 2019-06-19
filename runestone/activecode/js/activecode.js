@@ -38,6 +38,7 @@ ActiveCode.prototype.init = function(opts) {
     this.chatcodes = $(orig).data('chatcodes');
     this.hidehistory = $(orig).data('hidehistory');
     this.tie = $(orig).data('tie')
+    this.dburl = $(orig).data('dburl');
     this.runButton = null;
     this.enabledownload = $(orig).data('enabledownload');
     this.downloadButton = null;
@@ -475,7 +476,7 @@ ActiveCode.prototype.createOutput = function () {
     // to hold turtle graphics output.  We use a div in case the turtle changes from
     // using a canvas to using some other element like svg in the future.
     var outDiv = document.createElement("div");
-    $(outDiv).addClass("ac_output col-md-5");
+    $(outDiv).addClass("ac_output col-md-12");
     this.outDiv = outDiv;
     this.output = document.createElement('pre');
     this.output.id = this.divid+'_stdout';
@@ -2358,6 +2359,153 @@ LiveCode.prototype.pushDataFile = function (file, resolve, reject) {
      return classes;
  }
 
+ //
+ // SQL
+ //
+
+ SQLActiveCode.prototype = new ActiveCode();
+
+ function SQLActiveCode(opts) {
+     if (opts) {
+         this.init(opts)
+         }
+     }
+
+SQLActiveCode.prototype.init = function(opts) {
+
+    ActiveCode.prototype.init.apply(this,arguments);
+
+    if (eBookConfig.useRunestoneServices) {
+        var fnprefix = '/runestone/books/published/' + eBookConfig.basecourse + '/_static';
+    } else {
+        var fnprefix = '/_static';
+    }
+    this.config = {
+        locateFile: filename => `${fnprefix}/${filename}`
+    }
+
+    var self = this;
+
+    initSqlJs(this.config).then(function (SQL) {
+    // set up call to load database asynchronously if given
+        if (self.dburl) {
+            var xhr = new XMLHttpRequest();
+            $(self.runButton).attr('disabled','disabled')
+            // For example: https://github.com/lerocha/chinook-database/raw/master/ChinookDatabase/DataSources/Chinook_Sqlite.sqlite
+            xhr.open('GET', self.dburl, true);
+            xhr.responseType = 'arraybuffer';
+
+            xhr.onload = e => {
+                var uInt8Array = new Uint8Array(xhr.response);
+                self.db = new SQL.Database(uInt8Array);
+                $(self.runButton).removeAttr('disabled')
+                // contents is now [{columns:['col1','col2',...], values:[[first row], [second row], ...]}]
+                };
+            xhr.send();
+        } else {
+            self.db = new SQL.Database();
+        }
+    });
+};
+
+
+SQLActiveCode.prototype.runProg = function()  {
+    var result_mess = "success"
+    var scrubber_dfd, history_dfd, saveCode
+    // Clear any old results
+    saveCode = "True"
+    let divid = this.divid+'_sql_out';
+    let respDiv = document.getElementById(divid);
+    if (respDiv) {
+        respDiv.parentElement.removeChild(respDiv)
+    }
+    $(this.output).text("")
+    // Run this query
+    let query = this.buildProg();
+    try {
+        var res = this.db.exec(query);
+    } catch(error) {
+        result_mess = error.toString();
+        $(this.output).text(error);
+        $(this.outDiv).show();
+
+    }
+    this.logRunEvent({
+        'div_id': this.divid,
+        'code': this.editor.getValue(),
+        'lang': this.language,
+        'errinfo': result_mess,
+        'to_save': saveCode,
+        'prefix': this.pretext,
+        'suffix': this.suffix,
+        'partner': this.partner
+    }); // Log the run event
+
+    var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
+    history_dfd = __ret.history_dfd;
+    saveCode = __ret.saveCode;
+
+    history_dfd.then(function() {
+        if (this.slideit) {
+            $(this.historyScrubber).on("slidechange", this.slideit.bind(this));
+        }
+        $(this.historyScrubber).slider("enable");
+    });
+
+    if (result_mess != "success") {
+        return;
+    }
+    // Create a nice table to show the result of the query
+    if (res[0].values.length > 100) {
+        $(this.output).text("Result set is longer than 100 rows limiting output to first 100")
+    }
+    let table = createTable(res[0]);
+    respDiv = document.createElement('div')
+    respDiv.id = divid;
+    $(respDiv).addClass('table-responsive-md')
+    $(respDiv).css('max-height', '500px')
+    $(respDiv).css('overflow', 'scroll')
+    this.outDiv.appendChild(respDiv)
+    respDiv.appendChild(table)
+    $(this.outDiv).show()
+
+}
+
+function createTable(tableData) {
+    var table = document.createElement('table');
+    var head = document.createElement('thead');
+    var tableBody = document.createElement('tbody');
+    var theads = document.createElement('tr')
+
+    tableData.columns.forEach(function(colData) {
+        let th = document.createElement('th');
+        th.appendChild(document.createTextNode(colData));
+        theads.appendChild(th);
+    });
+    table.appendChild(head);
+    head.appendChild(theads);
+    tableData.values.slice(0,100).forEach(function(rowData) {
+      var row = document.createElement('tr');
+
+      rowData.forEach(function(cellData) {
+        var cell = document.createElement('td');
+        cell.appendChild(document.createTextNode(cellData));
+        row.appendChild(cell);
+      });
+
+      tableBody.appendChild(row);
+    });
+
+    table.appendChild(tableBody);
+    $(table).css('background', 'white');
+    $(table).addClass('table-striped table-light thead-dark')
+    return table;
+  }
+
+
+//
+// ActiveCode Factory Class
+//
 
 ACFactory = {};
 
@@ -2372,6 +2520,8 @@ ACFactory.createActiveCode = function (orig, lang, addopts) {
         return new JSActiveCode(opts);
     } else if (lang === 'htmlmixed') {
         return new HTMLActiveCode(opts);
+    } else if (lang === 'sql') {
+        return new SQLActiveCode(opts);
     } else if (['java', 'cpp', 'c', 'python3', 'python2'].indexOf(lang) > -1) {
         return new LiveCode(opts);
     } else {   // default is python
@@ -2379,6 +2529,7 @@ ACFactory.createActiveCode = function (orig, lang, addopts) {
     }
 
 };
+
 
 // used by web2py controller(s)
 ACFactory.addActiveCodeToDiv = function(outerdivid, acdivid, sid, initialcode, language) {
@@ -2461,6 +2612,11 @@ ACFactory.toggleScratchActivecode = function () {
     div.modal('toggle');
 
 };
+
+
+//
+// Page Initialization
+//
 
 $(document).ready(function() {
     ACFactory.createScratchActivecode();
