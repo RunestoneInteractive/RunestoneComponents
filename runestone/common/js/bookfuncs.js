@@ -104,38 +104,52 @@ function timedRefresh() {
     $.idleTimer(timeoutPeriod);
 }
 
-function calculateProgress() {
-    let possible = 0;
-    let total = 1;
-    for (let k in eBookConfig.activities) {
-        if (k !== undefined) {
-            possible++;
-            if (eBookConfig.activities[k] > 0) {
-                total++;
+class PageProgressBar {
+
+    constructor(actDict) {
+        this.possible = 0;
+        this.total = 1;
+        this.activities = actDict;
+        this.calculateProgress();
+        this.renderProgress()
+
+    }
+
+    calculateProgress() {
+        for (let k in this.activities) {
+            if (k !== undefined) {
+                this.possible++;
+                if (this.activities[k] > 0) {
+                    this.total++;
+                }
             }
         }
     }
-    return {possible: possible, total: total}
-}
 
 
-function addProgress() {
-    let {possible, total} = calculateProgress()
-    $("#scprogresstotal").text(total);
-    $("#scprogressposs").text(possible);
-    $( "#subchapterprogress" ).progressbar({
-        value: 100 * total/possible
-      });
+    renderProgress() {
+        $("#scprogresstotal").text(this.total);
+        $("#scprogressposs").text(this.possible);
+        $( "#subchapterprogress" ).progressbar({
+            value: 100 * this.total/this.possible
+        });
+    }
+
+    updateProgress(div_id) {
+        this.activities[div_id]++;
+        // We only update the progress bar on the first interaction with an object.
+        if (this.activities[div_id] === 1) {
+            this.total++;
+            let val = 100 * this.total / this.possible;
+            $("#scprogresstotal").text(this.total);
+            $("#scprogressposs").text(this.possible);
+            $("#subchapterprogress").progressbar("option","value", val)
+        }
+    }
+
 }
 
-function updateProgress(div_id) {
-    eBookConfig.activities[div_id]++;
-    let {possible, total} = calculateProgress();
-    let val = 100 * total / possible;
-    $("#scprogresstotal").text(total);
-    $("#scprogressposs").text(possible);
-    $("#subchapterprogress").progressbar("option","value", val)
-}
+pageProgressTracker = {};
 
 function handlePageSetup() {
 
@@ -156,7 +170,7 @@ function handlePageSetup() {
     }
     $(".loggedinuser").html(mess);
 
-    addProgress();
+    pageProgressTracker = new PageProgressBar(eBookConfig.activities);
     notifyRunestoneComponents();
 }
 

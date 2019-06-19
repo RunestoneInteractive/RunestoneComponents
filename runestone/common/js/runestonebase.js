@@ -38,7 +38,7 @@ RunestoneBase.prototype.logBookEvent = function (eventInfo) {
                                       null, 'json');
     }
     console.log("logging event " + JSON.stringify(eventInfo));
-    updateProgress(eventInfo.div_id);
+    pageProgressTracker.updateProgress(eventInfo.div_id);
     return post_return;
 };
 
@@ -61,6 +61,8 @@ RunestoneBase.prototype.logRunEvent = function (eventInfo) {
                 this.forceSave = true; }).bind(this))
     }
     console.log("running " + JSON.stringify(eventInfo));
+    pageProgressTracker.updateProgress(eventInfo.div_id);
+
 };
 
 /* Checking/loading from storage */
