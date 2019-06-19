@@ -80,3 +80,21 @@ class ActiveCodeTests(RunestoneTestCase):
             self.assertLess(count, 20)
         except:
             print("WARNING - No response from JOBE server")
+
+    def test_activity_count(self):
+        self.driver.get(self.host + "/index.html")
+        t2 = self.driver.find_element_by_id("test1")
+        self.assertIsNotNone(t2)
+        rb = t2.find_element_by_class_name("run-button")
+        self.assertIsNotNone(rb)
+        rb.click()
+        pb = self.driver.find_element_by_id("subchapterprogress")
+        self.assertIsNotNone(pb)
+        total = self.driver.find_element_by_id("scprogresstotal").text.strip()
+        self.assertEqual(2, int(total))
+        possible = self.driver.find_element_by_id("scprogressposs").text.strip()
+        self.assertEqual(5, int(possible))
+        # count should not increment after a second click
+        rb.click()
+        total = self.driver.find_element_by_id("scprogresstotal").text.strip()
+        self.assertEqual(2, int(total))

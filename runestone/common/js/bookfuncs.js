@@ -109,7 +109,15 @@ class PageProgressBar {
     constructor(actDict) {
         this.possible = 0;
         this.total = 1;
-        this.activities = actDict || {};
+        if(actDict) {
+            this.activities = actDict;
+        } else {
+            let activities = {}
+            $(".runestone").each(function (idx, e) {
+                activities[e.firstElementChild.id] = 0;
+            })
+            this.activities = activities;
+        }
         this.calculateProgress();
         this.renderProgress()
 
