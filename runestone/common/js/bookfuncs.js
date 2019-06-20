@@ -119,8 +119,10 @@ class PageProgressBar {
             this.activities = activities;
         }
         this.calculateProgress();
+        if (window.location.pathname.match(/.*(index.html|toctree.html|Exercises.html|Glossary.html)$/i)) {
+            $("#scprogresscontainer").hide()
+        }
         this.renderProgress()
-
     }
 
     calculateProgress() {
