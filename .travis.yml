@@ -14,7 +14,4 @@ script:
 - "pip install -U -r requirements-test.txt"
 - "pytest"
 notifications:
-  slack:
-    secure: ZM7WB8p85i+sZXQYqlm7M/Eu1ZL5UptFw3ZRpzWuBMnC/OLw721eGaY1GsbyLhqtBUMbMnaStwptz/mHEZfEv36ARSnyOZdhl+g5ckQKUB+ECULk7HkyjiU4kPJ5U/yyGUFBZUFlZfhY76EBOqtGU6IhXw8TqWOfD8CZDXXvICE=
-    rooms:
-    - runestoneteam:aKSajF6qfp9WpgisFH8mocs6#builds
+  slack: runestoneteam:aKSajF6qfp9WpgisFH8mocs6
