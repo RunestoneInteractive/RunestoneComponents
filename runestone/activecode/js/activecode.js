@@ -2396,6 +2396,9 @@ SQLActiveCode.prototype.init = function(opts) {
     initSqlJs(this.config).then(function (SQL) {
     // set up call to load database asynchronously if given
         if (self.dburl) {
+            if (! self.dburl.startsWith("http")) {
+                self.dburl = window.location.protocol + '//' + window.location.host + self.dburl;
+            }
             var xhr = new XMLHttpRequest();
             $(self.runButton).attr('disabled','disabled')
             // For example: https://github.com/lerocha/chinook-database/raw/master/ChinookDatabase/DataSources/Chinook_Sqlite.sqlite
