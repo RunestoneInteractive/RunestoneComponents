@@ -82,8 +82,8 @@ class ActiveCodeTests(RunestoneTestCase):
             print("WARNING - No response from JOBE server")
 
     def test_activity_count(self):
-        self.driver.get(self.host + "/index.html")
-        t2 = self.driver.find_element_by_id("test1")
+        self.driver.get(self.host + "/progresspage.html")
+        t2 = self.driver.find_element_by_id("test_p1")
         self.assertIsNotNone(t2)
         rb = t2.find_element_by_class_name("run-button")
         self.assertIsNotNone(rb)
@@ -93,8 +93,23 @@ class ActiveCodeTests(RunestoneTestCase):
         total = self.driver.find_element_by_id("scprogresstotal").text.strip()
         self.assertEqual(2, int(total))
         possible = self.driver.find_element_by_id("scprogressposs").text.strip()
-        self.assertEqual(5, int(possible))
+        # expect only 1 because the page isn't included when not using services
+        self.assertEqual(1, int(possible))
         # count should not increment after a second click
         rb.click()
         total = self.driver.find_element_by_id("scprogresstotal").text.strip()
         self.assertEqual(2, int(total))
+
+    def test_sql_activecode(self):
+        self.driver.get(self.host + "/index.html")
+        t2 = self.driver.find_element_by_id("sql1")
+        self.assertIsNotNone(t2)
+        time.sleep(1)
+        rb = t2.find_element_by_class_name("run-button")
+        self.assertIsNotNone(rb)
+        rb.click()
+        res = self.driver.find_element_by_id("sql1_sql_out")
+        self.assertIsNotNone(res)
+        trlist = res.find_elements_by_tag_name('tr')
+        self.assertEqual(6, len(trlist))
+        self.assertTrue("hello" in trlist[1].text)

@@ -1,3 +1,5 @@
+:orphan:
+
 ActiveCode Test
 ===============
 
@@ -1304,6 +1306,8 @@ Support for SQL in the browser ?  Yes!
 
 .. activecode:: sql1
     :language: sql
-    :dburl: http://dev.runestoneinteractive.org:8080/_static/bikeshare.db
+    :dburl: /_static/test.db
 
-    select * from trip_data limit 10;
+    select * from test;
+
+..     :dburl: http://dev.runestoneinteractive.org:8080/_static/bikeshare.db
