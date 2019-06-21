@@ -113,3 +113,45 @@ class ActiveCodeTests(RunestoneTestCase):
         trlist = res.find_elements_by_tag_name('tr')
         self.assertEqual(6, len(trlist))
         self.assertTrue("hello" in trlist[1].text)
+
+
+    def test_readfiles(self):
+        self.driver.get(self.host + "/skulptfeatures.html")
+        t2 = self.driver.find_element_by_id("ac9_13_1")
+        self.assertIsNotNone(t2)
+        rb = t2.find_element_by_class_name("run-button")
+        self.assertIsNotNone(rb)
+        rb.click()
+        out = t2.find_element_by_id("ac9_13_1_stdout")
+        self.assertIsNotNone(out)
+        self.assertTrue('Lindenau' in out.text)
+
+
+    def test_altair(self):
+        self.driver.get(self.host + "/skulptfeatures.html")
+        t2 = self.driver.find_element_by_id("alt_kiva_bar1")
+        self.assertIsNotNone(t2)
+        rb = t2.find_element_by_class_name("run-button")
+        self.assertIsNotNone(rb)
+        rb.click()
+        out = t2.find_element_by_id("alt_kiva_bar1_stdout")
+        self.assertIsNotNone(out)
+        self.assertTrue("mark = bar" in out.text)
+        self.assertTrue("{'type': 'nominal', 'field': 'customer'}" in out.text)
+        can = t2.find_element_by_tag_name("canvas")
+        self.assertIsNotNone(can)
+
+    def test_image(self):
+        self.driver.get(self.host + "/skulptfeatures.html")
+        t2 = self.driver.find_element_by_id("ac14_7_2")
+        self.assertIsNotNone(t2)
+        rb = t2.find_element_by_class_name("run-button")
+        self.assertIsNotNone(rb)
+        rb.click()
+        out = t2.find_element_by_id("ac14_7_2_stdout")
+        self.assertIsNotNone(out)
+        self.assertTrue("400" in out.text)
+        self.assertTrue("244" in out.text)
+        self.assertTrue("165 161 158" in out.text)
+        can = t2.find_element_by_tag_name("canvas")
+        self.assertIsNotNone(can)
