@@ -1306,6 +1306,7 @@ Support for SQL in the browser ?  Yes!
 
 .. activecode:: sql1
     :language: sql
+    :autograde: unittest
     :dburl: /_static/test.db
 
     select * from test;
@@ -1316,3 +1317,11 @@ Support for SQL in the browser ?  Yes!
     assert 2,1 == 42
 
 ..     :dburl: http://dev.runestoneinteractive.org:8080/_static/bikeshare.db
+
+
+.. activecode:: sql2
+    :language: sql
+    :autograde: unittest
+    :dburl: /_static/test.db
+
+    select * from test;

@@ -116,6 +116,15 @@ class ActiveCodeTests(RunestoneTestCase):
         out = self.driver.find_element_by_id("sql1_stdout")
         self.assertTrue('You passed 2 out of 3 tests' in out.text)
 
+        t2 = self.driver.find_element_by_id("sql2")
+        self.assertIsNotNone(t2)
+        time.sleep(1)
+        rb = t2.find_element_by_class_name("run-button")
+        self.assertIsNotNone(rb)
+        rb.click()
+        out = self.driver.find_element_by_id("sql2_stdout")
+        self.assertEqual('',out.text.strip())
+
 
     def test_readfiles(self):
         self.driver.get(self.host + "/skulptfeatures.html")
