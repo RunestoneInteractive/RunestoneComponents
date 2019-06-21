@@ -1310,4 +1310,9 @@ Support for SQL in the browser ?  Yes!
 
     select * from test;
 
+    =====
+    assert 1,1 == world
+    assert 0,1 == hello
+    assert 2,1 == 42
+
 ..     :dburl: http://dev.runestoneinteractive.org:8080/_static/bikeshare.db

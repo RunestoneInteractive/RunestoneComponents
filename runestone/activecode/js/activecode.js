@@ -2431,14 +2431,13 @@ SQLActiveCode.prototype.runProg = function()  {
     }
     $(this.output).text("")
     // Run this query
-    let query = this.buildProg();
+    let query = this.buildProg(false);  // false --> Do not include suffix
     try {
         var res = this.db.exec(query);
     } catch(error) {
         result_mess = error.toString();
         $(this.output).text(error);
         $(this.outDiv).show();
-
     }
     this.logRunEvent({
         'div_id': this.divid,
@@ -2479,7 +2478,70 @@ SQLActiveCode.prototype.runProg = function()  {
     respDiv.appendChild(table)
     $(this.outDiv).show()
 
+    // Now handle autograding
+    if (this.suffix) {
+        result = this.autograde(res[0]);
+        $(this.output).text(result);
+    }
+
 }
+
+SQLActiveCode.prototype.autograde = function(result_table) {
+    tests = this.suffix.split(/\n/);
+    this.passed = 0;
+    this.failed = 0;
+    // Tests should be of the form
+    // assert row,col oper value for example
+    // assert 4,4 == 3
+    result = ""
+    tests = tests.filter(function(s) {
+        return s.indexOf('assert') > -1
+    })
+    for (let test of tests) {
+        [assert, loc, oper, expected] = test.split(/\s+/);
+        [row,col] = loc.split(',');
+        result += this.testOneAssert(row, col, oper, expected, result_table);
+        result += "\n"
+    }
+    pct = 100 * this.passed / (this.passed + this.failed);
+    pct = pct.toLocaleString(undefined, { maximumFractionDigits: 2});
+    result += `You passed ${this.passed} out of ${this.passed+this.failed} tests for ${pct}%`
+    this.logBookEvent({event: 'unittest',
+                       div_id: this.divid,
+                       course: eBookConfig.course,
+                       act: `percent:${pct}:passed:${this.passed}:failed:${this.failed}`
+                    });
+    return result;
+}
+
+SQLActiveCode.prototype.testOneAssert = function(row, col, oper, expected, result_table) {
+    let actual  = result_table.values[row][col]
+    const operators = {
+        "==" : function (operand1, operand2) {
+            return operand1 == operand2;
+        },
+        "!=" : function (operand1, operand2) {
+            return operand1 != operand2;
+        },
+        ">" : function (operand1, operand2) {
+            return operand1 > operand2;
+        },
+        "<" : function (operand1, operand2) {
+            return operand1 > operand2;
+        }
+    };
+
+    res = operators[oper](actual, expected)
+    if (res) {
+        output = `Pass: ${actual} ${oper} ${expected} in row ${row} column ${result_table.columns[col]}`;
+        this.passed++;
+    } else {
+        output = `Failed ${actual} ${oper} ${expected} in row ${row} column ${result_table.columns[col]}`;
+        this.failed++
+    }
+    return output;
+}
+
 
 function createTable(tableData) {
     var table = document.createElement('table');
