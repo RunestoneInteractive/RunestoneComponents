@@ -30,6 +30,8 @@ $.i18n().load({
         "msg_activecode_general_error_fix": "Add some print statements to figure out if your program is in an infinte loop.  If it is not you can increase the run time with sys.setExecutionLimit(msecs)",
         "msg_activecode_syntax_error": "This message indicates that Python can't figure out the syntax of a particular statement.  Some examples are assigning to a literal, or a function call",
         "msg_activecode_syntax_error_fix": "Check your assignment statments and make sure that the left hand side of the assignment is a variable, not a literal or a function.",
+        "msg_activecode_key_error": "This message indicates that you are trying to access an element of a dictionary, but the dictionary does not have that the key you are using.",
+        "msg_activecode_key_error_fix": "You may have a typo in the name of your key.  It is also good practice to check if the key exists using a statement like if key in mydict.  You can also use mydict.get(key,defaultvalue) so that if the key is not in the dictionary you get the default value instead of an error.",
         "msg_activecode_index_error": "This message means that you are trying to index past the end of a string or a list.  For example if your list has 3 things in it and you try to access the item at position 3 or more.",
         "msg_activecode_index_error_fix": "Remember that the first item in a list or string is at index position 0, quite often this message comes about because you are off by one.  Remember in a list of length 3 the last legal index is 2",
         "msg_activecode_uri_error": "",

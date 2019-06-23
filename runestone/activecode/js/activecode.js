@@ -888,7 +888,8 @@ errorText.IndentationError = $.i18n("msg_activecode_indentation_error");
 errorText.IndentationErrorFix = $.i18n("msg_activecode_indentation_error_fix");
 errorText.NotImplementedError = $.i18n("msg_activecode_not_implemented_error");
 errorText.NotImplementedErrorFix = $.i18n("msg_activecode_not_implemented_error_fix");
-
+errorText.KeyError = $.i18n("msg_activecode_key_error");
+errorText.KeyErrorFix = $.i18n("msg_activecode_key_error_fix");
 
 ActiveCode.prototype.addJSONLibrary = function () {
     var jsonExternalLibInfo = {
