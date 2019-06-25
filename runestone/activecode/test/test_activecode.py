@@ -90,6 +90,8 @@ class ActiveCodeTests(RunestoneTestCase):
         rb.click()
         pb = self.driver.find_element_by_id("subchapterprogress")
         self.assertIsNotNone(pb)
+        # Wait for the JS to run. Increase this delay if the next assertion fails.
+        time.sleep(1)
         total = self.driver.find_element_by_id("scprogresstotal").text.strip()
         self.assertEqual(2, int(total))
         possible = self.driver.find_element_by_id("scprogressposs").text.strip()
