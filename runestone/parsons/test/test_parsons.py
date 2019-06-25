@@ -171,7 +171,7 @@ class ParsonsTests(RunestoneTestCase):
             WebDriverWait(self.driver, timeout).until(EC.alert_is_present(),
                                    'Timed out waiting for PA creation ' +
                                    'confirmation popup to appear.')
-            alert = self.driver.switch_to_alert()
+            alert = self.driver.switch_to.alert
             alert.accept()
             return True
         except TimeoutException:
