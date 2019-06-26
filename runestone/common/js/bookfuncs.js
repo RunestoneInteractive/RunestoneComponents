@@ -169,8 +169,11 @@ pageProgressTracker = {};
 
 function handlePageSetup() {
 
-    let data = {timezoneoffset: (new Date()).getTimezoneOffset()/60 }
-    jQuery.get(eBookConfig.ajaxURL + 'set_tz_offset', data, function() {}).error(notifyRunestoneComponents);
+    if (eBookConfig.useRunestoneServices) {
+        jQuery.get(eBookConfig.ajaxURL + 'set_tz_offset', {
+            timezoneoffset: (new Date()).getTimezoneOffset()/60
+        });
+    }
 
     if (eBookConfig.isLoggedIn) {
         mess = `username: ${eBookConfig.username}`
