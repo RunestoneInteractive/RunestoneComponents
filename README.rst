@@ -192,3 +192,28 @@ If you already have an existing `Sphinx <http://sphinx-doc.org>`_  project and y
 
 
 See https://github.com/bnmnetp/runestone/wiki/DevelopmentRoadmap to get a sense for how this is all going to come together.
+
+Researchers
+-----------
+
+If you use Runestone in your Research or write about it, please reference ``https://runestone.academy`` and cite this paper:
+
+::
+
+   @inproceedings{Miller:2012:BPE:2325296.2325335,
+    author = {Miller, Bradley N. and Ranum, David L.},
+    title = {Beyond PDF and ePub: Toward an Interactive Textbook},
+    booktitle = {Proceedings of the 17th ACM Annual Conference on Innovation and Technology in Computer Science Education},
+    series = {ITiCSE '12},
+    year = {2012},
+    isbn = {978-1-4503-1246-2},
+    location = {Haifa, Israel},
+    pages = {150--155},
+    numpages = {6},
+    url = {http://doi.acm.org/10.1145/2325296.2325335},
+    doi = {10.1145/2325296.2325335},
+    acmid = {2325335},
+    publisher = {ACM},
+    address = {New York, NY, USA},
+    keywords = {cs1, ebook, sphinx},
+   } 
