@@ -17,6 +17,9 @@ SECTION 1: Spreadsheets
 :::::::::::::::::::::::
 
 .. spreadsheet:: ss1
+    :mindimensions: 6,5
+    :colwidths: 200,100,100
+    :coltitles: 'name','year','price','foo'
 
     Google, 1998, 807.80
     Apple, 1976, 116.52
@@ -26,4 +29,12 @@ SECTION 1: Spreadsheets
     ====
     assert A3 == Yahoo
     assert B3 == 1994
+
+
+.. spreadsheet:: ss2
+    :fromcsv: Iris.csv
+    :colwidths: 50,100,100,100,100
+
+    ====
+    assert A151 == 150
 

@@ -9,6 +9,11 @@ class SpreadSheet extends RunestoneBase {
         this.data = eval(`${this.div_id}_data`);
         this.autograde = $(orig).data("autograde");
         this.suffix = window[`${this.div_id}_asserts`];
+        this.mindimensions = $(orig).data("mindimensions");
+        this.colwidths = $(orig).data("colwidths");
+        this.coltitles = eval($(orig).data("coltitles"));
+        this.maxHeight = 50;
+        // Render the components
         this.renderSheet();
 
         if (this.autograde) {
@@ -19,7 +24,29 @@ class SpreadSheet extends RunestoneBase {
 
     renderSheet() {
         let div = document.getElementById(this.sheet_id);
-        this.table = jexcel(div, {data:this.data});
+        let opts = {data:this.data,
+            tableHeight: this.maxHeight
+        };
+        if (this.mindimensions) {
+            opts.minDimensions = this.mindimensions;
+        }
+        opts.columns = [];
+        if (this.colwidths) {
+            for (let w of this.colwidths) {
+                opts.columns.push({width:w});
+            }
+        }
+        if (this.coltitles) {
+            for (let i in this.coltitles) {
+                if (opts.columns[i]) {
+                    opts.columns[i].title = this.coltitles[i];
+                } else {
+                    opts.columns.push({title:this.coltitles[i]});
+                }
+            }
+        }
+
+        this.table = jexcel(div, opts);
     }
 
     addAutoGradeButton() {
@@ -31,11 +58,12 @@ class SpreadSheet extends RunestoneBase {
         this.gradeButton = butt;
         $(butt).click(this.doAutoGrade.bind(this));
         $(butt).attr("type","button");
+        $(butt).css("display","block");
     }
 
     addOutput() {
         this.output = document.createElement('pre');
-        this.output.id = this.divid+'_stdout';
+        this.output.id = `${this.div_id}_stdout`;
         $(this.output).css("visibility","hidden");
         let div = document.getElementById(this.div_id);
         div.appendChild(this.output);
@@ -62,7 +90,7 @@ class SpreadSheet extends RunestoneBase {
         pct = pct.toLocaleString(undefined, { maximumFractionDigits: 2});
         result += `You passed ${this.passed} out of ${this.passed+this.failed} tests for ${pct}%`;
         this.logBookEvent({event: 'unittest',
-                           div_id: this.divid,
+                           div_id: this.div_id,
                            course: eBookConfig.course,
                            act: `percent:${pct}:passed:${this.passed}:failed:${this.failed}`
                         });

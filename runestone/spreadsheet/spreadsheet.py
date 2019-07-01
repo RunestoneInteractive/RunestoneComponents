@@ -15,7 +15,7 @@
 #
 __author__ = 'bmiller'
 
-import re
+import re, os
 from docutils import nodes
 from docutils.parsers.rst import directives
 from runestone.common.runestonedirective import RunestoneNode, RunestoneIdDirective, get_node_line
@@ -66,7 +66,6 @@ class SpreadSheet(RunestoneIdDirective):
         :fromcsv: path/to/csv/file
         :colwidths: list of column widths
         :coltitles: list of column names
-        :coltypes: list of column types
         :mindimensions: mincols, minrows  -- minDimensions:[10,5]
 
         A1,B1,C1,D1...
@@ -80,7 +79,7 @@ class SpreadSheet(RunestoneIdDirective):
         'fromcsv': directives.unchanged,
         'colwidths': directives.unchanged,
         'coltitles': directives.unchanged,
-        'coltypes': directives.unchanged
+        'mindimensions': directives.unchanged
     })
 
 
@@ -96,17 +95,33 @@ class SpreadSheet(RunestoneIdDirective):
             self.options['asserts'] = suffix
             self.options['autograde'] = 'data-autograde="true"'
         else:
+            self.options['asserts'] = '""'
             self.options['autograde'] = ''
 
         if 'fromcsv' in self.options:
-            self.content = self.body_from_csv(self.options['fromcsv'])
+            self.content = self.body_from_csv(env, self.options['fromcsv'])
         else:
             if self.content:
-                self.content = self.body_to_csv()
+                self.content = self.body_to_csv(self.content)
             else:
                 raise ValueError("You must specify either from csv or provide content in the body")
 
         self.options['data'] = self.content
+
+        if 'coltitles' not in  self.options:
+            self.options['coltitles'] = ""
+        else:
+            self.options['coltitles'] = "data-coltitles=[{}]".format(self.options['coltitles'])
+
+        if 'mindimensions' not in self.options:
+            self.options['mindimensions'] = ""
+        else:
+            self.options['mindimensions'] = "data-mindimensions=[{}]".format(self.options['mindimensions'])
+
+        if 'colwidths' not in self.options:
+            self.options['colwidths'] = ""
+        else:
+            self.options['colwidths'] = "data-colwidths=[{}]".format(self.options['colwidths'])
 
         ssnode = SpreadSheetNode(self.options, rawsource=self.block_text)
         ssnode.source, ssnode.line = self.state_machine.get_source_and_line(self.lineno)
@@ -116,9 +131,9 @@ class SpreadSheet(RunestoneIdDirective):
 
 
 
-    def body_to_csv(self):
+    def body_to_csv(self, row_list):
         csvlist = []
-        for row in self.content:
+        for row in row_list:
             if re.match(r'^\s*====', row):
                 break
             items = row.split(',')
@@ -134,8 +149,16 @@ class SpreadSheet(RunestoneIdDirective):
             csvlist.append(ilist)
         return csvlist
 
-    def body_from_csv(self, csvfile):
-        return "to do"
+    def body_from_csv(self, env, csvfile):
+        ffpath = os.path.dirname(self.srcpath)
+        print(self.srcpath, os.getcwd())
+        filename = os.path.join(env.srcdir, ffpath, csvfile)
+
+        print("\n\nPATH=", self.srcpath)
+        with open(filename,'r') as csv:
+            content = csv.readlines()
+
+        return self.body_to_csv(content)
 
 def is_float(s):
     try:
@@ -154,7 +177,7 @@ def as_int_or_float(s):
 
 
 TEMPLATE = """
-<div id="{divid}" data-component="spreadsheet" class="runestone" {autograde}>
+<div id="{divid}" data-component="spreadsheet" class="runestone" {autograde} {mindimensions} {colwidths} {coltitles}>
     <div id="{divid}_sheet"></div>
 
     <script>
