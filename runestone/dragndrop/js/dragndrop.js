@@ -87,11 +87,11 @@ DragNDrop.prototype.createNewElements = function () {
     this.containerDiv.appendChild(this.dragDropWrapDiv);
 
     this.draggableDiv = document.createElement("div");
-    $(this.draggableDiv).addClass("draggable dragzone");
+    $(this.draggableDiv).addClass("rsdraggable dragzone");
     this.addDragDivListeners();
 
     this.dropZoneDiv = document.createElement("div");
-    $(this.dropZoneDiv).addClass("draggable");
+    $(this.dropZoneDiv).addClass("rsdraggable");
     this.dragDropWrapDiv.appendChild(this.draggableDiv);
     this.dragDropWrapDiv.appendChild(this.dropZoneDiv);
 
