@@ -47,6 +47,15 @@ class SpreadSheet extends RunestoneBase {
         }
 
         this.table = jexcel(div, opts);
+
+        // Set background of cells that are autograded
+        if (this.suffix) {
+            for (let test of this.suffix) {
+                let assert, loc, oper, expected;
+                [assert, loc, oper, expected] = test.split(/\s+/);
+                $(`#${this.div_id}_sheet`).find(this.getCellSelector(loc)).css("background-color","#d4e3ff");
+            }
+        }
     }
 
     addAutoGradeButton() {
@@ -74,8 +83,8 @@ class SpreadSheet extends RunestoneBase {
         this.passed = 0;
         this.failed = 0;
         // Tests should be of the form
-        // assert row,col oper value for example
-        // assert 4,4 == 3
+        // assert cell oper value for example
+        // assert A4 == 3
         let result = "";
         tests = tests.filter(function(s) {
             return s.indexOf('assert') > -1;
@@ -119,9 +128,11 @@ class SpreadSheet extends RunestoneBase {
         let output = "";
         if (res) {
             output = `Pass: ${actual} ${oper} ${expected} in ${cell}`;
+            $(`#${this.div_id}_sheet`).find(this.getCellSelector(cell)).css("background-color","#ccffcc");
             this.passed++;
         } else {
             output = `Failed ${actual} ${oper} ${expected} in cell ${cell}`;
+            $(`#${this.div_id}_sheet`).find(this.getCellSelector(cell)).css("background-color","#ff9980");
             this.failed++;
         }
         return output;
@@ -136,13 +147,16 @@ class SpreadSheet extends RunestoneBase {
 
     // If the cell contains a formula this call will return the computed value
     getCellDisplayValue(cell) {
-        let parts = cell.match(/\$?([A-Z]+)\$?([0-9]+)/);
-        let x = this.columnToIndex(parts[1]);
-        let y = parts[2] - 1;
-        let res = this.table.el.querySelector(`[data-x="${x}"][data-y="${y}"]`);
+        let res = this.table.el.querySelector(this.getCellSelector(cell));
         return res.innerText;
     }
 
+    getCellSelector(cell) {
+        let parts = cell.match(/\$?([A-Z]+)\$?([0-9]+)/);
+        let x = this.columnToIndex(parts[1]);
+        let y = parts[2] - 1;
+        return `[data-x="${x}"][data-y="${y}"]`;
+    }
     columnToIndex(colName) {
         // Convert the column name to a number A = 0 AA = 26 BA = 52, etc
         let base = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
