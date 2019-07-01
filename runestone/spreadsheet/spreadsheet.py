@@ -15,7 +15,7 @@
 #
 __author__ = 'bmiller'
 
-
+import re
 from docutils import nodes
 from docutils.parsers.rst import directives
 from runestone.common.runestonedirective import RunestoneNode, RunestoneIdDirective, get_node_line
@@ -67,6 +67,7 @@ class SpreadSheet(RunestoneIdDirective):
         :colwidths: list of column widths
         :coltitles: list of column names
         :coltypes: list of column types
+        :mindimensions: mincols, minrows  -- minDimensions:[10,5]
 
         A1,B1,C1,D1...
         A2,B2,C2,D2...
@@ -89,6 +90,14 @@ class SpreadSheet(RunestoneIdDirective):
 
         self.options['divid'] = self.arguments[0].strip()
 
+        if '====' in self.content:
+            idx = self.content.index('====')
+            suffix = self.content[idx+1:]
+            self.options['asserts'] = suffix
+            self.options['autograde'] = 'data-autograde="true"'
+        else:
+            self.options['autograde'] = ''
+
         if 'fromcsv' in self.options:
             self.content = self.body_from_csv(self.options['fromcsv'])
         else:
@@ -110,6 +119,8 @@ class SpreadSheet(RunestoneIdDirective):
     def body_to_csv(self):
         csvlist = []
         for row in self.content:
+            if re.match(r'^\s*====', row):
+                break
             items = row.split(',')
             ilist = []
             for item in items:
@@ -143,12 +154,12 @@ def as_int_or_float(s):
 
 
 TEMPLATE = """
-<div id="{divid}" data-component="spreadsheet">
+<div id="{divid}" data-component="spreadsheet" class="runestone" {autograde}>
     <div id="{divid}_sheet"></div>
 
     <script>
-        {divid}_data = {data}
-
+        {divid}_data = {data};
+        {divid}_asserts = {asserts};
     </script>
 </div>
 """

@@ -23,3 +23,7 @@ SECTION 1: Spreadsheets
     Yahoo, 1994, 38.66
     ,,=sum(c1:c3)
 
+    ====
+    assert A3 == Yahoo
+    assert B3 == 1994
+
