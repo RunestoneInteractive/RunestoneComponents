@@ -1,6 +1,6 @@
-=====================
-This Is A New Project
-=====================
+======================
+Spreadsheets Test Page
+======================
 
 .. Here is were you specify the content and order of your new book.
 
@@ -13,8 +13,7 @@ This Is A New Project
 .. Sources can also be included from subfolders of this directory.
    (e.g. "DataStructures/queues.rst").
 
-SECTION 1: Spreadsheets
-:::::::::::::::::::::::
+Cells in the spreadsheet that are graded are initially colored light blue.  When the grade button is pressed a test report is printed out, and the cells that were correct are colored with a light green background.  The cells that were not correct have a light redish background
 
 .. spreadsheet:: ss1
     :mindimensions: 6,5
