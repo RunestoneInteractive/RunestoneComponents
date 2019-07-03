@@ -47,7 +47,7 @@ def runestone_extensions():
     modules.insert(0, modules.pop(modules.index('runestone.common')))
     return modules
 
-def master_url():
+def get_master_url():
     if socket.gethostname() in ['runestone-deploy', 'rsbuilder']:
         master_url = 'https://runestone.academy'
     elif 'RUNESTONE_HOST' in os.environ:
