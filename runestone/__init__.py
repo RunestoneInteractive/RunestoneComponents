@@ -21,7 +21,7 @@ from .video import *
 from .webgldemo import *
 
 
-import os, sys
+import os, sys, socket
 
 def runestone_static_dirs():
     basedir = os.path.dirname(__file__)
@@ -46,6 +46,18 @@ def runestone_extensions():
     # Place ``runestone.common`` first, so it can run init code needed by all other modules. This assumes that the first module in the list is run first. An alternative to this to guarantee this ordering is to call ``app.setup_extension('runestone.common')`` in every extension.
     modules.insert(0, modules.pop(modules.index('runestone.common')))
     return modules
+
+def master_url():
+    if socket.gethostname() in ['runestone-deploy', 'rsbuilder']:
+        master_url = 'https://runestone.academy'
+    elif 'RUNESTONE_HOST' in os.environ:
+        port = os.environ.get('RUNESTONE_PORT', 80)
+        secure = os.environ.get('RUNESTONE_PROTOCOL','http')
+        master_url = '{}://{}:{}'.format(secure, os.environ['RUNESTONE_HOST'], port)
+    else:
+        master_url = 'http://127.0.0.1:8000'
+
+    return master_url
 
 from paver.easy import task, cmdopts, sh
 from sphinxcontrib import paverutils
