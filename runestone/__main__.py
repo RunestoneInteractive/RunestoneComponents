@@ -130,6 +130,13 @@ def serve(port,listen):
     sys.path.insert(0,os.getcwd())
     try:
         import pavement
+        try:
+            if pavement.dynamic_pages == True:
+                click.echo("Error -- dynamic_pages is True, but this server does not support templates", err=True)
+                click.echo("You should update pavement.py and rebuild")
+                return
+        except:
+            click.echo("dynamic_pages is not defined")
     except:
         print("Error, you must be in your project root directory")
         return
