@@ -7,12 +7,17 @@ from runestone.server import get_dburl
 from sphinxcontrib import paverutils
 import pkg_resources
 from socket import gethostname
+from runestone import get_master_url
 
 sys.path.append(os.getcwd())
 
 # The project name, for use below.
 project_name = %(project_name)s
-# True if this project uses Runestone services.
+
+master_url = '%(master_url)s'
+if not master_url:
+    master_url = get_master_url()
+
 # The root directory for ``runestone serve``.
 serving_dir = "%(build_dir)s/" + project_name
 # The destination directory for ``runestone deploy``.
@@ -44,7 +49,7 @@ options(
                        # If ``dynamic_pages`` is 'True', then the following values are ignored, since they're provided by the server.
                        'course_id': project_name,
                        'appname': 'runestone',
-                       'course_url': '%(master_url)s',
+                       'course_url': master_url,
                       }
     )
 )
