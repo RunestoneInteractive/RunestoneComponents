@@ -6,7 +6,7 @@ with open('requirements.txt', 'r') as fh:
 setup(
     name='runestone',
     description='Sphinx extensions for writing interactive documents.',
-    version='4.0.0',
+    version='4.0.1',
     author = 'Brad Miller',
     author_email = 'bonelake@mac.com',
     packages= find_packages(exclude=['*.*.test']),
@@ -37,6 +37,7 @@ setup(
     #             ('project/template', ['newproject_copy_me/*'])
     # ],
     long_description=open('README.rst').read(),
+    long_description_content_type='text/x-rst',
     entry_points = {
         'console_scripts': [
             'runestone = runestone.__main__:cli'
