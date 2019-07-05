@@ -66,15 +66,15 @@ function addReadingList() {
     if (eBookConfig.readings){
         cur_path_parts = window.location.pathname.split('/');
         name = cur_path_parts[cur_path_parts.length-2] + '/' + cur_path_parts[cur_path_parts.length-1];
-        position = d.readings.indexOf(name);
-        num_readings = d.readings.length
-        if (position == (d.readings.length-1)){
+        position = eBookConfig.readings.indexOf(name);
+        num_readings = eBookConfig.readings.length
+        if (position == (eBookConfig.readings.length-1)){
             // no more readings
             l = $("<div />", {text: `Finished reading assignment. Page ${num_readings} of ${num_readings}.`});
         }
         else if(position >= 0){
             // get next name
-            nxt = d.readings[position+1];
+            nxt = eBookConfig.readings[position+1];
             path_parts = cur_path_parts.slice(0,cur_path_parts.length-2 );
             path_parts.push(nxt);
             nxt_link = path_parts.join('/');
