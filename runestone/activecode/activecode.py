@@ -394,7 +394,7 @@ config values (conf.py):
             self.options['hidehistory'] = ''
 
         if 'includesrc' in self.options:
-            fname = self.options['includesrc']
+            fname = self.options['includesrc'].replace('\\', '/')
             cwd = os.path.abspath(os.getcwd())
             path = os.path.join(cwd, fname)
             with open(path, encoding='utf-8') as f:
@@ -403,7 +403,7 @@ config values (conf.py):
             self.options['includesrc'] = ""
 
         if 'includehsrc' in self.options:
-            fname = self.options['includehsrc']
+            fname = self.options['includehsrc'].replace('\\', '/')
             cwd = os.path.abspath(os.getcwd())
             path = os.path.join(cwd, fname)
             with open(path, encoding='utf-8') as f:
@@ -412,7 +412,7 @@ config values (conf.py):
             self.options['includehsrc'] = ""
 
         if 'includexsrc' in self.options:
-            fname = self.options['includexsrc']
+            fname = self.options['includexsrc'].replace('\\', '/')
             cwd = os.path.abspath(os.getcwd())
             path = os.path.join(cwd, fname)
             with open(path, encoding='utf-8') as f:
