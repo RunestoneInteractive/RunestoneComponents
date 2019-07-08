@@ -275,6 +275,10 @@ ActiveCode.prototype.createEditor = function (index) {
     }
 };
 
+ActiveCode.prototype.BUILD_TYPE_DEFAULT =  0;
+ActiveCode.prototype.BUILD_TYPE_RUNORTEST = 1;
+ActiveCode.prototype.BUILD_TYPE_PLAYTASK = 2;
+
 ActiveCode.prototype.createControls = function () {
     var ctrlDiv = document.createElement("div");
     $(ctrlDiv).addClass("ac_actions mb-2");
@@ -291,7 +295,7 @@ ActiveCode.prototype.createControls = function () {
             $(testButton).addClass("btn btn-success test-button");
             ctrlDiv.appendChild(testButton);
             this.testButton = testButton;
-            $(testButton).click(this.runProg.bind(this, [1]));
+            $(testButton).click(this.runProg.bind(this, [this.BUILD_TYPE_RUNORTEST]));
             $(testButton).attr("type", "button");
         }
         if (this.playtask) {
@@ -300,11 +304,11 @@ ActiveCode.prototype.createControls = function () {
             $(playTaskButton).addClass("btn btn-success test-button")
             ctrlDiv.appendChild(playTaskButton);
             this.plaTaskButton = playTaskButton;
-            $(playTaskButton).click(this.runProg.bind(this, [2]));
+            $(playTaskButton).click(this.runProg.bind(this, [this.BUILD_TYPE_PLAYTASK]));
             $(playTaskButton).attr("type", "button");
         }
         this.runButton = butt;
-        $(butt).click(this.runProg.bind(this, [0]));
+        $(butt).click(this.runProg.bind(this, [this.BUILD_TYPE_DEFAULT]));
         $(butt).attr("type", "button")
 
         if (this.enabledownload || eBookConfig.downloadsEnabled) {
@@ -987,50 +991,47 @@ ActiveCode.prototype.outputfun = function (text) {
     $(this.output).append(text);
 };
 
-ActiveCode.prototype.buildProg = function (buildType = 0) {
+ActiveCode.prototype.buildProg = function (buildType = ActiveCode.prototype.BUILD_TYPE_DEFAULT) {
     // assemble code from prefix, suffix, and editor for running.
-    var pretext;
-    var prog = buildType > 0 ? "" : (this.passivecodestr == 'onlymain' ? this.code : this.editor.getValue() + "\n");
+    var prog = "";
 
-    this.pretext = "";
     if (this.includes !== undefined) {
         // iterate over the includes, in-order prepending to prog
-
-        pretext = "";
+        this.pretext = "";
         for (var x = 0; x < this.includes.length; x++) {
-            pretext = pretext + edList[this.includes[x]].editor.getValue();
+            this.pretext += edList[this.includes[x]].editor.getValue();
         }
-        this.pretext = pretext;
-        prog = pretext + prog;
+        prog = this.pretext + prog;
     }
-
-    if (this.runortest) {
-        if (buildType == 1) {
-            var tmp = this.editor.getValue().split('\n');
-            var readOnlyLines = [];
-            var main = "";
-            for (var i = 0; i < this.lineHandles.length; i++)
-                readOnlyLines.push(this.editor.getLineNumber(this.lineHandles[i]));
-            for (var i = 0; i < tmp.length; i++) {
-                if (readOnlyLines.includes(i)) continue;
-                main += "\t" + tmp[i] + "\n";
-            }
-            var parameters = this.testParameters.trim().split(' ');
-
-            var parametersString = "";
-            var returnString = "";
-            for (var i = 0; i < parameters.length; i++) {
-                parametersString += parameters[i] + "=None" + (i < parameters.length - 1 ? ',' : '');
-                returnString += parameters[i] + "=" + parameters[i] + (i < parameters.length - 1 ? ',' : '');
-            }
-            pretext = this.generalInitContent + "def acMainSection(" + parametersString + "):\n";
-            returnString = "\treturn dict(" + returnString + ")\n";
-            prog += pretext + main + returnString;
+    
+    if (buildType == this.BUILD_TYPE_DEFAULT) {
+        if (this.passivecodestr == 'onlymain')
+            prog += this.code;
+        else
+            prog += this.editor.getValue() + "\n";
+    } else if (buildType == this.BUILD_TYPE_RUNORTEST) {
+        var tmp = this.editor.getValue().split('\n');
+        var readOnlyLines = [];
+        var main = "";
+        for (var i = 0; i < this.lineHandles.length; i++)
+            readOnlyLines.push(this.editor.getLineNumber(this.lineHandles[i]));
+        for (var i = 0; i < tmp.length; i++) {
+            if (readOnlyLines.includes(i)) continue;
+            main += "\t" + tmp[i] + "\n";
         }
-    }
+        var parameters = this.testParameters.trim().split(' ');
 
-    if (this.suffix) {
-        if (!this.runortest && !this.playtask || (this.runortest && buildType == 1) || (this.playtask && buildType == 2)) prog = prog + this.suffix;
+        var parametersString = "";
+        var returnString = "";
+        for (var i = 0; i < parameters.length; i++) {
+            parametersString += parameters[i] + "=None" + (i < parameters.length - 1 ? ',' : '');
+            returnString += parameters[i] + "=" + parameters[i] + (i < parameters.length - 1 ? ',' : '');
+        }
+        this.pretext = this.generalInitContent + "def acMainSection(" + parametersString + "):\n";
+        returnString = "\treturn dict(" + returnString + ")\n";
+        prog += this.pretext + main + returnString + this.suffix;
+    } else if (buildType == this.BUILD_TYPE_PLAYTASK) {
+        prog += this.suffix;
     }
 
     return prog;
@@ -1073,18 +1074,63 @@ ActiveCode.prototype.manage_scrubber = function (scrubber_dfd, history_dfd, save
 };
 
 var pygameModalUse = true;
-ActiveCode.prototype.runProg = function (params = [0]) {
+ActiveCode.prototype.runProg = function (params = [ActiveCode.prototype.BUILD_TYPE_DEFAULT]) {
     Sk.hardInterrupt = false;
     Sk.builtin.KeyboardInterrupt = null;
     var prog = this.buildProg(params[0]);
-
-
+    
     if (prog.indexOf("???") != -1) {
-        if (!confirm('Treba da umesto ??? otkucas svoj kod. \nAko si namerno stavio ??? mozes da izvrsis kod. Da li zelis da izvrsis kod?')) {
+        if (!confirm('Treba da umesto ??? otkucаš svoj kod.\nSve naredbe koje sadrže ??? će biti preskočene prilikom izvršavanja programa.\nDa li želiš da izvršiš kod?')) {
             return;
         }
-
     }
+
+    // skip lines containing ???
+
+    // count characters in a string
+    function cntChar(s, c) {
+        c = c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return (s.match(new RegExp(c, "g"))||[]).length;
+    }
+
+    // extract program lines 
+    var progLines = prog.split("\n");
+    // join statements spanning multiple lines
+    var progStatements = []
+    var i = 0;
+    while (i < progLines.length) {
+        var open_parent = cntChar(progLines[i], "(");
+        var close_parent = cntChar(progLines[i], ")");
+        var open_bracket = cntChar(progLines[i], "[");
+        var close_bracket = cntChar(progLines[i], "]");
+        var open_brace = cntChar(progLines[i], "{");
+        var close_brace = cntChar(progLines[i], "}");
+        var statement = progLines[i];
+        while (i + 1 < progLines.length &&
+               (open_parent > close_parent ||
+                open_bracket > close_bracket ||
+                open_brace > close_brace ||
+                statement[statement.length - 1] == "\\")) {
+            i++;
+            statement += " " + progLines[i];
+            open_parent += cntChar(progLines[i], "(");
+            close_parent += cntChar(progLines[i], ")");
+            open_bracket += cntChar(progLines[i], "[");
+            close_bracket += cntChar(progLines[i], "]");
+            open_brace += cntChar(progLines[i], "{");
+            close_brace += cntChar(progLines[i], "}");
+        }
+        progStatements.push(statement);
+        i++;
+    }
+    
+    // remove statements containing ??? and join all statements back
+    // into a program
+    prog = progStatements.filter(line => line.indexOf("???") == -1).join("\n");
+
+    console.log("About to run:")
+    console.log(prog);
+    console.log("----");
 
     var saveCode = "True";
     var scrubber_dfd, history_dfd, skulpt_run_dfd;
