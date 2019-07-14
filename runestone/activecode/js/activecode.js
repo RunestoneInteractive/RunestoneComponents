@@ -54,6 +54,7 @@ ActiveCode.prototype.init = function (opts) {
     this.testParameters = $(orig).data('runortest');
     this.runortest = this.testParameters ? true : false;
     this.playtask = $(orig).data('playtask');
+    this.help = $(orig).data('help');
     this.passivecodestr = $(orig).data('passivecode');
     this.passivecode = this.passivecodestr ? true : false;
     this.modaloutput = $(orig).data('modaloutput');
@@ -64,11 +65,9 @@ ActiveCode.prototype.init = function (opts) {
 
     if (this.includesrc) {
         this.code = this.includesrc + this.code;
-    }
-    else if (this.includehsrc) {
+    } else if (this.includehsrc) {
         this.code = this.code + "====\n" + this.includehsrc;
-    }
-    else if (this.includexsrc) {
+    } else if (this.includexsrc) {
         var tmp = this.includexsrc.split('\n');
         var c = 0;
         var insertBefore = "";
@@ -102,7 +101,13 @@ ActiveCode.prototype.init = function (opts) {
             }
             c++;
         }
-        this.code = insertBefore + this.code + insertAfter + "====\n" + this.includexsrc;
+        if (!this.help) {
+            this.code = insertBefore + this.code + insertAfter + "====\n" + this.includexsrc;
+        } else {
+            this.helpCode = this.code;
+            this.code = insertBefore + "\n" + insertAfter + "====\n" + this.includexsrc;
+            this.afterMainSec = this.mainSec + 1;
+        }
     }
 
     if (this.chatcodes && eBookConfig.enable_chatcodes) {
@@ -306,6 +311,16 @@ ActiveCode.prototype.createControls = function () {
             this.plaTaskButton = playTaskButton;
             $(playTaskButton).click(this.runProg.bind(this, [this.BUILD_TYPE_PLAYTASK]));
             $(playTaskButton).attr("type", "button");
+        }
+        if (this.help) {
+            var helpButton =  document.createElement("button");
+            $(helpButton).text($.i18n("msg_activecode_help"));
+            $(helpButton).addClass("btn btn-success test-button")
+            ctrlDiv.appendChild(helpButton);
+            this.helpButton = helpButton;
+            $(helpButton).click(this.showHelp.bind(this));
+            $(helpButton).attr("type", "button");
+            
         }
         this.runButton = butt;
         $(butt).click(this.runProg.bind(this, [this.BUILD_TYPE_DEFAULT]));
@@ -1072,6 +1087,13 @@ ActiveCode.prototype.manage_scrubber = function (scrubber_dfd, history_dfd, save
         });
     return { history_dfd: history_dfd, saveCode: saveCode };
 };
+
+ActiveCode.prototype.showHelp = function()  {
+    var marks = this.editor.getAllMarks();
+    var mainSecStart = marks[0].lines.length - 1;
+    var mainSecEnd = this.editor.lineCount() - marks[1].lines.length;
+    this.editor.replaceRange(this.helpCode, {line: mainSecStart, ch: 0}, {line: mainSecEnd, ch: 0});
+}
 
 var pygameModalUse = true;
 ActiveCode.prototype.runProg = function (params = [ActiveCode.prototype.BUILD_TYPE_DEFAULT]) {

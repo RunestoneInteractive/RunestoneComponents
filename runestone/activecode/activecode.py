@@ -70,7 +70,7 @@ TEMPLATE_END = """
 <textarea data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s
     %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s %(chatcodes)s
     data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s
-    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(runortest)s %(playtask)s %(passivecode)s %(modaloutput)s %(hidehistory)s
+    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(runortest)s %(playtask)s %(help)s %(passivecode)s %(modaloutput)s %(hidehistory)s
     %(includesrc)s %(includehsrc)s %(includexsrc)s %(enablecopy)s>
 %(initialcode)s
 </textarea>
@@ -169,6 +169,7 @@ class ActiveCode(RunestoneIdDirective):
    :enabledownload: -- allow textfield contents to be downloaded as *.py file
    :runortest:  -- run activecode or run unit tests within activecode
    :playtask:  -- run hidden code
+   :help:  -- show help
    :passivecode: -- used for just showing incomplete pieces of code without interaction
    :modaloutput: -- show output in modal window (used for drawing)
    :includesrc: -- include source code from file
@@ -223,6 +224,7 @@ config values (conf.py):
         'runargs': directives.unchanged,
         'runortest': directives.unchanged,
         'playtask': directives.flag,
+        'help': directives.flag,
         'passivecode': directives.unchanged,
         'modaloutput': directives.flag,
         'includesrc': directives.unchanged,
@@ -340,6 +342,11 @@ config values (conf.py):
         else:
             self.options['playtask'] = 'data-playtask="true"'
 
+        if 'help' not in self.options:
+            self.options['help'] = ''
+        else:
+            self.options['help'] = 'data-help="true"'
+            
         if 'passivecode' not in self.options:
             self.options['passivecode'] = ''
         else:
