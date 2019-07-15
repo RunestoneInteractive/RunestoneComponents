@@ -181,6 +181,7 @@ ActiveCode.prototype.init = function (opts) {
     this.createEditor();
     this.createOutput();
     this.createControls();
+    this.runAttempts = 0; // number of times the program has been run
 
     if ($(orig).data('caption')) {
         this.caption = $(orig).data('caption');
@@ -1089,6 +1090,12 @@ ActiveCode.prototype.manage_scrubber = function (scrubber_dfd, history_dfd, save
 };
 
 ActiveCode.prototype.showHelp = function()  {
+    if (this.runAttempts == 0) {
+        if (!confirm('Savetujemo ti da uvek pokušaš samostalno da rešiš problem pre nego što pogledaš pomoć. Da li sigurno želiš da vidiš pomoć?')) {
+            return;
+        }
+    }
+
     var marks = this.editor.getAllMarks();
     var mainSecStart = marks[0].lines.length - 1;
     var mainSecEnd = this.editor.lineCount() - marks[1].lines.length;
@@ -1106,6 +1113,8 @@ ActiveCode.prototype.runProg = function (params = [ActiveCode.prototype.BUILD_TY
             return;
         }
     }
+
+    this.runAttempts++; // the number of times the program has been run
 
     // skip lines containing ???
 
