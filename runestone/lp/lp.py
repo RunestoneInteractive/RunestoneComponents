@@ -486,7 +486,6 @@ def setup(
 
     app.add_autoversioned_javascript('lp.js')
     app.add_autoversioned_javascript('gas.js')
-    app.add_javascript('https://hypothes.is/embed.js')
 
     # Use the `source-read <http://sphinx-doc.org/extdev/appapi.html#event-source-read>`_
     # event hook to replace solutions with textareas before Sphinx processes it.
