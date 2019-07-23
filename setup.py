@@ -6,7 +6,7 @@ with open('requirements.txt', 'r') as fh:
 setup(
     name='runestone',
     description='Sphinx extensions for writing interactive documents.',
-    version='4.0.1',
+    version='4.0.2',
     author = 'Brad Miller',
     author_email = 'bonelake@mac.com',
     packages= find_packages(exclude=['*.*.test']),
@@ -30,7 +30,7 @@ setup(
                    'Operating System :: Unix',
                    'Programming Language :: Python',
                    'Programming Language :: Python :: 2.7',
-                   'Programming Language :: Python :: 3.6',
+                   'Programming Language :: Python :: 3.7',
                    'Topic :: Education',
                    'Topic :: Text Processing :: Markup'),
     # data_files=[('common',['runestone/common/*']),
