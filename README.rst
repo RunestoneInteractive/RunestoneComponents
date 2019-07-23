@@ -18,7 +18,7 @@ Packaging of the Runestone components for publishing educational materials using
 Documentation
 -------------
 
-You will find the new Authors Guide `here <https://runestone.academy/runestone/static/authorguide/index.html>`_
+You will find the new `Authors Guide <https://runestone.academy/runestone/static/authorguide/index.html>`_
 
 If you want to report any issues with the docs or submit PRs to improve them please do so on `github <https://github.com/RunestoneInteractive/runestoneinteractive.github.io/issues>`_
 
@@ -88,9 +88,8 @@ You will now have a build folder with a file index.html in it, along with some d
 
 Now from your browser you can open up ``http://localhost:8000/index.html``  You should see the table of contents for a sample page like this:
 
-.. raw:: html
-
-    <img src="images/runeCompo-index.png" height="400" width="370">
+.. image:: images/runeCompo-index.png
+    :width: 370
 
 
 If you edit ``_sources/index.html`` or ``_sources/overview.rst`` and then rebuild and serve again you will see your changes.  The best documentation is probably the overview.rst file itself, as it demonstrates how to use all of the common components and shows most of their options.
@@ -178,7 +177,7 @@ If you have an error relating to PhantomJS/a driver in the output, you probably 
 
 * Write the appropriate directive example(s) inside the ``index.rst`` file (which will be created as a result of ``runestone init``)
 
-* Edit the Python file you created as appropriate (see documentation for the Python ``unittest`` module `here <https://docs.python.org/2/library/unittest.html>`_.)
+* Edit the Python file you created as appropriate (see documentation for the Python ``unittest`` module `In the Python docs <https://docs.python.org/2/library/unittest.html>`_.)
 
 
 Notes for more Advanced Users
@@ -216,4 +215,4 @@ If you use Runestone in your Research or write about it, please reference ``http
     publisher = {ACM},
     address = {New York, NY, USA},
     keywords = {cs1, ebook, sphinx},
-   } 
+   }
