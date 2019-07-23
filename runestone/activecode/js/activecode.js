@@ -499,13 +499,13 @@ ActiveCode.prototype.createOutput = function () {
         $(this.graphics).addClass("visible-ac-canvas");
     }).bind(this));
 
-    outDiv.appendChild(this.output);
-    outDiv.appendChild(this.graphics);
-    this.outerDiv.appendChild(outDiv);
-
     var clearDiv = document.createElement("div");
     $(clearDiv).css("clear","both");  // needed to make parent div resize properly
     this.outerDiv.appendChild(clearDiv);
+
+    outDiv.appendChild(this.output);
+    outDiv.appendChild(this.graphics);
+    this.outerDiv.appendChild(outDiv);
 
 
     var lensDiv = document.createElement("div");
@@ -1148,7 +1148,6 @@ ActiveCode.prototype.runProg = function () {
     $(this.runButton).attr('disabled', 'disabled');
     $(this.historyScrubber).off("slidechange");
     $(this.historyScrubber).slider("disable");
-    $(this.codeDiv).switchClass("col-md-12", "col-md-7", {duration: 500, queue: false});
     $(this.outDiv).show({duration: 700, queue: false});
 
     var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
@@ -1267,7 +1266,6 @@ JSActiveCode.prototype.runProg = function() {
 
     $(this.eContainer).remove();
     $(this.output).text('');
-    $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
     $(this.outDiv).show({duration:700,queue:false});
 
     try {
@@ -2081,7 +2079,6 @@ LiveCode.prototype.runProg_callback = function(data) {
 
         var odiv = this.output;
         $(this.runButton).attr('disabled', 'disabled');
-        $(this.codeDiv).switchClass("col-md-12","col-md-6",{duration:500,queue:false});
         $(this.outDiv).show({duration:700,queue:false});
         $(this.errDiv).remove();
         $(this.output).css("visibility","visible");
