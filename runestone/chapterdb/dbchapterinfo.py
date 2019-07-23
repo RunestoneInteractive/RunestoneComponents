@@ -21,7 +21,7 @@ import os.path
 from collections import OrderedDict
 import docutils
 from sqlalchemy import Table, select, and_, or_
-from runestone.server.componentdb import engine, meta
+from runestone.server.componentdb import engine, meta, sess
 from sphinx.util import logging
 
 logger = logging.getLogger(__name__)
@@ -42,7 +42,7 @@ def update_database(chaptitles, subtitles, skips, app):
     When the build is completely finished output the information gathered about
     chapters and subchapters into the database.
     """
-    if not engine:
+    if not sess:
         logger.info("You need to install a DBAPI module - psycopg2 for Postgres")
         logger.info("Or perhaps you have not set your DBURL environment variable")
         return
@@ -58,7 +58,7 @@ def update_database(chaptitles, subtitles, skips, app):
         cname = app.env.config.html_context.get('course_id', "unknown")
 
     logger.info("Cleaning up old chapters info for {}".format(cname))
-    engine.execute(chapters.delete().where(chapters.c.course_id == basecourse))
+    sess.execute(chapters.delete().where(chapters.c.course_id == basecourse))
 
 
     logger.info("Populating the database with Chapter information")
@@ -70,7 +70,7 @@ def update_database(chaptitles, subtitles, skips, app):
         ins = chapters.insert().values(chapter_name=chaptitles.get(chap, chap),
                                        course_id=cname, chapter_label=chap,
                                        chapter_num=chapnum)
-        res = engine.execute(ins)
+        res = sess.execute(ins)
         currentRowId = res.inserted_primary_key[0]
         for subchapnum, sub in enumerate(subtitles[chap], start=1):
             if (chap,sub) in skips:
@@ -85,7 +85,7 @@ def update_database(chaptitles, subtitles, skips, app):
                                                sub_chapter_label=sub,
                                                skipreading=skipreading,
                                                sub_chapter_num=subchapnum)
-            engine.execute(ins)
+            sess.execute(ins)
             # Three possibilities:
             # 1) The chapter and subchapter labels match existing, but the q_name doesn't match; because you changed
             # heading in a file.
@@ -100,21 +100,23 @@ def update_database(chaptitles, subtitles, skips, app):
                                                      questions.c.question_type == 'page',
                                                      questions.c.base_course == basecourse))
                                             )
-            res = engine.execute(sel).first()
+            res = sess.execute(sel).first()
             if res and ((res.name != q_name) or (res.chapter != chap) or (res.subchapter !=sub)):
                 # Something changed
                 upd = questions.update().where(questions.c.id == res['id']).values(name=q_name,
                                                                                    chapter = chap,
+                                                                                   from_source='T',
                                                                                    subchapter = sub)
-                engine.execute(upd)
+                sess.execute(upd)
             if not res:
                 # this is a new subchapter
                 ins = questions.insert().values(chapter=chap, subchapter=sub,
                                             question_type='page',
+                                            from_source='T',
                                             name=q_name,
                                             timestamp=datetime.datetime.now(),
                                             base_course=basecourse)
-                engine.execute(ins)
+                sess.execute(ins)
 
 
 

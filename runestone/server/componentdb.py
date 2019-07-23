@@ -20,19 +20,71 @@ from datetime import datetime
 __author__ = 'bmiller'
 
 import os
+from os import environ
+import re
 from sqlalchemy import create_engine, Table, MetaData, select, and_
-from . import get_dburl
+from sqlalchemy.orm.session import sessionmaker
 from runestone.common.runestonedirective import RunestoneDirective
+
+def get_dburl(outer={}):
+    """
+    Return a nicely formatted database connection URL
+    This function should not be used to configure a DAL db_uri for web2py that will already
+    be configured in settings.
+
+    :param outer:  pass locals from the calling environment
+    :return:  string
+    """
+    # outer may contain the locals from the calling function
+    # nonlocal env, settings # Python 3 only
+
+    if 'WEB2PY_CONFIG' in environ:
+        w2py_config = environ['WEB2PY_CONFIG']
+        if w2py_config == 'development':
+            return environ['DEV_DBURL']
+
+        if w2py_config == 'production':
+            return environ['DBURL']
+
+        if w2py_config == 'test':
+            return environ['TEST_DBURL']
+
+    if 'options' in outer:
+        return outer['options'].build.template_args['dburl']
+
+    if 'env' in outer:
+        return outer['env'].config.html_context['dburl']
+
+    if 'env' in globals():
+        return globals()['env'].config.html_context['dburl']
+
+    ret = None
+    if 'settings' in outer:
+        ret = outer['settings'].database_uri
+
+    if 'settings' in globals():
+        ret = globals()['settings'].database_uri.replace('postgres:','postgresql:')
+
+    if ret:
+        return re.sub(r'postgres:.*/', 'postgresql:/', ret)
+
+    raise RuntimeError("Cannot configure a Database URL!")
+
 
 # create a global DB query engine to share for the rest of the file
 try:
     dburl = get_dburl()
     engine = create_engine(dburl, client_encoding='utf8', convert_unicode=True)
+    Session = sessionmaker()
     engine.connect()
+    Session.configure(bind=engine)
+    sess = Session()
 except Exception as e:  # psycopg2.OperationalError
     dburl = None
     engine = None
     meta = None
+    sess = None
+    print(e)
     print("Skipping all DB operations because environment variables not set up")
 else:
     # If no exceptions are raised, then set up the database.
@@ -40,6 +92,27 @@ else:
     questions = Table('questions', meta, autoload=True, autoload_with=engine)
     assignment_questions = Table('assignment_questions', meta, autoload=True, autoload_with=engine)
     courses = Table('courses', meta, autoload=True, autoload_with=engine)
+
+
+def setup(app):
+    app.connect('env-before-read-docs', reset_questions)
+    app.connect('build-finished', finalize_updates)
+
+
+def reset_questions(app, env, docnames):
+    if sess:
+        basecourse = env.config.html_context.get('basecourse')
+        stmt = questions.update().where(and_(questions.c.base_course == basecourse,
+                questions.c.question_type != 'page')).values(from_source='F')
+        sess.execute(stmt)
+
+def finalize_updates(app, excpt):
+    if sess:
+        if excpt is None:
+            sess.commit()
+        else:
+            sess.rollback()
+
 
 def logSource(self):
     sourcelog = self.state.document.settings.env.config.html_context.get('dsource', None)
@@ -87,15 +160,15 @@ def addQuestionToDB(self):
         id_ = self.options['divid']
         sel = select([questions]).where(and_(questions.c.name == id_,
                                               questions.c.base_course == basecourse))
-        res = engine.execute(sel).first()
+        res = sess.execute(sel).first()
         try:
             if res:
-                stmt = questions.update().where(questions.c.id == res['id']).values(question = self.block_text, timestamp=last_changed, is_private='F', question_type=self.name, subchapter=self.subchapter, autograde=autograde, author=author,difficulty=difficulty,chapter=self.chapter, practice=practice, topic=topics)
-                engine.execute(stmt)
+                stmt = questions.update().where(questions.c.id == res['id']).values(question = self.block_text, timestamp=last_changed, is_private='F', question_type=self.name, subchapter=self.subchapter, autograde=autograde, author=author,difficulty=difficulty,chapter=self.chapter, practice=practice, topic=topics, from_source='T')
+                sess.execute(stmt)
             else:
-                ins = questions.insert().values(base_course=basecourse, name=id_, question=self.block_text, timestamp=last_changed, is_private='F', question_type=self.name, subchapter=self.subchapter, autograde=autograde, author=author,difficulty=difficulty,chapter=self.chapter, practice=practice, topic=topics)
+                ins = questions.insert().values(base_course=basecourse, name=id_, question=self.block_text, timestamp=last_changed, is_private='F', question_type=self.name, subchapter=self.subchapter, autograde=autograde, author=author,difficulty=difficulty,chapter=self.chapter, practice=practice, topic=topics, from_source='T')
 
-                engine.execute(ins)
+                sess.execute(ins)
         except UnicodeEncodeError:
             raise self.severe("Bad character in directive {} in {}/{}. This will not be saved to the DB".format(id_, self.chapter, self.subchapter))
 
@@ -103,7 +176,7 @@ def getQuestionID(base_course, name):
 
     sel = select([questions]).where(and_(questions.c.name == name,
                                           questions.c.base_course == base_course))
-    res = engine.execute(sel).first()
+    res = sess.execute(sel).first()
     if res:
         return res['id']
     else:
@@ -114,7 +187,7 @@ def getOrInsertQuestionForPage(base_course=None, name=None, is_private='F', ques
 
     sel = select([questions]).where(and_(questions.c.name == name,
                                           questions.c.base_course == base_course))
-    res = engine.execute(sel).first()
+    res = sess.execute(sel).first()
 
     if res:
         id = res['id']
@@ -126,7 +199,7 @@ def getOrInsertQuestionForPage(base_course=None, name=None, is_private='F', ques
             author=author,
             difficulty=difficulty,
             chapter=chapter)
-        res = engine.execute(stmt)
+        res = sess.execute(stmt)
         return id
     else:
         ins = questions.insert().values(
@@ -139,14 +212,14 @@ def getOrInsertQuestionForPage(base_course=None, name=None, is_private='F', ques
             author=author,
             difficulty=difficulty,
             chapter=chapter)
-        res = engine.execute(ins)
+        res = sess.execute(ins)
         return res.inserted_primary_key[0]
 
 def addAssignmentQuestionToDB(question_id, assignment_id, points, activities_required = 0, autograde=None, which_to_grade = None, reading_assignment=None, sorting_priority=0):
     # now insert or update the assignment_questions row
     sel = select([assignment_questions]).where(and_(assignment_questions.c.assignment_id == assignment_id,
                                           assignment_questions.c.question_id == question_id))
-    res = engine.execute(sel).first()
+    res = sess.execute(sel).first()
     vals = dict(
             assignment_id = assignment_id,
             question_id = question_id,
@@ -159,15 +232,15 @@ def addAssignmentQuestionToDB(question_id, assignment_id, points, activities_req
     if res:
         #update
         stmt = assignment_questions.update().where(assignment_questions.c.id == res['id']).values(**vals)
-        engine.execute(stmt)
+        sess.execute(stmt)
     else:
         #insert
         ins = assignment_questions.insert().values(**vals)
-        engine.execute(ins)
+        sess.execute(ins)
 
 def getCourseID(coursename):
     sel = select([courses]).where(courses.c.course_name == coursename)
-    res = engine.execute(sel).first()
+    res = sess.execute(sel).first()
     return res['id']
 
 def addAssignmentToDB(name = None, course_id = None, assignment_type_id = None, deadline = None, points = None):
@@ -175,19 +248,19 @@ def addAssignmentToDB(name = None, course_id = None, assignment_type_id = None, 
     last_changed = datetime.now()
     sel = select([assignments]).where(and_(assignments.c.name == name,
                                           assignments.c.course == course_id))
-    res = engine.execute(sel).first()
+    res = sess.execute(sel).first()
     if res:
         stmt = assignments.update().where(assignments.c.id == res['id']).values(
             assignment_type = assignment_type_id,
             duedate = deadline,
             points = points
         )
-        engine.execute(stmt)
+        sess.execute(stmt)
         a_id = res['id']
         # delete all existing AssignmentQuestions, so that you don't have any leftovers
         # this is safe because grades and comments are associated with div_ids and course_names, not assignment_questions rows.
         stmt2 = assignment_questions.delete().where(assignment_questions.c.assignment_id == a_id)
-        engine.execute(stmt2)
+        sess.execute(stmt2)
 
     else:
         ins = assignments.insert().values(
@@ -196,7 +269,7 @@ def addAssignmentToDB(name = None, course_id = None, assignment_type_id = None, 
             assignment_type = assignment_type_id,
             duedate = deadline,
             points = points)
-        res = engine.execute(ins)
+        res = sess.execute(ins)
         a_id = res.inserted_primary_key[0]
 
     return a_id
@@ -206,12 +279,12 @@ def addHTMLToDB(divid, basecourse, htmlsrc, feedback=None):
         last_changed = datetime.now()
         sel = select([questions]).where(and_(questions.c.name == divid,
                                               questions.c.base_course == basecourse))
-        res = engine.execute(sel).first()
+        res = sess.execute(sel).first()
         try:
             if res:
                 if res['htmlsrc'] != htmlsrc or res['feedback'] != feedback:
                     stmt = questions.update().where(questions.c.id == res['id']).values(htmlsrc = htmlsrc, feedback=feedback, timestamp=last_changed)
-                    engine.execute(stmt)
+                    sess.execute(stmt)
         except UnicodeEncodeError:
             print("Bad character in directive {}".format(divid))
         except:
@@ -220,7 +293,7 @@ def addHTMLToDB(divid, basecourse, htmlsrc, feedback=None):
 def get_HTML_from_DB(divid, basecourse):
     sel = select([questions]).where(and_(questions.c.name == divid,
                                           questions.c.base_course == basecourse))
-    res = engine.execute(sel).first()
+    res = sess.execute(sel).first()
     if res:
         return res['htmlsrc']
     else:
