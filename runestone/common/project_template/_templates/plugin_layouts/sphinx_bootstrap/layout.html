@@ -1,5 +1,9 @@
 {% extends "basic/layout.html" %}
 
+{% if dynamic_pages == 'True' %}
+  {% set appname = '{{ =request.application }}' %}
+{% endif %}
+
 {% set script_files = ['_static/runestonebase.js'] + script_files + [
     '_static'+'/jquery-ui-1.10.3.custom.min.js',
     '_static'+'/jquery-fix.js',
@@ -114,11 +118,11 @@
           </a>
           <ul class='dropdown-menu'>
             {% if 'overview' in course_id %}
-                <li><a href='/{{appname}}/static/{{course_id}}/overview.html' aria-label="index-page">Table of Contents</a></li>
+                <li><a href='{{ pathto(master_doc) }}/overview.html' aria-label="index-page">Table of Contents</a></li>
             {% else: %}
                 <li><a href='{{ pathto(master_doc) }}' aria-label="index-page">Table of Contents</a></li>
             {% endif %}
-            <li><a href='/{{appname}}/static/{{course_id}}/genindex.html'>Book Index</a></li>
+            <li><a href='{{ pathto(master_doc) }}/genindex.html'>Book Index</a></li>
             <li class="divider"></li>
             <li style="width: 240px;">
               <form class="navbar-search" style="margin:10px;" action="{{ pathto('search') }}" method="get">
@@ -149,17 +153,17 @@
           <ul class="dropdown-menu user-menu">
             <li><span class='loggedinuser'></span></li>
             <li class="divider"></li>
-            <li><a href='{{course_url}}/{{appname}}/assignments/chooseAssignment.html'>Assignments</a></li>
-            <li><a href='{{course_url}}/{{appname}}/assignments/practice'>Practice</a></li>
+            <li><a href='/{{appname}}/assignments/chooseAssignment.html'>Assignments</a></li>
+            <li><a href='/{{appname}}/assignments/practice'>Practice</a></li>
             <li class="divider"></li>
             <li><a href='/{{appname}}/default/courses'>Change Course</a></li>
 			      <li class="divider"></li>
-            <li id="ip_dropdown_link"><a href='{{course_url}}/{{appname}}/admin/index'>Instructor's Page</a></li>
-            <li><a href='{{ course_url }}/{{ appname }}/assignments/index'>Progress Page</a></li>
+            <li id="ip_dropdown_link"><a href='/{{appname}}/admin/index'>Instructor's Page</a></li>
+            <li><a href='/{{appname}}/assignments/index'>Progress Page</a></li>
             <li class="divider"></li>
-            <li><a href="{{course_url}}/{{appname}}/default/user/profile" id="profilelink">Edit Profile</a></li>
-            <li><a href="{{course_url}}/{{appname}}/default/user/change_password" id="passwordlink">Change Password</a></li>
-            <li><a href="{{course_url}}/{{appname}}/default/user/register" id="registerlink">Register</a></li>
+            <li><a href="/{{appname}}/default/user/profile" id="profilelink">Edit Profile</a></li>
+            <li><a href="/{{appname}}/default/user/change_password" id="passwordlink">Change Password</a></li>
+            <li><a href="/{{appname}}/default/user/register" id="registerlink">Register</a></li>
             <li class='loginout'><a href='#'>Login</a></li> <!-- correct link populated by addNavbarLoginLink() -->
           </ul>
         </li>
@@ -182,8 +186,8 @@
           </a>
           <ul class="dropdown-menu user-menu">
             <li><a href='http://runestoneinteractive.org/pages/faq.html'>FAQ</a></li>
-            <li><a href='/{{appname}}/static/{{course_id}}/navhelp.html'>Navigation Help</a></li>
-            <li><a href='/{{appname}}/static/instructorguide/index.html'>Help for Instructors</a></li>
+            <li><a href='https://runestone.academy/runestone/static/overview/navhelp.html'>Navigation Help</a></li>
+            <li><a href='https://runestone.academy/runestone/static/overview/instructor.html'>Help for Instructors</a></li>
             <li class="divider"></li>
             <li><a href='http://runestoneinteractive.org'>About Runestone</a></li>
             <li><a href='/{{ appname }}/default/reportabug?course={{ course_id }}&page={{ pathto(pagename,1) }}'>Report A Problem</a></li>
@@ -247,7 +251,7 @@
     {% endraw %}
   {% else %}
     eBookConfig.useRunestoneServices = {% if use_services == 'True' -%}true{%- else -%}false{%- endif -%};
-    eBookConfig.host = '{{course_url}}' ? '{{course_url}}' : 'http://127.0.0.1:8000';
+    eBookConfig.host = '{{course_url}}' || 'http://127.0.0.1:8000';
     eBookConfig.app = eBookConfig.host+'/{{appname}}';
     eBookConfig.course = '{{course_id}}';
     eBookConfig.basecourse = '{{ basecourse }}';
