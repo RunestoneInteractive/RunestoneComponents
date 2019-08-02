@@ -24,7 +24,7 @@ function getCompletions() {
             }
             else {
                 completionClass = "buttonAskCompletion";
-                completionMsg = "Mark as completed";
+                completionMsg = "Mark as Completed";
             }
             $("#main-content").append('<div style="text-align:center"><button class="btn btn-lg ' + completionClass + '" id="completionButton">' + completionMsg + '</button></div>');
         }
@@ -102,7 +102,7 @@ function addNavigationAndCompletionButtons() {
         else if ($(this).hasClass("buttonConfirmCompletion")) {
             $(this).removeClass("buttonConfirmCompletion")
                 .addClass("buttonAskCompletion")
-                .html("Mark as completed");
+                .html("Mark as Completed");
             navLinkBgRightHalfOpen = navLinkBgRightHiddenPosition + 70;
             $("#navLinkBgRight").animate({"right": navLinkBgRightHalfOpen});
             $("#relations-next").animate({"right": relationsNextIconInitialPosition});

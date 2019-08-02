@@ -159,7 +159,10 @@ class PageProgressBar {
             let val = 100 * this.total / this.possible;
             $("#scprogresstotal").text(this.total);
             $("#scprogressposs").text(this.possible);
-            $("#subchapterprogress").progressbar("option","value", val)
+            $("#subchapterprogress").progressbar("option","value", val);
+            if (val == 100.0 && $("#completionButton").text().toLowerCase() === "mark as completed") {
+                $("#completionButton").click();
+            }
         }
     }
 
