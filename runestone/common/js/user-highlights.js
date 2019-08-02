@@ -5,7 +5,7 @@ var rsb = new RunestoneBase();
 
 function getCompletions() {
 // Get the completion status
-    if ((window.location.href).match(/(index.html|genindex.html|navhelp.html|toc.html|assignments.html|exercises.html)/)) {
+    if ((window.location.href).match(/(index.html|toctree.html|genindex.html|navhelp.html|toc.html|assignments.html|Exercises.html)/)) {
         return;
     }
 
@@ -40,7 +40,7 @@ function showLastPositionBanner() {
 }
 
 function addNavigationAndCompletionButtons() {
-    if ((window.location.href).match(/(index.html|genindex.html|navhelp.html|toc.html|assignments.html|exercises.html)/)) {
+    if ((window.location.href).match(/(index.html|genindex.html|navhelp.html|toc.html|assignments.html|Exercises.html|toctree.html)/)) {
         return;
     }
     var navLinkBgRightHiddenPosition = -$("#navLinkBgRight").outerWidth() - 5;
