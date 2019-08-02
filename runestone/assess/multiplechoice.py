@@ -179,10 +179,16 @@ class MChoice(Assessment):
 
         super(MChoice, self).run()
 
+        env = self.state.document.settings.env
+        if env.config.mchoice_compare_button_show:
+            self.options['showcomparebutton'] = 'data-showcomparebutton=true'
+        else:
+            self.options['showcomparebutton'] = ''
+
         TEMPLATE_START = '''
             <div class="%(divclass)s">
-            <ul data-component="multiplechoice" data-multipleanswers="%(multipleAnswers)s" %(random)s id="%(divid)s">
-            '''
+            <ul data-component="multiplechoice" data-multipleanswers="%(multipleAnswers)s" %(random)s %(showcomparebutton)s id="%(divid)s">
+           '''
 
         OPTION = '''
             <li data-component="answer" %(is_correct)s id="%(divid)s_opt_%(alabel)s">%(atext)s</li><li data-component="feedback">%(feedtext)s</li>
