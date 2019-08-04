@@ -115,6 +115,7 @@ class FillInTheBlank(RunestoneIdDirective):
     config values (conf.py):
 
     - fitb_div_class - custom CSS class of the component's outermost div
+    - fitb_compare_button_show - if False, hide the 'Compare me' button (default True)
     """
     required_arguments = 1
     optional_arguments = 0
