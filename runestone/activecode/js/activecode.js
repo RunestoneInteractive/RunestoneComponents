@@ -2699,6 +2699,10 @@ $(document).ready(function() {
         for (k in edList) {
             edList[k].disableSaveLoad();
         }
+    } else {
+        for (k in edList) {
+            edList[k].enableSaveLoad();
+        }
     }
 
 });
@@ -2708,13 +2712,6 @@ if (typeof component_factory === 'undefined') {
 }
 component_factory['activecode'] = ACFactory.createActiveCodeFromOpts;
 
-$(document).bind("runestone:login", function() {
-    for (k in edList) {
-        if (edList.hasOwnProperty(k)) {
-            edList[k].enableSaveLoad();
-        }
-    }
-});
 
 // This seems a bit hacky and possibly brittle, but its hard to know how long it will take to
 // figure out the login/logout status of the user.  Sometimes its immediate, and sometimes its

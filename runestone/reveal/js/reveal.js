@@ -243,13 +243,11 @@ Reveal.prototype.hideInline = function () {
 == Find the custom HTML tags and ==
 ==     execute our code on them        ==
 =================================*/
-$(document).ready(function () {
+
+$(document).bind("runestone:login-complete",function () {
     $("[data-component=reveal]").each(function (index) {
         RevealList[this.id] = new Reveal({"orig": this});
     });
-});
-
-$(document).bind("runestone:login-complete",function () {
     if (eBookConfig.isInstructor) {
         for (const divid of Object.keys(RevealList)) {
             if (RevealList[divid].instructorOnly) {
