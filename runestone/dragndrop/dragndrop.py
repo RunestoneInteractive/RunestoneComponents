@@ -20,13 +20,14 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode, add_i18n_js
 
 def setup(app):
     app.add_directive('dragndrop',DragNDrop)
     app.add_autoversioned_javascript('dragndrop.js')
     app.add_autoversioned_javascript('timeddnd.js')
     app.add_autoversioned_stylesheet('dragndrop.css')
+    add_i18n_js(app, {"en","sr-Cyrl"}, "dragndrop-i18n")
 
     app.add_node(DragNDropNode, html=(visit_dnd_node, depart_dnd_node))
 
