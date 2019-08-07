@@ -244,6 +244,7 @@
     eBookConfig.username = '{{= user_id}}';
     eBookConfig.readings = {{= readings}};
     eBookConfig.activities = {{= XML(activity_info) }}
+    eBookConfig.allow_pairs = {{=allow_pairs}}
     {% endraw %}
   {% else %}
     eBookConfig.useRunestoneServices = {% if use_services == 'True' -%}true{%- else -%}false{%- endif -%};
@@ -265,7 +266,7 @@
   eBookConfig.proxyuri_files = '{{proxy_uri_files}}';
   eBookConfig.downloadsEnabled = {{downloads_enabled}};
   eBookConfig.enable_chatcodes = {{enable_chatcodes}} ? {{ enable_chatcodes }} : false;
-  eBookConfig.allow_pairs = {{allow_pairs}} ? {{allow_pairs}} : false;
+
 
 </script>
 
