@@ -112,7 +112,7 @@ class PageProgressBar {
         if(actDict) {
             this.activities = actDict;
         } else {
-            let activities = {}
+            let activities = {'page': 0};
             $(".runestone").each(function (idx, e) {
                 activities[e.firstElementChild.id] = 0;
             })
@@ -120,7 +120,7 @@ class PageProgressBar {
         }
         this.calculateProgress();
         if (window.location.pathname.match(/.*(index.html|toctree.html|Exercises.html|Glossary.html)$/i)) {
-            $("#scprogresscontainer").hide()
+            $("#scprogresscontainer").hide();
         }
         this.renderProgress()
     }
