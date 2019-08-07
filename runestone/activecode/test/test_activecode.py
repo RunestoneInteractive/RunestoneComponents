@@ -96,7 +96,7 @@ class ActiveCodeTests(RunestoneTestCase):
         self.assertEqual(2, int(total))
         possible = self.driver.find_element_by_id("scprogressposs").text.strip()
         # expect only 1 because the page isn't included when not using services
-        self.assertEqual(1, int(possible))
+        self.assertEqual(2, int(possible))
         # count should not increment after a second click
         rb.click()
         total = self.driver.find_element_by_id("scprogresstotal").text.strip()
