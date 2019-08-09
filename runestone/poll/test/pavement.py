@@ -3,7 +3,7 @@ from paver.easy import *
 import paver.setuputils
 paver.setuputils.install_distutils_tasks()
 import os, sys
-from runestone.server import get_dburl
+from runestone.server.componentdb import get_dburl
 from sphinxcontrib import paverutils
 
 sys.path.append(os.getcwd())
