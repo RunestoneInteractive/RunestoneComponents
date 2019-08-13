@@ -140,7 +140,7 @@
 
         <li class="divider-vertical"></li>
 
-        {% if use_services %}
+        {% if use_services == 'true' %}
         <!-- user account dropdown -->
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
@@ -198,7 +198,9 @@
       <ul class="nav navbar-nav">
         <li class="divider-vertical"></li>
         {% block sidebartoc %}
-          {% include "subchaptoc.html" %}
+          {% if dynamic_pages == 'True': %}
+            {% include "subchaptoc.html" %}
+          {% endif %}
           <li class="divider-vertical"></li>
         {% endblock %}
         <!-- {% block sidebarrel %}
@@ -247,7 +249,7 @@
     eBookConfig.allow_pairs = {{=allow_pairs}}
     {% endraw %}
   {% else %}
-    eBookConfig.useRunestoneServices = {% if use_services == 'True' -%}true{%- else -%}false{%- endif -%};
+    eBookConfig.useRunestoneServices = {% if use_services == 'true' -%}true{%- else -%}false{%- endif -%};
     eBookConfig.host = '{{course_url}}' ? '{{course_url}}' : 'http://127.0.0.1:8000';
     eBookConfig.app = eBookConfig.host+'/{{appname}}';
     eBookConfig.course = '{{course_id}}';
@@ -312,7 +314,7 @@
 <footer class="footer">
   <div class="container">
     <p class="pull-right">
-      {% if use_services %}
+      {% if use_services == 'true' %}
       <span id='numuserspan'></span><span class='loggedinuser'></span>
       {% endif %}
       | <a href="#">Back to top</a>
