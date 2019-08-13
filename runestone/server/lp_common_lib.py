@@ -175,6 +175,10 @@ def get_sim_str_mdb(
         'set uart1io.uartioenabled true\n'
         'set uart1io.outputfile "{}"\n'
 
+        # Configure the clock to match the setup in the PIC24 libary ``lib/include/pic24_clockfreq.h`` named ``SIM_CLOCK``.
+        'set oscillator.frequency 1\n'
+        'set oscillator.frequencyunit Mega\n'
+
         # Load in the program.
         'program "{}"\n'
 
