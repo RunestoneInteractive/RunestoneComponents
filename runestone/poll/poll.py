@@ -93,7 +93,7 @@ class Poll(RunestoneIdDirective):
     :results: One of all, instructor, superuser - who should see results?
 
 
-config values (conf.py): 
+config values (conf.py):
 
 - poll_div_class - custom CSS class of the component's outermost div
     """
@@ -113,6 +113,7 @@ config values (conf.py):
         'option_8':directives.unchanged,
         'option_9':directives.unchanged,
         'option_10':directives.unchanged,
+        'results': directives.unchanged
     }
 
     def run(self):

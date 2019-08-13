@@ -120,7 +120,7 @@ Poll.prototype.renderTextField = function () {
 
 Poll.prototype.submitPoll = function() {
     //checks the poll, sets localstorage and submits to the server
-    var poll_val = null; 
+    var poll_val = null;
     for (var i = 0; i < this.optsArray.length; i++) {
         if (this.optsArray[i].checked) {
             poll_val = this.optsArray[i].value;
@@ -149,7 +149,11 @@ Poll.prototype.submitPoll = function() {
 
     // log the fact that the user has answered the poll to local storage
     localStorage.setItem(this.divid, "true");
-    $(this.pollForm).append(`<span id=${this.divid}_sent><strong>Thanks, your response has been recorded</strong></span>`);
+    if (! document.getElementById(`${this.divid}_sent`)) {
+        $(this.pollForm).append(`<span id=${this.divid}_sent><strong>Thanks, your response has been recorded</strong></span>`);
+    } else {
+        $(`#${this.divid}_sent`).html("<strong>Only Your last reponse is recorded</strong>")
+    }
 
     // show the results of the poll
     if (this.resultsViewer === "all") {
@@ -184,7 +188,7 @@ Poll.prototype.showPollResults = function(data) {
             var percent = (count / total) * 100;
             var text = Math.round(10*percent)/10 + "%";   // round percent to 10ths
 
-            var html = "<li value='"+opt_list[i]+"'><div class='progress'><div class='progress-bar progress-bar-success' style=width:"+percent+"%;><span class='poll-text'>"+text+"</span></div></div></li>";
+            var html = "<li value='"+(opt_list[i]+1)+"'><div class='progress'><div class='progress-bar progress-bar-success' style=width:"+percent+"%;><span class='poll-text'>"+text+"</span></div></div></li>";
             var el = $(html);
             list.append(el);
         }
