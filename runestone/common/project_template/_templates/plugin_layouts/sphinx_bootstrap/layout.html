@@ -122,7 +122,7 @@
             {% else: %}
                 <li><a href='{{ pathto(master_doc) }}' aria-label="index-page">Table of Contents</a></li>
             {% endif %}
-            <li><a href='{{ pathto(master_doc) }}/genindex.html'>Book Index</a></li>
+            <li><a href='{{ pathto("genindex.html",1) }}'>Book Index</a></li>
             <li class="divider"></li>
             <li style="width: 240px;">
               <form class="navbar-search" style="margin:10px;" action="{{ pathto('search') }}" method="get">
@@ -186,8 +186,7 @@
           </a>
           <ul class="dropdown-menu user-menu">
             <li><a href='http://runestoneinteractive.org/pages/faq.html'>FAQ</a></li>
-            <li><a href='https://runestone.academy/runestone/static/overview/navhelp.html'>Navigation Help</a></li>
-            <li><a href='https://runestone.academy/runestone/static/overview/instructor.html'>Help for Instructors</a></li>
+            <li><a href='https://runestone.academy/runestone/static/instructorguide/index.html'>Instructors Guide</a></li>
             <li class="divider"></li>
             <li><a href='http://runestoneinteractive.org'>About Runestone</a></li>
             <li><a href='/{{ appname }}/default/reportabug?course={{ course_id }}&page={{ pathto(pagename,1) }}'>Report A Problem</a></li>
