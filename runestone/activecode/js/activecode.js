@@ -7,6 +7,7 @@ var isMouseDown = false;
 document.onmousedown = function() { isMouseDown = true };
 document.onmouseup   = function() { isMouseDown = false };
 var edList = {};
+var allDburls = {};
 
 ActiveCode.prototype = new RunestoneBase();
 var socket, connection, doc;
@@ -2397,8 +2398,23 @@ SQLActiveCode.prototype.init = function(opts) {
             if (! self.dburl.startsWith("http")) {
                 self.dburl = window.location.protocol + '//' + window.location.host + self.dburl;
             }
-            var xhr = new XMLHttpRequest();
             $(self.runButton).attr('disabled','disabled')
+            if (! (self.dburl in allDburls)) {
+                allDburls[self.dburl] = {status: 'loading', xWaitFor: jQuery.Deferred() };
+            } else {
+                if (allDburls[self.dburl].status == 'loading') {
+                    allDburls[self.dburl].xWaitFor.done(function() {
+                        self.db = new SQL.Database(allDburls[self.dburl].db);
+                        $(self.runButton).removeAttr('disabled')
+                    });
+                    return;
+                }
+                self.db = new SQL.Database(allDburls[self.dburl].db);
+                $(self.runButton).removeAttr('disabled')
+                return;
+            }
+            var xhr = new XMLHttpRequest();
+
             // For example: https://github.com/lerocha/chinook-database/raw/master/ChinookDatabase/DataSources/Chinook_Sqlite.sqlite
             xhr.open('GET', self.dburl, true);
             xhr.responseType = 'arraybuffer';
@@ -2407,6 +2423,9 @@ SQLActiveCode.prototype.init = function(opts) {
                 var uInt8Array = new Uint8Array(xhr.response);
                 self.db = new SQL.Database(uInt8Array);
                 $(self.runButton).removeAttr('disabled')
+                allDburls[self.dburl].db = uInt8Array;
+                allDburls[self.dburl].status = 'ready';
+                allDburls[self.dburl].xWaitFor.resolve();
                 // contents is now [{columns:['col1','col2',...], values:[[first row], [second row], ...]}]
                 };
             xhr.send();
