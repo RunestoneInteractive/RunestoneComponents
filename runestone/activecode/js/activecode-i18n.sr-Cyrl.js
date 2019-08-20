@@ -70,6 +70,7 @@ $.i18n().load({
         "msg_activecode_server_err": "Дошло је до грешке на серверу: $1 $2",
         "msg_activecode_compiling_running": "Компајлирам и покрећем ваш код...",
         "msg_activecode_server_comm_err": "Грешка у комуникацији са сервером.",
-        "msg_activecode_save_run": "Покрени програм" //"Сачувај и покрени програм"
+        "msg_activecode_save_run": "Покрени програм", //"Сачувај и покрени програм"
+        "msg_activecode_reset": "Врати на почетак"
     }
 });
