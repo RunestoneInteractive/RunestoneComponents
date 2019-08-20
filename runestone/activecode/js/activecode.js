@@ -2554,7 +2554,7 @@ component_factory['activecode'] = ACFactory.createActiveCodeFromOpts;
 
 $(document).ready(function () {
     $(".run-button").text($.i18n("msg_activecode_run_code"));
-    $(".reset-button").text($.i18n("msg_activecode_run_code"));
+    $(".reset-button").text($.i18n("msg_activecode_reset"));
 });
 
 // This seems a bit hacky and possibly brittle, but its hard to know how long it will take to
