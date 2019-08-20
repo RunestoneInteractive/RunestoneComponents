@@ -1308,7 +1308,8 @@ def call_event_handler(handle_event, event):
         }
 
         if (this.modaloutput) {
-            PygameLib.running = false;
+            if (typeof PygameLib !== 'undefined')
+                PygameLib.running = false;
             $('.modal').modal('hide');
         }
         // if (this.slideit) {
@@ -1334,7 +1335,8 @@ def call_event_handler(handle_event, event):
         (function (err) {  // fail
             $(self.runButton).removeAttr('disabled');
             if (this.modaloutput) {
-                PygameLib.running = false;
+                if (typeof PygameLib !== 'undefined')
+                    PygameLib.running = false;
                 $('.modal').modal('hide');
             }
             self.logRunEvent({
@@ -2624,7 +2626,8 @@ function createPyCanvas() {
     Sk.main_canvas = document.createElement("canvas");
     Sk.quitHandler = function () {
         $('.modal').modal('hide');
-        PygameLib.running = false;
+        if (typeof PygameLib !== 'undefined')
+            PygameLib.running = false;
     };
     openPyCanvas();
 }
