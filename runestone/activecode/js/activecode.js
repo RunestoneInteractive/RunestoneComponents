@@ -954,6 +954,7 @@ ActiveCode.prototype.setTimeLimit = function (timer) {
 
 };
 
+
 ActiveCode.prototype.builtinRead = function (x) {
     if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
         throw $.i18n("msg_activecode_file_not_found", x);
@@ -2602,7 +2603,8 @@ if (typeof component_factory === 'undefined') {
 component_factory['activecode'] = ACFactory.createActiveCodeFromOpts;
 
 $(document).ready(function () {
-    $(".run-button").text($.i18n("msg_activecode_save_run"));
+    $(".run-button").text($.i18n("msg_activecode_run_code"));
+    $(".reset-button").text($.i18n("msg_activecode_reset"));
 });
 
 // This seems a bit hacky and possibly brittle, but its hard to know how long it will take to
