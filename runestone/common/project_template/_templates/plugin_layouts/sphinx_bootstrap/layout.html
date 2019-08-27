@@ -365,7 +365,7 @@
 {{ if request.application == 'runestone':}}
 <script type="text/javascript">
   var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', '{{ google_ga_account }}']);
+  _gaq.push(['_setAccount', '{{ =settings.google_ga }}']);
   _gaq.push(['_trackPageview']);
 
   (function() {
@@ -374,11 +374,11 @@
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
 </script>
-{% if minimal_outside_links != 'True' %}
-<script async src="https://hypothes.is/embed.js"></script>
-{% endif %}
 
 {{ pass }}
 {% endraw %}
+{% if minimal_outside_links != 'True' %}
+<script async src="https://hypothes.is/embed.js"></script>
+{% endif %}
 {% endif %}
 {% endblock %}
