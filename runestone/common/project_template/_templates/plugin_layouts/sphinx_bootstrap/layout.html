@@ -165,24 +165,15 @@
             {% if minimal_outside_links != 'True' %}
             <li><a href='/{{appname}}/default/courses'>Change Course</a></li>
 			      <li class="divider"></li>
-<<<<<<< HEAD
             <li id="ip_dropdown_link"><a href='/{{appname}}/admin/index'>Instructor's Page</a></li>
+            {% endif %}
             <li><a href='/{{appname}}/assignments/index'>Progress Page</a></li>
             <li class="divider"></li>
+            {% if minimal_outside_links != 'True' %}
             <li><a href="/{{appname}}/default/user/profile" id="profilelink">Edit Profile</a></li>
             <li><a href="/{{appname}}/default/user/change_password" id="passwordlink">Change Password</a></li>
             <li><a href="/{{appname}}/default/user/register" id="registerlink">Register</a></li>
-=======
-            <li id="ip_dropdown_link"><a href='{{course_url}}/{{appname}}/admin/index'>Instructor's Page</a></li>
-            {%- endif -%}
-            <li><a href='{{ course_url }}/{{ appname }}/assignments/index'>Progress Page</a></li>
-            <li class="divider"></li>
-            {% if minimal_outside_links != 'True' %}
-            <li><a href="{{course_url}}/{{appname}}/default/user/profile" id="profilelink">Edit Profile</a></li>
-            <li><a href="{{course_url}}/{{appname}}/default/user/change_password" id="passwordlink">Change Password</a></li>
-            <li><a href="{{course_url}}/{{appname}}/default/user/register" id="registerlink">Register</a></li>
-            {%- endif -%}
->>>>>>> d79c3e3... remove lots of links if pavements specifies minimal_outside_links
+            {% endif %}
             <li class='loginout'><a href='#'>Login</a></li> <!-- correct link populated by addNavbarLoginLink() -->
           </ul>
         </li>
