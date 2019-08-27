@@ -345,7 +345,9 @@
 </footer>
 
 
-{% if appname == "runestone" %}
+{% if dynamic_pages == 'True' %}
+{% raw %}
+{{ if request.application == 'runestone':}}
 <script type="text/javascript">
   var _gaq = _gaq || [];
   _gaq.push(['_setAccount', 'UA-32029811-1']);
@@ -358,7 +360,7 @@
   })();
 </script>
 <script async src="https://hypothes.is/embed.js"></script>
-
+{{ pass }}
+{% endraw %}
 {% endif %}
-
 {% endblock %}
