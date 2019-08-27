@@ -2515,7 +2515,11 @@ SQLActiveCode.prototype.autograde = function(result_table) {
         return s.indexOf('assert') > -1
     })
     for (let test of tests) {
-        [assert, loc, oper, expected] = test.split(/\s+/);
+        let wlist = test.split(/\s+/);
+        wlist.shift();
+        loc = wlist.shift()
+        oper = wlist.shift();
+        expected = wlist.join(' ');
         [row,col] = loc.split(',');
         result += this.testOneAssert(row, col, oper, expected, result_table);
         result += "\n"
