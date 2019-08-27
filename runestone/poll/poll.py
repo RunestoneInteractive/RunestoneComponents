@@ -19,7 +19,7 @@ __author__ = 'isaiahmayerchak'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
-from runestone.server.componentdb import addQuestionToDB
+from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 
 
 
@@ -72,6 +72,8 @@ def visit_poll_node(self,node):
             node.poll_content["optiontext"] = i + 1
             res += TEMPLATE_OPTION % node.poll_content
     res += TEMPLATE_END
+
+    addHTMLToDB(node.poll_content['divid'], node.poll_content['basecourse'], res)
     self.body.append(res)
 
 def depart_poll_node(self,node):
