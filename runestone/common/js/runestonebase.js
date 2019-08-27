@@ -49,9 +49,9 @@ RunestoneBase.prototype.logRunEvent = function (eventInfo) {
         eventInfo.save_code = "True"
     }
     if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
-        jQuery.post(eBookConfig.ajaxURL + 'runlog', eventInfo) // Log the run event
+        jQuery.post(eBookConfig.ajaxURL + 'runlog.json', eventInfo) // Log the run event
             .done((function(data, status, whatever) {
-                data = JSON.parse(data);
+                // data = JSON.parse(data);
                 if (data.message) {
                     alert(data.message);
                 }
