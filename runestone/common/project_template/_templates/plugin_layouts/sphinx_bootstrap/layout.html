@@ -249,8 +249,7 @@
   {% if dynamic_pages == 'True' %}
     {% raw %}
     eBookConfig.useRunestoneServices = true;
-    eBookConfig.host = '{{= "{}://{}".format(request.env.wsgi_url_scheme,
-                                             request.env.http_host) }}';
+    eBookConfig.host = '';
     eBookConfig.app = eBookConfig.host + '/' + '{{= request.application }}';
     eBookConfig.course = '{{= course_name }}';
     eBookConfig.basecourse = '{{= base_course }}';
