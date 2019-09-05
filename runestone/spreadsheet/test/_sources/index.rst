@@ -37,3 +37,9 @@ Cells in the spreadsheet that are graded are initially colored light blue.  When
     ====
     assert A151 == 150
 
+
+.. spreadsheet:: ss3
+   :colwidths: 200,200
+
+   "&#61;CONCATENATE(""abc"", ""xyz"")","=CONCATENATE(""abc"", ""xyz"")"
+   '=1+1, 2
