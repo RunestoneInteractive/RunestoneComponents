@@ -302,7 +302,7 @@ class YtPopUp(IframeVideo):
    :http: http
    """
     html = '''
-    <div  onclick="javascript:toggleYTVideo('%(video_id)s\');"  style="text-align: center; margin: 15px; cursor:pointer;">
+    <div  id="%(video_id)s" class="ytvideo"  style="text-align: center; margin: 15px; cursor:pointer;">
         <div style="background-image: url('https://img.youtube.com/vi/%(video_id)s/mqdefault.jpg'); background-repeat: no-repeat;background-position: center; height: 210px; width: 310px; margin: 0 auto; border: 1px solid #20c997">
             <img src="_static/images/play_button.svg" style="margin-top: 78px;" /> 
         </div>
