@@ -19,7 +19,7 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from runestone.assess import Assessment
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common.runestonedirective import RunestoneNode
+from runestone.common.runestonedirective import RunestoneNode , add_i18n_js
 
 def setup(app):
     app.add_directive('parsonsprob', ParsonsProblem)
@@ -29,6 +29,7 @@ def setup(app):
     app.add_javascript('lib/prettify.js')
     app.add_javascript('lib/hammer.min.js')
     app.add_javascript('parsons.js')
+    add_i18n_js(app, {"en","sr-Cyrl"}, "parsons-i18n")
     app.add_javascript('timedparsons.js')
     app.add_config_value('parsons_div_class', 'runestone', 'html')
 
@@ -44,6 +45,7 @@ class ParsonsNode(nodes.General, nodes.Element, RunestoneNode):
     def __init__(self, options, **kwargs):
         super(ParsonsNode, self).__init__(**kwargs)
         self.parsonsnode_components = options
+
 
 def visit_parsons_node(self, node):
     div_id = node.parsonsnode_components['divid']
