@@ -40,6 +40,7 @@ Cells in the spreadsheet that are graded are initially colored light blue.  When
 
 .. spreadsheet:: ss3
    :colwidths: 200,200
+   :coltitles: 'my formula', 'result'
 
    "&#61;CONCATENATE(""abc"", ""xyz"")","=CONCATENATE(""abc"", ""xyz"")"
    '=1+1, 2

@@ -39,7 +39,7 @@ class SpreadSheet extends RunestoneBase {
         if (this.coltitles) {
             for (let i in this.coltitles) {
                 if (opts.columns[i]) {
-                    opts.columns[i].title = this.coltitles[i];
+                    opts.columns[i].title = unescape(this.coltitles[i]);
                 } else {
                     opts.columns.push({title:this.coltitles[i]});
                 }

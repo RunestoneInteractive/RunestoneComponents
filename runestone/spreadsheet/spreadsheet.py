@@ -19,6 +19,7 @@ import csv
 import io
 import os
 import re
+import urllib.parse
 from docutils import nodes
 from docutils.parsers.rst import directives
 from runestone.common.runestonedirective import (
@@ -124,7 +125,7 @@ class SpreadSheet(RunestoneIdDirective):
             self.options["coltitles"] = ""
         else:
             self.options["coltitles"] = "data-coltitles=[{}]".format(
-                ",".join([x.strip() for x in self.options["coltitles"].split(",")])
+                ",".join([urllib.parse.quote(x.strip(),safe="'\"") for x in self.options["coltitles"].split(",")])
             )
 
         if "mindimensions" not in self.options:
