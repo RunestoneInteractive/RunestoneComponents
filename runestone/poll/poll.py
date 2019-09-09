@@ -33,6 +33,7 @@ def setup(app):
 
 
 TEMPLATE_START = """
+<div class="runestone">
 <ul data-component="poll" id=%(divid)s %(comment)s class='%(divclass)s' data-results='%(results)s'>
 %(question)s
 """
@@ -41,7 +42,7 @@ TEMPLATE_OPTION = """
 <li>%(optiontext)s</li>
 """
 
-TEMPLATE_END = """</ul>"""
+TEMPLATE_END = """</ul></div>"""
 
 class PollNode(nodes.General, nodes.Element, RunestoneNode):
     def __init__(self,content, **kwargs):
