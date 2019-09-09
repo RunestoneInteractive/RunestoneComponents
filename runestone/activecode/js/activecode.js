@@ -1330,6 +1330,7 @@ HTMLActiveCode.prototype.runProg = function () {
 };
 
 HTMLActiveCode.prototype.init = function(opts) {
+    opts.alignVertical = true;
     ActiveCode.prototype.init.apply(this,arguments);
     this.code = $('<textarea />').html(this.origElem.innerHTML).text();
     $(this.runButton).text('Render');
@@ -1337,6 +1338,7 @@ HTMLActiveCode.prototype.init = function(opts) {
 };
 
 HTMLActiveCode.prototype.createOutput = function () {
+    this.alignVertical = true;
     var outDiv = document.createElement("div");
     $(outDiv).addClass("ac_output");
     if(this.alignVertical) {
