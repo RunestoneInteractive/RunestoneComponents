@@ -89,7 +89,7 @@ LineBasedGrader.prototype.grade = function() {
 		answerArea.addClass("incorrect");
 		feedbackArea.fadeIn(500);
 		feedbackArea.attr("class", "alert alert-danger");
-		feedbackArea.html("Your program is too short.  Add more blocks.");
+		feedbackArea.html($.i18n("msg_parson_too_short"));
 	} else {
 		// Determine whether the code is in the correct order
 		var isCorrectOrder = false;
@@ -1215,7 +1215,7 @@ Parsons.prototype.initializeView = function () {
 	this.sourceLabel = document.createElement("div");
 	$(this.sourceLabel).attr("role", "tooltip");
 	this.sourceLabel.id = this.counterId + "-sourceTip";
-	this.sourceLabel.innerHTML = "Drag from here";
+	this.sourceLabel.innerHTML = ($.i18n("msg_parson_drag_from_here"));
 	this.sourceRegionDiv.appendChild(this.sourceLabel);
 	this.sortContainerDiv.appendChild(this.sourceRegionDiv);
 
@@ -1231,7 +1231,7 @@ Parsons.prototype.initializeView = function () {
 	this.answerLabel = document.createElement("div");
 	$(this.answerLabel).attr("role", "tooltip");
 	this.answerLabel.id = this.counterId + "-answerTip";
-	this.answerLabel.innerHTML = "Drop blocks here";
+	this.answerLabel.innerHTML = ($.i18n("msg_parson_drag_to_here"));
 	this.answerRegionDiv.appendChild(this.answerLabel);
 	this.sortContainerDiv.appendChild(this.answerRegionDiv);
 
@@ -1247,7 +1247,7 @@ Parsons.prototype.initializeView = function () {
 	var that = this;
 	this.checkButton = document.createElement("button");
 	$(this.checkButton).attr("class", "btn btn-success");
-	this.checkButton.textContent = "Check Me";
+	this.checkButton.textContent = $.i18n("msg_parson_check_me");
 	this.checkButton.id = this.counterId + "-check";
 	this.parsonsControlDiv.appendChild(this.checkButton);
 	this.checkButton.type = "button";
@@ -1257,7 +1257,7 @@ Parsons.prototype.initializeView = function () {
 	});
 	this.resetButton = document.createElement("button");
 	$(this.resetButton).attr("class", "btn btn-default");
-	this.resetButton.textContent = "Reset";
+	this.resetButton.textContent =  $.i18n("msg_parson_reset");
 	this.resetButton.id = this.counterId + "-reset";
 	this.resetButton.type = "button";
 	this.parsonsControlDiv.appendChild(this.resetButton);
