@@ -202,7 +202,7 @@ ActiveCode.prototype.createEditor = function (index) {
     $(this.containerDiv).addClass("ac_section alert alert-warning");
     $(this.containerDiv).attr("style", "padding: 0 !important; margin-top: 15px;");
     var codeDiv = document.createElement("div");
-    if (this.code == '\n')
+    if (this.code.trim() == '')
         $(codeDiv).attr("style", "display: none;");
     else
         $(codeDiv).addClass("ac_code_div col-md-12");
@@ -298,7 +298,7 @@ ActiveCode.prototype.createControls = function () {
         var butt = document.createElement("button");
         $(butt).text($.i18n("msg_activecode_run_code"));
         $(butt).addClass("btn btn-success run-button");
-        if (this.code != "\n")
+        if (this.code.trim() != "")
              ctrlDiv.appendChild(butt);
         if (this.runortest) {
             var testButton = document.createElement("button");
