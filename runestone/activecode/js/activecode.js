@@ -1300,7 +1300,7 @@ function HTMLActiveCode (opts) {
 HTMLActiveCode.prototype.runProg = function () {
     var prog = this.buildProg(true);
     var scrubber_dfd, history_dfd, saveCode;
-
+    var saveCode = "True"
     var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
     history_dfd = __ret.history_dfd;
     saveCode = __ret.saveCode;
@@ -2451,6 +2451,10 @@ SQLActiveCode.prototype.runProg = function()  {
     $(this.output).text("")
     // Run this query
     let query = this.buildProg(false);  // false --> Do not include suffix
+    if (! this.db ) {
+        $(this.output).text(`Error: Database not initialized! DBURL: ${this.dburl}`)
+        return;
+    }
     try {
         var res = this.db.exec(query);
     } catch(error) {
