@@ -1999,26 +1999,24 @@ LiveCode.prototype.runProg = function() {
     $(this.output).html($.i18n("msg_activecode_compiling_running"));
 
     var files = [];
-    if(this.language === "java") {
-        if (this.datafile != undefined) {
-            var ids = this.datafile.split(",");
-            for (var i = 0; i < ids.length; i++) {
-                file = document.getElementById(ids[i].trim());
-                if (file === null || file === undefined) {
-                    // console.log("No file with given id");
-                } else if (file.className === "javaFiles") {
-                    files = files.concat(this.parseJavaClasses(file.textContent));
-                } else if (file.className === "image") {
-                    var fileName = file.id;
-                    var extension = fileName.substring(fileName.indexOf('.') + 1);
-                    var base64 = file.toDataURL('image/' + extension);
-                    base64 = base64.substring(base64.indexOf(',') + 1);
-                    files.push({name: fileName, content: base64});
-                } else {
-                    // if no className or un recognized className it is treated as an individual file
-                    // this could be any type of file, .txt, .java, .csv, etc
-                    files.push({name: file.id, content: file.textContent});
-                }
+    if (this.datafile != undefined) {
+        var ids = this.datafile.split(",");
+        for (var i = 0; i < ids.length; i++) {
+            file = document.getElementById(ids[i].trim());
+            if (file === null || file === undefined) {
+                // console.log("No file with given id");
+            } else if (file.className === "javaFiles") {
+                files = files.concat(this.parseJavaClasses(file.textContent));
+            } else if (file.className === "image") {
+                var fileName = file.id;
+                var extension = fileName.substring(fileName.indexOf('.') + 1);
+                var base64 = file.toDataURL('image/' + extension);
+                base64 = base64.substring(base64.indexOf(',') + 1);
+                files.push({name: fileName, content: base64});
+            } else {
+                // if no className or un recognized className it is treated as an individual file
+                // this could be any type of file, .txt, .java, .csv, etc
+                files.push({name: file.id, content: file.textContent});
             }
         }
     }
@@ -2035,7 +2033,7 @@ LiveCode.prototype.runProg = function() {
     }
 
 
-    if(this.language !== "java" || files.length === 0) {
+    if(files.length === 0) {
         data = JSON.stringify({'run_spec': runspec});
         this.runProg_callback(data);
     } else {
