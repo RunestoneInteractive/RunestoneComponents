@@ -3,10 +3,11 @@ from setuptools import setup, find_packages
 with open('requirements.txt', 'r') as fh:
     dependencies = [l.strip() for l in fh]
 
+VERSION='4.1.4'
 setup(
     name='runestone',
     description='Sphinx extensions for writing interactive documents.',
-    version='4.1.3',
+    version=VERSION,
     author = 'Brad Miller',
     author_email = 'bonelake@mac.com',
     packages= find_packages(exclude=['*.*.test']),
@@ -17,7 +18,7 @@ setup(
     package_data = { '' : ['js/*.js', 'css/*.css', '*.txt']},
     license='GPL',
     url = 'https://github.com/RunestoneInteractive/RunestoneComponents',
-    download_url = 'https://github.com/RunestoneInteractive/RunestoneComponents/tarball/4.1.2',
+    download_url = 'https://github.com/RunestoneInteractive/RunestoneComponents/tarball/{}'.format(VERSION),
     keywords = ['runestone', 'sphinx', 'ebook'], # arbitrary keywords
     classifiers=('Development Status :: 5 - Production/Stable',
                    'Environment :: Console',
