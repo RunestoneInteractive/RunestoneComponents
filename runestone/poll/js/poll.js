@@ -219,3 +219,9 @@ $(document).bind("runestone:login-complete", function () {
         pollList[this.id] = new Poll({"orig":this});
     });
 });
+
+if (typeof component_factory === 'undefined') {
+    component_factory = {}
+}
+component_factory['poll'] = function(opts) { return new Poll(opts)}
+
