@@ -16,6 +16,14 @@ class ActiveCodeTests(RunestoneTestCase):
         :return:
         '''
         self.driver.get(self.host + "/index.html")
+        wait = WebDriverWait(self.driver, 10)
+        try:
+            wait.until(
+                EC.presence_of_element_located((By.ID, "test1"))
+            )
+        except:
+            text = self.driver.page_source
+            print(text)
         t1 = self.driver.find_element_by_id("test1")
         self.assertIsNotNone(t1)
         rb = t1.find_element_by_class_name("run-button")

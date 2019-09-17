@@ -20,6 +20,8 @@ from unittest import TestCase
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+
 #
 # Local imports
 # -------------
@@ -163,6 +165,15 @@ Line 12"""])
 class Functional_Test_Lp(RunestoneTestCase):
     def test_1(self):
         self.driver.get(self.host + "/lp_tester.s.html")
+        wait = WebDriverWait(self.driver, 10)
+        try:
+            wait.until(
+                EC.presence_of_element_located((By.TAG_NAME, "body"))
+            )
+        except:
+            text = self.driver.page_source
+            print(text)
+
         snippets = self.driver.find_elements_by_class_name("code_snippet")
         self.assertEqual(len(snippets), 2)
         check_button = self.driver.find_element_by_id('e1')

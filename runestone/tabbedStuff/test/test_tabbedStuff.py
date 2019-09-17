@@ -5,6 +5,9 @@ Test Tabbed stuff directive
 __author__ = 'yasinovskyy'
 
 from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
 
 setUpModule, tearDownModule = module_fixture_maker(__file__)
 
@@ -12,6 +15,16 @@ class TabbedQuestion_Tests(RunestoneTestCase):
     def test_t1(self):
         '''Initial view. Tab 1 is visible, tab 2 is hidden'''
         self.driver.get(self.host + "/index.html")
+        wait = WebDriverWait(self.driver, 10)
+        try:
+            wait.until(
+                EC.presence_of_element_located((By.ID, "exercise1"))
+            )
+        except:
+            text = self.driver.page_source
+            print(text)
+
+
         e1 = self.driver.find_element_by_id("exercise1")
 
         t1 = e1.find_element_by_class_name('active')

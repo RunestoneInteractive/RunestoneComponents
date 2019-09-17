@@ -21,6 +21,14 @@ class ParsonsTests(RunestoneTestCase):
     def test_general(self):
 
         self.driver.get(self.host + "/index.html")
+        wait = WebDriverWait(self.driver, 10)
+        try:
+            wait.until(
+                EC.presence_of_element_located((By.ID, "parsons-1-source"))
+            )
+        except:
+            text = self.driver.page_source
+            print(text)
         self.driver.execute_script('window.localStorage.clear();')
 
         # Source has correct number of blocks and each block has a label
