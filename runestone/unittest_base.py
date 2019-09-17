@@ -2,6 +2,7 @@ import unittest
 import os
 import sys
 import platform
+import pytest
 import signal
 import time
 import subprocess
@@ -43,16 +44,27 @@ class ModuleFixture(unittest.TestCase):
         if self.exit_status_success:
             self.assertFalse(p.returncode)
         # Make sure any older servers on port 8081 are killed  -- Windows???
-        process = subprocess.Popen(["lsof", "-i", ":{0}".format(PORT)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
-        for process in str(stdout.decode("utf-8")).split("\n")[1:]:
-            data = [x for x in process.split(" ") if x != '']
-            if (len(data) <= 1):
-                continue
-            ptokill = int(data[1])
-            os.kill(ptokill, signal.SIGKILL)
-            time.sleep(1)
-            os.kill(ptokill, 0)  # will return an OSError if not dead
+        if sys.platform in ("darwin", "linux"):
+            process = subprocess.Popen(["lsof", "-i", ":{0}".format(PORT)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            for process in str(stdout.decode("utf-8")).split("\n")[1:]:
+                data = [x for x in process.split(" ") if x != '']
+                if (len(data) <= 1):
+                    continue
+                ptokill = int(data[1])
+                os.kill(ptokill, signal.SIGKILL)
+                time.sleep(2)
+                try:
+                    os.kill(ptokill, 0)  # will throw an Error if process gone
+                    pytest.exit("Stale runestone server can't kill process: {}".format(ptokill))
+                except ProcessLookupError:
+                    # The process was killed
+                    pass
+                except PermissionError:
+                    pytest.exit("Another server is using port {} process: {}".format(PORT, ptokill))
+                except Exception:
+                    pytest.exit("Unknown error while trying to kill stale runestone server")
+
 
         # Run the server. Simply calling ``runestone serve`` fails, since the process killed isn't the actual server, but probably a setuptools-created launcher.
         self.runestone_server = subprocess.Popen([sys.executable, '-m', 'runestone', 'serve', '--port', PORT])

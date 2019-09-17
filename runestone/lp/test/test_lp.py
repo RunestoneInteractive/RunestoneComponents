@@ -172,7 +172,7 @@ class Functional_Test_Lp(RunestoneTestCase):
             )
         except:
             text = self.driver.page_source
-            print(text)
+            print(text[:300])
 
         snippets = self.driver.find_elements_by_class_name("code_snippet")
         self.assertEqual(len(snippets), 2)

@@ -17,7 +17,7 @@ class PollTests(RunestoneTestCase):
             )
         except:
             text = self.driver.page_source
-            print(text)
+            print(text[:300])
 
 
         poll_div = self.driver.find_element_by_id('pollid1_container')

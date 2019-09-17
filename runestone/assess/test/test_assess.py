@@ -55,7 +55,7 @@ class MultipleChoiceQuestion_Tests(RunestoneTestCase):
             )
         except:
             text = self.driver.page_source
-            print(text)
+            print(text[:300])
         t1 = self.driver.find_element_by_id("question1")
 
         btn_check = t1.find_element_by_tag_name('button')

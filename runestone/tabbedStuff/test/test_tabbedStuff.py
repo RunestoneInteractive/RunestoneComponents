@@ -22,7 +22,7 @@ class TabbedQuestion_Tests(RunestoneTestCase):
             )
         except:
             text = self.driver.page_source
-            print(text)
+            print(text[:300])
 
 
         e1 = self.driver.find_element_by_id("exercise1")

@@ -25,7 +25,7 @@ class ClickableAreaQuestion_Tests(RunestoneTestCase):
             )
         except:
             text = self.driver.page_source
-            print(text)
+            print(text[:300])
 
         t1 = self.driver.find_elements_by_class_name("alert-warning")[0]
 

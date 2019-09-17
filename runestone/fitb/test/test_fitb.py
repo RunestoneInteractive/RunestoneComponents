@@ -56,7 +56,7 @@ class FITBtests(RunestoneTestCase):
             )
         except:
             text = self.driver.page_source
-            print(text)
+            print(text[:300])
 
         self.fitb = self.driver.find_element_by_id(elem_id)
         return self.fitb

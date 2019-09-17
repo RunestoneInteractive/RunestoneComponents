@@ -38,7 +38,7 @@ class DragAndDropQuestion_Tests(RunestoneTestCase):
             )
         except:
             text = self.driver.page_source
-            print(text)
+            print(text[:300])
 
         t1 = self.driver.find_element_by_id("drag-and-drop")
 

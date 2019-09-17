@@ -19,7 +19,7 @@ class SpreadsheetTests(RunestoneTestCase):
             )
         except:
             text = self.driver.page_source
-            print(text)
+            print(text[:300])
 
         t2 = self.driver.find_element_by_id("ss1")
         self.assertIsNotNone(t2)

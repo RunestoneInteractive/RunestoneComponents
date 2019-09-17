@@ -22,7 +22,7 @@ class ShowEvalTest_TraceMode(RunestoneTestCase):
             )
         except:
             text = self.driver.page_source
-            print(text)
+            print(text[:300])
 
 
 

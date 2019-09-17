@@ -13,7 +13,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import NoSuchElementException
 
-mf, setUpModule, tearDownModule = module_fixture_maker(__file__, True)
+setUpModule, tearDownModule = module_fixture_maker(__file__)
 
 
 class ParsonsTests(RunestoneTestCase):
@@ -28,7 +28,7 @@ class ParsonsTests(RunestoneTestCase):
             )
         except:
             text = self.driver.page_source
-            print(text)
+            print(text[:300])
         self.driver.execute_script('window.localStorage.clear();')
 
         # Source has correct number of blocks and each block has a label

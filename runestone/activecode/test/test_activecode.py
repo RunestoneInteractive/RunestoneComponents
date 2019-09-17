@@ -23,7 +23,7 @@ class ActiveCodeTests(RunestoneTestCase):
             )
         except:
             text = self.driver.page_source
-            print(text)
+            print(text[:300])
         t1 = self.driver.find_element_by_id("test1")
         self.assertIsNotNone(t1)
         rb = t1.find_element_by_class_name("run-button")
