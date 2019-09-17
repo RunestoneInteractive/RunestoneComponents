@@ -150,6 +150,10 @@ ShortAnswer.prototype.setLocalStorage = function(data) {
 ShortAnswer.prototype.checkLocalStorage = function () {
     // Repopulates the short answer text
     // which was stored into local storage.
+    if (this.graderactive) {
+        return;
+    }
+
     var len = localStorage.length;
     if (len > 0) {
         var ex = localStorage.getItem(this.localStorageKey());

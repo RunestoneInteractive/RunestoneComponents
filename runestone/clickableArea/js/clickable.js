@@ -156,6 +156,9 @@ ClickableArea.prototype.restoreAnswers = function (data) {
 
 
 ClickableArea.prototype.checkLocalStorage = function () {
+    if (this.graderactive) {
+        return;
+    }
     // Gets previous answer data from local storage if it exists
     this.hasStoredAnswers = false;
     var len = localStorage.length;

@@ -380,6 +380,11 @@ DragNDrop.prototype.restoreAnswers = function (data) {
 };
 
 DragNDrop.prototype.checkLocalStorage = function () {
+
+    if (this.graderactive) {
+        return;
+    }
+
     this.hasStoredDropzones = false;
     var len = localStorage.length;
     if (len > 0) {
