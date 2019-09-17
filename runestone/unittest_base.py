@@ -12,7 +12,6 @@
 import logging
 import os
 import platform
-import pytest
 import signal
 import time
 import subprocess
@@ -25,6 +24,7 @@ from urllib.error import URLError
 # -------------------
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+import pytest
 from pyvirtualdisplay import Display
 logging.basicConfig(level=logging.WARN)
 mylogger = logging.getLogger()
@@ -36,8 +36,13 @@ mylogger = logging.getLogger()
 # Select an unused port for serving web pages to the test suite.
 PORT = "8081"
 # Use the localhost for testing.
-HOST = "http://127.0.0.1:" + PORT
+HOST_ADDRESS = "127.0.0.1:" + PORT
+HOST_URL = "http://" + HOST_ADDRESS
 
+
+# Define the platform.
+IS_WINDOWS = platform.system() == "Windows"
+IS_LINUX = sys.platform.startswith("linux")
 
 # Provide access to the currently-active ModuleFixture object.
 mf = None
@@ -57,7 +62,7 @@ class ModuleFixture(unittest.TestCase):
         self.base_path = os.path.dirname(module_path)
         self.exit_status_success = exit_status_success
         # Windows Compatability
-        if platform.system() == "Windows" and self.base_path == "":
+        if IS_WINDOWS and self.base_path == "":
             self.base_path = "."
 
     def setUpModule(self):
@@ -75,14 +80,35 @@ class ModuleFixture(unittest.TestCase):
         print(self.build_stdout_data + self.build_stderr_data)
         if self.exit_status_success:
             self.assertFalse(p.returncode)
-        # Make sure any older servers on port 8081 are killed  -- Windows???
-        if sys.platform in ("darwin", "linux"):
-            mylogger.debug("Checking for stale Runestone processes")
-            process = subprocess.Popen(["lsof", "-i", ":{0}".format(PORT)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            stdout, stderr = process.communicate()
-            for process in str(stdout.decode("utf-8")).split("\n")[1:]:
-                data = [x for x in process.split(" ") if x != '']
-                if (len(data) <= 1):
+        # Make sure any older servers on port 8081 are killed.
+        if IS_WINDOWS:
+            netstat_output = subprocess.run(
+                # Flags are:
+                #
+                # -n: Display addresses numerically. Looking up names is slow.
+                # -o: Include the PID for each connection.
+                ["netstat", "-no"],
+                universal_newlines=True,
+                stdout=subprocess.PIPE,
+            ).stdout
+            # Skip the first four lines, which are headings.
+            for connection in netstat_output.splitlines()[4:]:
+                # Typical output is:
+                ##   Proto  Local Address          Foreign Address        State           PID
+                ##   TCP    127.0.0.1:1277         127.0.0.1:49971        ESTABLISHED     4624
+                proto, local_address, foreign_address, state, pid = connection.split()
+                pid = int(pid)
+                if local_address == HOST_ADDRESS and pid != 0:
+                    os.kill(pid, 0)
+        else:
+            lsof_output = subprocess.run(
+                ["lsof", "-i", ":{0}".format(PORT)],
+                universal_newlines=True,
+                stdout=subprocess.PIPE,
+            ).stdout
+            for process in lsof_output.split("\n")[1:]:
+                data = [x for x in process.split(" ") if x != ""]
+                if len(data) <= 1:
                     continue
                 ptokill = int(data[1])
                 mylogger.warn("Attempting to kill a stale runestone serve process: {}".format(ptokill))
@@ -90,14 +116,22 @@ class ModuleFixture(unittest.TestCase):
                 time.sleep(2) # give the old process a couple seconds to clear out
                 try:
                     os.kill(ptokill, 0)  # will throw an Error if process gone
-                    pytest.exit("Stale runestone server can't kill process: {}".format(ptokill))
+                    pytest.exit(
+                        "Stale runestone server can't kill process: {}".format(ptokill)
+                    )
                 except ProcessLookupError:
                     # The process was killed
                     pass
                 except PermissionError:
-                    pytest.exit("Another server is using port {} process: {}".format(PORT, ptokill))
+                    pytest.exit(
+                        "Another server is using port {} process: {}".format(
+                            PORT, ptokill
+                        )
+                    )
                 except Exception:
-                    pytest.exit("Unknown error while trying to kill stale runestone server")
+                    pytest.exit(
+                        "Unknown error while trying to kill stale runestone server"
+                    )
 
         # Run the server. Simply calling ``runestone serve`` fails, since the process killed isn't the actual server, but probably a setuptools-created launcher.
         self.runestone_server = subprocess.Popen(
@@ -107,7 +141,7 @@ class ModuleFixture(unittest.TestCase):
         # Testing time in dominated by browser startup/shutdown. So, simply run all tests in a module in a single browser instance to speed things up. See ``RunestoneTestCase.setUp`` for additional code to (mostly) clear the browser between tests.
         #
         # `PyVirtualDisplay <http://pyvirtualdisplay.readthedocs.io/en/latest/>`_ only runs on X-windows, meaning Linux. Mac seems to have `some support <https://support.apple.com/en-us/HT201341>`_. Windows is out of the question.
-        if sys.platform.startswith("linux"):
+        if IS_LINUX:
             self.display = Display(visible=0, size=(1280, 1024))
             self.display.start()
         else:
@@ -125,7 +159,7 @@ class ModuleFixture(unittest.TestCase):
         # Wait for the webserver to come up.
         for tries in range(50):
             try:
-                urlopen(HOST, timeout=5)
+                urlopen(HOST_URL, timeout=5)
             except URLError:
                 # Wait for the server to come up.
                 time.sleep(0.1)
@@ -180,7 +214,7 @@ class RunestoneTestCase(unittest.TestCase):
     def setUp(self):
         # Use the shared module-wide driver.
         self.driver = mf.driver
-        self.host = HOST
+        self.host = HOST_URL
 
     def tearDown(self):
         # Clear as much as possible, to present an almost-fresh instance of a browser for the next test. (Shutting down then starting up a browswer is very slow.)
