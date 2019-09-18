@@ -1,20 +1,42 @@
-import unittest
+# *************************************************************************
+# ``unittest_base.py`` - Base classes for RunestoneComponents test fixtures
+# *************************************************************************
+#
+# Imports
+# =======
+# These are listed in the order prescribed by `PEP 8
+# <http://www.python.org/dev/peps/pep-0008/#imports>`_.
+#
+# Standard library
+# ----------------
 import logging
 import os
-import sys
 import platform
 import pytest
 import signal
 import time
 import subprocess
+import sys
+import unittest
+from urllib.request import urlopen
+from urllib.error import URLError
+
+# Third-party imports
+# -------------------
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from pyvirtualdisplay import Display
 logging.basicConfig(level=logging.WARN)
 mylogger = logging.getLogger()
 
+# Local imports
+# -------------
+# None
+
 # Select an unused port for serving web pages to the test suite.
-PORT = '8081'
+PORT = "8081"
+# Use the localhost for testing.
+HOST = "http://127.0.0.1:" + PORT
 
 
 # Provide access to the currently-active ModuleFixture object.
@@ -23,25 +45,32 @@ mf = None
 
 # Define `module fixtures <https://docs.python.org/2/library/unittest.html#setupmodule-and-teardownmodule>`_ to build the test Runestone project, run the server, then shut it down when the tests complete.
 class ModuleFixture(unittest.TestCase):
-    def __init__(self,
+    def __init__(
+        self,
         # The path to the Python module in which the test resides. This provides a simple way to determine the path in which to run runestone build/serve.
         module_path,
         # True if the sphinx-build process must exit with status of 0 (success)
-        exit_status_success=True):
+        exit_status_success=True,
+    ):
 
         super(ModuleFixture, self).__init__()
         self.base_path = os.path.dirname(module_path)
         self.exit_status_success = exit_status_success
         # Windows Compatability
-        if platform.system() is 'Windows' and self.base_path is '':
-            self.base_path = '.'
+        if platform.system() is "Windows" and self.base_path is "":
+            self.base_path = "."
 
     def setUpModule(self):
         # Change to this directory for running Runestone.
         self.old_cwd = os.getcwd()
         os.chdir(self.base_path)
         # Compile the docs. Save the stdout and stderr for examination.
-        p = subprocess.Popen(['runestone', 'build', '--all'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        p = subprocess.Popen(
+            ["runestone", "build", "--all"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+        )
         self.build_stdout_data, self.build_stderr_data = p.communicate()
         print(self.build_stdout_data + self.build_stderr_data)
         if self.exit_status_success:
@@ -71,17 +100,19 @@ class ModuleFixture(unittest.TestCase):
                     pytest.exit("Unknown error while trying to kill stale runestone server")
 
         # Run the server. Simply calling ``runestone serve`` fails, since the process killed isn't the actual server, but probably a setuptools-created launcher.
-        self.runestone_server = subprocess.Popen([sys.executable, '-m', 'runestone', 'serve', '--port', PORT])
+        self.runestone_server = subprocess.Popen(
+            [sys.executable, "-m", "runestone", "serve", "--port", PORT]
+        )
 
         # Testing time in dominated by browser startup/shutdown. So, simply run all tests in a module in a single browser instance to speed things up. See ``RunestoneTestCase.setUp`` for additional code to (mostly) clear the browser between tests.
         #
         # `PyVirtualDisplay <http://pyvirtualdisplay.readthedocs.io/en/latest/>`_ only runs on X-windows, meaning Linux. Mac seems to have `some support <https://support.apple.com/en-us/HT201341>`_. Windows is out of the question.
-        if sys.platform.startswith('linux'):
+        if sys.platform.startswith("linux"):
             self.display = Display(visible=0, size=(1280, 1024))
             self.display.start()
         else:
             self.display = None
-        #self.driver = webdriver.PhantomJS() # use this for Jenkins auto testing
+        # self.driver = webdriver.PhantomJS() # use this for Jenkins auto testing
         options = Options()
         options.add_argument("--window-size=1200,800")
         options.add_argument("--no-sandbox")
@@ -90,6 +121,17 @@ class ModuleFixture(unittest.TestCase):
         # Make this accessible
         global mf
         mf = self
+
+        # Wait for the webserver to come up.
+        for tries in range(50):
+            try:
+                urlopen(HOST, timeout=5)
+            except URLError:
+                # Wait for the server to come up.
+                time.sleep(0.1)
+            else:
+                # The server is up. We're done.
+                break
 
     def tearDownModule(self):
         # Shut down Selenium.
@@ -117,6 +159,7 @@ class ModuleFixture(unittest.TestCase):
     def runTest(self):
         pass
 
+
 # Provide a simple way to instantiante a ModuleFixture in a test module. Typical use:
 #
 # .. code:: Python
@@ -137,10 +180,10 @@ class RunestoneTestCase(unittest.TestCase):
     def setUp(self):
         # Use the shared module-wide driver.
         self.driver = mf.driver
-        self.host = 'http://127.0.0.1:' + PORT
+        self.host = HOST
 
     def tearDown(self):
         # Clear as much as possible, to present an almost-fresh instance of a browser for the next test. (Shutting down then starting up a browswer is very slow.)
-        self.driver.execute_script('window.localStorage.clear();')
-        self.driver.execute_script('window.sessionStorage.clear();')
+        self.driver.execute_script("window.localStorage.clear();")
+        self.driver.execute_script("window.sessionStorage.clear();")
         self.driver.delete_all_cookies()
