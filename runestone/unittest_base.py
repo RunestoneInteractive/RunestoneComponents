@@ -26,6 +26,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import pytest
 from pyvirtualdisplay import Display
+
 logging.basicConfig(level=logging.WARN)
 mylogger = logging.getLogger()
 
@@ -111,9 +112,13 @@ class ModuleFixture(unittest.TestCase):
                 if len(data) <= 1:
                     continue
                 ptokill = int(data[1])
-                mylogger.warn("Attempting to kill a stale runestone serve process: {}".format(ptokill))
+                mylogger.warn(
+                    "Attempting to kill a stale runestone serve process: {}".format(
+                        ptokill
+                    )
+                )
                 os.kill(ptokill, signal.SIGKILL)
-                time.sleep(2) # give the old process a couple seconds to clear out
+                time.sleep(2)  # give the old process a couple seconds to clear out
                 try:
                     os.kill(ptokill, 0)  # will throw an Error if process gone
                     pytest.exit(
