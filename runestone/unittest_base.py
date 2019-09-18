@@ -57,7 +57,7 @@ class ModuleFixture(unittest.TestCase):
         self.base_path = os.path.dirname(module_path)
         self.exit_status_success = exit_status_success
         # Windows Compatability
-        if platform.system() is "Windows" and self.base_path is "":
+        if platform.system() == "Windows" and self.base_path == "":
             self.base_path = "."
 
     def setUpModule(self):
