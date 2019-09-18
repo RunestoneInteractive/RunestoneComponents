@@ -1,4 +1,5 @@
 import unittest
+import logging
 import os
 import sys
 import platform
@@ -9,6 +10,8 @@ import subprocess
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from pyvirtualdisplay import Display
+logging.basicConfig(level=logging.WARN)
+mylogger = logging.getLogger()
 
 # Select an unused port for serving web pages to the test suite.
 PORT = '8081'
@@ -45,6 +48,7 @@ class ModuleFixture(unittest.TestCase):
             self.assertFalse(p.returncode)
         # Make sure any older servers on port 8081 are killed  -- Windows???
         if sys.platform in ("darwin", "linux"):
+            mylogger.debug("Checking for stale Runestone processes")
             process = subprocess.Popen(["lsof", "-i", ":{0}".format(PORT)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = process.communicate()
             for process in str(stdout.decode("utf-8")).split("\n")[1:]:
@@ -52,8 +56,9 @@ class ModuleFixture(unittest.TestCase):
                 if (len(data) <= 1):
                     continue
                 ptokill = int(data[1])
+                mylogger.warn("Attempting to kill a stale runestone serve process: {}".format(ptokill))
                 os.kill(ptokill, signal.SIGKILL)
-                time.sleep(2)
+                time.sleep(2) # give the old process a couple seconds to clear out
                 try:
                     os.kill(ptokill, 0)  # will throw an Error if process gone
                     pytest.exit("Stale runestone server can't kill process: {}".format(ptokill))
@@ -64,7 +69,6 @@ class ModuleFixture(unittest.TestCase):
                     pytest.exit("Another server is using port {} process: {}".format(PORT, ptokill))
                 except Exception:
                     pytest.exit("Unknown error while trying to kill stale runestone server")
-
 
         # Run the server. Simply calling ``runestone serve`` fails, since the process killed isn't the actual server, but probably a setuptools-created launcher.
         self.runestone_server = subprocess.Popen([sys.executable, '-m', 'runestone', 'serve', '--port', PORT])
