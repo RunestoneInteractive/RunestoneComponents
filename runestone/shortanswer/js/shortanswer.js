@@ -39,6 +39,9 @@ ShortAnswer.prototype.init = function (opts) {
 
     this.renderHTML();
     this.checkServer("shortanswer");
+    this.caption = "shortanswer";
+    this.addCaption("runestone");
+    
 };
 
 ShortAnswer.prototype.renderHTML = function() {

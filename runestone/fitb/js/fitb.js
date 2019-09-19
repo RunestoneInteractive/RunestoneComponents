@@ -41,6 +41,9 @@ FITB.prototype.init = function (opts) {
 
     this.createFITBElement();
     this.checkServer("fillb");
+    this.caption="Fill in the Blank";
+	this.addCaption('runestone');
+
 };
 
 // Find the script tag containing JSON in a given root DOM node.

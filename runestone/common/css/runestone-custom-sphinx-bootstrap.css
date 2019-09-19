@@ -58,6 +58,7 @@ div.ExecutionVisualizer table#pyCodeOutput .lineNo {
 body {
     padding-top: 60px;
     background-color: #eeeeee;
+    counter-reset: rscomponent;
 }
 
 pre {
@@ -867,3 +868,13 @@ textarea#lp-result {
 #subchapterprogress > div {
     background: green;
 }
+
+.runestone_caption {
+    text-align: center;
+}
+
+.runestone_caption:before {
+    content: "Activity: " counter(rscomponent) " -- ";
+    counter-increment: rscomponent;
+}
+

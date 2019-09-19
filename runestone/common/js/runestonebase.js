@@ -38,7 +38,9 @@ RunestoneBase.prototype.logBookEvent = function (eventInfo) {
                                       null, 'json');
     }
     console.log("logging event " + JSON.stringify(eventInfo));
-    pageProgressTracker.updateProgress(eventInfo.div_id);
+    if (typeof pageProgressTracker.updateProgress === "function") {
+        pageProgressTracker.updateProgress(eventInfo.div_id);
+    }
     return post_return;
 };
 
@@ -61,7 +63,9 @@ RunestoneBase.prototype.logRunEvent = function (eventInfo) {
                 this.forceSave = true; }).bind(this))
     }
     console.log("running " + JSON.stringify(eventInfo));
-    pageProgressTracker.updateProgress(eventInfo.div_id);
+    if (typeof pageProgressTracker.updateProgress === "function") {
+        pageProgressTracker.updateProgress(eventInfo.div_id);
+    }
 
 };
 
@@ -137,3 +141,15 @@ RunestoneBase.prototype.shouldUseServer = function (data) {
 RunestoneBase.prototype.localStorageKey = function () {
     return eBookConfig.email + ":" + eBookConfig.course + ":" + this.divid + "-given";
 }
+
+
+RunestoneBase.prototype.addCaption = function(elType) {
+    //someElement.parentNode.insertBefore(newElement, someElement.nextSibling);
+    var capDiv = document.createElement('p');
+    $(capDiv).html(this.caption + " (" + this.divid + ")");
+    $(capDiv).addClass(`${elType}_caption`);
+    $(capDiv).addClass(`${elType}_caption_text`);
+
+    //this.outerDiv.parentNode.insertBefore(capDiv, this.outerDiv.nextSibling);
+    this.containerDiv.appendChild(capDiv);
+};

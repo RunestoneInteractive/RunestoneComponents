@@ -95,9 +95,9 @@ ActiveCode.prototype.init = function(opts) {
     if ($(orig).data('caption')) {
         this.caption = $(orig).data('caption');
     } else {
-        this.caption = ""
+        this.caption = "ActiveCode"
     }
-    this.addCaption();
+    this.addCaption('runestone');
     this.addJSONLibrary();
 
     if (this.autorun) {
@@ -573,15 +573,6 @@ ActiveCode.prototype.downloadFile = function (lang) {
   }
 };
 
-ActiveCode.prototype.addCaption = function() {
-    //someElement.parentNode.insertBefore(newElement, someElement.nextSibling);
-    var capDiv = document.createElement('p');
-    $(capDiv).html(this.caption + " (" + this.divid + ")");
-    $(capDiv).addClass("ac_caption");
-    $(capDiv).addClass("ac_caption_text");
-
-    this.outerDiv.parentNode.insertBefore(capDiv, this.outerDiv.nextSibling);
-};
 
 
 

@@ -20,6 +20,11 @@ class SpreadSheet extends RunestoneBase {
             this.addAutoGradeButton();
             this.addOutput();
         }
+
+        this.caption = "Spreadsheet";
+        this.divid = this.div_id;
+        this.containerDiv = document.getElementById(this.div_id)
+        this.addCaption("runestone");
     }
 
     renderSheet() {

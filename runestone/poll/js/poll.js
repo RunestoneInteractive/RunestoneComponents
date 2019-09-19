@@ -31,6 +31,9 @@ Poll.prototype.init = function (opts) {
     this.getOptionText(); //populates optionList
     this.renderPoll();  //generates HTML
     this.checkPollStorage(); //checks localStorage to see if this poll has already been completed by this user
+
+    this.caption="Poll"
+    this.addCaption('runestone')
 };
 
 Poll.prototype.getQuestionText = function() {

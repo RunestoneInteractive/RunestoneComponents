@@ -1118,6 +1118,9 @@ Parsons.prototype.init = function (opts) {
 	} else {
 		this.checkLocalStorage();
 	}
+
+	this.caption="Parsons"
+	this.addCaption('runestone')
 };
 
 // Based on the data-fields in the original HTML, initialize options

@@ -34,6 +34,7 @@ MultipleChoice.prototype.init = function (opts) {
     this.useRunestoneServices = opts.useRunestoneServices;
     this.multipleanswers = false;
     this.divid = orig.id;
+    this.caption = 'Multiple Choice'
 
     if ($(this.origElem).data("multipleanswers") === true) {
         this.multipleanswers = true;
@@ -60,6 +61,8 @@ MultipleChoice.prototype.init = function (opts) {
     this.createCorrectList();
     this.createMCForm();
     this.checkServer("mChoice");
+
+    this.addCaption('runestone');
 };
 
 /*====================================

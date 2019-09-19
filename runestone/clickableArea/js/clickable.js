@@ -54,6 +54,10 @@ ClickableArea.prototype.init = function (opts) {
     this.getQuestion();
     this.getFeedback();
     this.renderNewElements();
+
+    this.caption="Clickable"
+	this.addCaption('runestone')
+
 };
 
 /*===========================
