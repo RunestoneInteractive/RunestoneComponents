@@ -293,6 +293,32 @@ ActiveCode.prototype.createControls = function () {
         $(butt).click((function() {new AudioTour(this.divid, this.code, 1, $(this.origElem).data("audio"))}).bind(this));
     }
 
+    if (eBookConfig.isInstructor) {
+        let butt = document.createElement("button");
+        $(butt).addClass("btn btn-info");
+        $(butt).text("Share Code");
+        $(butt).css("margin-left", "10px");
+        this.shareButt = butt;
+        ctrlDiv.appendChild(butt);
+        $(butt).click((function() {
+             let data = {
+                 divid: this.divid, 
+                 code: this.editor.getValue(),
+                 lang: this.language,
+             };
+             $.getJSON('/runestone/ajax/broadcast_code.json', 
+                data, 
+                function (status) {
+                    if (status.mess === 'success') {
+                        alert(`Shared Code with ${status.share_count} students`);
+                    } else {
+                        alert("Sharing Failed");
+                    }
+                        
+                });
+                }).bind(this));
+    }
+
     if (this.enablePartner) {
         var checkPartner = document.createElement("input");
         checkPartner.type = 'checkbox'
