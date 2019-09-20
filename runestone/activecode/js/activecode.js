@@ -1185,7 +1185,8 @@ ActiveCode.prototype.runProg = function () {
                     'errinfo': err.toString(),
                     'to_save': saveCode,
                     'prefix': self.pretext,
-                    'suffix': self.suffix
+                    'suffix': self.suffix,
+                    'partner': this.partner,
                 }); // Log the run event
                 self.addErrorMessage(err)
             });
@@ -1272,9 +1273,11 @@ JSActiveCode.prototype.runProg = function() {
     'div_id': this.divid,
     'code': this.editor.getValue(),
     'errinfo': einfo,
+    'lang': this.language,
     'to_save': saveCode,
     'prefix': this.pretext,
-    'suffix': this.suffix
+    'suffix': this.suffix,
+    'partner': this.partner
     }); // Log the run event
 
 
@@ -1314,7 +1317,9 @@ HTMLActiveCode.prototype.runProg = function () {
     'errinfo': 'success',
     'to_save': saveCode,
     'prefix': this.pretext,
-    'suffix': this.suffix
+    'suffix': this.suffix,
+    'lang': this.language,
+    'partner': this.partner
     }); // Log the run event
 
 
@@ -2095,7 +2100,14 @@ LiveCode.prototype.runProg_callback = function(data) {
             } else {
                 logresult = result.outcome;
             }
-            this.logRunEvent({'div_id': this.divid, 'code': source, 'errinfo': logresult, 'to_save':saveCode, 'event':'livecode'});
+            this.logRunEvent({'div_id': this.divid,
+                 'code': source, 
+                 'errinfo': logresult, 
+                 'to_save':saveCode, 
+                 'lang': this.language,
+                 'event':'livecode',
+                 'partner': this.partner,
+                });
             switch (result.outcome) {
                 case 15:
                     $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
