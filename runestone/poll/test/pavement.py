@@ -3,6 +3,7 @@ from paver.easy import *
 import paver.setuputils
 paver.setuputils.install_distutils_tasks()
 import os, sys
+import pkg_resources
 from runestone.server import get_dburl
 from sphinxcontrib import paverutils
 
@@ -35,6 +36,8 @@ options(
                         }
     )
 )
+version = pkg_resources.require("runestone")[0].version
+options.build.template_args['runestone_version'] = version
 
 # If DBURL is in the environment override dburl
 options.build.template_args['dburl'] = get_dburl(outer=locals())
