@@ -4,18 +4,18 @@
   {% set appname = '{{ =request.application }}' %}
 {% endif %}
 
-{% set script_files = ['_static/runestonebase.js'] + script_files + [
+{% set script_files = ['_static/runestonebase.js?v='+runestone_version] + script_files + [
     '_static'+'/jquery-ui-1.10.3.custom.min.js',
     '_static'+'/jquery-fix.js',
     '_static'+'/bootstrap-3.0.0/js/bootstrap.min.js',
     '_static'+'/bootstrap-sphinx.js',
     '_static'+'/waypoints.min.js',
-    '_static'+'/user-highlights.js',
+    '_static'+'/user-highlights.js?v='+runestone_version,
     '_static'+'/jquery.idle-timer.js',
     '_static'+'/processing-1.4.1.min.js',
     '_static'+'/jquery.hotkey.js',
     '_static'+'/jquery-migrate-1.2.1.min.js',
-    '_static'+'/presenter_mode.js',
+    '_static'+'/presenter_mode.js?v='+runestone_version,
   ]
 %}
 
@@ -30,7 +30,7 @@
     '_static'+'/jquery-ui-1.10.3.custom.min.css',
     '_static'+'/bootstrap-sphinx.css',
     '_static'+'/user-highlights.css',
-    '_static/runestone-custom-sphinx-bootstrap.css',
+    '_static/runestone-custom-sphinx-bootstrap.css?v='+runestone_version,
   ]
 %}
 
