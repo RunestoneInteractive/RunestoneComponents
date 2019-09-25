@@ -144,8 +144,13 @@ ActiveCode.prototype.createEditor = function (index) {
     });
 
     // give the user a visual cue that they have changed but not saved
-    editor.on('change', (function () {
+    editor.on('change', (function (ev) {
         if (editor.acEditEvent == false || editor.acEditEvent === undefined) {
+            // change events can come before any real changes for various reasons, some unknown
+            // this avoids unneccsary log events and updates to the activity counter
+            if (this.origElem.textContent === editor.getValue()) {
+                return;
+            }
             $(editor.getWrapperElement()).css('border-top', '2px solid #b43232');
             $(editor.getWrapperElement()).css('border-bottom', '2px solid #b43232');
             this.logBookEvent({'event': 'activecode', 'act': 'edit', 'div_id': this.divid});
@@ -302,19 +307,19 @@ ActiveCode.prototype.createControls = function () {
         ctrlDiv.appendChild(butt);
         $(butt).click((function() {
              let data = {
-                 divid: this.divid, 
+                 divid: this.divid,
                  code: this.editor.getValue(),
                  lang: this.language,
              };
-             $.getJSON('/runestone/ajax/broadcast_code.json', 
-                data, 
+             $.getJSON('/runestone/ajax/broadcast_code.json',
+                data,
                 function (status) {
                     if (status.mess === 'success') {
                         alert(`Shared Code with ${status.share_count} students`);
                     } else {
                         alert("Sharing Failed");
                     }
-                        
+
                 });
                 }).bind(this));
     }
@@ -437,27 +442,27 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
         $(scrubberDiv).css("display","inline-block");
         $(scrubberDiv).css("margin-left","10px");
         $(scrubberDiv).css("margin-right","10px");
-        $(scrubberDiv).width("180px");
+        $(scrubberDiv).css({"min-width": "200px",
+            "max-width": "300px"});
         var scrubber = document.createElement("div");
+        this.timestampP = document.createElement("span");
         this.slideit = function() {
             this.editor.setValue(this.history[$(scrubber).slider("value")]);
             var curVal = this.timestamps[$(scrubber).slider("value")];
-            var tooltip = '<div class="sltooltip"><div class="sltooltip-inner">' +
-                curVal + '</div><div class="sltooltip-arrow"></div></div>';
-            $(scrubber).find(".ui-slider-handle").html(tooltip);
+            let pos = $(scrubber).slider("value");
+            let outOf = this.history.length;
+            $(this.timestampP).text(`${curVal} - ${pos+1} of ${outOf}`);
             this.logBookEvent({'event': 'activecode', 'act': 'slide:'+curVal, 'div_id': this.divid})
-            setTimeout(function () {
-                $(scrubber).find(".sltooltip").fadeOut()
-            }, 4000);
         };
         $(scrubber).slider({
             max: this.history.length-1,
             value: this.history.length-1,
         });
+        $(scrubber).css('margin','10px');
         $(scrubber).on("slide",this.slideit.bind(this));
         $(scrubber).on("slidechange",this.slideit.bind(this));
         scrubberDiv.appendChild(scrubber);
-
+        scrubberDiv.appendChild(this.timestampP);
         // If there is a deadline set then position the scrubber at the last submission
         // prior to the deadline
         if (this.deadline) {
@@ -473,6 +478,7 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
             i = i - 1;
             scrubber.value = Math.max(i,0);
             this.editor.setValue(this.history[scrubber.value]);
+            $(scrubber).slider('value', scrubber.value);
         }
         else if (pos_last) {
             scrubber.value = this.history.length-1;
@@ -480,7 +486,10 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
         } else {
             scrubber.value = 0;
         }
-
+        let pos = $(scrubber).slider("value");
+        let outOf = this.history.length;
+        let ts = this.timestamps[$(scrubber).slider("value")];
+        $(this.timestampP).text(`${ts} - ${pos+1} of ${outOf}`);
         $(this.histButton).remove();
         this.histButton = null;
         this.historyScrubber = scrubber;
@@ -2127,9 +2136,9 @@ LiveCode.prototype.runProg_callback = function(data) {
                 logresult = result.outcome;
             }
             this.logRunEvent({'div_id': this.divid,
-                 'code': source, 
-                 'errinfo': logresult, 
-                 'to_save':saveCode, 
+                 'code': source,
+                 'errinfo': logresult,
+                 'to_save':saveCode,
                  'lang': this.language,
                  'event':'livecode',
                  'partner': this.partner,

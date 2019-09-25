@@ -38,7 +38,8 @@ RunestoneBase.prototype.logBookEvent = function (eventInfo) {
                                       null, 'json');
     }
     console.log("logging event " + JSON.stringify(eventInfo));
-    if (typeof pageProgressTracker.updateProgress === "function") {
+    if (typeof pageProgressTracker.updateProgress === "function"
+        && eventInfo.act != 'edit') {
         pageProgressTracker.updateProgress(eventInfo.div_id);
     }
     return post_return;
@@ -149,7 +150,7 @@ RunestoneBase.prototype.addCaption = function(elType) {
     $(capDiv).html(this.caption + " (" + this.divid + ")");
     $(capDiv).addClass(`${elType}_caption`);
     $(capDiv).addClass(`${elType}_caption_text`);
-
+    this.capDiv = capDiv;
     //this.outerDiv.parentNode.insertBefore(capDiv, this.outerDiv.nextSibling);
     this.containerDiv.appendChild(capDiv);
 };
