@@ -311,7 +311,7 @@ ActiveCode.prototype.createControls = function () {
                  code: this.editor.getValue(),
                  lang: this.language,
              };
-             $.getJSON('/runestone/ajax/broadcast_code.json',
+             $.post('/runestone/ajax/broadcast_code.json',
                 data,
                 function (status) {
                     if (status.mess === 'success') {
@@ -320,7 +320,7 @@ ActiveCode.prototype.createControls = function () {
                         alert("Sharing Failed");
                     }
 
-                });
+                }, 'json');
                 }).bind(this));
     }
 
@@ -2714,7 +2714,7 @@ ACFactory.createScratchActivecode = function() {
         '        <h4 class="modal-title">Scratch ActiveCode</h4>' +
         '      </div> ' +
         '      <div class="modal-body">' +
-        '      <textarea data-component="activecode" id="' + divid + '" data-lang="'+ lang +'">' +
+        '      <textarea data-component="activecode" data-codelens="true" id="' + divid + '" data-lang="'+ lang +'">' +
         '\n' +
         '\n' +
         '\n' +
