@@ -462,7 +462,7 @@ div.flash {
 
 /* Modal dialog styles (scratch activecode, compare me, etc) */
 .scratch-ac-modal {
-    width: 800px;
+    width: 90%;
 }
 
 .compare-modal .progress {

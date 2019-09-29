@@ -724,11 +724,18 @@ ActiveCode.prototype.showCodelens = function () {
     myVars.textReferences = false;
     myVars.showOnlyOutputs = false;
     myVars.rawInputLstJSON = JSON.stringify([]);
-    if (this.python3) {
-        myVars.py = 3;
+    if (this.language == 'python') {
+        if (this.python3) {
+            myVars.py = 3;
+        } else {
+            myVars.py = 2;
+        }
+    } else if (this.langauge == 'javascript') {
+        myVars.py = 'js'
     } else {
-        myVars.py = 2;
+        myVars.py = this.language;
     }
+
     myVars.curInstr = 0;
     myVars.codeDivWidth = 350;
     myVars.codeDivHeight = 400;
@@ -2744,6 +2751,7 @@ ACFactory.toggleScratchActivecode = function () {
     var divid = "ac_modal_" + eBookConfig.scratchDiv;
     var div = $("#" + divid);
 
+    $(`#${eBookConfig.scratchDiv}`).removeClass('ac_section');
     div.modal('toggle');
 
 };
