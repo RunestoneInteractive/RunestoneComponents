@@ -306,6 +306,9 @@ ActiveCode.prototype.createControls = function () {
         this.shareButt = butt;
         ctrlDiv.appendChild(butt);
         $(butt).click((function() {
+            if (! confirm("You are about to share this code with ALL of your students.  Are you sure you want to continue?")) {
+                return;
+            }
              let data = {
                  divid: this.divid,
                  code: this.editor.getValue(),
@@ -739,7 +742,7 @@ ActiveCode.prototype.showCodelens = function () {
     myVars.curInstr = 0;
     myVars.codeDivWidth = 350;
     myVars.codeDivHeight = 400;
-    var srcURL = '//pythontutor.com/iframe-embed.html';
+    var srcURL = 'https://pythontutor.com/iframe-embed.html';
     var embedUrlStr = $.param.fragment(srcURL, myVars, 2 /* clobber all */);
     var myIframe = document.createElement('iframe');
     myIframe.setAttribute("id", this.divid + '_codelens');
