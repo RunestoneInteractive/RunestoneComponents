@@ -31,6 +31,9 @@ RunestoneBase.prototype.init = function(opts) {
 };
 
 RunestoneBase.prototype.logBookEvent = function (eventInfo) {
+    if (this.graderactive) {
+        return;
+    }
     eventInfo.course = eBookConfig.course;
     eventInfo.timezoneoffset = (new Date()).getTimezoneOffset()/60
     if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
@@ -46,6 +49,9 @@ RunestoneBase.prototype.logBookEvent = function (eventInfo) {
 };
 
 RunestoneBase.prototype.logRunEvent = function (eventInfo) {
+    if (this.graderactive) {
+        return;
+    }
     eventInfo.course = eBookConfig.course;
     eventInfo.timezoneoffset = (new Date()).getTimezoneOffset()/60
     if ( this.forceSave || (! 'to_save' in eventInfo) ) {
