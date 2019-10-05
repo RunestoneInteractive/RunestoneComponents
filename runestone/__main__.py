@@ -126,6 +126,9 @@ def build(all, wd):
 @click.option('--port', default=8000, help="port for server to listen on")
 @click.option('--listen', default="", help="address for server to listen on")
 def serve(port,listen):
+    click.echo("Note: this is a minimal static server without templates or a database.")
+    click.echo("For many use cases this is fine.")
+    click.echo("For the full server, see https://github.com/RunestoneInteractive/RunestoneServer")
     os.chdir(findProjectRoot())
     sys.path.insert(0,os.getcwd())
     try:
