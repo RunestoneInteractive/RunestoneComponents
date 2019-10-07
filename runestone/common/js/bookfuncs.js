@@ -109,7 +109,7 @@ class PageProgressBar {
     constructor(actDict) {
         this.possible = 0;
         this.total = 1;
-        if(Object.keys(actDict).length > 0) {
+        if(actDict && Object.keys(actDict).length > 0) {
             this.activities = actDict;
         } else {
             let activities = {'page': 0};
