@@ -35,10 +35,16 @@ RunestoneBase.prototype.logBookEvent = function (eventInfo) {
         return;
     }
     eventInfo.course = eBookConfig.course;
+    eventInfo.clientLoginStatus = eBookConfig.isLoggedIn;
     eventInfo.timezoneoffset = (new Date()).getTimezoneOffset()/60
     if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
         var post_return = jQuery.post(eBookConfig.ajaxURL + 'hsblog', eventInfo,
-                                      null, 'json');
+            function(jsondata) {
+                if (jsondata.log == false) {
+                    alert(jsondata.message);
+                    location.href = eBookConfig.app + '/default/user/login?_next=' + location.pathname;
+                }
+            }, 'json');
     }
     console.log("logging event " + JSON.stringify(eventInfo));
     if (typeof pageProgressTracker.updateProgress === "function"
@@ -53,6 +59,7 @@ RunestoneBase.prototype.logRunEvent = function (eventInfo) {
         return;
     }
     eventInfo.course = eBookConfig.course;
+    eventInfo.clientLoginStatus = eBookConfig.isLoggedIn;
     eventInfo.timezoneoffset = (new Date()).getTimezoneOffset()/60
     if ( this.forceSave || (! 'to_save' in eventInfo) ) {
         eventInfo.save_code = "True"
@@ -63,6 +70,9 @@ RunestoneBase.prototype.logRunEvent = function (eventInfo) {
                 // data = JSON.parse(data);
                 if (data.message) {
                     alert(data.message);
+                    if (data.log == false) {
+                        location.href = eBookConfig.app + '/default/user/login?_next=' + location.pathname;
+                    }
                 }
                 this.forceSave = false;
             }).bind(this))
