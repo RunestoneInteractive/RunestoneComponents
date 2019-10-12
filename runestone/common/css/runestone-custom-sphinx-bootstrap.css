@@ -869,6 +869,10 @@ textarea#lp-result {
     background: green;
 }
 
+#subchapterprogress > div.loggedout {
+    background: lightgray;
+}
+
 .runestone_caption {
     text-align: center;
 }
