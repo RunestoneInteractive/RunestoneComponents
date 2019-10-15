@@ -213,6 +213,7 @@ class Youtube(IframeVideo):
     html = '''
     <div class="runestone" style="margin-left: auto; margin-right:auto">
         <div id="%(divid)s" class="align-%(align)s youtube-video" data-video-height="%(height)d" data-video-width="%(width)d" data-video-videoid="%(video_id)s" data-video-divid="%(divid)s" data-video-start="%(start)d" data-video-end="%(end)s" ></div>
+        <p class="runestone_caption"><span class="runestone_caption_text">Video: (%(divid)s)</span> </p>
     </div>
     '''
 

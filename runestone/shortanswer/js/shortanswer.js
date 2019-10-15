@@ -39,6 +39,9 @@ ShortAnswer.prototype.init = function (opts) {
 
     this.renderHTML();
     this.checkServer("shortanswer");
+    this.caption = "shortanswer";
+    this.addCaption("runestone");
+
 };
 
 ShortAnswer.prototype.renderHTML = function() {
@@ -150,6 +153,10 @@ ShortAnswer.prototype.setLocalStorage = function(data) {
 ShortAnswer.prototype.checkLocalStorage = function () {
     // Repopulates the short answer text
     // which was stored into local storage.
+    if (this.graderactive) {
+        return;
+    }
+
     var len = localStorage.length;
     if (len > 0) {
         var ex = localStorage.getItem(this.localStorageKey());
@@ -179,9 +186,9 @@ ShortAnswer.prototype.restoreAnswers = function (data) {
     if (!data.answer) {
         data.answer = "";
     }
+    this.answer = data.answer;
+    this.jTextArea.value = this.answer;
 
-    let solution = $("#" + this.divid + "_solution");
-    solution.text(data.answer);
     this.feedbackDiv.innerHTML = "Your current saved answer is shown above.";
     $(this.feedbackDiv).removeClass("alert-danger");
     $(this.feedbackDiv).addClass("alert alert-success");

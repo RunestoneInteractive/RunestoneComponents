@@ -5,6 +5,9 @@ Test Multiple Choice question directive
 __author__ = 'yasinovskyy'
 
 from unittest import TestCase
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
 from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
 mf, setUpModule, tearDownModule = module_fixture_maker(__file__, True)
@@ -45,6 +48,14 @@ class MultipleChoiceQuestion_Tests(RunestoneTestCase):
     def test_ma1(self):
         '''Multiple Answer: Nothing selected, Check button clicked'''
         self.driver.get(self.host + "/index.html")
+        wait = WebDriverWait(self.driver, 10)
+        try:
+            wait.until(
+                EC.presence_of_element_located((By.ID, "question1"))
+            )
+        except:
+            text = self.driver.page_source
+            print(text[:300])
         t1 = self.driver.find_element_by_id("question1")
 
         btn_check = t1.find_element_by_tag_name('button')

@@ -90,7 +90,7 @@ function addReadingList() {
 
 
 function timedRefresh() {
-    timeoutPeriod = 4500000;  // 75 minutes
+    timeoutPeriod =  900000;  // 75 minutes
     $(document).bind("idle.idleTimer", function () {
         // After timeout period send the user back to the index.  This will force a login
         // if needed when they want to go to a particular page.  This may not be perfect
@@ -109,18 +109,18 @@ class PageProgressBar {
     constructor(actDict) {
         this.possible = 0;
         this.total = 1;
-        if(actDict) {
+        if(actDict && Object.keys(actDict).length > 0) {
             this.activities = actDict;
         } else {
-            let activities = {}
+            let activities = {'page': 0};
             $(".runestone").each(function (idx, e) {
                 activities[e.firstElementChild.id] = 0;
             })
             this.activities = activities;
         }
         this.calculateProgress();
-        if (window.location.pathname.match(/.*(index.html|toctree.html|Exercises.html|Glossary.html)$/i)) {
-            $("#scprogresscontainer").hide()
+        if (window.location.pathname.match(/.*(index.html|toctree.html|Exercises.html|Glossary.html|search.html)$/i)) {
+            $("#scprogresscontainer").hide();
         }
         this.renderProgress()
     }
@@ -149,6 +149,9 @@ class PageProgressBar {
         $( "#subchapterprogress" ).progressbar({
             value: value
         });
+        if (! eBookConfig.isLoggedIn) {
+            $("#subchapterprogress>div").addClass("loggedout");
+        }
     }
 
     updateProgress(div_id) {
@@ -185,10 +188,10 @@ function handlePageSetup() {
         }
         $(document).trigger("runestone:login")
         addReadingList();
-        // timedRefresh() ??
+        timedRefresh();
     } else {
         mess = 'Not logged in'
-        $(document).trigger("runestone:logout")
+        $(document).trigger("runestone:logout");
     }
     $(".loggedinuser").html(mess);
 

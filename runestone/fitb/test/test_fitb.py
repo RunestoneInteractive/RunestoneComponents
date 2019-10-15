@@ -1,6 +1,9 @@
 from unittest import TestCase
 import codecs
 from selenium.webdriver.common.alert import Alert
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
 from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
 mf, setUpModule, tearDownModule = module_fixture_maker(__file__, True)
@@ -46,6 +49,15 @@ class FITBtests(RunestoneTestCase):
     # Load the web page, then return the DIV containing a FITB question.
     def find_fitb(self, elem_id):
         self.driver.get(self.host + "/index.html")
+        wait = WebDriverWait(self.driver, 10)
+        try:
+            wait.until(
+                EC.presence_of_element_located((By.ID, elem_id))
+            )
+        except:
+            text = self.driver.page_source
+            print(text[:300])
+
         self.fitb = self.driver.find_element_by_id(elem_id)
         return self.fitb
 

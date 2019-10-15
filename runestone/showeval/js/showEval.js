@@ -47,6 +47,10 @@ var SHOWEVAL = (function () {
       this.steps[i].push(comment); // 'anno'
     }
     this.reset();
+    this.rb.caption = "ShowEval";
+    this.rb.containerDiv = this.container[0].parentElement;
+    this.rb.divid = this.container[0].id;
+    this.rb.addCaption('runestone');
   };
 
   thisModule.ShowEval.prototype.setNextButton = function(nextButtonSelector) {

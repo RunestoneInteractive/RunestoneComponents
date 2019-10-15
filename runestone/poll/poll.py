@@ -19,7 +19,7 @@ __author__ = 'isaiahmayerchak'
 from docutils import nodes
 from docutils.parsers.rst import directives
 from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
-from runestone.server.componentdb import addQuestionToDB
+from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 
 
 
@@ -33,6 +33,7 @@ def setup(app):
 
 
 TEMPLATE_START = """
+<div class="runestone">
 <ul data-component="poll" id=%(divid)s %(comment)s class='%(divclass)s' data-results='%(results)s'>
 %(question)s
 """
@@ -41,7 +42,7 @@ TEMPLATE_OPTION = """
 <li>%(optiontext)s</li>
 """
 
-TEMPLATE_END = """</ul>"""
+TEMPLATE_END = """</ul></div>"""
 
 class PollNode(nodes.General, nodes.Element, RunestoneNode):
     def __init__(self,content, **kwargs):
@@ -72,6 +73,8 @@ def visit_poll_node(self,node):
             node.poll_content["optiontext"] = i + 1
             res += TEMPLATE_OPTION % node.poll_content
     res += TEMPLATE_END
+
+    addHTMLToDB(node.poll_content['divid'], node.poll_content['basecourse'], res)
     self.body.append(res)
 
 def depart_poll_node(self,node):
@@ -93,7 +96,7 @@ class Poll(RunestoneIdDirective):
     :results: One of all, instructor, superuser - who should see results?
 
 
-config values (conf.py): 
+config values (conf.py):
 
 - poll_div_class - custom CSS class of the component's outermost div
     """
@@ -113,6 +116,7 @@ config values (conf.py):
         'option_8':directives.unchanged,
         'option_9':directives.unchanged,
         'option_10':directives.unchanged,
+        'results': directives.unchanged
     }
 
     def run(self):

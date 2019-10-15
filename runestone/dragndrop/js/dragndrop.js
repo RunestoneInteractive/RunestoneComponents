@@ -39,6 +39,10 @@ DragNDrop.prototype.init = function (opts) {
     this.populate();   // Populates this.dragPairArray, this.feedback and this.question
 
     this.createNewElements();
+
+    this.caption="Drag-N-Drop"
+	this.addCaption('runestone')
+
 };
 /*======================
 === Update variables ===
@@ -382,6 +386,11 @@ DragNDrop.prototype.restoreAnswers = function (data) {
 };
 
 DragNDrop.prototype.checkLocalStorage = function () {
+
+    if (this.graderactive) {
+        return;
+    }
+
     this.hasStoredDropzones = false;
     var len = localStorage.length;
     if (len > 0) {

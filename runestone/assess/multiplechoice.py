@@ -185,7 +185,7 @@ class MChoice(Assessment):
             '''
 
         OPTION = '''
-            <li data-component="answer" %(is_correct)s id="%(divid)s_opt_%(alabel)s">%(atext)s</li><li data-component="feedback" id="%(divid)s_opt_%(alabel)s">%(feedtext)s</li>
+            <li data-component="answer" %(is_correct)s id="%(divid)s_opt_%(alabel)s">%(atext)s</li><li data-component="feedback">%(feedtext)s</li>
             '''
 
         TEMPLATE_END = '''

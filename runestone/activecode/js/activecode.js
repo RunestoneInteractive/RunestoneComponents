@@ -7,6 +7,7 @@ var isMouseDown = false;
 document.onmousedown = function() { isMouseDown = true };
 document.onmouseup   = function() { isMouseDown = false };
 var edList = {};
+var allDburls = {};
 
 ActiveCode.prototype = new RunestoneBase();
 var socket, connection, doc;
@@ -94,9 +95,9 @@ ActiveCode.prototype.init = function(opts) {
     if ($(orig).data('caption')) {
         this.caption = $(orig).data('caption');
     } else {
-        this.caption = ""
+        this.caption = "ActiveCode"
     }
-    this.addCaption();
+    this.addCaption('runestone');
     this.addJSONLibrary();
 
     if (this.autorun) {
@@ -143,8 +144,13 @@ ActiveCode.prototype.createEditor = function (index) {
     });
 
     // give the user a visual cue that they have changed but not saved
-    editor.on('change', (function () {
+    editor.on('change', (function (ev) {
         if (editor.acEditEvent == false || editor.acEditEvent === undefined) {
+            // change events can come before any real changes for various reasons, some unknown
+            // this avoids unneccsary log events and updates to the activity counter
+            if (this.origElem.textContent === editor.getValue()) {
+                return;
+            }
             $(editor.getWrapperElement()).css('border-top', '2px solid #b43232');
             $(editor.getWrapperElement()).css('border-bottom', '2px solid #b43232');
             this.logBookEvent({'event': 'activecode', 'act': 'edit', 'div_id': this.divid});
@@ -292,6 +298,35 @@ ActiveCode.prototype.createControls = function () {
         $(butt).click((function() {new AudioTour(this.divid, this.code, 1, $(this.origElem).data("audio"))}).bind(this));
     }
 
+    if (eBookConfig.isInstructor) {
+        let butt = document.createElement("button");
+        $(butt).addClass("btn btn-info");
+        $(butt).text("Share Code");
+        $(butt).css("margin-left", "10px");
+        this.shareButt = butt;
+        ctrlDiv.appendChild(butt);
+        $(butt).click((function() {
+            if (! confirm("You are about to share this code with ALL of your students.  Are you sure you want to continue?")) {
+                return;
+            }
+             let data = {
+                 divid: this.divid,
+                 code: this.editor.getValue(),
+                 lang: this.language,
+             };
+             $.post('/runestone/ajax/broadcast_code.json',
+                data,
+                function (status) {
+                    if (status.mess === 'success') {
+                        alert(`Shared Code with ${status.share_count} students`);
+                    } else {
+                        alert("Sharing Failed");
+                    }
+
+                }, 'json');
+                }).bind(this));
+    }
+
     if (this.enablePartner) {
         var checkPartner = document.createElement("input");
         checkPartner.type = 'checkbox'
@@ -410,27 +445,27 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
         $(scrubberDiv).css("display","inline-block");
         $(scrubberDiv).css("margin-left","10px");
         $(scrubberDiv).css("margin-right","10px");
-        $(scrubberDiv).width("180px");
+        $(scrubberDiv).css({"min-width": "200px",
+            "max-width": "300px"});
         var scrubber = document.createElement("div");
+        this.timestampP = document.createElement("span");
         this.slideit = function() {
             this.editor.setValue(this.history[$(scrubber).slider("value")]);
             var curVal = this.timestamps[$(scrubber).slider("value")];
-            var tooltip = '<div class="sltooltip"><div class="sltooltip-inner">' +
-                curVal + '</div><div class="sltooltip-arrow"></div></div>';
-            $(scrubber).find(".ui-slider-handle").html(tooltip);
+            let pos = $(scrubber).slider("value");
+            let outOf = this.history.length;
+            $(this.timestampP).text(`${curVal} - ${pos+1} of ${outOf}`);
             this.logBookEvent({'event': 'activecode', 'act': 'slide:'+curVal, 'div_id': this.divid})
-            setTimeout(function () {
-                $(scrubber).find(".sltooltip").fadeOut()
-            }, 4000);
         };
         $(scrubber).slider({
             max: this.history.length-1,
             value: this.history.length-1,
         });
+        $(scrubber).css('margin','10px');
         $(scrubber).on("slide",this.slideit.bind(this));
         $(scrubber).on("slidechange",this.slideit.bind(this));
         scrubberDiv.appendChild(scrubber);
-
+        scrubberDiv.appendChild(this.timestampP);
         // If there is a deadline set then position the scrubber at the last submission
         // prior to the deadline
         if (this.deadline) {
@@ -446,6 +481,7 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
             i = i - 1;
             scrubber.value = Math.max(i,0);
             this.editor.setValue(this.history[scrubber.value]);
+            $(scrubber).slider('value', scrubber.value);
         }
         else if (pos_last) {
             scrubber.value = this.history.length-1;
@@ -453,7 +489,10 @@ ActiveCode.prototype.addHistoryScrubber = function (pos_last) {
         } else {
             scrubber.value = 0;
         }
-
+        let pos = $(scrubber).slider("value");
+        let outOf = this.history.length;
+        let ts = this.timestamps[$(scrubber).slider("value")];
+        $(this.timestampP).text(`${ts} - ${pos+1} of ${outOf}`);
         $(this.histButton).remove();
         this.histButton = null;
         this.historyScrubber = scrubber;
@@ -572,15 +611,6 @@ ActiveCode.prototype.downloadFile = function (lang) {
   }
 };
 
-ActiveCode.prototype.addCaption = function() {
-    //someElement.parentNode.insertBefore(newElement, someElement.nextSibling);
-    var capDiv = document.createElement('p');
-    $(capDiv).html(this.caption + " (" + this.divid + ")");
-    $(capDiv).addClass("ac_caption");
-    $(capDiv).addClass("ac_caption_text");
-
-    this.outerDiv.parentNode.insertBefore(capDiv, this.outerDiv.nextSibling);
-};
 
 
 
@@ -697,15 +727,22 @@ ActiveCode.prototype.showCodelens = function () {
     myVars.textReferences = false;
     myVars.showOnlyOutputs = false;
     myVars.rawInputLstJSON = JSON.stringify([]);
-    if (this.python3) {
-        myVars.py = 3;
+    if (this.language == 'python') {
+        if (this.python3) {
+            myVars.py = 3;
+        } else {
+            myVars.py = 2;
+        }
+    } else if (this.langauge == 'javascript') {
+        myVars.py = 'js'
     } else {
-        myVars.py = 2;
+        myVars.py = this.language;
     }
+
     myVars.curInstr = 0;
     myVars.codeDivWidth = 350;
     myVars.codeDivHeight = 400;
-    var srcURL = '//pythontutor.com/iframe-embed.html';
+    var srcURL = 'https://pythontutor.com/iframe-embed.html';
     var embedUrlStr = $.param.fragment(srcURL, myVars, 2 /* clobber all */);
     var myIframe = document.createElement('iframe');
     myIframe.setAttribute("id", this.divid + '_codelens');
@@ -1193,7 +1230,8 @@ ActiveCode.prototype.runProg = function () {
                     'errinfo': err.toString(),
                     'to_save': saveCode,
                     'prefix': self.pretext,
-                    'suffix': self.suffix
+                    'suffix': self.suffix,
+                    'partner': this.partner,
                 }); // Log the run event
                 self.addErrorMessage(err)
             });
@@ -1280,9 +1318,11 @@ JSActiveCode.prototype.runProg = function() {
     'div_id': this.divid,
     'code': this.editor.getValue(),
     'errinfo': einfo,
+    'lang': this.language,
     'to_save': saveCode,
     'prefix': this.pretext,
-    'suffix': this.suffix
+    'suffix': this.suffix,
+    'partner': this.partner
     }); // Log the run event
 
 
@@ -1299,7 +1339,7 @@ function HTMLActiveCode (opts) {
 HTMLActiveCode.prototype.runProg = function () {
     var prog = this.buildProg(true);
     var scrubber_dfd, history_dfd, saveCode;
-
+    var saveCode = "True"
     var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
     history_dfd = __ret.history_dfd;
     saveCode = __ret.saveCode;
@@ -1322,13 +1362,16 @@ HTMLActiveCode.prototype.runProg = function () {
     'errinfo': 'success',
     'to_save': saveCode,
     'prefix': this.pretext,
-    'suffix': this.suffix
+    'suffix': this.suffix,
+    'lang': this.language,
+    'partner': this.partner
     }); // Log the run event
 
 
 };
 
 HTMLActiveCode.prototype.init = function(opts) {
+    opts.alignVertical = true;
     ActiveCode.prototype.init.apply(this,arguments);
     this.code = $('<textarea />').html(this.origElem.innerHTML).text();
     $(this.runButton).text('Render');
@@ -1336,6 +1379,7 @@ HTMLActiveCode.prototype.init = function(opts) {
 };
 
 HTMLActiveCode.prototype.createOutput = function () {
+    this.alignVertical = true;
     var outDiv = document.createElement("div");
     $(outDiv).addClass("ac_output");
     if(this.alignVertical) {
@@ -1996,26 +2040,24 @@ LiveCode.prototype.runProg = function() {
     $(this.output).html($.i18n("msg_activecode_compiling_running"));
 
     var files = [];
-    if(this.language === "java") {
-        if (this.datafile != undefined) {
-            var ids = this.datafile.split(",");
-            for (var i = 0; i < ids.length; i++) {
-                file = document.getElementById(ids[i].trim());
-                if (file === null || file === undefined) {
-                    // console.log("No file with given id");
-                } else if (file.className === "javaFiles") {
-                    files = files.concat(this.parseJavaClasses(file.textContent));
-                } else if (file.className === "image") {
-                    var fileName = file.id;
-                    var extension = fileName.substring(fileName.indexOf('.') + 1);
-                    var base64 = file.toDataURL('image/' + extension);
-                    base64 = base64.substring(base64.indexOf(',') + 1);
-                    files.push({name: fileName, content: base64});
-                } else {
-                    // if no className or un recognized className it is treated as an individual file
-                    // this could be any type of file, .txt, .java, .csv, etc
-                    files.push({name: file.id, content: file.textContent});
-                }
+    if (this.datafile != undefined) {
+        var ids = this.datafile.split(",");
+        for (var i = 0; i < ids.length; i++) {
+            file = document.getElementById(ids[i].trim());
+            if (file === null || file === undefined) {
+                // console.log("No file with given id");
+            } else if (file.className === "javaFiles") {
+                files = files.concat(this.parseJavaClasses(file.textContent));
+            } else if (file.className === "image") {
+                var fileName = file.id;
+                var extension = fileName.substring(fileName.indexOf('.') + 1);
+                var base64 = file.toDataURL('image/' + extension);
+                base64 = base64.substring(base64.indexOf(',') + 1);
+                files.push({name: fileName, content: base64});
+            } else {
+                // if no className or un recognized className it is treated as an individual file
+                // this could be any type of file, .txt, .java, .csv, etc
+                files.push({name: file.id, content: file.textContent});
             }
         }
     }
@@ -2032,7 +2074,7 @@ LiveCode.prototype.runProg = function() {
     }
 
 
-    if(this.language !== "java" || files.length === 0) {
+    if(files.length === 0) {
         data = JSON.stringify({'run_spec': runspec});
         this.runProg_callback(data);
     } else {
@@ -2103,7 +2145,14 @@ LiveCode.prototype.runProg_callback = function(data) {
             } else {
                 logresult = result.outcome;
             }
-            this.logRunEvent({'div_id': this.divid, 'code': source, 'errinfo': logresult, 'to_save':saveCode, 'event':'livecode'});
+            this.logRunEvent({'div_id': this.divid,
+                 'code': source,
+                 'errinfo': logresult,
+                 'to_save':saveCode,
+                 'lang': this.language,
+                 'event':'livecode',
+                 'partner': this.partner,
+                });
             switch (result.outcome) {
                 case 15:
                     $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
@@ -2397,8 +2446,23 @@ SQLActiveCode.prototype.init = function(opts) {
             if (! self.dburl.startsWith("http")) {
                 self.dburl = window.location.protocol + '//' + window.location.host + self.dburl;
             }
-            var xhr = new XMLHttpRequest();
             $(self.runButton).attr('disabled','disabled')
+            if (! (self.dburl in allDburls)) {
+                allDburls[self.dburl] = {status: 'loading', xWaitFor: jQuery.Deferred() };
+            } else {
+                if (allDburls[self.dburl].status == 'loading') {
+                    allDburls[self.dburl].xWaitFor.done(function() {
+                        self.db = new SQL.Database(allDburls[self.dburl].db);
+                        $(self.runButton).removeAttr('disabled')
+                    });
+                    return;
+                }
+                self.db = new SQL.Database(allDburls[self.dburl].db);
+                $(self.runButton).removeAttr('disabled')
+                return;
+            }
+            var xhr = new XMLHttpRequest();
+
             // For example: https://github.com/lerocha/chinook-database/raw/master/ChinookDatabase/DataSources/Chinook_Sqlite.sqlite
             xhr.open('GET', self.dburl, true);
             xhr.responseType = 'arraybuffer';
@@ -2407,6 +2471,9 @@ SQLActiveCode.prototype.init = function(opts) {
                 var uInt8Array = new Uint8Array(xhr.response);
                 self.db = new SQL.Database(uInt8Array);
                 $(self.runButton).removeAttr('disabled')
+                allDburls[self.dburl].db = uInt8Array;
+                allDburls[self.dburl].status = 'ready';
+                allDburls[self.dburl].xWaitFor.resolve();
                 // contents is now [{columns:['col1','col2',...], values:[[first row], [second row], ...]}]
                 };
             xhr.send();
@@ -2430,6 +2497,10 @@ SQLActiveCode.prototype.runProg = function()  {
     $(this.output).text("")
     // Run this query
     let query = this.buildProg(false);  // false --> Do not include suffix
+    if (! this.db ) {
+        $(this.output).text(`Error: Database not initialized! DBURL: ${this.dburl}`)
+        return;
+    }
     try {
         var res = this.db.exec(query);
     } catch(error) {
@@ -2496,7 +2567,11 @@ SQLActiveCode.prototype.autograde = function(result_table) {
         return s.indexOf('assert') > -1
     })
     for (let test of tests) {
-        [assert, loc, oper, expected] = test.split(/\s+/);
+        let wlist = test.split(/\s+/);
+        wlist.shift();
+        loc = wlist.shift()
+        oper = wlist.shift();
+        expected = wlist.join(' ');
         [row,col] = loc.split(',');
         result += this.testOneAssert(row, col, oper, expected, result_table);
         result += "\n"
@@ -2649,7 +2724,7 @@ ACFactory.createScratchActivecode = function() {
         '        <h4 class="modal-title">Scratch ActiveCode</h4>' +
         '      </div> ' +
         '      <div class="modal-body">' +
-        '      <textarea data-component="activecode" id="' + divid + '" data-lang="'+ lang +'">' +
+        '      <textarea data-component="activecode" data-codelens="true" id="' + divid + '" data-lang="'+ lang +'">' +
         '\n' +
         '\n' +
         '\n' +
@@ -2679,6 +2754,7 @@ ACFactory.toggleScratchActivecode = function () {
     var divid = "ac_modal_" + eBookConfig.scratchDiv;
     var div = $("#" + divid);
 
+    $(`#${eBookConfig.scratchDiv}`).removeClass('ac_section');
     div.modal('toggle');
 
 };

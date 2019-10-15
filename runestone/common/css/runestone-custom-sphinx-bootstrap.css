@@ -58,6 +58,7 @@ div.ExecutionVisualizer table#pyCodeOutput .lineNo {
 body {
     padding-top: 60px;
     background-color: #eeeeee;
+    counter-reset: rscomponent;
 }
 
 pre {
@@ -461,7 +462,7 @@ div.flash {
 
 /* Modal dialog styles (scratch activecode, compare me, etc) */
 .scratch-ac-modal {
-    width: 800px;
+    width: 90%;
 }
 
 .compare-modal .progress {
@@ -867,3 +868,17 @@ textarea#lp-result {
 #subchapterprogress > div {
     background: green;
 }
+
+#subchapterprogress > div.loggedout {
+    background: lightgray;
+}
+
+.runestone_caption {
+    text-align: center;
+}
+
+.runestone_caption:before {
+    content: "Activity: " counter(rscomponent) " -- ";
+    counter-increment: rscomponent;
+}
+

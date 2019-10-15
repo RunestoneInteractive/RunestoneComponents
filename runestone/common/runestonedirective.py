@@ -171,6 +171,7 @@ def setup(app):
     app.add_role('skipreading', SkipReading)
     # See http://www.sphinx-doc.org/en/stable/extdev/appapi.html#sphinx.application.Sphinx.add_config_value.
     app.add_config_value('runestone_server_side_grading', False, 'env')
+    app.add_config_value('generate_component_labels', True, 'env')
 
 
 # A base class for all Runestone directives.
@@ -203,10 +204,11 @@ class RunestoneDirective(Directive):
 # This is a base class for all Runestone directives which require a divid as their first parameter.
 class RunestoneIdDirective(RunestoneDirective):
     def getNumber(self):
-        if self.name in UNNUMBERED_DIRECTIVES:
+        env = self.state.document.settings.env
+
+        if self.name in UNNUMBERED_DIRECTIVES or env.config.generate_component_labels is False:
             return ""
 
-        env = self.state.document.settings.env
         env.assesscounter += 1
 
         res = "Q-%d"
@@ -232,7 +234,9 @@ class RunestoneIdDirective(RunestoneDirective):
                     self.content
                 )
             else:
-                self.content[0] = self.options['qnumber'] + ': ' + self.content[0]
+                if self.options['qnumber']:
+                    self.content[0] = self.options['qnumber'] + ': ' + self.content[0]
+                    
 
     def run(self):
         # Make sure the runestone directive at least requires an ID.

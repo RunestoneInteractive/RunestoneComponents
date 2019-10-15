@@ -39,14 +39,14 @@ def init():
     print("Next we need to gather a few pieces of information to create your configuration files")
     conf_dict['dynamic_pages'] = click.prompt("Build book for dynamic page service?", type=bool, default=False)
     if conf_dict['dynamic_pages'] == False:
-        conf_dict['use_services'] = click.prompt("Use Runestone Web Services ", type=bool, default=False)
+        conf_dict['use_services'] = click.prompt("Use Runestone Web Services ", default="false")
     else:
-        conf_dict['use_services'] = True
+        conf_dict['use_services'] = 'true'
     conf_dict['author'] = click.prompt("Your Name ", default=getpass.getuser())
     conf_dict['project_title'] = click.prompt("Title for this project ", default="Runestone Default")
     conf_dict['python3'] = click.prompt("Use Simple Python3 Semantics ", default="false")
     conf_dict['default_ac_lang'] = click.prompt("Default ActiveCode language", default="python")
-    if conf_dict['use_services']:
+    if conf_dict['use_services'] == 'true':
         conf_dict['project_name'] = 'os.path.basename(os.path.dirname(os.path.abspath(__file__)))'
         conf_dict['build_dir'] = './build'
         conf_dict['dest'] = './published'
@@ -126,6 +126,9 @@ def build(all, wd):
 @click.option('--port', default=8000, help="port for server to listen on")
 @click.option('--listen', default="", help="address for server to listen on")
 def serve(port,listen):
+    click.echo("Note: this is a minimal static server without templates or a database.")
+    click.echo("For many use cases this is fine.")
+    click.echo("For the full server, see https://github.com/RunestoneInteractive/RunestoneServer")
     os.chdir(findProjectRoot())
     sys.path.insert(0,os.getcwd())
     try:

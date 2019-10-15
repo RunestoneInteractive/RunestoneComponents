@@ -1,17 +1,21 @@
 {% extends "basic/layout.html" %}
 
-{% set script_files = ['_static/runestonebase.js'] + script_files + [
+{% if dynamic_pages == 'True' %}
+  {% set appname = '{{ =request.application }}' %}
+{% endif %}
+
+{% set script_files = ['_static/runestonebase.js?v='+runestone_version] + script_files + [
     '_static'+'/jquery-ui-1.10.3.custom.min.js',
     '_static'+'/jquery-fix.js',
     '_static'+'/bootstrap-3.0.0/js/bootstrap.min.js',
     '_static'+'/bootstrap-sphinx.js',
     '_static'+'/waypoints.min.js',
-    '_static'+'/user-highlights.js',
+    '_static'+'/user-highlights.js?v='+runestone_version,
     '_static'+'/jquery.idle-timer.js',
     '_static'+'/processing-1.4.1.min.js',
     '_static'+'/jquery.hotkey.js',
     '_static'+'/jquery-migrate-1.2.1.min.js',
-    '_static'+'/presenter_mode.js',
+    '_static'+'/presenter_mode.js?v='+runestone_version,
   ]
 %}
 
@@ -26,7 +30,7 @@
     '_static'+'/jquery-ui-1.10.3.custom.min.css',
     '_static'+'/bootstrap-sphinx.css',
     '_static'+'/user-highlights.css',
-    '_static/runestone-custom-sphinx-bootstrap.css',
+    '_static/runestone-custom-sphinx-bootstrap.css?v='+runestone_version,
   ]
 %}
 
@@ -51,7 +55,11 @@
       </button>
 
       <div>
-        <a class="brand-logo" style='background: transparent url("{{pathto('_static/img/logo_small.png', 1)}}") no-repeat 0px 0px;' href="/{{appname}}/default/user/login">&nbsp; </a>
+        {% if minimal_outside_links != 'True' %}
+          <a class="brand-logo" style='background: transparent url("{{pathto('_static/img/logo_small.png', 1)}}") no-repeat 0px 0px;' href="/{{appname}}/default/user/login">&nbsp; </a>
+        {% else %}
+          <a class="brand-logo" style='background: transparent url("{{pathto('_static/img/logo_small.png', 1)}}") no-repeat 0px 0px;'>&nbsp;<span aria-label="logo" class="visuallyhidden">Runestone Logo</span> </a>
+        {% endif %}
         <a class="navbar-brand" href="{{ pathto(master_doc) }}" aria-label="index-page">
           {% if dynamic_pages == 'True' %}
             {% raw %}
@@ -72,6 +80,7 @@
         <li class="divider-vertical"></li>
 
         <!-- social media dropdown -->
+        {% if minimal_outside_links != 'True' %}
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
             <i class="glyphicon glyphicon-globe" style="opacity: 0.9"><span aria-label="Social" class="visuallyhidden">Social</span></i>
@@ -103,6 +112,7 @@
               </li>
           </ul>
         </li>
+        {%- endif -%}
         <!-- end social media dropdown -->
 
         <li class="divider-vertical"></li>
@@ -114,11 +124,11 @@
           </a>
           <ul class='dropdown-menu'>
             {% if 'overview' in course_id %}
-                <li><a href='/{{appname}}/static/{{course_id}}/overview.html' aria-label="index-page">Table of Contents</a></li>
+                <li><a href='{{ pathto(master_doc) }}/overview.html' aria-label="index-page">Table of Contents</a></li>
             {% else: %}
                 <li><a href='{{ pathto(master_doc) }}' aria-label="index-page">Table of Contents</a></li>
             {% endif %}
-            <li><a href='/{{appname}}/static/{{course_id}}/genindex.html'>Book Index</a></li>
+            <li><a href='{{ pathto("genindex.html",1) }}'>Book Index</a></li>
             <li class="divider"></li>
             <li style="width: 240px;">
               <form class="navbar-search" style="margin:10px;" action="{{ pathto('search') }}" method="get">
@@ -140,7 +150,7 @@
 
         <li class="divider-vertical"></li>
 
-        {% if use_services %}
+        {% if use_services == 'true' %}
         <!-- user account dropdown -->
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
@@ -149,17 +159,21 @@
           <ul class="dropdown-menu user-menu">
             <li><span class='loggedinuser'></span></li>
             <li class="divider"></li>
-            <li><a href='{{course_url}}/{{appname}}/assignments/chooseAssignment.html'>Assignments</a></li>
-            <li><a href='{{course_url}}/{{appname}}/assignments/practice'>Practice</a></li>
+            <li><a href='/{{appname}}/assignments/chooseAssignment.html'>Assignments</a></li>
+            <li><a href='/{{appname}}/assignments/practice'>Practice</a></li>
             <li class="divider"></li>
+            {% if minimal_outside_links != 'True' %}
             <li><a href='/{{appname}}/default/courses'>Change Course</a></li>
 			      <li class="divider"></li>
-            <li id="ip_dropdown_link"><a href='{{course_url}}/{{appname}}/admin/index'>Instructor's Page</a></li>
-            <li><a href='{{ course_url }}/{{ appname }}/assignments/index'>Progress Page</a></li>
+            <li id="ip_dropdown_link"><a href='/{{appname}}/admin/index'>Instructor's Page</a></li>
+            {% endif %}
+            <li><a href='/{{appname}}/assignments/index'>Progress Page</a></li>
             <li class="divider"></li>
-            <li><a href="{{course_url}}/{{appname}}/default/user/profile" id="profilelink">Edit Profile</a></li>
-            <li><a href="{{course_url}}/{{appname}}/default/user/change_password" id="passwordlink">Change Password</a></li>
-            <li><a href="{{course_url}}/{{appname}}/default/user/register" id="registerlink">Register</a></li>
+            {% if minimal_outside_links != 'True' %}
+            <li><a href="/{{appname}}/default/user/profile" id="profilelink">Edit Profile</a></li>
+            <li><a href="/{{appname}}/default/user/change_password" id="passwordlink">Change Password</a></li>
+            <li><a href="/{{appname}}/default/user/register" id="registerlink">Register</a></li>
+            {% endif %}
             <li class='loginout'><a href='#'>Login</a></li> <!-- correct link populated by addNavbarLoginLink() -->
           </ul>
         </li>
@@ -175,6 +189,7 @@
 
         <li class="divider-vertical"></li>
 
+        {% if minimal_outside_links != 'True' %}
         <!-- help menu dropdown -->
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
@@ -182,8 +197,7 @@
           </a>
           <ul class="dropdown-menu user-menu">
             <li><a href='http://runestoneinteractive.org/pages/faq.html'>FAQ</a></li>
-            <li><a href='/{{appname}}/static/{{course_id}}/navhelp.html'>Navigation Help</a></li>
-            <li><a href='/{{appname}}/static/instructorguide/index.html'>Help for Instructors</a></li>
+            <li><a href='https://runestone.academy/runestone/static/instructorguide/index.html'>Instructors Guide</a></li>
             <li class="divider"></li>
             <li><a href='http://runestoneinteractive.org'>About Runestone</a></li>
             <li><a href='/{{ appname }}/default/reportabug?course={{ course_id }}&page={{ pathto(pagename,1) }}'>Report A Problem</a></li>
@@ -192,13 +206,15 @@
         <!-- end help menu dropdown -->
 
         <li class="divider-vertical"></li>
-
+      {% endif %}
       </ul>
 
       <ul class="nav navbar-nav">
         <li class="divider-vertical"></li>
         {% block sidebartoc %}
-          {% include "subchaptoc.html" %}
+          {% if dynamic_pages == 'True': %}
+            {% include "subchaptoc.html" %}
+          {% endif %}
           <li class="divider-vertical"></li>
         {% endblock %}
         <!-- {% block sidebarrel %}
@@ -233,8 +249,7 @@
   {% if dynamic_pages == 'True' %}
     {% raw %}
     eBookConfig.useRunestoneServices = true;
-    eBookConfig.host = '{{= "{}://{}".format(request.env.wsgi_url_scheme,
-                                             request.env.http_host) }}';
+    eBookConfig.host = '';
     eBookConfig.app = eBookConfig.host + '/' + '{{= request.application }}';
     eBookConfig.course = '{{= course_name }}';
     eBookConfig.basecourse = '{{= base_course }}';
@@ -244,10 +259,12 @@
     eBookConfig.username = '{{= user_id}}';
     eBookConfig.readings = {{= readings}};
     eBookConfig.activities = {{= XML(activity_info) }}
+    eBookConfig.downloadsEnabled = {{=downloads_enabled}};
+    eBookConfig.allow_pairs = {{=allow_pairs}}
     {% endraw %}
   {% else %}
-    eBookConfig.useRunestoneServices = {% if use_services == 'True' -%}true{%- else -%}false{%- endif -%};
-    eBookConfig.host = '{{course_url}}' ? '{{course_url}}' : 'http://127.0.0.1:8000';
+    eBookConfig.useRunestoneServices = {% if use_services == 'true' -%}true{%- else -%}false{%- endif -%};
+    eBookConfig.host = '{{course_url}}' || 'http://127.0.0.1:8000';
     eBookConfig.app = eBookConfig.host+'/{{appname}}';
     eBookConfig.course = '{{course_id}}';
     eBookConfig.basecourse = '{{ basecourse }}';
@@ -263,12 +280,12 @@
   eBookConfig.jobehost = '{{jobe_server}}';
   eBookConfig.proxyuri_runs = '{{proxy_uri_runs}}';
   eBookConfig.proxyuri_files = '{{proxy_uri_files}}';
-  eBookConfig.downloadsEnabled = {{downloads_enabled}};
   eBookConfig.enable_chatcodes = {{enable_chatcodes}} ? {{ enable_chatcodes }} : false;
-  eBookConfig.allow_pairs = {{allow_pairs}} ? {{allow_pairs}} : false;
+
 
 </script>
 
+{% if minimal_outside_links != 'True' %}
 <div id="fb-root"></div>
 <script>
   (function(d, s, id) {
@@ -279,6 +296,7 @@
     fjs.parentNode.insertBefore(js, fjs);
   }(document, 'script', 'facebook-jssdk'));
 </script>
+{% endif %}
 
 {% endblock %}
 
@@ -295,7 +313,7 @@
 
 <div class="container" id="continue-reading"></div>
 
-<div class="container" id="main-content">
+<div class="container" id="main-content" role="main">
   {% block body %}
   {% endblock %}
   <div id=scprogresscontainer>
@@ -311,8 +329,10 @@
 <footer class="footer">
   <div class="container">
     <p class="pull-right">
-      {% if use_services %}
+      {% if use_services == 'true' %}
+      {% if minimal_outside_links != 'True' %}
       <span id='numuserspan'></span><span class='loggedinuser'></span>
+      {% endif %}
       {% endif %}
       | <a href="#">Back to top</a>
       {% if theme_source_link_position == "footer" %}
@@ -339,20 +359,26 @@
 </footer>
 
 
-{% if appname == "runestone" %}
-<script type="text/javascript">
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-32029811-1']);
-  _gaq.push(['_trackPageview']);
+{% if dynamic_pages == 'True' %}
+  {% raw %}
+    {{ if request.application == 'runestone':}}
+      <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', '{{ =settings.google_ga }}']);
+        _gaq.push(['_trackPageview']);
 
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-</script>
-<script async src="https://hypothes.is/embed.js"></script>
+        (function() {
+          var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+          ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+          var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+      </script>
+    {{ pass }}
+  {% endraw %}
 
+  {% if minimal_outside_links != 'True' %}
+    <script async src="https://hypothes.is/embed.js"></script>
+  {% endif %}
 {% endif %}
 
 {% endblock %}

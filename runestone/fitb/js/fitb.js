@@ -41,6 +41,9 @@ FITB.prototype.init = function (opts) {
 
     this.createFITBElement();
     this.checkServer("fillb");
+    this.caption="Fill in the Blank";
+	this.addCaption('runestone');
+
 };
 
 // Find the script tag containing JSON in a given root DOM node.
@@ -159,6 +162,10 @@ FITB.prototype.restoreAnswers = function (data) {
 
 FITB.prototype.checkLocalStorage = function () {
     // Loads previous answers from local storage if they exist
+    if (this.graderactive) {
+        return;
+    }
+
     var len = localStorage.length;
     if (len > 0) {
         var ex = localStorage.getItem(this.localStorageKey());

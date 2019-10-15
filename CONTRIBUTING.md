@@ -6,19 +6,19 @@ We welcome contributions large and small to the Runestone Components.  We welcom
 Understand the RoadMap
 ----------------------
 
-You should look at the [development road map](https://github.com/bnmnetp/runestone/wiki/DevelopmentRoadmap) 
-and especially RSE-0001 which gives you a clear idea of the current philosophy behind the components.  Any 
+You should look at the [development road map](https://github.com/bnmnetp/runestone/wiki/DevelopmentRoadmap)
+and especially RSE-0001 which gives you a clear idea of the current philosophy behind the components.  Any
 Sphinx directives should create very simple html and let Javascript take care of the rest.
 
 Coding Standards
 ----------------
 
-* All components must remain Python 3/2 compatible.   The ``six`` module is already 
+* All components must be Python 3 compatible.   The ``six`` module is already
 in the requirements.txt file, so feel free to use that.
 * No Tabs for Python files (4 spaces = 1 indention)
 * Avoid profliferation of jQuery versions.  Make your stuff compatible with the version
 of jQuery in the common folder.
-* Avoid proliferation of additional third party javascript modules.  We are already out of 
+* Avoid proliferation of additional third party javascript modules.  We are already out of
 control in this regard and it would be nice to rein it in.
 * When creating a new directive, assign a unique class name to the outermost HTML division. That will allow you to easily confine your CSS declarations to apply only within your directive. Since there are many directives, chances for CSS namespace conflicts are high without that.
 * When making a new directive Also put the outer div in the runestone class, this makes it easy for us to select all runestone components on a page.
@@ -26,7 +26,8 @@ control in this regard and it would be nice to rein it in.
 * Make sure your new directive class inherits and uses RunestoneBase
 * Avoid writing a directive that returns a raw node.  Creating appropriate nodes that inherit from Runestone gives us much more flexibility to auto number and cross reference and store source in the database.
 * Make sure any buttons you create have their type specified.  Unless you know you want it to be submit or reset make sure it is 'button' otherwise it causes problems for previewing.
-
+* Keep Pull Requests small, and limit them to the feature you are adding or bug you are fixing.
+* Please don't make gratuitous changes to the code to fit your own personal style or sense of what is correct or incorrect.  In other words If it ain't broke, don't fix it.  These kinds of changes make it harder for reviewers to figure out what you are trying to do.
 
 Unit Testing
 ------------
@@ -39,7 +40,7 @@ Provide an example
 The folder ``runestone/<component>/test/index.rst``  is a great place to add code
 that demonstrates your new feature or component in action.
 
-In fact you should provide two examples whenever possible to demonstrate that you can have 
+In fact you should provide two examples whenever possible to demonstrate that you can have
 multiple instances of your component on a single web page.
 
 Internationalization

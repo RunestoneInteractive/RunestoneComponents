@@ -21,3 +21,16 @@ Short Answer
    :optional:
 
    What are the colors in the rainbow?
+
+
+.. shortanswer:: question2
+   :optional:
+
+   What are the colors in the rainbow?
+   What is meaning of :math:`\pi r^2`
+   How about an image?
+
+   .. image:: Figures/LutherBellPic.jpg
+      :width: 200
+
+   This is the famous Luther Bell!

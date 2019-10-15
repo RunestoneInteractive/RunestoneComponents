@@ -77,14 +77,11 @@ To build the included default project run
 
     runestone build
 
-You will now have a build folder with a file index.html in it, along with some default content.  The contents of the build folder are suitable for hosting anywhere that you can serve static web content from!  For a small class you could even serve the content using the builtin Python webserver.
-
 *Note:* If you come across version conflict with ``six`` library while building the project, ``pip install --ignore-installed six`` command might be useful.
 
-::
+You will now have a build folder with a file index.html in it, along with some default content.  The contents of the build folder are suitable for hosting anywhere that you can serve static web content from!  For a small class you could even serve the content using the provided Python webserver::
 
     $ runestone serve
-
 
 Now from your browser you can open up ``http://localhost:8000/index.html``  You should see the table of contents for a sample page like this:
 

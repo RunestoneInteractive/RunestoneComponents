@@ -42,7 +42,7 @@ VIS = '''
 <div class="runestone" style="max-width: none;">
 <div class="%(divclass)s">
 <div id="%(divid)s"></div>
-<p class="cl_caption"><span class="cl_caption_text">%(caption)s (%(divid)s)</span> </p>
+<p class="runestone_caption"><span class="runestone_caption_text">CodeLens: %(caption)s (%(divid)s)</span> </p>
 </div>'''
 
 QUESTION = '''

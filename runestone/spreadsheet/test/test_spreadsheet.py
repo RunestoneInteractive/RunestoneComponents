@@ -12,6 +12,15 @@ class SpreadsheetTests(RunestoneTestCase):
 
     def test_ss_autograde(self):
         self.driver.get(self.host + "/index.html")
+        wait = WebDriverWait(self.driver, 10)
+        try:
+            wait.until(
+                EC.presence_of_element_located((By.ID, "ss1"))
+            )
+        except:
+            text = self.driver.page_source
+            print(text[:300])
+
         t2 = self.driver.find_element_by_id("ss1")
         self.assertIsNotNone(t2)
         time.sleep(1)

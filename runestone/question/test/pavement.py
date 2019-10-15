@@ -5,6 +5,7 @@ paver.setuputils.install_distutils_tasks()
 import os, sys
 from runestone.server import get_dburl
 from sphinxcontrib import paverutils
+import pkg_resources
 
 sys.path.append(os.getcwd())
 
@@ -35,6 +36,9 @@ options(
                         }
     )
 )
+
+version = pkg_resources.require("runestone")[0].version
+options.build.template_args['runestone_version'] = version
 
 # If DBURL is in the environment override dburl
 options.build.template_args['dburl'] = get_dburl(outer=locals())
