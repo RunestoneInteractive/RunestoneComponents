@@ -150,7 +150,7 @@ DragNDrop.prototype.addDragDivListeners = function () {
 DragNDrop.prototype.createButtons = function () {
     this.buttonDiv = document.createElement("div");
     this.submitButton = document.createElement("button");    // Check me button
-    this.submitButton.textContent = "Check Me";
+    this.submitButton.textContent = $.i18n("msg_dragndrop_check_me");
     $(this.submitButton).attr({
         "class": "btn btn-success drag-button",
         "name": "do answer",
@@ -162,7 +162,7 @@ DragNDrop.prototype.createButtons = function () {
     }.bind(this);
 
     this.resetButton = document.createElement("button");    // Check me button
-    this.resetButton.textContent = "Reset";
+    this.resetButton.textContent =  $.i18n("msg_dragndrop_reset");;
     $(this.resetButton).attr({
         "class": "btn btn-default drag-button drag-reset",
         "name": "do answer",
