@@ -80,12 +80,17 @@ class FITBtests(RunestoneTestCase):
         '''
         http://runestoneinteractive.org/build/html/directives.html#fill-in-the-blank for documentation
         '''
+
         self.find_fitb("fill1412")
         self.find_blank(0).send_keys("red")
         self.click_checkme()
         feedback = self.find_feedback("fill1412")
         self.assertIn('Correct', feedback.text)
-        self.assertIn('No answer provided', feedback.text)
+
+        msg_no_answer = self.driver.execute_script("return $.i18n('msg_no_answer')")
+        self.assertIsNot(msg_no_answer,'msg_no_answer')
+
+        self.assertIn(msg_no_answer, feedback.text)
 
     # No answers yet -- no answer provided feedback.
     def test_fitb2(self):
@@ -93,7 +98,11 @@ class FITBtests(RunestoneTestCase):
         self.click_checkme()
         feedback = self.find_feedback("fill1412")
         self.assertIsNotNone(feedback.text)
-        self.assertIn("No answer provided.", feedback.text)
+
+        msg_no_answer = self.driver.execute_script("return $.i18n('msg_no_answer')")
+        self.assertIsNotNone(msg_no_answer)
+
+        self.assertIn(msg_no_answer, feedback.text)
 
     # Both correct answers
     def test_fitb3(self):

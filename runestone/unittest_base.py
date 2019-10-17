@@ -155,7 +155,7 @@ class ModuleFixture(unittest.TestCase):
         options = Options()
         options.add_argument("--window-size=1200,800")
         options.add_argument("--no-sandbox")
-        self.driver = webdriver.Chrome(chrome_options=options)  # good for development.
+        self.driver = webdriver.Chrome(options=options)  # good for development.
 
         # Make this accessible
         global mf
