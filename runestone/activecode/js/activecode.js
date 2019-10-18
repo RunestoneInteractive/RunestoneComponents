@@ -1179,6 +1179,11 @@ ActiveCode.prototype.runProg = function () {
         jsonpSites : ['https://itunes.apple.com'],
     });
     Sk.divid = this.divid;
+    if (this.graderactive) {
+        Sk.gradeContainer = this.containerDiv.closest('.loading').id;
+    } else {
+        Sk.gradeContainer = this.divid;
+    }
     this.setTimeLimit();
     (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = this.graphics;
     Sk.canvas = this.graphics.id; //todo: get rid of this here and in image
