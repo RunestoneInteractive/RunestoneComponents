@@ -358,7 +358,8 @@ Timed.prototype.createRenderedQuestionArray = function () {
         } else if ($(tmpChild).is("[data-component=parsons]")) {
             this.renderedQuestionArray.push({"question": new TimedParsons(opts)});
         } else if ($(tmpChild).is("[data-component=activecode]")) {
-            this.renderedQuestionArray.push({"question": new TimedActiveCode(opts)});
+            var acQuest = $(tmpChild.parentElement).children("p");
+            this.renderedQuestionArray.push({"wrapper": tmpChild.parentElement, "question": new TimedActiveCode(opts)});
         } else if ($(tmpChild).is("[data-childcomponent]")) {
             // this is for when a directive has a wrapper element that isn't actually part of the javascript object
             // for example, activecode has a wrapper div that contains the question for the element

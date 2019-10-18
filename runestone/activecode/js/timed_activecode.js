@@ -14,7 +14,10 @@ TimedActiveCode.prototype.timedInit = function (opts) {
     }
     this.hideButtons();
     this.addHistoryScrubber();
+    this.isTimed = true;
     this.needsReinitialization = true;   // the run button click listener needs to be reinitialized
+    this.containerDiv.classList.add('timedComponent');
+    edList[this.divid] = this;
 };
 
 
@@ -43,7 +46,15 @@ TimedActiveCode.prototype.renderTimedIcon = function (component) {
 };
 
 TimedActiveCode.prototype.checkCorrectTimed = function () {
-    return "I";   // we ignore this in the grading
+    if (this.pct_correct) {
+        if(this.pct_correct >= 100.0) {
+            return "T";
+        } else {
+            return "F";
+        }
+    } else {
+        return "I";   // we ignore this in the grading if no unittests
+    }
 };
 
 TimedActiveCode.prototype.hideFeedback = function () {
@@ -52,20 +63,32 @@ TimedActiveCode.prototype.hideFeedback = function () {
 
 TimedActiveCode.prototype.processTimedSubmission = function (logFlag) {
     // Disable input & evaluate component
-    if (this.useRunestoneServices) {
+/*    if (this.useRunestoneServices) {
         if (logFlag) {
+            if (this.historyScrubber !== null) {
+                $(this.historyScrubber).slider({
+                    max: this.history.length-1,
+                    value: this.history.length-1,
+                    slide: this.slideit.bind(this),
+                    change: this.slideit.bind(this)
+                });
+            }
             this.runProg();
         } else {
             this.loadEditor().done(this.runProg.bind(this));
         }
-    }
-    this.runButton.disabled = true;
+    } */
+    $(this.runButton).hide();
+    $(`#${this.divid}_unit_results`).show();
     $(this.codeDiv).addClass("ac-disabled");
 };
 
 TimedActiveCode.prototype.reinitializeListeners = function () {
     // re-attach the run button listener
     $(this.runButton).click(this.runProg.bind(this));
+    $(this.codeDiv).show();
+    this.runButton.disabled = false;
+    $(this.codeDiv).removeClass("ac-disabled");
     $(this.histButton).click(this.addHistoryScrubber.bind(this));
     if (this.historyScrubber !== null) {
         $(this.historyScrubber).slider({
