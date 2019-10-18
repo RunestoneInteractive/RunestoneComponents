@@ -150,3 +150,46 @@ New style
 
         -   Not gray.
 
+
+
+.. timed:: timed_exam_test
+
+    .. mchoice:: question_timed_new
+
+        What color is a stop sign?
+
+        -   red
+
+            +   Red it is.
+
+        -   brown
+
+            -   Not brown.
+
+        -   blue
+
+            -   Not blue.
+
+        -   gray
+
+            -   Not gray.
+
+
+    .. activecode:: timed_ac
+
+        This is the question part of the activecode.
+        ~~~~
+        # Your code here
+        radius = 10
+        print(radius * radius * 3.14)
+
+        ====
+        from unittest.gui import TestCaseGui
+        class myTests(TestCaseGui):
+            def test_radius(self):
+                self.assertIn("radius", self.getEditorText(), 'radius variable')
+                self.assertIn(str(3.14*radius**2)[:4], self.getOutput(), 'Checking answer.')
+                self.assertEqual(radius, 10, 'no feedback')
+        myTests().main()
+
+
