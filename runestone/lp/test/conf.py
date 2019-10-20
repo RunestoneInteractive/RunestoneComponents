@@ -42,6 +42,14 @@ source_suffix = '.rst'
 # The encoding of source files.
 #source_encoding = 'utf-8-sig'
 
+# **CodeChat note:** A dict of {glob_, lexer_alias}, which uses lexer_alias
+# (e.g. a lexer's `short name <http://pygments.org/docs/lexers/>`_) to analyze
+# any file which matches the given glob-style pattern (e.g. `glob
+# <https://docs.python.org/3/library/pathlib.html#pathlib.PurePath.match>`_).
+CodeChat_lexer_for_glob = {
+    "*.s": "NASM",
+}
+
 # The master toctree document.
 master_doc = 'index'
 
