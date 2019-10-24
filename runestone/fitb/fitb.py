@@ -38,7 +38,7 @@ def setup(app):
     app.add_node(BlankNode, html=(visit_blank_node, depart_blank_node))
     app.add_node(FITBFeedbackNode, html=(visit_fitb_feedback_node, depart_fitb_feedback_node))
     app.add_config_value('fitb_div_class', 'runestone', 'html')
-    app.add_config_value('fitb_compare_button_show', True, 'html');
+    app.add_config_value('fitb_compare_button_show', True, 'html')
 
 class FITBNode(nodes.General, nodes.Element, RunestoneNode):
     def __init__(self, content, **kwargs):
@@ -141,7 +141,7 @@ class FillInTheBlank(RunestoneIdDirective):
         if env.config.fitb_compare_button_show:
             self.options['showcomparebutton'] = 'data-showcomparebutton=true'
         else:
-            self.options['showcomparebutton'] = ''
+            self.options['showcomparebutton'] = 'data-showcomparebutton=false'
         
         TEMPLATE_START = '''
         <div class="%(divclass)s">

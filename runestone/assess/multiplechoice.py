@@ -184,7 +184,7 @@ class MChoice(Assessment):
         if env.config.mchoice_compare_button_show:
             self.options['showcomparebutton'] = 'data-showcomparebutton=true'
         else:
-            self.options['showcomparebutton'] = ''
+            self.options['showcomparebutton'] = 'data-showcomparebutton=false'
 
         TEMPLATE_START = '''
             <div class="%(divclass)s">
