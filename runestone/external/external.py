@@ -24,13 +24,13 @@ try:
 except ImportError:
     from cgi import escape  # py2
 
-__author__ = 'jczetta'
+__author__ = "jczetta"
 # Code template is directly from question.py at the moment, which is (c) Bradley N. Miller.
-#This is intended as the basis for a potential new gradeable directive class, still potential TODO.
+# This is intended as the basis for a potential new gradeable directive class, still potential TODO.
 
 
 def setup(app):
-    app.add_directive('external', ExternalDirective)
+    app.add_directive("external", ExternalDirective)
 
     app.add_node(ExternalNode, html=(visit_external_node, depart_external_node))
 
@@ -45,7 +45,7 @@ def visit_external_node(self, node):
     # Set options and format templates accordingly
     # env = node.document.settings.env
 
-    node.delimiter = "_start__{}_".format(node.external_options['divid'])
+    node.delimiter = "_start__{}_".format(node.external_options["divid"])
 
     self.body.append(node.delimiter)
 
@@ -59,22 +59,23 @@ def depart_external_node(self, node):
 
     self.body.append(res)
 
-    addHTMLToDB(node.external_options['divid'],
-                node.external_options['basecourse'],
-                "".join(""))
+    addHTMLToDB(
+        node.external_options["divid"], node.external_options["basecourse"], "".join("")
+    )
 
     self.body.remove(node.delimiter)
 
+
 # Templates to be formatted by node options
-TEMPLATE_START = '''
+TEMPLATE_START = """
     <div data-component="external" class="full-width container external" id="%(divid)s" >
     <li class="alert alert-warning">
 
-    '''
-TEMPLATE_END = '''
+    """
+TEMPLATE_END = """
     </li>
     </div>
-    '''
+    """
 
 
 class ExternalDirective(RunestoneIdDirective):
@@ -84,12 +85,13 @@ class ExternalDirective(RunestoneIdDirective):
    Content  Everything here is part of the activity
    Content  Can include links...
     """
+
     required_arguments = 1
     optional_arguments = 0
     final_argument_whitespace = True
     has_content = True
     option_spec = RunestoneIdDirective.option_spec.copy()
-    option_spec.update({'number': directives.positive_int})
+    option_spec.update({"number": directives.positive_int})
 
     def run(self):
         super(ExternalDirective, self).run()
@@ -97,10 +99,12 @@ class ExternalDirective(RunestoneIdDirective):
 
         self.assert_has_content()  # make sure activity has something in it
 
-        self.options['name'] = self.arguments[0].strip()
+        self.options["name"] = self.arguments[0].strip()
 
         external_node = ExternalNode(self.options, rawsource=self.block_text)
-        external_node.source, external_node.line = self.state_machine.get_source_and_line(self.lineno)
+        external_node.source, external_node.line = self.state_machine.get_source_and_line(
+            self.lineno
+        )
         self.add_name(external_node)
 
         self.state.nested_parse(self.content, self.content_offset, external_node)

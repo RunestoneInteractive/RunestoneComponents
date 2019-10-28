@@ -8,7 +8,7 @@
 
 # To see an example of this module at work, write the following code in
 # http://pythontutor.com/visualize.html
-'''
+"""
 from htmlexample_module import ColorTable
 
 t = ColorTable(3, 4)
@@ -26,7 +26,7 @@ for i in range(3):
     for j in range(4):
         t.set_color(i, j, 'gray')
         t.render_HTML()
-'''
+"""
 
 
 # defines a simple table where you can set colors for individual rows and columns
@@ -38,9 +38,8 @@ class ColorTable:
         # create a 2D matrix of empty strings
         self.table = []
         for i in range(self.num_rows):
-            new_lst = ['' for e in range(self.num_columns)]
+            new_lst = ["" for e in range(self.num_columns)]
             self.table.append(new_lst)
-
 
     # color must be a legal HTML color string
     def set_color(self, row, column, color):
@@ -48,24 +47,25 @@ class ColorTable:
         assert 0 <= column < self.num_columns
         self.table[row][column] = color
 
-
     # call this function whenever you want to render this table in HTML
     def render_HTML(self):
         # incrementally build up an HTML table string
-        html_string = '<table>'
+        html_string = "<table>"
 
         for i in range(self.num_rows):
-            html_string += '<tr>'
+            html_string += "<tr>"
             for j in range(self.num_columns):
                 color = self.table[i][j]
                 if not color:
                     color = "white"
-                html_string += '''<td style="width: 30px; height: 30px; border: 1px solid black;
-                                  background-color: %s;"></td>''' % color
-            html_string += '</tr>'
+                html_string += (
+                    """<td style="width: 30px; height: 30px; border: 1px solid black;
+                                  background-color: %s;"></td>"""
+                    % color
+                )
+            html_string += "</tr>"
 
-        html_string += '</table>'
+        html_string += "</table>"
 
         # then call the magic setHTML function
         setHTML(html_string)
-
