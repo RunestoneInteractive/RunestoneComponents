@@ -14,7 +14,7 @@ class UpdateConfig(RunestoneDirective):
     update config
     """ 
     required_arguments = 0
-    optional_arguments = 1
+    optional_arguments = 0
     has_content = False
     option_spec = RunestoneDirective.option_spec.copy()
     option_spec.update({'set_config_option': directives.unchanged,
@@ -27,7 +27,7 @@ class UpdateConfig(RunestoneDirective):
         if 'set_config_option' in self.options:
             config_opt , value = self.options['set_config_option'].split(" ", 1)
 
-            if(len(value)>1000):
+            if len(value)>1000:
                 self.error("Length of configuration option value exceeded")
 
             env.config[config_opt]= literal_eval(value)

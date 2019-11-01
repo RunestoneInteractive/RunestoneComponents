@@ -29,13 +29,8 @@ class UpdateConfigTests(RunestoneTestCase):
         button_before_config_update = self.driver.find_element_by_id("question1_bcomp")
 
         self.find_fitb("fill2")
-        button_after_config_update = None
-        try:
-            button_after_config_update = self.driver.find_element_by_id("question2_bcomp")
-        except NoSuchElementException:
-            pass
-        finally:
-            self.assertIsNone(button_after_config_update)
+        assert not is_element_present_by_id(self,"question2_bcomp")
+        
     
         self.find_fitb("fill3")
         button_after_second_config_update = self.driver.find_element_by_id("question3_bcomp")
@@ -51,13 +46,7 @@ class UpdateConfigTests(RunestoneTestCase):
         button_before_config_update = self.driver.find_element_by_id("fill1_bcomp")
 
         self.find_fitb("question2")
-        button_after_config_update = None
-        try:
-            button_after_config_update = self.driver.find_element_by_id("fill2_bcomp")
-        except NoSuchElementException:
-            pass
-        finally:
-            self.assertIsNone(button_after_config_update)
+        assert not is_element_present_by_id(self,"fill2_bcomp")
     
         self.find_fitb("question3")
         button_after_second_config_update = self.driver.find_element_by_id("fill3_bcomp")
@@ -66,5 +55,11 @@ class UpdateConfigTests(RunestoneTestCase):
         self.assertIsNotNone(button_before_config_update)
         self.assertIsNotNone(button_after_second_config_update)
 
+def is_element_present_by_id(self, id):
+    try:
+        self.driver.find_element_by_id(id)
+        return True
+    except NoSuchElementException:
+        return False
 
  

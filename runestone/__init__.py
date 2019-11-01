@@ -44,9 +44,10 @@ def runestone_extensions():
     modules = [ 'runestone.{}'.format(x) for x in module_paths if os.path.exists('{}/__init__.py'.format(os.path.join(basedir,x)))]
     # Place ``runestone.common`` first, so it can run init code needed by all other modules. This assumes that the first module in the list is run first. An alternative to this to guarantee this ordering is to call ``app.setup_extension('runestone.common')`` in every extension.
     modules.insert(0, modules.pop(modules.index('runestone.common')))
-	# ``runestone.updateConfig`` is reserved for testing and will only be included if you are in a directory with ``test`` in its name
-    if('test' not in (os.path.split(os.getcwd())[-1])):
-        modules.pop(modules.index('runestone.updateConfig'))
+	# ``runestone.updateConfig`` is reserved for testing and will only be included if ``test`` is the second to last element of tha path
+    if('test' != os.path.split(os.getcwd())[-1]):
+        modules.remove('runestone.updateConfig')
+        
     return modules
 
 def get_master_url():
