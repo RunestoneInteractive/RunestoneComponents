@@ -11,7 +11,12 @@ def setup(app):
 
 class UpdateConfig(Directive):
     """
-    update config
+    The syntax for a update config is:
+    .. update-config::
+        :set_config_option: configuration new_value
+
+    .. update-config::
+        :set_config_option: mchoice_compare_button_show False
     """ 
     required_arguments = 0
     optional_arguments = 0
