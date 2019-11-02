@@ -927,6 +927,8 @@ errorText.NotImplementedError = $.i18n("msg_activecode_not_implemented_error");
 errorText.NotImplementedErrorFix = $.i18n("msg_activecode_not_implemented_error_fix");
 errorText.KeyError = $.i18n("msg_activecode_key_error");
 errorText.KeyErrorFix = $.i18n("msg_activecode_key_error_fix");
+errorText.AssertionError = $.i18n("msg_activecode_assertion_error");
+errorText.AssertionErrorFix = $.i18n("msg_activecode_assertion_error_fix");
 
 ActiveCode.prototype.addJSONLibrary = function () {
     var jsonExternalLibInfo = {

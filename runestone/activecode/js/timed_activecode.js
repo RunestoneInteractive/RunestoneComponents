@@ -22,7 +22,7 @@ TimedActiveCode.prototype.timedInit = function (opts) {
 
 
 TimedActiveCode.prototype.hideButtons = function () {
-    var buttonList = [this.saveButton, this.loadButton, this.gradeButton, this.showHideButt, this.clButton, this.coachButton, this.atButton];
+    var buttonList = [this.saveButton, this.loadButton, this.gradeButton, this.showHideButt, this.coachButton, this.atButton];
     for (var i = 0; i < buttonList.length; i++) {
         if (buttonList[i] !== undefined && buttonList[i] !== null)
             $(buttonList[i]).hide();
