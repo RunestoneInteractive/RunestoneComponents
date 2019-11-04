@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-__author__ = 'isaiahmayerchak'
+__author__ = "isaiahmayerchak"
 
 import json
 import ast
@@ -29,16 +29,18 @@ from runestone.common import RunestoneIdDirective, RunestoneNode, get_node_line
 
 
 def setup(app):
-    app.add_directive('fillintheblank', FillInTheBlank)
-    app.add_role('blank', BlankRole)
-    app.add_autoversioned_stylesheet('fitb.css')
-    app.add_autoversioned_javascript('fitb.js')
-    app.add_autoversioned_javascript('timedfitb.js')
+    app.add_directive("fillintheblank", FillInTheBlank)
+    app.add_role("blank", BlankRole)
+    app.add_autoversioned_stylesheet("fitb.css")
+    app.add_autoversioned_javascript("fitb.js")
+    app.add_autoversioned_javascript("timedfitb.js")
     app.add_node(FITBNode, html=(visit_fitb_node, depart_fitb_node))
     app.add_node(BlankNode, html=(visit_blank_node, depart_blank_node))
+
     app.add_node(FITBFeedbackNode, html=(visit_fitb_feedback_node, depart_fitb_feedback_node))
     app.add_config_value('fitb_div_class', 'runestone', 'html')
     app.add_config_value('fitb_compare_button_show', True, 'html')
+
 
 class FITBNode(nodes.General, nodes.Element, RunestoneNode):
     def __init__(self, content, **kwargs):
@@ -48,15 +50,15 @@ class FITBNode(nodes.General, nodes.Element, RunestoneNode):
         - `self`:
         - `content`:
         """
-        super(FITBNode,self).__init__(**kwargs)
+        super(FITBNode, self).__init__(**kwargs)
         self.fitb_options = content
         # Create a data structure of feedback.
         self.feedbackArray = []
 
 
-def visit_fitb_node(self,node):
+def visit_fitb_node(self, node):
 
-    node.delimiter = "_start__{}_".format(node.fitb_options['divid'])
+    node.delimiter = "_start__{}_".format(node.fitb_options["divid"])
     self.body.append(node.delimiter)
 
     res = node.template_start % node.fitb_options
@@ -76,7 +78,9 @@ def depart_fitb_node(self, node):
     if len(node.feedbackArray) < blankCount:
         # Taken from the example in the `logging API <http://www.sphinx-doc.org/en/stable/extdev/logging.html#logging-api>`_.
         logger = logging.getLogger(__name__)
-        logger.warning('Not enough feedback for the number of blanks supplied.', location=node)
+        logger.warning(
+            "Not enough feedback for the number of blanks supplied.", location=node
+        )
 
     # Generate the HTML.
     json_feedback = json.dumps(node.feedbackArray)
@@ -85,17 +89,24 @@ def depart_fitb_node(self, node):
     while not node_with_document.document:
         node_with_document = node_with_document.parent
     # Supply client-side grading info if we're not grading on the server.
-    node.fitb_options['json'] = 'false' if node_with_document.document.settings.env.config.runestone_server_side_grading else json_feedback
+    node.fitb_options["json"] = (
+        "false"
+        if node_with_document.document.settings.env.config.runestone_server_side_grading
+        else json_feedback
+    )
     res = node.template_end % node.fitb_options
     self.body.append(res)
 
     # add HTML to the Database and clean up
-    addHTMLToDB(node.fitb_options['divid'],
-                node.fitb_options['basecourse'],
-                "".join(self.body[self.body.index(node.delimiter) + 1:]),
-                json_feedback)
+    addHTMLToDB(
+        node.fitb_options["divid"],
+        node.fitb_options["basecourse"],
+        "".join(self.body[self.body.index(node.delimiter) + 1 :]),
+        json_feedback,
+    )
 
     self.body.remove(node.delimiter)
+
 
 class FillInTheBlank(RunestoneIdDirective):
     """
@@ -117,15 +128,18 @@ class FillInTheBlank(RunestoneIdDirective):
     - fitb_div_class - custom CSS class of the component's outermost div
     - fitb_compare_button_show - if False, hide the 'Compare me' button (default True)
     """
+
     required_arguments = 1
     optional_arguments = 0
     final_argument_whitespace = True
     has_content = True
     option_spec = RunestoneIdDirective.option_spec.copy()
     option_spec.update(
-       {'blankid':directives.unchanged,
-        'casei':directives.flag  # case insensitive matching
-    })
+        {
+            "blankid": directives.unchanged,
+            "casei": directives.flag,  # case insensitive matching
+        }
+    )
 
     def run(self):
         """
@@ -149,19 +163,21 @@ class FillInTheBlank(RunestoneIdDirective):
         <div data-component="fillintheblank" id="%(divid)s" %(showcomparebutton)s>
         '''
 
-        TEMPLATE_END = '''
+        TEMPLATE_END = """
         <script type="application/json">
             %(json)s
         </script>
 
         </div>
         </div>
-            '''
+            """
 
         addQuestionToDB(self)
 
         fitbNode = FITBNode(self.options, rawsource=self.block_text)
-        fitbNode.source, fitbNode.line = self.state_machine.get_source_and_line(self.lineno)
+        fitbNode.source, fitbNode.line = self.state_machine.get_source_and_line(
+            self.lineno
+        )
         fitbNode.template_start = TEMPLATE_START
         fitbNode.template_end = TEMPLATE_END
 
@@ -169,7 +185,7 @@ class FillInTheBlank(RunestoneIdDirective):
 
         self.state.nested_parse(self.content, self.content_offset, fitbNode)
         env = self.state.document.settings.env
-        self.options['divclass'] = env.config.fitb_div_class
+        self.options["divclass"] = env.config.fitb_div_class
 
         # Expected _`structure`, with assigned variable names and transformations made:
         #
@@ -227,12 +243,22 @@ class FillInTheBlank(RunestoneIdDirective):
         self.assert_has_content()
         feedback_bullet_list = fitbNode.pop()
         if not isinstance(feedback_bullet_list, nodes.bullet_list):
-            raise self.error('On line {}, the last item in a fill-in-the-blank question must be a bulleted list.'.format(get_node_line(feedback_bullet_list)))
+            raise self.error(
+                "On line {}, the last item in a fill-in-the-blank question must be a bulleted list.".format(
+                    get_node_line(feedback_bullet_list)
+                )
+            )
         for feedback_list_item in feedback_bullet_list.children:
             assert isinstance(feedback_list_item, nodes.list_item)
             feedback_field_list = feedback_list_item[0]
-            if len(feedback_list_item) != 1 or not isinstance(feedback_field_list, nodes.field_list):
-                raise self.error('On line {}, each list item in a fill-in-the-blank problems must contain only one item, a field list.'.format(get_node_line(feedback_list_item)))
+            if len(feedback_list_item) != 1 or not isinstance(
+                feedback_field_list, nodes.field_list
+            ):
+                raise self.error(
+                    "On line {}, each list item in a fill-in-the-blank problems must contain only one item, a field list.".format(
+                        get_node_line(feedback_list_item)
+                    )
+                )
             blankArray = []
             for feedback_field in feedback_field_list:
                 assert isinstance(feedback_field, nodes.field)
@@ -261,28 +287,36 @@ class FillInTheBlank(RunestoneIdDirective):
                     # We can't parse this as a number, so assume it's a regex.
                     regex = (
                         # The given regex must match the entire string, from the beginning (which may be preceeded by whitespaces) ...
-                        '^\s*' +
+                        "^\s*"
+                        +
                         # ... to the contents (where a single space in the provided pattern is treated as one or more whitespaces in the student's anwer) ...
-                        feedback_field_name.rawsource.replace(' ', '\s+')
+                        feedback_field_name.rawsource.replace(" ", "\s+")
                         # ... to the end (also with optional spaces).
-                        + '\s*$'
+                        + "\s*$"
                     )
                     blankFeedbackDict = {
-                        'regex': regex,
-                        'regexFlags':
-                            'i' if 'casei' in self.options else '',
+                        "regex": regex,
+                        "regexFlags": "i" if "casei" in self.options else "",
                     }
                     # Test out the regex to make sure it compiles without an error.
                     try:
                         re.compile(regex)
                     except Exception as ex:
-                        raise self.error('Error when compiling regex "{}": {}.'.format(regex, str(ex)))
+                        raise self.error(
+                            'Error when compiling regex "{}": {}.'.format(
+                                regex, str(ex)
+                            )
+                        )
                 blankArray.append(blankFeedbackDict)
 
                 feedback_field_body = feedback_field[1]
                 assert isinstance(feedback_field_body, nodes.field_body)
                 # Append feedback for this answer to the end of the fitbNode.
-                ffn = FITBFeedbackNode(feedback_field_body.rawsource, *feedback_field_body.children, **feedback_field_body.attributes)
+                ffn = FITBFeedbackNode(
+                    feedback_field_body.rawsource,
+                    *feedback_field_body.children,
+                    **feedback_field_body.attributes
+                )
                 ffn.blankFeedbackDict = blankFeedbackDict
                 fitbNode += ffn
 
@@ -292,7 +326,6 @@ class FillInTheBlank(RunestoneIdDirective):
         return [fitbNode]
 
 
-
 # BlankRole
 # ---------
 # Create role representing the blank in a fill-in-the-blank question. This function returns a tuple of two values:
@@ -300,31 +333,35 @@ class FillInTheBlank(RunestoneIdDirective):
 # 0. A list of nodes which will be inserted into the document tree at the point where the interpreted role was encountered (can be an empty list).
 # #. A list of system messages, which will be inserted into the document tree immediately after the end of the current block (can also be empty).
 def BlankRole(
-  # _`roleName`: the local name of the interpreted role, the role name actually used in the document.
-  roleName,
-  # _`rawtext` is a string containing the enitre interpreted text input, including the role and markup. Return it as a problematic node linked to a system message if a problem is encountered.
-  rawtext,
-  # The interpreted _`text` content.
-  text,
-  # The line number (_`lineno`) where the interpreted text begins.
-  lineno,
-  # _`inliner` is the docutils.parsers.rst.states.Inliner object that called this function. It contains the several attributes useful for error reporting and document tree access.
-  inliner,
-  # A dictionary of directive _`options` for customization (from the "role" directive), to be interpreted by this function. Used for additional attributes for the generated elements and other functionality.
-  options={},
-  # A list of strings, the directive _`content` for customization (from the "role" directive). To be interpreted by the role function.
-  content=[]):
+    # _`roleName`: the local name of the interpreted role, the role name actually used in the document.
+    roleName,
+    # _`rawtext` is a string containing the enitre interpreted text input, including the role and markup. Return it as a problematic node linked to a system message if a problem is encountered.
+    rawtext,
+    # The interpreted _`text` content.
+    text,
+    # The line number (_`lineno`) where the interpreted text begins.
+    lineno,
+    # _`inliner` is the docutils.parsers.rst.states.Inliner object that called this function. It contains the several attributes useful for error reporting and document tree access.
+    inliner,
+    # A dictionary of directive _`options` for customization (from the "role" directive), to be interpreted by this function. Used for additional attributes for the generated elements and other functionality.
+    options={},
+    # A list of strings, the directive _`content` for customization (from the "role" directive). To be interpreted by the role function.
+    content=[],
+):
 
     # Blanks ignore all arguments, just inserting a blank.
     blank_node = BlankNode(rawtext)
     blank_node.line = lineno
     return [blank_node], []
 
+
 class BlankNode(nodes.Inline, nodes.TextElement, RunestoneNode):
     pass
 
+
 def visit_blank_node(self, node):
     self.body.append('<input type="text">')
+
 
 def depart_blank_node(self, node):
     pass
@@ -334,13 +371,15 @@ def depart_blank_node(self, node):
 class FITBFeedbackNode(nodes.General, nodes.Element, RunestoneNode):
     pass
 
+
 def visit_fitb_feedback_node(self, node):
     # Save the HTML generated thus far. Anything generated under this node will be placed in JSON.
     self.context.append(self.body)
     self.body = []
 
+
 def depart_fitb_feedback_node(self, node):
     # Place all the HTML generated for this node and its children into the feedbackArray.
-    node.blankFeedbackDict['feedback'] = ''.join(self.body)
+    node.blankFeedbackDict["feedback"] = "".join(self.body)
     # Restore HTML generated thus far.
     self.body = self.context.pop()

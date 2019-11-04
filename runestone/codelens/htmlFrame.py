@@ -17,18 +17,19 @@ dft_template = """
 </html></body>
 """
 
-class HtmlFrame :
-    def __init__ (self, template=dft_template, banner="") :
+
+class HtmlFrame:
+    def __init__(self, template=dft_template, banner=""):
         self.outputOn = True
         self.template = template
-        self.banner   = banner
+        self.banner = banner
         self.item1 = self.item2 = self.item3 = ""
 
-    def makeEofPage(self) :
+    def makeEofPage(self):
         pass
-            
-    def makeFrame (self,template=None) :
-        if not template : template = self.template
+
+    def makeFrame(self, template=None):
+        if not template:
+            template = self.template
         content = template % self.__dict__
         setHTML(content)
-

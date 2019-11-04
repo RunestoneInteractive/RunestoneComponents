@@ -25,8 +25,9 @@ from docutils import nodes
 import re
 from sphinx.writers.html import HTMLTranslator
 
-DIV_PRE_RE = re.compile(r'^<div[^>]*><pre>')
-PRE_DIV_RE = re.compile(r'\s*</pre></div>\s*$')
+DIV_PRE_RE = re.compile(r"^<div[^>]*><pre>")
+PRE_DIV_RE = re.compile(r"\s*</pre></div>\s*$")
+
 
 def html_visit_literal(self, node):
     env = self.builder.env
@@ -35,42 +36,53 @@ def html_visit_literal(self, node):
 
     if (
         # This is a literal...
-        (node.rawsource.startswith('``') and
-        # ...that's not inside a ``:file:``
-        'role' not in node.attributes and
-        # ...and we should highlight literals, OR
-        env.config.inline_highlight_literals) or
+        (
+            node.rawsource.startswith("``")
+            and
+            # ...that's not inside a ``:file:``
+            "role" not in node.attributes
+            and
+            # ...and we should highlight literals, OR
+            env.config.inline_highlight_literals
+        )
+        or
         # this is a code block, highlight.
-        ('code' in node['classes'])):
+        ("code" in node["classes"])
+    ):
 
         if env.config.inline_highlight_respect_highlight:
             lang = self.highlightlang
         else:
             lang = None
 
-        highlight_args = node.get('highlight_args', {})
+        highlight_args = node.get("highlight_args", {})
 
-        if node.has_key('language'):
+        if node.has_key("language"):
             # code-block directives
-            lang = node['language']
-            highlight_args['force'] = True
+            lang = node["language"]
+            highlight_args["force"] = True
 
         def warner(msg, **kwargs):
             self.builder.warn(self.builder.current_docname, msg, node.line, **kwargs)
 
         highlighted = self.highlighter.highlight_block(
-            node.astext(), lang, warn=warner, **highlight_args)
+            node.astext(), lang, warn=warner, **highlight_args
+        )
 
         # highlighted comes as <div class="highlighted"><pre>...</pre></div>
 
-        highlighted = DIV_PRE_RE.sub('', highlighted)
-        highlighted = PRE_DIV_RE.sub('', highlighted)
+        highlighted = DIV_PRE_RE.sub("", highlighted)
+        highlighted = PRE_DIV_RE.sub("", highlighted)
 
         # import rpdb2 ; rpdb2.start_embedded_debugger('foo')
 
-        starttag = self.starttag(node, 'code', suffix='',
-                                 CLASS='docutils literal highlight highlight-%s' % lang)
-        self.body.append(starttag + highlighted + '</code>')
+        starttag = self.starttag(
+            node,
+            "code",
+            suffix="",
+            CLASS="docutils literal highlight highlight-%s" % lang,
+        )
+        self.body.append(starttag + highlighted + "</code>")
 
     else:
         return old_html_visit_literal(self, node)
@@ -79,9 +91,9 @@ def html_visit_literal(self, node):
 
 
 old_html_visit_literal = HTMLTranslator.visit_literal
-HTMLTranslator.visit_literal  = html_visit_literal
+HTMLTranslator.visit_literal = html_visit_literal
+
 
 def setup(app):
-    app.add_config_value('inline_highlight_literals', True, 'env')
-    app.add_config_value('inline_highlight_respect_highlight', True, 'env')
-
+    app.add_config_value("inline_highlight_literals", True, "env")
+    app.add_config_value("inline_highlight_respect_highlight", True, "env")

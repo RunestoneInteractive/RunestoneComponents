@@ -19,6 +19,7 @@ import os
 from os import makedirs
 from pathlib import Path
 import json
+
 #
 # Third-party imports
 # -------------------
@@ -31,12 +32,14 @@ from docutils.parsers.rst import directives
 from docutils.parsers.rst.states import Struct
 from CodeChat.CodeToRestSphinx import is_source_code
 from CodeChat.CodeToRest import get_lexer
+
 #
 # Local imports
 # -------------
 from ..common.runestonedirective import RunestoneIdDirective, RunestoneNode
 from .lp_common_lib import STUDENT_SOURCE_PATH, code_here_comment, SPHINX_CONFIG_NAME
 from ..server.componentdb import addQuestionToDB, addHTMLToDB
+
 #
 # Directives
 # ----------
@@ -47,16 +50,17 @@ from ..server.componentdb import addQuestionToDB, addHTMLToDB
 # """"""""""""""""""""""
 # Given code containing solution tags, remove the lines containing the solution tags and any intervening lines, replacing them with the provided string.
 def _remove_code_solutions(
-  # The file name of this code.
-  file_name,
-  # A string containing the code.
-  src,
-  # The _`replacement function`, invoked as ``replacement_func(start_line, end_line, file_name)`` which returns a replacement string.
-  replacement_func):
+    # The file name of this code.
+    file_name,
+    # A string containing the code.
+    src,
+    # The _`replacement function`, invoked as ``replacement_func(start_line, end_line, file_name)`` which returns a replacement string.
+    replacement_func,
+):
 
     # Split these so they won't be treated as actual tags when this file is parsed.
-    start_token = 'SOLUTION_' 'BEGIN'
-    end_token = 'SOLUTION_' 'END'
+    start_token = "SOLUTION_" "BEGIN"
+    end_token = "SOLUTION_" "END"
 
     # Search through the lines of source from the end of the beginning. That way, any deletions made at the end won't change line numbers for deletions made earlier in the source.
     lines = src.splitlines(keepends=True)
@@ -72,38 +76,48 @@ def _remove_code_solutions(
         # 2. Otherwise, ``end_token_index`` contains the line number at which the end token was found. Therefore, we're searching for the beginning token.
         else:
             if start_token in lines[current_index]:
-                del lines[current_index:end_token_index + 1]
-                lines.insert(current_index, replacement_func(current_index + 1, end_token_index + 1, file_name))
+                del lines[current_index : end_token_index + 1]
+                lines.insert(
+                    current_index,
+                    replacement_func(current_index + 1, end_token_index + 1, file_name),
+                )
                 end_token_index = None
         current_index -= 1
 
-    return ''.join(lines)
+    return "".join(lines)
+
+
 #
 # _assert_has_no_content
 # """"""""""""""""""""""
 # An almost-copy of ``docutils.parsers.rst.Directive.assert_has_content``. It throws an ERROR-level DirectiveError if the directive has contents.
 def _assert_has_no_content(self):
     if self.content:
-        raise self.error('Content block not allowed for the "%s" directive.'
-                         % self.name)
+        raise self.error(
+            'Content block not allowed for the "%s" directive.' % self.name
+        )
+
+
 #
 # _source_read
 # ^^^^^^^^^^^^
 # The source-read_ event occurs when a source file is read. If it's code, this
 # routine replaces code solutions with HTML textareas, so students can fill in their own code.
 def _source_read(
-  # .. _app:
-  #
-  # The `Sphinx application object <http://sphinx-doc.org/extdev/appapi.html#sphinx.application.Sphinx>`_.
-  app,
-  # The name of the document that was read. It contains a path relative to the
-  # project directory and (typically) no extension.
-  docname,
-  # A list whose single element is the contents of the source file.
-  source):
+    # .. _app:
+    #
+    # The `Sphinx application object <http://sphinx-doc.org/extdev/appapi.html#sphinx.application.Sphinx>`_.
+    app,
+    # The name of the document that was read. It contains a path relative to the
+    # project directory and (typically) no extension.
+    docname,
+    # A list whose single element is the contents of the source file.
+    source,
+):
 
     if is_source_code(app.env, docname):
         source[0] = _remove_code_solutions(docname, source[0], _textarea_replacement)
+
 
 # A `replacement function`_ to substitute a text area for student code for the solution.
 def _textarea_replacement(start_line, end_line, file_name):
@@ -112,14 +126,14 @@ def _textarea_replacement(start_line, end_line, file_name):
     s = TEXTAREA_REPLACEMENT_STRING.format(end_line - 4)
 
     # Pad with newlines if we can so line numbering is preserved.
-    padding_newlines = end_line - start_line + 1 - s.count('\n')
+    padding_newlines = end_line - start_line + 1 - s.count("\n")
     if padding_newlines > 0:
-        s += '\n'*padding_newlines
+        s += "\n" * padding_newlines
 
     return s
 
-TEXTAREA_REPLACEMENT_STRING = (
-"""
+
+TEXTAREA_REPLACEMENT_STRING = """
 .. raw::
  html
 
@@ -127,7 +141,7 @@ TEXTAREA_REPLACEMENT_STRING = (
 
 ..
 
-""")
+"""
 #
 # _LpBuildButtonDirective
 # ^^^^^^^^^^^^^^^^^^^^^^^
@@ -141,52 +155,67 @@ class _LpBuildButtonDirective(RunestoneIdDirective):
     has_content = False
     # Options. Everything but language is currently ignored. This is based on activecode, so in the future similar support would be provided for these options.
     option_spec = RunestoneIdDirective.option_spec.copy()
-    option_spec.update({
-        'include': directives.unchanged,
-        'language': directives.unchanged,
-        'timelimit': directives.unchanged,
-        'stdin': directives.unchanged,
-        'datafile': directives.unchanged,
-        'available_files': directives.unchanged,
-        'builder': directives.unchanged,
-    })
+    option_spec.update(
+        {
+            "include": directives.unchanged,
+            "language": directives.unchanged,
+            "timelimit": directives.unchanged,
+            "stdin": directives.unchanged,
+            "datafile": directives.unchanged,
+            "available_files": directives.unchanged,
+            "builder": directives.unchanged,
+        }
+    )
 
     def run(self):
         super(_LpBuildButtonDirective, self).run()
         _assert_has_no_content(self)
         addQuestionToDB(self)
         # Gather arguments.
-        id_ = self.options['divid']
+        id_ = self.options["divid"]
 
         # Process options
         ##===============
-        self.options['include'] = [x.strip() for x in self.options.get('include', '')]
+        self.options["include"] = [x.strip() for x in self.options.get("include", "")]
         # If a language isn't provided, derive it from the file's name.
         env = self.state.document.settings.env
-        self.options.setdefault('language', get_lexer(filename=env.docname).name)
-        self.options.setdefault('timelimit', 25000)
-        self.options.setdefault('builder', 'JOBE')
+        self.options.setdefault("language", get_lexer(filename=env.docname).name)
+        self.options.setdefault("timelimit", 25000)
+        self.options.setdefault("builder", "JOBE")
 
         # Generate HTML for the lp build directive. Pass the language, so client-side JS can use the correct syntax highligher.
-        html = (
-"""<div class="runestone">
+        html = """<div class="runestone">
     <input type="button" value="Save and run" class="btn btn-success" data-component="lp_build" data-lang="{}" id="{}" />
     <br />
     <textarea readonly id="lp-result"></textarea>
     <br />
     <div></div>
-</div>""".format(self.options['language'], id_)
+</div>""".format(
+            self.options["language"], id_
         )
-        addHTMLToDB(id_, self.options['basecourse'], html, json.dumps(dict(
-            # Provide these to the server, indicating how to build.
-            language=self.options['language'], builder=self.options['builder'],
-            timelimit=self.options['timelimit'], include=self.options['include'],
-            source_path=env.docname, sphinx_base_path=env.app.confdir,
-        )))
-        raw_node = nodes.raw(self.block_text, html, format='html')
-        raw_node.source, raw_node.line = self.state_machine.get_source_and_line(self.lineno)
+        addHTMLToDB(
+            id_,
+            self.options["basecourse"],
+            html,
+            json.dumps(
+                dict(
+                    # Provide these to the server, indicating how to build.
+                    language=self.options["language"],
+                    builder=self.options["builder"],
+                    timelimit=self.options["timelimit"],
+                    include=self.options["include"],
+                    source_path=env.docname,
+                    sphinx_base_path=env.app.confdir,
+                )
+            ),
+        )
+        raw_node = nodes.raw(self.block_text, html, format="html")
+        raw_node.source, raw_node.line = self.state_machine.get_source_and_line(
+            self.lineno
+        )
 
         return [raw_node]
+
 
 # Remove code solutions and feedback from source files. Also, produce a Pygments-highlighted version of each source file.
 def _doctree_resolved(app, doctree, docname):
@@ -196,7 +225,7 @@ def _doctree_resolved(app, doctree, docname):
         # Read the source of this file.
         src_path = env.doc2path(docname, None)
         src_abs_path = Path(env.srcdir) / src_path
-        with src_abs_path.open(encoding='utf-8') as f_in:
+        with src_abs_path.open(encoding="utf-8") as f_in:
             str_ = f_in.read()
 
         # See if any Runestone questions exist in this source file.
@@ -213,24 +242,29 @@ def _doctree_resolved(app, doctree, docname):
                 # None of the node's ancestors are RunestoneNodes. Add to our list.
                 # Some nodes don't define enough information to remove them. Skip.
                 if node.line and node.rawsource:
-                    runestone_directives_to_remove += [[node.line, node.line + len(node.rawsource.splitlines())]]
+                    runestone_directives_to_remove += [
+                        [node.line, node.line + len(node.rawsource.splitlines())]
+                    ]
         if runestone_directives_to_remove:
             # Look for answers in the source and remove them. Work from the last answer (which is closest to the end of the file), so edits don't change the line numbering for earlier answers.
             l = str_.splitlines(keepends=True)
             for fb in reversed(runestone_directives_to_remove):
-                del l[fb[0]:fb[1]]
+                del l[fb[0] : fb[1]]
 
             # Now that feedback is removed, convert it back to a string.
-            str_ = ''.join(l)
+            str_ = "".join(l)
 
         # Replace solutions with "put your code here" comments. The lambda is a `replacement function`_.
-        str_ = _remove_code_solutions(docname, str_,
-            lambda start_line, end_line, file_name: code_here_comment(file_name))
+        str_ = _remove_code_solutions(
+            docname,
+            str_,
+            lambda start_line, end_line, file_name: code_here_comment(file_name),
+        )
 
         # Write the source without answers or feedback into ``outdir/STUDENT_SOURCE_PATH``. Create the path if it doesn't exist.
         dest_path = Path(app.outdir) / STUDENT_SOURCE_PATH / src_path
         makedirs(str(dest_path.parent), exist_ok=True)
-        with dest_path.open('w', encoding='utf-8') as f_out:
+        with dest_path.open("w", encoding="utf-8") as f_out:
             f_out.write(str_)
 
         # _`Pygments source`: Write an HTML version of the source without answers or feedback using Pygments.
@@ -256,18 +290,25 @@ def _doctree_resolved(app, doctree, docname):
             #   ValueError: '\\' does not start with '\\a\\b\\c'
             #
             # To make this work, prepend a ``/`` to both paths, signifying that they start from the same directory (app.outdir, in this case). Use the parent of docname. so that the file name isn't treated as a directory.
-            cssfile = os.path.relpath('/_static/pygments.css', '/' + str(Path(docname).parent))
+            cssfile = os.path.relpath(
+                "/_static/pygments.css", "/" + str(Path(docname).parent)
+            )
             # The directory containing the cssfile may not exist yet; create it if needed.
-            makedirs(app.outdir + '/_static', exist_ok=True)
+            makedirs(app.outdir + "/_static", exist_ok=True)
             # See http://pygments.org/docs/formatters/.
-            formatter = HtmlFormatter(full=True, title=env.titles[docname], cssfile=cssfile,
-                                      noclobber_cssfile=True)
-            pygments_name = Path(app.outdir) / (docname + '-source.html')
+            formatter = HtmlFormatter(
+                full=True,
+                title=env.titles[docname],
+                cssfile=cssfile,
+                noclobber_cssfile=True,
+            )
+            pygments_name = Path(app.outdir) / (docname + "-source.html")
             # The directory containing pygments_name may not exist yet; create it if so.
             makedirs(str(pygments_name.parent), exist_ok=True)
-            with pygments_name.open('w', encoding='utf-8') as f_out:
+            with pygments_name.open("w", encoding="utf-8") as f_out:
                 # See http://pygments.org/docs/api/#module-pygments.
                 pygments.highlight(str_, lexer, formatter, f_out)
+
 
 #
 # Anchored references
@@ -290,44 +331,48 @@ def _doctree_resolved(app, doctree, docname):
 # --------------------
 # Define the ``alink`` role, as discueed `above <anchored references>`_. `Docutils <http://docutils.sourceforge.net/docs/howto/rst-roles.html>`_ has documentation on this. There's a very helpful `tutorial <https://doughellmann.com/blog/2010/05/09/defining-custom-roles-in-sphinx/>`_ for creating a new role in Sphinx.
 def _alink_role(
-  # See roleName_.
-  roleName,
-  # See rawtext_.
-  rawtext,
-  # See text_.
-  text,
-  # See lineno_.
-  lineno,
-  # See inliner_.
-  inliner,
-  # See options_.
-  options={},
-  # See content_.
-  content=[]):
+    # See roleName_.
+    roleName,
+    # See rawtext_.
+    rawtext,
+    # See text_.
+    text,
+    # See lineno_.
+    lineno,
+    # See inliner_.
+    inliner,
+    # See options_.
+    options={},
+    # See content_.
+    content=[],
+):
 
     # Look for ``title <refname#anchor>``.
-    m = re.search('(.*\s+<[^#]+)(#.+)(>\s*)$', text)
+    m = re.search("(.*\s+<[^#]+)(#.+)(>\s*)$", text)
     if not m:
-        msg = inliner.reporter.error('Expected "title <refname#anchor>", but saw "{}"'.format(text))
+        msg = inliner.reporter.error(
+            'Expected "title <refname#anchor>", but saw "{}"'.format(text)
+        )
         prb = inliner.problematic(rawtext, rawtext, msg)
         return [prb], [msg]
     anchor = m.group(2)
     # Reassemble this into a reference, but removing the anchor. It then becomes
     ## `title <refname_>`_
-    no_anchor_reference = '`' + m.group(1) + '_' + m.group(3) + '`_'
+    no_anchor_reference = "`" + m.group(1) + "_" + m.group(3) + "`_"
 
     # Parse this. Booger a bit to be able to invoke the inliner. Just creating a reference node doesn't work, since the parser modifies internal data structures which relate refnames to references.
-    memo = Struct(reporter=inliner.reporter,
-                  document=inliner.document,
-                  language=inliner.language)
-    parsed_nodes, system_messages = inliner.parse(no_anchor_reference, lineno,
-                                                  memo, inliner.parent)
+    memo = Struct(
+        reporter=inliner.reporter, document=inliner.document, language=inliner.language
+    )
+    parsed_nodes, system_messages = inliner.parse(
+        no_anchor_reference, lineno, memo, inliner.parent
+    )
 
     # This should return [refence_node, target_node].
     assert isinstance(parsed_nodes[0], nodes.reference)
     assert isinstance(parsed_nodes[1], nodes.target)
     # Add in the anchor to the reference node.
-    parsed_nodes[0]['anchor'] = anchor
+    parsed_nodes[0]["anchor"] = anchor
     # I'd like ``:alink:`foo <bar#thing>``` followed by ``foo_`` to link to ``bar#thing``, but it instead links to ``bar``. That's because:
     #
     # #. ``:alink:`foo <bar#thing>``` is translated to ```foo <bar_>_```, an indirect reference to ``bar``.
@@ -339,6 +384,8 @@ def _alink_role(
     # and the following should refer to the same thing (but leaves off the anchor)
     # `.space directive`_.
     return parsed_nodes, system_messages
+
+
 #
 # Transform ``alink`` references
 # ------------------------------
@@ -366,25 +413,27 @@ class ExternalAnchorTargets(Transform):
     """
 
     # This line was changed from the original. Lower is higher priority.
-    #default_priority = 640
+    # default_priority = 640
     default_priority = 639
 
     def apply(self):
         for target in self.document.traverse(nodes.target):
-            if target.hasattr('refuri'):
-                refuri = target['refuri']
-                for name in target['names']:
+            if target.hasattr("refuri"):
+                refuri = target["refuri"]
+                for name in target["names"]:
                     reflist = self.document.refnames.get(name, [])
                     if reflist:
                         target.note_referenced_by(name=name)
                     for ref in reflist:
                         if ref.resolved:
                             continue
-                        del ref['refname']
+                        del ref["refname"]
                         # This line was changed from the original:
-                        #ref['refuri'] = refuri
-                        ref['refuri'] = refuri + ref.get('anchor', '')
+                        # ref['refuri'] = refuri
+                        ref["refuri"] = refuri + ref.get("anchor", "")
                         ref.resolved = 1
+
+
 #
 # Hyperlinks to PDF documents
 # ---------------------------
@@ -421,7 +470,8 @@ def _docname_role(
     # A dictionary of directive _`options` for customization (from the "role" directive), to be interpreted by this function. Used for additional attributes for the generated elements and other functionality.
     options={},
     # A list of strings, the directive _`content` for customization (from the "role" directive). To be interpreted by the role function.
-    content=[]):
+    content=[],
+):
 
     # See https://doughellmann.com/blog/2010/05/09/defining-custom-roles-in-sphinx/.
     env = inliner.document.settings.env
@@ -433,7 +483,7 @@ def _docname_role(
     except Exception as e:
         # Report an error.
         msg = inliner.reporter.error(
-            'Invalid path component {}: {}'.format(text, e), line=lineno
+            "Invalid path component {}: {}".format(text, e), line=lineno
         )
         prb = inliner.problematic(rawtext, rawtext, msg)
         return [prb], [msg]
@@ -447,45 +497,51 @@ def _docname_role(
     #   <target ids="['link-text']" names="['link text']" refuri="../link.html"/>
     #
     # For simplicity, I omit the target and just insert the reference. The source HTML is created from `Pygments source`_.
-    refuri = str(Path(env.docname).name) + '-source.html'
+    refuri = str(Path(env.docname).name) + "-source.html"
     return [nodes.reference(rawtext, path_component, refuri=refuri, **options)], []
+
+
 #
 # setup
 # =====
 # Register these additions with Sphinx.
 def setup(
-  # Sphinx application context.
-  app):
+    # Sphinx application context.
+    app
+):
 
     # This depends on `CodeChat <https://pythonhosted.org/CodeChat/README.html>`_.
-    app.setup_extension('CodeChat.CodeToRestSphinx')
+    app.setup_extension("CodeChat.CodeToRestSphinx")
 
     # See http://www.sphinx-doc.org/en/stable/extdev/appapi.html#sphinx.application.Sphinx.add_role.
-    app.add_role('alink', _alink_role)
-    app.add_role('docname', _docname_role)
+    app.add_role("alink", _alink_role)
+    app.add_role("docname", _docname_role)
 
     # See http://www.sphinx-doc.org/en/stable/extdev/appapi.html#sphinx.application.Sphinx.add_transform.
     app.add_transform(ExternalAnchorTargets)
 
     # See http://www.sphinx-doc.org/en/stable/extdev/appapi.html#sphinx.application.Sphinx.add_directive.
-    app.add_directive('lp_build', _LpBuildButtonDirective)
+    app.add_directive("lp_build", _LpBuildButtonDirective)
 
-    app.add_autoversioned_javascript('lp.js')
-    app.add_autoversioned_javascript('gas.js')
+    app.add_autoversioned_javascript("lp.js")
+    app.add_autoversioned_javascript("gas.js")
 
     # Use the `source-read <http://sphinx-doc.org/extdev/appapi.html#event-source-read>`_
     # event hook to replace solutions with textareas before Sphinx processes it.
-    app.connect('source-read', _source_read)
+    app.connect("source-read", _source_read)
     # See http://www.sphinx-doc.org/en/stable/extdev/appapi.html#event-doctree-resolved.
-    app.connect('doctree-resolved', _doctree_resolved)
+    app.connect("doctree-resolved", _doctree_resolved)
 
     # Save Sphinx build info for use in other applications (web server, build system, etc.)
-    with open(SPHINX_CONFIG_NAME, 'w', encoding='utf-8') as f:
-        f.write(json.dumps({
-            'SPHINX_SOURCE_PATH': str(Path(app.srcdir).relative_to(Path.cwd())),
-            'SPHINX_OUT_PATH': str(Path(app.outdir).relative_to(Path.cwd())),
-        }))
+    with open(SPHINX_CONFIG_NAME, "w", encoding="utf-8") as f:
+        f.write(
+            json.dumps(
+                {
+                    "SPHINX_SOURCE_PATH": str(Path(app.srcdir).relative_to(Path.cwd())),
+                    "SPHINX_OUT_PATH": str(Path(app.outdir).relative_to(Path.cwd())),
+                }
+            )
+        )
 
     # Return `extension metadata <http://sphinx-doc.org/extdev/index.html>`_.
-    return {'version' : '0.0.1',
-            'parallel_read_safe' : True }
+    return {"version": "0.0.1", "parallel_read_safe": True}
