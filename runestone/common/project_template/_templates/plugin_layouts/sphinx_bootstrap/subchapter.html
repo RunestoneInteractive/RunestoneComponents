@@ -1,6 +1,6 @@
 {%- if prev %}
 <ul>
-  <li id="relations-prev" class="navLink" title='Previous Section - {{ prev.title|extractText|extractTextII }}' data-toggle="tooltip">
+  <li id="relations-prev" style="opacity:0.2" onmouseover="mouseOverPrev()" onmouseout="mouseOutPrev()"class="navLink" title='Previous Section - {{ prev.title|extractText|extractTextII }}' data-toggle="tooltip">
     <a href="{{ prev.link|e }}" aria-label="{{ prev.title|extractText|extractTextII }}">
         <div style="background-color: white; border-style:solid; border-color:lightgrey; border-width:2px; width:100px; height:50px">
             <i class='prevNav glyphicon glyphicon-chevron-left' style="top:50%; transform:translateY(-50%)translateX(-50%); left: 50%;"></i>
@@ -13,7 +13,7 @@
 
 {%- if next %}
 <ul>
-  <li id="relations-next" class="navLink" title='Next Section - {{ next.title|extractText|extractTextII }}' data-toggle="tooltip" >
+  <li id="relations-next" style="opacity:0.2" onmouseover="mouseOverNext()" onmouseout="mouseOutNext()" class="navLink" title='Next Section - {{ next.title|extractText|extractTextII }}' data-toggle="tooltip" >
     <a href="{{ next.link|e }}" aria-label="{{ next.title|extractText|extractTextII }}">
       <div style="background-color: white; border-style:solid; border-color:lightgrey; border-width:2px; width:100px; height:50px">
           <i id="relationsNextIcon" class='nextNav glyphicon glyphicon-chevron-right' style="top:50%; transform:translateY(-50%)translateX(-50%); left: 50%;"></i>
@@ -29,4 +29,21 @@
   $('#relations-prev').tooltip({'placement':'right', 'selector': '', 'delay': { show: 100, hide: 50}});
   $('#relations-next').tooltip({'placement':'left', 'selector': '', 'delay': { show: 100, hide: 50}});
 
+</script>
+
+<script>
+	function mouseOverPrev() {
+		document.getElementById("relations-prev").style.opacity=1;
+	}
+
+	function mouseOutPrev() {
+		document.getElementById("relations-prev").style.opacity=0.2;
+	}
+	function mouseOverNext() {
+		document.getElementById("relations-next").style.opacity=1;
+	}
+
+	function mouseOutNext() {
+		document.getElementById("relations-next").style.opacity=0.2;
+	}
 </script>
