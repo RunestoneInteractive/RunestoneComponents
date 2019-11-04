@@ -127,6 +127,8 @@ ActiveCode.prototype.createEditor = function (index) {
         edmode = 'text/x-sql'
     } else if (edmode === 'java') {
         edmode = 'text/x-java'
+    } else if (edmode === 'cpp') {
+        edmode = 'text/x-c++src'
     }
 
     var editor = CodeMirror(codeDiv, {value: this.code, lineNumbers: true,
