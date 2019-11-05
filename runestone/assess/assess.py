@@ -32,12 +32,11 @@ def setup(app):
     app.add_directive("qnum", QuestionNumber)
     app.add_directive("timed", TimedDirective)
 
-    app.add_config_value('mchoice_div_class', 'runestone alert alert-warning', 'html')
-    app.add_config_value('mchoice_compare_button_show', True, 'html');
-    app.add_autoversioned_javascript('mchoice.js')
-    app.add_autoversioned_javascript('timedmc.js')
-    app.add_autoversioned_javascript('timed.js')
-
+    app.add_config_value("mchoice_div_class", "runestone alert alert-warning", "html")
+    app.add_config_value("mchoice_compare_button_show", True, "html")
+    app.add_autoversioned_javascript("mchoice.js")
+    app.add_autoversioned_javascript("timedmc.js")
+    app.add_autoversioned_javascript("timed.js")
 
     app.add_node(TimedNode, html=(visit_timed_node, depart_timed_node))
     app.add_node(MChoiceNode, html=(visit_mc_node, depart_mc_node))

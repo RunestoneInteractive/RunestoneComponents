@@ -36,10 +36,11 @@ def setup(app):
     app.add_autoversioned_javascript("timedfitb.js")
     app.add_node(FITBNode, html=(visit_fitb_node, depart_fitb_node))
     app.add_node(BlankNode, html=(visit_blank_node, depart_blank_node))
-
-    app.add_node(FITBFeedbackNode, html=(visit_fitb_feedback_node, depart_fitb_feedback_node))
-    app.add_config_value('fitb_div_class', 'runestone', 'html')
-    app.add_config_value('fitb_compare_button_show', True, 'html')
+    app.add_node(
+        FITBFeedbackNode, html=(visit_fitb_feedback_node, depart_fitb_feedback_node)
+    )
+    app.add_config_value("fitb_div_class", "runestone", "html")
+    app.add_config_value("fitb_compare_button_show", True, "html")
 
 
 class FITBNode(nodes.General, nodes.Element, RunestoneNode):
@@ -157,11 +158,10 @@ class FillInTheBlank(RunestoneIdDirective):
         else:
             self.options['showcomparebutton'] = 'data-showcomparebutton=false'
         
-        TEMPLATE_START = '''
+        TEMPLATE_START = """
         <div class="%(divclass)s">
-        
         <div data-component="fillintheblank" id="%(divid)s" %(showcomparebutton)s>
-        '''
+            """
 
         TEMPLATE_END = """
         <script type="application/json">
