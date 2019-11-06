@@ -105,7 +105,7 @@ FITB.prototype.renderFITBButtons = function () {
             "disabled": "",
             "name": "compare"
         });
-        this.compareButton.textContent = "Compare Me";
+        this.compareButton.textContent = $.i18n("msg_fitb_compare_me");
         this.compareButton.addEventListener("click", function () {
             this.compareFITBAnswers();
         }.bind(this), false);

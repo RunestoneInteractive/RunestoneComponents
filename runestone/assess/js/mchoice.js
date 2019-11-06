@@ -241,7 +241,7 @@ MultipleChoice.prototype.renderMCFormButtons = function () {
             "disabled": "",
             "name": "compare"
         });
-        this.compareButton.textContent = "Compare me";
+        this.compareButton.textContent = $.i18n("msg_mchoice_compare_me");
         this.compareButton.addEventListener("click", function () {
             this.compareAnswers(this.divid);
         }.bind(this), false);
