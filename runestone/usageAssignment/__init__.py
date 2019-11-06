@@ -15,42 +15,52 @@
 #
 from __future__ import print_function
 
-__author__ = 'Paul Resnick'
+__author__ = "Paul Resnick"
 
 from docutils import nodes
 from docutils.parsers.rst import directives
 from sqlalchemy import Table
 from sqlalchemy.orm import sessionmaker
 from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
-from runestone.server.componentdb import addAssignmentToDB, getCourseID, addAssignmentQuestionToDB, getOrInsertQuestionForPage, engine, meta
+from runestone.server.componentdb import (
+    addAssignmentToDB,
+    getCourseID,
+    addAssignmentQuestionToDB,
+    getOrInsertQuestionForPage,
+    engine,
+    meta,
+)
 from datetime import datetime
 from collections import OrderedDict
 
+
 def setup(app):
-    app.add_directive('usageassignment',usageAssignment)
+    app.add_directive("usageassignment", usageAssignment)
 
     app.add_node(usageAssignmentNode, html=(visit_ua_node, depart_ua_node))
 
-    app.connect('doctree-resolved',process_nodes)
-    app.connect('env-purge-doc', purge)
+    app.connect("doctree-resolved", process_nodes)
+    app.connect("env-purge-doc", purge)
+
 
 class usageAssignmentNode(nodes.General, nodes.Element, RunestoneNode):
-    def __init__(self,content, **kwargs):
+    def __init__(self, content, **kwargs):
         """
         Arguments:
         - `self`:
         - `content`:
         """
-        super(usageAssignmentNode,self).__init__(**kwargs)
+        super(usageAssignmentNode, self).__init__(**kwargs)
         self.ua_content = content
+
 
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
-def visit_ua_node(self,node):
+def visit_ua_node(self, node):
     try:
-        course_name = node.ua_content['course_name']
-        chapter_data = node.ua_content['chapter_data']
+        course_name = node.ua_content["course_name"]
+        chapter_data = node.ua_content["chapter_data"]
     except:
         course_name = None
         chapter_data = None
@@ -58,44 +68,52 @@ def visit_ua_node(self,node):
     s = ""
     chapters_and_subchapters = OrderedDict()
     if chapter_data and course_name:
-        for d in chapter_data: # Set up Chapter-Subchs dictionary
-            ch_name, sub_chs = d['ch'], d['sub_chs']
-            if d['ch'] not in chapters_and_subchapters:
-                chapters_and_subchapters[d['ch']] = d['sub_chs']
+        for d in chapter_data:  # Set up Chapter-Subchs dictionary
+            ch_name, sub_chs = d["ch"], d["sub_chs"]
+            if d["ch"] not in chapters_and_subchapters:
+                chapters_and_subchapters[d["ch"]] = d["sub_chs"]
             else:
                 # The order matters with respect to the list wherein they're added to the dictionary.
-                for subch in d['sub_chs']:
-                    chapters_and_subchapters[d['ch']].append(subch)
+                for subch in d["sub_chs"]:
+                    chapters_and_subchapters[d["ch"]].append(subch)
 
-        for ch_name,sub_chs in chapters_and_subchapters.items():
+        for ch_name, sub_chs in chapters_and_subchapters.items():
             s += '<div style="margin-left:150px;" class="panel-heading">'
             s += ch_name
             s += '<ul class="list-group">'
             for sub_ch_name in sub_chs:
                 s += '<li class="simple">'
-                s += '<a href = "/runestone/static/%s/%s/%s.html">%s</a>' % (course_name, ch_name, sub_ch_name, sub_ch_name)
-                s += '</li>'
-            s += '</ul>'
-            s += '</div>'
+                s += '<a href = "/runestone/static/%s/%s/%s.html">%s</a>' % (
+                    course_name,
+                    ch_name,
+                    sub_ch_name,
+                    sub_ch_name,
+                )
+                s += "</li>"
+            s += "</ul>"
+            s += "</div>"
 
     # is this needed??
-    s = s.replace("u'","'")  # hack:  there must be a better way to include the list and avoid unicode strings
+    s = s.replace(
+        "u'", "'"
+    )  # hack:  there must be a better way to include the list and avoid unicode strings
 
     self.body.append(s)
 
-def depart_ua_node(self,node):
-    ''' This is called at the start of processing a ua node.  If ua had recursive nodes
+
+def depart_ua_node(self, node):
+    """ This is called at the start of processing a ua node.  If ua had recursive nodes
         etc and did not want to do all of the processing in visit_ua_node any finishing touches could be
         added here.
-    '''
+    """
     pass
 
 
-def process_nodes(app,env,docname):
+def process_nodes(app, env, docname):
     pass
 
 
-def purge(app,env,docname):
+def purge(app, env, docname):
     pass
 
 
@@ -111,20 +129,23 @@ class usageAssignment(RunestoneDirective):
    :pct_required: <int>   :points: <int>
 
     """
+
     required_arguments = 0  # use assignment_name parameter
     optional_arguments = 0
     has_content = False
     option_spec = RunestoneDirective.option_spec.copy()
-    option_spec.update({
-        'assignment_type': directives.positive_int,
-        'sections':directives.unchanged,
-        'chapters':directives.unchanged,
-        'subchapters':directives.unchanged,
-        'assignment_name':directives.unchanged,
-        'deadline':directives.unchanged,
-        'pct_required':directives.positive_int,
-        'points':directives.positive_int
-    })
+    option_spec.update(
+        {
+            "assignment_type": directives.positive_int,
+            "sections": directives.unchanged,
+            "chapters": directives.unchanged,
+            "subchapters": directives.unchanged,
+            "assignment_name": directives.unchanged,
+            "deadline": directives.unchanged,
+            "pct_required": directives.positive_int,
+            "points": directives.positive_int,
+        }
+    )
 
     def run(self):
         """
@@ -140,55 +161,98 @@ class usageAssignment(RunestoneDirective):
         """
 
         if not engine:
-            self.state.document.settings.env.warn(self.state.document.settings.env.docname, "Environment variables not set for DB access; can't save usageassignment to DB")
+            self.state.document.settings.env.warn(
+                self.state.document.settings.env.docname,
+                "Environment variables not set for DB access; can't save usageassignment to DB",
+            )
             return [usageAssignmentNode(self.options)]
         # create a configured "Session" class
         Session = sessionmaker(bind=engine)
         session = Session()
 
-        Chapter = Table('chapters', meta, autoload=True, autoload_with=engine)
-        SubChapter = Table('sub_chapters', meta, autoload=True, autoload_with=engine)
+        Chapter = Table("chapters", meta, autoload=True, autoload_with=engine)
+        SubChapter = Table("sub_chapters", meta, autoload=True, autoload_with=engine)
         # Problem = Table('problems', meta, autoload=True, autoload_with=engine)
         # Questions = Table('questions', meta, autoload=True, autoload_with=engine)
         # AssignmentType = Table('assignment_types', meta, autoload=True, autoload_with=engine)
         # Section = Table('sections', meta, autoload=True, autoload_with=engine)
 
-        course_name = self.state.document.settings.env.config.html_context['course_id']
-        self.options['course_name'] = course_name
+        course_name = self.state.document.settings.env.config.html_context["course_id"]
+        self.options["course_name"] = course_name
         # course_id = getCourseID(course_name)
         # basecourse_name = self.state.document.settings.env.config.html_context.get('basecourse', "unknown")
 
         # Accumulate all the Chapters and SubChapters that are to be visited
         # For each chapter, accumulate all subchapters
-        self.options['chapter_data'] = []
+        self.options["chapter_data"] = []
         sub_chs = []
-        if 'chapters' in self.options:
+        if "chapters" in self.options:
             try:
-                for nm in self.options.get('chapters').split(','):
+                for nm in self.options.get("chapters").split(","):
                     nm = nm.strip()
-                    ch = session.query(Chapter).filter(Chapter.c.course_id == course_name,
-                                                       Chapter.c.chapter_label == nm).first()
+                    ch = (
+                        session.query(Chapter)
+                        .filter(
+                            Chapter.c.course_id == course_name,
+                            Chapter.c.chapter_label == nm,
+                        )
+                        .first()
+                    )
 
-                    results = session.query(SubChapter).filter(SubChapter.c.chapter_id == str(ch.id)).all()
+                    results = (
+                        session.query(SubChapter)
+                        .filter(SubChapter.c.chapter_id == str(ch.id))
+                        .all()
+                    )
                     sub_chs += results
-                    chapter_data = {'ch': nm, 'sub_chs': [r.sub_chapter_label for r in results]}
-                    self.options['chapter_data'].append(chapter_data)
+                    chapter_data = {
+                        "ch": nm,
+                        "sub_chs": [r.sub_chapter_label for r in results],
+                    }
+                    self.options["chapter_data"].append(chapter_data)
 
             except:
-                self.state.document.settings.env.warn(self.state.document.settings.env.docname, "Chapters requested not found: %s" % (self.options.get('chapters')))
+                self.state.document.settings.env.warn(
+                    self.state.document.settings.env.docname,
+                    "Chapters requested not found: %s" % (self.options.get("chapters")),
+                )
         # Add any explicit subchapters
-        if 'subchapters' in self.options:
+        if "subchapters" in self.options:
             try:
-                for nm in self.options.get('subchapters').split(','):
-                    (ch_dir, subch_name) = nm.strip().split('/')
-                    ch_id = session.query(Chapter).filter(Chapter.c.course_id == course_name, Chapter.c.chapter_label == ch_dir).first().id
-                    subch = session.query(SubChapter).filter(SubChapter.c.chapter_id == ch_id, SubChapter.c.sub_chapter_label == subch_name).first()
+                for nm in self.options.get("subchapters").split(","):
+                    (ch_dir, subch_name) = nm.strip().split("/")
+                    ch_id = (
+                        session.query(Chapter)
+                        .filter(
+                            Chapter.c.course_id == course_name,
+                            Chapter.c.chapter_label == ch_dir,
+                        )
+                        .first()
+                        .id
+                    )
+                    subch = (
+                        session.query(SubChapter)
+                        .filter(
+                            SubChapter.c.chapter_id == ch_id,
+                            SubChapter.c.sub_chapter_label == subch_name,
+                        )
+                        .first()
+                    )
                     sub_chs.append(subch)
                     if not subch:
-                        self.state.document.settings.env.warn(self.state.document.settings.env.docname, "problem with: %s" % nm)
-                    self.options['chapter_data'].append({'ch': ch_dir, 'sub_chs': [subch_name]})
+                        self.state.document.settings.env.warn(
+                            self.state.document.settings.env.docname,
+                            "problem with: %s" % nm,
+                        )
+                    self.options["chapter_data"].append(
+                        {"ch": ch_dir, "sub_chs": [subch_name]}
+                    )
             except:
-                self.state.document.settings.env.warn(self.state.document.settings.env.docname, "Subchapters requested not found: %s" % (self.options.get('subchapters')))
+                self.state.document.settings.env.warn(
+                    self.state.document.settings.env.docname,
+                    "Subchapters requested not found: %s"
+                    % (self.options.get("subchapters")),
+                )
 
         # Accumulate all the ActiveCodes that are to be run and URL paths to be visited
         # questions = []
@@ -231,6 +295,10 @@ class usageAssignment(RunestoneDirective):
         #     ## Associate the question with the assignment, by adding a row to the assignment_questions table
         #     addAssignmentQuestionToDB(q_id, assignment_id, 1, autograde="visited", reading_assignment='T', )
 
-        usage_assignment_node = usageAssignmentNode(self.options, rawsource=self.block_text)
-        usage_assignment_node.source, usage_assignment_node.line = self.state_machine.get_source_and_line(self.lineno)
+        usage_assignment_node = usageAssignmentNode(
+            self.options, rawsource=self.block_text
+        )
+        usage_assignment_node.source, usage_assignment_node.line = self.state_machine.get_source_and_line(
+            self.lineno
+        )
         return [usage_assignment_node]

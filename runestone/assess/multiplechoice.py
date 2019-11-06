@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-__author__ = 'bmiller'
+__author__ = "bmiller"
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -33,57 +33,58 @@ class MChoiceNode(nodes.General, nodes.Element, RunestoneNode):
         super(MChoiceNode, self).__init__(**kwargs)
         self.mc_options = content
 
-def visit_mc_node(self,node):
 
-    node.delimiter = "_start__{}_".format(node.mc_options['divid'])
+def visit_mc_node(self, node):
+
+    node.delimiter = "_start__{}_".format(node.mc_options["divid"])
     self.body.append(node.delimiter)
 
     res = ""
-    if 'random' in node.mc_options:
-        node.mc_options['random'] = 'data-random'
+    if "random" in node.mc_options:
+        node.mc_options["random"] = "data-random"
     else:
-        node.mc_options['random'] = ''
+        node.mc_options["random"] = ""
     # Use multiple_answers behavior if explicitly required or if multiple correct answers were provided.
-    if ('multiple_answers' in node.mc_options) or (',' in node.mc_options['correct']):
-        node.mc_options['multipleAnswers'] = 'true'
+    if ("multiple_answers" in node.mc_options) or ("," in node.mc_options["correct"]):
+        node.mc_options["multipleAnswers"] = "true"
     else:
-        node.mc_options['multipleAnswers'] = 'false'
+        node.mc_options["multipleAnswers"] = "false"
     res = node.template_start % node.mc_options
 
     self.body.append(res)
 
-def depart_mc_node(self,node):
+
+def depart_mc_node(self, node):
     res = ""
     currFeedback = ""
     # Add all of the possible answers
     okeys = list(node.mc_options.keys())
     okeys.sort()
     for k in okeys:
-        if 'answer_' in k:
-            x,label = k.split('_')
-            node.mc_options['alabel'] = label
-            node.mc_options['atext'] = node.mc_options[k]
+        if "answer_" in k:
+            x, label = k.split("_")
+            node.mc_options["alabel"] = label
+            node.mc_options["atext"] = node.mc_options[k]
             currFeedback = "feedback_" + label
-            node.mc_options['feedtext'] = node.mc_options.get(currFeedback,"") #node.mc_options[currFeedback]
-            if label in node.mc_options['correct']:
+            node.mc_options["feedtext"] = node.mc_options.get(
+                currFeedback, ""
+            )  # node.mc_options[currFeedback]
+            if label in node.mc_options["correct"]:
                 node.mc_options["is_correct"] = "data-correct"
             else:
                 node.mc_options["is_correct"] = ""
             res += node.template_option % node.mc_options
 
-
     res += node.template_end % node.mc_options
     self.body.append(res)
 
-    addHTMLToDB(node.mc_options['divid'],
-                node.mc_options['basecourse'],
-                "".join(self.body[self.body.index(node.delimiter) + 1:]))
+    addHTMLToDB(
+        node.mc_options["divid"],
+        node.mc_options["basecourse"],
+        "".join(self.body[self.body.index(node.delimiter) + 1 :]),
+    )
 
     self.body.remove(node.delimiter)
-
-
-
-
 
 
 #####################
@@ -149,25 +150,29 @@ class MChoice(Assessment):
 
     - mchoice_div_class - custom CSS class of the component's outermost div
     """
+
     required_arguments = 1
     optional_arguments = 1
     final_argument_whitespace = True
     has_content = True
     option_spec = Assessment.option_spec.copy()
-    option_spec.update({'answer_a':directives.unchanged,
-        'answer_b':directives.unchanged,
-        'answer_c':directives.unchanged,
-        'answer_d':directives.unchanged,
-        'answer_e':directives.unchanged,
-        'correct':directives.unchanged,
-        'feedback_a':directives.unchanged,
-        'feedback_b':directives.unchanged,
-        'feedback_c':directives.unchanged,
-        'feedback_d':directives.unchanged,
-        'feedback_e':directives.unchanged,
-        'random':directives.flag,
-        'multiple_answers':directives.flag,
-    })
+    option_spec.update(
+        {
+            "answer_a": directives.unchanged,
+            "answer_b": directives.unchanged,
+            "answer_c": directives.unchanged,
+            "answer_d": directives.unchanged,
+            "answer_e": directives.unchanged,
+            "correct": directives.unchanged,
+            "feedback_a": directives.unchanged,
+            "feedback_b": directives.unchanged,
+            "feedback_c": directives.unchanged,
+            "feedback_d": directives.unchanged,
+            "feedback_e": directives.unchanged,
+            "random": directives.flag,
+            "multiple_answers": directives.flag,
+        }
+    )
 
     def run(self):
         """
@@ -179,20 +184,20 @@ class MChoice(Assessment):
 
         super(MChoice, self).run()
 
-        TEMPLATE_START = '''
+        TEMPLATE_START = """
             <div class="%(divclass)s">
             <ul data-component="multiplechoice" data-multipleanswers="%(multipleAnswers)s" %(random)s id="%(divid)s">
-            '''
+            """
 
-        OPTION = '''
+        OPTION = """
             <li data-component="answer" %(is_correct)s id="%(divid)s_opt_%(alabel)s">%(atext)s</li><li data-component="feedback">%(feedtext)s</li>
-            '''
+            """
 
-        TEMPLATE_END = '''
+        TEMPLATE_END = """
 
             </ul>
             </div>
-            '''
+            """
         addQuestionToDB(self)
 
         mcNode = MChoiceNode(self.options, rawsource=self.block_text)
@@ -206,7 +211,7 @@ class MChoice(Assessment):
 
         self.state.nested_parse(self.content, self.content_offset, mcNode)
         env = self.state.document.settings.env
-        self.options['divclass'] = env.config.mchoice_div_class
+        self.options["divclass"] = env.config.mchoice_div_class
         # Expected _`structure`, with assigned variable names and transformations made:
         #
         # .. code-block::
@@ -229,7 +234,9 @@ class MChoice(Assessment):
         #
         # See if the last item is a list. If so, and questions/answers weren't specified as options, assume it contains questions and answers.
         answers_bullet_list = mcNode[-1] if len(mcNode) else None
-        if isinstance(answers_bullet_list, nodes.bullet_list) and ('answer_a' not in self.options and ('correct' not in self.options)):
+        if isinstance(answers_bullet_list, nodes.bullet_list) and (
+            "answer_a" not in self.options and ("correct" not in self.options)
+        ):
             # Accumulate the correct answers.
             correct_answers = []
 
@@ -239,34 +246,67 @@ class MChoice(Assessment):
 
                 # Look for the feedback for this answer -- the last child of this answer list item.
                 feedback_bullet_list = answer_list_item[-1]
-                if ((not isinstance(feedback_bullet_list, nodes.bullet_list) or
-                  # It should have just one item (the feedback itself).
-                  (len(feedback_bullet_list) != 1))):
-                    raise self.error('On line {}, a single-item list must be nested under each answer.'.format(get_node_line(feedback_bullet_list)))
+                if (
+                    not isinstance(feedback_bullet_list, nodes.bullet_list)
+                    or
+                    # It should have just one item (the feedback itself).
+                    (len(feedback_bullet_list) != 1)
+                ):
+                    raise self.error(
+                        "On line {}, a single-item list must be nested under each answer.".format(
+                            get_node_line(feedback_bullet_list)
+                        )
+                    )
 
                 # Check for a correct answer.
                 feedback_list_item = feedback_bullet_list[0]
                 assert isinstance(feedback_list_item, nodes.list_item)
-                if feedback_bullet_list['bullet'] == '+':
-                    correct_answers.append(chr(answer_list_item.parent.index(answer_list_item) + ord('a')))
+                if feedback_bullet_list["bullet"] == "+":
+                    correct_answers.append(
+                        chr(answer_list_item.parent.index(answer_list_item) + ord("a"))
+                    )
 
                 # Change the feedback list item (which is currently a generic list_item) to our special node class (a FeedbackListItem).
-                feedback_list_item.replace_self(FeedbackListItem(feedback_list_item.rawsource, *feedback_list_item.children, **feedback_list_item.attributes))
+                feedback_list_item.replace_self(
+                    FeedbackListItem(
+                        feedback_list_item.rawsource,
+                        *feedback_list_item.children,
+                        **feedback_list_item.attributes
+                    )
+                )
 
                 # Change the feedback bulleted list (currently a bullet_list) to our class (a FeedbackBulletList).
-                feedback_bullet_list.replace_self(FeedbackBulletList(feedback_bullet_list.rawsource, *feedback_bullet_list.children, **feedback_bullet_list.attributes))
+                feedback_bullet_list.replace_self(
+                    FeedbackBulletList(
+                        feedback_bullet_list.rawsource,
+                        *feedback_bullet_list.children,
+                        **feedback_bullet_list.attributes
+                    )
+                )
 
                 # Change the answer list item (currently a list_item) to an AnswerListItem.
-                answer_list_item.replace_self(AnswerListItem(answer_list_item.rawsource, *answer_list_item.children, **answer_list_item.attributes))
+                answer_list_item.replace_self(
+                    AnswerListItem(
+                        answer_list_item.rawsource,
+                        *answer_list_item.children,
+                        **answer_list_item.attributes
+                    )
+                )
 
             # Change the answer bulleted list (currently a bullet_list) to an AnswersBulletList.
-            answers_bullet_list.replace_self(AnswersBulletList(answers_bullet_list.rawsource, *answers_bullet_list.children, **answers_bullet_list.attributes))
+            answers_bullet_list.replace_self(
+                AnswersBulletList(
+                    answers_bullet_list.rawsource,
+                    *answers_bullet_list.children,
+                    **answers_bullet_list.attributes
+                )
+            )
             # Store the correct answers.
-            self.options['correct'] = ','.join(correct_answers)
+            self.options["correct"] = ",".join(correct_answers)
 
         # Check that a correct answer was provided.
-        if not self.options.get('correct'):
-            raise self.error('No correct answer specified.')
+        if not self.options.get("correct"):
+            raise self.error("No correct answer specified.")
         return [mcNode]
 
 
@@ -274,17 +314,21 @@ class MChoice(Assessment):
 class AnswersBulletList(nodes.bullet_list, RunestoneNode):
     pass
 
+
 # Define a list_item which contains answers (see the structure_).
 class AnswerListItem(nodes.list_item, RunestoneNode):
     pass
+
 
 # Define a bullet_list which contains feedback (see the structure_).
 class FeedbackBulletList(nodes.bullet_list, RunestoneNode):
     pass
 
+
 # Define a list_item which contains answers (see the structure_).
 class FeedbackListItem(nodes.list_item, RunestoneNode):
     pass
+
 
 # The ``<ul>`` tag will be generated already -- don't output it.
 def visit_answers_bullet_node(self, node):
@@ -293,10 +337,12 @@ def visit_answers_bullet_node(self, node):
     self.compact_p = None
     self.compact_simple = True
 
+
 # The ``</ul>`` tag will be generated already -- don't output it.
 def depart_answers_bullet_node(self, node):
     # Restore the state modified in ``visit_answers_bullet_node``.
     self.compact_simple, self.compact_p = self.context.pop()
+
 
 # Write out the special attributes needed by the ``<li>`` tag.
 def visit_answer_list_item(self, node):
@@ -304,62 +350,80 @@ def visit_answer_list_item(self, node):
     mcNode = node.parent.parent
 
     # _`label`: Turn the index of this item in the answer_bullet_list (see structure_) into a letter.
-    label = chr(node.parent.index(node) + ord('a'))
+    label = chr(node.parent.index(node) + ord("a"))
     # Update dict for formatting the HTML.
-    mcNode.mc_options['alabel'] = label
-    if label in mcNode.mc_options['correct']:
-        mcNode.mc_options['is_correct'] = 'data-correct'
+    mcNode.mc_options["alabel"] = label
+    if label in mcNode.mc_options["correct"]:
+        mcNode.mc_options["is_correct"] = "data-correct"
     else:
-        mcNode.mc_options['is_correct'] = ''
+        mcNode.mc_options["is_correct"] = ""
 
     # Format the HTML.
-    self.body.append('<li data-component="answer" %(is_correct)s id="%(divid)s_opt_%(alabel)s">' % mcNode.mc_options)
+    self.body.append(
+        '<li data-component="answer" %(is_correct)s id="%(divid)s_opt_%(alabel)s">'
+        % mcNode.mc_options
+    )
+
 
 # Although the feedback for an answer is given as a sublist, the HTML is just a list. So, let the feedback list item close this list.
 def depart_answer_list_item(self, node):
     pass
 
+
 # Nothing to output, since feedback isn't nested under an answer in the HTML.
 def visit_feedback_bullet_node(self, node):
     pass
+
 
 # Nothing to output, since feedback isn't nested under an answer in the HTML.
 def depart_feedback_bullet_node(self, node):
     pass
 
+
 def visit_feedback_list_item(self, node):
     # See label_ and structure_.
     answer_list_item = node.parent.parent
     mcNode = answer_list_item.parent.parent
-    label = chr(answer_list_item.parent.index(answer_list_item) + ord('a'))
-    mcNode.mc_options['alabel'] = label
-    self.body.append('</li><li data-component="feedback" id="%(divid)s_opt_%(alabel)s">\n' % mcNode.mc_options)
+    label = chr(answer_list_item.parent.index(answer_list_item) + ord("a"))
+    mcNode.mc_options["alabel"] = label
+    self.body.append(
+        '</li><li data-component="feedback" id="%(divid)s_opt_%(alabel)s">\n'
+        % mcNode.mc_options
+    )
+
 
 def depart_feedback_list_item(self, node):
-    self.body.append('</li>')
+    self.body.append("</li>")
 
 
-
-#backwards compatibility
+# backwards compatibility
 class MChoiceMF(MChoice):
     def run(self):
-        raise self.error("This directive has been depreciated. Please convert to the new directive 'mchoice'")
-        mcmfNode = super(MChoiceMF,self).run()[0]
+        raise self.error(
+            "This directive has been depreciated. Please convert to the new directive 'mchoice'"
+        )
+        mcmfNode = super(MChoiceMF, self).run()[0]
 
         return [mcmfNode]
 
+
 class MChoiceMA(MChoice):
     def run(self):
-        self.options['multiple_answers'] = 'multipleAnswers'
-        raise self.error("This directive has been depreciated. Please convert to the new directive 'mchoice'")
-        mchoicemaNode = super(MChoiceMA,self).run()[0]
+        self.options["multiple_answers"] = "multipleAnswers"
+        raise self.error(
+            "This directive has been depreciated. Please convert to the new directive 'mchoice'"
+        )
+        mchoicemaNode = super(MChoiceMA, self).run()[0]
 
         return [mchoicemaNode]
 
+
 class MChoiceRandomMF(MChoice):
     def run(self):
-        self.options['random'] = 'random'
-        raise self.error("This directive has been depreciated. Please convert to the new directive 'mchoice'")
-        mchoicerandommfNode = super(MChoiceRandomMF,self).run()[0]
+        self.options["random"] = "random"
+        raise self.error(
+            "This directive has been depreciated. Please convert to the new directive 'mchoice'"
+        )
+        mchoicerandommfNode = super(MChoiceRandomMF, self).run()[0]
 
-        return[mchoicerandommfNode]
+        return [mchoicerandommfNode]

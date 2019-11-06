@@ -6,21 +6,21 @@ import time
 from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
 setUpModule, tearDownModule = module_fixture_maker(__file__)
+
+
 class ActiveCodeTests(RunestoneTestCase):
     def test_hello(self):
-        '''
+        """
         1. Get the outer div id of the activecode component
         2. Find the run button using its class name
         3. Run the example
         4. Check the output from the ac_output element
         :return:
-        '''
+        """
         self.driver.get(self.host + "/index.html")
         wait = WebDriverWait(self.driver, 10)
         try:
-            wait.until(
-                EC.presence_of_element_located((By.ID, "test1"))
-            )
+            wait.until(EC.presence_of_element_located((By.ID, "test1")))
         except:
             text = self.driver.page_source
             print(text[:300])
@@ -30,17 +30,16 @@ class ActiveCodeTests(RunestoneTestCase):
         self.assertIsNotNone(rb)
         rb.click()
         output = t1.find_element_by_class_name("ac_output")
-        self.assertEqual(output.text.strip(),"Hello World")
-
+        self.assertEqual(output.text.strip(), "Hello World")
 
     def test_history(self):
-        '''
+        """
         1. Get the outer div id of the activecode component
         2. Find the run button using its class name
         3. Run the example
         4. Check the output from the ac_output element
         :return:
-        '''
+        """
         self.driver.get(self.host + "/index.html")
         t1 = self.driver.find_element_by_id("test1")
         self.assertIsNotNone(t1)
@@ -49,26 +48,29 @@ class ActiveCodeTests(RunestoneTestCase):
         rb.click()
         ta = t1.find_element_by_class_name("cm-s-default")
         self.assertIsNotNone(ta)
-        self.driver.execute_script("""edList['test1'].editor.setValue("print('GoodBye')")""")
-        WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, "run-button")))
+        self.driver.execute_script(
+            """edList['test1'].editor.setValue("print('GoodBye')")"""
+        )
+        WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable((By.CLASS_NAME, "run-button"))
+        )
         rb.click()
         output = t1.find_element_by_class_name("ac_output")
-        self.assertEqual(output.text.strip(),"GoodBye")
+        self.assertEqual(output.text.strip(), "GoodBye")
         move = ActionChains(self.driver)
         slider = t1.find_element_by_class_name("ui-slider")
-        width = slider.size['width']
+        width = slider.size["width"]
         slider = t1.find_element_by_class_name("ui-slider-handle")
-        move.click_and_hold(slider).move_by_offset(-width,0).release().perform()
+        move.click_and_hold(slider).move_by_offset(-width, 0).release().perform()
         rb.click()
         output = t1.find_element_by_class_name("ac_output")
         self.assertEqual(output.text.strip(), "Hello World")
 
-
     def test_livecode_datafile(self):
-        '''
+        """
         Runs test2 example
         Code is dependent on supplementary file
-        '''
+        """
         self.driver.get(self.host + "/index.html")
         t2 = self.driver.find_element_by_id("test2")
         self.assertIsNotNone(t2)
@@ -82,7 +84,7 @@ class ActiveCodeTests(RunestoneTestCase):
         print(output.text)
         while output.text.strip() != "Width: 25.0" and count < 20:
             count += 1
-            time.sleep(.5)
+            time.sleep(0.5)
             print("Ouput so far:", output.text)
         try:
             self.assertLess(count, 20)
@@ -120,11 +122,11 @@ class ActiveCodeTests(RunestoneTestCase):
         rb.click()
         res = self.driver.find_element_by_id("sql1_sql_out")
         self.assertIsNotNone(res)
-        trlist = res.find_elements_by_tag_name('tr')
+        trlist = res.find_elements_by_tag_name("tr")
         self.assertEqual(6, len(trlist))
         self.assertTrue("hello" in trlist[1].text)
         out = self.driver.find_element_by_id("sql1_stdout")
-        self.assertTrue('You passed 2 out of 3 tests' in out.text)
+        self.assertTrue("You passed 2 out of 3 tests" in out.text)
 
         t2 = self.driver.find_element_by_id("sql2")
         self.assertIsNotNone(t2)
@@ -133,8 +135,7 @@ class ActiveCodeTests(RunestoneTestCase):
         self.assertIsNotNone(rb)
         rb.click()
         out = self.driver.find_element_by_id("sql2_stdout")
-        self.assertEqual('',out.text.strip())
-
+        self.assertEqual("", out.text.strip())
 
     def test_readfiles(self):
         self.driver.get(self.host + "/skulptfeatures.html")
@@ -145,8 +146,7 @@ class ActiveCodeTests(RunestoneTestCase):
         rb.click()
         out = t2.find_element_by_id("ac9_13_1_stdout")
         self.assertIsNotNone(out)
-        self.assertTrue('Lindenau' in out.text)
-
+        self.assertTrue("Lindenau" in out.text)
 
     def test_altair(self):
         self.driver.get(self.host + "/skulptfeatures.html")
