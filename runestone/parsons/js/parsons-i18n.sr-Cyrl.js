@@ -14,12 +14,12 @@ $.i18n().load({
         "msg_parson_arrow_navigate":"Користи стрелице за кретње а Спејс да означииш блок који помераш.",
         "msg_parson_help_info":"Одабери Помоћ ако желиш да олакшаш задатак",
         "msg_parson_not_solution":"Одстранили смо блок који није део решења.",
-        "msg_parson_provided_indent":"Обезбедили смо увлачење.",
+        "msg_parson_provided_indent":"Увукли смо блок.",
         "msg_parson_combined_blocks":"Спојили смо два блока.",
-        "msg_parson_remove_incorrect":"Уклонићемо нетачне блокове из одговора",
-        "msg_parson_will_combine":"Спојићемо два блока",
-        "msg_parson_atleast_three_attempts":"Мораш пробати бар 3 могућа решења пре него што погледаш помоћ",
-        "msg_parson_three_blocks_left" : "Остало је још 3 тачна блока.  пронађи им редослед", 
-        "msg_parson_will_provide_indent" : "Обезбедћемо увлачење"
+        "msg_parson_remove_incorrect":"Уклонићемо нетачне блокове из одговора.",
+        "msg_parson_will_combine":"Спојићемо два блока.",
+        "msg_parson_atleast_three_attempts":"Мораш пробати бар 3 могућа решења пре него што погледаш помоћ.",
+        "msg_parson_three_blocks_left" : "Остало је још 3 тачна блока.  Пронађи им редослед.", 
+        "msg_parson_will_provide_indent" : "Увућићемо блок."
     }
 });
