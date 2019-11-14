@@ -57,7 +57,7 @@ div.ExecutionVisualizer table#pyCodeOutput .lineNo {
 
 body {
     padding-top: 60px;
-    background-color: #eeeeee;
+    background-color: var(--color-bg2);
     counter-reset: rscomponent;
 }
 
@@ -72,11 +72,11 @@ h5 {
 
 /* table-of-contents related styles for color-contrast (AA compliant) */
 #table-of-contents a {
-    color: #0645ad;
+    color: var(--a-color);
 }
 
 #table-of-contents a:hover {
-    color: #0645ad;
+    color: var(--a-color);
     text-decoration: underline;
 }
 
@@ -100,11 +100,11 @@ h5 {
 }
 
 .toctree-wrapper a {
-    color: #0645ad;
+    color: var(--a-color);
 }
 
 .toctree-wrapper a:hover {
-    color: #0645ad;
+    color: var(--a-color);
     text-decoration: underline;
 }
 
@@ -114,18 +114,18 @@ h5 {
 }
 
 #index-and-search.section a {
-    color: #0645ad;
+    color: var(--a-color);
 }
 
 #index-and-search.section a:hover {
-    color: #0645ad;
+    color: var(--a-color);
     text-decoration: underline;
 }
 
 /* custom style for `a` tag for color-contrast (AA compliant) */
 
 a {
-    color: #0645ad;
+    color: var(--a-color);
 }
 
 /* navbar and menu related styles */
@@ -151,13 +151,14 @@ a {
 }
 
 div.container {
-    background-color: #ffffff;
+    background-color: var(--color-bg);
 }
 
 div.section {
     margin-left: auto;
     margin-right: auto;
 }
+
 .container{
 	padding-left:0;
 	padding-right:0;
@@ -199,7 +200,7 @@ div.section {
     background-color: #eeeeee;
 }
 .footer>.container p>a {
-    color: #0645ad;
+    color: var(--a-color);
 }
 
 .brand-logo {
@@ -882,3 +883,20 @@ textarea#lp-result {
     counter-increment: rscomponent;
 }
 
+body{
+	color: var(--font-color);
+}
+
+:root {
+    --color-bg2: #eeeeee;
+	--color-bg: #ffffff;
+	--a-color: #0645ad;
+	--font-color: #000;
+}
+
+[data-theme="dark"] {
+    --color-bg2: #3d3d3d;
+	--color-bg: #000000;
+	--a-color: green;
+	--font-color: white;
+}

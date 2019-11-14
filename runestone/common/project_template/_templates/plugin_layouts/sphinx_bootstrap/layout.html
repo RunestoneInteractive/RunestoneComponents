@@ -41,6 +41,20 @@
 {# Sidebar: Rework into our Boostrap nav section. #}
 {% macro navBar() %}
 
+<script>
+
+const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
+
+if (currentTheme) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+}
+
+function switchTheme() {
+    document.documentElement.setAttribute('data-theme', 'dark');
+	localStorage.setItem('theme', 'dark');
+}
+</script>
+
 <!-- Begin navbar -->
 <div id="navbar" class="navbar navbar-default navbar-fixed-top" role="navigation">
 
@@ -78,7 +92,22 @@
       <ul class="nav navbar-nav navbar-right" >
 
         <li class="divider-vertical"></li>
-
+         
+		<!-- themeing dropdown -->
+		<li class="dropdown">
+		  <a class="dropdown-toggle" href="#" data-toggle="dropdown">
+            <i class="glyphicon glyphicon-eye-open" style="opacity: 0.9"><span aria-label="Theme" class="visuallyhidden">Theme</span></i>
+          </a>
+		  <ul class="dropdown-menu">
+              <li>
+			  <div>
+					<button type="button" onclick="switchTheme()"><em>Dark Mode!</em></button>
+                </div>
+              </li>
+              </li>
+			  </ul>
+			  
+			  
         <!-- social media dropdown -->
         {% if minimal_outside_links != 'True' %}
         <li class="dropdown">
