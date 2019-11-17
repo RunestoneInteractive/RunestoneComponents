@@ -25,18 +25,18 @@ This shows the different CSS files from most compliance (left) to least
 compliance (right)
 """
 
+
 def setup(app):
-    app.add_config_value('accessibility_style', 'normal', 'html')
+    app.add_config_value("accessibility_style", "normal", "html")
 
     # Since the `init_values()` method of the `app.config` object (Config class)
     # is not invoked yet (will be invoked after the setup of all extensions),
     # we need to access the raw config dictionary here
-    acc_style = app.config._raw_config.get('accessibility_style', 'normal')
+    acc_style = app.config._raw_config.get("accessibility_style", "normal")
 
-    if acc_style == 'normal':
-        app.add_autoversioned_stylesheet('accessibility.css')
-    elif acc_style == 'light':
-        app.add_autoversioned_stylesheet('accessibilitylight.css')
-    elif acc_style == 'darkest':
-        app.add_autoversioned_stylesheet('accessibilitydarkest.css')
-  
+    if acc_style == "normal":
+        app.add_autoversioned_stylesheet("accessibility.css")
+    elif acc_style == "light":
+        app.add_autoversioned_stylesheet("accessibilitylight.css")
+    elif acc_style == "darkest":
+        app.add_autoversioned_stylesheet("accessibilitydarkest.css")

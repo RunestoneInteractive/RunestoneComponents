@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-__author__ = 'isaiahmayerchak'
+__author__ = "isaiahmayerchak"
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -22,14 +22,13 @@ from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneN
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 
 
-
 def setup(app):
-    app.add_directive('poll',Poll)
-    app.add_autoversioned_javascript('poll.js')
-    app.add_autoversioned_stylesheet('poll.css')
+    app.add_directive("poll", Poll)
+    app.add_autoversioned_javascript("poll.js")
+    app.add_autoversioned_stylesheet("poll.css")
     app.add_node(PollNode, html=(visit_poll_node, depart_poll_node))
 
-    app.add_config_value('poll_div_class', 'alert alert-warning', 'html')
+    app.add_config_value("poll_div_class", "alert alert-warning", "html")
 
 
 TEMPLATE_START = """
@@ -44,20 +43,22 @@ TEMPLATE_OPTION = """
 
 TEMPLATE_END = """</ul></div>"""
 
+
 class PollNode(nodes.General, nodes.Element, RunestoneNode):
-    def __init__(self,content, **kwargs):
+    def __init__(self, content, **kwargs):
         """
         Arguments:
         - `self`:
         - `content`:
         """
-        super(PollNode,self).__init__(**kwargs)
+        super(PollNode, self).__init__(**kwargs)
         self.poll_content = content
+
 
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
-def visit_poll_node(self,node):
+def visit_poll_node(self, node):
     res = TEMPLATE_START
     res = res % node.poll_content
 
@@ -65,7 +66,7 @@ def visit_poll_node(self,node):
         okeys = list(node.poll_content.keys())
         okeys.sort()
         for k in okeys:
-            if 'option_' in k:
+            if "option_" in k:
                 node.poll_content["optiontext"] = node.poll_content[k]
                 res += TEMPLATE_OPTION % node.poll_content
     else:
@@ -74,14 +75,15 @@ def visit_poll_node(self,node):
             res += TEMPLATE_OPTION % node.poll_content
     res += TEMPLATE_END
 
-    addHTMLToDB(node.poll_content['divid'], node.poll_content['basecourse'], res)
+    addHTMLToDB(node.poll_content["divid"], node.poll_content["basecourse"], res)
     self.body.append(res)
 
-def depart_poll_node(self,node):
-    ''' This is called at the start of processing a poll node.  If poll had recursive nodes
+
+def depart_poll_node(self, node):
+    """ This is called at the start of processing a poll node.  If poll had recursive nodes
         etc and did not want to do all of the processing in visit_poll_node any finishing touches could be
         added here.
-    '''
+    """
     pass
 
 
@@ -100,23 +102,24 @@ config values (conf.py):
 
 - poll_div_class - custom CSS class of the component's outermost div
     """
+
     required_arguments = 1
     optional_arguments = 0
     has_content = True
     option_spec = {
-        'scale':directives.positive_int,
-        'allowcomment':directives.flag,
-        'option_1':directives.unchanged,
-        'option_2':directives.unchanged,
-        'option_3':directives.unchanged,
-        'option_4':directives.unchanged,
-        'option_5':directives.unchanged,
-        'option_6':directives.unchanged,
-        'option_7':directives.unchanged,
-        'option_8':directives.unchanged,
-        'option_9':directives.unchanged,
-        'option_10':directives.unchanged,
-        'results': directives.unchanged
+        "scale": directives.positive_int,
+        "allowcomment": directives.flag,
+        "option_1": directives.unchanged,
+        "option_2": directives.unchanged,
+        "option_3": directives.unchanged,
+        "option_4": directives.unchanged,
+        "option_5": directives.unchanged,
+        "option_6": directives.unchanged,
+        "option_7": directives.unchanged,
+        "option_8": directives.unchanged,
+        "option_9": directives.unchanged,
+        "option_10": directives.unchanged,
+        "results": directives.unchanged,
     }
 
     def run(self):
@@ -138,8 +141,8 @@ config values (conf.py):
         if self.content:
             source = "\n".join(self.content)
         else:
-            source = '\n'
-        self.options['question'] = source
+            source = "\n"
+        self.options["question"] = source
 
         if not "scale" in self.options:
             self.options["scale"] = ""
@@ -149,11 +152,13 @@ config values (conf.py):
             self.options["comment"] = ""
 
         if not "results" in self.options:
-            self.options['results'] = "instructor"
+            self.options["results"] = "instructor"
 
         env = self.state.document.settings.env
-        self.options['divclass'] = env.config.poll_div_class
+        self.options["divclass"] = env.config.poll_div_class
 
         poll_node = PollNode(self.options, rawsource=self.block_text)
-        poll_node.source, poll_node.line = self.state_machine.get_source_and_line(self.lineno)
+        poll_node.source, poll_node.line = self.state_machine.get_source_and_line(
+            self.lineno
+        )
         return [poll_node]

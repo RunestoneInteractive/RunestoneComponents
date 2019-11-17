@@ -298,7 +298,7 @@ Timed.prototype.renderSubmitButton = function () {
     });
     this.finishButton.textContent = "Finish Exam";
     this.finishButton.addEventListener("click", function () {
-       if (window.confirm("Clicking OK means you are ready to submit your answers and are finished with this assessment.")) {
+       if (window.confirm("Submission Checklist:\n1. Have you answered all the questions?\n2. Have you clicked Run to finalize/save any code?\n3. Are you Completely Done?\nWhen you click on OK you are done and cannot go back.")) {
           this.finishAssessment();
        }
     }.bind(this), false);
@@ -715,7 +715,7 @@ Timed.prototype.shouldUseServer = function (data) {
                 return false;   // In this case, because local storage has more info, we want to use that if it's consistent
             }
         }
-        var storageDate = new Date(JSON.parse(storageObj[1]).timestamp);
+        var storageDate = new Date(JSON.parse(storageObj).timestamp);
     } catch (err) {
         // error while parsing; likely due to bad value stored in storage
         console.log(err.message);
@@ -768,6 +768,7 @@ Timed.prototype.restoreAnswers = function (data) {
         this.taken = 0;
         return;
     }
+    // TODO:  This needs to be redone -- relying on the length of the array is very fragile
     if (tmpArr.length == 4) {
         // Accidental Reload OR Database Entry
         this.score = tmpArr[0];
@@ -808,7 +809,20 @@ Timed.prototype.restoreAnswers = function (data) {
 };
 
 Timed.prototype.setLocalStorage = function (parsedData) {
-    var timeStamp = new Date();
+    var timeStamp;
+    if (parsedData.timestamp) {
+        timeStamp = parsedData.timestamp;
+    } else {
+        timeStamp = new Date();
+    }
+    if (! (parsedData instanceof Array)) {
+        let data = parsedData;
+        if (data.reset === "None") {
+            data.reset = false;
+        }
+        // do not include reset here as it messes up the checks for length.
+        parsedData = [parseInt(data.correct), parseInt(data.incorrect), parseInt(data.skipped), parseInt(data.timeTaken)];
+    }
     var storageObj = {"answer": parsedData, "timestamp": timeStamp};
     localStorage.setItem(this.localStorageKey(), JSON.stringify(storageObj));
 };

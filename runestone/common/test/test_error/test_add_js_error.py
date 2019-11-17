@@ -8,4 +8,7 @@ mf, setUpModule, tearDownModule = module_fixture_maker(__file__, True, False)
 
 class AddJsTestsError(TestCase):
     def test_1(self):
-        self.assertIn('Extension error:\nUnable to find this_file_does_not_exist.js in html_static_path.', mf.build_stderr_data)
+        self.assertIn(
+            "Extension error:\nUnable to find this_file_does_not_exist.js in html_static_path.",
+            mf.build_stderr_data,
+        )

@@ -125,7 +125,12 @@ class SpreadSheet(RunestoneIdDirective):
             self.options["coltitles"] = ""
         else:
             self.options["coltitles"] = "data-coltitles=[{}]".format(
-                ",".join([urllib.parse.quote(x.strip(),safe="'\"") for x in self.options["coltitles"].split(",")])
+                ",".join(
+                    [
+                        urllib.parse.quote(x.strip(), safe="'\"")
+                        for x in self.options["coltitles"].split(",")
+                    ]
+                )
             )
 
         if "mindimensions" not in self.options:

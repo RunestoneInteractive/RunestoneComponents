@@ -13,15 +13,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-__author__ = 'bmiller'
+__author__ = "bmiller"
 
 from docutils import nodes
 from docutils.parsers.rst import directives
 from runestone.common.runestonedirective import RunestoneDirective
 
+
 def setup(app):
-    app.add_directive('shortname',Meta)
-    app.add_directive('description',Meta)
+    app.add_directive("shortname", Meta)
+    app.add_directive("description", Meta)
 
 
 class Meta(RunestoneDirective):
@@ -34,10 +35,11 @@ class Meta(RunestoneDirective):
         :param self:
         :return:
         """
-        raw_node = nodes.raw(self.block_text,'', format='html')
-        raw_node.source, raw_node.line = self.state_machine.get_source_and_line(self.lineno)
+        raw_node = nodes.raw(self.block_text, "", format="html")
+        raw_node.source, raw_node.line = self.state_machine.get_source_and_line(
+            self.lineno
+        )
         return [raw_node]
-
 
 
 source = """\
@@ -49,15 +51,16 @@ This is some text.
 This is some more text.
 """
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from docutils.core import publish_parts
 
-    directives.register_directive('shortname',Meta)
-    directives.register_directive('description',Meta)
+    directives.register_directive("shortname", Meta)
+    directives.register_directive("description", Meta)
 
-    doc_parts = publish_parts(source,
-            settings_overrides={'output_encoding': 'utf8',
-            'initial_header_level': 2},
-            writer_name="html")
+    doc_parts = publish_parts(
+        source,
+        settings_overrides={"output_encoding": "utf8", "initial_header_level": 2},
+        writer_name="html",
+    )
 
-    print(doc_parts['html_body'])
+    print(doc_parts["html_body"])
