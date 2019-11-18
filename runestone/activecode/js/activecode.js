@@ -2515,6 +2515,7 @@ SQLActiveCode.prototype.runProg = function()  {
     } catch(error) {
         result_mess = error.toString();
         $(this.output).text(error);
+        $(this.output).css("visibility","visible");
         $(this.outDiv).show();
     }
     this.logRunEvent({
