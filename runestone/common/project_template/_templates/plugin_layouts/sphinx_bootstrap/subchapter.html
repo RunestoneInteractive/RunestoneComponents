@@ -1,25 +1,40 @@
 {%- if prev %}
 <ul>
-  <li id="relations-prev" style="opacity:0.4" onmouseover="mouseOverPrev()" onmouseout="mouseOutPrev()"class="navLink" title='Previous Section - {{ prev.title|extractText|extractTextII }}' data-toggle="tooltip">
+  <li id="relations-prev" class="navLink" title='Previous Section - {{ prev.title|extractText|extractTextII }}' data-toggle="tooltip">
     <a href="{{ prev.link|e }}" aria-label="{{ prev.title|extractText|extractTextII }}">
-        <div style="background-color: white; border-style:solid; border-color:lightgrey; border-width:2px; width:100px; height:50px">
+        <div style="background-color: white; border-style:solid; border-color:lightgrey; border-width:2px; width:100px; height:50px;">
             <i class='prevNav glyphicon glyphicon-chevron-left'  style="top:50%; transform:translateY(-50%)translateX(-50%); left: 50%; color:black;"></i>
         </div>
+<div style="width: 100px; padding-top:10px;">
+	<p style="color:black;">
+		Previous Section - {{ prev.title|extractText|extractTextII }}
+  </p>
+</div>
     </a>
-  </li>
+ </li>
+<li id="relations-prev" class="navLink" data-toggle="tooltip" style="margin:-17px; bottom=100px;">
+</li>
 </ul>
   <a class="navLinkBg" id="navLinkBgLeft"  href="{{ prev.link|e }}" aria-label="{{ prev.title|extractText|extractTextII }}"></a>
   {% endif %}
 
 {%- if next %}
 <ul>
-  <li id="relations-next" style="opacity:0.4" onmouseover="mouseOverNext()" onmouseout="mouseOutNext()" class="navLink" title='Next Section - {{ next.title|extractText|extractTextII }}' data-toggle="tooltip" >
+  <li id="relations-next"  class="navLink" title='Next Section - {{ next.title|extractText|extractTextII }}' data-toggle="tooltip" >
     <a href="{{ next.link|e }}" aria-label="{{ next.title|extractText|extractTextII }}">
-      <div style="background-color: white; border-style:solid; border-color:lightgrey; border-width:2px; width:100px; height:50px">
+      <div style="background-color: white; border-style:solid; border-color:lightgrey; border-width:2px; width:100px; height:50px;">
           <i id="relationsNextIcon" class='nextNav glyphicon glyphicon-chevron-right' style="top:50%; transform:translateY(-50%)translateX(-50%); left: 50%; color:black; "></i>
+
       </div>
+<div style="width: 100px; padding-top:10px;">
+	<p style="color:black;">
+		Next Section - {{ next.title|extractText|extractTextII }}
+  </p>
+</div>
     </a>
   </li>
+<li id="relations-next" class="navLink" data-toggle="tooltip" style="margin:-17px; bottom=100px;">
+</li>
 </ul>
   <a class="navLinkBg navLink" id="navLinkBgRight" href="{{ next.link|e }}" aria-label="{{ next.title|extractText|extractTextII }}">Next Section - {{ next.title|extractText|extractTextII }}</a>
 {%- endif %}
@@ -46,4 +61,26 @@
 	function mouseOutNext() {
 		document.getElementById("relations-next").style.opacity=0.4;
 	}
+	
+
 </script>
+<script>
+function makeTransparent() {
+	if (window.innerWidth<(0.75*screen.width)) {
+		document.getElementById("relations-prev").style.opacity=0.4;
+		document.getElementById("relations-next").style.opacity=0.4;
+	} else{
+		document.getElementById("relations-prev").style.opacity=1;
+		document.getElementById("relations-next").style.opacity=1;
+	}
+	centerButton();
+}
+
+function centerButton(){
+	var centerPosition = window.innerHeight/2;
+	document.getElementById("relations-prev").style.top = num.toString(centerPosition);
+	document.getElementById("relations-next").style.top = num.toString(centerPosition);
+}
+window.onresize = makeTransparent;
+</script>
+
