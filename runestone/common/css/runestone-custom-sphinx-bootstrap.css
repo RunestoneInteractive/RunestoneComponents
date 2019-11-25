@@ -1,3 +1,46 @@
+/* Variables holding theme colors */
+:root {
+	--background: #ffffff;
+	--outerBackground: #eeeeee;
+	--links: #0645ad;
+	--bodyFont: #000000;
+	--tooltip: #ffffff;
+	--grayToWhite: #333333;
+	--navbar: #f8f8f8;
+	--navbarFont: #707070;
+	--navbarFontHover: #000000;
+	--alerts: #d9edf7;
+	--completionButton: #ffaa2b;
+	--completionButtonHover: #ff9f19;
+	--admonition: #fcf8e3;
+	--admonitionBorder: #fbeed5;
+	--codeButtons: #474949;
+	--codeButtonsBorder: #474949;
+	--dangerAlerts: #f2dede;
+	--successAlerts: #dff0d8;
+}
+
+[data-theme="dark"] {
+	--background: #000000;
+	--outerBackground: #3d3d3d;
+	--links: #1165f0;
+	--bodyFont: white;
+	--tooltip: #000000;
+	--grayToWhite: #ffffff;
+	--navbar: #3d3d3d;
+	--navbarFont: #ffffff;
+	--navbarFontHover: #d6d6d6;
+	--alerts: #650087;
+	--completionButton: #650087;
+	--completionButtonHover: #560073;
+	--admonition: #3d3d3d;
+	--admonitionBorder: #262626;
+	--codeButtons: #2c0aa6;
+	--codeButtonsBorder: #ffffff;
+	--dangerAlerts: #8a0000;
+	--successAlerts: #217300;
+}
+
 /* custom modification of basic.css for color-contrast (AA compliant) */
 td.linenos pre {
     color: #6b6b6b;
@@ -48,6 +91,11 @@ span.highlighted {
     color: #6b6b6b;
 }
 
+.alert-warning{
+	background-color: var(--admonition);
+	border-color: var(--admonitionBorder);
+}
+
 /* Python code output custom modification for color-contrast (AA compliant) */
 div.ExecutionVisualizer table#pyCodeOutput .lineNo {
     color: #6b6b6b;
@@ -57,7 +105,7 @@ div.ExecutionVisualizer table#pyCodeOutput .lineNo {
 
 body {
     padding-top: 60px;
-    background-color: var(--color-bg2);
+    background-color: var(--outerBackground);
     counter-reset: rscomponent;
 }
 
@@ -72,11 +120,11 @@ h5 {
 
 /* table-of-contents related styles for color-contrast (AA compliant) */
 #table-of-contents a {
-    color: var(--a-color);
+    color: var(--links);
 }
 
 #table-of-contents a:hover {
-    color: var(--a-color);
+    color: var(--links);
     text-decoration: underline;
 }
 
@@ -85,13 +133,22 @@ h5 {
 }
 
 /* navbar-brand color contrast (AA compliant) */
-.navbar-default .navbar-nav>li>a{
-    color: #6B6B6B;
+.navbar-default{
+	background-color: var(--navbar);
+}
 
+.navbar-default .navbar-nav>li{
+	 color: var(--navbarFont);
+}
+.navbar-default .navbar-nav>li>a{
+    color: var(--navbarFont);
+}
+.navbar-default .navbar-nav>li>a:hover{
+	color: var(--navbarFontHover);
 }
 
 .navbar-default .navbar-brand{
-    color: #6B6B6B;
+    color: var(--navbarFont);
 }
 
 /* acknowledgement related styles for color-contrast (AA compliant) */
@@ -100,11 +157,11 @@ h5 {
 }
 
 .toctree-wrapper a {
-    color: var(--a-color);
+    color: var(--links);
 }
 
 .toctree-wrapper a:hover {
-    color: var(--a-color);
+    color: var(--links);
     text-decoration: underline;
 }
 
@@ -114,18 +171,18 @@ h5 {
 }
 
 #index-and-search.section a {
-    color: var(--a-color);
+    color: var(--links);
 }
 
 #index-and-search.section a:hover {
-    color: var(--a-color);
+    color: var(--links);
     text-decoration: underline;
 }
 
 /* custom style for `a` tag for color-contrast (AA compliant) */
 
 a {
-    color: var(--a-color);
+    color: var(--links);
 }
 
 /* navbar and menu related styles */
@@ -151,7 +208,7 @@ a {
 }
 
 div.container {
-    background-color: var(--color-bg);
+    background-color: var(--background);
 }
 
 div.section {
@@ -193,14 +250,14 @@ div.section {
 }
 
 .navbar>.container  {
-    background-color: #f8f8f8;
+    background-color: var(--navbar);
 }
 
 .footer>.container {
-    background-color: #eeeeee;
+    background-color: var(--outerBackground);
 }
 .footer>.container p>a {
-    color: var(--a-color);
+    color: var(--links);
 }
 
 .brand-logo {
@@ -244,8 +301,12 @@ div.section {
     clear: both;
     font-weight: bold;
     line-height: 20px;
-    color: #333;
+    color: var(--grayToWhite);
     white-space: nowrap;
+}
+
+.dropdown-menu > li > a {
+	color: var(--grayToWhite);
 }
 
 .loggedinuser {
@@ -256,7 +317,7 @@ div.section {
 
 .CodeMirror {
     margin: 0 0 1em 0;
-    background-color: #fff;
+    background-color: var(--background);
 	clear:both;
 }
 
@@ -303,15 +364,15 @@ input[type="button"].btn.btn-sm {
 .btn-default[disabled],
 .btn-default.disabled:hover,
 .btn-default[disabled]:hover {
-    color: #fff;
-    background-color: #474949;
-    border-color: #474949;
+    color: #ffffff;
+    background-color: var(--codeButtons);
+    border-color: var(codeButtonsBorder);
 }
 
 .btn-default:hover, .btn-default:focus, .btn-default:active, .btn-default.active {
     background-color: #3a3c3c;
     border-color: #2e2f2f;
-    color: #fff;
+    color: #ffffff;
 }
 
 input[type="radio"],
@@ -337,17 +398,23 @@ h2 {
 }
 /* default bookstrap alert color is hard to read (low contrast). */
 .alert {
-    color: #333;
+    color: var(--grayToWhite);
     padding: 10px;
 }
 
+.alert-info{
+	background-color: var(--alerts);
+}
+.alert-danger{
+	background-color: var(--dangerAlerts);
+}
 /* override the color styles applied by Skulpt to the unittest results divs */
 .unittest-results.alert-danger {
-    background-color: #f2dede !important;
+    background-color: var(--dangerAlerts); !important;
 }
 
 .unittest-results.alert-success {
-    background-color: #dff0d8 !important;
+    background-color: var(--successAlerts) !important;
 }
 
 .alert label {
@@ -361,7 +428,7 @@ h2 {
     margin-bottom: 20px !important;
     margin-top: 20px !important;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
-    background-color: #fcf8e3;
+    background-color: var(--admonition);
     border: 1px solid #fbeed5;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
@@ -393,7 +460,7 @@ div.flash {
     margin: 0 0 10px 10px;
     vertical-align: middle;
     cursor: pointer;
-    color: #fff;
+    color: #ffffff;
     background-color: #000;
     border: 2px solid #fff;
     border-radius: 8px;
@@ -477,6 +544,14 @@ div.flash {
 .compare-me-progress .progress-bar,
 .unittest-results-progress .progress-bar {
     color: #333;
+}
+
+.modal-body{
+	background-color: var(--background);
+}
+
+.modal-header{
+	background-color: var(--background);
 }
 
 .unittest-results-progress {
@@ -597,17 +672,17 @@ div.flash {
 	margin-bottom: 15px;
 	padding-left: 70px;
 	padding-right: 70px;
-	color: #fff;
+	color: #ffffff;
 	font-weight: bold;
 }
 .buttonAskCompletion{
-	background-color: #ffaa2b;
-	border-color:#ff9f19;
+	background-color: var(--completionButton);
+	border-color: var(--completionButtonHover);
 	font-weight: bold;
 }
 .buttonAskCompletion:hover{
-	background-color: #ff9f19;
-	border-color:#ff9f19;
+	background-color: var(--completionButtonHover);
+	border-color: var(--completionButtonHover);
 }
 
 .buttonConfirmCompletion{
@@ -622,7 +697,7 @@ div.flash {
 
 .navLinkBg{
 	height: 40px;
-	background-color: #fff;
+	background-color: #ffffff;
 	z-index: 1;
 	position: fixed;
 	bottom: 55px;
@@ -651,7 +726,7 @@ div.flash {
 .activehtml  {
     width: 100%;
     height: 400px;
-    background-color: #fff;
+    background-color: #ffffff;
 }
 
 .container  .section>div.sidebar {
@@ -693,7 +768,7 @@ div.ExecutionVisualizer table.visualizer {
     width: auto;
     margin-left: auto;
     margin-right: auto;
-    background-color: #fff;
+    background-color: #ffffff;
 }
 
 
@@ -715,7 +790,7 @@ ul#pageNums, ul#pageNums li {
 .pagination > .active > a,
 .pagination > .active > span {
 background-color: #428bca !important;
-color: #fff !important;
+color: #ffffff !important;
 }
 
 .col-md-6-override {
@@ -782,7 +857,7 @@ border-color: #000000;
 .sltooltip-inner {
     max-width: 200px;
     padding: 3px 8px;
-    color: #ffffff;
+    color: var(--tooltip);
     text-align: center;
     text-decoration: none;
     background-color: #000000;
@@ -884,19 +959,65 @@ textarea#lp-result {
 }
 
 body{
-	color: var(--font-color);
+	color: var(--bodyFont);
 }
 
-:root {
-    --color-bg2: #eeeeee;
-	--color-bg: #ffffff;
-	--a-color: #0645ad;
-	--font-color: #000;
+/*Theme toggle*/
+.theme-switch-wrapper {
+  display: flex;
+  align-items: center;
+
+  em {
+    margin-left: 10px;
+    font-size: 1rem;
+  }
+}
+.theme-switch {
+  display: inline-block;
+  height: 34px;
+  position: relative;
+  width: 60px;
 }
 
-[data-theme="dark"] {
-    --color-bg2: #3d3d3d;
-	--color-bg: #000000;
-	--a-color: green;
-	--font-color: white;
+.theme-switch input {
+  display:none;
 }
+
+.slider {
+  background-color: #ccc;
+  bottom: 0;
+  cursor: pointer;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  transition: .4s;
+}
+
+.slider:before {
+  background-color: #fff;
+  bottom: 4px;
+  content: "";
+  height: 26px;
+  left: 4px;
+  position: absolute;
+  transition: .4s;
+  width: 26px;
+}
+
+input:checked + .slider {
+  background-color: #66bb6a;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+/*End theme toggle*/

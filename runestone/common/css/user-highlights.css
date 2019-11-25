@@ -1,3 +1,12 @@
+/* Variables holding theme colors */
+:root {
+	--menu: #FFFFFF;
+}
+
+[data-theme="dark"] {
+	--menu: #000000;
+}
+
 .my-highlighted-text{
 	background-color:#FFFF99;
 }
@@ -46,7 +55,7 @@ list-style-image: url('active.png');
 }
 .dropdown-menu{
 	background-clip: padding-box;
-    background-color: #FFFFFF;
+    background-color: var(--menu);
     border: 1px solid rgba(0, 0, 0, 0.2);
     border-radius: 5px 5px 5px 5px;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);

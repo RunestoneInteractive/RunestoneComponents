@@ -1,10 +1,27 @@
 /* BASICS */
 
+/* Variables for theme colors */
+:root {
+    --color-bg2: #eeeeee;
+	--color-bg: #ffffff;
+	--font-color: #000;
+	--gutter: #f7f7f7;
+	--linenums: #999;
+}
+
+[data-theme="dark"] {
+    --color-bg2: #3d3d3d;
+	--color-bg: #000000;
+	--font-color: white;
+	--gutter: #000;
+	--linenums: #f7f7f7;
+}
+
 .CodeMirror {
   /* Set height, width, borders, and global font properties here */
   font-family: monospace;
   height: 300px;
-  color: black;
+  color: var(--font-color);
   direction: ltr;
 }
 
@@ -26,7 +43,7 @@
 
 .CodeMirror-gutters {
   border-right: 1px solid #ddd;
-  background-color: #f7f7f7;
+  background-color: var(--gutter);
   white-space: nowrap;
 }
 .CodeMirror-linenumbers {}
@@ -44,7 +61,7 @@
 /* CURSOR */
 
 .CodeMirror-cursor {
-  border-left: 1px solid black;
+  border-left: 1px solid var(--font-color);
   border-right: none;
   width: 0;
 }
