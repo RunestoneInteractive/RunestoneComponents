@@ -12,7 +12,7 @@
 [data-theme="dark"] {
     --color-bg2: #3d3d3d;
 	--color-bg: #000000;
-	--font-color: white;
+	--font-color: #ffffff;
 	--gutter: #000;
 	--linenums: #f7f7f7;
 }

@@ -16,6 +16,7 @@
     '_static'+'/jquery.hotkey.js',
     '_static'+'/jquery-migrate-1.2.1.min.js',
     '_static'+'/presenter_mode.js?v='+runestone_version,
+    '_static'+'/theme.js',
   ]
 %}
 
@@ -86,8 +87,6 @@
           </a>
 		  <ul class="dropdown-menu">
              <li>
-			  
-					<!-- <button type="button" onclick="switchTheme()"><em>Dark Mode!</em></button>-->
 					<div class="theme-switch-wrapper">
 						<label class="theme-switch" for="checkbox">
 							<input type="checkbox" id="checkbox" onchange="switchTheme()" />
@@ -403,28 +402,6 @@
   {% endif %}
 {% endif %}
 
-<script>
-const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
-const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
+<script> getSwitch(); </script>
 
-if (currentTheme) {
-    document.documentElement.setAttribute('data-theme', currentTheme);
-
-    if (currentTheme === 'dark') {
-        toggleSwitch.checked = true;
-    }
-}
-
-function switchTheme() {
-	var checkBox = document.getElementById("checkbox");
-    if (checkBox.checked == true) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        localStorage.setItem('theme', 'dark'); //add this
-    }
-    else {
-        document.documentElement.setAttribute('data-theme', 'light');
-        localStorage.setItem('theme', 'light'); //add this
-    }    
-}
-</script>
 {% endblock %}
