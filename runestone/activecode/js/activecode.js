@@ -2456,18 +2456,22 @@ SQLActiveCode.prototype.init = function(opts) {
                 self.dburl = window.location.protocol + '//' + window.location.host + self.dburl;
             }
             $(self.runButton).attr('disabled','disabled')
+            let buttonText = $(self.runButton).text();
+            $(self.runButton).text($.i18n("msg_activecode_load_db"))
             if (! (self.dburl in allDburls)) {
                 allDburls[self.dburl] = {status: 'loading', xWaitFor: jQuery.Deferred() };
             } else {
                 if (allDburls[self.dburl].status == 'loading') {
                     allDburls[self.dburl].xWaitFor.done(function() {
                         self.db = new SQL.Database(allDburls[self.dburl].db);
-                        $(self.runButton).removeAttr('disabled')
+                        $(self.runButton).removeAttr('disabled');
+                        $(self.runButton).text(buttonText);
                     });
                     return;
                 }
                 self.db = new SQL.Database(allDburls[self.dburl].db);
-                $(self.runButton).removeAttr('disabled')
+                $(self.runButton).removeAttr('disabled');
+                $(self.runButton).text(buttonText);
                 return;
             }
             var xhr = new XMLHttpRequest();
@@ -2479,6 +2483,7 @@ SQLActiveCode.prototype.init = function(opts) {
             xhr.onload = e => {
                 var uInt8Array = new Uint8Array(xhr.response);
                 self.db = new SQL.Database(uInt8Array);
+                $(self.runButton).text(buttonText);
                 $(self.runButton).removeAttr('disabled')
                 allDburls[self.dburl].db = uInt8Array;
                 allDburls[self.dburl].status = 'ready';
@@ -2547,15 +2552,11 @@ SQLActiveCode.prototype.runProg = function()  {
     if (res[0].values.length > 100) {
         $(this.output).text("Result set is longer than 100 rows limiting output to first 100")
     }
-    let table = createTable(res[0]);
     respDiv = document.createElement('div')
     respDiv.id = divid;
-    $(respDiv).addClass('table-responsive-md')
-    $(respDiv).css('max-height', '500px')
-    $(respDiv).css('overflow', 'scroll')
     this.outDiv.appendChild(respDiv)
-    respDiv.appendChild(table)
     $(this.outDiv).show()
+    createTable(res[0], respDiv);
 
     // Now handle autograding
     if (this.suffix) {
@@ -2626,36 +2627,22 @@ SQLActiveCode.prototype.testOneAssert = function(row, col, oper, expected, resul
 }
 
 
-function createTable(tableData) {
-    var table = document.createElement('table');
-    var head = document.createElement('thead');
-    var tableBody = document.createElement('tbody');
-    var theads = document.createElement('tr')
+function createTable(tableData, container) {
 
-    tableData.columns.forEach(function(colData) {
-        let th = document.createElement('th');
-        th.appendChild(document.createTextNode(colData));
-        theads.appendChild(th);
-    });
-    table.appendChild(head);
-    head.appendChild(theads);
-    tableData.values.slice(0,100).forEach(function(rowData) {
-      var row = document.createElement('tr');
-
-      rowData.forEach(function(cellData) {
-        var cell = document.createElement('td');
-        cell.appendChild(document.createTextNode(cellData));
-        row.appendChild(cell);
+    var hot = new Handsontable(container, {
+        data: tableData.values,
+        rowHeaders: false,
+        colHeaders: tableData.columns,
+        height: 350,
+        width: '100%',
+        maxRows: 100,
+        filters: false,
+        dropdownMenu: false,
+        licenseKey: 'non-commercial-and-evaluation',
       });
 
-      tableBody.appendChild(row);
-    });
-
-    table.appendChild(tableBody);
-    $(table).css('background', 'white');
-    $(table).addClass('table-striped table-light thead-dark')
-    return table;
-  }
+    return hot
+}
 
 
 //
