@@ -120,7 +120,6 @@ FITB.prototype.renderFITBFeedbackDiv = function () {
     this.feedBackDiv.id = this.divid + "_feedback";
     this.containerDiv.appendChild(document.createElement("br"));
     this.containerDiv.appendChild(this.feedBackDiv);
-    MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
 };
 
 /*===================================
@@ -326,6 +325,9 @@ FITB.prototype.renderFITBFeedback = function () {
         feedback_html = feedback_html.slice('<ul><li>'.length, -('</li></ul>'.length))
     }
     this.feedBackDiv.innerHTML = feedback_html;
+    if (typeof MathJax !== 'undefined') {
+        MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+    }
 };
 
 /*==================================
