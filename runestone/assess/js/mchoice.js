@@ -435,6 +435,7 @@ MultipleChoice.prototype.renderMCMAFeedBack = function () {
             numNeeded + ' needed.<ol type="A">' + feedbackText + "</ul>");
         $(this.feedBackDiv).attr("class", "alert alert-danger");
     }
+    MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
 };
 
 MultipleChoice.prototype.processMCMFSubmission = function (logFlag) {
@@ -479,6 +480,7 @@ MultipleChoice.prototype.renderMCMFFeedback = function (correct, feedbackText) {
         $(this.feedBackDiv).html("✖️ " + feedbackText);
         $(this.feedBackDiv).attr("class", "alert alert-danger");
     }
+    MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
 };
 
 MultipleChoice.prototype.enableMCComparison = function () {

@@ -120,6 +120,7 @@ FITB.prototype.renderFITBFeedbackDiv = function () {
     this.feedBackDiv.id = this.divid + "_feedback";
     this.containerDiv.appendChild(document.createElement("br"));
     this.containerDiv.appendChild(this.feedBackDiv);
+    MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
 };
 
 /*===================================
