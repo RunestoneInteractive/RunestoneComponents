@@ -143,7 +143,6 @@ class ParsonsTests(RunestoneTestCase):
         checkme.click()
         self.assertTrue(self.wait_and_close_alert())
         helpBtn.click()
-        print("Help 1")
         self.assertTrue(self.wait_and_close_alert())
         self.wait_for_animation("#parsons-1-block-4")
         b4 = source.find_element_by_id("parsons-1-block-4")

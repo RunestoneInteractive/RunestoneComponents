@@ -17,7 +17,7 @@ __author__ = "bmiller"
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from runestone.common.runestonedirective import RunestoneDirective, RunestoneIdDirective
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneIdDirective, add_i18n_js
 from .assessbase import Assessment
 from .multiplechoice import *
 from .timedassessment import *
@@ -37,6 +37,8 @@ def setup(app):
     app.add_autoversioned_javascript("mchoice.js")
     app.add_autoversioned_javascript("timedmc.js")
     app.add_autoversioned_javascript("timed.js")
+
+    add_i18n_js(app, {"en","sr-Cyrl"}, "mchoice-i18n")
 
     app.add_node(TimedNode, html=(visit_timed_node, depart_timed_node))
     app.add_node(MChoiceNode, html=(visit_mc_node, depart_mc_node))

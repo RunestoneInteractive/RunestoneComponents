@@ -89,7 +89,7 @@ LineBasedGrader.prototype.grade = function() {
 		answerArea.addClass("incorrect");
 		feedbackArea.fadeIn(500);
 		feedbackArea.attr("class", "alert alert-danger");
-		feedbackArea.html("Your program is too short.  Add more blocks.");
+		feedbackArea.html($.i18n("msg_parson_too_short"));
 	} else {
 		// Determine whether the code is in the correct order
 		var isCorrectOrder = false;
@@ -120,11 +120,11 @@ LineBasedGrader.prototype.grade = function() {
 				feedbackArea.attr("class", "alert alert-info");
 				if (problem.checkCount > 1)
 				{
-				   feedbackArea.html("Perfect!  It took you " + problem.checkCount + " tries to solve this.  Click Reset to try to solve it in one attempt.");
+				   feedbackArea.html($.i18n("msg_parson_correct", problem.checkCount));
 			    }
 			    else
 			    {
-			       feedbackArea.html("Perfect!  It took you only one try to solve this.  Great job!");
+			       feedbackArea.html($.i18n("msg_parson_correct_first_try"));
 			    }
 				correct = true;
 			} else {
@@ -148,9 +148,9 @@ LineBasedGrader.prototype.grade = function() {
 				feedbackArea.fadeIn(500);
 				feedbackArea.attr("class", "alert alert-danger");
 				if (incorrectBlocks.length == 1) {
-					feedbackArea.html("This block is not indented correctly. Either indent it more by dragging it right or reduce the indention by dragging it left.");
+					feedbackArea.html($.i18n("msg_parson_wrong_indent"));
 				} else {
-					feedbackArea.html("These blocks are not indented correctly. To indent a block more, drag it to the right. To reduce the indention, drag it to the left.");
+					feedbackArea.html($.i18n("msg_parson_wrong_indents"));
 				}
 			}
 		} else {
@@ -180,7 +180,7 @@ LineBasedGrader.prototype.grade = function() {
 			for (i = 0; i < notInSolution.length; i++) {
 				$(notInSolution[i].view).addClass("incorrectPosition");
 			}
-			feedbackArea.html("Highlighted blocks in your program are wrong or are in the wrong order. This can be fixed by moving, removing, or replacing highlighted blocks.");
+			feedbackArea.html($.i18n("msg_parson_wrong_order"));
 		}
 	}
 	return state;
@@ -1203,7 +1203,7 @@ Parsons.prototype.initializeView = function () {
 	this.keyboardTip = document.createElement("div");
 	$(this.keyboardTip).attr("role", "tooltip");
 	this.keyboardTip.id = this.counterId + "-tip";
-	this.keyboardTip.innerHTML = "Arrow keys to navigate. Space to select / deselect block to move.";
+	this.keyboardTip.innerHTML = $.i18n("msg_parson_arrow_navigate");
 	this.containerDiv.appendChild(this.keyboardTip);
 	$(this.keyboardTip).hide();
 
@@ -1218,7 +1218,7 @@ Parsons.prototype.initializeView = function () {
 	this.sourceLabel = document.createElement("div");
 	$(this.sourceLabel).attr("role", "tooltip");
 	this.sourceLabel.id = this.counterId + "-sourceTip";
-	this.sourceLabel.innerHTML = "Drag from here";
+	this.sourceLabel.innerHTML = $.i18n("msg_parson_drag_from_here");
 	this.sourceRegionDiv.appendChild(this.sourceLabel);
 	this.sortContainerDiv.appendChild(this.sourceRegionDiv);
 
@@ -1234,7 +1234,7 @@ Parsons.prototype.initializeView = function () {
 	this.answerLabel = document.createElement("div");
 	$(this.answerLabel).attr("role", "tooltip");
 	this.answerLabel.id = this.counterId + "-answerTip";
-	this.answerLabel.innerHTML = "Drop blocks here";
+	this.answerLabel.innerHTML = $.i18n("msg_parson_drag_to_here");
 	this.answerRegionDiv.appendChild(this.answerLabel);
 	this.sortContainerDiv.appendChild(this.answerRegionDiv);
 
@@ -1250,7 +1250,7 @@ Parsons.prototype.initializeView = function () {
 	var that = this;
 	this.checkButton = document.createElement("button");
 	$(this.checkButton).attr("class", "btn btn-success");
-	this.checkButton.textContent = "Check Me";
+	this.checkButton.textContent = $.i18n("msg_parson_check_me");
 	this.checkButton.id = this.counterId + "-check";
 	this.parsonsControlDiv.appendChild(this.checkButton);
 	this.checkButton.type = "button";
@@ -1260,7 +1260,7 @@ Parsons.prototype.initializeView = function () {
 	});
 	this.resetButton = document.createElement("button");
 	$(this.resetButton).attr("class", "btn btn-default");
-	this.resetButton.textContent = "Reset";
+	this.resetButton.textContent = $.i18n("msg_parson_reset");
 	this.resetButton.id = this.counterId + "-reset";
 	this.resetButton.type = "button";
 	this.parsonsControlDiv.appendChild(this.resetButton);
@@ -1274,7 +1274,7 @@ Parsons.prototype.initializeView = function () {
 	if (this.options.adaptive) {
 		this.helpButton = document.createElement("button");
 		$(this.helpButton).attr("class", "btn btn-primary");
-		this.helpButton.textContent = "Help Me";
+		this.helpButton.textContent = $.i18n("msg_parson_help");
 		this.helpButton.id = this.counterId + "-help";
 		this.helpButton.disabled = false; // bje
 		this.parsonsControlDiv.appendChild(this.helpButton);
@@ -2261,7 +2261,7 @@ Parsons.prototype.checkMe = function() {
         			//		.animate({ left : -5 }, 60)
         			//		.animate({ left : 5 }, 120)
         			//		.animate({ left : 0 }, 60);
-        			alert("Click on the Help Me button if you want to make the problem easier");
+        			alert($.i18n("msg_parson_help_info"));
         			//} // end for
     			} // end if
 			} // end if can help
@@ -2368,7 +2368,7 @@ Parsons.prototype.removeDistractor = function(block) {
 	var feedbackArea = $(this.messageDiv);
 	feedbackArea.fadeIn(500);
 	feedbackArea.attr("class", "alert alert-info");
-	feedbackArea.html("Disabled an unneeded code block (one that is not part of the solution).");
+	feedbackArea.html($.i18n("msg_parson_not_solution"));
 	// Stop ability to select
 	block.disable();
 	// If in answer area, move to source area
@@ -2453,7 +2453,7 @@ Parsons.prototype.removeIndentation = function() {
 	var feedbackArea = $(this.messageDiv);
 	feedbackArea.fadeIn(500);
 	feedbackArea.attr("class", "alert alert-info");
-	feedbackArea.html("Provided the indentation.");
+	feedbackArea.html($.i18n("msg_parson_provided_indent"));
 	// Move and resize blocks
 	var blockWidth = 200;
 	for (var i = 0; i < this.lines.length; i++) {
@@ -2554,7 +2554,7 @@ Parsons.prototype.combineBlocks = function() {
 	var feedbackArea = $(this.messageDiv);
 	feedbackArea.fadeIn(500);
 	feedbackArea.attr("class", "alert alert-info");
-	feedbackArea.html("Combined two code blocks into one.");
+	feedbackArea.html($.i18n("msg_parson_combined_blocks"));
 	// Use heuristics to figure out which block to combine
 	var solutionBlocks = this.solutionBlocks();
 	var answerBlocks = this.answerBlocks();
@@ -2703,17 +2703,17 @@ Parsons.prototype.combineBlocks = function() {
 Parsons.prototype.makeEasier = function() {
 	var distractorToRemove = this.distractorToRemove();
 	if (distractorToRemove !== undefined && !distractorToRemove.inSourceArea()) {
-	    alert("Will remove an incorrect code block from answer area");
+	    alert($.i18n("msg_parson_remove_incorrect"));
 		this.removeDistractor(distractorToRemove);
 		this.logMove("removedDistractor-" + distractorToRemove.hash());
 	} else if (this.usesIndentation()) {
-	    alert("Will provide indentation");
+	    alert($.i18n("msg_parson_will_provide_indent"));
 		this.removeIndentation();
 		this.logMove("removedIndentation");
 	} else {
 		var numberOfBlocks = this.numberOfBlocks(false);
 		if (numberOfBlocks > 3) {
-		    alert("Will combine two blocks");
+		    alert($.i18n("msg_parson_will_combine"));
 			this.combineBlocks();
 			this.logMove("combinedBlocks");
 		} /*else if(this.numberOfBlocks(true) > 3 && distractorToRemove !==  undefined) {
@@ -2721,7 +2721,7 @@ Parsons.prototype.makeEasier = function() {
 			this.removeDistractor(distractorToRemove);
 			this.logMove("removedDistractor-" + distractorToRemove.hash());
 		} */else {
-			alert("There are only 3 correct blocks left.  You should be able to put them in order");
+			alert($.i18n("msg_parson_three_blocks_left"));
 			this.canHelp = false;
 		}
 		//if (numberOfBlocks < 5) {
@@ -2744,7 +2744,7 @@ Parsons.prototype.helpMe = function() {
 	// if less than 3 attempts
 	if (this.numDistinct < 3)
 	{
-	   alert("You must make at least three distinct full attempts at a solution before you can get help");
+	   alert($.i18n("msg_parson_atleast_three_attempts"));
 	}
 	// otherwise give help
     else
