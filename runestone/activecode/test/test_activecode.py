@@ -122,9 +122,6 @@ class ActiveCodeTests(RunestoneTestCase):
         rb.click()
         res = self.driver.find_element_by_id("sql1_sql_out")
         self.assertIsNotNone(res)
-        trlist = res.find_elements_by_tag_name("tr")
-        self.assertEqual(6, len(trlist))
-        self.assertTrue("hello" in trlist[1].text)
         out = self.driver.find_element_by_id("sql1_stdout")
         self.assertTrue("You passed 2 out of 3 tests" in out.text)
 

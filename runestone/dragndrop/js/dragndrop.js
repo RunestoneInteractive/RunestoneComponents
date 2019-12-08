@@ -150,7 +150,7 @@ DragNDrop.prototype.addDragDivListeners = function () {
 DragNDrop.prototype.createButtons = function () {
     this.buttonDiv = document.createElement("div");
     this.submitButton = document.createElement("button");    // Check me button
-    this.submitButton.textContent = "Check Me";
+    this.submitButton.textContent = $.i18n("msg_dragndrop_check_me");
     $(this.submitButton).attr({
         "class": "btn btn-success drag-button",
         "name": "do answer",
@@ -162,7 +162,7 @@ DragNDrop.prototype.createButtons = function () {
     }.bind(this);
 
     this.resetButton = document.createElement("button");    // Check me button
-    this.resetButton.textContent = "Reset";
+    this.resetButton.textContent =  $.i18n("msg_dragndrop_reset");;
     $(this.resetButton).attr({
         "class": "btn btn-default drag-button drag-reset",
         "name": "do answer",
@@ -364,10 +364,12 @@ DragNDrop.prototype.renderFeedback = function () {
     }
     this.feedBackDiv.style.display = "block";
     if (this.correct) {
-        $(this.feedBackDiv).html("You are correct!");
+       var msgCorrect = $.i18n("msg_dragndrop_correct_answer");
+        $(this.feedBackDiv).html(msgCorrect);
         $(this.feedBackDiv).attr("class", "alert alert-info draggable-feedback");
     } else {
-        $(this.feedBackDiv).html("Incorrect. " + "You got " + this.correctNum + " correct and " + this.incorrectNum + " incorrect out of " + this.dragNum + ". You left " + this.unansweredNum + " blank. " + this.feedback);
+        var msgIncorrect = $.i18n($.i18n("msg_dragndrop_incorrect_answer"), this.correctNum, this.incorrectNum, this.dragNum, this.unansweredNum);
+        $(this.feedBackDiv).html(msgIncorrect + " " + this.feedback);
         $(this.feedBackDiv).attr("class", "alert alert-danger draggable-feedback");
     }
 };

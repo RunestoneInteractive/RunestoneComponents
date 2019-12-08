@@ -63,6 +63,9 @@ def setup(app):
     app.add_autoversioned_javascript("clike.js")
     app.add_autoversioned_javascript("timed_activecode.js")
     app.add_autoversioned_javascript("sql-wasm.js")  # todo: only load if we need it
+    app.add_javascript("https://cdn.jsdelivr.net/npm/handsontable@7.2.2/dist/handsontable.full.js")
+    app.add_stylesheet("https://cdn.jsdelivr.net/npm/handsontable@7.2.2/dist/handsontable.full.min.css")
+
 
     app.add_node(ActivcodeNode, html=(visit_ac_node, depart_ac_node))
 
