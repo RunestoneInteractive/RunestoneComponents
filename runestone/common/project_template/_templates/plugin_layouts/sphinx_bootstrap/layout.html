@@ -79,26 +79,7 @@
       <ul class="nav navbar-nav navbar-right" >
 
         <li class="divider-vertical"></li>
-         
-		<!-- themeing dropdown -->
-		<li class="dropdown">
-		  <a class="dropdown-toggle" href="#" data-toggle="dropdown">
-            <i class="glyphicon glyphicon-eye-open" style="opacity: 0.9"><span aria-label="Theme" class="visuallyhidden">Theme</span></i>
-          </a>
-		  <ul class="dropdown-menu">
-             <li>
-					<div class="theme-switch-wrapper">
-						<label class="theme-switch" for="checkbox">
-							<input type="checkbox" id="checkbox" onchange="switchTheme()" />
-								<div class="slider round"></div>
-						</label>
-						<em>Enable Dark Mode!</em>
-					</div>
-             </li>
-			 </ul>
-         </li>
-			  
-			  
+	  
 			  
         <!-- social media dropdown -->
         {% if minimal_outside_links != 'True' %}
@@ -196,7 +177,12 @@
             <li><a href="/{{appname}}/default/user/register" id="registerlink">Register</a></li>
             {% endif %}
             <li class='loginout'><a href='#'>Login</a></li> <!-- correct link populated by addNavbarLoginLink() -->
-          </ul>
+			<!-- dark mode toggle -->
+             <li><label class="theme-switch" for="checkbox">
+					  <input type="checkbox" id="checkbox" onchange="switchTheme()" />
+							<div class="slider round"></div>
+					</label>Dark Mode</li>
+			 </ul>
         </li>
         <!-- end user account dropdown -->
         {% endif %}
