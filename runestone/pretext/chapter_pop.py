@@ -10,7 +10,7 @@ if os.environ["WEB2PY_CONFIG"] == "development":
 elif os.environ["WEB2PY_CONFIG"] == "production":
     DBURL = os.environ["DBURL"]
 
-course_name = "sb"
+course_name = "fcla"
 
 engine = create_engine(DBURL)
 Session = sessionmaker()
@@ -68,5 +68,31 @@ for chapter in root:
             from_source="T",
         )
         sess.execute(ins)
+
+        for question in subchapter.findall("./question"):
+            dbtext = ET.tostring(question.find("./"))
+            print(dbtext.decode("utf8"))
+            el = question.find(".//*[@data-component]")
+            idchild = el.attrib["id"]
+            res = sess.execute(
+                """select * from questions where name='{idchild}' and base_course='{course_name}'"""
+            ).first()
+            if res:
+                pass
+                # update
+            else:
+                ins = questions.insert().values(
+                    base_course=course_name,
+                    name=idchild,
+                    timestamp=datetime.datetime.now(),
+                    is_private="F",
+                    question_type=el.attrib["data-component"],
+                    htmlsrc=dbtext.decode("utf8"),
+                    from_source="T",
+                    subchapter=subchapter.find("./id").text,
+                    chapter=chapter.find("./id").text,
+                )
+                sess.execute(ins)
+
 
 sess.commit()

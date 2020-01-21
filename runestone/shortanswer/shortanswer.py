@@ -36,7 +36,7 @@ def setup(app):
 
 TEXT_START = """
 <div class="runestone">
-<div data-component="shortanswer" class="%(divclass)s" id=%(divid)s %(optional)s>
+<div data-component="shortanswer" class="%(divclass)s" id=%(divid)s %(optional)s %(mathjax)s>
 """
 
 TEXT_END = """
@@ -99,6 +99,7 @@ config values (conf.py):
     has_content = True
     option_spec = Assessment.option_spec.copy()
     option_spec.update({"optional": directives.flag})
+    option_spec.update({"mathjax": directives.flag})
 
     node_class = JournalNode
 
@@ -109,6 +110,7 @@ config values (conf.py):
         self.assert_has_content()
 
         self.options["optional"] = "data-optional" if "optional" in self.options else ""
+        self.options["mathjax"] = "data-mathjax" if "mathjax" in self.options else ""
 
         journal_node = JournalNode(self.options, rawsource=self.block_text)
         journal_node.source, journal_node.line = self.state_machine.get_source_and_line(
