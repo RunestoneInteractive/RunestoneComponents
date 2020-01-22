@@ -80,7 +80,6 @@ def manifest_data_to_db(course_name, manifest_path):
 
             for question in subchapter.findall("./question"):
                 dbtext = ET.tostring(question.find("./"))
-                print(dbtext.decode("utf8"))
                 el = question.find(".//*[@data-component]")
                 idchild = el.attrib["id"]
                 res = sess.execute(
