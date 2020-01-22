@@ -7,6 +7,7 @@ import six
 import click
 from paver.easy import sh
 from pkg_resources import resource_string, resource_filename, require
+from .pretext.chapter_pop import manifest_data_to_db
 import codecs
 
 if len(sys.argv) == 2:
@@ -294,6 +295,25 @@ def update():
     shutil.rmtree("_templates.bak", ignore_errors=True)
     shutil.move("_templates", "_templates.bak")
     shutil.copytree(os.path.join(template_base_dir, "_templates"), "_templates")
+
+
+@cli.command(short_help="Process runestone-manifest.xml file")
+@click.option("--course", help="Name of the course (base course)")
+@click.option("--manifest", default="runestone-manifest.xml", help="path to runestone-manifest.xml file")
+def process_manifest(course, manifest):
+    """Populate a runestone database with meta data about a course created with the PreTeXt processor
+
+    Arguments:
+        course {string} -- Name of the base course
+        manifest {path} -- Path to manifest file
+
+    Raises:
+        IOError: If manifest file not found
+    """
+    if os.path.exists(manifest):
+        manifest_data_to_db(course, manifest)
+    else:
+        raise IOError("You must provide a valid path to a manifest file")
 
 
 def main(args=None):
