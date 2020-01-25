@@ -31,11 +31,13 @@ def manifest_data_to_db(course_name, manifest_path):
     chapters = Table("chapters", meta, autoload=True, autoload_with=engine)
     subchapters = Table("sub_chapters", meta, autoload=True, autoload_with=engine)
     questions = Table("questions", meta, autoload=True, autoload_with=engine)
+    course_attributes = Table("course_attributes", meta, autoload=True, autoload_with=engine)
 
     tree = ET.parse(manifest_path)
     root = tree.getroot()
     chap = 0
-    for chapter in root:
+    for chapter in root.findall("./chapter"):
+        print(chapter)
         chap += 1
         print(chapter.tag, chapter.find("./id").text, chapter.find("./title").text)
         ins = chapters.insert().values(
@@ -83,7 +85,7 @@ def manifest_data_to_db(course_name, manifest_path):
                 el = question.find(".//*[@data-component]")
                 idchild = el.attrib["id"]
                 res = sess.execute(
-                    """select * from questions where name='{idchild}' and base_course='{course_name}'"""
+                    f"""select * from questions where name='{idchild}' and base_course='{course_name}'"""
                 ).first()
                 if res:
                     pass
@@ -102,6 +104,17 @@ def manifest_data_to_db(course_name, manifest_path):
                     )
                     sess.execute(ins)
 
+    latex = root.find("./latex-macros")
+    print(latex.text)
+    print(course_name)
+    res = sess.execute(f"select * from courses where course_name ='{course_name}'").first()
+    cid = res['id']
+    ins = course_attributes.insert().values(
+        course_id=cid,
+        attr="latex_macros",
+        value=latex.text
+    )
+    sess.execute(ins)
     sess.commit()
 
 
