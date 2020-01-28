@@ -6,10 +6,14 @@ import xml.etree.ElementTree as ET
 from sqlalchemy import create_engine, Table, MetaData, select
 from sqlalchemy.orm.session import sessionmaker
 
-if os.environ["WEB2PY_CONFIG"] == "development":
-    DBURL = os.environ["DEV_DBURL"]
-elif os.environ["WEB2PY_CONFIG"] == "production":
-    DBURL = os.environ["DBURL"]
+try:
+    if os.environ["WEB2PY_CONFIG"] == "development":
+        DBURL = os.environ["DEV_DBURL"]
+    elif os.environ["WEB2PY_CONFIG"] == "production":
+        DBURL = os.environ["DBURL"]
+except KeyError as e:
+    print("PreTeXt integration requires a valid WEB2PY Environment")
+    print("make sure WEB2PY_CONFIG and DBURLs are set up")
 
 
 def manifest_data_to_db(course_name, manifest_path):
