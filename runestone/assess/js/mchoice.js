@@ -564,7 +564,11 @@ $(document).bind("runestone:login-complete", function () {
     $("[data-component=multiplechoice]").each(function (index) {    // MC
         var opts = {"orig": this, 'useRunestoneServices':eBookConfig.useRunestoneServices};
         if ($(this).closest('[data-component=timedAssessment]').length == 0) { // If this element exists within a timed component, don't render it here
-            mcList[this.id] = new MultipleChoice(opts);
+            try {
+                mcList[this.id] = new MultipleChoice(opts);
+            } catch(err) {
+                console.log(`Error rendering Mchoice Problem ${this.id}`);
+            }
         }
     });
 });

@@ -180,10 +180,14 @@ LP.prototype.setLocalStorage = function (data) {
 // Find the custom HTML tags and execute our code on them.
 $(document).bind("runestone:login-complete", function () {
     $("[data-component=lp_build]").each(function (index) {
-        LPList[this.id] = new LP({
-            orig: this,
-            useRunestoneServices: eBookConfig.useRunestoneServices,
-        });
+        try {
+            LPList[this.id] = new LP({
+                orig: this,
+                useRunestoneServices: eBookConfig.useRunestoneServices,
+            });
+        } catch(err) {
+            console.log(`Error rendering LP Problem ${this.id}`);
+        }
     });
 });
 

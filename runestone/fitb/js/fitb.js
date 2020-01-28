@@ -385,7 +385,11 @@ $(document).bind("runestone:login-complete", function () {
     $("[data-component=fillintheblank]").each(function (index) {
         var opts = {"orig" : this, "useRunestoneServices": eBookConfig.useRunestoneServices};
         if ($(this).closest('[data-component=timedAssessment]').length == 0) { // If this element exists within a timed component, don't render it here
-            FITBList[this.id] = new FITB(opts);
+            try {
+                FITBList[this.id] = new FITB(opts);
+            } catch(err) {
+                console.log(`Error rendering Fill in the Blank Problem ${this.id}`);
+            }
         }
     });
 });

@@ -246,8 +246,13 @@ Reveal.prototype.hideInline = function () {
 
 $(document).bind("runestone:login-complete",function () {
     $("[data-component=reveal]").each(function (index) {
-        RevealList[this.id] = new Reveal({"orig": this});
+        try {
+            RevealList[this.id] = new Reveal({"orig": this});
+        } catch(err) {
+            console.log(`Error rendering Reveal ${this.id}`);
+        }
     });
+
     if (eBookConfig.isInstructor) {
         for (const divid of Object.keys(RevealList)) {
             if (RevealList[divid].instructorOnly) {

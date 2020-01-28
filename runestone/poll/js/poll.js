@@ -219,7 +219,11 @@ Poll.prototype.checkPollStorage = function() {
 // Do not render poll data until login-complete event so we know instructor status
 $(document).bind("runestone:login-complete", function () {
     $("[data-component=poll]").each(function(index) {
-        pollList[this.id] = new Poll({"orig":this});
+        try {
+            pollList[this.id] = new Poll({"orig":this});
+        } catch(err) {
+            console.log(`Error rendering Parsons Problem ${this.id}`);
+        }
     });
 });
 
