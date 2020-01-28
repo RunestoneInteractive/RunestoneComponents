@@ -11,9 +11,10 @@ try:
         DBURL = os.environ["DEV_DBURL"]
     elif os.environ["WEB2PY_CONFIG"] == "production":
         DBURL = os.environ["DBURL"]
-except KeyError as e:
+except KeyError:
     print("PreTeXt integration requires a valid WEB2PY Environment")
     print("make sure WEB2PY_CONFIG and DBURLs are set up")
+    print("If you don't know about PreTeXt then you can ignore this message")
 
 
 def manifest_data_to_db(course_name, manifest_path):
