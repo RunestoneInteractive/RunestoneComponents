@@ -105,6 +105,8 @@ rst_prolog = (
 """
 )
 
+# wasm_uri = "/_static"
+
 # -- Options for HTML output ---------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for

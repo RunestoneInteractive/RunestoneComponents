@@ -49,7 +49,7 @@ def setup(app):
         "html",
     )
     app.add_config_value("activecode_hide_load_history", False, "html")
-
+    app.add_config_value("wasm_uri", "/_static", "html")
     app.add_autoversioned_stylesheet("activecode.css")
 
     app.add_autoversioned_javascript("jquery.highlight.js")
@@ -81,7 +81,7 @@ TEMPLATE_END = """
 <textarea data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s
     %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s %(chatcodes)s
     data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(tie)s %(dburl)s %(nopair)s
-    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(hidehistory)s>
+    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(hidehistory)s %(wasmuri)s>
 %(initialcode)s
 </textarea>
 </div>
@@ -183,6 +183,7 @@ config values (conf.py):
 
 - activecode_div_class - custom CSS class of the component's outermost div
 - activecode_hide_load_history - if True, hide the load history button
+- wasm_uri - Path or Full URL to folder containing WASM files for SQL. /_static is default
     """
 
     required_arguments = 1
@@ -377,6 +378,11 @@ config values (conf.py):
             self.options["hidehistory"] = "data-hidehistory=true"
         else:
             self.options["hidehistory"] = ""
+
+        if env.config.wasm_uri:
+            self.options["wasmuri"] = f"data-wasm={env.config.wasm_uri}"
+        else:
+            self.options["wasmuri"] = ""
 
         if self.content:
             if "====" in self.content:

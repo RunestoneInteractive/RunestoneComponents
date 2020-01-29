@@ -47,6 +47,7 @@ ActiveCode.prototype.init = function(opts) {
     this.loadButton = null;
     this.outerDiv = null;
     this.partner = ""
+    this.wasmuri = $(orig).data("wasm");
     if ((! eBookConfig.allow_pairs) || $(orig).data('nopair')) {
         this.enablePartner = false;
     } else {
@@ -2437,14 +2438,20 @@ LiveCode.prototype.pushDataFile = function (file, resolve, reject) {
 SQLActiveCode.prototype.init = function(opts) {
 
     ActiveCode.prototype.init.apply(this,arguments);
-
+    var fnprefix;
     if (eBookConfig.useRunestoneServices) {
-        var fnprefix = '/runestone/books/published/' + eBookConfig.basecourse + '/_static';
+        fnprefix = '/runestone/books/published/' + eBookConfig.basecourse + '/_static';
     } else {
-        var fnprefix = '/_static';
+        if (this.wasmuri) {
+            fnprefix = this.wasmuri;
+        } else {
+            fnprefix = '/_static';
+        }
     }
     this.config = {
-        locateFile: filename => `${fnprefix}/${filename}`
+        locateFile: function(filename) {
+            return `${fnprefix}/${filename}`
+        }
     }
 
     var self = this;
