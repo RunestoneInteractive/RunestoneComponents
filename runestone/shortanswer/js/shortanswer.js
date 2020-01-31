@@ -203,12 +203,15 @@ ShortAnswer.prototype.restoreAnswers = function (data) {
     this.answer = data.answer;
     this.jTextArea.value = this.answer;
     this.renderMath(this.answer);
-    if (data.comment) {
-        this.feedbackDiv.innerHTML = `Score: ${data.score} -- ${data.comment}`;
-    } else {
-        this.feedbackDiv.innerHTML =
-            "Your current saved answer is shown above.";
+    let feedbackStr = "Your current saved answer is shown above.";
+    if (typeof data.score !== "undefined") {
+        feedbackStr = `Score: ${data.score}`;
     }
+    if (data.comment) {
+        feedbackStr += ` -- ${data.comment}`;
+    }
+    this.feedbackDiv.innerHTML = feedbackStr;
+
     $(this.feedbackDiv).removeClass("alert-danger");
     $(this.feedbackDiv).addClass("alert alert-success");
 
