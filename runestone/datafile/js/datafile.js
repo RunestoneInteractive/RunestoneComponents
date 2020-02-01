@@ -77,7 +77,11 @@ DataFile.prototype.createTextArea = function () {     // If data edit is true
 =================================*/
 $(document).ready(function () {
     $("[data-component=datafile]").each(function (index) {
-        dfList[this.id] = new DataFile({"orig": this});
+        try {
+            dfList[this.id] = new DataFile({"orig": this});
+        } catch(err) {
+            console.log(`Error rendering DataFile ${this.id}`);
+        }
     });
 
 });

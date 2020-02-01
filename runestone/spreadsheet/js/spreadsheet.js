@@ -179,7 +179,11 @@ class SpreadSheet extends RunestoneBase {
 $(document).bind("runestone:login-complete", function () {
     $("[data-component=spreadsheet]").each(function (index) {    // MC
         var opts = {"orig": this, 'useRunestoneServices':eBookConfig.useRunestoneServices};
-        ssList[this.id] = new SpreadSheet(opts);
+        try {
+            ssList[this.id] = new SpreadSheet(opts);
+        } catch(err) {
+            console.log(`Error rendering SpreadSheet Problem ${this.id}`);
+        }
     });
 });
 

@@ -2772,9 +2772,14 @@ $(document).ready(function() {
     ACFactory.createScratchActivecode();
     $('[data-component=activecode]').each( function(index ) {
         if ($(this).closest('[data-component=timedAssessment]').length == 0 ) {   // If this element exists within a timed component, don't render it here
-            edList[this.id] = ACFactory.createActiveCode(this, $(this).data('lang'));
+            try {
+                edList[this.id] = ACFactory.createActiveCode(this, $(this).data('lang'));
+            } catch(err) {
+                console.log(`Error rendering ActiveCode Problem ${this.id}`);
+            }
         }
     });
+
     if (loggedout) {
         for (k in edList) {
             edList[k].disableSaveLoad();
