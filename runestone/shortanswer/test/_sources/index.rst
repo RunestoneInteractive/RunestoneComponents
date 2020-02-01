@@ -25,6 +25,7 @@ Short Answer
 
 .. shortanswer:: question2
    :optional:
+   :mathjax:
 
    What are the colors in the rainbow?
    What is meaning of :math:`\pi r^2`

@@ -58,8 +58,6 @@ class ShortAnswerQuestion_Tests(RunestoneTestCase):
         btn_check = t1.find_element_by_tag_name("button")
         btn_check.click()
 
-        ta.clear()
-
         fb = t1.find_element_by_id("question1_feedback")
         self.assertIsNotNone(fb)
         cnamestr = fb.get_attribute("class")

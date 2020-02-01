@@ -37,6 +37,10 @@ ShortAnswer.prototype.init = function (opts) {
         this.optional = true;
     }
 
+    if ($(this.origElem).is("[data-mathjax]")) {
+        this.mathjax = true;
+    }
+
     this.renderHTML();
     this.checkServer("shortanswer");
     this.caption = "shortanswer";
@@ -86,17 +90,16 @@ ShortAnswer.prototype.renderHTML = function() {
     this.jTextArea.rows = 4;
     this.jTextArea.cols = 50;
     this.jLabel.appendChild(this.jTextArea);
-    this.jTextArea.oninput = function () {
-       this.feedbackDiv.innerHTML = "Your answer has not been saved yet!";
-       $(this.feedbackDiv).removeClass("alert-success");
-       $(this.feedbackDiv).addClass("alert alert-danger");
+    this.jTextArea.onchange = function() {
+        this.feedbackDiv.innerHTML = "Your answer has not been saved yet!";
+        $(this.feedbackDiv).removeClass("alert-success");
+        $(this.feedbackDiv).addClass("alert alert-danger");
     }.bind(this);
-
     this.fieldSet.appendChild(document.createElement("br"));
-
+    this.renderedAnswer = document.createElement("div");
+    this.fieldSet.appendChild(this.renderedAnswer);
     this.buttonDiv = document.createElement("div");
     this.fieldSet.appendChild(this.buttonDiv);
-
     this.submitButton = document.createElement("button");
     $(this.submitButton).addClass("btn btn-success");
     this.submitButton.type = "button";
@@ -105,16 +108,14 @@ ShortAnswer.prototype.renderHTML = function() {
         this.submitJournal();
     }.bind(this);
     this.buttonDiv.appendChild(this.submitButton);
-
-    // barb - removed since we aren't really giving instructor feedback here
-    /* this.randomSpan = document.createElement("span");
+    this.randomSpan = document.createElement("span");
     this.randomSpan.innerHTML = "Instructor's Feedback";
-    this.fieldSet.appendChild(this.randomSpan); */
+    this.fieldSet.appendChild(this.randomSpan);
 
-    /* this.otherOptionsDiv = document.createElement("div");
+    this.otherOptionsDiv = document.createElement("div");
     $(this.otherOptionsDiv).css("padding-left:20px");
     $(this.otherOptionsDiv).addClass("journal-options");
-    this.fieldSet.appendChild(this.otherOptionsDiv); */
+    this.fieldSet.appendChild(this.otherOptionsDiv);
 
     // add a feedback div to give user feedback
     this.feedbackDiv = document.createElement("div");
@@ -130,12 +131,24 @@ ShortAnswer.prototype.renderHTML = function() {
     //this.fieldSet.appendChild(document.createElement("br"));
 
     $(this.origElem).replaceWith(this.containerDiv);
+    if (typeof MathJax !== "undefined") {
+        MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.containerDiv]);
+    }
+
 };
+
+ShortAnswer.prototype.renderMath = function(value) {
+    if (this.mathjax) {
+        value = value.replace(/\$\$(.*?)\$\$/g, "\\[ $1 \\]");
+        value = value.replace(/\$(.*?)\$/g, "\\( $1 \\)");
+        $(this.renderedAnswer).text(value);
+        MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.renderedAnswer]);
+    }
+}
 
 ShortAnswer.prototype.submitJournal = function () {
     var value = $("#"+this.divid+"_solution").val();
-
-
+    this.renderMath(value);
     this.setLocalStorage({answer: value, timestamp: new Date()})
     this.logBookEvent({'event': 'shortanswer', 'act': value, 'div_id': this.divid});
     this.feedbackDiv.innerHTML = "Your answer has been saved.";
@@ -172,6 +185,7 @@ ShortAnswer.prototype.checkLocalStorage = function () {
             }
             let solution = $("#" + this.divid + "_solution");
             solution.text(answer);
+            this.renderMath(answer);
             this.feedbackDiv.innerHTML = "Your current saved answer is shown above.";
             $(this.feedbackDiv).removeClass("alert-danger");
             $(this.feedbackDiv).addClass("alert alert-success");
@@ -188,8 +202,16 @@ ShortAnswer.prototype.restoreAnswers = function (data) {
     }
     this.answer = data.answer;
     this.jTextArea.value = this.answer;
+    this.renderMath(this.answer);
+    let feedbackStr = "Your current saved answer is shown above.";
+    if (typeof data.score !== "undefined") {
+        feedbackStr = `Score: ${data.score}`;
+    }
+    if (data.comment) {
+        feedbackStr += ` -- ${data.comment}`;
+    }
+    this.feedbackDiv.innerHTML = feedbackStr;
 
-    this.feedbackDiv.innerHTML = "Your current saved answer is shown above.";
     $(this.feedbackDiv).removeClass("alert-danger");
     $(this.feedbackDiv).addClass("alert alert-success");
 

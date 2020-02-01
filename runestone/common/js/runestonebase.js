@@ -95,8 +95,11 @@ RunestoneBase.prototype.checkServer = function (eventInfo) {
         data.div_id = this.divid;
         data.course = eBookConfig.course;
         data.event = eventInfo;
+        if (this.graderactive && this.deadline) {
+            data.deadline = this.deadline;
+        }
         if (this.sid) {
-            data.sid = this.sid
+            data.sid = this.sid;
         }
         if (!eBookConfig.practice_mode){
             jQuery.getJSON(eBookConfig.ajaxURL + "getAssessResults", data, this.repopulateFromStorage.bind(this)).error(this.checkLocalStorage.bind(this));
