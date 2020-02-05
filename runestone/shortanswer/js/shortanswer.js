@@ -203,6 +203,39 @@ ShortAnswer.prototype.restoreAnswers = function (data) {
     this.answer = data.answer;
     this.jTextArea.value = this.answer;
     this.renderMath(this.answer);
+    let p = document.createElement('p');
+    this.jInputDiv.appendChild(p);
+    $(p).text(data.timestamp);
+    if (data.last_answer) {
+        this.current_answer = "ontime";
+        let toggle_answer_button = document.createElement("button");
+        toggle_answer_button.type="button";
+        $(toggle_answer_button).text("Show Late Answer");
+        $(toggle_answer_button).addClass("btn btn-warning");
+        $(toggle_answer_button).css("margin-left","5px");
+
+        $(toggle_answer_button).click(function() {
+            var display_timestamp, button_text;
+            if (this.current_answer === "ontime") {
+                this.jTextArea.value = data.last_answer;
+                this.answer = data.last_answer;
+                display_timestamp = data.last_timestamp;
+                button_text = "Show on-Time Answer";
+                this.current_answer = "late";
+            } else {
+                this.jTextArea.value = data.answer;
+                this.answer = data.answer;
+                display_timestamp = data.timestamp;
+                button_text = "Show Late Answer";
+                this.current_answer = "ontime";
+            }
+            this.renderMath(this.answer);
+            $(p).text(`Submitted: ${display_timestamp}`);
+            $(toggle_answer_button).text(button_text);
+        }.bind(this));
+
+        this.buttonDiv.appendChild(toggle_answer_button);
+    }
     let feedbackStr = "Your current saved answer is shown above.";
     if (typeof data.score !== "undefined") {
         feedbackStr = `Score: ${data.score}`;
