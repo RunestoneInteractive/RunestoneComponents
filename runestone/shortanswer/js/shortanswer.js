@@ -96,8 +96,11 @@ ShortAnswer.prototype.renderHTML = function() {
         $(this.feedbackDiv).addClass("alert alert-danger");
     }.bind(this);
     this.fieldSet.appendChild(document.createElement("br"));
-    this.renderedAnswer = document.createElement("div");
-    this.fieldSet.appendChild(this.renderedAnswer);
+    if (this.mathjax) {
+        this.renderedAnswer = document.createElement("div");
+        $(this.renderedAnswer).addClass("latexoutput");
+        this.fieldSet.appendChild(this.renderedAnswer);
+    }
     this.buttonDiv = document.createElement("div");
     this.fieldSet.appendChild(this.buttonDiv);
     this.submitButton = document.createElement("button");

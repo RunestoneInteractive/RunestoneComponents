@@ -28,6 +28,7 @@ def setup(app):
     app.add_node(JournalNode, html=(visit_journal_node, depart_journal_node))
     app.add_autoversioned_javascript("shortanswer.js")
     app.add_autoversioned_javascript("timed_shortanswer.js")
+    app.add_autoversioned_stylesheet("shortanswer.css")
     app.add_config_value("shortanswer_div_class", "journal alert alert-warning", "html")
     app.add_config_value(
         "shortanswer_optional_div_class", "journal alert alert-success", "html"
