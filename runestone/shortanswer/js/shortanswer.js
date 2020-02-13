@@ -208,7 +208,13 @@ ShortAnswer.prototype.restoreAnswers = function (data) {
     this.renderMath(this.answer);
     let p = document.createElement('p');
     this.jInputDiv.appendChild(p);
-    $(p).text(data.timestamp);
+    var tsString = "";
+    if (data.timestamp) {
+        tsString = new Date(data.timestamp).toLocaleString();
+    } else {
+        tsString = "";
+    }
+    $(p).text(tsString);
     if (data.last_answer) {
         this.current_answer = "ontime";
         let toggle_answer_button = document.createElement("button");
@@ -222,13 +228,13 @@ ShortAnswer.prototype.restoreAnswers = function (data) {
             if (this.current_answer === "ontime") {
                 this.jTextArea.value = data.last_answer;
                 this.answer = data.last_answer;
-                display_timestamp = data.last_timestamp;
+                display_timestamp = new Date(data.last_timestamp).toLocaleString();
                 button_text = "Show on-Time Answer";
                 this.current_answer = "late";
             } else {
                 this.jTextArea.value = data.answer;
                 this.answer = data.answer;
-                display_timestamp = data.timestamp;
+                display_timestamp = tsString;
                 button_text = "Show Late Answer";
                 this.current_answer = "ontime";
             }
