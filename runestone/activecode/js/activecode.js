@@ -1040,7 +1040,16 @@ ActiveCode.prototype.outputfun = function(text) {
     $(this.output).css("visibility","visible");
     text = x;
     text = text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br/>");
-        $(this.output).append(text);
+    return Promise.resolve().then(
+        function() {
+            setTimeout(
+                function() {
+                    $(this.output).append(text);
+                }.bind(this),
+                0
+            );
+        }.bind(this)
+    );
     };
 
 ActiveCode.prototype.filewriter = function(fobj, bytes) {
