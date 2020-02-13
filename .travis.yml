@@ -11,7 +11,7 @@ script:
 - export PATH=$TRAVIS_BUILD_DIR:$PATH
 - "python -m pip install -U pip"
 - "pip install -e ."
-- "pip install -U -r requirements-test.txt"
+- "pip install -U -r requirements-dev.txt"
 - "pytest"
 notifications:
   slack: runestoneteam:aKSajF6qfp9WpgisFH8mocs6
