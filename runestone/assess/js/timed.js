@@ -30,6 +30,7 @@ Timed.prototype.init = function (opts) {
     this.origElem = orig; // the entire element of this timed assessment and all of its children
     this.divid = orig.id;
     this.children = this.origElem.childNodes;
+    this.seen = [] // none yet
 
     this.timeLimit = 0;
     this.limitedTime = false;
@@ -305,6 +306,7 @@ Timed.prototype.renderSubmitButton = function () {
 
     this.buttonContainer.appendChild(this.finishButton);
     this.timedDiv.appendChild(this.buttonContainer);
+    this.finishButton.hide(); // hide it 
 };
 
 Timed.prototype.ensureButtonSafety = function () {  // Makes sure that user can't navigate past the range of this.renderedQuestionArray
@@ -394,6 +396,15 @@ Timed.prototype.randomizeRQA = function () {
 };
 
 Timed.prototype.renderTimedQuestion = function () {
+
+    // add question to seen if not seen yet and chedk if seen all - bje
+    if (this.seen.indexOf(this.currentQuestionIndex) < 0) {
+        this.seen.append(this.currentQuestionIndex)
+        if (this.seen.length == this.renderedQuestionArray.length) {
+            this.finishButton.show()
+        }
+    }
+
     var currentWrapper = this.renderedQuestionArray[this.currentQuestionIndex].wrapper;
     var currentQuestion = this.renderedQuestionArray[this.currentQuestionIndex].question;
     // if the question is actually inside a wrapper (for example, activecode), then we want to display the wrapper, but evaluate the actual question object
