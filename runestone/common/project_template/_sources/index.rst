@@ -36,7 +36,7 @@ Section 2: Links
 Runestone uses the ``restructuredText`` (rst) markup language.  We chose this over markdown largely because rst is extensible.  Nearly all of the basic markup tasks are already handled by restructuredText.  You should check out the docs for the basics of restructuredText (link below). Our extensions are all for the interactive elements.  One key hint about restructuredText:  Its like **Python** -- *indentation matters!*
 
 * `restructuredText Docs <http://docutils.sourceforge.net/rst.html>`_
-* `Runestone Docs <http://runestoneinteractive.org/build/html/index.html>`_
+* `Runestone Docs <https://runestone.academy/runestone/static/authorguide/index.html>`_
 * Join the discussion on our `Google Group <https://groups.google.com/forum/#!forum/runestone_instructors>`_
 * Tell us about problems on `Github <https://github.com/RunestoneInteractive/RunestoneComponents>`_
 
@@ -80,3 +80,19 @@ These are just two of the many interactive components for writing online course 
 
 Now feel free to modify this file to start creating your own interactive page.
 
+
+Section 4: Theme
+:::::::::::::::::::
+
+You can override the style rules in the default theme by adding css rules to a file named **theme-overrides.css** (the filename is important - this will replace an existing file). Make sure the file's directory is part of the ``html_static_path``. You can do so by placing it in a folder **_static**, then modifying ``html_static_path`` in conf.py to include that folder:
+
+.. code:: 
+    html_static_path =  runestone_static_dirs() + ['_static']
+
+
+If you want to do more significant changes to the theme, you should copy the files in the runestone/common/project/template/sphinx_bootstrap to a directory like ``_templates/my_theme``. Then make sure these values are set in conf.py:
+
+.. code:: 
+
+    html_theme_path = ["_templates"]
+    html_theme = 'my_theme'

@@ -1,26 +1,17 @@
+dist: xenial
 language: python
 python:
-- '3.6'
+- '3.7'
 script:
 - export LANG=en_US.UTF-8
-- wget https://chromedriver.storage.googleapis.com/2.40/chromedriver_linux64.zip
+- wget https://chromedriver.storage.googleapis.com/73.0.3683.68/chromedriver_linux64.zip
 - unzip chromedriver_linux64.zip
-- sudo apt-get install python3.4-venv
 - sudo apt-get -y update
 - sudo apt-get -y install google-chrome-stable
-- export PATH=.:$PATH
-- wget https://bootstrap.pypa.io/get-pip.py
-- python3.4 -m venv rune3
-- ". rune3/bin/activate"
-- cp chromedriver rune3/bin
-- echo $PATH
-- ls rune3/bin
-- "./rune3/bin/python -m ensurepip"
-- "./rune3/bin/python get-pip.py"
-- "./rune3/bin/pip install -e ."
-- "./rune3/bin/pip install -r requirements.txt"
-- "./rune3/bin/pip install pyvirtualdisplay"
-- "./runTests.sh"
+- export PATH=$TRAVIS_BUILD_DIR:$PATH
+- "python -m pip install -U pip"
+- "pip install -e ."
+- "pip install -U -r requirements-dev.txt"
+- "pytest"
 notifications:
-  slack:
-    secure: ZM7WB8p85i+sZXQYqlm7M/Eu1ZL5UptFw3ZRpzWuBMnC/OLw721eGaY1GsbyLhqtBUMbMnaStwptz/mHEZfEv36ARSnyOZdhl+g5ckQKUB+ECULk7HkyjiU4kPJ5U/yyGUFBZUFlZfhY76EBOqtGU6IhXw8TqWOfD8CZDXXvICE=
+  slack: runestoneteam:aKSajF6qfp9WpgisFH8mocs6

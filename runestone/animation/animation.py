@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-__author__ = 'bmiller'
+__author__ = "bmiller"
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -21,12 +21,11 @@ from runestone.common.runestonedirective import RunestoneIdDirective
 
 
 def setup(app):
-    app.add_directive('animation',Animation)
-#    app.add_stylesheet('video.css')
-    app.add_javascript('animationbase.js')
+    app.add_directive("animation", Animation)
+    app.add_autoversioned_javascript("animationbase.js")
 
 
-SRC = '''
+SRC = """
 <div id="%(divid)s">
 <canvas id="%(divid)s_canvas" width="400" height="400" style="border:4px solid blue"></canvas>
 <br />
@@ -48,20 +47,22 @@ SRC = '''
 </script>
 
 </div>
-'''
+"""
 
-SCRIPTTAG = '''<script type="text/javascript" src="../_static/%s"></script>\n'''
+SCRIPTTAG = """<script type="text/javascript" src="../_static/%s"></script>\n"""
+
 
 class Animation(RunestoneIdDirective):
     required_arguments = 1
     optional_arguments = 1
     final_argument_whitespace = True
     has_content = False
-    option_spec = {'modelfile':directives.unchanged,
-                   'viewerfile':directives.unchanged,
-                   'model':directives.unchanged,
-                   'viewer':directives.unchanged
-                   }
+    option_spec = {
+        "modelfile": directives.unchanged,
+        "viewerfile": directives.unchanged,
+        "model": directives.unchanged,
+        "viewer": directives.unchanged,
+    }
 
     def run(self):
         """
@@ -70,37 +71,39 @@ class Animation(RunestoneIdDirective):
         :return:
         """
         super(Animation, self).run()
-        res = ''
+        res = ""
 
-        if 'modelfile' in self.options:
-          res = res + SCRIPTTAG % self.options['modelfile']
-        if 'viewerfile' in self.options:
-          res = res + SCRIPTTAG % self.options['viewerfile']
-
+        if "modelfile" in self.options:
+            res = res + SCRIPTTAG % self.options["modelfile"]
+        if "viewerfile" in self.options:
+            res = res + SCRIPTTAG % self.options["viewerfile"]
 
         res = res + SRC % self.options
-        rawnode = nodes.raw(self.block_text, res, format='html')
-        rawnode.source, rawnode.line = self.state_machine.get_source_and_line(self.lineno)
+        rawnode = nodes.raw(self.block_text, res, format="html")
+        rawnode.source, rawnode.line = self.state_machine.get_source_and_line(
+            self.lineno
+        )
         return [rawnode]
 
 
-source = '''
+source = """
 .. animation:: testanim
    :modelfile: sortmodels.js
    :viewerfile: sortviewers.js
    :model: SortModel
    :viewer: BarViewer
 
-'''
+"""
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from docutils.core import publish_parts
 
-    directives.register_directive('animation',Animation)
+    directives.register_directive("animation", Animation)
 
-    doc_parts = publish_parts(source,
-            settings_overrides={'output_encoding': 'utf8',
-            'initial_header_level': 2},
-            writer_name="html")
+    doc_parts = publish_parts(
+        source,
+        settings_overrides={"output_encoding": "utf8", "initial_header_level": 2},
+        writer_name="html",
+    )
 
-    print(doc_parts['html_body'])
+    print(doc_parts["html_body"])

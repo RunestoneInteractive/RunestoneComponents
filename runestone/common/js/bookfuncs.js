@@ -1,9 +1,13 @@
 /**
- * Created by IntelliJ IDEA.
+ *
  * User: bmiller
- * Date: 4/20/11
+ * Original: 2011-04-20
+ * Date: 2019-06-14
  * Time: 2:01 PM
- * To change this template use File | Settings | File Templates.
+ * This change marks the beginning of version 4.0 of the runestone components
+ * Login/logout is no longer handled through javascript but rather server side.
+ * Many of the components depend on the runestone:login event so we will keep that
+ * for now to keep the churn fairly minimal.
  */
 
 /*
@@ -54,145 +58,149 @@ $(function () {
 
 
 //
-// Logging functions
+// Page decoration functions
 //
 
+function addReadingList() {
 
-
-//
-// Grading functions
-//
-
-function comment(blockid) {
-    $.modal('<iframe width="600" height="400" src="/getcomment?id=' + blockid + '" style="background-color: white">', {
-        //$.modal('<form><textarea name="content"></textarea><input type="submit" name="submit" > </form>', {
-        overlayClose: true,
-        closeHTML: "",
-        containerCss: {
-            width: 600,
-            height: 400,
-            backgroundColor: "#fff"
+    if (eBookConfig.readings){
+        cur_path_parts = window.location.pathname.split('/');
+        name = cur_path_parts[cur_path_parts.length-2] + '/' + cur_path_parts[cur_path_parts.length-1];
+        position = eBookConfig.readings.indexOf(name);
+        num_readings = eBookConfig.readings.length
+        if (position == (eBookConfig.readings.length-1)){
+            // no more readings
+            l = $("<div />", {text: `Finished reading assignment. Page ${num_readings} of ${num_readings}.`});
         }
-    });
-}
-
-function sendGrade(grade, sid, acid, id) {
-    var data = {'sid': sid, 'acid': acid, 'grade': grade, 'id': id};
-    jQuery.get(eBookConfig.ajaxURL + 'savegrade', data);
-}
-
-function sendComment(comment, sid, acid, id) {
-    var data = {'sid': sid, 'acid': acid, 'comment': comment, 'id': id};
-    jQuery.get(eBookConfig.ajaxURL + 'savegrade', data);
-}
-
-//
-// User login and page decoration functions
-//
-
-var rb = new RunestoneBase();
-
-function gotUser(data, status, whatever) {
-    var mess = '';
-    var caughtErr = false;
-    var d;
-    try {
-        d = eval(data)[0];
-    } catch (err) {
-        if (eBookConfig.loginRequired) {
-            if (confirm("Error: " + err.toString() + "Please report this error!  Click OK to continue without logging in.  Cancel to retry.")) {
-                caughtErr = true;
-                mess = "Not logged in";
-                $(document).trigger("runestone:logout")
-                $('li.loginout').html('<a href="' + eBookConfig.app + '/default/user/login">Login</a>')
-            } else {
-                window.location.href = eBookConfig.app + '/default/user/login?_next=' + window.location.href
-            }
+        else if(position >= 0){
+            // get next name
+            nxt = eBookConfig.readings[position+1];
+            path_parts = cur_path_parts.slice(0,cur_path_parts.length-2 );
+            path_parts.push(nxt);
+            nxt_link = path_parts.join('/');
+            l = $("<a />", {name : "link", class: "btn btn-lg ' + 'buttonConfirmCompletion'", href : nxt_link, text : `Continue to page ${position+2} of ${num_readings} in the reading assignment.`});
         }
+        else{
+            l = $("<div />", {text: "This page is not part of the last reading assignment you visited."});
+        }
+        $("#main-content").append(l);
     }
-    if (d.redirect) {
-        if (eBookConfig.loginRequired) {
-            window.location.href = eBookConfig.app + '/default/user/login?_next=' + window.location.href
-        } else {
-            mess = "Not logged in";
-            $(document).trigger("runestone:logout")
-            $('li.loginout').html('<a href="' + eBookConfig.app + '/default/user/login">Login</a>')
-        }
-    } else {
-        if (!caughtErr) {
-            mess = "username: " + d.nick;
-            eBookConfig.email = d.email;
-            eBookConfig.isLoggedIn = true;
-            eBookConfig.cohortId = d.cohortId;
-            eBookConfig.isInstructor = d.isInstructor;
-            $(document).trigger("runestone:login")
-            timedRefresh();
-        }
-    }
-    $(".loggedinuser").html(mess);
-    rb.logBookEvent({
-        'event': 'page',
-        'act': 'view',
-        'div_id': window.location.pathname
-    })
-	notifyRunestoneComponents();
+
 }
 
 
 function timedRefresh() {
-    timeoutPeriod = 4500000;  // 75 minutes
+    timeoutPeriod =  900000;  // 75 minutes
     $(document).bind("idle.idleTimer", function () {
         // After timeout period send the user back to the index.  This will force a login
         // if needed when they want to go to a particular page.  This may not be perfect
         // but its an easy way to make sure laptop users are properly logged in when they
         // take quizzes and save stuff.
         if (location.href.indexOf('index.html') < 0) {
-            location.href = eBookConfig.app + '/static/' + eBookConfig.course + '/index.html'
+            console.log("Idle timer - " + location.pathname)
+            location.href = eBookConfig.app + '/default/user/login?_next=' + location.pathname;
         }
     });
     $.idleTimer(timeoutPeriod);
 }
 
-function shouldLogin() {
-    var sli = true;
+class PageProgressBar {
 
-    if (window.location.href.indexOf('file://') > -1 || (! eBookConfig.useRunestoneServices) ) {
-        sli = false;
+    constructor(actDict) {
+        this.possible = 0;
+        this.total = 1;
+        if(actDict && Object.keys(actDict).length > 0) {
+            this.activities = actDict;
+        } else {
+            let activities = {'page': 0};
+            $(".runestone").each(function (idx, e) {
+                activities[e.firstElementChild.id] = 0;
+            })
+            this.activities = activities;
+        }
+        this.calculateProgress();
+        if (window.location.pathname.match(/.*(index.html|toctree.html|Exercises.html|Glossary.html|search.html)$/i)) {
+            $("#scprogresscontainer").hide();
+        }
+        this.renderProgress()
     }
 
-    return sli;
-}
-
-function isLoggedIn() {
-    if (typeof eBookConfig.isLoggedIn !== undefined) {
-        return eBookConfig.isLoggedIn;
+    calculateProgress() {
+        for (let k in this.activities) {
+            if (k !== undefined) {
+                this.possible++;
+                if (this.activities[k] > 0) {
+                    this.total++;
+                }
+            }
+        }
     }
-    return false;
+
+
+    renderProgress() {
+        let value = 0;
+        $("#scprogresstotal").text(this.total);
+        $("#scprogressposs").text(this.possible);
+        try {
+            value = 100 * this.total / this.possible;
+        } catch(e) {
+            value = 0;
+        }
+        $( "#subchapterprogress" ).progressbar({
+            value: value
+        });
+        if (! eBookConfig.isLoggedIn) {
+            $("#subchapterprogress>div").addClass("loggedout");
+        }
+    }
+
+    updateProgress(div_id) {
+        this.activities[div_id]++;
+        // Only update the progress bar on the first interaction with an object.
+        if (this.activities[div_id] === 1) {
+            this.total++;
+            let val = 100 * this.total / this.possible;
+            $("#scprogresstotal").text(this.total);
+            $("#scprogressposs").text(this.possible);
+            $("#subchapterprogress").progressbar("option","value", val);
+            if (val == 100.0 && $("#completionButton").text().toLowerCase() === "mark as completed") {
+                $("#completionButton").click();
+            }
+        }
+    }
+
 }
 
-function handleLoginLogout() {
-    if (shouldLogin()) {
-        data = {timezoneoffset: (new Date()).getTimezoneOffset()/60 }
-        jQuery.get(eBookConfig.ajaxURL + 'getuser', data, gotUser).error(notifyRunestoneComponents);
+pageProgressTracker = {};
+
+function handlePageSetup() {
+
+    if (eBookConfig.useRunestoneServices) {
+        jQuery.get(eBookConfig.ajaxURL + 'set_tz_offset', {
+            timezoneoffset: (new Date()).getTimezoneOffset()/60
+        });
+    }
+
+    if (eBookConfig.isLoggedIn) {
+        mess = `username: ${eBookConfig.username}`
+        if (! eBookConfig.isInstructor) {
+            $("#ip_dropdown_link").remove()
+        }
+        $(document).trigger("runestone:login")
+        addReadingList();
+        timedRefresh();
     } else {
-        $(document).trigger("runestone:logout")
-		// Let runestone components know they can run their javascript now
-		notifyRunestoneComponents();
+        mess = 'Not logged in'
+        $(document).trigger("runestone:logout");
     }
+    $(".loggedinuser").html(mess);
+
+    pageProgressTracker = new PageProgressBar(eBookConfig.activities);
+    notifyRunestoneComponents();
 }
+
 
 function setupNavbarLoggedIn() {
-    if (eBookConfig.cohortId == null || eBookConfig.cohortId == "") {
-        $('#joinGroupLink').show();
-        $('#groupScheduleLink').hide();
-        $('#newChapterLink').hide();
-        $('#manageGroupLink').hide();
-    } else {
-        $('#joinGroupLink').hide();
-        $('#groupScheduleLink').show();
-        $('#newChapterLink').show();
-        $('#manageGroupLink').show();
-    }
     $('#profilelink').show();
     $('#passwordlink').show();
     $('#registerlink').hide();
@@ -205,33 +213,12 @@ function setupNavbarLoggedOut() {
     $('#registerlink').show();
     $('#profilelink').hide();
     $('#passwordlink').hide();
+    $('#ip_dropdown_link').hide();
     $('li.loginout').html('<a href="' + eBookConfig.app + '/default/user/login">Login</a>')
     $(".footer").html('user not logged in');
-    rb.logBookEvent({'event': 'page', 'act': 'view', 'div_id': window.location.pathname})
 }
 $(document).bind("runestone:logout",setupNavbarLoggedOut);
 
-function getNumUsers() {
-    if (eBookConfig.useRunestoneServices) {
-        $.getJSON(eBookConfig.ajaxURL + 'getnumusers', setNumUsers)
-    }
-}
-
-function getOnlineUsers() {
-    if (eBookConfig.useRunestoneServices) {
-        $.getJSON(eBookConfig.ajaxURL + 'getnumonline', setOnlineUsers)
-    }
-}
-
-function setOnlineUsers(data) {
-    var d = data[0];
-    $("#numuserspan").text(d.online);
-}
-
-function setNumUsers(data) {
-    var d = data[0];
-    $("#totalusers").html(d.numusers);
-}
 
 function notifyRunestoneComponents() {
 	// Runestone components wait until login process is over to load components because of storage issues
@@ -240,59 +227,15 @@ function notifyRunestoneComponents() {
 		$pjQ(document).trigger("runestone:login-complete");   // for parsons components which are using a different version of jQuery
 }
 
-//
-// Nice interface for localstore  -- Thanks acbart
-//
-//
-
-var storage = {
-    set: function (directive, value) {
-        localStorage.setItem(directive + "_value", value);
-        localStorage.setItem(directive + "_timestamp", $.now());
-    },
-    remove: function (directive) {
-        localStorage.removeItem(directive + "_value");
-        localStorage.removeItem(directive + "_timestamp");
-    },
-    get: function (directive) {
-        return localStorage.getItem(directive + "_value");
-    },
-    has: function (directive) {
-        return localStorage.getItem(directive + "_value") !== null;
-    },
-    // Tests whether the server has the newer version
-    is_new: function (directive, server_time) {
-        var stored_time = localStorage.getItem(directive + "_timestamp");
-        return (server_time >= stored_time + 5000);
-    },
-};
-
-//
-// delay function used by VT to autosave some component data
-//
-
-var timers = {};
-function addDelay(directive, action, delay) {
-    if (delay === undefined) {
-        delay = 400;
-    }
-    clearTimeout(timers[directive]);
-    timers[directive] = setTimeout(action, delay);
-}
-
-
 
 // initialize stuff
 $(document).ready(function() {
-    if (eBookConfig && eBookConfig.useRunestoneServices) {
-        $(document).ready(handleLoginLogout);
-        $(document).ready(getNumUsers);
-        $(document).ready(getOnlineUsers);
+    if (eBookConfig ) {
+        handlePageSetup();
     } else {
         if (typeof eBookConfig === 'undefined') {
             console.log("eBookConfig is not defined.  This page must not be set up for Runestone");
         }
-		notifyRunestoneComponents();
     }
 });
 

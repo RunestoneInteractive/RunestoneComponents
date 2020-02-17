@@ -5,7 +5,7 @@ var rsb = new RunestoneBase();
 
 function getCompletions() {
 // Get the completion status
-    if ((window.location.href).match(/(index.html|genindex.html|navhelp.html|toc.html|assignments.html|exercises.html)/)) {
+    if ((window.location.href).match(/(index.html|toctree.html|genindex.html|navhelp.html|toc.html|assignments.html|Exercises.html)/)) {
         return;
     }
 
@@ -24,7 +24,7 @@ function getCompletions() {
             }
             else {
                 completionClass = "buttonAskCompletion";
-                completionMsg = "Mark as completed";
+                completionMsg = "Mark as Completed";
             }
             $("#main-content").append('<div style="text-align:center"><button class="btn btn-lg ' + completionClass + '" id="completionButton">' + completionMsg + '</button></div>');
         }
@@ -40,7 +40,7 @@ function showLastPositionBanner() {
 }
 
 function addNavigationAndCompletionButtons() {
-    if ((window.location.href).match(/(index.html|genindex.html|navhelp.html|toc.html|assignments.html|exercises.html)/)) {
+    if ((window.location.href).match(/(index.html|genindex.html|navhelp.html|toc.html|assignments.html|Exercises.html|toctree.html)/)) {
         return;
     }
     var navLinkBgRightHiddenPosition = -$("#navLinkBgRight").outerWidth() - 5;
@@ -102,7 +102,7 @@ function addNavigationAndCompletionButtons() {
         else if ($(this).hasClass("buttonConfirmCompletion")) {
             $(this).removeClass("buttonConfirmCompletion")
                 .addClass("buttonAskCompletion")
-                .html("Mark as completed");
+                .html("Mark as Completed");
             navLinkBgRightHalfOpen = navLinkBgRightHiddenPosition + 70;
             $("#navLinkBgRight").animate({"right": navLinkBgRightHalfOpen});
             $("#relations-next").animate({"right": relationsNextIconInitialPosition});

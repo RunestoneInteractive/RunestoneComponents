@@ -37,8 +37,15 @@ ShortAnswer.prototype.init = function (opts) {
         this.optional = true;
     }
 
+    if ($(this.origElem).is("[data-mathjax]")) {
+        this.mathjax = true;
+    }
+
     this.renderHTML();
     this.checkServer("shortanswer");
+    this.caption = "shortanswer";
+    this.addCaption("runestone");
+
 };
 
 ShortAnswer.prototype.renderHTML = function() {
@@ -77,22 +84,25 @@ ShortAnswer.prototype.renderHTML = function() {
 
     this.jTextArea = document.createElement("textarea");
     this.jTextArea.id = this.divid + "_solution";
+    $(this.jTextArea).attr("aria-label", "textarea");
     $(this.jTextArea).css("display:inline, width:530px");
     $(this.jTextArea).addClass("form-control");
     this.jTextArea.rows = 4;
     this.jTextArea.cols = 50;
     this.jLabel.appendChild(this.jTextArea);
-    this.jTextArea.oninput = function () {
-       this.feedbackDiv.innerHTML = "Your answer has not been saved yet!";
-       $(this.feedbackDiv).removeClass("alert-success");
-       $(this.feedbackDiv).addClass("alert alert-danger");
+    this.jTextArea.onchange = function() {
+        this.feedbackDiv.innerHTML = "Your answer has not been saved yet!";
+        $(this.feedbackDiv).removeClass("alert-success");
+        $(this.feedbackDiv).addClass("alert alert-danger");
     }.bind(this);
-
     this.fieldSet.appendChild(document.createElement("br"));
-
+    if (this.mathjax) {
+        this.renderedAnswer = document.createElement("div");
+        $(this.renderedAnswer).addClass("latexoutput");
+        this.fieldSet.appendChild(this.renderedAnswer);
+    }
     this.buttonDiv = document.createElement("div");
     this.fieldSet.appendChild(this.buttonDiv);
-
     this.submitButton = document.createElement("button");
     $(this.submitButton).addClass("btn btn-success");
     this.submitButton.type = "button";
@@ -101,16 +111,14 @@ ShortAnswer.prototype.renderHTML = function() {
         this.submitJournal();
     }.bind(this);
     this.buttonDiv.appendChild(this.submitButton);
-  
-    // barb - removed since we aren't really giving instructor feedback here
-    /* this.randomSpan = document.createElement("span");
+    this.randomSpan = document.createElement("span");
     this.randomSpan.innerHTML = "Instructor's Feedback";
-    this.fieldSet.appendChild(this.randomSpan); */
+    this.fieldSet.appendChild(this.randomSpan);
 
-    /* this.otherOptionsDiv = document.createElement("div");
+    this.otherOptionsDiv = document.createElement("div");
     $(this.otherOptionsDiv).css("padding-left:20px");
     $(this.otherOptionsDiv).addClass("journal-options");
-    this.fieldSet.appendChild(this.otherOptionsDiv); */
+    this.fieldSet.appendChild(this.otherOptionsDiv);
 
     // add a feedback div to give user feedback
     this.feedbackDiv = document.createElement("div");
@@ -126,14 +134,26 @@ ShortAnswer.prototype.renderHTML = function() {
     //this.fieldSet.appendChild(document.createElement("br"));
 
     $(this.origElem).replaceWith(this.containerDiv);
+    if (typeof MathJax !== "undefined") {
+        MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.containerDiv]);
+    }
+
 };
+
+ShortAnswer.prototype.renderMath = function(value) {
+    if (this.mathjax) {
+        value = value.replace(/\$\$(.*?)\$\$/g, "\\[ $1 \\]");
+        value = value.replace(/\$(.*?)\$/g, "\\( $1 \\)");
+        $(this.renderedAnswer).text(value);
+        MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.renderedAnswer]);
+    }
+}
 
 ShortAnswer.prototype.submitJournal = function () {
     var value = $("#"+this.divid+"_solution").val();
-
-
+    this.renderMath(value);
     this.setLocalStorage({answer: value, timestamp: new Date()})
-    this.logBookEvent({'event': 'shortanswer', 'act': JSON.stringify(value), 'div_id': this.divid});
+    this.logBookEvent({'event': 'shortanswer', 'act': value, 'div_id': this.divid});
     this.feedbackDiv.innerHTML = "Your answer has been saved.";
     $(this.feedbackDiv).removeClass("alert-danger");
     $(this.feedbackDiv).addClass("alert alert-success");
@@ -141,7 +161,7 @@ ShortAnswer.prototype.submitJournal = function () {
 
 ShortAnswer.prototype.setLocalStorage = function(data) {
     if (! this.graderactive ) {
-        let key = eBookConfig.email + ":" + this.divid + "-given"
+        let key = this.localStorageKey()
         localStorage.setItem(key, JSON.stringify(data));
     }
 };
@@ -149,9 +169,13 @@ ShortAnswer.prototype.setLocalStorage = function(data) {
 ShortAnswer.prototype.checkLocalStorage = function () {
     // Repopulates the short answer text
     // which was stored into local storage.
+    if (this.graderactive) {
+        return;
+    }
+
     var len = localStorage.length;
     if (len > 0) {
-        var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
+        var ex = localStorage.getItem(this.localStorageKey());
         if (ex !== null) {
             try {
                 var storedData = JSON.parse(ex);
@@ -159,11 +183,12 @@ ShortAnswer.prototype.checkLocalStorage = function () {
             } catch (err) {
                 // error while parsing; likely due to bad value stored in storage
                 console.log(err.message);
-                localStorage.removeItem(eBookConfig.email + ":" + this.divid + "-given");
+                localStorage.removeItem(this.localStorageKey());
                 return;
             }
             let solution = $("#" + this.divid + "_solution");
             solution.text(answer);
+            this.renderMath(answer);
             this.feedbackDiv.innerHTML = "Your current saved answer is shown above.";
             $(this.feedbackDiv).removeClass("alert-danger");
             $(this.feedbackDiv).addClass("alert alert-success");
@@ -178,10 +203,57 @@ ShortAnswer.prototype.restoreAnswers = function (data) {
     if (!data.answer) {
         data.answer = "";
     }
+    this.answer = data.answer;
+    this.jTextArea.value = this.answer;
+    this.renderMath(this.answer);
+    let p = document.createElement('p');
+    this.jInputDiv.appendChild(p);
+    var tsString = "";
+    if (data.timestamp) {
+        tsString = new Date(data.timestamp).toLocaleString();
+    } else {
+        tsString = "";
+    }
+    $(p).text(tsString);
+    if (data.last_answer) {
+        this.current_answer = "ontime";
+        let toggle_answer_button = document.createElement("button");
+        toggle_answer_button.type="button";
+        $(toggle_answer_button).text("Show Late Answer");
+        $(toggle_answer_button).addClass("btn btn-warning");
+        $(toggle_answer_button).css("margin-left","5px");
 
-    let solution = $("#" + this.divid + "_solution");
-    solution.text(data.answer);
-    this.feedbackDiv.innerHTML = "Your current saved answer is shown above.";
+        $(toggle_answer_button).click(function() {
+            var display_timestamp, button_text;
+            if (this.current_answer === "ontime") {
+                this.jTextArea.value = data.last_answer;
+                this.answer = data.last_answer;
+                display_timestamp = new Date(data.last_timestamp).toLocaleString();
+                button_text = "Show on-Time Answer";
+                this.current_answer = "late";
+            } else {
+                this.jTextArea.value = data.answer;
+                this.answer = data.answer;
+                display_timestamp = tsString;
+                button_text = "Show Late Answer";
+                this.current_answer = "ontime";
+            }
+            this.renderMath(this.answer);
+            $(p).text(`Submitted: ${display_timestamp}`);
+            $(toggle_answer_button).text(button_text);
+        }.bind(this));
+
+        this.buttonDiv.appendChild(toggle_answer_button);
+    }
+    let feedbackStr = "Your current saved answer is shown above.";
+    if (typeof data.score !== "undefined") {
+        feedbackStr = `Score: ${data.score}`;
+    }
+    if (data.comment) {
+        feedbackStr += ` -- ${data.comment}`;
+    }
+    this.feedbackDiv.innerHTML = feedbackStr;
+
     $(this.feedbackDiv).removeClass("alert-danger");
     $(this.feedbackDiv).addClass("alert alert-success");
 
@@ -195,7 +267,11 @@ ShortAnswer.prototype.restoreAnswers = function (data) {
 $(document).ready(function () {
     $("[data-component=shortanswer]").each(function (index) {
         if ($(this).closest('[data-component=timedAssessment]').length == 0) { // If this element exists within a timed component, don't render it here
-            saList[this.id] = new ShortAnswer({"orig": this, 'useRunestoneServices': eBookConfig.useRunestoneServices});
+            try {
+                saList[this.id] = new ShortAnswer({"orig": this, 'useRunestoneServices': eBookConfig.useRunestoneServices});
+            } catch(err) {
+                console.log(`Error rendering ShortAnswer Problem ${this.id}`);
+            }
         }
     });
 

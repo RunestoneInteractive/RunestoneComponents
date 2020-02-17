@@ -1,17 +1,25 @@
 import time
 from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
 
-__author__ = 'wayne brown'
+__author__ = "wayne brown"
 
 mf, setUpModule, tearDownModule = module_fixture_maker(__file__, True)
 
 
 class ShowEvalTest_TraceMode(RunestoneTestCase):
-
     def setUp(self):
         super(ShowEvalTest_TraceMode, self).setUp()
         print(vars(self))
         self.driver.get(self.host + "/trace.html")
+        wait = WebDriverWait(self.driver, 10)
+        try:
+            wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+        except:
+            text = self.driver.page_source
+            print(text[:300])
 
     def test_Next_Step(self):
         driver = self.driver
@@ -43,7 +51,6 @@ class ShowEvalTest_TraceMode(RunestoneTestCase):
 
 
 class ShowEvalTest_ReplaceMode(RunestoneTestCase):
-
     def setUp(self):
         super(ShowEvalTest_ReplaceMode, self).setUp()
         self.driver.get(self.host + "/replace.html")

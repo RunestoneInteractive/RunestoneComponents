@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-__author__ = 'tconzett'
+__author__ = "tconzett"
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -21,12 +21,16 @@ from docutils.parsers.rst import Directive
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 from runestone.common.runestonedirective import RunestoneIdDirective
 
-def setup(app):
-    app.add_directive('showeval', ShowEval)
-    app.add_javascript('showEval.js')
-    app.add_stylesheet('showEval.css')
 
-    app.add_config_value('showeval_div_class', 'runestone explainer alert alert-warning', 'html')
+def setup(app):
+    app.add_directive("showeval", ShowEval)
+    app.add_autoversioned_javascript("showEval.js")
+    app.add_autoversioned_stylesheet("showEval.css")
+
+    app.add_config_value(
+        "showeval_div_class", "runestone explainer alert alert-warning", "html"
+    )
+
 
 CODE = """\
 <div data-childcomponent="showeval" class="%(divclass)s">
@@ -40,13 +44,18 @@ CODE = """\
 SCRIPT = """\
 <script>
     $(document).ready(function() {
-      steps = %(steps)s;
+      raw_steps = %(steps)s;
+      steps = []
+      for (let s of raw_steps) {
+          steps.push(s.replace(/\\\\/g, ''))
+      }
       %(divid)s_object = new SHOWEVAL.ShowEval($('#%(divid)s'), steps, %(trace_mode)s);
       %(divid)s_object.setNextButton('#%(divid)s_nextStep');
       %(divid)s_object.setResetButton('#%(divid)s_reset');
     });
 </script>
 """
+
 
 class ShowEval(RunestoneIdDirective):
     """
@@ -65,11 +74,12 @@ config values (conf.py):
 
 - showeval_div_class - custom CSS class of the component's outermost div
     """
+
     required_arguments = 1
     optional_arguments = 0
     final_argument_whitespace = True
     has_content = True
-    option_spec = {'trace_mode':directives.unchanged_required}
+    option_spec = {"trace_mode": directives.unchanged_required}
 
     def run(self):
         """
@@ -102,26 +112,31 @@ config values (conf.py):
         super(ShowEval, self).run()
         addQuestionToDB(self)
 
-        self.options['trace_mode'] = self.options['trace_mode'].lower()
-        self.options['preReqLines'] = ''
-        self.options['steps'] = []
+        self.options["trace_mode"] = self.options["trace_mode"].lower()
+        self.options["preReqLines"] = ""
+        self.options["steps"] = []
 
         env = self.state.document.settings.env
-        self.options['divclass'] = env.config.showeval_div_class
+        self.options["divclass"] = env.config.showeval_div_class
 
+        is_dynamic = env.config.html_context.get("dynamic_pages", False)
+        is_dynamic = True if is_dynamic == "True" else False
         step = False
         count = 0
         for line in self.content:
             if step == True:
-                if line != '':
-                    self.options['steps'].append(str(line))
-            elif '~~~~' in line:
+                if line != "":
+                    if is_dynamic:
+                        esc_line = str(line).replace("{", "\{")
+                    else:
+                        esc_line = str(line)
+                    self.options["steps"].append(esc_line)
+            elif "~~~~" in line:
                 step = True
             else:
-                self.options['preReqLines'] += line + '<br />\n'
-
+                self.options["preReqLines"] += line + "<br />\n"
 
         res = (CODE + SCRIPT) % self.options
 
-        addHTMLToDB(self.options['divid'], self.options['basecourse'], res)
-        return [nodes.raw(self.block_text, res, format='html')]
+        addHTMLToDB(self.options["divid"], self.options["basecourse"], res)
+        return [nodes.raw(self.block_text, res, format="html")]

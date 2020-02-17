@@ -42,10 +42,13 @@ bower_componenets/
 *~
 
 # Files produced by runestone builds.
-runestone/build_info
 runestone/*/test/build_info
 **/sphinx_settings.json
+build_info
 
 # IDEs
 .vscode/
+.vs/
 **/sphinx-enki-info.txt
+# Mac stuff
+.DS_Store

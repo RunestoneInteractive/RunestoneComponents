@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-__author__ = 'bmiller'
+__author__ = "bmiller"
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -24,28 +24,29 @@ import six
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 from runestone.common.runestonedirective import RunestoneIdDirective
 
+
 def setup(app):
-    app.add_directive('codelens', Codelens)
-    app.add_stylesheet('pytutor.css')
-    app.add_stylesheet('modal-basic.css')
+    app.add_directive("codelens", Codelens)
+    app.add_autoversioned_stylesheet("pytutor.css")
+    app.add_autoversioned_stylesheet("modal-basic.css")
 
-    app.add_javascript('d3.v2.min.js')
-    app.add_javascript('jquery.ba-bbq.min.js')
-    app.add_javascript('jquery.jsPlumb-1.3.10-all-min.js')
-    app.add_javascript('pytutor.js')
-    app.add_javascript('codelens.js')
+    app.add_autoversioned_javascript("d3.v2.min.js")
+    app.add_autoversioned_javascript("jquery.ba-bbq.min.js")
+    app.add_autoversioned_javascript("jquery.jsPlumb-1.3.10-all-min.js")
+    app.add_autoversioned_javascript("pytutor.js")
+    app.add_autoversioned_javascript("codelens.js")
 
-    app.add_config_value('codelens_div_class', "alert alert-warning cd_section", 'html')
+    app.add_config_value("codelens_div_class", "alert alert-warning cd_section", "html")
 
 
-VIS = '''
+VIS = """
 <div class="runestone" style="max-width: none;">
 <div class="%(divclass)s">
 <div id="%(divid)s"></div>
-<p class="cl_caption"><span class="cl_caption_text">%(caption)s (%(divid)s)</span> </p>
-</div>'''
+<p class="runestone_caption"><span class="runestone_caption_text">CodeLens: %(caption)s (%(divid)s)</span> </p>
+</div>"""
 
-QUESTION = '''
+QUESTION = """
 <div id="%(divid)s_modal" class="modal fade codelens-modal">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -68,9 +69,9 @@ QUESTION = '''
   </div>
 </div>
 
-'''
+"""
 
-DATA = '''
+DATA = """
 <script type="text/javascript">
 %(tracedata)s
 var %(divid)s_vis;
@@ -112,7 +113,7 @@ $(window).resize(function() {
 });
 </script>
 </div>
-'''
+"""
 
 
 # Some documentation to help the author.
@@ -172,19 +173,22 @@ config values (conf.py):
 
 - codelens_div_class - custom CSS class of the component's outermost div
     """
+
     required_arguments = 1
     optional_arguments = 1
     option_spec = RunestoneIdDirective.option_spec.copy()
-    option_spec.update({
-        'tracedata': directives.unchanged,
-        'caption': directives.unchanged,
-        'showoutput': directives.flag,
-        'question': directives.unchanged,
-        'correct': directives.unchanged,
-        'feedback': directives.unchanged,
-        'breakline': directives.nonnegative_int,
-        'python': directives.unchanged
-    })
+    option_spec.update(
+        {
+            "tracedata": directives.unchanged,
+            "caption": directives.unchanged,
+            "showoutput": directives.flag,
+            "question": directives.unchanged,
+            "correct": directives.unchanged,
+            "feedback": directives.unchanged,
+            "breakline": directives.nonnegative_int,
+            "python": directives.unchanged,
+        }
+    )
 
     has_content = True
 
@@ -209,55 +213,63 @@ config values (conf.py):
         if self.content:
             source = "\n".join(self.content)
         else:
-            source = '\n'
+            source = "\n"
 
         CUMULATIVE_MODE = False
-        self.JS_VARNAME = self.options['divid'] + '_trace'
+        self.JS_VARNAME = self.options["divid"] + "_trace"
         env = self.state.document.settings.env
-        self.options['divclass'] = env.config.codelens_div_class
+        self.options["divclass"] = env.config.codelens_div_class
 
-        if 'showoutput' not in self.options:
-            self.options['embedded'] = 'true'  # to set embeddedmode to true
+        if "showoutput" not in self.options:
+            self.options["embedded"] = "true"  # to set embeddedmode to true
         else:
-            self.options['embedded'] = 'false'
+            self.options["embedded"] = "false"
 
-        if 'python' not in self.options:
+        if "python" not in self.options:
             if six.PY2:
-                self.options['python'] = 'py2'
+                self.options["python"] = "py2"
             else:
-                self.options['python'] = 'py3'
+                self.options["python"] = "py3"
 
-        if 'question' in self.options:
-            curTrace = exec_script_str_local(source, None, CUMULATIVE_MODE, None, raw_dict)
+        if "question" in self.options:
+            curTrace = exec_script_str_local(
+                source, None, CUMULATIVE_MODE, None, raw_dict
+            )
             self.inject_questions(curTrace)
             json_output = json.dumps(curTrace, indent=None)
-            self.options['tracedata'] = "var %s = %s;" % (self.JS_VARNAME, json_output)
+            self.options["tracedata"] = "var %s = %s;" % (self.JS_VARNAME, json_output)
         else:
-            self.options['tracedata'] = exec_script_str_local(source, None,
-                                                              CUMULATIVE_MODE,
-                                                              None, js_var_finalizer)
+            self.options["tracedata"] = exec_script_str_local(
+                source, None, CUMULATIVE_MODE, None, js_var_finalizer
+            )
 
         res = VIS
-        if 'caption' not in self.options:
-            self.options['caption'] = ''
-        if 'question' in self.options:
+        if "caption" not in self.options:
+            self.options["caption"] = ""
+        if "question" in self.options:
             res += QUESTION
-        if 'tracedata' in self.options:
+        if "tracedata" in self.options:
             res += DATA
         else:
-            res += '</div>'
-        addHTMLToDB(self.options['divid'], self.options['basecourse'], res % self.options)
-        raw_node = nodes.raw(self.block_text, res % self.options, format='html')
-        raw_node.source, raw_node.line = self.state_machine.get_source_and_line(self.lineno)
+            res += "</div>"
+        addHTMLToDB(
+            self.options["divid"], self.options["basecourse"], res % self.options
+        )
+        raw_node = nodes.raw(self.block_text, res % self.options, format="html")
+        raw_node.source, raw_node.line = self.state_machine.get_source_and_line(
+            self.lineno
+        )
         return [raw_node]
 
     def inject_questions(self, curTrace):
-        if 'breakline' not in self.options:
-            raise RuntimeError('Must have breakline option')
-        breakline = self.options['breakline']
-        for frame in curTrace['trace']:
-            if frame['line'] == breakline:
-                frame['question'] = dict(text=self.options['question'],
-                                         correct=self.options['correct'],
-                                         div=self.options['divid'] + '_modal',
-                                         feedback=self.options['feedback'])
+        if "breakline" not in self.options:
+            raise RuntimeError("Must have breakline option")
+        breakline = self.options["breakline"]
+        for frame in curTrace["trace"]:
+            if frame["line"] == breakline:
+                frame["question"] = dict(
+                    text=self.options["question"],
+                    correct=self.options["correct"],
+                    div=self.options["divid"] + "_modal",
+                    feedback=self.options["feedback"],
+                )

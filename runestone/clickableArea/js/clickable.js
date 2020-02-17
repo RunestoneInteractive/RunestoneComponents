@@ -54,6 +54,10 @@ ClickableArea.prototype.init = function (opts) {
     this.getQuestion();
     this.getFeedback();
     this.renderNewElements();
+
+    this.caption="Clickable"
+	this.addCaption('runestone')
+
 };
 
 /*===========================
@@ -156,11 +160,14 @@ ClickableArea.prototype.restoreAnswers = function (data) {
 
 
 ClickableArea.prototype.checkLocalStorage = function () {
+    if (this.graderactive) {
+        return;
+    }
     // Gets previous answer data from local storage if it exists
     this.hasStoredAnswers = false;
     var len = localStorage.length;
     if (len > 0) {
-        var ex = localStorage.getItem(eBookConfig.email + ":" + this.divid + "-given");
+        var ex = localStorage.getItem(this.localStorageKey());
         if (ex !== null) {
             this.hasStoredAnswers = true;
             try {
@@ -169,7 +176,7 @@ ClickableArea.prototype.checkLocalStorage = function () {
             } catch (err) {
                 // error while parsing; likely due to bad value stored in storage
                 console.log(err.message);
-                localStorage.removeItem(eBookConfig.email + ":" + this.divid + "-given");
+                localStorage.removeItem(this.localStorageKey());
                 this.hasStoredAnswers = false;
                 this.restoreAnswers({});
                 return;
@@ -209,7 +216,7 @@ ClickableArea.prototype.setLocalStorage = function (data) {
     var timeStamp = new Date();
     var correct = data.correct;
     var storageObject = {"answer": answer, "correct": correct, "timestamp": timeStamp};
-    localStorage.setItem(eBookConfig.email + ":" + this.divid + "-given", JSON.stringify(storageObject));
+    localStorage.setItem(this.localStorageKey(), JSON.stringify(storageObject));
 };
 
 /*==========================
@@ -381,7 +388,11 @@ ClickableArea.prototype.renderFeedback = function () {
 $(document).bind("runestone:login-complete", function () {
     $("[data-component=clickablearea]").each(function (index) {
         if ($(this).closest('[data-component=timedAssessment]').length == 0) { // If this element exists within a timed component, don't render it here
-            CAList[this.id] = new ClickableArea({"orig": this, "useRunestoneServices":eBookConfig.useRunestoneServices});
+            try {
+                CAList[this.id] = new ClickableArea({"orig": this, "useRunestoneServices":eBookConfig.useRunestoneServices});
+            } catch(err) {
+                console.log(`Error rendering ClickableArea Problem ${this.id}`);
+            }
         }
     });
 });

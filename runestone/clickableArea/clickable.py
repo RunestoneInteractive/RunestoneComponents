@@ -14,22 +14,24 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-__author__ = 'isaiahmayerchak'
+__author__ = "isaiahmayerchak"
 
 from docutils import nodes
 from docutils.parsers.rst import directives
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
 
+
 def setup(app):
-    app.add_directive('clickablearea',ClickableArea)
-    app.add_javascript('clickable.js')
-    app.add_javascript('timedclickable.js')
-    app.add_stylesheet('clickable.css')
+    app.add_directive("clickablearea", ClickableArea)
+    app.add_autoversioned_javascript("clickable.js")
+    app.add_autoversioned_javascript("timedclickable.js")
+    app.add_autoversioned_stylesheet("clickable.css")
 
     app.add_node(ClickableAreaNode, html=(visit_ca_node, depart_ca_node))
 
-    app.add_config_value('clickable_div_class', "runestone alert alert-warning", 'html')
+    app.add_config_value("clickable_div_class", "runestone alert alert-warning", "html")
+
 
 TEMPLATE = """
 <div class="runestone">
@@ -41,33 +43,39 @@ TEMPLATE_END = """
 </div>
 """
 
+
 class ClickableAreaNode(nodes.General, nodes.Element, RunestoneNode):
-    def __init__(self,content, **kwargs):
+    def __init__(self, content, **kwargs):
         """
         Arguments:
         - `self`:
         - `content`:
         """
-        super(ClickableAreaNode,self).__init__(**kwargs)
+        super(ClickableAreaNode, self).__init__(**kwargs)
         self.ca_options = content
+
 
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
-def visit_ca_node(self,node):
+def visit_ca_node(self, node):
     res = TEMPLATE
 
-    node.delimiter = "_start__{}_".format(node.ca_options['divid'])
+    node.delimiter = "_start__{}_".format(node.ca_options["divid"])
     self.body.append(node.delimiter)
 
     if "feedback" in node.ca_options:
-        node.ca_options["feedback"] = "<span data-feedback>" + node.ca_options["feedback"] + "</span>"
+        node.ca_options["feedback"] = (
+            "<span data-feedback>" + node.ca_options["feedback"] + "</span>"
+        )
     else:
         node.ca_options["feedback"] = ""
 
     if "iscode" not in node.ca_options:
         node.ca_options["correct"] = "data-cc=" + '"' + node.ca_options["correct"] + '"'
-        node.ca_options["incorrect"] = "data-ci=" + '"' + node.ca_options["incorrect"] + '"'
+        node.ca_options["incorrect"] = (
+            "data-ci=" + '"' + node.ca_options["incorrect"] + '"'
+        )
     else:
         node.ca_options["correct"] = ""
         node.ca_options["incorrect"] = ""
@@ -76,14 +84,17 @@ def visit_ca_node(self,node):
 
     self.body.append(res)
 
-def depart_ca_node(self,node):
+
+def depart_ca_node(self, node):
     res = ""
     res = TEMPLATE_END % node.ca_options
     self.body.append(res)
 
-    addHTMLToDB(node.ca_options['divid'],
-                node.ca_options['basecourse'],
-                "".join(self.body[self.body.index(node.delimiter) + 1:]))
+    addHTMLToDB(
+        node.ca_options["divid"],
+        node.ca_options["basecourse"],
+        "".join(self.body[self.body.index(node.delimiter) + 1 :]),
+    )
 
     self.body.remove(node.delimiter)
 
@@ -106,18 +117,22 @@ config values (conf.py):
 
 - clickable_div_class - custom CSS class of the component's outermost div
     """
+
     required_arguments = 1
     optional_arguments = 0
     has_content = True
     final_argument_whitespace = True
     option_spec = RunestoneIdDirective.option_spec.copy()
-    option_spec.update({"question":directives.unchanged,
-        "feedback":directives.unchanged,
-        "iscode":directives.flag,
-        "correct":directives.unchanged,
-        "incorrect":directives.unchanged,
-        "table":directives.flag
-    })
+    option_spec.update(
+        {
+            "question": directives.unchanged,
+            "feedback": directives.unchanged,
+            "iscode": directives.flag,
+            "correct": directives.unchanged,
+            "incorrect": directives.unchanged,
+            "table": directives.flag,
+        }
+    )
 
     def run(self):
         """
@@ -144,11 +159,13 @@ config values (conf.py):
             source = source.replace(":click-incorrect:", "<span data-incorrect>")
             source = source.replace(":endclick:", "</span>")
             source = "<pre>" + source + "</pre>"
-            self.options['clickcode'] = source
+            self.options["clickcode"] = source
         else:
-            self.options['clickcode'] = ''
+            self.options["clickcode"] = ""
         clickNode = ClickableAreaNode(self.options, rawsource=self.block_text)
-        clickNode.source, clickNode.line = self.state_machine.get_source_and_line(self.lineno)
+        clickNode.source, clickNode.line = self.state_machine.get_source_and_line(
+            self.lineno
+        )
         clickNode.template_start = TEMPLATE
 
         if "table" in self.options:
@@ -159,8 +176,7 @@ config values (conf.py):
         if "iscode" not in self.options:
             self.state.nested_parse(self.content, self.content_offset, clickNode)
 
-        
         env = self.state.document.settings.env
-        self.options['divclass'] = env.config.clickable_div_class
+        self.options["divclass"] = env.config.clickable_div_class
 
         return [clickNode]
