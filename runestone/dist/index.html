@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta charset="utf-8" />
+        <title>
+            Testing: Short Answer Questions &#8212; Runestone Interactive
+            Overview
+        </title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.emitter.bidi.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.emitter.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.fallbacks.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.messagestore.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.parser.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.language.js"></script>
+        <script
+            src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+            integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+            crossorigin="anonymous"
+        ></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_CHTML-full"></script>
+
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.4/codemirror.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css"
+        />
+        <link
+            href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+            crossorigin="anonymous"
+        />
+
+        <script type="text/javascript">
+            eBookConfig = {};
+
+            eBookConfig.useRunestoneServices = false;
+            eBookConfig.host = "";
+            eBookConfig.app = eBookConfig.host + "/runestone";
+            eBookConfig.course = "sa_test";
+            eBookConfig.basecourse = "sa_test";
+            eBookConfig.isLoggedIn = false;
+
+            eBookConfig.ajaxURL = eBookConfig.app + "/ajax/";
+            eBookConfig.logLevel = 0;
+            eBookConfig.loginRequired = false;
+            eBookConfig.build_info = "4.1.15";
+            eBookConfig.python3 = false;
+            eBookConfig.acDefaultLanguage = "" ? "" : "python";
+            eBookConfig.runestone_version = "4.1.15";
+            eBookConfig.jobehost = "";
+            eBookConfig.proxyuri_runs = "";
+            eBookConfig.proxyuri_files = "";
+            eBookConfig.enable_chatcodes = false ? false : false;
+            eBookConfig.enableScratchAC = false;
+        </script>
+    <script type="text/javascript" src="runestone.js"></script></head>
+
+    <body>
+        <div class="container" id="continue-reading"></div>
+
+        <div class="container" id="main-content" role="main">
+            <div class="section" id="testing-short-answer-questions">
+                <h1>
+                    Testing: Short Answer Questions<a
+                        class="headerlink"
+                        href="#testing-short-answer-questions"
+                        title="Permalink to this headline"
+                        >¶</a
+                    >
+                </h1>
+                <div class="section" id="short-answer">
+                    <h2>
+                        Short Answer<a
+                            class="headerlink"
+                            href="#short-answer"
+                            title="Permalink to this headline"
+                            >¶</a
+                        >
+                    </h2>
+
+                    <div class="runestone">
+                        <div
+                            data-component="shortanswer"
+                            class="journal alert alert-success"
+                            id="question1"
+                            data-optional
+                            data-mathjax
+                        >
+                            <p>Q-1: What are the colors in the rainbow?</p>
+                        </div>
+                    </div>
+                    <!-- end of runestone div -->
+                </div>
+            </div>
+        </div>
+
+        <div
+            data-childcomponent="over_ac_example1"
+            class="runestone explainer ac_section alert alert-warning"
+        >
+            <textarea
+                data-component="activecode"
+                id="over_ac_example1"
+                data-lang="python"
+                data-timelimit="25000"
+                data-coach="true"
+                data-codelens="true"
+                data-audio=""
+            >
+print("My first program adds a list of numbers")
+myList = [2, 4, 6, 8, 10]
+total = 0
+for num in myList:
+    total = total + num
+print(total)
+    </textarea
+            >
+        </div>
+
+        <div class="runestone alert alert-warning">
+            <ul
+                data-component="multiplechoice"
+                data-multipleanswers="false"
+                id="question2_new"
+            >
+                <p>Q-10: What color is a stop sign?</p>
+                <li
+                    data-component="answer"
+                    data-correct
+                    id="question2_new_opt_a"
+                >
+                    <p>red</p>
+                </li>
+                <li data-component="feedback" id="question2_new_opt_a">
+                    <p>Red it is.</p>
+                </li>
+                <li data-component="answer" id="question2_new_opt_b">
+                    <p>brown</p>
+                </li>
+                <li data-component="feedback" id="question2_new_opt_b">
+                    <p>Not brown.</p>
+                </li>
+                <li data-component="answer" id="question2_new_opt_c">
+                    <p>blue</p>
+                </li>
+                <li data-component="feedback" id="question2_new_opt_c">
+                    <p>Not blue.</p>
+                </li>
+                <li data-component="answer" id="question2_new_opt_d">
+                    <p>gray</p>
+                </li>
+                <li data-component="feedback" id="question2_new_opt_d">
+                    <p>Not gray.</p>
+                </li>
+            </ul>
+        </div>
+
+        <div class="runestone">
+            <div data-component="fillintheblank" id="fill1412">
+                <p>Before-5-After: Fill in the blanks to make the following sentence: “The red car drove away.”</p>
+                <p>The <input type="text"> car drove <input type="text">.</p>
+
+            <script type="application/json">
+                [[{"regex": "^\\s*red\\s*$", "regexFlags": "", "feedback": "<p>Correct.</p>\n"},
+                  {"regex": "^\\s*x\\s*$", "regexFlags": "", "feedback": "<p>Incorrect. Try \u2018red\u2019.</p>\n"}],
+                 [{"regex": "^\\s*away\\s*$", "regexFlags": "", "feedback": "<p>Correct.</p>\n"},
+                 {"regex": "^\\s*x\\s*$", "regexFlags": "", "feedback": "<p>Incorrect. Try \u2018away\u2019.</p>\n"}]]
+            </script>
+
+            </div>
+        </div>
+
+        <div class="runestone">
+            <div data-component="clickablearea" class="runestone alert alert-warning" id="ca_question1"   >
+            <span data-question>Q-1: Click the rainbow color(s)</span><span data-feedback>This is incorrect</span><pre><span data-correct>Red</span>
+            <span data-incorrect>Gold</span>
+            <span data-correct>Blue</span>
+            <span data-incorrect>Black</span></pre>
+
+            </div>
+            </div>
+
+            <div class="runestone">
+            <div data-component="clickablearea" class="runestone alert alert-warning" id="ca_question2" data-table data-cc="1,0;2,2;3,1;3,3;4,2" data-ci="2,1;2,3;3,2;4,1;4,3">
+            <span data-question>Q-2: Click the rainbow color(s)</span><span data-feedback>This is incorrect</span>
+            <table class="docutils align-default">
+            <colgroup>
+            <col style="width: 29%" />
+            <col style="width: 38%" />
+            <col style="width: 33%" />
+            </colgroup>
+            <tbody>
+            <tr class="row-odd"><td><p>Red</p></td>
+            <td><p>Orange</p></td>
+            <td><p>Yellow</p></td>
+            </tr>
+            <tr class="row-even"><td><p>White</p></td>
+            <td><p>Green</p></td>
+            <td><p>White</p></td>
+            </tr>
+            <tr class="row-odd"><td><p>Blue</p></td>
+            <td><p>White</p></td>
+            <td><p>Indigo</p></td>
+            </tr>
+            <tr class="row-even"><td><p>White</p></td>
+            <td><p>Violet</p></td>
+            <td><p>White</p></td>
+            </tr>
+            </tbody>
+            </table>
+
+            </div>
+            </div>
+
+        <div class="runestone">
+            <ul data-component="dragndrop" id="question3">
+                <span data-component="question">Q-1: Match the language and the file extension.</span>
+                <span data-component=feedback>Review your choice</span>
+
+                <li data-component="draggable" id="question3_drag1">C++</li>
+                <li data-component="dropzone" for="question3_drag1">cpp</li>
+
+                <li data-component="draggable" id="question3_drag2">Java</li>
+                <li data-component="dropzone" for="question3_drag2">java</li>
+
+                <li data-component="draggable" id="question3_drag3">Python</li>
+                <li data-component="dropzone" for="question3_drag3">py</li>
+            </ul></div>
+
+
+        <div id="scprogresscontainer">
+            You have attempted <span id="scprogresstotal"></span> of
+            <span id="scprogressposs"></span> activities on this page
+            <div id="subchapterprogress"></div>
+        </div>
+
+
+        <div class="runestone" style="max-width: none;">
+            <pre data-component="parsons" id="Test1"  data-adaptive="true"   data-order="0 1 2 3 4"   >
+            <span data-question>Q-1: need some text ?</span>
+def fib(num):
+---
+   if num == 0:
+       return 0:
+---
+   if num == 1:
+       return 1:
+---
+   return fib(num - 1) + fib(num - 2)
+---
+   return fib(num - 1) * fib(num - 2) #paired
+         </pre>
+            </div>
+
+            <div class="runestone">
+                <ul data-component="poll" id=pollid1 data-comment class='alert alert-warning' data-results='instructor'>
+                 <p>On a scale from 1 to 10, how important do you think it is to have a polling directive in the Runestone Tools?</p>
+
+                <li>1</li>
+
+                <li>2</li>
+
+                <li>3</li>
+
+                <li>4</li>
+
+                <li>5</li>
+
+                <li>6</li>
+
+                <li>7</li>
+
+                <li>8</li>
+
+                <li>9</li>
+
+                <li>10</li>
+                </ul></div></div>
+
+    </body>
+</html>

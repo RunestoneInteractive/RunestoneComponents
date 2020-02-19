@@ -1,27 +1,26 @@
-from .activecode import *
-from .animation import *
-from .assess import *
-from .blockly import *
-from .codelens import *
-from .clickableArea import *
-from .datafile import *
-from .disqus import *
-from .dragndrop import *
-from .fitb import *
-from .matrixeq import *
-from .meta import *
-from .parsons import *
-from .poll import *
-from .reveal import *
-from .shortanswer import *
-from .showeval import *
-from .tabbedStuff import *
-from .usageAssignment import *
-from .video import *
-from .webgldemo import *
+from .activecode import ActiveCode
+from .animation import Animation
+from .assess import MChoice, TimedDirective, QuestionNumber
+from .blockly import Blockly
+from .codelens import Codelens
+from .clickableArea import ClickableArea
+from .datafile import DataFile
+from .disqus import DisqusDirective
+from .dragndrop import DragNDrop
+from .fitb import FillInTheBlank
+from .matrixeq import MatrixEq
+from .meta import Meta
+from .parsons import ParsonsProblem
+from .poll import Poll
+from .reveal import RevealDirective
+from .shortanswer import JournalDirective
+from .showeval import ShowEval
+from .tabbedStuff import TabbedStuffDirective, TabDirective
+from .video import Youtube, Vimeo, Video
+from .webgldemo import WebglDemo
 
 
-import os, sys, socket
+import os, socket
 
 
 def runestone_static_dirs():
@@ -34,6 +33,7 @@ def runestone_static_dirs():
         for x in module_paths
         if os.path.exists("%s/js" % os.path.join(basedir, x))
     ]
+    module_static_js.append(os.path.join(basedir, "dist"))
     module_static_css = [
         "%s/css" % os.path.join(basedir, x)
         for x in module_paths
@@ -158,5 +158,4 @@ cmap = {
     "video": Video,
     "youtube": Youtube,
     "vimeo": Vimeo,
-    "usageassignment": usageAssignment,
 }

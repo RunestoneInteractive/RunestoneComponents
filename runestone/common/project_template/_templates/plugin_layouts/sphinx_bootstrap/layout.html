@@ -4,7 +4,7 @@
   {% set appname = '{{ =request.application }}' %}
 {% endif %}
 
-{% set script_files = ['_static/runestonebase.js?v='+runestone_version] + script_files + [
+{% set script_files =  script_files + [
     '_static'+'/jquery-ui-1.10.3.custom.min.js',
     '_static'+'/jquery-fix.js',
     '_static'+'/bootstrap-3.0.0/js/bootstrap.min.js',
@@ -80,8 +80,8 @@
       <ul class="nav navbar-nav navbar-right" >
 
         <li class="divider-vertical"></li>
-	  
-			  
+
+
         <!-- social media dropdown -->
         {% if minimal_outside_links != 'True' %}
         <li class="dropdown">

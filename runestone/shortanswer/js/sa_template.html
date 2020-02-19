@@ -1,0 +1,32 @@
+<style>
+    @import "mystyle.css";
+</style>
+
+<div id="runestone_sa" class="runestone">
+    <div id="question1" class="journal alert alert-success">
+        <form id="question1_journal" name="question1_journal" action="">
+            <fieldset>
+                <legend>Short Answer</legend>
+                <div class="journal-question">
+                    <p>
+                        <slot name="sa-questiontext"></slot>
+                    </p>
+                </div>
+                <div id="question1_journal_input">
+                    <div class="journal-options">
+                        <label class="radio-inline">
+                            <textarea id="question1_solution" aria-label="textarea" class="form-control" rows="4"
+                                cols="50"></textarea>
+                        </label>
+                    </div>
+                </div>
+                <br>
+                <div>
+                    <button id="sa_save" class="btn btn-success" type="button">Save</button>
+                </div>
+                <div id="question1_feedback" class="alert alert-success">Your current saved answer is shown above.</div>
+            </fieldset>
+        </form>
+        <p class="runestone_caption runestone_caption_text">shortanswer (question1)</p>
+    </div>
+</div>
