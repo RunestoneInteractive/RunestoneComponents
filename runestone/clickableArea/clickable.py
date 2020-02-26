@@ -24,7 +24,6 @@ from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneN
 
 def setup(app):
     app.add_directive("clickablearea", ClickableArea)
-    app.add_autoversioned_javascript("runestone.js")
 
     app.add_node(ClickableAreaNode, html=(visit_ca_node, depart_ca_node))
 

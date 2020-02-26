@@ -11,7 +11,7 @@ module.exports = env => {
             "./runestone/mchoice/js/mchoice.js",
             "./runestone/fitb/js/fitb.js",
             "./runestone/clickableArea/js/clickable.js",
-            // "./src/dragndrop/dragndrop.js",
+            "./runestone/dragndrop/js/dragndrop.js",
             "./runestone/timed/js/timed.js"
             // "./src/parsons/parsons.js",
             // "./src/poll/poll.js"

@@ -31,14 +31,9 @@ def setup(app):
     app.add_directive("addbutton", AddButton)
     app.add_directive("qnum", QuestionNumber)
 
-
     app.add_config_value("mchoice_div_class", "runestone alert alert-warning", "html")
 
-    app.add_autoversioned_javascript("runestone.js")
-
-
     app.add_node(MChoiceNode, html=(visit_mc_node, depart_mc_node))
-
     app.add_node(
         AnswersBulletList, html=(visit_answers_bullet_node, depart_answers_bullet_node)
     )

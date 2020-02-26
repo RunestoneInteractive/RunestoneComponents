@@ -26,7 +26,6 @@ from runestone.common.runestonedirective import RunestoneDirective, RunestoneNod
 def setup(app):
     app.add_directive("shortanswer", JournalDirective)
     app.add_node(JournalNode, html=(visit_journal_node, depart_journal_node))
-    app.add_autoversioned_javascript("runestone.js")
     app.add_config_value("shortanswer_div_class", "journal alert alert-warning", "html")
     app.add_config_value(
         "shortanswer_optional_div_class", "journal alert alert-success", "html"

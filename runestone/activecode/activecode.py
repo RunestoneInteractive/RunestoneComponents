@@ -50,7 +50,6 @@ def setup(app):
     app.add_config_value("activecode_hide_load_history", False, "html")
     app.add_config_value("wasm_uri", "/_static", "html")
 
-    app.add_autoversioned_javascript("runestone.js")
     app.add_autoversioned_javascript("jquery.highlight.js")
     app.add_autoversioned_javascript("sql-wasm.js")  # todo: only load if we need it
     app.add_javascript("https://cdn.jsdelivr.net/npm/handsontable@7.2.2/dist/handsontable.full.js")

@@ -39,7 +39,6 @@ def setup(app):
         FITBFeedbackNode, html=(visit_fitb_feedback_node, depart_fitb_feedback_node)
     )
 
-    app.add_autoversioned_javascript("runestone.js")
     app.add_config_value("fitb_div_class", "runestone", "html")
 
 
