@@ -13,8 +13,8 @@ module.exports = env => {
             "./runestone/clickableArea/js/clickable.js",
             "./runestone/dragndrop/js/dragndrop.js",
             "./runestone/timed/js/timed.js",
-            "./runestone/parsons/js/parsons.js"
-            // "./src/poll/poll.js"
+            "./runestone/parsons/js/parsons.js",
+            "./runestone/poll/js/poll.js"
         ],
         mode: env.MODE,
         devtool: env.MODE === "development" ? "inline-source-map" : "none",
