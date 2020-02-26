@@ -328,16 +328,6 @@ def add_i18n_js(app, supported_langs, *i18n_resources):
                 )
 
 
-# Adds CSS and JavaScript for the CodeMirror text editor
-def add_codemirror_css_and_js(app, *mods):
-    if first_time(app, "add_codemirror_css_and_js"):
-        app.add_autoversioned_stylesheet("codemirror.css")
-        app.add_autoversioned_javascript("codemirror.js")
-    for mod in mods:
-        if first_time(app, "add_codemirror_css_and_js", mod):
-            app.add_autoversioned_javascript(mod + ".js")
-
-
 # Adds JavaScript for the Sculpt in-browser implementation of Python
 def add_skulpt_js(app):
     if first_time(app, "add_skulpt_js"):

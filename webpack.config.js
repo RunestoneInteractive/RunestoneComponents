@@ -7,7 +7,7 @@ module.exports = env => {
     return {
         entry: [
             "./runestone/shortanswer/js/shortanswer.js",
-            // "./src/activecode/acfactory.js",
+            "./runestone/activecode/js/acfactory.js"
             // "./src/mchoice/mchoice.js",
             // "./src/fitb/fitb.js",
             // "./src/clickablearea/clickable.js",

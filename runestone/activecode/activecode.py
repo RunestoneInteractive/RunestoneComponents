@@ -26,7 +26,6 @@ from runestone.common.runestonedirective import (
     RunestoneIdDirective,
     RunestoneNode,
     add_i18n_js,
-    add_codemirror_css_and_js,
     add_skulpt_js,
 )
 
@@ -50,18 +49,9 @@ def setup(app):
     )
     app.add_config_value("activecode_hide_load_history", False, "html")
     app.add_config_value("wasm_uri", "/_static", "html")
-    app.add_autoversioned_stylesheet("activecode.css")
 
+    app.add_autoversioned_javascript("runestone.js")
     app.add_autoversioned_javascript("jquery.highlight.js")
-    app.add_autoversioned_javascript("bookfuncs.js")
-    add_codemirror_css_and_js(
-        app, "xml", "css", "python", "htmlmixed", "javascript", "sql"
-    )
-    add_i18n_js(app, {"en", "sr-Cyrl"}, "activecode-i18n")
-    add_skulpt_js(app)
-    app.add_autoversioned_javascript("activecode.js")
-    app.add_autoversioned_javascript("clike.js")
-    app.add_autoversioned_javascript("timed_activecode.js")
     app.add_autoversioned_javascript("sql-wasm.js")  # todo: only load if we need it
     app.add_javascript("https://cdn.jsdelivr.net/npm/handsontable@7.2.2/dist/handsontable.full.js")
     app.add_stylesheet("https://cdn.jsdelivr.net/npm/handsontable@7.2.2/dist/handsontable.full.min.css")

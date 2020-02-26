@@ -20,7 +20,6 @@ from docutils.parsers.rst import Directive
 import string
 import re
 import os
-from runestone.common.runestonedirective import add_codemirror_css_and_js
 
 __author__ = "wayne brown"
 
@@ -47,7 +46,6 @@ def setup(app):
     app.add_autoversioned_stylesheet("webglinteractive.css")
 
     # CodeMirror syntax highlighting for various types of code
-    add_codemirror_css_and_js(app, "xml", "css", "htmlmixed", "javascript")
 
     app.add_autoversioned_javascript("webglinteractive.js")
 

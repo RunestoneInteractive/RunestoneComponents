@@ -49,7 +49,7 @@ class ActiveCodeTests(RunestoneTestCase):
         ta = t1.find_element_by_class_name("cm-s-default")
         self.assertIsNotNone(ta)
         self.driver.execute_script(
-            """edList['test1'].editor.setValue("print('GoodBye')")"""
+            """window.edList['test1'].editor.setValue("print('GoodBye')")"""
         )
         WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable((By.CLASS_NAME, "run-button"))
