@@ -9,7 +9,7 @@ module.exports = env => {
             "./runestone/shortanswer/js/shortanswer.js",
             "./runestone/activecode/js/acfactory.js",
             "./runestone/mchoice/js/mchoice.js",
-            // "./src/fitb/fitb.js",
+            "./runestone/fitb/js/fitb.js",
             // "./src/clickablearea/clickable.js",
             // "./src/dragndrop/dragndrop.js",
             "./runestone/timed/js/timed.js"

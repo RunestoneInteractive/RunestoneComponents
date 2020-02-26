@@ -4,10 +4,12 @@
         "$",
         "jQuery",
         "Sk",
-        "allVisualizers"
+        "allVisualizers",
+        "console"
     ],
     "esversion": 6,
     "quotmark": true,
     "strict": true,
+    "sub": true,
     "browser": true
 }

@@ -11,7 +11,7 @@
 "use strict";
 
 import RunestoneBase from "../../common/js/runestonebase.js";
-//import TimedFITB from "../fitb/timedfitb.js";
+import TimedFITB from "../../fitb/js/timedfitb.js";
 import TimedMC from "../../mchoice/js/timedmc.js";
 import TimedShortAnswer from "../../shortanswer/js/timed_shortanswer.js";
 import TimedActiveCode from "../../activecode/js/timed_activecode.js";

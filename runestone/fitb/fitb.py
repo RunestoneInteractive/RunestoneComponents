@@ -29,18 +29,17 @@ from runestone.common import RunestoneIdDirective, RunestoneNode, get_node_line
 
 from runestone.common.runestonedirective import add_i18n_js
 
+
 def setup(app):
     app.add_directive("fillintheblank", FillInTheBlank)
     app.add_role("blank", BlankRole)
-    app.add_autoversioned_stylesheet("fitb.css")
-    app.add_autoversioned_javascript("fitb.js")
-    app.add_autoversioned_javascript("timedfitb.js")
     app.add_node(FITBNode, html=(visit_fitb_node, depart_fitb_node))
     app.add_node(BlankNode, html=(visit_blank_node, depart_blank_node))
     app.add_node(
         FITBFeedbackNode, html=(visit_fitb_feedback_node, depart_fitb_feedback_node)
     )
-    add_i18n_js(app, {"en","sr-Cyrl"}, "fitb-i18n")
+    add_i18n_js(app, {"en", "sr-Cyrl"}, "fitb-i18n")
+    app.add_autoversioned_javascript("runestone.js")
     app.add_config_value("fitb_div_class", "runestone", "html")
 
 
