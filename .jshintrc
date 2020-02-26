@@ -11,5 +11,6 @@
     "quotmark": true,
     "strict": true,
     "sub": true,
-    "browser": true
+    "browser": true,
+    "maxerr": 200
 }

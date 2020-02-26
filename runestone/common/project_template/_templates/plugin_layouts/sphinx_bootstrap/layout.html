@@ -5,7 +5,14 @@
 {% endif %}
 
 {% set script_files =  script_files + [
-    '_static'+'/runestone.js',
+    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.emitter.bidi.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.emitter.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.fallbacks.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.messagestore.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.parser.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.language.js",
+    '_static'+'/runestone.js?v='+runestone_version,
     '_static'+'/jquery-ui-1.10.3.custom.min.js',
     '_static'+'/jquery-fix.js',
     '_static'+'/bootstrap-3.0.0/js/bootstrap.min.js',

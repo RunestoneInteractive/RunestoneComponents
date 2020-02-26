@@ -25,15 +25,8 @@ from runestone.common.runestonedirective import RunestoneNode, add_i18n_js
 def setup(app):
     app.add_directive("parsonsprob", ParsonsProblem)
     app.add_node(ParsonsNode, html=(visit_parsons_node, depart_parsons_node))
-    app.add_autoversioned_stylesheet("parsons.css")
-    app.add_autoversioned_stylesheet("js_lib/prettify.css")
-    app.add_autoversioned_javascript("js_lib/prettify.js")
-    app.add_autoversioned_javascript("js_lib/hammer.min.js")
-    app.add_autoversioned_javascript("parsons.js")
-    app.add_autoversioned_javascript("timedparsons.js")
     app.add_config_value("parsons_div_class", "runestone", "html")
 
-    add_i18n_js(app, {"en","sr-Cyrl"}, "parsons-i18n")
 
 TEMPLATE = """
         <div class="%(divclass)s" style="max-width: none;">
