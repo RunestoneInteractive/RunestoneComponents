@@ -15,6 +15,7 @@ import TimedFITB from "../../fitb/js/timedfitb.js";
 import TimedMC from "../../mchoice/js/timedmc.js";
 import TimedShortAnswer from "../../shortanswer/js/timed_shortanswer.js";
 import TimedActiveCode from "../../activecode/js/timed_activecode.js";
+import TimedClickableArea from "../../clickableArea/js/timedclickable";
 //import TimedDragNDrop from "../dragndrop/dragndrop.js";
 
 export var TimedList = {}; // Timed dictionary
