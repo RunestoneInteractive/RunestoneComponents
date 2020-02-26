@@ -17,7 +17,7 @@ __author__ = "isaiahmayerchak"
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from runestone.assess import Assessment
+from runestone.mchoice import Assessment
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 from runestone.common.runestonedirective import RunestoneNode, add_i18n_js
 

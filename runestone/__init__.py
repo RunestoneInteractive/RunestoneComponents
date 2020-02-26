@@ -1,6 +1,6 @@
 from .activecode import ActiveCode
 from .animation import Animation
-from .assess import MChoice, TimedDirective, QuestionNumber
+from .mchoice import MChoice, QuestionNumber
 from .blockly import Blockly
 from .codelens import Codelens
 from .clickableArea import ClickableArea
@@ -16,6 +16,7 @@ from .reveal import RevealDirective
 from .shortanswer import JournalDirective
 from .showeval import ShowEval
 from .tabbedStuff import TabbedStuffDirective, TabDirective
+from .timed import TimedDirective
 from .video import Youtube, Vimeo, Video
 from .webgldemo import WebglDemo
 

@@ -1,4 +1,13 @@
 {
+    "predef": [
+        "eBookConfig",
+        "$",
+        "jQuery",
+        "Sk",
+        "allVisualizers"
+    ],
     "esversion": 6,
-    "quotmark": true
+    "quotmark": true,
+    "strict": true,
+    "browser": true
 }

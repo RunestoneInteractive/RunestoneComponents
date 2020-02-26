@@ -7,12 +7,12 @@ module.exports = env => {
     return {
         entry: [
             "./runestone/shortanswer/js/shortanswer.js",
-            "./runestone/activecode/js/acfactory.js"
-            // "./src/mchoice/mchoice.js",
+            "./runestone/activecode/js/acfactory.js",
+            "./runestone/mchoice/js/mchoice.js",
             // "./src/fitb/fitb.js",
             // "./src/clickablearea/clickable.js",
             // "./src/dragndrop/dragndrop.js",
-            // "./src/timed/timed.js",
+            "./runestone/timed/js/timed.js"
             // "./src/parsons/parsons.js",
             // "./src/poll/poll.js"
         ],

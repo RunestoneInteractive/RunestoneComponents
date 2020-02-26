@@ -2,8 +2,10 @@
  *
  * Created by bmiller on 3/19/15.
  */
+"use strict";
 
 import RunestoneBase from "../../common/js/runestonebase.js";
+import "./activecode-i18n.en";
 import CodeMirror from "codemirror";
 import "codemirror/mode/python/python.js";
 import "codemirror/mode/css/css.js";
@@ -1132,8 +1134,9 @@ export class ActiveCode extends RunestoneBase {
         fobj.pos$ = current.length;
         return current.length;
     }
+
     getIncludedCode(divid) {
-        var wresult;
+        var result, wresult;
         if (window.edList[divid]) {
             return window.edList[divid].editor.getValue();
         } else {
@@ -1150,6 +1153,7 @@ export class ActiveCode extends RunestoneBase {
             return result;
         }
     }
+
     buildProg(useSuffix) {
         // assemble code from prefix, suffix, and editor for running.
         var pretext;
