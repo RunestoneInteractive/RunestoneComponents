@@ -30,10 +30,6 @@ def setup(app):
         TabbedStuffNode, html=(visit_tabbedstuff_node, depart_tabbedstuff_node)
     )
 
-    app.add_autoversioned_javascript("tabbedstuff.js")
-
-    app.add_autoversioned_stylesheet("tabbedstuff.css")
-
     app.add_config_value("tabbed_div_class", "alert alert-warning", "html")
 
 
@@ -126,7 +122,7 @@ class TabDirective(RunestoneDirective):
    ...
 
 
-config values (conf.py): 
+config values (conf.py):
 
 - tabbed_div_class - custom CSS class of the component's outermost div
     """
@@ -172,7 +168,7 @@ class TabbedStuffDirective(RunestoneDirective):
 
 
 
-config values (conf.py): 
+config values (conf.py):
 
 - tabbed_div_class - custom CSS class of the component's outermost div
     """

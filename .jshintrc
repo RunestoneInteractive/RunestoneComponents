@@ -9,7 +9,7 @@
     ],
     "esversion": 6,
     "quotmark": true,
-    "strict": true,
+    "strict": false,
     "sub": true,
     "browser": true,
     "maxerr": 200
