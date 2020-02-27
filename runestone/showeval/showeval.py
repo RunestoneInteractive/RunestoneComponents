@@ -24,36 +24,25 @@ from runestone.common.runestonedirective import RunestoneIdDirective
 
 def setup(app):
     app.add_directive("showeval", ShowEval)
-    app.add_autoversioned_javascript("showEval.js")
-    app.add_autoversioned_stylesheet("showEval.css")
 
     app.add_config_value(
         "showeval_div_class", "runestone explainer alert alert-warning", "html"
     )
 
 
-CODE = """\
-<div data-childcomponent="showeval" class="%(divclass)s">
+CODE = """
+<div data-childcomponent="showeval" class="%(divclass)s" id="%(divid)s" data-tracemode="%(trace_mode)s">
     <button class="btn btn-success" id="%(divid)s_nextStep">Next Step</button>
     <button class="btn btn-default" id ="%(divid)s_reset">Reset</button>
     <div class="evalCont" style="background-color: #FDFDFD;">%(preReqLines)s</div>
     <div class="evalCont" id="%(divid)s"></div>
+    <script>
+    if (typeof window.raw_steps === "undefined") {
+    window.raw_steps = {};
+    }
+    raw_steps["%(divid)s"] = %(steps)s;
+    </script>
 </div>
-"""
-
-SCRIPT = """\
-<script>
-    $(document).ready(function() {
-      raw_steps = %(steps)s;
-      steps = []
-      for (let s of raw_steps) {
-          steps.push(s.replace(/\\\\/g, ''))
-      }
-      %(divid)s_object = new SHOWEVAL.ShowEval($('#%(divid)s'), steps, %(trace_mode)s);
-      %(divid)s_object.setNextButton('#%(divid)s_nextStep');
-      %(divid)s_object.setResetButton('#%(divid)s_reset');
-    });
-</script>
 """
 
 
@@ -70,7 +59,7 @@ class ShowEval(RunestoneIdDirective):
    as many steps as you want {{the first double braces}}{{animate into the second}} wherever.
 
 
-config values (conf.py): 
+config values (conf.py):
 
 - showeval_div_class - custom CSS class of the component's outermost div
     """
@@ -136,7 +125,7 @@ config values (conf.py):
             else:
                 self.options["preReqLines"] += line + "<br />\n"
 
-        res = (CODE + SCRIPT) % self.options
+        res = CODE % self.options
 
         addHTMLToDB(self.options["divid"], self.options["basecourse"], res)
         return [nodes.raw(self.block_text, res, format="html")]

@@ -19,7 +19,8 @@ module.exports = env => {
             "./runestone/spreadsheet/js/spreadsheet.js",
             "./runestone/tabbedStuff/js/tabbedstuff.js",
             "./runestone/reveal/js/reveal.js",
-            "./runestone/datafile/js/datafile.js"
+            "./runestone/datafile/js/datafile.js",
+            "./runestone/showeval/js/showEval.js"
         ],
         mode: env.MODE,
         devtool: env.MODE === "development" ? "inline-source-map" : "none",

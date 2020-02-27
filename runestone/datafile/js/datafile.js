@@ -60,8 +60,6 @@ class DataFile extends RunestoneBase {
     }
 }
 
-DataFile.prototype = new RunestoneBase();
-
 /*=================================
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
