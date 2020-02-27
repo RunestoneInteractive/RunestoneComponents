@@ -12,5 +12,7 @@
     "strict": false,
     "sub": true,
     "browser": true,
-    "maxerr": 200
+    "maxerr": 200,
+    "globalstrict": true
+
 }
