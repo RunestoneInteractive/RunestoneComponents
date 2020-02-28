@@ -46,7 +46,7 @@ SPHINX_CONFIG_NAME = "sphinx_settings.json"
 
 def read_sphinx_config(
     # The directory in which the ``SPHINX_CONFIG_NAME`` file is located.
-    dir_="."
+    dir_=".",
 ):
 
     try:

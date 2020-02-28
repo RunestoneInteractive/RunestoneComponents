@@ -507,7 +507,7 @@ def _docname_role(
 # Register these additions with Sphinx.
 def setup(
     # Sphinx application context.
-    app
+    app,
 ):
 
     # This depends on `CodeChat <https://pythonhosted.org/CodeChat/README.html>`_.
@@ -522,9 +522,6 @@ def setup(
 
     # See http://www.sphinx-doc.org/en/stable/extdev/appapi.html#sphinx.application.Sphinx.add_directive.
     app.add_directive("lp_build", _LpBuildButtonDirective)
-
-    app.add_autoversioned_javascript("lp.js")
-    app.add_autoversioned_javascript("gas.js")
 
     # Use the `source-read <http://sphinx-doc.org/extdev/appapi.html#event-source-read>`_
     # event hook to replace solutions with textareas before Sphinx processes it.

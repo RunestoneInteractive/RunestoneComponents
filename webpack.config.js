@@ -21,7 +21,8 @@ module.exports = env => {
             "./runestone/reveal/js/reveal.js",
             "./runestone/datafile/js/datafile.js",
             "./runestone/showeval/js/showEval.js",
-            "./runestone/video/js/runestonevideo.js"
+            "./runestone/video/js/runestonevideo.js",
+            "./runestone/lp/js/lp.js"
         ],
         mode: env.MODE,
         devtool: env.MODE === "development" ? "inline-source-map" : "none",

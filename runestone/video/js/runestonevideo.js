@@ -37,7 +37,7 @@ window.onYouTubeIframeAPIReady = function() {
             videoId: $(video).data("video-videoid"),
             playerVars: playerVars,
             events: {
-                onStateChange: onPlayerStateChange
+                onStateChange: window.onPlayerStateChange
             }
         });
     });
