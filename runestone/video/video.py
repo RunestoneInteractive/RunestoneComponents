@@ -26,8 +26,6 @@ def setup(app):
     app.add_directive("video", Video)
     app.add_directive("youtube", Youtube)
     app.add_directive("vimeo", Vimeo)
-    app.add_autoversioned_stylesheet("video.css")
-    app.add_autoversioned_javascript("runestonevideo.js")
 
 
 CODE = """\

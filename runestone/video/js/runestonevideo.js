@@ -1,9 +1,9 @@
 "use strict";
 
-//import RunestoneBase from "../../common/js/runestonebase";
-//import "../css/video.css";
+import RunestoneBase from "../../common/js/runestonebase";
+import "../css/video.css";
 
-function onPlayerStateChange(event) {
+window.onPlayerStateChange = function(event) {
     let rb = new RunestoneBase();
     let videoTime = event.target.getCurrentTime();
     let data = {
@@ -21,10 +21,10 @@ function onPlayerStateChange(event) {
         data.act = "pause:" + videoTime;
     }
     rb.logBookEvent(data);
-}
+};
 
 //Callback function to load youtube videos once IFrame Player loads
-function onYouTubeIframeAPIReady() {
+window.onYouTubeIframeAPIReady = function() {
     let videolist = $(".youtube-video");
     videolist.each(function(i, video) {
         let playerVars = {};
@@ -41,7 +41,7 @@ function onYouTubeIframeAPIReady() {
             }
         });
     });
-}
+};
 
 //Need to make sure the YouTube IFrame Player API is not loaded until after
 // all YouTube videos are in the DOM. Add a script tag with it after document is loaded
