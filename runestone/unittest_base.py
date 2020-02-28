@@ -70,6 +70,12 @@ class ModuleFixture(unittest.TestCase):
         # Change to this directory for running Runestone.
         self.old_cwd = os.getcwd()
         os.chdir(self.base_path)
+        p = subprocess.Popen(
+            ["npm", "run", "build"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+        )
         # Compile the docs. Save the stdout and stderr for examination.
         p = subprocess.Popen(
             ["runestone", "build", "--all"],
