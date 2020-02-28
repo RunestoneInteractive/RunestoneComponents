@@ -29,17 +29,19 @@ def runestone_static_dirs():
     module_paths = [
         x for x in os.listdir(basedir) if os.path.isdir(os.path.join(basedir, x))
     ]
-    module_static_js = [
-        "%s/js" % os.path.join(basedir, x)
-        for x in module_paths
-        if os.path.exists("%s/js" % os.path.join(basedir, x))
-    ]
-    module_static_js.append(os.path.join(basedir, "dist"))
+    module_static_js = [os.path.join(basedir, "dist")]
+    module_static_js.append(os.path.join(basedir, "common", "js"))
+    module_static_js.append(os.path.join(basedir, "animation", "js"))
+    module_static_js.append(os.path.join(basedir, "codelens", "js"))
+    module_static_js.append(os.path.join(basedir, "webgldemo", "js"))
+    module_static_js.append(os.path.join(basedir, "matrixeq", "js"))
     module_static_css = [
-        "%s/css" % os.path.join(basedir, x)
-        for x in module_paths
-        if os.path.exists("%s/css" % os.path.join(basedir, x))
+        os.path.join(basedir, "common", "css")
     ]
+    module_static_css.append(os.path.join(basedir, "codelens", "css"))
+    module_static_css.append(os.path.join(basedir, "accessibility", "css"))
+    module_static_css.append(os.path.join(basedir, "webgldemo", "css"))
+    module_static_css.append(os.path.join(basedir, "matrixeq", "css"))
     module_static_image = [
         "%s/images" % os.path.join(basedir, x)
         for x in module_paths

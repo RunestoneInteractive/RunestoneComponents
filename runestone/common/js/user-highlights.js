@@ -3,6 +3,7 @@
 "use strict";
 
 import RunestoneBase from "./runestonebase";
+import "../css/user-highlights.css";
 
 var urlList;
 var extendType;

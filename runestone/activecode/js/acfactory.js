@@ -3,7 +3,6 @@ import JSActiveCode from "./activecode_js.js";
 import HTMLActiveCode from "./activecode_html.js";
 import SQLActiveCode from "./activecode_sql.js";
 import LiveCode from "./livecode.js";
-//import "./../styles/activecode.css";
 
 export default class ACFactory {
     constructor() {
