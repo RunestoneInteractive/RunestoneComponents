@@ -76,6 +76,7 @@ DATA = """
 %(tracedata)s
 var %(divid)s_vis;
 
+var rb = new RunestoneBase();
 $(document).ready(function() {
     try {
         %(divid)s_vis = new ExecutionVisualizer('%(divid)s',%(divid)s_trace,
@@ -97,7 +98,7 @@ $(document).ready(function() {
 
 $(document).ready(function() {
     $("#%(divid)s_tracecheck").click(function() {
-        logBookEvent({'event':'codelens', 'act': 'check', 'div_id':'%(divid)s'});
+        rb.logBookEvent({'event':'codelens', 'act': 'check', 'div_id':'%(divid)s'});
     });
 });
 
@@ -169,7 +170,7 @@ class Codelens(RunestoneIdDirective):
        x = x + i
 
 
-config values (conf.py): 
+config values (conf.py):
 
 - codelens_div_class - custom CSS class of the component's outermost div
     """

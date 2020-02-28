@@ -255,18 +255,23 @@ $(document).ready(function() {
     $("[data-component=shortanswer]").each(function(index) {
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
-            saList[this.id] = new ShortAnswer({
-                orig: this,
-                useRunestoneServices: eBookConfig.useRunestoneServices
-            });
+            try {
+                saList[this.id] = new ShortAnswer({
+                    orig: this,
+                    useRunestoneServices: eBookConfig.useRunestoneServices
+                });
+            } catch (err) {
+                console.log(`Error rendering ClickableArea Problem ${this.id}
+                Details: ${err}`);
+            }
         }
     });
 });
 
-if (typeof component_factory === "undefined") {
-    var component_factory = {};
+if (typeof window.component_factory === "undefined") {
+    window.component_factory = {};
 }
 
-component_factory.shortanswer = function(opts) {
+window.component_factory.shortanswer = function(opts) {
     return new ShortAnswer(opts);
 };

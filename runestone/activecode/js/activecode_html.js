@@ -4,7 +4,6 @@ export default class HTMLActiveCode extends ActiveCode {
     constructor(opts) {
         super(opts);
         opts.alignVertical = true;
-        ActiveCode.prototype.init.apply(this, arguments);
         this.code = $("<textarea />")
             .html(this.origElem.innerHTML)
             .text();

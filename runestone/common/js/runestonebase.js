@@ -206,3 +206,5 @@ export default class RunestoneBase {
         this.containerDiv.appendChild(capDiv);
     }
 }
+
+window.RunestoneBase = RunestoneBase;

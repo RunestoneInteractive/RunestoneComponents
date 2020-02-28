@@ -136,10 +136,15 @@ $(document).ready(function() {
     $("[data-component=activecode]").each(function(index) {
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
-            window.edList[this.id] = ACFactory.createActiveCode(
-                this,
-                $(this).data("lang")
-            );
+            try {
+                window.edList[this.id] = ACFactory.createActiveCode(
+                    this,
+                    $(this).data("lang")
+                );
+            } catch (err) {
+                console.log(`Error rendering ClickableArea Problem ${this.id}
+                Details: ${err}`);
+            }
         }
     });
     if (loggedout) {
@@ -153,10 +158,14 @@ $(document).ready(function() {
     }
 });
 
-if (typeof component_factory === "undefined") {
-    var component_factory = {};
+if (typeof window.component_factory === "undefined") {
+    window.component_factory = {};
 }
-component_factory["activecode"] = ACFactory.createActiveCodeFromOpts;
+
+window.component_factory.activecode = ACFactory.createActiveCodeFromOpts;
+
+// This is the easiest way to expose this outside the module.
+window.ACFactory = ACFactory;
 
 // This seems a bit hacky and possibly brittle, but its hard to know how long it will take to
 // figure out the login/logout status of the user.  Sometimes its immediate, and sometimes its
