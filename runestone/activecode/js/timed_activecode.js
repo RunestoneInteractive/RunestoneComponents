@@ -109,3 +109,19 @@ class TimedJSActiveCode extends JSActiveCode {
     }
 }
 Object.assign(TimedJSActiveCode.prototype, TimedActiveCodeMixin);
+
+class TimedHTMLActiveCode extends HTMLActiveCode {
+    constructor(opts) {
+        super(opts);
+        this.timedInit(opts);
+    }
+}
+Object.assign(TimedHTMLActiveCode.prototype, TimedActiveCodeMixin);
+
+class TimedSQLActiveCode extends SQLActiveCode {
+    constructor(opts) {
+        super(opts);
+        this.timedInit(opts);
+    }
+}
+Object.assign(TimedSQLActiveCode.prototype, TimedActiveCodeMixin);

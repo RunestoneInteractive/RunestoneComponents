@@ -2982,13 +2982,19 @@ ACFactory.createActiveCode = function(orig, lang, addopts) {
             opts[attrname] = addopts[attrname];
         }
     }
-    if (opts["timed"] == true) {
+    if (opts.timed == true) {
         if (lang === "python") {
             return new TimedActiveCode(opts);
         } else if (lang === "java" || lang === "cpp" || lang === "c") {
             return new TimedLiveCode(opts);
         } else if (lang === "javascript") {
             return new TimedJSActiveCode(opts);
+        } else if (lang === "htmlmixed") {
+            return new TimedHTMLActiveCode(opts);
+        } else if (lang === "sql") {
+            return new TimedSQLActiveCode(opts);
+        } else {
+            return new TimedActiveCode(opts);
         }
     } else {
         if (lang === "javascript") {
