@@ -21,13 +21,13 @@
 }
 
 [data-theme="dark"] {
-    --background: #000000;
-    --outerBackground: #3d3d3d;
-    --links: #1165f0;
+    --background: #ffffff;
+    --outerBackground: #ffffff;
+    --links: #ffffff;
     --bodyFont: #ffffff;
-    --tooltip: #000000;
+    --tooltip: #ffffff;
     --grayToWhite: #ffffff;
-    --navbar: #3d3d3d;
+    --navbar: #ffffff;
     --navbarFont: #ffffff;
     --navbarFontHover: #d6d6d6;
     --alerts: #714082;
