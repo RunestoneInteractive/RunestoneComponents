@@ -139,6 +139,7 @@ div.ExecutionVisualizer table#pyCodeOutput .cod {
   margin-left: 3px;
   padding-left: 7px;
   text-align: left; /* necessary or else doesn't work properly in IE */
+  color: black;
 }
 
 div.ExecutionVisualizer div#progOutputs {
@@ -635,7 +636,7 @@ textarea.bubbleInputText {
 	.ui-tooltip-pgbootstrap .ui-tooltip-content{
 		padding: 5px /* 5px is minimum or else it might look ugly */ 8px;
 	}
-	
+
 
 		.ui-tooltip-pgbootstrap .ui-tooltip-titlebar .ui-state-default{
 			right: 9px; top: 49%;
@@ -689,7 +690,7 @@ textarea.bubbleInputText {
 	.ui-tooltip-pgbootstrap-stub .ui-tooltip-content{
 		padding: 6px 9px;
 	}
-	
+
 
 div.ExecutionVisualizer .annotationText,
 div.ExecutionVisualizer .vizDescriptionText {
