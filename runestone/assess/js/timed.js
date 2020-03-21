@@ -214,6 +214,7 @@ Timed.prototype.renderNavControls = function() {
     $(this.leftNavButton).attr("aria-label", "Previous");
     $(this.leftNavButton).attr("tabindex", "0");
     $(this.leftNavButton).attr("role", "button");
+    $(this.rightNavButton).attr("id","prev");
     $(this.leftNavButton).css("cursor", "pointer");
     this.leftContainer.appendChild(this.leftNavButton);
     this.pagNavList.appendChild(this.leftContainer);
@@ -222,6 +223,7 @@ Timed.prototype.renderNavControls = function() {
     $(this.rightNavButton).attr("aria-label", "Next");
     $(this.rightNavButton).attr("tabindex", "0");
     $(this.rightNavButton).attr("role", "button");
+    $(this.rightNavButton).attr("id","next");
     this.rightNavButton.innerHTML = "Next &#8250;";
     $(this.rightNavButton).css("cursor", "pointer");
     this.rightContainer.appendChild(this.rightNavButton);

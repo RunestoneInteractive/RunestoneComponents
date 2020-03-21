@@ -197,6 +197,11 @@ class FITBtests(RunestoneTestCase):
         # Fill it in.
         self.find_blank(0).send_keys("red")
         self.find_blank(1).send_keys("away")
+        # find the second fitb
+        self.driver.find_element_by_id("next").click()
+        self.fitb = self.driver.find_element_by_id("timed-fitb-2")
+        # Fill it in with a wrong answer
+        self.find_blank(0).send_keys("3.27")
         # Finish the exam and click OK.
         self.driver.find_element_by_id("finish").click()
         Alert(self.driver).accept()
