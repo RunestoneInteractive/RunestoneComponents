@@ -8,7 +8,7 @@
     </a>
   </li>
 </ul>
-  <a class="navLinkBg" id="navLinkBgLeft"  href="{{ prev.link|e }}" aria-label="{{ prev.title|extractText|extractTextII }}"></a>
+
   {% endif %}
 
 {%- if next %}
@@ -21,7 +21,7 @@
     </a>
   </li>
 </ul>
-  <a class="navLinkBg navLink" id="navLinkBgRight" href="{{ next.link|e }}" aria-label="{{ next.title|extractText|extractTextII }}">Next Section - {{ next.title|extractText|extractTextII }}</a>
+
 {%- endif %}
 
 <script type="text/javascript">
