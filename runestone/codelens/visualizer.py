@@ -35,7 +35,7 @@ def setup(app):
     app.add_autoversioned_javascript("codelens.js")
 
     app.add_config_value("codelens_div_class", "alert alert-warning cd_section", "html")
-    app.add_config_value("trace_url", "http://localhost:5000", "html")
+    app.add_config_value("trace_url", "http://tracer.runestone.academy:5000", "html")
 
 
 #  data-tracefile="pytutor-embed-demo/java.json"
@@ -271,7 +271,7 @@ config values (conf.py):
         env = self.state.document.settings.env
         url = f"{env.config.trace_url}/trace{lang}"
 
-        r = requests.post(url, data=dict(src=src), timeout=15)
+        r = requests.post(url, data=dict(src=src), timeout=30)
         if r.status_code == 200:
             if lang == "java":
                 return r.text
