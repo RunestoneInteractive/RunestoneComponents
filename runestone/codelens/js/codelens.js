@@ -50,7 +50,7 @@ if (typeof allVsualizers === "undefined") {
 }
 
 $(document).ready(function() {
-    if (allTraceData !== undefined) {
+    if (typeof allTraceData !== "undefined") {
         for (let divid in allTraceData) {
             let cl = document.getElementById(divid);
             let lang = $(cl).data("params").lang;
