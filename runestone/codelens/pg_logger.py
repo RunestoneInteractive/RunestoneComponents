@@ -41,16 +41,18 @@ is_python3 = sys.version_info[0] == 3
 # NB: don't use cStringIO since it doesn't support unicode!!!
 if is_python3:
     import io as StringIO
+    import io  # expose regular io for Python3 users too
 else:
     import StringIO
 
-import runestone.codelens.pg_encoder
+import runestone.codelens.pg_encoder as pg_encoder
 
 # TODO: not threadsafe:
 
 # upper-bound on the number of executed lines, in order to guard against
 # infinite loops
-MAX_EXECUTED_LINES = 300
+# MAX_EXECUTED_LINES = 300
+MAX_EXECUTED_LINES = 1000  # on 2016-05-01, I increased the limit from 300 to 1000 for Python due to popular user demand! and I also improved the warning message
 
 # DEBUG = False
 DEBUG = True
@@ -122,6 +124,7 @@ else:
 ALLOWED_STDLIB_MODULE_IMPORTS = (
     "math",
     "random",
+    "time",
     "datetime",
     "functools",
     "itertools",
@@ -132,7 +135,13 @@ ALLOWED_STDLIB_MODULE_IMPORTS = (
     "json",
     "heapq",
     "bisect",
+    "copy",
+    "hashlib",
 )
+
+# allow users to import but don't explicitly import it since it's
+# already been done above
+OTHER_STDLIB_WHITELIST = ("StringIO", "io")
 
 # whitelist of custom modules to import into OPT
 # (TODO: support modules in a subdirectory, but there are various
@@ -171,7 +180,12 @@ def __restricted_import__(*args):
     # subclass str and bypass the 'in' test on the next line
     args = [e for e in args if type(e) is str]
 
-    if args[0] in ALLOWED_STDLIB_MODULE_IMPORTS + CUSTOM_MODULE_IMPORTS:
+    if (
+        args[0]
+        in ALLOWED_STDLIB_MODULE_IMPORTS
+        + CUSTOM_MODULE_IMPORTS
+        + OTHER_STDLIB_WHITELIST
+    ):
         imported_mod = BUILTIN_IMPORT(*args)
 
         if args[0] in CUSTOM_MODULE_IMPORTS:
@@ -212,6 +226,29 @@ random.seed(0)
 input_string_queue = []
 
 
+def open_wrapper(*args):
+    if is_python3:
+        raise Exception(
+            """open() is not supported by Python Tutor.
+Instead use io.StringIO() to simulate a file.
+Here is an example: http://goo.gl/uNvBGl"""
+        )
+    else:
+        raise Exception(
+            """open() is not supported by Python Tutor.
+Instead use StringIO.StringIO() to simulate a file.
+Here is an example: http://goo.gl/Q9xQ4p"""
+        )
+
+
+# create a more sensible error message for unsupported features
+def create_banned_builtins_wrapper(fn_name):
+    def err_func(*args):
+        raise Exception("'" + fn_name + "' is not supported by Python Tutor.")
+
+    return err_func
+
+
 class RawInputException(Exception):
     pass
 
@@ -225,6 +262,19 @@ def raw_input_wrapper(prompt=""):
         sys.stdout.write(str(prompt))  # always convert prompt into a string
         sys.stdout.write(input_str + "\n")  # newline to simulate the user hitting Enter
         return input_str
+    raise RawInputException(str(prompt))  # always convert prompt into a string
+
+
+# Python 2 input() does eval(raw_input())
+def python2_input_wrapper(prompt=""):
+    if input_string_queue:
+        input_str = input_string_queue.pop(0)
+
+        # write the prompt and user input to stdout, to emulate what happens
+        # at the terminal
+        sys.stdout.write(str(prompt))  # always convert prompt into a string
+        sys.stdout.write(input_str + "\n")  # newline to simulate the user hitting Enter
+        return eval(input_str)  # remember to eval!
     raise RawInputException(str(prompt))  # always convert prompt into a string
 
 
@@ -256,12 +306,6 @@ BANNED_BUILTINS = [
     "vars",
 ]
 # Peter says 'apply' isn't dangerous, so don't ban it
-
-# ban input() in Python 2 since it does an eval!
-# (Python 3 input is Python 2 raw_input, so we're okay)
-if not is_python3:
-    BANNED_BUILTINS.append("input")
-
 
 IGNORE_VARS = set(
     (
@@ -445,11 +489,7 @@ def visit_function_obj(v, ids_seen_set):
                 for child_res in visit_function_obj(child, ids_seen_set):
                     yield child_res
 
-        elif (
-            typ == dict
-            or runestone.codelens.pg_encoder.is_class(v)
-            or runestone.codelens.pg_encoder.is_instance(v)
-        ):
+        elif typ == dict or pg_encoder.is_class(v) or pg_encoder.is_instance(v):
             contents_dict = None
 
             if typ == dict:
@@ -523,6 +563,10 @@ class PGLogger(bdb.Bdb):
         # Value: parent frame
         self.closures = {}
 
+        # Key:   code object for a lambda
+        # Value: parent frame
+        self.lambda_closures = {}
+
         # set of function objects that were defined in the global scope
         self.globally_defined_funcs = set()
 
@@ -549,9 +593,7 @@ class PGLogger(bdb.Bdb):
 
         # very important for this single object to persist throughout
         # execution, or else canonical small IDs won't be consistent.
-        self.encoder = runestone.codelens.pg_encoder.ObjectEncoder(
-            self.render_heap_primitives
-        )
+        self.encoder = pg_encoder.ObjectEncoder(self.render_heap_primitives)
 
         self.executed_script = None  # Python script to be executed!
 
@@ -567,9 +609,12 @@ class PGLogger(bdb.Bdb):
 
     # Returns the (lexical) parent of a function value.
     def get_parent_of_function(self, val):
-        if val not in self.closures:
+        if val in self.closures:
+            return self.get_frame_id(self.closures[val])
+        elif val in self.lambda_closures:
+            return self.get_frame_id(self.lambda_closures[val])
+        else:
             return None
-        return self.get_frame_id(self.closures[val])
 
     # Returns the (lexical) parent frame of the function that was called
     # to create the stack frame 'frame'.
@@ -583,6 +628,7 @@ class PGLogger(bdb.Bdb):
     # to make an educated guess based on the contents of local
     # variables inherited from possible parent frame candidates.
     def get_parent_frame(self, frame):
+        # print >> sys.stderr, 'get_parent_frame: frame.f_code', frame.f_code
         for (func_obj, parent_frame) in self.closures.items():
             # ok, there's a possible match, but let's compare the
             # local variables in parent_frame to those of frame
@@ -602,6 +648,11 @@ class PGLogger(bdb.Bdb):
 
                 if all_matched:
                     return parent_frame
+
+        for (lambda_code_obj, parent_frame) in self.lambda_closures.items():
+            if lambda_code_obj == frame.f_code:
+                # TODO: should we do more verification like above?!?
+                return parent_frame
 
         return None
 
@@ -722,7 +773,7 @@ class PGLogger(bdb.Bdb):
         print >> sys.stderr, '=== STACK ===', 'curindex:', self.curindex
         for (e,ln) in self.stack:
           print >> sys.stderr, e.f_code.co_name + ' ' + e.f_code.co_filename + ' ' + str(ln)
-        print >> sys.stderr, "top_frame", top_frame.f_code.co_name
+        print >> sys.stderr, "top_frame", top_frame.f_code.co_name, top_frame.f_code
         """
 
         # don't trace inside of ANY functions that aren't user-written code
@@ -822,6 +873,7 @@ class PGLogger(bdb.Bdb):
 
         # returns a dict with keys: function name, frame id, id of parent frame, encoded_locals dict
         def create_encoded_stack_entry(cur_frame):
+            # print >> sys.stderr, '- create_encoded_stack_entry', cur_frame, self.closures, self.lambda_closures
             ret = {}
 
             parent_frame_id_list = []
@@ -844,7 +896,7 @@ class PGLogger(bdb.Bdb):
 
             # augment lambdas with line number
             if cur_name == "<lambda>":
-                cur_name += runestone.codelens.pg_encoder.create_lambda_line_number(
+                cur_name += pg_encoder.create_lambda_line_number(
                     cur_frame.f_code, self.encoder.line_to_lambda_code
                 )
 
@@ -987,6 +1039,23 @@ class PGLogger(bdb.Bdb):
                         )  # unequivocally add to this set!!!
                         if not chosen_parent_frame in self.zombie_frames:
                             self.zombie_frames.append(chosen_parent_frame)
+            else:
+                # look for code objects of lambdas defined within this
+                # function, which comes up in cases like line 2 of:
+                # def x(y):
+                #   (lambda z: lambda w: z+y)(y)
+                #
+                # x(42)
+                if top_frame.f_code.co_consts:
+                    for e in top_frame.f_code.co_consts:
+                        if type(e) == types.CodeType and e.co_name == "<lambda>":
+                            # TODO: what if it's already in lambda_closures?
+                            self.lambda_closures[e] = top_frame
+                            self.parent_frames_set.add(
+                                top_frame
+                            )  # copy-paste from above
+                            if not top_frame in self.zombie_frames:
+                                self.zombie_frames.append(top_frame)
         else:
             # if there is only a global scope visible ...
             for (k, v) in get_user_globals(top_frame).items():
@@ -1199,9 +1268,9 @@ class PGLogger(bdb.Bdb):
             self.trace.append(
                 dict(
                     event="instruction_limit_reached",
-                    exception_msg="(stopped after "
+                    exception_msg="Stopped after running "
                     + str(MAX_EXECUTED_LINES)
-                    + " steps to prevent possible infinite loop)",
+                    + " steps. Please shorten your code,\nsince Python Tutor is not designed to handle long-running code.",
                 )
             )
             self.force_terminate()
@@ -1251,16 +1320,21 @@ class PGLogger(bdb.Bdb):
                 builtin_items.append((k, getattr(__builtins__, k)))
 
         for (k, v) in builtin_items:
-            if k in BANNED_BUILTINS:
-                continue
+            if k == "open":  # put this before BANNED_BUILTINS
+                user_builtins[k] = open_wrapper
+            elif k in BANNED_BUILTINS:
+                user_builtins[k] = create_banned_builtins_wrapper(k)
             elif k == "__import__":
                 user_builtins[k] = __restricted_import__
             else:
                 if k == "raw_input":
                     user_builtins[k] = raw_input_wrapper
-                elif k == "input" and is_python3:
-                    # Python 3 input() is Python 2 raw_input()
-                    user_builtins[k] = raw_input_wrapper
+                elif k == "input":
+                    if is_python3:
+                        # Python 3 input() is Python 2 raw_input()
+                        user_builtins[k] = raw_input_wrapper
+                    else:
+                        user_builtins[k] = python2_input_wrapper
                 else:
                     user_builtins[k] = v
 
