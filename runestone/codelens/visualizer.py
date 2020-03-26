@@ -50,40 +50,10 @@ VIS = """
     </div>
 """
 
-QUESTION = """
-<div id="%(divid)s_modal" class="modal fade codelens-modal">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Check your understanding</h4>
-      </div>
-      <div class="modal-body">
-        <p>%(question)s</p>
-        <input id="%(divid)s_textbox" type="textbox" class="form-control" style="width:200px;" />
-        <br />
-        <button id="%(divid)s_tracecheck" class='btn btn-default tracecheck' onclick="traceQCheckMe('%(divid)s_textbox','%(divid)s','%(correct)s')">
-          Check Me
-        </button>
-        <button type="button" class="btn btn-default" data-dismiss="modal">Continue</button>
-        <br />
-        <p id="%(divid)s_feedbacktext" class="feedbacktext alert alert-warning"></p>
-      </div>
-    </div>
-  </div>
-</div>
-
-"""
 
 DATA = """
 <script type="text/javascript">
 var %(divid)s_vis;
-
-$(document).ready(function() {
-    $("#%(divid)s_tracecheck").click(function() {
-        logBookEvent({'event':'codelens', 'act': 'check', 'div_id':'%(divid)s'});
-    });
-});
 
 if (allTraceData === undefined) {
    var allTraceData = {};
@@ -238,8 +208,6 @@ config values (conf.py):
         res = VIS
         if "caption" not in self.options:
             self.options["caption"] = ""
-        if "question" in self.options:
-            res += QUESTION
         if "tracedata" in self.options:
             res += DATA
         else:
