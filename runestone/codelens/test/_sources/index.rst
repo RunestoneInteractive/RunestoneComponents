@@ -74,3 +74,15 @@ Lets test Java now by providing the source.
    b = [4, 5, 6]
    b[1] = 5
    print (a+b)
+
+.. codelens:: codelens_question
+    :question: What is the value of tot after the line with the red arrow executes?
+    :breakline: 4
+    :feedback: Use the global variables box to look at the current values of tot and i.
+    :correct: globals.tot
+
+    tot = 0
+    prod = 1
+    for i in range(10):
+       tot = tot + i
+       prod = prod * i
