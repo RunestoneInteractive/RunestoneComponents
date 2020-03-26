@@ -17,18 +17,18 @@ class ShowEvalTest_TraceMode(RunestoneTestCase):
         wait = WebDriverWait(self.driver, 10)
         try:
             wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-        except:
+        except Exception:
             text = self.driver.page_source
             print(text[:300])
 
     def test_Next_Step(self):
         driver = self.driver
         self.assertIn("CodeLens", driver.title)
-        for tdiv in ["test1", "test2", "test3", "test4", "test5"]:
+        for tdiv in ["test1", "test2", "test3", "test4", "test5", "test6"]:
             clDiv = driver.find_element_by_id("test5")
             assert clDiv
             fwd = clDiv.find_element_by_id("jmpStepFwd")
             assert fwd
             bak = clDiv.find_element_by_id("jmpStepBack")
             assert bak
-            assert bak.get_property("disabled") == True
+            assert bak.get_property("disabled") is True
