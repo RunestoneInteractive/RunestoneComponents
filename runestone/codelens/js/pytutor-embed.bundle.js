@@ -1409,9 +1409,22 @@ var ExecutionVisualizer = /** @class */ (function () {
                 if (ans.length > 0 && ans == correctAns) {
                     alert('Correct');
                     done = true;
+                    // Create a custom event so that we don't have to suck in all of runestone
+                    // codelens.js  has code that binds to this event and generates the call to
+                    // record the answer.
+                    var e = new CustomEvent("codelens:answer", { detail: { divid: $(this.domRoot).closest(".pytutorVisualizer")[0].id,
+                            correct: true,
+                            answer: ans
+                        } });
+                    document.dispatchEvent(e);
                 }
                 else {
                     done = !confirm(curEntry.question.feedback + "\nClick OK to try again");
+                    var e = new CustomEvent("codelens:answer", { detail: { divid: $(this.domRoot).closest(".pytutorVisualizer")[0].id,
+                            correct: false,
+                            answer: ans
+                        } });
+                    document.dispatchEvent(e);
                 }
             }
         }

@@ -68,5 +68,15 @@ $(document).ready(function() {
                 console.log(`Error rendering CodeLens Problem ${divid}`);
             }
         }
+        document.addEventListener("codelens:answer", function(evt) {
+            let rb = new RunestoneBase();
+            rb.logBookEvent({
+                event: "codelens",
+                div_id: evt.detail.divid,
+                act: `answer:${evt.detail.answer}`,
+                correct: evt.detail.correct
+            });
+            console.log(evt);
+        });
     }
 });
