@@ -28,11 +28,8 @@ from runestone.common.runestonedirective import RunestoneIdDirective
 
 def setup(app):
     app.add_directive("codelens", Codelens)
-    app.add_autoversioned_stylesheet("pytutor.css")
-    app.add_autoversioned_stylesheet("modal-basic.css")
 
     app.add_autoversioned_javascript("pytutor-embed.bundle.js")
-    app.add_autoversioned_javascript("codelens.js")
 
     app.add_config_value("codelens_div_class", "alert alert-warning cd_section", "html")
     app.add_config_value("trace_url", "http://tracer.runestone.academy:5000", "html")

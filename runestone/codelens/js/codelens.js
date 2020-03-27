@@ -10,6 +10,9 @@
  continue to work.... In the best of all worlds we might add a function to the visualizer to
  return the buttons, but I'm having a hard time thinking of any other use for that besides mine.
  */
+
+import "./../css/pytutor.css";
+
 function attachLoggers(codelens, divid) {
     rb = new RunestoneBase();
     codelens.domRoot.find("#jmpFirstInstr").click(function() {
