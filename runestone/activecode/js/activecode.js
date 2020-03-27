@@ -572,7 +572,7 @@ export class ActiveCode extends RunestoneBase {
                     function(data, status, whatever) {
                         if (data.history !== undefined) {
                             this.history = this.history.concat(data.history);
-                            for (t in data.timestamps) {
+                            for (let t in data.timestamps) {
                                 this.timestamps.push(
                                     new Date(
                                         data.timestamps[t]

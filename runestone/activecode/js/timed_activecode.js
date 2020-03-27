@@ -5,8 +5,11 @@ But since Javascript does not suppport multiple inheritance we use the mixin pat
 */
 import LiveCode from "./livecode";
 import { ActiveCode } from "./activecode";
+import JSActiveCode from "./activecode_js";
+import HTMLActiveCode from "./activecode_html";
+import SQLActiveCode from "./activecode_sql";
 
-TimedActiveCodeMixin = {
+var TimedActiveCodeMixin = {
     timedInit: function(opts) {
         this.hideButtons();
         this.addHistoryScrubber();
