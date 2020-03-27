@@ -14,7 +14,7 @@
 import "./../css/pytutor.css";
 
 function attachLoggers(codelens, divid) {
-    rb = new RunestoneBase();
+    let rb = new RunestoneBase();
     codelens.domRoot.find("#jmpFirstInstr").click(function() {
         rb.logBookEvent({ event: "codelens", act: "first", div_id: divid });
     });
@@ -49,7 +49,7 @@ function styleButtons(divid) {
 }
 
 if (typeof allVsualizers === "undefined") {
-    allVisualizers = [];
+    window.allVisualizers = [];
 }
 
 $(document).ready(function() {
@@ -66,9 +66,10 @@ $(document).ready(function() {
                 });
                 attachLoggers(vis, divid);
                 styleButtons(divid);
-                allVisualizers.push(vis);
+                window.allVisualizers.push(vis);
             } catch (err) {
                 console.log(`Error rendering CodeLens Problem ${divid}`);
+                console.log(err);
             }
         }
         document.addEventListener("codelens:answer", function(evt) {

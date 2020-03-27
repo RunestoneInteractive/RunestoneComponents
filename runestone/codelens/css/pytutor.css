@@ -238,7 +238,7 @@ div.ExecutionVisualizer .vizFrame {
 /* Rendering of primitive types */
 
 div.ExecutionVisualizer .nullObj {
-//  font-size: 8pt;
+  font-size: 8pt;
 }
 
 div.ExecutionVisualizer .stringObj,

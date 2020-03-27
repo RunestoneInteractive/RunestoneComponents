@@ -1320,8 +1320,8 @@ export class ActiveCode extends RunestoneBase {
                 });
             }
         );
-        if (typeof allVisualizers != "undefined") {
-            $.each(allVisualizers, function(i, e) {
+        if (typeof window.allVisualizers != "undefined") {
+            $.each(window.allVisualizers, function(i, e) {
                 e.redrawConnectors();
             });
         }
