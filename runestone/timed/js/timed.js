@@ -14,7 +14,7 @@ import RunestoneBase from "../../common/js/runestonebase.js";
 import TimedFITB from "../../fitb/js/timedfitb.js";
 import TimedMC from "../../mchoice/js/timedmc.js";
 import TimedShortAnswer from "../../shortanswer/js/timed_shortanswer.js";
-import TimedActiveCode from "../../activecode/js/timed_activecode.js";
+import ACFactory from "../../activecode/js/acfactory.js";
 import TimedClickableArea from "../../clickableArea/js/timedclickable";
 import TimedDragNDrop from "../../dragndrop/js/timeddnd.js";
 
@@ -382,7 +382,8 @@ export default class Timed extends RunestoneBase {
             var tmpChild = this.newChildren[i];
             opts = {
                 orig: tmpChild,
-                useRunestoneServices: eBookConfig.useRunestoneServices
+                useRunestoneServices: eBookConfig.useRunestoneServices,
+                timed: true
             };
             if ($(tmpChild).children("[data-component]")) {
                 tmpChild = $(tmpChild).children("[data-component]")[0];
@@ -414,8 +415,10 @@ export default class Timed extends RunestoneBase {
                     question: new TimedParsons(opts)
                 });
             } else if ($(tmpChild).is("[data-component=activecode]")) {
+                let lang = $(tmpChild).data("lang");
                 this.renderedQuestionArray.push({
-                    question: new TimedActiveCode(opts)
+                    wrapper: tmpChild.parentElement,
+                    question: ACFactory.createActiveCode(tmpChild, lang, opts)
                 });
             } else if ($(tmpChild).is("[data-childcomponent]")) {
                 // this is for when a directive has a wrapper element that isn't actually part of the javascript object
@@ -424,7 +427,12 @@ export default class Timed extends RunestoneBase {
                 if ($(child[0]).is("[data-component=activecode]")) {
                     // create & insert new JS object back into wrapper div-- we're simulating the parsing that would happen outside of a timed exam
                     opts.orig = child[0];
-                    var newAC = new TimedActiveCode(opts);
+                    let lang = $(child[0]).data("lang");
+                    var newAC = ACFactory.createActiveCode(
+                        child[0],
+                        lang,
+                        opts
+                    );
                     $(child[0]).remove();
                     var tmp = tmpChild.childNodes[0];
                     $(tmp).after(newAC.containerDiv);

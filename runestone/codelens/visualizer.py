@@ -21,6 +21,7 @@ from docutils.parsers.rst import directives
 from .pg_logger import exec_script_str_local
 import json
 import six
+import requests
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 from runestone.common.runestonedirective import RunestoneIdDirective
 
@@ -30,88 +31,35 @@ def setup(app):
     app.add_autoversioned_stylesheet("pytutor.css")
     app.add_autoversioned_stylesheet("modal-basic.css")
 
-    app.add_autoversioned_javascript("d3.v2.min.js")
-    app.add_autoversioned_javascript("jquery.ba-bbq.min.js")
-    app.add_autoversioned_javascript("jquery.jsPlumb-1.3.10-all-min.js")
-    app.add_autoversioned_javascript("pytutor.js")
+    app.add_autoversioned_javascript("pytutor-embed.bundle.js")
     app.add_autoversioned_javascript("codelens.js")
 
     app.add_config_value("codelens_div_class", "alert alert-warning cd_section", "html")
+    app.add_config_value("trace_url", "http://tracer.runestone.academy:5000", "html")
 
+
+#  data-tracefile="pytutor-embed-demo/java.json"
 
 VIS = """
 <div class="runestone" style="max-width: none;">
-<div class="%(divclass)s">
-<div id="%(divid)s"></div>
-<p class="runestone_caption"><span class="runestone_caption_text">CodeLens: %(caption)s (%(divid)s)</span> </p>
-</div>"""
-
-QUESTION = """
-<div id="%(divid)s_modal" class="modal fade codelens-modal">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Check your understanding</h4>
-      </div>
-      <div class="modal-body">
-        <p>%(question)s</p>
-        <input id="%(divid)s_textbox" type="textbox" class="form-control" style="width:200px;" />
-        <br />
-        <button id="%(divid)s_tracecheck" class='btn btn-default tracecheck' onclick="traceQCheckMe('%(divid)s_textbox','%(divid)s','%(correct)s')">
-          Check Me
-        </button>
-        <button type="button" class="btn btn-default" data-dismiss="modal">Continue</button>
-        <br />
-        <p id="%(divid)s_feedbacktext" class="feedbacktext alert alert-warning"></p>
-      </div>
+    <div class="%(divclass)s">
+        <div class="pytutorVisualizer" id="%(divid)s"
+           data-params='{"embeddedMode": true, "lang": "%(language)s", "jumpToEnd": false}'>
+        </div>
+        <p class="runestone_caption"><span class="runestone_caption_text">CodeLens: %(caption)s (%(divid)s)</span> </p>
     </div>
-  </div>
-</div>
-
 """
+
 
 DATA = """
 <script type="text/javascript">
-%(tracedata)s
 var %(divid)s_vis;
 
-var rb = new RunestoneBase();
-$(document).ready(function() {
-    try {
-        %(divid)s_vis = new ExecutionVisualizer('%(divid)s',%(divid)s_trace,
-                                    {embeddedMode: %(embedded)s,
-                                    verticalStack: false,
-                                    heightChangeCallback: redrawAllVisualizerArrows,
-                                    codeDivWidth: 500,
-                                    lang : '%(python)s'
-                                    });
-        attachLoggers(%(divid)s_vis,'%(divid)s');
-        styleButtons('%(divid)s');
-        allVisualizers.push(%(divid)s_vis);
-    } catch (e) {
-        console.log("Failed to Initialize CodeLens component %(divid)s_vis" );
-        console.log(e.toString());
-    }
-
-});
-
-$(document).ready(function() {
-    $("#%(divid)s_tracecheck").click(function() {
-        rb.logBookEvent({'event':'codelens', 'act': 'check', 'div_id':'%(divid)s'});
-    });
-});
-
-if (allVisualizers === undefined) {
-   var allVisualizers = [];
+if (allTraceData === undefined) {
+   var allTraceData = {};
 }
 
-
-$(window).resize(function() {
-    if (%(divid)s_vis) {
-        %(divid)s_vis.redrawConnectors();
-    }
-});
+allTraceData["%(divid)s"] = %(tracedata)s;
 </script>
 </div>
 """
@@ -188,6 +136,7 @@ config values (conf.py):
             "feedback": directives.unchanged,
             "breakline": directives.nonnegative_int,
             "python": directives.unchanged,
+            "language": directives.unchanged,
         }
     )
 
@@ -206,10 +155,9 @@ config values (conf.py):
             return ret
 
         def js_var_finalizer(input_code, output_trace):
-            global JS_VARNAME
             ret = dict(code=input_code, trace=output_trace)
             json_output = json.dumps(ret, indent=None)
-            return "var %s = %s;" % (self.JS_VARNAME, json_output)
+            return json_output
 
         if self.content:
             source = "\n".join(self.content)
@@ -226,29 +174,40 @@ config values (conf.py):
         else:
             self.options["embedded"] = "false"
 
+        if "language" not in self.options:
+            self.options["language"] = "python"
+
         if "python" not in self.options:
             if six.PY2:
                 self.options["python"] = "py2"
             else:
                 self.options["python"] = "py3"
 
-        if "question" in self.options:
-            curTrace = exec_script_str_local(
-                source, None, CUMULATIVE_MODE, None, raw_dict
-            )
-            self.inject_questions(curTrace)
-            json_output = json.dumps(curTrace, indent=None)
-            self.options["tracedata"] = "var %s = %s;" % (self.JS_VARNAME, json_output)
-        else:
-            self.options["tracedata"] = exec_script_str_local(
-                source, None, CUMULATIVE_MODE, None, js_var_finalizer
-            )
+        if "tracedata" not in self.options:
+            if "question" in self.options:
+                curTrace = exec_script_str_local(
+                    source, None, CUMULATIVE_MODE, None, raw_dict
+                )
+                self.inject_questions(curTrace)
+                json_output = json.dumps(curTrace, indent=None)
+                self.options["tracedata"] = json_output
+            else:
+                if self.options["language"] == "python":
+                    self.options["tracedata"] = exec_script_str_local(
+                        source, None, CUMULATIVE_MODE, None, js_var_finalizer
+                    )
+                elif self.options["language"] == "java":
+                    self.options["tracedata"] = self.get_trace(source, "java")
+                elif self.options["language"] == "cpp":
+                    self.options["tracedata"] = self.get_trace(source, "cpp")
+                elif self.options["language"] == "c":
+                    self.options["tracedata"] = self.get_trace(source, "c")
+                else:
+                    raise ValueError("language not supported")
 
         res = VIS
         if "caption" not in self.options:
             self.options["caption"] = ""
-        if "question" in self.options:
-            res += QUESTION
         if "tracedata" in self.options:
             res += DATA
         else:
@@ -256,6 +215,7 @@ config values (conf.py):
         addHTMLToDB(
             self.options["divid"], self.options["basecourse"], res % self.options
         )
+        print("before template", self.options["tracedata"])
         raw_node = nodes.raw(self.block_text, res % self.options, format="html")
         raw_node.source, raw_node.line = self.state_machine.get_source_and_line(
             self.lineno
@@ -265,7 +225,7 @@ config values (conf.py):
     def inject_questions(self, curTrace):
         if "breakline" not in self.options:
             raise RuntimeError("Must have breakline option")
-        breakline = self.options["breakline"]
+        breakline = self.options["breakline"] + 1
         for frame in curTrace["trace"]:
             if frame["line"] == breakline:
                 frame["question"] = dict(
@@ -274,3 +234,15 @@ config values (conf.py):
                     div=self.options["divid"] + "_modal",
                     feedback=self.options["feedback"],
                 )
+
+    def get_trace(self, src, lang):
+        env = self.state.document.settings.env
+        url = f"{env.config.trace_url}/trace{lang}"
+
+        r = requests.post(url, data=dict(src=src), timeout=30)
+        if r.status_code == 200:
+            if lang == "java":
+                return r.text
+            else:
+                res = r.text[r.text.find('{"code":'):]
+                return(res)

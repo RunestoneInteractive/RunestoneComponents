@@ -1004,6 +1004,20 @@ body {
     color: var(--bodyFont);
 }
 
+.jupyter_container .output  {
+    margin-top: 10px;
+}
+
+.jupyter_container .output td {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.jupyter_container .output th {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
 /*Theme toggle*/
 .theme-switch-wrapper {
     display: flex;

@@ -19,19 +19,35 @@ export default class ACFactory {
                 opts[attrname] = addopts[attrname];
             }
         }
-        if (lang === "javascript") {
-            return new JSActiveCode(opts);
-        } else if (lang === "htmlmixed") {
-            return new HTMLActiveCode(opts);
-        } else if (lang === "sql") {
-            return new SQLActiveCode(opts);
-        } else if (
-            ["java", "cpp", "c", "python3", "python2"].indexOf(lang) > -1
-        ) {
-            return new LiveCode(opts);
+        if (opts.timed == true) {
+            if (lang === "python") {
+                return new TimedActiveCode(opts);
+            } else if (lang === "java" || lang === "cpp" || lang === "c") {
+                return new TimedLiveCode(opts);
+            } else if (lang === "javascript") {
+                return new TimedJSActiveCode(opts);
+            } else if (lang === "htmlmixed") {
+                return new TimedHTMLActiveCode(opts);
+            } else if (lang === "sql") {
+                return new TimedSQLActiveCode(opts);
+            } else {
+                return new TimedActiveCode(opts);
+            }
         } else {
-            // default is python
-            return new ActiveCode(opts);
+            if (lang === "javascript") {
+                return new JSActiveCode(opts);
+            } else if (lang === "htmlmixed") {
+                return new HTMLActiveCode(opts);
+            } else if (lang === "sql") {
+                return new SQLActiveCode(opts);
+            } else if (
+                ["java", "cpp", "c", "python3", "python2"].indexOf(lang) > -1
+            ) {
+                return new LiveCode(opts);
+            } else {
+                // default is python
+                return new ActiveCode(opts);
+            }
         }
     }
     // used by web2py controller(s)

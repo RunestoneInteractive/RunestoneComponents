@@ -54,3 +54,4 @@ dist/
 # Mac stuff
 .DS_Store
 node_modules
+runestone/dist

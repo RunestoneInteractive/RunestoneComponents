@@ -138,8 +138,7 @@ Our goal is to have unit tests which rely on Selenium (a library that helps simu
 * If you have installed RunestoneComponents in your virtualenv using ``pip install -e .``,
   then you should have all the python dependencies you need.
 
-  * ``pip install selenium`` in the virtualenv you're using for Runestone Components development
-  * ``pip install pyvirtualdisplay``
+* You can do ``pip install -r requirements-dev.txt`` to be sure you have everything.
 
 
 **To run tests:**
@@ -152,7 +151,11 @@ Our goal is to have unit tests which rely on Selenium (a library that helps simu
 
 * Finally, to run a test, ensuring that you have accessed a directive folder, type the following at the command prompt:
 
-  * ``python -m unittest discover``
+  * ``pytest``
+
+Running pytest from the main directory will run all the tests.  To run a single test you can navigate to the
+directory of the test, or you can run ``pytest -k XXX` where XXX is a substring that matches some part of
+the test functions name.
 
 .. note::
 
