@@ -212,7 +212,6 @@ config values (conf.py):
         addHTMLToDB(
             self.options["divid"], self.options["basecourse"], res % self.options
         )
-        print("before template", self.options["tracedata"])
         raw_node = nodes.raw(self.block_text, res % self.options, format="html")
         raw_node.source, raw_node.line = self.state_machine.get_source_and_line(
             self.lineno
