@@ -1395,14 +1395,43 @@ var ExecutionVisualizer = /** @class */ (function () {
             hasError = true;
             myViz.curLineExceptionMsg = curEntry.exception_msg;
         }
+        curLineNumber = curEntry.line;
+        // edge case for the final instruction :0
+        if (isTerminated && !hasError) {
+            // don't show redundant arrows on the same line when terminated ...
+            if (prevLineNumber == curLineNumber) {
+                curLineNumber = null;
+            }
+        }
+        // add these fields to myViz, which is the point of this function!
+        myViz.curLineNumber = curLineNumber;
+        myViz.prevLineNumber = prevLineNumber;
+        myViz.curLineIsReturn = curIsReturn;
+        myViz.prevLineIsReturn = prevIsReturn;
+        myViz.renderQuestionMaybe();
+    };
+    ExecutionVisualizer.prototype.isOutputLineVisibleForBubbles = function (lineDivID) {
+        var pcod = this.domRoot.find('#pyCodeOutputDiv');
+        var lineNoTd = $('#' + lineDivID);
+        var LO = lineNoTd.offset().top;
+        var PO = pcod.offset().top;
+        var ST = pcod.scrollTop();
+        var H = pcod.height();
+        // add a few pixels of fudge factor on the bottom end due to bottom scrollbar
+        return (PO <= LO) && (LO < (PO + H - 25));
+    };
+    ExecutionVisualizer.prototype.renderQuestionMaybe = function () {
         // bnm
+        if (this.curInstr < 1)
+            return;
+        var curEntry = this.curTrace[this.curInstr - 1];
         if (curEntry.question) {
             var done = false;
             while (!done) {
                 var ans = prompt(curEntry.question.text);
                 var answer = curEntry.question.correct;
                 var attrs = answer.split(".");
-                var correctAns = curEntry;
+                var correctAns = this.curTrace[this.curInstr];
                 for (var j in attrs) {
                     correctAns = correctAns[attrs[j]];
                 }
@@ -1428,29 +1457,6 @@ var ExecutionVisualizer = /** @class */ (function () {
                 }
             }
         }
-        curLineNumber = curEntry.line;
-        // edge case for the final instruction :0
-        if (isTerminated && !hasError) {
-            // don't show redundant arrows on the same line when terminated ...
-            if (prevLineNumber == curLineNumber) {
-                curLineNumber = null;
-            }
-        }
-        // add these fields to myViz, which is the point of this function!
-        myViz.curLineNumber = curLineNumber;
-        myViz.prevLineNumber = prevLineNumber;
-        myViz.curLineIsReturn = curIsReturn;
-        myViz.prevLineIsReturn = prevIsReturn;
-    };
-    ExecutionVisualizer.prototype.isOutputLineVisibleForBubbles = function (lineDivID) {
-        var pcod = this.domRoot.find('#pyCodeOutputDiv');
-        var lineNoTd = $('#' + lineDivID);
-        var LO = lineNoTd.offset().top;
-        var PO = pcod.offset().top;
-        var ST = pcod.scrollTop();
-        var H = pcod.height();
-        // add a few pixels of fudge factor on the bottom end due to bottom scrollbar
-        return (PO <= LO) && (LO < (PO + H - 25));
     };
     ExecutionVisualizer.curVisualizerID = 1;
     ExecutionVisualizer.DEFAULT_EMBEDDED_CODE_DIV_WIDTH = 350;

@@ -225,7 +225,7 @@ config values (conf.py):
     def inject_questions(self, curTrace):
         if "breakline" not in self.options:
             raise RuntimeError("Must have breakline option")
-        breakline = self.options["breakline"] + 1
+        breakline = self.options["breakline"]
         for frame in curTrace["trace"]:
             if frame["line"] == breakline:
                 frame["question"] = dict(
