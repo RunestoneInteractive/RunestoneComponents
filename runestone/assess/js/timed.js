@@ -30,6 +30,7 @@ Timed.prototype.init = function(opts) {
     this.origElem = orig; // the entire element of this timed assessment and all of its children
     this.divid = orig.id;
     this.children = this.origElem.childNodes;
+    this.visited = [] // none yet
 
     this.timeLimit = 0;
     this.limitedTime = false;
@@ -213,6 +214,7 @@ Timed.prototype.renderNavControls = function() {
     $(this.leftNavButton).attr("aria-label", "Previous");
     $(this.leftNavButton).attr("tabindex", "0");
     $(this.leftNavButton).attr("role", "button");
+    $(this.rightNavButton).attr("id","prev");
     $(this.leftNavButton).css("cursor", "pointer");
     this.leftContainer.appendChild(this.leftNavButton);
     this.pagNavList.appendChild(this.leftContainer);
@@ -221,6 +223,7 @@ Timed.prototype.renderNavControls = function() {
     $(this.rightNavButton).attr("aria-label", "Next");
     $(this.rightNavButton).attr("tabindex", "0");
     $(this.rightNavButton).attr("role", "button");
+    $(this.rightNavButton).attr("id","next");
     this.rightNavButton.innerHTML = "Next &#8250;";
     $(this.rightNavButton).css("cursor", "pointer");
     this.rightContainer.appendChild(this.rightNavButton);
@@ -476,6 +479,14 @@ Timed.prototype.renderTimedQuestion = function() {
         .wrapper;
     var currentQuestion = this.renderedQuestionArray[this.currentQuestionIndex]
         .question;
+        
+    // if not visited add it and check if last question to view
+    if (!this.visited.includes(this.currentQuestionIndex)) {
+    	this.visited.push(this.currentQuestionIndex);
+    	if (this.visited.length == this.renderedQuestionArray.length) {
+    		$(this.finishButton).show();
+    	}
+    }
     // if the question is actually inside a wrapper (for example, activecode), then we want to display the wrapper, but evaluate the actual question object
     if (currentWrapper) {
         $(this.switchDiv).replaceWith(currentWrapper);
@@ -515,6 +526,7 @@ Timed.prototype.startAssessment = function() {
         $("#relations-next").hide(); // hide the next page button for now
         $("#relations-prev").hide(); // hide the previous button for now
         $(this.startBtn).hide();
+        $(this.finishButton).hide(); // hide the finish exam button for now
         $(this.pauseBtn).attr("disabled", false);
         if (this.running === 0 && this.paused === 0) {
             this.running = 1;
