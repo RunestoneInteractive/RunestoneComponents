@@ -55,6 +55,10 @@ def spareBlobHelper(title, spareBlob):
 
 def extractTextII(blob):
     # checking for <strong> tag
+    if "</span>" in blob:
+        blob = blob.replace('<span class="section-number">',"")
+        blob = blob.replace("</span>","")
+        return blob
     if "<strong>" in blob:
         title = ""
         idx0 = blob.find("<strong>")

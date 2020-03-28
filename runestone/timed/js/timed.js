@@ -28,6 +28,7 @@ export default class Timed extends RunestoneBase {
         this.origElem = orig; // the entire element of this timed assessment and all of its children
         this.divid = orig.id;
         this.children = this.origElem.childNodes;
+        this.visited = [];
         this.timeLimit = 0;
         this.limitedTime = false;
         if (!isNaN($(this.origElem).data("time"))) {
@@ -194,6 +195,7 @@ export default class Timed extends RunestoneBase {
         $(this.leftNavButton).attr("aria-label", "Previous");
         $(this.leftNavButton).attr("tabindex", "0");
         $(this.leftNavButton).attr("role", "button");
+        $(this.rightNavButton).attr("id", "prev");
         $(this.leftNavButton).css("cursor", "pointer");
         this.leftContainer.appendChild(this.leftNavButton);
         this.pagNavList.appendChild(this.leftContainer);
@@ -202,6 +204,7 @@ export default class Timed extends RunestoneBase {
         $(this.rightNavButton).attr("aria-label", "Next");
         $(this.rightNavButton).attr("tabindex", "0");
         $(this.rightNavButton).attr("role", "button");
+        $(this.rightNavButton).attr("id", "next");
         this.rightNavButton.innerHTML = "Next &#8250;";
         $(this.rightNavButton).css("cursor", "pointer");
         this.rightContainer.appendChild(this.rightNavButton);
@@ -471,6 +474,12 @@ export default class Timed extends RunestoneBase {
         var currentQuestion = this.renderedQuestionArray[
             this.currentQuestionIndex
         ].question;
+        if (!this.visited.includes(this.currentQuestionIndex)) {
+            this.visited.push(this.currentQuestionIndex);
+            if (this.visited.length === this.renderedQuestionArray.length) {
+                $(this.finishButton).show();
+            }
+        }
         // if the question is actually inside a wrapper (for example, activecode), then we want to display the wrapper, but evaluate the actual question object
         if (currentWrapper) {
             $(this.switchDiv).replaceWith(currentWrapper);
@@ -507,6 +516,7 @@ export default class Timed extends RunestoneBase {
             $("#relations-next").hide(); // hide the next page button for now
             $("#relations-prev").hide(); // hide the previous button for now
             $(this.startBtn).hide();
+            $(this.finishButton).hide(); // hide the finish button for now
             $(this.pauseBtn).attr("disabled", false);
             if (this.running === 0 && this.paused === 0) {
                 this.running = 1;

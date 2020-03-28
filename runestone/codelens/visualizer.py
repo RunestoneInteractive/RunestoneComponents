@@ -235,10 +235,16 @@ config values (conf.py):
         env = self.state.document.settings.env
         url = f"{env.config.trace_url}/trace{lang}"
 
-        r = requests.post(url, data=dict(src=src), timeout=30)
+        try:
+            r = requests.post(url, data=dict(src=src), timeout=30)
+        except requests.ReadTimeout:
+            self.error(
+                "The request to the trace server timed out, you will need to rerun the build"
+            )
+            return ""
         if r.status_code == 200:
             if lang == "java":
                 return r.text
             else:
-                res = r.text[r.text.find('{"code":'):]
-                return(res)
+                res = r.text[r.text.find('{"code":') :]
+                return res

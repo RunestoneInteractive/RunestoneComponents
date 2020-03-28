@@ -154,7 +154,7 @@ Our goal is to have unit tests which rely on Selenium (a library that helps simu
   * ``pytest``
 
 Running pytest from the main directory will run all the tests.  To run a single test you can navigate to the
-directory of the test, or you can run ``pytest -k XXX` where XXX is a substring that matches some part of
+directory of the test, or you can run ``pytest -k XXX`` where XXX is a substring that matches some part of
 the test functions name.
 
 .. note::
