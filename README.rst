@@ -102,17 +102,34 @@ link on `Using Python with Windows <https://docs.python.org/3.4/using/windows.ht
 Developing and Hacking
 ----------------------
 
-So, you would like to help out with developing the Runestone Components.  What do you need to know?  Check out the `Development Roadmap <https://github.com/bnmnetp/runestone/wiki>`_ to get an understanding of our migration towards webcomponents.
+So, you would like to help out with developing the Runestone Components.  Great We welcome all the help we can get.  There is plenty to do no matter what your experience level.  There are a couple of prerequisites.
 
-1.  Make a Fork of this repository.
+1. You will need a version of Python, I recommend at least 3.7 or higher.
+2. You will need nodejs and npm as well since there is a LOT of Javascript code in the components.
+
+To get everything set up do the following
+
+1.  Make a Fork of this repository. and ``git clone`` the repository to your development machine.
 2.  Set up your environment on your development machine
 
-    1.  Make a virtual environment for testing and working  (I recommend pyvenv-3.4  as it is baked in to Python 3.4 and higher)
+    1.  Make a virtual environment for testing and working  (I recommend ``python -m venv`` as it is baked in).  Activate the virtual environment. Then run ``pip install -r requirements-dev.txt`` to install the necessary python packages.
     2.  To use Runestone Components, rather than following the instructions above for installing runestone simply run ``pip install -e .`` from the top level runestone directory.  This will install all of the required prerequisites and setup the runestone install as a link to the development directory. Once you've done that, you can continue following the instructions in the Quick Start section from the line starting with ``mkdir myproject``.
 
-3.  When you have some changes to share, make a Pull Request.
+3.  From the top level RunestoneComponents folder run ``npm install`` this will install the packaging tools that are needed for Javascript development.  ``npm run`` gives you a list of commands  The key command is ``npm run build`` this will combine all of the Javascript and CSS files for all the components into a single runestone.js file.  If you are doing some really deep development and want to avoid building a book, you can put your html in public/index.html and use the ``npm run start`` command.  This will automatically rebuild runestone.js and refresh the webpage every time you save a change.
+
+
+4.  When you have some changes to share, make a Pull Request.
 
 (See the RunestoneServer repository and **http://runestoneinteractive.org** for more complete documentation on how this project works.)
+
+Code Style
+----------
+
+We use ``black`` to automatically style Python.  You can set up your editor to automatically run black whenever you save, or you can run it manually.
+
+We use ``prettier`` to automatically style Javascript.
+
+Run ``jshint`` on your code we have some options configured for this project.
 
 Writing Tests
 -------------
