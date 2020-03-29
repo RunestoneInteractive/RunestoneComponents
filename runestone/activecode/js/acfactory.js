@@ -104,7 +104,7 @@ export default class ACFactory {
             ? eBookConfig.acDefaultLanguage
             : "python";
         // generate the HTML
-        var html = `<div id="ac_modal_${divid} class="modal fade">
+        var html = `<div id="ac_modal_${divid}" class="modal fade">
               <div class="modal-dialog scratch-ac-modal">
                 <div class="modal-content">
                   <div class="modal-header">
