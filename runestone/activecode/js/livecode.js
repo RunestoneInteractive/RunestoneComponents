@@ -85,7 +85,7 @@ export default class LiveCode extends ActiveCode {
         if (this.datafile != undefined) {
             var ids = this.datafile.split(",");
             for (var i = 0; i < ids.length; i++) {
-                file = document.getElementById(ids[i].trim());
+                let file = document.getElementById(ids[i].trim());
                 if (file === null || file === undefined) {
                     // console.log("No file with given id");
                 } else if (file.className === "javaFiles") {
@@ -107,7 +107,7 @@ export default class LiveCode extends ActiveCode {
                 }
             }
         }
-        runspec = {
+        let runspec = {
             language_id: this.language,
             sourcecode: source,
             parameters: paramobj,
@@ -117,7 +117,7 @@ export default class LiveCode extends ActiveCode {
             runspec.input = stdin;
         }
         if (files.length === 0) {
-            data = JSON.stringify({ run_spec: runspec });
+            let data = JSON.stringify({ run_spec: runspec });
             this.runProg_callback(data);
         } else {
             runspec["file_list"] = [];
@@ -142,7 +142,7 @@ export default class LiveCode extends ActiveCode {
                             })
                         );
                     }
-                    data = JSON.stringify({ run_spec: runspec });
+                    let data = JSON.stringify({ run_spec: runspec });
                     this.div2id = instance.div2id;
                     Promise.all(promises)
                         .then(function() {
@@ -171,6 +171,7 @@ export default class LiveCode extends ActiveCode {
         };
         source = this.editor.getValue();
         xhr = new XMLHttpRequest();
+        var result;
         host = this.JOBE_SERVER + this.resource;
         var odiv = this.output;
         $(this.runButton).attr("disabled", "disabled");
@@ -185,7 +186,7 @@ export default class LiveCode extends ActiveCode {
             var logresult;
             $(this.runButton).removeAttr("disabled");
             try {
-                var result = JSON.parse(xhr.responseText);
+                result = JSON.parse(xhr.responseText);
             } catch (e) {
                 result = {};
                 result.outcome = -1;
@@ -422,7 +423,7 @@ export default class LiveCode extends ActiveCode {
                 }
             }
             if (found && stack === 0) {
-                endIndex = i + 1;
+                let endIndex = i + 1;
                 var words = text
                     .substring(endOfLastCommentBeforeClassBegins, startIndex)
                     .trim()

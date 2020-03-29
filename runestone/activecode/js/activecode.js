@@ -5,6 +5,7 @@
 "use strict";
 
 import RunestoneBase from "../../common/js/runestonebase.js";
+import AudioTour from "./audiotour";
 import "./activecode-i18n.en";
 import CodeMirror from "codemirror";
 import "codemirror/mode/python/python.js";
@@ -77,7 +78,7 @@ export class ActiveCode extends RunestoneBase {
                 socket = new WebSocket("wss://" + chatcodesServer);
             }
             if (!connection) {
-                connection = new sharedb.Connection(socket);
+                connection = new window.sharedb.Connection(socket);
             }
             if (!doc) {
                 doc = connection.get("chatcodes", "channels");
@@ -209,10 +210,11 @@ export class ActiveCode extends RunestoneBase {
     }
     createControls() {
         var ctrlDiv = document.createElement("div");
+        var butt;
         $(ctrlDiv).addClass("ac_actions");
         $(ctrlDiv).addClass("col-md-12");
         // Run
-        var butt = document.createElement("button");
+        butt = document.createElement("button");
         $(butt).text($.i18n("msg_activecode_run_code"));
         $(butt).addClass("btn btn-success run-button");
         ctrlDiv.appendChild(butt);
@@ -220,7 +222,7 @@ export class ActiveCode extends RunestoneBase {
         $(butt).click(this.runProg.bind(this));
         $(butt).attr("type", "button");
         if (this.enabledownload || eBookConfig.downloadsEnabled) {
-            var butt = document.createElement("button");
+            butt = document.createElement("button");
             $(butt).text("Download");
             $(butt).addClass("btn save-button");
             ctrlDiv.appendChild(butt);
@@ -229,7 +231,7 @@ export class ActiveCode extends RunestoneBase {
             $(butt).attr("type", "button");
         }
         if (!this.hidecode && !this.hidehistory) {
-            var butt = document.createElement("button");
+            butt = document.createElement("button");
             $(butt).text($.i18n("msg_activecode_load_history"));
             $(butt).addClass("btn btn-default");
             $(butt).attr("type", "button");
@@ -625,7 +627,7 @@ export class ActiveCode extends RunestoneBase {
         $(coachDiv).css("display", "none");
         this.codecoach = coachDiv;
         this.outerDiv.appendChild(coachDiv);
-        var clearDiv = document.createElement("div");
+        clearDiv = document.createElement("div");
         $(clearDiv).css("clear", "both"); // needed to make parent div resize properly
         this.outerDiv.appendChild(clearDiv);
     }
@@ -728,11 +730,12 @@ export class ActiveCode extends RunestoneBase {
         // display grades in modal window
         var showGradeSummary = function(data, status, whatever) {
             var report = eval(data)[0];
+            var body;
             // check for report['message']
             if (report) {
                 if (report["version"] == 2) {
                     // new version; would be better to embed this in HTML for the activecode
-                    var body =
+                    body =
                         "<h4>Grade Report</h4>" +
                         "<p>This question: " +
                         report["grade"] +
@@ -743,7 +746,7 @@ export class ActiveCode extends RunestoneBase {
                         report["comment"] +
                         "</p>";
                 } else {
-                    var body =
+                    body =
                         "<h4>Grade Report</h4>" +
                         "<p>This assignment: " +
                         report["grade"] +
@@ -762,20 +765,19 @@ export class ActiveCode extends RunestoneBase {
                 body =
                     "<h4>The server did not return any grade information</h4>";
             }
-            var html =
-                '<div class="modal fade">' +
-                '  <div class="modal-dialog compare-modal">' +
-                '    <div class="modal-content">' +
-                '      <div class="modal-header">' +
-                '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
-                '        <h4 class="modal-title">Assignment Feedback</h4>' +
-                "      </div>" +
-                '      <div class="modal-body">' +
-                body +
-                "      </div>" +
-                "    </div>" +
-                "  </div>" +
-                "</div>";
+            var html = `<div class="modal fade">
+                  <div class="modal-dialog compare-modal">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Assignment Feedback</h4>
+                      </div>
+                      <div class="modal-body">
+                        ${body}
+                      </div>
+                    </div>
+                  </div>
+                </div>`;
             var el = $(html);
             el.modal();
         };
@@ -885,7 +887,7 @@ export class ActiveCode extends RunestoneBase {
         var ifm = document.createElement("iframe");
         $(ifm).addClass("tie-frame");
         ifm.src = `https://tech-interview-exercises.appspot.com/client/question.html?qid=${this.tie}`;
-        setIframeDimensions = function() {
+        var setIframeDimensions = function() {
             $(".tie-container").css(
                 "width",
                 $(".tie-container")

@@ -9,10 +9,11 @@
     ],
     "esversion": 6,
     "quotmark": true,
-    "strict": false,
+    "strict": "implied",
     "sub": true,
     "browser": true,
     "maxerr": 200,
-    "globalstrict": true
+    "globalstrict": true,
+    "devel": true
 
 }

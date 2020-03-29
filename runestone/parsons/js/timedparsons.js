@@ -1,6 +1,6 @@
 import Parsons from "./parsons";
 
-class TimedParsons extends Parsons {
+export default class TimedParsons extends Parsons {
     constructor(opts) {
         super(opts);
     }

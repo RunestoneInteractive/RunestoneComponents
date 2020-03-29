@@ -104,30 +104,24 @@ export default class ACFactory {
             ? eBookConfig.acDefaultLanguage
             : "python";
         // generate the HTML
-        var html =
-            '<div id="ac_modal_' +
-            divid +
-            '" class="modal fade">' +
-            '  <div class="modal-dialog scratch-ac-modal">' +
-            '    <div class="modal-content">' +
-            '      <div class="modal-header">' +
-            '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
-            '        <h4 class="modal-title">Scratch ActiveCode</h4>' +
-            "      </div> " +
-            '      <div class="modal-body">' +
-            '      <textarea data-component="activecode" data-codelens="true" id="' +
-            divid +
-            '" data-lang="' +
-            lang +
-            '">' +
-            "\n" +
-            "\n" +
-            "\n" +
-            "      </textarea>" +
-            "      </div>" +
-            "    </div>" +
-            "  </div>" +
-            "</div>";
+        var html = `<div id="ac_modal_${divid} class="modal fade">
+              <div class="modal-dialog scratch-ac-modal">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Scratch ActiveCode</h4>
+                  </div>
+                  <div class="modal-body">
+                  <textarea data-component="activecode" data-codelens="true" id="${divid} data-lang="${lang}">
+
+
+
+
+                  </textarea>
+                  </div>
+                </div>
+              </div>
+            </div>`;
         var el = $(html);
         $("body").append(el);
         el.on("shown.bs.modal show.bs.modal", function() {
@@ -136,10 +130,6 @@ export default class ACFactory {
                 e.CodeMirror.focus();
             });
         });
-        //$(document).bind('keypress', '\\', function(evt) {
-        //    ACFactory.toggleScratchActivecode();
-        //    return false;
-        //});
     }
     static toggleScratchActivecode() {
         var divid = "ac_modal_" + eBookConfig.scratchDiv;

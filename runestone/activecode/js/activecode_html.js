@@ -14,7 +14,7 @@ export default class HTMLActiveCode extends ActiveCode {
     runProg() {
         var prog = this.buildProg(true);
         var scrubber_dfd, history_dfd, saveCode;
-        var saveCode = "True";
+        saveCode = "True";
         var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
         history_dfd = __ret.history_dfd;
         saveCode = __ret.saveCode;
