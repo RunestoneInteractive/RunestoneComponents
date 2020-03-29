@@ -112,7 +112,7 @@ export default class ACFactory {
                     <h4 class="modal-title">Scratch ActiveCode</h4>
                   </div>
                   <div class="modal-body">
-                  <textarea data-component="activecode" data-codelens="true" id="${divid} data-lang="${lang}">
+                  <textarea data-component="activecode" data-codelens="true" id="${divid}" data-lang="${lang}">
 
 
 
