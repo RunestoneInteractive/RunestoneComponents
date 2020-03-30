@@ -42,7 +42,7 @@ export default class FITB extends RunestoneBase {
     }
     // Find the script tag containing JSON in a given root DOM node.
     scriptSelector(root_node) {
-        return $(root_node).find('script[type="application/json"]');
+        return $(root_node).find(`script[type="application/json"]`);
     }
     /*===========================================
     ====   Functions generating final HTML   ====
