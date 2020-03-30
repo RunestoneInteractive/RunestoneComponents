@@ -854,7 +854,8 @@ ActiveCode.prototype.showCodelens = function() {
     myVars.codeDivWidth = 350;
     myVars.codeDivHeight = 400;
     var srcURL = "https://pythontutor.com/iframe-embed.html";
-    var embedUrlStr = $.param.fragment(srcURL, myVars, 2 /* clobber all */);
+    var embedUri = $.param(myVars);
+    var embedUrlStr = `${srcURL}#${embedUri}`;
     var myIframe = document.createElement("iframe");
     myIframe.setAttribute("id", this.divid + "_codelens");
     myIframe.setAttribute("width", "800");
