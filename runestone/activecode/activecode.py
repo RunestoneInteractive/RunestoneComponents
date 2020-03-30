@@ -54,6 +54,7 @@ def setup(app):
 
     app.add_autoversioned_javascript("jquery.highlight.js")
     app.add_autoversioned_javascript("bookfuncs.js")
+    app.add_autoversioned_javascript("jquery.ba-bbq.js")
     add_codemirror_css_and_js(
         app, "xml", "css", "python", "htmlmixed", "javascript", "sql"
     )
