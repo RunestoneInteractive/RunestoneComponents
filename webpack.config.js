@@ -48,6 +48,7 @@ module.exports = env => {
                 }
             ]
         },
+        watch: true,
         output: {
             path: path.resolve(__dirname, "runestone/dist"),
             filename: "runestone.js",
