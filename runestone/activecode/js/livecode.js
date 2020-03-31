@@ -350,6 +350,45 @@ export default class LiveCode extends ActiveCode {
         };
         xhr.send(data);
     }
+
+    showCodelens() {
+        let clMess = "";
+        if (this.codelens.style.display == "none") {
+            this.codelens.style.display = "block";
+            clMess = "Building your visualization";
+            this.codelens.innerHTML = clMess;
+            this.clButton.innerText = $.i18n("msg_activecode_hide_codelens");
+        } else {
+            this.codelens.style.display = "none";
+            this.clButton.innerText = $.i18n("msg_activecode_show_in_codelens");
+            return;
+        }
+        var cl = this.codelens.firstChild;
+        if (cl) {
+            this.codelens.removeChild(cl);
+            this.codelens.innerHTML = clMess;
+        }
+        var code = this.buildProg(false);
+        var myVars = {};
+        myVars.code = code;
+        myVars.lang = this.language;
+        var targetDiv = this.codelens.id;
+
+        $.getJSON("/runestone/proxy/pytutor_trace", myVars, function(data) {
+            let vis = addVisualizerToPage(data, targetDiv, {
+                startingInstruction: 0,
+                editCodeBaseURL: null,
+                hideCode: false,
+                lang: myVars.lang
+            });
+        }).fail(function(jqxhr, textStatus, error) {
+            targetDiv.innerHTML =
+                "Sorry, an error occurred while creating your visualization.";
+            console.log("Get Trace Failed -- ");
+            console.log(error);
+        });
+    }
+
     /**
      * Seperates text into multiple .java files
      * @param  {String} text String with muliple java classes needed to be seperated

@@ -618,6 +618,7 @@ export class ActiveCode extends RunestoneBase {
         outDiv.appendChild(this.graphics);
         this.outerDiv.appendChild(outDiv);
         var lensDiv = document.createElement("div");
+        lensDiv.id = `${this.divid}_codelens`;
         $(lensDiv).addClass("col-md-12");
         $(lensDiv).css("display", "none");
         this.codelens = lensDiv;
@@ -831,7 +832,8 @@ export class ActiveCode extends RunestoneBase {
         myVars.codeDivWidth = 350;
         myVars.codeDivHeight = 400;
         var srcURL = "https://pythontutor.com/iframe-embed.html";
-        var embedUrlStr = $.param.fragment(srcURL, myVars, 2 /* clobber all */);
+        var srcVars = $.param(myVars);
+        var embedUrlStr = `${srcURL}#${srcVars}`;
         var myIframe = document.createElement("iframe");
         myIframe.setAttribute("id", this.divid + "_codelens");
         myIframe.setAttribute("width", "800");
