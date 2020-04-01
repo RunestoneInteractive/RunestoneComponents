@@ -369,6 +369,12 @@ export default class LiveCode extends ActiveCode {
             this.codelens.innerHTML = clMess;
         }
         var code = this.buildProg(false);
+        if (code.match(/System.exit/)) {
+            alert(
+                "Sorry... System.exit breaks the visualizer temporarily removing"
+            );
+            code = code.replace(/System.exit\(\d+\);/, "");
+        }
         var myVars = {};
         myVars.code = code;
         myVars.lang = this.language;
