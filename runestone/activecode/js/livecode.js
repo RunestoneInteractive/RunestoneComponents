@@ -396,6 +396,11 @@ export default class LiveCode extends ActiveCode {
             console.log("Get Trace Failed -- ");
             console.log(error);
         });
+        this.logBookEvent({
+            event: "codelens",
+            act: "view",
+            div_id: this.divid
+        });
     }
 
     /**
