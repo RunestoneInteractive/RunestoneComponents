@@ -378,6 +378,9 @@ export default class LiveCode extends ActiveCode {
         var myVars = {};
         myVars.code = code;
         myVars.lang = this.language;
+        if (this.stdin) {
+            myVars.stdin = $(this.stdin_el).val();
+        }
         var targetDiv = this.codelens.id;
 
         $.getJSON("/runestone/proxy/pytutor_trace", myVars, function(data) {
