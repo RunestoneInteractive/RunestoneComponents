@@ -1000,6 +1000,48 @@ export class ActiveCode extends RunestoneBase {
                 Sk.execLimit = 25000;
             }
         }
+<<<<<<< HEAD
+=======
+    } else if (this.langauge == "javascript") {
+        myVars.py = "js";
+    } else {
+        myVars.py = this.language;
+    }
+
+    myVars.curInstr = 0;
+    myVars.codeDivWidth = 350;
+    myVars.codeDivHeight = 400;
+    var srcURL = "https://pythontutor.com/iframe-embed.html";
+    var embedUri = $.param(myVars);
+    var embedUrlStr = `${srcURL}#${embedUri}`;
+    var myIframe = document.createElement("iframe");
+    myIframe.setAttribute("id", this.divid + "_codelens");
+    myIframe.setAttribute("width", "800");
+    myIframe.setAttribute("height", "500");
+    myIframe.setAttribute("style", "display:block");
+    myIframe.style.background = "#fff";
+    //myIframe.setAttribute("src",srcURL)
+    myIframe.src = embedUrlStr;
+    this.codelens.appendChild(myIframe);
+    this.logBookEvent({
+        event: "codelens",
+        act: "view",
+        div_id: this.divid
+    });
+};
+
+// <iframe id="%(divid)s_codelens" width="800" height="500" style="display:block"src="#">
+// </iframe>
+
+ActiveCode.prototype.showCodeCoach = function() {
+    var myIframe;
+    var srcURL;
+    var cl;
+    var div_id = this.divid;
+    if (this.codecoach === null) {
+        this.codecoach = document.createElement("div");
+        this.codecoach.style.display = "block";
+>>>>>>> master
     }
     builtinRead(x) {
         if (

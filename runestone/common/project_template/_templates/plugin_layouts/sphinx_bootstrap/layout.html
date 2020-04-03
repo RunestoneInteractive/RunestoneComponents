@@ -395,7 +395,14 @@
   {% endraw %}
 
   {% if minimal_outside_links != 'True' %}
+    <script type="application/json" class="js-hypothesis-config">
+    {
+      "showHighlights": false
+    }
+    </script>
+
     <script async src="https://hypothes.is/embed.js"></script>
+
   {% endif %}
 {% endif %}
 
