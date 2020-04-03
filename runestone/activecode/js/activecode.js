@@ -105,7 +105,6 @@ export class ActiveCode extends RunestoneBase {
             this.caption = "ActiveCode";
         }
         this.addCaption("runestone");
-        this.addJSONLibrary();
         if (this.autorun) {
             $(document).ready(this.runProg.bind(this));
         }
@@ -977,28 +976,6 @@ export class ActiveCode extends RunestoneBase {
         errFix.innerHTML = errorText[errName + "Fix"];
         var moreInfo = "../ErrorHelp/" + errName.toLowerCase() + ".html";
         //console.log("Runtime Error: " + err.toString());
-    }
-    addJSONLibrary() {
-        var jsonExternalLibInfo = {
-            path:
-                eBookConfig.app +
-                "/static/" +
-                eBookConfig.course +
-                "/_static/json.sk-master/__init__.js",
-            dependencies: [
-                eBookConfig.app +
-                    "/static/" +
-                    eBookConfig.course +
-                    "/_static/json.sk-master/stringify.js"
-            ]
-        };
-        if (Sk.externalLibraries) {
-            Sk.externalLibraries.json = jsonExternalLibInfo;
-        } else {
-            Sk.externalLibraries = {
-                json: jsonExternalLibInfo
-            };
-        }
     }
     setTimeLimit(timer) {
         var timelimit = this.timelimit;
