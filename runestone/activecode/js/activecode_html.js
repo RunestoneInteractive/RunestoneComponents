@@ -4,9 +4,7 @@ export default class HTMLActiveCode extends ActiveCode {
     constructor(opts) {
         super(opts);
         opts.alignVertical = true;
-        this.code = $("<textarea />")
-            .html(this.origElem.innerHTML)
-            .text();
+        this.code = $("<textarea />").html(this.origElem.innerHTML).text();
         $(this.runButton).text("Render");
         this.editor.setValue(this.code);
     }
@@ -26,7 +24,7 @@ export default class HTMLActiveCode extends ActiveCode {
         if (!this.alignVertical) {
             $(this.codeDiv).switchClass("col-md-12", "col-md-6", {
                 duration: 500,
-                queue: false
+                queue: false,
             });
         }
         $(this.outDiv).show({ duration: 700, queue: false });
@@ -42,7 +40,7 @@ export default class HTMLActiveCode extends ActiveCode {
             prefix: this.pretext,
             suffix: this.suffix,
             lang: this.language,
-            partner: this.partner
+            partner: this.partner,
         }); // Log the run event
     }
     createOutput() {

@@ -35,10 +35,10 @@ export default class JSActiveCode extends ActiveCode {
         var einfo;
         var scrubber_dfd, history_dfd;
         var saveCode = "True";
-        var write = function(str) {
+        var write = function (str) {
             _this.output.innerHTML += _this.outputfun(str);
         };
-        var writeln = function(str) {
+        var writeln = function (str) {
             if (!str) str = "";
             _this.output.innerHTML += _this.outputfun(str) + "<br />";
         };
@@ -63,7 +63,7 @@ export default class JSActiveCode extends ActiveCode {
             to_save: saveCode,
             prefix: this.pretext,
             suffix: this.suffix,
-            partner: this.partner
+            partner: this.partner,
         }); // Log the run event
     }
 }

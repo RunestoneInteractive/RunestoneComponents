@@ -8,7 +8,7 @@ import {
     TimedLiveCode,
     TimedJSActiveCode,
     TimedHTMLActiveCode,
-    TimedSQLActiveCode
+    TimedSQLActiveCode,
 } from "./timed_activecode";
 
 export default class ACFactory {
@@ -19,7 +19,7 @@ export default class ACFactory {
         var opts = {
             orig: orig,
             useRunestoneServices: eBookConfig.useRunestoneServices,
-            python3: eBookConfig.python3
+            python3: eBookConfig.python3,
         };
         if (addopts) {
             for (var attrname in addopts) {
@@ -69,11 +69,11 @@ export default class ACFactory {
         $(acdiv).append(thepre);
         var opts = {
             orig: thepre,
-            useRunestoneServices: true
+            useRunestoneServices: true,
         };
         var addopts = {
             sid: sid,
-            graderactive: true
+            graderactive: true,
         };
         if (language === "htmlmixed") {
             addopts["vertical"] = true;
@@ -82,7 +82,7 @@ export default class ACFactory {
         var savediv = newac.divid;
         newac.divid = savediv;
         newac.editor.setSize(500, 300);
-        setTimeout(function() {
+        setTimeout(function () {
             newac.editor.refresh();
         }, 500);
     }
@@ -124,8 +124,8 @@ export default class ACFactory {
             </div>`;
         var el = $(html);
         $("body").append(el);
-        el.on("shown.bs.modal show.bs.modal", function() {
-            el.find(".CodeMirror").each(function(i, e) {
+        el.on("shown.bs.modal show.bs.modal", function () {
+            el.find(".CodeMirror").each(function (i, e) {
                 e.CodeMirror.refresh();
                 e.CodeMirror.focus();
             });
@@ -143,9 +143,9 @@ export default class ACFactory {
 // Page Initialization
 //
 
-$(document).ready(function() {
+$(document).ready(function () {
     ACFactory.createScratchActivecode();
-    $("[data-component=activecode]").each(function(index) {
+    $("[data-component=activecode]").each(function (index) {
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
             try {
@@ -183,10 +183,10 @@ window.ACFactory = ACFactory;
 // figure out the login/logout status of the user.  Sometimes its immediate, and sometimes its
 // long.  So to be safe we'll do it both ways..
 var loggedout;
-$(document).bind("runestone:logout", function() {
+$(document).bind("runestone:logout", function () {
     loggedout = true;
 });
-$(document).bind("runestone:logout", function() {
+$(document).bind("runestone:logout", function () {
     for (let k in window.edList) {
         if (window.edList.hasOwnProperty(k)) {
             window.edList[k].disableSaveLoad();

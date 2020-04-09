@@ -10,7 +10,7 @@ import HTMLActiveCode from "./activecode_html";
 import SQLActiveCode from "./activecode_sql";
 
 var TimedActiveCodeMixin = {
-    timedInit: function(opts) {
+    timedInit: function (opts) {
         this.hideButtons();
         this.addHistoryScrubber();
         this.isTimed = true;
@@ -19,14 +19,14 @@ var TimedActiveCodeMixin = {
         window.edList[this.divid] = this;
     },
 
-    hideButtons: function() {
+    hideButtons: function () {
         var buttonList = [
             this.saveButton,
             this.loadButton,
             this.gradeButton,
             this.showHideButt,
             this.coachButton,
-            this.atButton
+            this.atButton,
         ];
         for (var i = 0; i < buttonList.length; i++) {
             if (buttonList[i] !== undefined && buttonList[i] !== null)
@@ -35,14 +35,14 @@ var TimedActiveCodeMixin = {
     },
 
     // bje - not needed anymore
-    renderTimedIcon: function(component) {
+    renderTimedIcon: function (component) {
         // renders the clock icon on timed components.    The component parameter
         // is the element that the icon should be appended to.
         var timeIconDiv = document.createElement("div");
         var timeIcon = document.createElement("img");
         $(timeIcon).attr({
             src: "../_static/clock.png",
-            style: "width:15px;height:15px"
+            style: "width:15px;height:15px",
         });
         timeIconDiv.className = "timeTip";
         timeIconDiv.title = "";
@@ -50,7 +50,7 @@ var TimedActiveCodeMixin = {
         $(component).prepend(timeIconDiv);
     },
 
-    checkCorrectTimed: function() {
+    checkCorrectTimed: function () {
         if (this.pct_correct) {
             if (this.pct_correct >= 100.0) {
                 return "T";
@@ -62,17 +62,17 @@ var TimedActiveCodeMixin = {
         }
     },
 
-    hideFeedback: function() {
+    hideFeedback: function () {
         $(this.output).css("visibility", "hidden");
     },
 
-    processTimedSubmission: function(logFlag) {
+    processTimedSubmission: function (logFlag) {
         $(this.runButton).hide();
         $(`#${this.divid}_unit_results`).show();
         $(this.codeDiv).addClass("ac-disabled");
     },
 
-    reinitializeListeners: function() {
+    reinitializeListeners: function () {
         // re-attach the run button listener
         $(this.runButton).click(this.runProg.bind(this));
         $(this.codeDiv).show();
@@ -84,10 +84,10 @@ var TimedActiveCodeMixin = {
                 max: this.history.length - 1,
                 value: this.history.length - 1,
                 slide: this.slideit.bind(this),
-                change: this.slideit.bind(this)
+                change: this.slideit.bind(this),
             });
         }
-    }
+    },
 };
 
 export class TimedLiveCode extends LiveCode {

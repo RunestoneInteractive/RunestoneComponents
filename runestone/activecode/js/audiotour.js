@@ -186,7 +186,7 @@ export default class AudioTour extends RunestoneBase {
         $("#" + divid + " .CodeMirror.cm-s-default.ui-resizable").hide();
         $("#" + divid + " .ac_opt.btn.btn-default:last-child").hide();
         $(this.stop_button).click(
-            function() {
+            function () {
                 if (this.playing) {
                     this.elem.pause();
                 }
@@ -194,7 +194,7 @@ export default class AudioTour extends RunestoneBase {
                 this.logBookEvent({
                     event: "Audio",
                     act: "closeWindow",
-                    div_id: divid
+                    div_id: divid,
                 });
                 $(this.audio_tour).remove();
                 $(
@@ -205,57 +205,57 @@ export default class AudioTour extends RunestoneBase {
             }.bind(this)
         );
         $(this.tourButtons[0]).click(
-            function() {
+            function () {
                 this.tour(divid, audio_hash[0], bcount);
             }.bind(this)
         );
         $(this.tourButtons[1]).click(
-            function() {
+            function () {
                 this.tour(divid, audio_hash[1], bcount);
             }.bind(this)
         );
         $(this.tourButtons[2]).click(
-            function() {
+            function () {
                 this.tour(divid, audio_hash[2], bcount);
             }.bind(this)
         );
         $(this.tourButtons[3]).click(
-            function() {
+            function () {
                 this.tour(divid, audio_hash[3], bcount);
             }.bind(this)
         );
         $(this.tourButtons[4]).click(
-            function() {
+            function () {
                 this.tour(divid, audio_hash[4], bcount);
             }.bind(this)
         );
         // handle the click to go to the next audio
         $(this.first_audio).click(
-            function() {
+            function () {
                 this.firstAudio();
             }.bind(this)
         );
         // handle the click to go to the next audio
         $(this.prev_audio).click(
-            function() {
+            function () {
                 this.prevAudio();
             }.bind(this)
         );
         // handle the click to pause or play the audio
         $(this.pause_audio).click(
-            function() {
+            function () {
                 this.pauseAndPlayAudio(divid);
             }.bind(this)
         );
         // handle the click to go to the next audio
         $(this.next_audio).click(
-            function() {
+            function () {
                 this.nextAudio();
             }.bind(this)
         );
         // handle the click to go to the next audio
         $(this.last_audio).click(
-            function() {
+            function () {
                 this.lastAudio();
             }.bind(this)
         );
@@ -344,7 +344,7 @@ export default class AudioTour extends RunestoneBase {
         this.logBookEvent({
             event: "Audio",
             act: "first",
-            div_id: this.theDivid
+            div_id: this.theDivid,
         });
         // move to the first audio
         this.currIndex = 0;
@@ -360,7 +360,7 @@ export default class AudioTour extends RunestoneBase {
             this.logBookEvent({
                 event: "Audio",
                 act: "prev",
-                div_id: this.theDivid
+                div_id: this.theDivid,
             });
             // move to previous to the current (but the current index has moved to the next)
             this.currIndex = this.currIndex - 1;
@@ -375,7 +375,7 @@ export default class AudioTour extends RunestoneBase {
         this.logBookEvent({
             event: "Audio",
             act: "next",
-            div_id: this.theDivid
+            div_id: this.theDivid,
         });
         // if not at the end
         if (this.currIndex < this.len - 1) {
@@ -393,7 +393,7 @@ export default class AudioTour extends RunestoneBase {
         this.logBookEvent({
             event: "Audio",
             act: "last",
-            div_id: this.theDivid
+            div_id: this.theDivid,
         });
         // move to the last audio
         this.currIndex = this.len - 1;
@@ -467,7 +467,7 @@ export default class AudioTour extends RunestoneBase {
             );
             $("#" + afile).bind(
                 "ended",
-                function() {
+                function () {
                     this.outerAudio();
                 }.bind(this)
             );
@@ -475,7 +475,7 @@ export default class AudioTour extends RunestoneBase {
         } else {
             $("#" + afile).bind(
                 "ended",
-                function() {
+                function () {
                     this.outerAudio();
                 }.bind(this)
             );
@@ -492,7 +492,7 @@ export default class AudioTour extends RunestoneBase {
             $(this.status).html($.i18n("msg_activecode_loading_audio"));
             $("#" + this.afile).bind(
                 "canplaythrough",
-                function() {
+                function () {
                     this.playWhenReady(this.afile, divid, ahash);
                 }.bind(this)
             );
@@ -526,7 +526,7 @@ export default class AudioTour extends RunestoneBase {
             this.logBookEvent({
                 event: "Audio",
                 act: "play",
-                div_id: this.theDivid
+                div_id: this.theDivid,
             });
         }
         // if audio was this.playing pause it
@@ -545,7 +545,7 @@ export default class AudioTour extends RunestoneBase {
             this.logBookEvent({
                 event: "Audio",
                 act: "pause",
-                div_id: this.theDivid
+                div_id: this.theDivid,
             });
         }
     }

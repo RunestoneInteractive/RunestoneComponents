@@ -20,11 +20,11 @@ import "./../css/activecode.css";
 import "codemirror/lib/codemirror.css";
 
 var isMouseDown = false;
-document.onmousedown = function() {
+document.onmousedown = function () {
     isMouseDown = true;
 };
 
-document.onmouseup = function() {
+document.onmouseup = function () {
     isMouseDown = false;
 };
 window.edList = {};
@@ -144,20 +144,20 @@ export class ActiveCode extends RunestoneBase {
             autoMatchParens: true,
             extraKeys: {
                 Tab: "indentMore",
-                "Shift-Tab": "indentLess"
-            }
+                "Shift-Tab": "indentLess",
+            },
         });
         // Make the editor resizable
         $(editor.getWrapperElement()).resizable({
-            resize: function() {
+            resize: function () {
                 editor.setSize($(this).width(), $(this).height());
                 editor.refresh();
-            }
+            },
         });
         // give the user a visual cue that they have changed but not saved
         editor.on(
             "change",
-            function(ev) {
+            function (ev) {
                 if (
                     editor.acEditEvent == false ||
                     editor.acEditEvent === undefined
@@ -178,27 +178,27 @@ export class ActiveCode extends RunestoneBase {
                     this.logBookEvent({
                         event: "activecode",
                         act: "edit",
-                        div_id: this.divid
+                        div_id: this.divid,
                     });
                 }
                 editor.acEditEvent = true;
             }.bind(this)
         ); // use bind to preserve *this* inside the on handler.
         //Solving Keyboard Trap of ActiveCode: If user use tab for navigation outside of ActiveCode, then change tab behavior in ActiveCode to enable tab user to tab out of the textarea
-        $(window).keydown(function(e) {
+        $(window).keydown(function (e) {
             var code = e.keyCode ? e.keyCode : e.which;
             if (code == 9 && $("textarea:focus").length === 0) {
                 editor.setOption("extraKeys", {
-                    Tab: function(cm) {
+                    Tab: function (cm) {
                         $(document.activeElement)
                             .closest(".tab-content")
                             .nextSibling.focus();
                     },
-                    "Shift-Tab": function(cm) {
+                    "Shift-Tab": function (cm) {
                         $(document.activeElement)
                             .closest(".tab-content")
                             .previousSibling.focus();
-                    }
+                    },
                 });
             }
         });
@@ -262,7 +262,7 @@ export class ActiveCode extends RunestoneBase {
             this.showHideButt = butt;
             ctrlDiv.appendChild(butt);
             $(butt).click(
-                function() {
+                function () {
                     $(this.codeDiv).toggle();
                     if (this.historyScrubber == null) {
                         this.addHistoryScrubber(true);
@@ -328,7 +328,7 @@ export class ActiveCode extends RunestoneBase {
             this.atButton = butt;
             ctrlDiv.appendChild(butt);
             $(butt).click(
-                function() {
+                function () {
                     new AudioTour(
                         this.divid,
                         this.code,
@@ -346,7 +346,7 @@ export class ActiveCode extends RunestoneBase {
             this.shareButt = butt;
             ctrlDiv.appendChild(butt);
             $(butt).click(
-                function() {
+                function () {
                     if (
                         !confirm(
                             "You are about to share this code with ALL of your students.  Are you sure you want to continue?"
@@ -357,12 +357,12 @@ export class ActiveCode extends RunestoneBase {
                     let data = {
                         divid: this.divid,
                         code: this.editor.getValue(),
-                        lang: this.language
+                        lang: this.language,
                     };
                     $.post(
                         "/runestone/ajax/broadcast_code.json",
                         data,
-                        function(status) {
+                        function (status) {
                             if (status.mess === "success") {
                                 alert(
                                     `Shared Code with ${status.share_count} students`
@@ -386,7 +386,7 @@ export class ActiveCode extends RunestoneBase {
             $(plabel).text("Pair?");
             ctrlDiv.appendChild(plabel);
             $(checkPartner).click(
-                function() {
+                function () {
                     if (this.partner) {
                         this.partner = false;
                         $(partnerTextBox).hide();
@@ -418,7 +418,7 @@ export class ActiveCode extends RunestoneBase {
             ctrlDiv.appendChild(partnerTextBox);
             $(partnerTextBox).hide();
             $(partnerTextBox).change(
-                function() {
+                function () {
                     this.partner = partnerTextBox.value;
                 }.bind(this)
             );
@@ -444,16 +444,16 @@ export class ActiveCode extends RunestoneBase {
                     $.param({
                         topic: window.location.host + "-" + this.divid,
                         code: this.editor.getValue(),
-                        lang: "Python"
+                        lang: "Python",
                     })
             );
             this.chatButton = butt;
             chatBar.appendChild(butt);
-            var updateChatCodesChannels = function() {
+            var updateChatCodesChannels = function () {
                 var data = doc.data;
                 var i = 1;
                 $(channels).html("");
-                data["channels"].forEach(function(channel) {
+                data["channels"].forEach(function (channel) {
                     if (!channel.archived && topic === channel.topic) {
                         var link = $("<a />");
                         var href =
@@ -463,7 +463,7 @@ export class ActiveCode extends RunestoneBase {
                             channel.channelName;
                         link.attr({
                             href: href,
-                            target: "_blank"
+                            target: "_blank",
                         });
                         link.text(" " + channel.channelName + "(" + i + ") ");
                         $(channels).append(link);
@@ -491,14 +491,14 @@ export class ActiveCode extends RunestoneBase {
     // if there is no edit then there is no append   to_save (True/False)
     addHistoryScrubber(pos_last) {
         var data = {
-            acid: this.divid
+            acid: this.divid,
         };
         var deferred = jQuery.Deferred();
         if (this.sid !== undefined) {
             data["sid"] = this.sid;
         }
         console.log("before get hist");
-        var helper = function() {
+        var helper = function () {
             console.log("making a new scrubber");
             var scrubberDiv = document.createElement("div");
             $(scrubberDiv).css("display", "inline-block");
@@ -506,11 +506,11 @@ export class ActiveCode extends RunestoneBase {
             $(scrubberDiv).css("margin-right", "10px");
             $(scrubberDiv).css({
                 "min-width": "200px",
-                "max-width": "300px"
+                "max-width": "300px",
             });
             var scrubber = document.createElement("div");
             this.timestampP = document.createElement("span");
-            this.slideit = function() {
+            this.slideit = function () {
                 this.editor.setValue(this.history[$(scrubber).slider("value")]);
                 var curVal = this.timestamps[$(scrubber).slider("value")];
                 let pos = $(scrubber).slider("value");
@@ -519,12 +519,12 @@ export class ActiveCode extends RunestoneBase {
                 this.logBookEvent({
                     event: "activecode",
                     act: "slide:" + curVal,
-                    div_id: this.divid
+                    div_id: this.divid,
                 });
             };
             $(scrubber).slider({
                 max: this.history.length - 1,
-                value: this.history.length - 1
+                value: this.history.length - 1,
             });
             $(scrubber).css("margin", "10px");
             $(scrubber).on("slide", this.slideit.bind(this));
@@ -570,7 +570,7 @@ export class ActiveCode extends RunestoneBase {
                 .getJSON(
                     eBookConfig.ajaxURL + "gethist.json",
                     data,
-                    function(data, status, whatever) {
+                    function (data, status, whatever) {
                         if (data.history !== undefined) {
                             this.history = this.history.concat(data.history);
                             for (let t in data.timestamps) {
@@ -606,7 +606,7 @@ export class ActiveCode extends RunestoneBase {
         $(this.graphics).on(
             "DOMNodeInserted",
             "canvas",
-            function(e) {
+            function (e) {
                 $(this.graphics).addClass("visible-ac-canvas");
             }.bind(this)
         );
@@ -654,7 +654,7 @@ export class ActiveCode extends RunestoneBase {
         if ("Blob" in window) {
             var textToWrite = code.replace(/\n/g, "\r\n");
             var textFileAsBlob = new Blob([textToWrite], {
-                type: "text/plain"
+                type: "text/plain",
             });
             if ("msSaveOrOpenBlob" in navigator) {
                 navigator.msSaveOrOpenBlob(textFileAsBlob, fileName);
@@ -672,13 +672,13 @@ export class ActiveCode extends RunestoneBase {
         }
     }
     loadEditor() {
-        var loadEditor = function(data, status, whatever) {
+        var loadEditor = function (data, status, whatever) {
             // function called when contents of database are returned successfully
             var res = eval(data)[0];
             if (res.source) {
                 this.editor.setValue(res.source);
                 setTimeout(
-                    function() {
+                    function () {
                         this.editor.refresh();
                     }.bind(this),
                     500
@@ -686,25 +686,25 @@ export class ActiveCode extends RunestoneBase {
                 $(this.loadButton).tooltip({
                     placement: "bottom",
                     title: $.i18n("msg_activecode_loaded_code"),
-                    trigger: "manual"
+                    trigger: "manual",
                 });
             } else {
                 $(this.loadButton).tooltip({
                     placement: "bottom",
                     title: $.i18n("msg_activecode_no_saved_code"),
-                    trigger: "manual"
+                    trigger: "manual",
                 });
             }
             $(this.loadButton).tooltip("show");
             setTimeout(
-                function() {
+                function () {
                     $(this.loadButton).tooltip("destroy");
                 }.bind(this),
                 4000
             );
         }.bind(this);
         var data = {
-            acid: this.divid
+            acid: this.divid,
         };
         if (this.sid !== undefined) {
             data["sid"] = this.sid;
@@ -715,11 +715,11 @@ export class ActiveCode extends RunestoneBase {
         this.logBookEvent({
             event: "activecode",
             act: "load",
-            div_id: this.divid
+            div_id: this.divid,
         }); // Log the run event
         jQuery
             .get(eBookConfig.ajaxURL + "getprog", data, loadEditor)
-            .done(function() {
+            .done(function () {
                 dfd.resolve();
             });
         return dfd;
@@ -728,7 +728,7 @@ export class ActiveCode extends RunestoneBase {
         // get grade and comments for this assignment
         // get summary of all grades for this student
         // display grades in modal window
-        var showGradeSummary = function(data, status, whatever) {
+        var showGradeSummary = function (data, status, whatever) {
             var report = eval(data)[0];
             var body;
             // check for report['message']
@@ -782,7 +782,7 @@ export class ActiveCode extends RunestoneBase {
             el.modal();
         };
         var data = {
-            div_id: this.divid
+            div_id: this.divid,
         };
         jQuery.get(
             eBookConfig.ajaxURL + "getassignmentgrade",
@@ -845,7 +845,7 @@ export class ActiveCode extends RunestoneBase {
         this.logBookEvent({
             event: "codelens",
             act: "view",
-            div_id: this.divid
+            div_id: this.divid,
         });
     }
     // <iframe id="%(divid)s_codelens" width="800" height="500" style="display:block"src="#">
@@ -877,7 +877,7 @@ export class ActiveCode extends RunestoneBase {
         this.logBookEvent({
             event: "coach",
             act: "view",
-            div_id: this.divid
+            div_id: this.divid,
         });
     }
     showTIE() {
@@ -888,22 +888,20 @@ export class ActiveCode extends RunestoneBase {
         var ifm = document.createElement("iframe");
         $(ifm).addClass("tie-frame");
         ifm.src = `https://tech-interview-exercises.appspot.com/client/question.html?qid=${this.tie}`;
-        var setIframeDimensions = function() {
+        var setIframeDimensions = function () {
             $(".tie-container").css(
                 "width",
-                $(".tie-container")
-                    .parent()
-                    .width()
+                $(".tie-container").parent().width()
             );
             //    $('.tie-frame').css('width', $('.tie-frame').parent().width() - 120);
         };
         ifm.onload = setIframeDimensions;
-        $(function() {
+        $(function () {
             $(window).resize(setIframeDimensions);
         });
         window.addEventListener(
             "message",
-            function(evt) {
+            function (evt) {
                 if (
                     evt.origin != "https://tech-interview-exercises.appspot.com"
                 ) {
@@ -918,7 +916,7 @@ export class ActiveCode extends RunestoneBase {
                     errinfo: "TIEresult",
                     to_save: true,
                     prefix: this.pretext,
-                    suffix: this.suffix
+                    suffix: this.suffix,
                 });
             }.bind(this),
             false
@@ -926,7 +924,7 @@ export class ActiveCode extends RunestoneBase {
         this.logBookEvent({
             event: "tie",
             act: "open",
-            div_id: this.divid
+            div_id: this.divid,
         });
         tieDiv.appendChild(ifm);
         this.outerDiv.appendChild(tieDiv);
@@ -1000,48 +998,6 @@ export class ActiveCode extends RunestoneBase {
                 Sk.execLimit = 25000;
             }
         }
-<<<<<<< HEAD
-=======
-    } else if (this.langauge == "javascript") {
-        myVars.py = "js";
-    } else {
-        myVars.py = this.language;
-    }
-
-    myVars.curInstr = 0;
-    myVars.codeDivWidth = 350;
-    myVars.codeDivHeight = 400;
-    var srcURL = "https://pythontutor.com/iframe-embed.html";
-    var embedUri = $.param(myVars);
-    var embedUrlStr = `${srcURL}#${embedUri}`;
-    var myIframe = document.createElement("iframe");
-    myIframe.setAttribute("id", this.divid + "_codelens");
-    myIframe.setAttribute("width", "800");
-    myIframe.setAttribute("height", "500");
-    myIframe.setAttribute("style", "display:block");
-    myIframe.style.background = "#fff";
-    //myIframe.setAttribute("src",srcURL)
-    myIframe.src = embedUrlStr;
-    this.codelens.appendChild(myIframe);
-    this.logBookEvent({
-        event: "codelens",
-        act: "view",
-        div_id: this.divid
-    });
-};
-
-// <iframe id="%(divid)s_codelens" width="800" height="500" style="display:block"src="#">
-// </iframe>
-
-ActiveCode.prototype.showCodeCoach = function() {
-    var myIframe;
-    var srcURL;
-    var cl;
-    var div_id = this.divid;
-    if (this.codecoach === null) {
-        this.codecoach = document.createElement("div");
-        this.codecoach.style.display = "block";
->>>>>>> master
     }
     builtinRead(x) {
         if (
@@ -1064,12 +1020,12 @@ ActiveCode.prototype.showCodeCoach = function() {
                 $.ajax({
                     async: false,
                     url: `/runestone/ajax/get_datafile?course_id=${eBookConfig.course}&acid=${divid}`,
-                    success: function(data) {
+                    success: function (data) {
                         result = JSON.parse(data).data;
                     },
-                    error: function(err) {
+                    error: function (err) {
                         result = null;
-                    }
+                    },
                 });
                 if (result) {
                     return result;
@@ -1091,7 +1047,7 @@ ActiveCode.prototype.showCodeCoach = function() {
     }
     outputfun(text) {
         // bnm python 3
-        var pyStr = function(x) {
+        var pyStr = function (x) {
             if (x instanceof Array) {
                 return "[" + x.join(", ") + "]";
             } else {
@@ -1117,9 +1073,9 @@ ActiveCode.prototype.showCodeCoach = function() {
             .replace(/>/g, "&gt;")
             .replace(/\n/g, "<br/>");
         return Promise.resolve().then(
-            function() {
+            function () {
                 setTimeout(
-                    function() {
+                    function () {
                         $(this.output).append(text);
                     }.bind(this),
                     0
@@ -1166,12 +1122,12 @@ ActiveCode.prototype.showCodeCoach = function() {
             wresult = $.ajax({
                 async: false,
                 url: `/runestone/ajax/get_datafile?course_id=${eBookConfig.course}&acid=${divid}`,
-                success: function(data) {
+                success: function (data) {
                     result = JSON.parse(data).data;
                 },
-                error: function(err) {
+                error: function (err) {
                     result = null;
-                }
+                },
             });
             return result;
         }
@@ -1212,7 +1168,7 @@ ActiveCode.prototype.showCodeCoach = function() {
         history_dfd = jQuery.Deferred();
         scrubber_dfd
             .done(
-                function() {
+                function () {
                     if (
                         this.historyScrubber &&
                         this.history[$(this.historyScrubber).slider("value")] !=
@@ -1241,7 +1197,7 @@ ActiveCode.prototype.showCodeCoach = function() {
                     history_dfd.resolve();
                 }.bind(this)
             )
-            .fail(function() {
+            .fail(function () {
                 console.log(
                     "Scrubber deferred failed - this should not happen"
                 );
@@ -1249,7 +1205,7 @@ ActiveCode.prototype.showCodeCoach = function() {
             });
         return {
             history_dfd: history_dfd,
-            saveCode: saveCode
+            saveCode: saveCode,
         };
     }
     runProg() {
@@ -1273,7 +1229,7 @@ ActiveCode.prototype.showCodeCoach = function() {
             //        python3: this.python3,
             imageProxy: "http://image.runestone.academy:8080/320x",
             inputfunTakesPrompt: true,
-            jsonpSites: ["https://itunes.apple.com"]
+            jsonpSites: ["https://itunes.apple.com"],
         });
         Sk.divid = this.divid;
         if (this.graderactive) {
@@ -1289,19 +1245,19 @@ ActiveCode.prototype.showCodeCoach = function() {
         $(this.historyScrubber).slider("disable");
         $(this.outDiv).show({
             duration: 700,
-            queue: false
+            queue: false,
         });
         var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
         history_dfd = __ret.history_dfd;
         saveCode = __ret.saveCode;
-        skulpt_run_dfd = Sk.misceval.asyncToPromise(function() {
+        skulpt_run_dfd = Sk.misceval.asyncToPromise(function () {
             return Sk.importMainWithBody("<stdin>", false, prog, true);
         });
         // Make sure that the history scrubber is fully initialized AND the code has been run
         // before we start logging stuff.
         var self = this;
         Promise.all([skulpt_run_dfd, history_dfd]).then(
-            function(mod) {
+            function (mod) {
                 $(this.runButton).removeAttr("disabled");
                 if (this.slideit) {
                     $(this.historyScrubber).on(
@@ -1318,11 +1274,11 @@ ActiveCode.prototype.showCodeCoach = function() {
                     to_save: saveCode,
                     prefix: this.pretext,
                     suffix: this.suffix,
-                    partner: this.partner
+                    partner: this.partner,
                 }); // Log the run event
             }.bind(this),
-            function(err) {
-                history_dfd.done(function() {
+            function (err) {
+                history_dfd.done(function () {
                     $(self.runButton).removeAttr("disabled");
                     $(self.historyScrubber).on(
                         "slidechange",
@@ -1337,14 +1293,14 @@ ActiveCode.prototype.showCodeCoach = function() {
                         to_save: saveCode,
                         prefix: self.pretext,
                         suffix: self.suffix,
-                        partner: self.partner
+                        partner: self.partner,
                     }); // Log the run event
                     self.addErrorMessage(err);
                 });
             }
         );
         if (typeof window.allVisualizers != "undefined") {
-            $.each(window.allVisualizers, function(i, e) {
+            $.each(window.allVisualizers, function (i, e) {
                 e.redrawConnectors();
             });
         }
@@ -1359,7 +1315,7 @@ var languageExtensions = {
     python2: "py",
     python3: "py",
     cpp: "cpp",
-    c: "c"
+    c: "c",
 };
 
 var errorText = {};
@@ -1409,6 +1365,6 @@ errorText.KeyErrorFix = $.i18n("msg_activecode_key_error_fix");
 errorText.AssertionError = $.i18n("msg_activecode_assertion_error");
 errorText.AssertionErrorFix = $.i18n("msg_activecode_assertion_error_fix");
 
-String.prototype.replaceAll = function(target, replacement) {
+String.prototype.replaceAll = function (target, replacement) {
     return this.split(target).join(replacement);
 };

@@ -16,10 +16,10 @@ export default class SQLActiveCode extends ActiveCode {
             fnprefix = "/_static";
         }
         this.config = {
-            locateFile: filename => `${fnprefix}/${filename}`
+            locateFile: (filename) => `${fnprefix}/${filename}`,
         };
         var self = this;
-        initSqlJs(this.config).then(function(SQL) {
+        initSqlJs(this.config).then(function (SQL) {
             // set up call to load database asynchronously if given
             if (self.dburl) {
                 if (!self.dburl.startsWith("http")) {
@@ -35,11 +35,11 @@ export default class SQLActiveCode extends ActiveCode {
                 if (!(self.dburl in allDburls)) {
                     allDburls[self.dburl] = {
                         status: "loading",
-                        xWaitFor: jQuery.Deferred()
+                        xWaitFor: jQuery.Deferred(),
                     };
                 } else {
                     if (allDburls[self.dburl].status == "loading") {
-                        allDburls[self.dburl].xWaitFor.done(function() {
+                        allDburls[self.dburl].xWaitFor.done(function () {
                             self.db = new SQL.Database(
                                 allDburls[self.dburl].db
                             );
@@ -57,7 +57,7 @@ export default class SQLActiveCode extends ActiveCode {
                 // For example: https://github.com/lerocha/chinook-database/raw/master/ChinookDatabase/DataSources/Chinook_Sqlite.sqlite
                 xhr.open("GET", self.dburl, true);
                 xhr.responseType = "arraybuffer";
-                xhr.onload = e => {
+                xhr.onload = (e) => {
                     var uInt8Array = new Uint8Array(xhr.response);
                     self.db = new SQL.Database(uInt8Array);
                     $(self.runButton).text(buttonText);
@@ -110,12 +110,12 @@ export default class SQLActiveCode extends ActiveCode {
             to_save: saveCode,
             prefix: this.pretext,
             suffix: this.suffix,
-            partner: this.partner
+            partner: this.partner,
         }); // Log the run event
         var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
         history_dfd = __ret.history_dfd;
         saveCode = __ret.saveCode;
-        history_dfd.then(function() {
+        history_dfd.then(function () {
             if (this.slideit) {
                 $(this.historyScrubber).on(
                     "slidechange",
@@ -152,7 +152,7 @@ export default class SQLActiveCode extends ActiveCode {
         // assert row,col oper value for example
         // assert 4,4 == 3
         var result = "";
-        tests = tests.filter(function(s) {
+        tests = tests.filter(function (s) {
             return s.indexOf("assert") > -1;
         });
         for (let test of tests) {
@@ -173,13 +173,14 @@ export default class SQLActiveCode extends ActiveCode {
         }
         let pct = (100 * this.passed) / (this.passed + this.failed);
         pct = pct.toLocaleString(undefined, { maximumFractionDigits: 2 });
-        result += `You passed ${this.passed} out of ${this.passed +
-            this.failed} tests for ${pct}%`;
+        result += `You passed ${this.passed} out of ${
+            this.passed + this.failed
+        } tests for ${pct}%`;
         this.logBookEvent({
             event: "unittest",
             div_id: this.divid,
             course: eBookConfig.course,
-            act: `percent:${pct}:passed:${this.passed}:failed:${this.failed}`
+            act: `percent:${pct}:passed:${this.passed}:failed:${this.failed}`,
         });
         return result;
     }
@@ -187,18 +188,18 @@ export default class SQLActiveCode extends ActiveCode {
         let actual = result_table.values[row][col];
         let output = "";
         const operators = {
-            "==": function(operand1, operand2) {
+            "==": function (operand1, operand2) {
                 return operand1 == operand2;
             },
-            "!=": function(operand1, operand2) {
+            "!=": function (operand1, operand2) {
                 return operand1 != operand2;
             },
-            ">": function(operand1, operand2) {
+            ">": function (operand1, operand2) {
                 return operand1 > operand2;
             },
-            "<": function(operand1, operand2) {
+            "<": function (operand1, operand2) {
                 return operand1 > operand2;
-            }
+            },
         };
         let res = operators[oper](actual, expected);
         if (res) {
@@ -222,7 +223,7 @@ function createTable(tableData, container) {
         maxRows: 100,
         filters: false,
         dropdownMenu: false,
-        licenseKey: "non-commercial-and-evaluation"
+        licenseKey: "non-commercial-and-evaluation",
     });
 
     return hot;

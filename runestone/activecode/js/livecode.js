@@ -55,7 +55,7 @@ export default class LiveCode extends ActiveCode {
             cpp: "test.cpp",
             c: "test.c",
             python3: "test.py",
-            python2: "test.py"
+            python2: "test.py",
         };
         var source = this.editor.getValue();
         source = this.buildProg(true);
@@ -66,7 +66,7 @@ export default class LiveCode extends ActiveCode {
             "compileargs",
             "linkargs",
             "runargs",
-            "interpreterargs"
+            "interpreterargs",
         ];
         var paramobj = {};
         for (let param of paramlist) {
@@ -111,7 +111,7 @@ export default class LiveCode extends ActiveCode {
             language_id: this.language,
             sourcecode: source,
             parameters: paramobj,
-            sourcefilename: this.sourcefile
+            sourcefilename: this.sourcefile,
         };
         if (stdin) {
             runspec.input = stdin;
@@ -126,7 +126,7 @@ export default class LiveCode extends ActiveCode {
             //todo: Not sure why this is loaded like this. It could be loaded once.
             $.getScript(
                 "https://cdn.rawgit.com/killmenot/webtoolkit.md5/master/md5.js",
-                function() {
+                function () {
                     for (var i = 0; i < files.length; i++) {
                         var fileName = files[i].name;
                         var fileContent = files[i].content;
@@ -134,7 +134,7 @@ export default class LiveCode extends ActiveCode {
                             "runestone" + MD5(fileName + fileContent);
                         runspec["file_list"].push([
                             instance.div2id[fileName],
-                            fileName
+                            fileName,
                         ]);
                         promises.push(
                             new Promise((resolve, reject) => {
@@ -145,11 +145,11 @@ export default class LiveCode extends ActiveCode {
                     let data = JSON.stringify({ run_spec: runspec });
                     this.div2id = instance.div2id;
                     Promise.all(promises)
-                        .then(function() {
+                        .then(function () {
                             // console.log("All files on Server");
                             instance.runProg_callback(data);
                         })
-                        .catch(function(err) {
+                        .catch(function (err) {
                             // console.log("Error: " + err);
                         });
                 }
@@ -167,7 +167,7 @@ export default class LiveCode extends ActiveCode {
             cpp: "test.cpp",
             c: "test.c",
             python3: "test.py",
-            python2: "test.py"
+            python2: "test.py",
         };
         source = this.editor.getValue();
         xhr = new XMLHttpRequest();
@@ -182,7 +182,7 @@ export default class LiveCode extends ActiveCode {
         xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
         xhr.setRequestHeader("Accept", "application/json");
         xhr.setRequestHeader("X-API-KEY", this.API_KEY);
-        xhr.onload = function() {
+        xhr.onload = function () {
             var logresult;
             $(this.runButton).removeAttr("disabled");
             try {
@@ -203,7 +203,7 @@ export default class LiveCode extends ActiveCode {
                 to_save: saveCode,
                 lang: this.language,
                 event: "livecode",
-                partner: this.partner
+                partner: this.partner,
             });
             switch (result.outcome) {
                 case 15:
@@ -241,7 +241,7 @@ export default class LiveCode extends ActiveCode {
             // todo: handle server busy and timeout errors too
         }.bind(this);
         ///$("#" + divid + "_errinfo").remove();
-        xhr.onerror = function() {
+        xhr.onerror = function () {
             this.addJobeErrorMessage($.i18n("msg_activecode_server_comm_err"));
             $(this.runButton).removeAttr("disabled");
         }.bind(this);
@@ -275,10 +275,10 @@ export default class LiveCode extends ActiveCode {
         xhr.setRequestHeader("Content-type", "application/json");
         xhr.setRequestHeader("Accept", "text/plain");
         xhr.setRequestHeader("X-API-KEY", this.API_KEY);
-        xhr.onerror = function() {
+        xhr.onerror = function () {
             // console.log("error sending file" + xhr.responseText);
         };
-        xhr.onload = function() {
+        xhr.onload = function () {
             switch (xhr.status) {
                 case 208:
                 case 404:
@@ -324,7 +324,7 @@ export default class LiveCode extends ActiveCode {
         xhr.setRequestHeader("Content-type", "application/json");
         xhr.setRequestHeader("Accept", "text/plain");
         xhr.setRequestHeader("X-API-KEY", this.API_KEY);
-        xhr.onload = function() {
+        xhr.onload = function () {
             switch (xhr.status) {
                 case 403:
                     // console.log("Forbidden");
@@ -344,7 +344,7 @@ export default class LiveCode extends ActiveCode {
                     reject();
             }
         }.bind(this);
-        xhr.onerror = function() {
+        xhr.onerror = function () {
             // console.log("error sending file" + xhr.responseText);
             reject();
         };
@@ -383,14 +383,14 @@ export default class LiveCode extends ActiveCode {
         }
         var targetDiv = this.codelens.id;
 
-        $.getJSON("/runestone/proxy/pytutor_trace", myVars, function(data) {
+        $.getJSON("/runestone/proxy/pytutor_trace", myVars, function (data) {
             let vis = addVisualizerToPage(data, targetDiv, {
                 startingInstruction: 0,
                 editCodeBaseURL: null,
                 hideCode: false,
-                lang: myVars.lang
+                lang: myVars.lang,
             });
-        }).fail(function(jqxhr, textStatus, error) {
+        }).fail(function (jqxhr, textStatus, error) {
             targetDiv.innerHTML =
                 "Sorry, an error occurred while creating your visualization.";
             console.log("Get Trace Failed -- ");
@@ -399,7 +399,7 @@ export default class LiveCode extends ActiveCode {
         this.logBookEvent({
             event: "codelens",
             act: "view",
-            div_id: this.divid
+            div_id: this.divid,
         });
     }
 
@@ -492,7 +492,7 @@ export default class LiveCode extends ActiveCode {
                 className = className.trim() + ".java";
                 classes.push({
                     name: className,
-                    content: text.substring(importIndex, endIndex)
+                    content: text.substring(importIndex, endIndex),
                 });
                 found = false;
                 importIndex = endIndex;
