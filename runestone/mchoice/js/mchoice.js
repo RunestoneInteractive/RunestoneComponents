@@ -86,7 +86,7 @@ export default class MultipleChoice extends RunestoneBase {
             var answer_object = {
                 id: answer_id,
                 correct: is_correct,
-                content: answer_text
+                content: answer_text,
             };
             this.answerList.push(answer_object);
         }
@@ -135,7 +135,7 @@ export default class MultipleChoice extends RunestoneBase {
         $(this.optsForm).attr({
             method: "get",
             action: "",
-            onsubmit: "return false;"
+            onsubmit: "return false;",
         });
         // generate form options
         this.renderMCFormOpts();
@@ -180,7 +180,7 @@ export default class MultipleChoice extends RunestoneBase {
             // create the object to store in optionArray
             var optObj = {
                 input: $(label).find("input")[0],
-                label: label
+                label: label,
             };
             this.optionArray.push(optObj);
             // add the option to the form
@@ -197,12 +197,12 @@ export default class MultipleChoice extends RunestoneBase {
         $(this.submitButton).attr({
             class: "btn btn-success",
             name: "do answer",
-            type: "button"
+            type: "button",
         });
         if (this.multipleanswers) {
             this.submitButton.addEventListener(
                 "click",
-                function() {
+                function () {
                     this.processMCMASubmission(true);
                 }.bind(this),
                 false
@@ -210,7 +210,7 @@ export default class MultipleChoice extends RunestoneBase {
         } else {
             this.submitButton.addEventListener(
                 "click",
-                function(ev) {
+                function (ev) {
                     ev.preventDefault();
                     this.processMCMFSubmission(true);
                 }.bind(this),
@@ -225,12 +225,12 @@ export default class MultipleChoice extends RunestoneBase {
                 class: "btn btn-default",
                 id: this.divid + "_bcomp",
                 disabled: "",
-                name: "compare"
+                name: "compare",
             });
             this.compareButton.textContent = "Compare me";
             this.compareButton.addEventListener(
                 "click",
-                function() {
+                function () {
                     this.compareAnswers(this.divid);
                 }.bind(this),
                 false
@@ -341,7 +341,7 @@ export default class MultipleChoice extends RunestoneBase {
         var storageObj = {
             answer: data.answer,
             timestamp: timeStamp,
-            correct: data.correct
+            correct: data.correct,
         };
         localStorage.setItem(
             this.localStorageKey(),
@@ -358,13 +358,13 @@ export default class MultipleChoice extends RunestoneBase {
         this.scoreMCMASubmission();
         this.setLocalStorage({
             correct: this.correct ? "T" : "F",
-            answer: this.givenArray.join(",")
+            answer: this.givenArray.join(","),
         });
         if (logFlag) {
             var answer = this.givenArray.join(",");
             this.logMCMAsubmission({
                 answer: answer,
-                correct: this.correct
+                correct: this.correct,
             });
         }
         this.renderMCMAFeedBack();
@@ -434,7 +434,7 @@ export default class MultipleChoice extends RunestoneBase {
             act: logAnswer,
             answer: answer,
             correct: correct,
-            div_id: this.divid
+            div_id: this.divid,
         });
     }
 
@@ -464,7 +464,7 @@ export default class MultipleChoice extends RunestoneBase {
         this.scoreMCMFSubmission();
         this.setLocalStorage({
             correct: this.correct ? "T" : "F",
-            answer: this.givenArray.join(",")
+            answer: this.givenArray.join(","),
         });
         if (logFlag) {
             this.logMCMFsubmission();
@@ -498,7 +498,7 @@ export default class MultipleChoice extends RunestoneBase {
             act: logAnswer,
             answer: answer,
             correct: correct,
-            div_id: this.divid
+            div_id: this.divid,
         });
     }
 
@@ -604,12 +604,12 @@ export default class MultipleChoice extends RunestoneBase {
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
 =================================*/
-$(document).bind("runestone:login-complete", function() {
-    $("[data-component=multiplechoice]").each(function(index) {
+$(document).bind("runestone:login-complete", function () {
+    $("[data-component=multiplechoice]").each(function (index) {
         // MC
         var opts = {
             orig: this,
-            useRunestoneServices: eBookConfig.useRunestoneServices
+            useRunestoneServices: eBookConfig.useRunestoneServices,
         };
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
@@ -621,6 +621,6 @@ $(document).bind("runestone:login-complete", function() {
 if (typeof window.component_factory === "undefined") {
     window.component_factory = {};
 }
-window.component_factory.multiplechoice = function(opts) {
+window.component_factory.multiplechoice = function (opts) {
     return new MultipleChoice(opts);
 };

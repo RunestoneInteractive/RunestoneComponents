@@ -60,10 +60,7 @@ export default class FITB extends RunestoneBase {
         $(this.containerDiv).addClass("alert alert-warning");
         this.containerDiv.id = this.divid;
         // Copy the original elements to the container holding what the user will see.
-        $(this.origElem)
-            .children()
-            .clone()
-            .appendTo(this.containerDiv);
+        $(this.origElem).children().clone().appendTo(this.containerDiv);
         // Remove the script tag.
         this.scriptSelector(this.containerDiv).remove();
         // Set the class for the text inputs, then store references to them.
@@ -79,11 +76,11 @@ export default class FITB extends RunestoneBase {
         $(this.submitButton).attr({
             class: "btn btn-success",
             name: "do answer",
-            type: "button"
+            type: "button",
         });
         this.submitButton.addEventListener(
             "click",
-            function() {
+            function () {
                 this.startEvaluation(true);
             }.bind(this),
             false
@@ -97,12 +94,12 @@ export default class FITB extends RunestoneBase {
                 class: "btn btn-default",
                 id: this.origElem.id + "_bcomp",
                 disabled: "",
-                name: "compare"
+                name: "compare",
             });
             this.compareButton.textContent = $.i18n("msg_fitb_compare_me");
             this.compareButton.addEventListener(
                 "click",
-                function() {
+                function () {
                     this.compareFITBAnswers();
                 }.bind(this),
                 false
@@ -203,7 +200,7 @@ export default class FITB extends RunestoneBase {
             // Save the answer locally.
             this.setLocalStorage({
                 answer: answer,
-                timestamp: new Date()
+                timestamp: new Date(),
             });
             var that = this;
             var ret = this.logBookEvent({
@@ -211,14 +208,14 @@ export default class FITB extends RunestoneBase {
                 act: answer,
                 answer: answer,
                 correct: this.correct ? "T" : "F",
-                div_id: this.divid
+                div_id: this.divid,
             });
             if (!this.feedbackArray) {
                 // On success, update the feedback from the server's grade.
-                ret.done(function(data) {
+                ret.done(function (data) {
                     that.setLocalStorage({
                         answer: answer,
-                        timestamp: data.timestamp
+                        timestamp: data.timestamp,
                     });
                     that.correct = data.correct;
                     that.displayFeed = data.displayFeed;
@@ -385,11 +382,11 @@ export default class FITB extends RunestoneBase {
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
 =================================*/
-$(document).bind("runestone:login-complete", function() {
-    $("[data-component=fillintheblank]").each(function(index) {
+$(document).bind("runestone:login-complete", function () {
+    $("[data-component=fillintheblank]").each(function (index) {
         var opts = {
             orig: this,
-            useRunestoneServices: eBookConfig.useRunestoneServices
+            useRunestoneServices: eBookConfig.useRunestoneServices,
         };
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
@@ -408,6 +405,6 @@ $(document).bind("runestone:login-complete", function() {
 if (typeof window.component_factory === "undefined") {
     window.component_factory = {};
 }
-window.component_factory.fillintheblank = function(opts) {
+window.component_factory.fillintheblank = function (opts) {
     return new FITB(opts);
 };

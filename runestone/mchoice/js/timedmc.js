@@ -14,7 +14,7 @@ export default class TimedMC extends MultipleChoice {
         var timeIcon = document.createElement("img");
         $(timeIcon).attr({
             src: "../_static/clock.png",
-            style: "width:15px;height:15px"
+            style: "width:15px;height:15px",
         });
         timeIconDiv.className = "timeTip";
         timeIconDiv.title = "";
@@ -88,7 +88,7 @@ export default class TimedMC extends MultipleChoice {
             // create the object to store in optionArray
             var optObj = {
                 input: input,
-                label: label
+                label: label,
             };
             this.optionArray.push(optObj);
             // add the option to the form

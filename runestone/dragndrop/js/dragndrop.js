@@ -108,9 +108,7 @@ export default class DragNDrop extends RunestoneBase {
         this.draggableDiv.style.minHeight = this.minheight.toString() + "px";
         if ($(this.dropZoneDiv).height() > this.minheight) {
             this.dragDropWrapDiv.style.minHeight =
-                $(this.dropZoneDiv)
-                    .height()
-                    .toString() + "px";
+                $(this.dropZoneDiv).height().toString() + "px";
         } else {
             this.dragDropWrapDiv.style.minHeight =
                 this.minheight.toString() + "px";
@@ -119,7 +117,7 @@ export default class DragNDrop extends RunestoneBase {
     addDragDivListeners() {
         this.draggableDiv.addEventListener(
             "dragover",
-            function(ev) {
+            function (ev) {
                 ev.preventDefault();
                 if ($(this.draggableDiv).hasClass("possibleDrop")) {
                     return;
@@ -129,7 +127,7 @@ export default class DragNDrop extends RunestoneBase {
         );
         this.draggableDiv.addEventListener(
             "drop",
-            function(ev) {
+            function (ev) {
                 ev.preventDefault();
                 if ($(this.draggableDiv).hasClass("possibleDrop")) {
                     $(this.draggableDiv).removeClass("possibleDrop");
@@ -147,7 +145,7 @@ export default class DragNDrop extends RunestoneBase {
         );
         this.draggableDiv.addEventListener(
             "dragleave",
-            function(e) {
+            function (e) {
                 if (!$(this.draggableDiv).hasClass("possibleDrop")) {
                     return;
                 }
@@ -162,18 +160,18 @@ export default class DragNDrop extends RunestoneBase {
         $(this.submitButton).attr({
             class: "btn btn-success drag-button",
             name: "do answer",
-            type: "button"
+            type: "button",
         });
-        this.submitButton.onclick = function() {
+        this.submitButton.onclick = function () {
             this.dragEval(true);
         }.bind(this);
         this.resetButton = document.createElement("button"); // Check me button
         this.resetButton.textContent = $.i18n("msg_dragndrop_reset");
         $(this.resetButton).attr({
             class: "btn btn-default drag-button drag-reset",
-            name: "do answer"
+            name: "do answer",
         });
-        this.resetButton.onclick = function() {
+        this.resetButton.onclick = function () {
             this.resetDraggables();
         }.bind(this);
         this.buttonDiv.appendChild(this.submitButton);
@@ -217,15 +215,15 @@ export default class DragNDrop extends RunestoneBase {
     }
     setEventListeners(dgSpan, dpSpan) {
         // Adds HTML5 "drag and drop" UI functionality
-        dgSpan.addEventListener("dragstart", function(ev) {
+        dgSpan.addEventListener("dragstart", function (ev) {
             ev.dataTransfer.setData("draggableID", ev.target.id);
         });
-        dgSpan.addEventListener("dragover", function(ev) {
+        dgSpan.addEventListener("dragover", function (ev) {
             ev.preventDefault();
         });
         dgSpan.addEventListener(
             "drop",
-            function(ev) {
+            function (ev) {
                 ev.preventDefault();
                 var data = ev.dataTransfer.getData("draggableID");
                 var draggedSpan = document.getElementById(data);
@@ -241,7 +239,7 @@ export default class DragNDrop extends RunestoneBase {
         );
         dpSpan.addEventListener(
             "dragover",
-            function(ev) {
+            function (ev) {
                 ev.preventDefault();
                 if ($(ev.target).hasClass("possibleDrop")) {
                     return;
@@ -254,7 +252,7 @@ export default class DragNDrop extends RunestoneBase {
                 }
             }.bind(this)
         );
-        dpSpan.addEventListener("dragleave", function(ev) {
+        dpSpan.addEventListener("dragleave", function (ev) {
             ev.preventDefault();
             if (!$(ev.target).hasClass("possibleDrop")) {
                 return;
@@ -263,7 +261,7 @@ export default class DragNDrop extends RunestoneBase {
         });
         dpSpan.addEventListener(
             "drop",
-            function(ev) {
+            function (ev) {
                 ev.preventDefault();
                 if ($(ev.target).hasClass("possibleDrop")) {
                     $(ev.target).removeClass("possibleDrop");
@@ -399,7 +397,7 @@ export default class DragNDrop extends RunestoneBase {
                 div_id: this.divid,
                 correct: this.correct,
                 correctNum: this.correctNum,
-                dragNum: this.dragNum
+                dragNum: this.dragNum,
             });
         }
     }
@@ -472,7 +470,7 @@ export default class DragNDrop extends RunestoneBase {
                         answer: answer,
                         minHeight: this.minheight,
                         div_id: this.divid,
-                        correct: storedObj.correct
+                        correct: storedObj.correct,
                     });
                 }
             }
@@ -506,7 +504,7 @@ export default class DragNDrop extends RunestoneBase {
             answer: this.pregnantIndexArray.join(";"),
             minHeight: this.minheight,
             timestamp: timeStamp,
-            correct: correct
+            correct: correct,
         };
         localStorage.setItem(
             this.localStorageKey(),
@@ -519,11 +517,11 @@ export default class DragNDrop extends RunestoneBase {
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
 =================================*/
-$(document).bind("runestone:login-complete", function() {
-    $("[data-component=dragndrop]").each(function(index) {
+$(document).bind("runestone:login-complete", function () {
+    $("[data-component=dragndrop]").each(function (index) {
         var opts = {
             orig: this,
-            useRunestoneServices: eBookConfig.useRunestoneServices
+            useRunestoneServices: eBookConfig.useRunestoneServices,
         };
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
@@ -539,6 +537,6 @@ $(document).bind("runestone:login-complete", function() {
 if (typeof window.component_factory === "undefined") {
     window.component_factory = {};
 }
-window.component_factory["dragndrop"] = function(opts) {
+window.component_factory["dragndrop"] = function (opts) {
     return new DragNDrop(opts);
 };

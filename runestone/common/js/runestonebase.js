@@ -40,7 +40,7 @@ export default class RunestoneBase {
             var post_return = jQuery.post(
                 eBookConfig.ajaxURL + "hsblog",
                 eventInfo,
-                function(jsondata) {
+                function (jsondata) {
                     if (jsondata.log == false) {
                         alert(jsondata.message);
                         location.href =
@@ -75,7 +75,7 @@ export default class RunestoneBase {
             jQuery
                 .post(eBookConfig.ajaxURL + "runlog.json", eventInfo) // Log the run event
                 .done(
-                    function(data, status, whatever) {
+                    function (data, status, whatever) {
                         // data = JSON.parse(data);
                         if (data.message) {
                             alert(data.message);
@@ -90,7 +90,7 @@ export default class RunestoneBase {
                     }.bind(this)
                 )
                 .fail(
-                    function() {
+                    function () {
                         alert(
                             "WARNING:  Your code was not saved!  Please Try again."
                         );
@@ -127,7 +127,7 @@ export default class RunestoneBase {
                         this.repopulateFromStorage.bind(this)
                     )
                     .fail(
-                        function() {
+                        function () {
                             try {
                                 this.checkLocalStorage();
                             } catch (err) {

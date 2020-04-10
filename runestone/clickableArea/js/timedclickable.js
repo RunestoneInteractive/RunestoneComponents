@@ -20,7 +20,7 @@ export default class TimedClickableArea extends ClickableArea {
         var timeIcon = document.createElement("img");
         $(timeIcon).attr({
             src: "../_static/clock.png",
-            style: "width:15px;height:15px"
+            style: "width:15px;height:15px",
         });
         timeIconDiv.className = "timeTip";
         timeIconDiv.title = "";
@@ -51,7 +51,7 @@ export default class TimedClickableArea extends ClickableArea {
         // Disable input, then evaluate component
         for (var i = 0; i < this.clickableArray.length; i++) {
             $(this.clickableArray[i]).css("cursor", "initial");
-            this.clickableArray[i].onclick = function() {
+            this.clickableArray[i].onclick = function () {
                 return;
             };
         }

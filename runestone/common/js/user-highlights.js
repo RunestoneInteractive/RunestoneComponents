@@ -31,9 +31,9 @@ function getCompletions() {
         .ajax({
             url: eBookConfig.ajaxURL + "getCompletionStatus",
             data: data,
-            async: false
+            async: false,
         })
-        .done(function(data) {
+        .done(function (data) {
             if (data != "None") {
                 var completionData = $.parseJSON(data);
                 var completionClass, completionMsg;
@@ -88,11 +88,9 @@ function addNavigationAndCompletionButtons() {
     var relationsNextIconInitialPosition = $("#relations-next").css("right");
     var relationsNextIconNewPosition = -(navLinkBgRightHiddenPosition + 35);
 
-    $("#navLinkBgRight")
-        .css("right", navLinkBgRightHiddenPosition)
-        .show();
+    $("#navLinkBgRight").css("right", navLinkBgRightHiddenPosition).show();
     var navBgShown = false;
-    $(window).scroll(function() {
+    $(window).scroll(function () {
         if (
             $(window).scrollTop() + $(window).height() ==
             $(document).height()
@@ -116,7 +114,7 @@ function addNavigationAndCompletionButtons() {
             );
             $("#navLinkBgLeft").animate({ left: "-65px" }, 200);
             $("#relations-next").animate({
-                right: relationsNextIconInitialPosition
+                right: relationsNextIconInitialPosition,
             });
             navBgShown = false;
         }
@@ -128,7 +126,7 @@ function addNavigationAndCompletionButtons() {
     } else {
         completionFlag = 1;
     }
-    $("#completionButton").on("click", function() {
+    $("#completionButton").on("click", function () {
         if ($(this).hasClass("buttonAskCompletion")) {
             $(this)
                 .removeClass("buttonAskCompletion")
@@ -138,7 +136,7 @@ function addNavigationAndCompletionButtons() {
                 );
             $("#navLinkBgRight").animate({ right: navLinkBgRightFullOpen });
             $("#relations-next").animate({
-                right: relationsNextIconNewPosition
+                right: relationsNextIconNewPosition,
             });
             navLinkBgRightHalfOpen = 0;
             completionFlag = 1;
@@ -150,14 +148,14 @@ function addNavigationAndCompletionButtons() {
             navLinkBgRightHalfOpen = navLinkBgRightHiddenPosition + 70;
             $("#navLinkBgRight").animate({ right: navLinkBgRightHalfOpen });
             $("#relations-next").animate({
-                right: relationsNextIconInitialPosition
+                right: relationsNextIconInitialPosition,
             });
             completionFlag = 0;
         }
         processPageState(completionFlag);
     });
 
-    $(window).on("beforeunload", function(e) {
+    $(window).on("beforeunload", function (e) {
         if (completionFlag == 0) {
             processPageState(completionFlag);
         }
@@ -169,7 +167,7 @@ function decorateTableOfContents() {
         window.location.href.toLowerCase().indexOf("toc.html") != -1 ||
         window.location.href.toLowerCase().indexOf("index.html") != -1
     ) {
-        jQuery.get(eBookConfig.ajaxURL + "getAllCompletionStatus", function(
+        jQuery.get(eBookConfig.ajaxURL + "getAllCompletionStatus", function (
             data
         ) {
             var subChapterList;
@@ -177,7 +175,7 @@ function decorateTableOfContents() {
                 subChapterList = $.parseJSON(data);
 
                 var allSubChapterURLs = $("#main-content div li a");
-                $.each(subChapterList, function(index, item) {
+                $.each(subChapterList, function (index, item) {
                     for (var s = 0; s < allSubChapterURLs.length; s++) {
                         if (
                             allSubChapterURLs[s].href.indexOf(
@@ -195,12 +193,12 @@ function decorateTableOfContents() {
                                     .children()
                                     .first()
                                     .hover(
-                                        function() {
+                                        function () {
                                             $(this)
                                                 .next(".infoTextCompleted")
                                                 .show();
                                         },
-                                        function() {
+                                        function () {
                                             $(this)
                                                 .next(".infoTextCompleted")
                                                 .hide();
@@ -217,12 +215,12 @@ function decorateTableOfContents() {
                                     .children()
                                     .first()
                                     .hover(
-                                        function() {
+                                        function () {
                                             $(this)
                                                 .next(".infoTextActive")
                                                 .show();
                                         },
-                                        function() {
+                                        function () {
                                             $(this)
                                                 .next(".infoTextActive")
                                                 .hide();
@@ -235,7 +233,7 @@ function decorateTableOfContents() {
             }
         });
         var data = { course: eBookConfig.course };
-        jQuery.get(eBookConfig.ajaxURL + "getlastpage", data, function(data) {
+        jQuery.get(eBookConfig.ajaxURL + "getlastpage", data, function (data) {
             var lastPageData;
             if (data != "None") {
                 lastPageData = $.parseJSON(data);
@@ -284,20 +282,20 @@ function processPageState(completionFlag) {
         lastPageUrl: currentPathname,
         lastPageScrollLocation: $(window).scrollTop(),
         completionFlag: completionFlag,
-        course: eBookConfig.course
+        course: eBookConfig.course,
     };
-    $(document).ajaxError(function(e, jqhxr, settings, exception) {
+    $(document).ajaxError(function (e, jqhxr, settings, exception) {
         console.log("Request Failed for " + settings.url);
     });
     jQuery.ajax({
         url: eBookConfig.ajaxURL + "updatelastpage",
         data: data,
-        async: false
+        async: false,
     });
 }
 
 $.extend({
-    getUrlVars: function() {
+    getUrlVars: function () {
         var vars = [],
             hash;
         var hashes = window.location.search
@@ -310,7 +308,7 @@ $.extend({
         }
         return vars;
     },
-    getUrlVar: function(name) {
+    getUrlVar: function (name) {
         return $.getUrlVars()[name];
-    }
+    },
 });

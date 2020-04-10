@@ -30,19 +30,11 @@ export default class ClickableArea extends RunestoneBase {
         if ($(this.origElem).data("cc") !== undefined) {
             if ($(this.origElem).is("[data-table]")) {
                 this.isTable = true;
-                this.ccArray = $(this.origElem)
-                    .data("cc")
-                    .split(";");
-                this.ciArray = $(this.origElem)
-                    .data("ci")
-                    .split(";");
+                this.ccArray = $(this.origElem).data("cc").split(";");
+                this.ciArray = $(this.origElem).data("ci").split(";");
             } else {
-                this.ccArray = $(this.origElem)
-                    .data("cc")
-                    .split(",");
-                this.ciArray = $(this.origElem)
-                    .data("ci")
-                    .split(",");
+                this.ccArray = $(this.origElem).data("cc").split(",");
+                this.ciArray = $(this.origElem).data("ci").split(",");
             }
         }
         // For use in the recursive replace function
@@ -104,9 +96,9 @@ export default class ClickableArea extends RunestoneBase {
         $(this.submitButton).attr({
             class: "btn btn-success",
             name: "do answer",
-            type: "button"
+            type: "button",
         });
-        this.submitButton.onclick = function() {
+        this.submitButton.onclick = function () {
             this.clickableEval(true);
         }.bind(this);
         this.containerDiv.appendChild(this.submitButton);
@@ -179,7 +171,7 @@ export default class ClickableArea extends RunestoneBase {
                         event: "clickableArea",
                         act: this.clickedIndexArray.join(";"),
                         div_id: this.divid,
-                        correct: storageObj.correct
+                        correct: storageObj.correct,
                     });
                 }
             }
@@ -206,7 +198,7 @@ export default class ClickableArea extends RunestoneBase {
         var storageObject = {
             answer: answer,
             correct: correct,
-            timestamp: timeStamp
+            timestamp: timeStamp,
         };
         localStorage.setItem(
             this.localStorageKey(),
@@ -363,7 +355,7 @@ export default class ClickableArea extends RunestoneBase {
                 }
             }
         }
-        clickable.onclick = function() {
+        clickable.onclick = function () {
             if ($(this).hasClass("clickable-clicked")) {
                 $(this).removeClass("clickable-clicked");
                 $(this).removeClass("clickable-incorrect");
@@ -405,7 +397,7 @@ export default class ClickableArea extends RunestoneBase {
                 event: "clickableArea",
                 act: this.givenIndexArray.join(";"),
                 div_id: this.divid,
-                correct: this.correct ? "T" : "F"
+                correct: this.correct ? "T" : "F",
             });
         }
         this.renderFeedback();
@@ -436,14 +428,14 @@ export default class ClickableArea extends RunestoneBase {
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
 =================================*/
-$(document).bind("runestone:login-complete", function() {
-    $("[data-component=clickablearea]").each(function(index) {
+$(document).bind("runestone:login-complete", function () {
+    $("[data-component=clickablearea]").each(function (index) {
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
             try {
                 CAList[this.id] = new ClickableArea({
                     orig: this,
-                    useRunestoneServices: eBookConfig.useRunestoneServices
+                    useRunestoneServices: eBookConfig.useRunestoneServices,
                 });
             } catch (err) {
                 console.log(`Error rendering ClickableArea Problem ${this.id}
@@ -456,6 +448,6 @@ $(document).bind("runestone:login-complete", function() {
 if (typeof window.component_factory === "undefined") {
     window.component_factory = {};
 }
-window.component_factory.clickablearea = function(opts) {
+window.component_factory.clickablearea = function (opts) {
     return new ClickableArea(opts);
 };

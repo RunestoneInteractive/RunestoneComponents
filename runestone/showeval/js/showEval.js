@@ -60,7 +60,7 @@ export class ShowEval {
                 s.substring(
                     s.indexOf("}}", s.indexOf("}}{{") + 4) + 2,
                     endpoint
-                )
+                ),
             ]; // 'post'
 
             this.steps[i].push(comment); // 'anno'
@@ -74,14 +74,14 @@ export class ShowEval {
 
     setNextButton(nextButtonSelector) {
         var thisObj = this; // uhg, javascript
-        $(nextButtonSelector).click(function() {
+        $(nextButtonSelector).click(function () {
             thisObj.evaluateStep(nextButtonSelector);
         });
     }
 
     setResetButton(resetButtonSelector) {
         var thisObj = this; // uhg, javascript
-        $(resetButtonSelector).click(function() {
+        $(resetButtonSelector).click(function () {
             thisObj.reset(0);
         });
     }
@@ -92,7 +92,7 @@ export class ShowEval {
         this.rb.logBookEvent({
             event: "showeval",
             act: "reset",
-            div_id: this.container[0].id
+            div_id: this.container[0].id,
         });
     }
 
@@ -164,16 +164,16 @@ export class ShowEval {
 
         evalElem.css("color", "red");
 
-        this.currentStepDiv.fadeTo(fadeInSpeed, 1, function() {
-            window.setTimeout(function() {
-                evalElem.fadeTo(400, 0, function() {
+        this.currentStepDiv.fadeTo(fadeInSpeed, 1, function () {
+            window.setTimeout(function () {
+                evalElem.fadeTo(400, 0, function () {
                     //evalElem.css('overflow', 'hidden');
                     evalElem.animate(
                         { width: newWidth, duration: 400 },
-                        function() {
+                        function () {
                             evalElem.html(thisShowEval.steps[step][2]);
-                            evalElem.fadeTo(400, 1, function() {
-                                window.setTimeout(function() {
+                            evalElem.fadeTo(400, 1, function () {
+                                window.setTimeout(function () {
                                     //evalElem.css('overflow', 'visible');
                                     evalElem.css("color", "#333");
                                     thisShowEval.currentStep += 1;
@@ -197,7 +197,7 @@ export class ShowEval {
         this.rb.logBookEvent({
             event: "showeval",
             act: "next",
-            div_id: this.container[0].id
+            div_id: this.container[0].id,
         });
     }
 }
@@ -206,12 +206,12 @@ export class ShowEval {
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
 =================================*/
-$(document).bind("runestone:login-complete", function() {
-    $("[data-childcomponent=showeval]").each(function(index) {
+$(document).bind("runestone:login-complete", function () {
+    $("[data-childcomponent=showeval]").each(function (index) {
         // MC
         var opts = {
             orig: this,
-            useRunestoneServices: eBookConfig.useRunestoneServices
+            useRunestoneServices: eBookConfig.useRunestoneServices,
         };
         opts.raw = window.raw_steps[this.id];
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
@@ -224,6 +224,6 @@ $(document).bind("runestone:login-complete", function() {
 if (typeof window.component_factory === "undefined") {
     window.component_factory = {};
 }
-window.component_factory["showeval"] = function(opts) {
+window.component_factory["showeval"] = function (opts) {
     return new ShowEval(opts);
 };

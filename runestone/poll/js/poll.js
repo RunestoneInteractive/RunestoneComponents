@@ -68,7 +68,7 @@ export default class Poll extends RunestoneBase {
             id: this.divid + "_form",
             method: "get",
             action: "",
-            onsubmit: "return false;"
+            onsubmit: "return false;",
         });
         this.pollForm.appendChild(document.createElement("br"));
         for (var i = 0; i < this.optionList.length; i++) {
@@ -78,7 +78,7 @@ export default class Poll extends RunestoneBase {
                 id: tmpid,
                 name: this.divid + "_group1",
                 type: "radio",
-                value: i
+                value: i,
             });
             $(radio).click(this.submitPoll.bind(this));
             var label = document.createElement("label");
@@ -211,8 +211,8 @@ export default class Poll extends RunestoneBase {
 }
 
 // Do not render poll data until login-complete event so we know instructor status
-$(document).bind("runestone:login-complete", function() {
-    $("[data-component=poll]").each(function(index) {
+$(document).bind("runestone:login-complete", function () {
+    $("[data-component=poll]").each(function (index) {
         try {
             pollList[this.id] = new Poll({ orig: this });
         } catch (err) {
@@ -226,6 +226,6 @@ $(document).bind("runestone:login-complete", function() {
 if (typeof window.component_factory === "undefined") {
     window.component_factory = {};
 }
-window.component_factory.poll = function(opts) {
+window.component_factory.poll = function (opts) {
     return new Poll(opts);
 };

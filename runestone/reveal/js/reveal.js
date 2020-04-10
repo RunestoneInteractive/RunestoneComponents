@@ -105,7 +105,7 @@ class Reveal extends RunestoneBase {
         this.sbutt.textContent = this.showtitle;
         this.sbutt.id = this.divid + "_show";
         if (!this.dataModal) {
-            this.sbutt.onclick = function() {
+            this.sbutt.onclick = function () {
                 _this.showInline();
                 $(this).hide();
             };
@@ -113,7 +113,7 @@ class Reveal extends RunestoneBase {
             this.createModal();
             $(this.sbutt).attr({
                 "data-toggle": "modal",
-                "data-target": "#" + this.divid + "_modal"
+                "data-target": "#" + this.divid + "_modal",
             });
         }
         this.wrapDiv.appendChild(this.sbutt);
@@ -127,7 +127,7 @@ class Reveal extends RunestoneBase {
         this.hbutt.className = "btn btn-default reveal_button";
         $(this.hbutt).css("margin-bottom", "10px");
         this.hbutt.id = this.divid + "_hide";
-        this.hbutt.onclick = function() {
+        this.hbutt.onclick = function () {
             _this.hideInline();
             $(this).hide();
         };
@@ -162,7 +162,7 @@ class Reveal extends RunestoneBase {
         $(this.modalButton).addClass("close");
         $(this.modalButton).attr({
             "aria-hidden": "true",
-            "data-dismiss": "modal"
+            "data-dismiss": "modal",
         });
         this.modalButton.innerHTML = "&times";
         this.modalHeaderDiv.appendChild(this.modalButton);
@@ -200,7 +200,7 @@ class Reveal extends RunestoneBase {
         $(this.hbutt).show();
         $(this.revealDiv)
             .find(".CodeMirror")
-            .each(function(i, el) {
+            .each(function (i, el) {
                 el.CodeMirror.refresh();
             });
     }
@@ -215,8 +215,8 @@ class Reveal extends RunestoneBase {
 ==     execute our code on them        ==
 =================================*/
 
-$(document).bind("runestone:login-complete", function() {
-    $("[data-component=reveal]").each(function(index) {
+$(document).bind("runestone:login-complete", function () {
+    $("[data-component=reveal]").each(function (index) {
         try {
             RevealList[this.id] = new Reveal({ orig: this });
         } catch (err) {

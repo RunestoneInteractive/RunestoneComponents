@@ -76,7 +76,7 @@ export default class ShortAnswer extends RunestoneBase {
         this.jTextArea.rows = 4;
         this.jTextArea.cols = 50;
         this.jLabel.appendChild(this.jTextArea);
-        this.jTextArea.onchange = function() {
+        this.jTextArea.onchange = function () {
             this.feedbackDiv.innerHTML = "Your answer has not been saved yet!";
             $(this.feedbackDiv).removeClass("alert-success");
             $(this.feedbackDiv).addClass("alert alert-danger");
@@ -93,7 +93,7 @@ export default class ShortAnswer extends RunestoneBase {
         $(this.submitButton).addClass("btn btn-success");
         this.submitButton.type = "button";
         this.submitButton.textContent = "Save";
-        this.submitButton.onclick = function() {
+        this.submitButton.onclick = function () {
             this.submitJournal();
         }.bind(this);
         this.buttonDiv.appendChild(this.submitButton);
@@ -133,12 +133,12 @@ export default class ShortAnswer extends RunestoneBase {
         this.renderMath(value);
         this.setLocalStorage({
             answer: value,
-            timestamp: new Date()
+            timestamp: new Date(),
         });
         this.logBookEvent({
             event: "shortanswer",
             act: value,
-            div_id: this.divid
+            div_id: this.divid,
         });
         this.feedbackDiv.innerHTML = "Your answer has been saved.";
         $(this.feedbackDiv).removeClass("alert-danger");
@@ -208,7 +208,7 @@ export default class ShortAnswer extends RunestoneBase {
             $(toggle_answer_button).css("margin-left", "5px");
 
             $(toggle_answer_button).click(
-                function() {
+                function () {
                     var display_timestamp, button_text;
                     if (this.current_answer === "ontime") {
                         this.jTextArea.value = data.last_answer;
@@ -251,14 +251,14 @@ export default class ShortAnswer extends RunestoneBase {
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
 =================================*/
-$(document).ready(function() {
-    $("[data-component=shortanswer]").each(function(index) {
+$(document).ready(function () {
+    $("[data-component=shortanswer]").each(function (index) {
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
             try {
                 saList[this.id] = new ShortAnswer({
                     orig: this,
-                    useRunestoneServices: eBookConfig.useRunestoneServices
+                    useRunestoneServices: eBookConfig.useRunestoneServices,
                 });
             } catch (err) {
                 console.log(`Error rendering ClickableArea Problem ${this.id}
@@ -272,6 +272,6 @@ if (typeof window.component_factory === "undefined") {
     window.component_factory = {};
 }
 
-window.component_factory.shortanswer = function(opts) {
+window.component_factory.shortanswer = function (opts) {
     return new ShortAnswer(opts);
 };

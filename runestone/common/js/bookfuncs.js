@@ -32,11 +32,11 @@
 //
 // Chevron functions - Must correspond with width in runestone-custom-sphinx-bootstrap.css
 //
-$(function() {
+$(function () {
     var resizeWindow = false;
     var resizeWidth = 600;
     $(window)
-        .on("resize", function(event) {
+        .on("resize", function (event) {
             if ($(window).width() <= resizeWidth && resizeWindow == false) {
                 resizeWindow = true;
                 var topPrev = $("#relations-prev")
@@ -86,7 +86,7 @@ function addReadingList() {
         if (position == eBookConfig.readings.length - 1) {
             // no more readings
             l = $("<div />", {
-                text: `Finished reading assignment. Page ${num_readings} of ${num_readings}.`
+                text: `Finished reading assignment. Page ${num_readings} of ${num_readings}.`,
             });
         } else if (position >= 0) {
             // get next name
@@ -98,13 +98,14 @@ function addReadingList() {
                 name: "link",
                 class: "btn btn-lg ' + 'buttonConfirmCompletion'",
                 href: nxt_link,
-                text: `Continue to page ${position +
-                    2} of ${num_readings} in the reading assignment.`
+                text: `Continue to page ${
+                    position + 2
+                } of ${num_readings} in the reading assignment.`,
             });
         } else {
             l = $("<div />", {
                 text:
-                    "This page is not part of the last reading assignment you visited."
+                    "This page is not part of the last reading assignment you visited.",
             });
         }
         $("#main-content").append(l);
@@ -113,7 +114,7 @@ function addReadingList() {
 
 function timedRefresh() {
     var timeoutPeriod = 900000; // 75 minutes
-    $(document).bind("idle.idleTimer", function() {
+    $(document).bind("idle.idleTimer", function () {
         // After timeout period send the user back to the index.  This will force a login
         // if needed when they want to go to a particular page.  This may not be perfect
         // but its an easy way to make sure laptop users are properly logged in when they
@@ -137,7 +138,7 @@ class PageProgressBar {
             this.activities = actDict;
         } else {
             let activities = { page: 0 };
-            $(".runestone").each(function(idx, e) {
+            $(".runestone").each(function (idx, e) {
                 activities[e.firstElementChild.id] = 0;
             });
             this.activities = activities;
@@ -174,7 +175,7 @@ class PageProgressBar {
             value = 0;
         }
         $("#subchapterprogress").progressbar({
-            value: value
+            value: value,
         });
         if (!eBookConfig.isLoggedIn) {
             $("#subchapterprogress>div").addClass("loggedout");
@@ -192,9 +193,8 @@ class PageProgressBar {
             $("#subchapterprogress").progressbar("option", "value", val);
             if (
                 val == 100.0 &&
-                $("#completionButton")
-                    .text()
-                    .toLowerCase() === "mark as completed"
+                $("#completionButton").text().toLowerCase() ===
+                    "mark as completed"
             ) {
                 $("#completionButton").click();
             }
@@ -208,7 +208,7 @@ function handlePageSetup() {
     var mess;
     if (eBookConfig.useRunestoneServices) {
         jQuery.get(eBookConfig.ajaxURL + "set_tz_offset", {
-            timezoneoffset: new Date().getTimezoneOffset() / 60
+            timezoneoffset: new Date().getTimezoneOffset() / 60,
         });
     }
 
@@ -261,7 +261,7 @@ function notifyRunestoneComponents() {
 }
 
 // initialize stuff
-$(document).ready(function() {
+$(document).ready(function () {
     if (eBookConfig) {
         handlePageSetup();
     } else {
@@ -275,9 +275,9 @@ $(document).ready(function() {
 
 // misc stuff
 // todo:  This could be further distributed but making a video.js file just for one function seems dumb.
-$(document).ready(function() {
+$(document).ready(function () {
     // add the video play button overlay image
-    $(".video-play-overlay").each(function() {
+    $(".video-play-overlay").each(function () {
         $(this).css(
             "background-image",
             "url('{{pathto('_static/play_overlay_icon.png', 1)}}')"
@@ -287,9 +287,9 @@ $(document).ready(function() {
     // This function is needed to allow the dropdown search bar to work;
     // The default behaviour is that the dropdown menu closes when something in
     // it (like the search bar) is clicked
-    $(function() {
+    $(function () {
         // Fix input element click problem
-        $(".dropdown input, .dropdown label").click(function(e) {
+        $(".dropdown input, .dropdown label").click(function (e) {
             e.stopPropagation();
         });
     });

@@ -99,7 +99,7 @@ class SpreadSheet extends RunestoneBase {
         // assert cell oper value for example
         // assert A4 == 3
         let result = "";
-        tests = tests.filter(function(s) {
+        tests = tests.filter(function (s) {
             return s.indexOf("assert") > -1;
         });
         for (let test of tests) {
@@ -110,13 +110,14 @@ class SpreadSheet extends RunestoneBase {
         }
         let pct = (100 * this.passed) / (this.passed + this.failed);
         pct = pct.toLocaleString(undefined, { maximumFractionDigits: 2 });
-        result += `You passed ${this.passed} out of ${this.passed +
-            this.failed} tests for ${pct}%`;
+        result += `You passed ${this.passed} out of ${
+            this.passed + this.failed
+        } tests for ${pct}%`;
         this.logBookEvent({
             event: "unittest",
             div_id: this.div_id,
             course: eBookConfig.course,
-            act: `percent:${pct}:passed:${this.passed}:failed:${this.failed}`
+            act: `percent:${pct}:passed:${this.passed}:failed:${this.failed}`,
         });
         $(this.output).css("visibility", "visible");
         $(this.output).text(result);
@@ -125,18 +126,18 @@ class SpreadSheet extends RunestoneBase {
     testOneAssert(cell, oper, expected) {
         let actual = this.getCellDisplayValue(cell);
         const operators = {
-            "==": function(operand1, operand2) {
+            "==": function (operand1, operand2) {
                 return operand1 == operand2;
             },
-            "!=": function(operand1, operand2) {
+            "!=": function (operand1, operand2) {
                 return operand1 != operand2;
             },
-            ">": function(operand1, operand2) {
+            ">": function (operand1, operand2) {
                 return operand1 > operand2;
             },
-            "<": function(operand1, operand2) {
+            "<": function (operand1, operand2) {
                 return operand1 > operand2;
-            }
+            },
         };
 
         let res = operators[oper](actual, expected);
@@ -191,12 +192,12 @@ class SpreadSheet extends RunestoneBase {
     }
 }
 
-$(document).bind("runestone:login-complete", function() {
-    $("[data-component=spreadsheet]").each(function(index) {
+$(document).bind("runestone:login-complete", function () {
+    $("[data-component=spreadsheet]").each(function (index) {
         // MC
         var opts = {
             orig: this,
-            useRunestoneServices: eBookConfig.useRunestoneServices
+            useRunestoneServices: eBookConfig.useRunestoneServices,
         };
         try {
             window.ssList[this.id] = new SpreadSheet(opts);
@@ -211,6 +212,6 @@ $(document).bind("runestone:login-complete", function() {
 if (typeof window.component_factory === "undefined") {
     window.component_factory = {};
 }
-window.component_factory.spreadsheet = function(opts) {
+window.component_factory.spreadsheet = function (opts) {
     return new SpreadSheet(opts);
 };

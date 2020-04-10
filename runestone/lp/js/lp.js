@@ -48,37 +48,35 @@ class LP extends RunestoneBase {
         // Use a nice editor.
         var that = this;
         this.textAreas = [];
-        $(".code_snippet").each(function(index, element) {
+        $(".code_snippet").each(function (index, element) {
             var editor = CodeMirror.fromTextArea(element, {
                 lineNumbers: true,
                 mode: $(that.element).attr("data-lang"),
                 indentUnit: 4,
                 matchBrackets: true,
                 autoMatchParens: true,
-                extraKeys: { Tab: "indentMore", "Shift-Tab": "indentLess" }
+                extraKeys: { Tab: "indentMore", "Shift-Tab": "indentLess" },
             });
             // Make the editor resizable.
             $(editor.getWrapperElement()).resizable({
-                resize: function() {
+                resize: function () {
                     editor.setSize($(this).width(), $(this).height());
                     editor.refresh();
-                }
+                },
             });
             // Keep track of it.
             that.textAreas.push(editor);
         });
         this.checkServer("lp_build");
         // Handle clicks to the "Save and run" button.
-        $(this.element).click(function(eventObject) {
+        $(this.element).click(function (eventObject) {
             $(that.resultElement).val("Building...");
-            $(that.feedbackElement)
-                .text("")
-                .attr("");
+            $(that.feedbackElement).text("").attr("");
             // Since the Save and run button was clicked, we assume the code snippets have been changed; therefore, don't store ``correct`` or ``answer.resultString`` because they are out of date.
             let answer = { code_snippets: that.textareasToData() };
             that.setLocalStorage({
                 answer: answer,
-                timestamp: new Date()
+                timestamp: new Date(),
             });
             that.logBookEvent({
                 event: "lp_build",
@@ -88,9 +86,9 @@ class LP extends RunestoneBase {
                 path: window.location.href
                     .replace(eBookConfig.app, "")
                     .slice(1),
-                div_id: that.divid
+                div_id: that.divid,
             })
-                .done(function(data) {
+                .done(function (data) {
                     // The server doesn't return the ``code_snippets``, for efficiency. Include those. If an error was returned, note that there is no ``answer`` yet.
                     if (!("answer" in data)) {
                         data["answer"] = {};
@@ -99,7 +97,7 @@ class LP extends RunestoneBase {
                     that.displayAnswer(data);
                     that.setLocalStorage(data);
                 })
-                .fail(function() {
+                .fail(function () {
                     $(that.feedbackElement)
                         .val("Error contacting server.")
                         .attr("class", "alert alert-danger");
@@ -135,7 +133,7 @@ class LP extends RunestoneBase {
     }
     // Store the contents of each textarea into an array of strings.
     textareasToData() {
-        return $.map(this.textAreas, function(obj, index) {
+        return $.map(this.textAreas, function (obj, index) {
             // See https://codemirror.net/doc/manual.html#api.
             return obj.getValue();
         });
@@ -143,7 +141,7 @@ class LP extends RunestoneBase {
     // Store an array of strings in ``data.code_snippets`` into each textarea.
     dataToTextareas(data) {
         // Find all code snippet textareas.
-        $(this.textAreas).each(function(index, value) {
+        $(this.textAreas).each(function (index, value) {
             // Silently ignore if ``data.answer.code_snippets`` or ``data.answer.code_snippets[index]`` isn't defined.
             value.setValue((data.answer.code_snippets || "")[index] || "");
         });
@@ -180,12 +178,12 @@ class LP extends RunestoneBase {
 // Initialization
 // ==============
 // Find the custom HTML tags and execute our code on them.
-$(document).bind("runestone:login-complete", function() {
-    $("[data-component=lp_build]").each(function(index) {
+$(document).bind("runestone:login-complete", function () {
+    $("[data-component=lp_build]").each(function (index) {
         try {
             LPList[this.id] = new LP({
                 orig: this,
-                useRunestoneServices: eBookConfig.useRunestoneServices
+                useRunestoneServices: eBookConfig.useRunestoneServices,
             });
         } catch (err) {
             console.log(`Error rendering LP Problem ${this.id}`);
@@ -196,6 +194,6 @@ $(document).bind("runestone:login-complete", function() {
 if (typeof window.component_factory === "undefined") {
     window.component_factory = {};
 }
-window.component_factory["lp_build"] = function(opts) {
+window.component_factory["lp_build"] = function (opts) {
     return new LP(opts);
 };

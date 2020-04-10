@@ -18,7 +18,7 @@ export default class TimedDragNDrop extends DragNDrop {
         var timeIcon = document.createElement("img");
         $(timeIcon).attr({
             src: "../_static/clock.png",
-            style: "width:15px;height:15px"
+            style: "width:15px;height:15px",
         });
         timeIconDiv.className = "timeTip";
         timeIconDiv.title = "";

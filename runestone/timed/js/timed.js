@@ -101,21 +101,21 @@ export default class Timed extends RunestoneBase {
         if (this.fullwidth) {
             // allow the container to fill the width - barb
             $(this.assessDiv).attr({
-                style: "max-width:none"
+                style: "max-width:none",
             });
         }
         this.assessDiv.id = this.divid;
         this.timedDiv = document.createElement("div"); // div that will hold the questions for the timed assessment
         this.navDiv = document.createElement("div"); // For navigation control
         $(this.navDiv).attr({
-            style: "text-align:center"
+            style: "text-align:center",
         });
         this.switchDiv = document.createElement("div"); // is replaced by the questions
         this.timedDiv.appendChild(this.switchDiv);
         this.timedDiv.appendChild(this.navDiv);
         $(this.timedDiv).attr({
             id: "timed_Test",
-            style: "display:none"
+            style: "display:none",
         });
     }
     renderTimer() {
@@ -130,7 +130,7 @@ export default class Timed extends RunestoneBase {
         this.controlDiv = document.createElement("div");
         $(this.controlDiv).attr({
             id: "controls",
-            style: "text-align: center"
+            style: "text-align: center",
         });
         this.startBtn = document.createElement("button");
         this.pauseBtn = document.createElement("button");
@@ -139,12 +139,12 @@ export default class Timed extends RunestoneBase {
             class: "btn btn-success",
             id: "start",
             tabindex: "0",
-            role: "button"
+            role: "button",
         });
         this.startBtn.textContent = "Start";
         this.startBtn.addEventListener(
             "click",
-            function() {
+            function () {
                 this.renderTimedQuestion();
                 this.startAssessment();
             }.bind(this),
@@ -155,12 +155,12 @@ export default class Timed extends RunestoneBase {
             id: "pause",
             disabled: "true",
             tabindex: "0",
-            role: "button"
+            role: "button",
         });
         this.pauseBtn.textContent = "Pause";
         this.pauseBtn.addEventListener(
             "click",
-            function() {
+            function () {
                 this.pauseAssessment();
             }.bind(this),
             false
@@ -170,12 +170,12 @@ export default class Timed extends RunestoneBase {
             id: "reset",
             disabled: "true",
             tabindex: "1",
-            role: "button"
+            role: "button",
         });
         this.resetBtn.textContent = "Reset";
         this.resetBtn.addEventListener(
             "click",
-            function() {
+            function () {
                 this.checkResetability();
             }.bind(this),
             false
@@ -239,7 +239,7 @@ export default class Timed extends RunestoneBase {
         // Next and Prev Listener
         this.pagNavList.addEventListener(
             "click",
-            function(event) {
+            function (event) {
                 if (
                     $("div#timed_Test form input[name='group1']").is(":checked")
                 ) {
@@ -285,7 +285,7 @@ export default class Timed extends RunestoneBase {
         // Numbered Listener
         this.qNumList.addEventListener(
             "click",
-            function(event) {
+            function (event) {
                 if (
                     $("div#timed_Test form input[name='group1']").is(":checked")
                 ) {
@@ -322,17 +322,17 @@ export default class Timed extends RunestoneBase {
     renderSubmitButton() {
         this.buttonContainer = document.createElement("div");
         $(this.buttonContainer).attr({
-            style: "text-align:center"
+            style: "text-align:center",
         });
         this.finishButton = document.createElement("button");
         $(this.finishButton).attr({
             id: "finish",
-            class: "btn btn-primary"
+            class: "btn btn-primary",
         });
         this.finishButton.textContent = "Finish Exam";
         this.finishButton.addEventListener(
             "click",
-            function() {
+            function () {
                 if (
                     window.confirm(
                         "Clicking OK means you are ready to submit your answers and are finished with this assessment."
@@ -387,7 +387,7 @@ export default class Timed extends RunestoneBase {
             opts = {
                 orig: tmpChild,
                 useRunestoneServices: eBookConfig.useRunestoneServices,
-                timed: true
+                timed: true,
             };
             if ($(tmpChild).children("[data-component]")) {
                 tmpChild = $(tmpChild).children("[data-component]")[0];
@@ -395,34 +395,34 @@ export default class Timed extends RunestoneBase {
             }
             if ($(tmpChild).is("[data-component=multiplechoice]")) {
                 this.renderedQuestionArray.push({
-                    question: new TimedMC(opts)
+                    question: new TimedMC(opts),
                 });
             } else if ($(tmpChild).is("[data-component=fillintheblank]")) {
                 var newFITB = new TimedFITB(opts);
                 this.renderedQuestionArray.push({
-                    question: newFITB
+                    question: newFITB,
                 });
             } else if ($(tmpChild).is("[data-component=dragndrop]")) {
                 this.renderedQuestionArray.push({
-                    question: new TimedDragNDrop(opts)
+                    question: new TimedDragNDrop(opts),
                 });
             } else if ($(tmpChild).is("[data-component=clickablearea]")) {
                 this.renderedQuestionArray.push({
-                    question: new TimedClickableArea(opts)
+                    question: new TimedClickableArea(opts),
                 });
             } else if ($(tmpChild).is("[data-component=shortanswer]")) {
                 this.renderedQuestionArray.push({
-                    question: new TimedShortAnswer(opts)
+                    question: new TimedShortAnswer(opts),
                 });
             } else if ($(tmpChild).is("[data-component=parsons]")) {
                 this.renderedQuestionArray.push({
-                    question: new TimedParsons(opts)
+                    question: new TimedParsons(opts),
                 });
             } else if ($(tmpChild).is("[data-component=activecode]")) {
                 let lang = $(tmpChild).data("lang");
                 this.renderedQuestionArray.push({
                     wrapper: tmpChild.parentElement,
-                    question: ACFactory.createActiveCode(tmpChild, lang, opts)
+                    question: ACFactory.createActiveCode(tmpChild, lang, opts),
                 });
             } else if ($(tmpChild).is("[data-childcomponent]")) {
                 // this is for when a directive has a wrapper element that isn't actually part of the javascript object
@@ -442,7 +442,7 @@ export default class Timed extends RunestoneBase {
                     $(tmp).after(newAC.containerDiv);
                     this.renderedQuestionArray.push({
                         wrapper: tmpChild,
-                        question: newAC
+                        question: newAC,
                     });
                 }
             }
@@ -526,19 +526,19 @@ export default class Timed extends RunestoneBase {
                 this.logBookEvent({
                     event: "timedExam",
                     act: "start",
-                    div_id: this.divid
+                    div_id: this.divid,
                 });
                 var timeStamp = new Date();
                 var storageObj = {
                     answer: [0, 0, this.renderedQuestionArray.length, 0],
-                    timestamp: timeStamp
+                    timestamp: timeStamp,
                 };
                 localStorage.setItem(
                     this.localStorageKey(),
                     JSON.stringify(storageObj)
                 );
             }
-            $(window).on("beforeunload", function() {
+            $(window).on("beforeunload", function () {
                 // this actual value gets ignored by newer browsers
                 return "Are you sure you want to leave?";
             });
@@ -552,7 +552,7 @@ export default class Timed extends RunestoneBase {
                 this.logBookEvent({
                     event: "timedExam",
                     act: "pause",
-                    div_id: this.divid
+                    div_id: this.divid,
                 });
                 this.running = 0;
                 this.paused = 1;
@@ -562,7 +562,7 @@ export default class Timed extends RunestoneBase {
                 this.logBookEvent({
                     event: "timedExam",
                     act: "resume",
-                    div_id: this.divid
+                    div_id: this.divid,
                 });
                 this.running = 1;
                 this.paused = 0;
@@ -577,10 +577,10 @@ export default class Timed extends RunestoneBase {
            localStorage does not reflect a partially completed exam */
         let sendInfo = {
             div_id: this.divid,
-            course: eBookConfig.course
+            course: eBookConfig.course,
         };
         $(this.resetBtn).attr({
-            disabled: true
+            disabled: true,
         });
         console.log(sendInfo);
         jQuery.getJSON(
@@ -606,7 +606,7 @@ export default class Timed extends RunestoneBase {
                     incorrect: this.incorrect,
                     skipped: this.skipped,
                     time: this.timeTaken,
-                    reset: true
+                    reset: true,
                 });
                 localStorage.clear(); // Clear records of exam from localStorage
                 /* Prevent using server's record of the reset as the exam results when the page reloads */
@@ -614,7 +614,7 @@ export default class Timed extends RunestoneBase {
                     this.localStorageKey(),
                     JSON.stringify({
                         answer: [-1],
-                        timestamp: new Date()
+                        timestamp: new Date(),
                     })
                 );
                 location.reload();
@@ -666,7 +666,7 @@ export default class Timed extends RunestoneBase {
         // if running (not paused) and not taken
         if (this.running === 1 && !this.taken) {
             setTimeout(
-                function() {
+                function () {
                     if (this.limitedTime) {
                         // If there's a time limit, count down to 0
                         this.timeLimit--;
@@ -683,10 +683,10 @@ export default class Timed extends RunestoneBase {
                         // ran out of time
                     } else {
                         $(this.startBtn).attr({
-                            disabled: "true"
+                            disabled: "true",
                         });
                         $(this.finishButton).attr({
-                            disabled: "true"
+                            disabled: "true",
                         });
                         this.running = 0;
                         this.done = 1;
@@ -711,7 +711,7 @@ export default class Timed extends RunestoneBase {
             "background-color": "#DFF0D8",
             "text-align": "center",
             border: "2px solid #DFF0D8",
-            "border-radius": "25px"
+            "border-radius": "25px",
         });
         $(this.scoreDiv).css({
             width: "50%",
@@ -719,13 +719,13 @@ export default class Timed extends RunestoneBase {
             "background-color": "#DFF0D8",
             "text-align": "center",
             border: "2px solid #DFF0D8",
-            "border-radius": "25px"
+            "border-radius": "25px",
         });
         $(".tooltipTime").css({
             margin: "0",
             padding: "0",
             "background-color": "black",
-            color: "white"
+            color: "white",
         });
         this.checkServer("timedExam");
     }
@@ -829,7 +829,7 @@ export default class Timed extends RunestoneBase {
         var timeStamp = new Date();
         var storageObj = JSON.stringify({
             answer: storage_arr,
-            timestamp: timeStamp
+            timestamp: timeStamp,
         });
         localStorage.setItem(this.localStorageKey(), storageObj);
     }
@@ -841,7 +841,7 @@ export default class Timed extends RunestoneBase {
             correct: this.score,
             incorrect: this.incorrect,
             skipped: this.skipped,
-            time: this.timeTaken
+            time: this.timeTaken,
         });
     }
     shouldUseServer(data) {
@@ -920,7 +920,7 @@ export default class Timed extends RunestoneBase {
                 parseInt(data.incorrect),
                 parseInt(data.skipped),
                 parseInt(data.timeTaken),
-                data.reset
+                data.reset,
             ];
             this.setLocalStorage(tmpArr);
         }
@@ -956,7 +956,7 @@ export default class Timed extends RunestoneBase {
             if (this.skipped === this.renderedQuestionArray.length) {
                 $(this.resetBtn).show();
                 $(this.resetBtn).attr({
-                    disabled: false
+                    disabled: false,
                 });
                 this.showFeedback = false;
             }
@@ -970,7 +970,7 @@ export default class Timed extends RunestoneBase {
         var timeStamp = new Date();
         var storageObj = {
             answer: parsedData,
-            timestamp: timeStamp
+            timestamp: timeStamp,
         };
         localStorage.setItem(
             this.localStorageKey(),
@@ -1017,7 +1017,7 @@ export default class Timed extends RunestoneBase {
         correctCount = correctCount.replace(/ /g, "").split(",");
         incorrectCount = incorrectCount.replace(/ /g, "").split(",");
         skippedCount = skippedCount.replace(/ /g, "").split(",");
-        $(function() {
+        $(function () {
             var numberedBtns = $("ul#pageNums > ul > li");
             if (numberedBtns.hasClass("answered")) {
                 numberedBtns.removeClass("answered");
@@ -1045,11 +1045,11 @@ export default class Timed extends RunestoneBase {
 /*=======================================================
 === Function that calls the constructors on page load ===
 =======================================================*/
-$(document).bind("runestone:login-complete", function() {
-    $("[data-component=timedAssessment]").each(function(index) {
+$(document).bind("runestone:login-complete", function () {
+    $("[data-component=timedAssessment]").each(function (index) {
         TimedList[this.id] = new Timed({
             orig: this,
-            useRunestoneServices: eBookConfig.useRunestoneServices
+            useRunestoneServices: eBookConfig.useRunestoneServices,
         });
     });
 });
