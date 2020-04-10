@@ -6,6 +6,7 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build": "webpack --env.MODE=development",
+        "watch": "webpack --env.MODE=development --watch",
         "start": "webpack-dev-server --env.MODE=development --open",
         "serve": "cd dist; python -m http.server 8080; cd .."
     },

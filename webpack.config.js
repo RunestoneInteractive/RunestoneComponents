@@ -3,7 +3,7 @@ const CopyPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const path = require("path");
 
-module.exports = env => {
+module.exports = (env) => {
     return {
         entry: [
             "./runestone/shortanswer/js/shortanswer.js",
@@ -23,7 +23,7 @@ module.exports = env => {
             "./runestone/showeval/js/showEval.js",
             "./runestone/video/js/runestonevideo.js",
             "./runestone/lp/js/lp.js",
-            "./runestone/codelens/js/codelens.js"
+            "./runestone/codelens/js/codelens.js",
         ],
         mode: env.MODE,
         devtool: env.MODE === "development" ? "inline-source-map" : "none",
@@ -34,38 +34,37 @@ module.exports = env => {
                     use: {
                         loader: "html-loader",
                         options: {
-                            attrs: false
-                        }
-                    }
+                            attrs: false,
+                        },
+                    },
                 },
                 {
                     test: /\.css$/,
-                    use: ["style-loader", "css-loader"]
+                    use: ["style-loader", "css-loader"],
                 },
                 {
                     test: /\.(png|jpg|svg)$/,
-                    loader: "url-loader"
-                }
-            ]
+                    loader: "url-loader",
+                },
+            ],
         },
-        watch: true,
         output: {
             path: path.resolve(__dirname, "runestone/dist"),
             filename: "runestone.js",
             library: "runestone",
-            libraryTarget: "umd"
+            libraryTarget: "umd",
         },
         plugins: [
             new CleanWebpackPlugin(),
             new CopyPlugin([
                 {
-                    from: "static"
-                }
+                    from: "static",
+                },
             ]),
             new HtmlWebpackPlugin({
                 inject: "head",
-                template: "public/index.html"
-            })
-        ]
+                template: "public/index.html",
+            }),
+        ],
     };
 };
