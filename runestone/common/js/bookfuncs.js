@@ -76,13 +76,14 @@ $(function () {
 
 function addReadingList() {
     if (eBookConfig.readings) {
-        cur_path_parts = window.location.pathname.split("/");
-        name =
+        var l, nxt, path_parts, nxt_link;
+        let cur_path_parts = window.location.pathname.split("/");
+        let name =
             cur_path_parts[cur_path_parts.length - 2] +
             "/" +
             cur_path_parts[cur_path_parts.length - 1];
-        position = eBookConfig.readings.indexOf(name);
-        num_readings = eBookConfig.readings.length;
+        let position = eBookConfig.readings.indexOf(name);
+        let num_readings = eBookConfig.readings.length;
         if (position == eBookConfig.readings.length - 1) {
             // no more readings
             l = $("<div />", {
