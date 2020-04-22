@@ -22,6 +22,14 @@ You will find the new `Authors Guide <https://runestone.academy/runestone/static
 
 If you want to report any issues with the docs or submit PRs to improve them please do so on `github <https://github.com/RunestoneInteractive/runestoneinteractive.github.io/issues>`_
 
+Make sure you are using Python 3.7 or later.
+
+I made a video that shows how to install the Runestone Components into a nice clean environment.
+
+.. raw:: html
+
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/Fy0S4bGRPNE" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 
 Quick Start
 -----------
