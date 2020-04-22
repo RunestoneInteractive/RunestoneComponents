@@ -1232,7 +1232,7 @@ export class ActiveCode extends RunestoneBase {
             jsonpSites: ["https://itunes.apple.com"],
         });
         Sk.divid = this.divid;
-        if (this.graderactive) {
+        if (this.graderactive && this.containerDiv.closest(".loading")) {
             Sk.gradeContainer = this.containerDiv.closest(".loading").id;
         } else {
             Sk.gradeContainer = this.divid;
