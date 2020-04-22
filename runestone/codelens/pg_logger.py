@@ -45,7 +45,7 @@ if is_python3:
 else:
     import StringIO
 
-import runestone.codelens.pg_encoder as pg_encoder
+from .pg_encoder import is_class, is_instance, ObjectEncoder, create_lambda_line_number
 
 # TODO: not threadsafe:
 
@@ -489,7 +489,7 @@ def visit_function_obj(v, ids_seen_set):
                 for child_res in visit_function_obj(child, ids_seen_set):
                     yield child_res
 
-        elif typ == dict or pg_encoder.is_class(v) or pg_encoder.is_instance(v):
+        elif typ == dict or is_class(v) or is_instance(v):
             contents_dict = None
 
             if typ == dict:
@@ -593,7 +593,7 @@ class PGLogger(bdb.Bdb):
 
         # very important for this single object to persist throughout
         # execution, or else canonical small IDs won't be consistent.
-        self.encoder = pg_encoder.ObjectEncoder(self.render_heap_primitives)
+        self.encoder = ObjectEncoder(self.render_heap_primitives)
 
         self.executed_script = None  # Python script to be executed!
 
@@ -896,7 +896,7 @@ class PGLogger(bdb.Bdb):
 
             # augment lambdas with line number
             if cur_name == "<lambda>":
-                cur_name += pg_encoder.create_lambda_line_number(
+                cur_name += create_lambda_line_number(
                     cur_frame.f_code, self.encoder.line_to_lambda_code
                 )
 
