@@ -82,28 +82,33 @@ export default class LiveCode extends ActiveCode {
         }
         $(this.output).html($.i18n("msg_activecode_compiling_running"));
         var files = [];
+        var content;
         if (this.datafile != undefined) {
             var ids = this.datafile.split(",");
             for (var i = 0; i < ids.length; i++) {
-                let file = document.getElementById(ids[i].trim());
+                let fileName = ids[i].trim();
+                let file = document.getElementById(fileName);
+                let fileExtension = fileName.substring(
+                    fileName.lastIndexOf(".") + 1
+                );
                 if (file === null || file === undefined) {
                     // console.log("No file with given id");
-                } else if (file.className === "javaFiles") {
-                    files = files.concat(
-                        this.parseJavaClasses(file.textContent)
-                    );
-                } else if (file.className === "image") {
-                    var fileName = file.id;
-                    var extension = fileName.substring(
-                        fileName.indexOf(".") + 1
-                    );
-                    var base64 = file.toDataURL("image/" + extension);
+                    // check to see if file is in db
+                    content = this.fileReader(fileName);
+                } else {
+                    content = file.textContent;
+                    // may be undefined at this point if file is an image
+                }
+                if (fileExtension === "jar") {
+                    files = files.concat(this.parseJavaClasses(content));
+                } else if (["jpg", "png", "gif"].indexOf(fileExtension) > -1) {
+                    var base64 = file.toDataURL("image/" + fileExtension);
                     base64 = base64.substring(base64.indexOf(",") + 1);
                     files.push({ name: fileName, content: base64 });
                 } else {
                     // if no className or un recognized className it is treated as an individual file
                     // this could be any type of file, .txt, .java, .csv, etc
-                    files.push({ name: file.id, content: file.textContent });
+                    files.push({ name: fileName, content: content });
                 }
             }
         }
@@ -207,7 +212,8 @@ export default class LiveCode extends ActiveCode {
             });
             switch (result.outcome) {
                 case 15:
-                    $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
+                    let outstr = result.stdout.replace("&lt;", "<");
+                    $(odiv).html(outstr.replace(/\n/g, "<br>"));
                     break;
                 case 11: // compiler error
                     $(odiv).html($.i18n("msg_activecode_were_compiling_err"));
