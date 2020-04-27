@@ -225,6 +225,7 @@ div.ExecutionVisualizer #pyStdout {
   overflow: auto; /* to look pretty on IE */
   /* make sure textarea doesn't grow and stretch */
   resize: none;
+  min-height: 100px!important;
 }
 
 
