@@ -57,7 +57,9 @@ export default class LiveCode extends ActiveCode {
             python3: "test.py",
             python2: "test.py",
         };
-        var sourcefilename, testdrivername;
+        var sourcefilename = "";
+        var testdrivername = "";
+
         let classMatch = new RegExp(/public class\s+(\w+)[\s+\{]/);
         let source = this.buildProg(false);
         let m = source.match(classMatch);
