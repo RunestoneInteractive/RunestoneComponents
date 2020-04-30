@@ -57,8 +57,20 @@ export default class LiveCode extends ActiveCode {
             python3: "test.py",
             python2: "test.py",
         };
-        var source = this.editor.getValue();
-        source = this.buildProg(true);
+        var sourcefilename, testdrivername;
+        let classMatch = new RegExp(/public class\s+(\w+)[\s+\{]/);
+        let source = this.buildProg(false);
+        let m = source.match(classMatch);
+        if (m) {
+            sourcefilename = m[1] + ".java";
+        }
+        if (this.suffix) {
+            // this will be unit test code
+            m = this.suffix.match(classMatch);
+            if (m) {
+                testdrivername = m[1] + ".java";
+            }
+        }
         var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
         history_dfd = __ret.history_dfd;
         saveCode = __ret.saveCode;
@@ -112,12 +124,53 @@ export default class LiveCode extends ActiveCode {
                 }
             }
         }
+        // If we are running unit tests we need to substitute the test driver for the student
+        // code and send the student code as a file.  We'll do that here.
+        this.junitDriverCode = `
+        import org.junit.runner.JUnitCore;
+        import org.junit.runner.Result;
+        import org.junit.runner.notification.Failure;
+
+        public class TestRunner
+        {
+            public static void main(String[] args)
+            {
+
+                Result result = JUnitCore.runClasses(${testdrivername.replace(
+                    ".java",
+                    ".class"
+                )});
+                for (Failure failure : result.getFailures()) {
+                    System.out.println(failure.toString());
+                }
+
+                System.out.println(result.wasSuccessful());
+
+                int total = result.getRunCount();
+                int fails = result.getFailureCount();
+                int corr  = total - fails;
+                System.out.println("You got " + corr + " out of " + total + " correct. " + 100.0 * corr / total + "%");
+            }
+        }
+
+        `;
+        if (this.suffix) {
+            files.push({ name: sourcefilename, content: source });
+            files.push({ name: testdrivername, content: this.suffix });
+            source = this.junitDriverCode;
+            if (paramobj.compileargs) {
+                paramobj.compileargs.push(sourcefilename);
+            } else {
+                paramobj.compileargs = [sourcefilename];
+            }
+        }
         let runspec = {
             language_id: this.language,
             sourcecode: source,
             parameters: paramobj,
             sourcefilename: this.sourcefile,
         };
+
         if (stdin) {
             runspec.input = stdin;
         }
