@@ -1,4 +1,5 @@
 import { ActiveCode } from "./activecode.js";
+import MD5 from "./md5.js";
 
 export default class LiveCode extends ActiveCode {
     constructor(opts) {
@@ -183,37 +184,32 @@ export default class LiveCode extends ActiveCode {
             runspec["file_list"] = [];
             var promises = [];
             var instance = this;
-            //todo: Not sure why this is loaded like this. It could be loaded once.
-            $.getScript(
-                "https://cdn.rawgit.com/killmenot/webtoolkit.md5/master/md5.js",
-                function () {
-                    for (var i = 0; i < files.length; i++) {
-                        var fileName = files[i].name;
-                        var fileContent = files[i].content;
-                        instance.div2id[fileName] =
-                            "runestone" + MD5(fileName + fileContent);
-                        runspec["file_list"].push([
-                            instance.div2id[fileName],
-                            fileName,
-                        ]);
-                        promises.push(
-                            new Promise((resolve, reject) => {
-                                instance.checkFile(files[i], resolve, reject);
-                            })
-                        );
-                    }
-                    let data = JSON.stringify({ run_spec: runspec });
-                    this.div2id = instance.div2id;
-                    Promise.all(promises)
-                        .then(function () {
-                            // console.log("All files on Server");
-                            instance.runProg_callback(data);
-                        })
-                        .catch(function (err) {
-                            // console.log("Error: " + err);
-                        });
-                }
-            );
+
+            for (let i = 0; i < files.length; i++) {
+                var fileName = files[i].name;
+                var fileContent = files[i].content;
+                instance.div2id[fileName] =
+                    "runestone" + MD5(fileName + fileContent);
+                runspec["file_list"].push([
+                    instance.div2id[fileName],
+                    fileName,
+                ]);
+                promises.push(
+                    new Promise((resolve, reject) => {
+                        instance.checkFile(files[i], resolve, reject);
+                    })
+                );
+            }
+            let data = JSON.stringify({ run_spec: runspec });
+            this.div2id = instance.div2id;
+            Promise.all(promises)
+                .then(function () {
+                    // console.log("All files on Server");
+                    instance.runProg_callback(data);
+                })
+                .catch(function (err) {
+                    // console.log("Error: " + err);
+                });
         }
     }
     runProg_callback(data) {
