@@ -265,6 +265,18 @@ export default class LiveCode extends ActiveCode {
                 case 15:
                     let outstr = result.stdout.replace("&lt;", "<");
                     $(odiv).html(outstr.replace(/\n/g, "<br>"));
+                    if (this.suffix) {
+                        let m = outstr.match(
+                            /You got\s+(\d+) out of (\d+) correct.\s+(\d+\.\d+)%/
+                        );
+                        if (m) {
+                            this.logBookEvent({
+                                event: "unittest",
+                                act: m[3],
+                                div_id: this.divid,
+                            });
+                        }
+                    }
                     break;
                 case 11: // compiler error
                     $(odiv).html($.i18n("msg_activecode_were_compiling_err"));
