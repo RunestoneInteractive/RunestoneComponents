@@ -35,6 +35,7 @@ MultipleChoice.prototype.init = function (opts) {
     this.multipleanswers = false;
     this.divid = orig.id;
     this.caption = 'Multiple Choice'
+    this.showcomparebutton = $(orig).data('showcomparebutton');
 
     if ($(this.origElem).data("multipleanswers") === true) {
         this.multipleanswers = true;
@@ -233,7 +234,7 @@ MultipleChoice.prototype.renderMCFormButtons = function () {
     this.optsForm.appendChild(this.submitButton);
 
     // Create compare button
-    if (this.useRunestoneServices) {
+    if (this.useRunestoneServices && this.showcomparebutton) {
         this.compareButton = document.createElement("button");
         $(this.compareButton).attr({
             "class": "btn btn-default",

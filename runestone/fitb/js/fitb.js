@@ -34,6 +34,7 @@ FITB.prototype.init = function (opts) {
     this.origElem = orig;
     this.divid = orig.id;
     this.correct = null;
+    this.showcomparebutton = $(orig).data('showcomparebutton');
     // See comments in fitb.py for the format of ``feedbackArray`` (which is identical in both files).
     //
     // Find the script tag containing JSON and parse it. See `SO <https://stackoverflow.com/questions/9320427/best-practice-for-embedding-arbitrary-json-in-the-dom>`_. If this parses to ``false``, then no feedback is available; server-side grading will be performed.
@@ -97,7 +98,7 @@ FITB.prototype.renderFITBButtons = function () {
     this.containerDiv.appendChild(document.createElement("br"));
     this.containerDiv.appendChild(document.createElement("br"));
     this.containerDiv.appendChild(this.submitButton);
-    if (this.useRunestoneServices) {
+    if (this.useRunestoneServices && this.showcomparebutton) {
         this.compareButton = document.createElement("button");
         $(this.compareButton).attr({
             "class": "btn btn-default",

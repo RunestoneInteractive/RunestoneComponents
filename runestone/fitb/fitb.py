@@ -42,6 +42,7 @@ def setup(app):
     )
     add_i18n_js(app, {"en","sr-Cyrl"}, "fitb-i18n")
     app.add_config_value("fitb_div_class", "runestone", "html")
+    app.add_config_value("fitb_compare_button_show", True, "html")
 
 
 class FITBNode(nodes.General, nodes.Element, RunestoneNode):
@@ -128,6 +129,7 @@ class FillInTheBlank(RunestoneIdDirective):
     config values (conf.py):
 
     - fitb_div_class - custom CSS class of the component's outermost div
+    - fitb_compare_button_show - if False, hide the 'Compare me' button (default True)
     """
 
     required_arguments = 1
@@ -152,9 +154,15 @@ class FillInTheBlank(RunestoneIdDirective):
 
         super(FillInTheBlank, self).run()
 
+        env = self.state.document.settings.env
+        if env.config.fitb_compare_button_show:
+            self.options['showcomparebutton'] = 'data-showcomparebutton=true'
+        else:
+            self.options['showcomparebutton'] = 'data-showcomparebutton=false'
+        
         TEMPLATE_START = """
         <div class="%(divclass)s">
-        <div data-component="fillintheblank" id="%(divid)s">
+        <div data-component="fillintheblank" id="%(divid)s" %(showcomparebutton)s>
             """
 
         TEMPLATE_END = """

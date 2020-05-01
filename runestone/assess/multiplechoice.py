@@ -149,6 +149,7 @@ class MChoice(Assessment):
     config values (conf.py): 
 
     - mchoice_div_class - custom CSS class of the component's outermost div
+    - mchoice_compare_button_show - if False, hide the 'Compare me' button (default True)
     """
 
     required_arguments = 1
@@ -184,10 +185,16 @@ class MChoice(Assessment):
 
         super(MChoice, self).run()
 
-        TEMPLATE_START = """
+        env = self.state.document.settings.env
+        if env.config.mchoice_compare_button_show:
+            self.options['showcomparebutton'] = 'data-showcomparebutton=true'
+        else:
+            self.options['showcomparebutton'] = 'data-showcomparebutton=false'
+
+        TEMPLATE_START = '''
             <div class="%(divclass)s">
-            <ul data-component="multiplechoice" data-multipleanswers="%(multipleAnswers)s" %(random)s id="%(divid)s">
-            """
+            <ul data-component="multiplechoice" data-multipleanswers="%(multipleAnswers)s" %(random)s %(showcomparebutton)s id="%(divid)s">
+           '''
 
         OPTION = """
             <li data-component="answer" %(is_correct)s id="%(divid)s_opt_%(alabel)s">%(atext)s</li><li data-component="feedback">%(feedtext)s</li>

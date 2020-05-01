@@ -47,7 +47,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Runestone Interactive Overview'
-copyright = '2017 %(author)s'
+copyright = '2017 Petlja'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -66,7 +66,7 @@ release = '0.0'
 # non-false value, then it is used:
 #today = ''
 # Else, today_fmt is used as the format for a strftime call.
-#today_fmt = '%%B %%d, %%Y'
+#today_fmt = '%B %d, %Y'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -120,7 +120,7 @@ rst_prolog = (
 # - Logging enabled (``eBookConfig.logLevel > 0``)
 #
 # The first two conditions cause the ``RunestoneBase.logBookEvent`` in ``runestonebase.js`` to post a student response to the server. The last conditions ensures that ``hsblog`` in ``ajax.py`` on the server will return a response containing grading information.
-runestone_server_side_grading = %(server_side_grading)s
+runestone_server_side_grading = False
 
 # Extensions
 # ==========
@@ -162,7 +162,7 @@ html_theme = 'sphinx_bootstrap'
 #html_theme_options = {'nosidebar': 'true'}
 html_theme_options = {
     # Navigation bar title. (Default: ``project`` value)
-    'navbar_title': "%(project_title)s",
+    'navbar_title': "Runestone Default",
 
     # Tab name for entire site. (Default: "Site")
     'navbar_site_name': "Chapters",
@@ -201,6 +201,7 @@ html_theme_options = {
     #'bootswatch_theme': "slate",
 }
 
+#html_style = "style.css"
 
 # This is set up to use the default runestone themes, you can override them by
 # creating your own folder and modifying this path.
@@ -234,7 +235,7 @@ html_static_path = runestone_static_dirs()
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
-#html_last_updated_fmt = '%%b %%d, %%Y'
+#html_last_updated_fmt = '%b %d, %Y'
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
@@ -296,7 +297,5 @@ htmlhelp_basename = 'PythonCoursewareProjectdoc'
 #shortanswer_optional_div_class = 'journal alert alert-success'
 #showeval_div_class = 'runestone explainer alert alert-warning'
 #tabbed_div_class = 'alert alert-warning'
-#mchoice_compare_button_show - if False, hide the 'Compare me' button (default True)
 #mchoice_compare_button_show = True
-#fitb_compare_button_show - if False, hide the 'Compare me' button (default True)
 #fitb_compare_button_show = True
