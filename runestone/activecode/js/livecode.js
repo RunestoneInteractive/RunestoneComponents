@@ -50,6 +50,7 @@ export default class LiveCode extends ActiveCode {
     runProg() {
         var stdin;
         var scrubber_dfd, history_dfd;
+        var source;
         var saveCode = "True";
         var sfilemap = {
             java: "",
@@ -61,18 +62,20 @@ export default class LiveCode extends ActiveCode {
         var sourcefilename = "";
         var testdrivername = "";
 
-        let classMatch = new RegExp(/public class\s+(\w+)[\s+\{]/);
-        let source = this.buildProg(false);
-        let m = source.match(classMatch);
-        if (m) {
-            sourcefilename = m[1] + ".java";
-        }
-        if (this.suffix) {
+        if (this.suffix && this.language == "java") {
+            let classMatch = new RegExp(/public class\s+(\w+)[\s+\{]/);
+            source = this.buildProg(false);
+            let m = source.match(classMatch);
+            if (m) {
+                sourcefilename = m[1] + ".java";
+            }
             // this will be unit test code
             m = this.suffix.match(classMatch);
             if (m) {
                 testdrivername = m[1] + ".java";
             }
+        } else {
+            source = this.buildProg(true);
         }
         var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
         history_dfd = __ret.history_dfd;
@@ -157,7 +160,7 @@ export default class LiveCode extends ActiveCode {
         }
 
         `;
-        if (this.suffix) {
+        if (this.suffix && this.language == "java") {
             files.push({ name: sourcefilename, content: source });
             files.push({ name: testdrivername, content: this.suffix });
             source = this.junitDriverCode;
