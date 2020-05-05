@@ -57,7 +57,7 @@ def setup(app):
     add_codemirror_css_and_js(
         app, "xml", "css", "python", "htmlmixed", "javascript", "sql"
     )
-    add_i18n_js(app, {"en", "sr-Cyrl"}, "activecode-i18n")
+    add_i18n_js(app, {"en", "sr-Cyrl", "es"}, "activecode-i18n")
     add_skulpt_js(app)
     app.add_autoversioned_javascript("activecode.js")
     app.add_autoversioned_javascript("clike.js")

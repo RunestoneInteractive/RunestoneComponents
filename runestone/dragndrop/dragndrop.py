@@ -28,7 +28,7 @@ def setup(app):
     app.add_autoversioned_javascript("dragndrop.js")
     app.add_autoversioned_javascript("timeddnd.js")
     app.add_autoversioned_stylesheet("dragndrop.css")
-    add_i18n_js(app, {"en","sr-Cyrl"}, "dragndrop-i18n")
+    add_i18n_js(app, {"en","sr-Cyrl","es"}, "dragndrop-i18n")
 
     app.add_node(DragNDropNode, html=(visit_dnd_node, depart_dnd_node))
 

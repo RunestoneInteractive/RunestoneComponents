@@ -33,7 +33,7 @@ def setup(app):
     app.add_autoversioned_javascript("timedparsons.js")
     app.add_config_value("parsons_div_class", "runestone", "html")
 
-    add_i18n_js(app, {"en","sr-Cyrl"}, "parsons-i18n")
+    add_i18n_js(app, {"en","sr-Cyrl","es"}, "parsons-i18n")
 
 TEMPLATE = """
         <div class="%(divclass)s" style="max-width: none;">
