@@ -4,31 +4,6 @@
   {% set appname = '{{ =request.application }}' %}
 {% endif %}
 
-{% set script_files =  script_files + [
-    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.emitter.bidi.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.emitter.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.fallbacks.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.messagestore.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.parser.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.language.js",
-    "https://cdn.jsdelivr.net/npm/vega@4.0.0-rc.2/build/vega.js",
-    "https://cdn.jsdelivr.net/npm/vega-lite@2.5.0/build/vega-lite.js",
-    "https://cdn.jsdelivr.net/npm/vega-embed@3.14.0/build/vega-embed.js",
-    '_static'+'/runestone.js?v='+runestone_version,
-    '_static'+'/jquery-ui-1.10.3.custom.min.js',
-    '_static'+'/jquery-fix.js',
-    '_static'+'/bootstrap-3.0.0/js/bootstrap.min.js',
-    '_static'+'/bootstrap-sphinx.js',
-    '_static'+'/waypoints.min.js',
-    '_static'+'/jquery.idle-timer.js',
-    '_static'+'/processing-1.4.1.min.js',
-    '_static'+'/jquery.hotkey.js',
-    '_static'+'/jquery-migrate-1.2.1.min.js',
-    '_static'+'/presenter_mode.js?v='+runestone_version,
-    '_static'+'/theme.js',
-  ]
-%}
 
 {% set css_files = ['_static/bootstrap-3.0.0/css/bootstrap.min.css', '_static/presenter_mode.css'] + css_files %}
 {% if theme_bootswatch_theme %}

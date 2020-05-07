@@ -21,7 +21,7 @@ from .video import Youtube, Vimeo, Video
 from .webgldemo import WebglDemo
 
 
-import os, socket
+import os, socket, pkg_resources
 
 
 def runestone_static_dirs():
@@ -35,9 +35,7 @@ def runestone_static_dirs():
     module_static_js.append(os.path.join(basedir, "codelens", "js"))
     module_static_js.append(os.path.join(basedir, "webgldemo", "js"))
     module_static_js.append(os.path.join(basedir, "matrixeq", "js"))
-    module_static_css = [
-        os.path.join(basedir, "common", "css")
-    ]
+    module_static_css = [os.path.join(basedir, "common", "css")]
     module_static_css.append(os.path.join(basedir, "codelens", "css"))
     module_static_css.append(os.path.join(basedir, "accessibility", "css"))
     module_static_css.append(os.path.join(basedir, "webgldemo", "css"))
@@ -75,6 +73,38 @@ def runestone_extensions():
     # Place ``runestone.common`` first, so it can run init code needed by all other modules. This assumes that the first module in the list is run first. An alternative to this to guarantee this ordering is to call ``app.setup_extension('runestone.common')`` in every extension.
     modules.insert(0, modules.pop(modules.index("runestone.common")))
     return modules
+
+
+runestone_version = version = pkg_resources.get_distribution("runestone").version
+script_files = [
+    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.emitter.bidi.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.emitter.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.fallbacks.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.messagestore.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.parser.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.language.js",
+    "https://cdn.jsdelivr.net/npm/vega@4.0.0-rc.2/build/vega.js",
+    "https://cdn.jsdelivr.net/npm/vega-lite@2.5.0/build/vega-lite.js",
+    "https://cdn.jsdelivr.net/npm/vega-embed@3.14.0/build/vega-embed.js",
+    "runestone.js?v=" + runestone_version,
+    "jquery-ui-1.10.3.custom.min.js",
+    "jquery-fix.js",
+    "bootstrap-3.0.0/js/bootstrap.min.js",
+    "bootstrap-sphinx.js",
+    "waypoints.min.js",
+    "jquery.idle-timer.js",
+    "processing-1.4.1.min.js",
+    "jquery.hotkey.js",
+    "jquery-migrate-1.2.1.min.js",
+    "presenter_mode.js?v=" + runestone_version,
+    "theme.js",
+]
+
+
+def setup(app):
+    for jsfile in script_files:
+        app.add_js_file(jsfile)
 
 
 def get_master_url():
