@@ -5,6 +5,7 @@ import shutil
 import getpass
 import six
 import click
+import re
 from paver.easy import sh
 from pkg_resources import resource_string, resource_filename, require
 from .pretext.chapter_pop import manifest_data_to_db
@@ -148,6 +149,14 @@ def build(all, wd):
     sys.path.insert(0, os.getcwd())
     version = require("runestone")[0].version
     print("Building with Runestone {}".format(version))
+
+    with open('conf.py') as cf:
+        ctext = cf.read()
+        if not re.search(r"from runestone import.*setup", ctext):
+            click.echo(click.style("Please update conf.py to import setup from runestone", fg='red'), err=True, color=True)
+            click.echo("The current line probably looks like:\nfrom runestone import runestone_static_dirs, runestone_extensions")
+            click.echo("Change it to:\nfrom runestone import runestone_static_dirs, runestone_extensions, setup")
+            sys.exit(1)
 
     import pavement
 
