@@ -2706,10 +2706,11 @@ Parsons.prototype.makeEasier = function() {
 	    alert($.i18n("msg_parson_remove_incorrect"));
 		this.removeDistractor(distractorToRemove);
 		this.logMove("removedDistractor-" + distractorToRemove.hash());
-	} else if (this.usesIndentation()) {
-	    alert($.i18n("msg_parson_will_provide_indent"));
-		this.removeIndentation();
-		this.logMove("removedIndentation");
+	// } 
+	// else if (this.usesIndentation()) {
+	//     alert($.i18n("msg_parson_will_provide_indent"));
+	// 	this.removeIndentation();
+	// 	this.logMove("removedIndentation");
 	} else {
 		var numberOfBlocks = this.numberOfBlocks(false);
 		if (numberOfBlocks > 3) {
