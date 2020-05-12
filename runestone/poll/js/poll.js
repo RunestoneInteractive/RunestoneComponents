@@ -171,20 +171,23 @@ export default class Poll extends RunestoneBase {
                 localStorage.getItem(this.divid === "true")) ||
             eBookConfig.isInstructor
         ) {
-            $(this.resultsDiv).html("<b>Results:</b><br><br>");
-            var list = $(document.createElement("ol"));
+            $(this.resultsDiv).html(
+                `<b>Results:</b> ${total} responses <br><br>`
+            );
+            var list = $(document.createElement("div"));
+            $(list).addClass("results-container");
             for (var i = 0; i < opt_list.length; i++) {
                 var count = count_list[i];
                 var percent = (count / total) * 100;
                 var text = Math.round(10 * percent) / 10 + "%"; // round percent to 10ths
                 var html =
-                    "<li value='" +
-                    (opt_list[i] + 1) +
-                    "'><div class='progress'><div class='progress-bar progress-bar-success' style=width:" +
-                    percent +
-                    "%;><span class='poll-text'>" +
+                    `<div class="progresscounter">${i + 1}. </div>` +
+                    "<div class='progress'>" +
+                    "<div class='progress-bar progress-bar-success'" +
+                    `style="width: ${percent}%; min-width: 2em;">` +
+                    "<span class='poll-text'>" +
                     text +
-                    "</span></div></div></li>";
+                    "</span></div></div>";
                 var el = $(html);
                 list.append(el);
             }

@@ -23,3 +23,8 @@
     display: inline-block;
     vertical-align: text-bottom;
 }
+
+.results-container {
+    display: grid;
+    grid-template-columns: 2em 90%;
+}

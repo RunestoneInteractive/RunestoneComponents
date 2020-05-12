@@ -63,9 +63,11 @@ def visit_poll_node(self, node):
     if node.poll_content["scale"] == "":
         okeys = list(node.poll_content.keys())
         okeys.sort()
+        i = 1
         for k in okeys:
             if "option_" in k:
-                node.poll_content["optiontext"] = node.poll_content[k]
+                node.poll_content["optiontext"] = f"{i}. " + node.poll_content[k]
+                i += 1
                 res += TEMPLATE_OPTION % node.poll_content
     else:
         for i in range(node.poll_content["scale"]):

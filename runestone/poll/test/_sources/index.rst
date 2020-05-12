@@ -22,3 +22,10 @@ This Is A New Project
 
 
 
+.. poll:: pollid2
+   :option_1: beginner programmer
+   :option_2: intermediate programmer
+   :option_3: expert programmer
+   :option_4: prefer not to answer
+
+   I am a :
