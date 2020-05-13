@@ -146,7 +146,7 @@ class MChoice(Assessment):
 
             -   Up to 26 answers and feedback pairs may be provided.
 
-    config values (conf.py): 
+    config values (conf.py):
 
     - mchoice_div_class - custom CSS class of the component's outermost div
     """
@@ -186,7 +186,7 @@ class MChoice(Assessment):
 
         TEMPLATE_START = """
             <div class="%(divclass)s">
-            <ul data-component="multiplechoice" data-multipleanswers="%(multipleAnswers)s" %(random)s id="%(divid)s">
+            <ul data-component="multiplechoice" data-multipleanswers="%(multipleAnswers)s" %(random)s id="%(divid)s" %(optional)s>
             """
 
         OPTION = """

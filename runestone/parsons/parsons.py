@@ -30,7 +30,7 @@ def setup(app):
 
 TEMPLATE = """
         <div class="%(divclass)s" style="max-width: none;">
-        <pre data-component="parsons" id="%(divid)s" %(adaptive)s %(maxdist)s %(order)s %(noindent)s %(language)s %(numbered)s>
+        <pre data-component="parsons" id="%(divid)s" %(adaptive)s %(maxdist)s %(order)s %(noindent)s %(language)s %(numbered)s %(optional)s>
         <span data-question>%(qnumber)s: %(instructions)s</span>%(code)s
         </pre>
         </div>

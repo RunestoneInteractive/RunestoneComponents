@@ -31,7 +31,7 @@ def setup(app):
 
 
 CODE = """
-<div data-childcomponent="showeval" class="%(divclass)s" id="%(divid)s" data-tracemode="%(trace_mode)s">
+<div data-childcomponent="showeval" class="%(divclass)s" id="%(divid)s" data-tracemode="%(trace_mode)s" %(optional)s>
     <button class="btn btn-success" id="%(divid)s_nextStep">Next Step</button>
     <button class="btn btn-default" id ="%(divid)s_reset">Reset</button>
     <div class="evalCont" style="background-color: #FDFDFD;">%(preReqLines)s</div>

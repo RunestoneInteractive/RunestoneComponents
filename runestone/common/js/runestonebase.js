@@ -26,6 +26,11 @@ export default class RunestoneBase {
             if (opts.enforceDeadline) {
                 this.deadline = opts.deadline;
             }
+            if ($(opts.orig).data("optional")) {
+                this.optional = true;
+            } else {
+                this.optional = false;
+            }
         }
     }
 
@@ -55,7 +60,8 @@ export default class RunestoneBase {
         console.log("logging event " + JSON.stringify(eventInfo));
         if (
             typeof pageProgressTracker.updateProgress === "function" &&
-            eventInfo.act != "edit"
+            eventInfo.act != "edit" &&
+            this.optional == false
         ) {
             pageProgressTracker.updateProgress(eventInfo.div_id);
         }

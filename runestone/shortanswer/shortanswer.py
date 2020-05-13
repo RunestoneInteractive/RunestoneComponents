@@ -106,7 +106,6 @@ config values (conf.py):
         # Raise an error if the directive does not have contents.
         self.assert_has_content()
 
-        self.options["optional"] = "data-optional" if "optional" in self.options else ""
         self.options["mathjax"] = "data-mathjax" if "mathjax" in self.options else ""
 
         journal_node = JournalNode(self.options, rawsource=self.block_text)

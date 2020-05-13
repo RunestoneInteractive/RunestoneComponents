@@ -220,6 +220,9 @@ class RunestoneDirective(Directive):
         self.options["basecourse"] = self.basecourse
         self.options["chapter"] = self.chapter
         self.options["subchapter"] = self.subchapter
+        self.options["optional"] = (
+            "data-optional=true" if "optional" in self.options else ""
+        )
 
 
 # This is a base class for all Runestone directives which require a divid as their first parameter.

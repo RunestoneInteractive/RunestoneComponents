@@ -31,7 +31,7 @@ def setup(app):
 
 TEMPLATE_START = """
 <div class="runestone">
-<ul data-component="poll" id=%(divid)s %(comment)s class='%(divclass)s' data-results='%(results)s'>
+<ul data-component="poll" id=%(divid)s %(comment)s class='%(divclass)s' data-results='%(results)s' %(optional)s>
 %(question)s
 """
 

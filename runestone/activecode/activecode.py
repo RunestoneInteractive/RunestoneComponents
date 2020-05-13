@@ -71,7 +71,7 @@ TEMPLATE_START = """
 
 TEMPLATE_END = """
 <textarea data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s
-    %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s %(chatcodes)s
+    %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s %(chatcodes)s %(optional)s
     data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(tie)s %(dburl)s %(nopair)s
     %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(hidehistory)s %(wasmuri)s>
 %(initialcode)s
@@ -300,7 +300,7 @@ config values (conf.py):
             "python",
             "java",
             "c",
-            "cpp"
+            "cpp",
         ]:
             self.options["codelens"] = ""
         else:

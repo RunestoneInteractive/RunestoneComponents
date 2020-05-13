@@ -152,7 +152,7 @@ class FillInTheBlank(RunestoneIdDirective):
 
         TEMPLATE_START = """
         <div class="%(divclass)s">
-        <div data-component="fillintheblank" id="%(divid)s">
+        <div data-component="fillintheblank" id="%(divid)s" %(optional)s>
             """
 
         TEMPLATE_END = """
