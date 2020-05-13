@@ -173,6 +173,7 @@ def addQuestionToDB(self):
             topics = "{}/{}".format(self.chapter, self.subchapter)
         #        topics = self.options.get('topics', "{}/{}".format(self.chapter, self.subchapter))
         qnumber = self.options.get("qnumber", "")
+        optional = "T" if "optional" in self.options else "F"
 
         id_ = self.options["divid"]
         sel = select([questions]).where(
@@ -198,6 +199,7 @@ def addQuestionToDB(self):
                         topic=topics,
                         from_source="T",
                         qnumber=qnumber,
+                        optional=optional,
                     )
                 )
                 sess.execute(stmt)

@@ -96,7 +96,6 @@ config values (conf.py):
     final_argument_whitespace = True
     has_content = True
     option_spec = Assessment.option_spec.copy()
-    option_spec.update({"optional": directives.flag})
     option_spec.update({"mathjax": directives.flag})
 
     node_class = JournalNode

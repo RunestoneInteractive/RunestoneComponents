@@ -18,7 +18,6 @@ Short Answer
 ------------
 
 .. shortanswer:: question1
-   :optional:
 
    What are the colors in the rainbow?
 

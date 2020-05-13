@@ -73,7 +73,7 @@ class Struct:
 # Get a data structure which holds Runestone data from the environment. Create one if it doesn't exist.
 def _get_runestone_data(
     # The Sphinx environment which (possibly) contains Runestone data.
-    env
+    env,
 ):
 
     # Create the Runestone data structure if it doesn't yet exist.
@@ -200,6 +200,7 @@ class RunestoneDirective(Directive):
         "autograde": directives.unchanged,
         "practice": directives.unchanged,
         "topics": directives.unchanged,
+        "optional": directives.flag,
     }
 
     def __init__(self, *args, **kwargs):
