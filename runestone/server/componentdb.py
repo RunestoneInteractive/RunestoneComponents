@@ -73,33 +73,41 @@ def get_dburl(outer={}):
 
 
 # create a global DB query engine to share for the rest of the file
-try:
-    dburl = get_dburl()
-    engine = create_engine(dburl, client_encoding="utf8", convert_unicode=True)
-    Session = sessionmaker()
-    engine.connect()
-    Session.configure(bind=engine)
-    sess = Session()
-except Exception as e:  # psycopg2.OperationalError
-    dburl = None
-    engine = None
-    meta = None
-    sess = None
-    print(e)
-    print("Skipping all DB operations because environment variables not set up")
-else:
-    # If no exceptions are raised, then set up the database.
-    meta = MetaData()
-    questions = Table("questions", meta, autoload=True, autoload_with=engine)
-    assignment_questions = Table(
-        "assignment_questions", meta, autoload=True, autoload_with=engine
-    )
-    courses = Table("courses", meta, autoload=True, autoload_with=engine)
+dburl = None
+engine = None
+meta = None
+sess = None
+questions = None
+assignment_questions = None
+courses = None
 
 
 def setup(app):
+    global dburl, engine, meta, sess, questions, assignment_questions, courses
+
     app.connect("env-before-read-docs", reset_questions)
     app.connect("build-finished", finalize_updates)
+    try:
+        dburl = get_dburl()
+        engine = create_engine(dburl, client_encoding="utf8", convert_unicode=True)
+        Session = sessionmaker()
+        engine.connect()
+        Session.configure(bind=engine)
+        sess = Session()
+    except Exception as e:  # psycopg2.OperationalError
+        dburl = None
+        engine = None
+        sess = None
+        print(e)
+        print("Skipping all DB operations because environment variables not set up")
+    else:
+        # If no exceptions are raised, then set up the database.
+        meta = MetaData()
+        questions = Table("questions", meta, autoload=True, autoload_with=engine)
+        assignment_questions = Table(
+            "assignment_questions", meta, autoload=True, autoload_with=engine
+        )
+        courses = Table("courses", meta, autoload=True, autoload_with=engine)
 
 
 def reset_questions(app, env, docnames):
