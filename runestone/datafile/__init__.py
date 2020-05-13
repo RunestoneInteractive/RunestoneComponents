@@ -21,7 +21,7 @@ import os.path
 from docutils import nodes
 from docutils.parsers.rst import directives
 from sqlalchemy import Table
-from runestone.server.componentdb import engine, meta
+from runestone.server.componentdb import get_engine_meta
 from runestone.common.runestonedirective import (
     RunestoneIdDirective,
     RunestoneNode,
@@ -163,6 +163,7 @@ class DataFile(RunestoneIdDirective):
         else:
             self.options["edit"] = "false"
 
+        engine, meta = get_engine_meta()
         if engine:
             Source_code = Table(
                 "source_code", meta, autoload=True, autoload_with=engine
@@ -192,7 +193,8 @@ class DataFile(RunestoneIdDirective):
             )
 
         data_file_node = DataFileNode(self.options, rawsource=self.block_text)
-        data_file_node.source, data_file_node.line = self.state_machine.get_source_and_line(
-            self.lineno
-        )
+        (
+            data_file_node.source,
+            data_file_node.line,
+        ) = self.state_machine.get_source_and_line(self.lineno)
         return [data_file_node]

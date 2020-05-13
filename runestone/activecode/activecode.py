@@ -21,7 +21,7 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from .textfield import *
 from sqlalchemy import Table
-from runestone.server.componentdb import addQuestionToDB, addHTMLToDB, engine, meta
+from runestone.server.componentdb import addQuestionToDB, addHTMLToDB, get_engine_meta
 from runestone.common.runestonedirective import (
     RunestoneIdDirective,
     RunestoneNode,
@@ -33,9 +33,6 @@ try:
     from html import escape  # py3
 except ImportError:
     from cgi import escape  # py2
-
-if engine:
-    Source_code = Table("source_code", meta, autoload=True, autoload_with=engine)
 
 
 def setup(app):
@@ -396,7 +393,12 @@ config values (conf.py):
         course_name = env.config.html_context["course_id"]
         divid = self.options["divid"]
 
+        engine, meta = get_engine_meta()
+
         if engine:
+            Source_code = Table(
+                "source_code", meta, autoload=True, autoload_with=engine
+            )
             engine.execute(
                 Source_code.delete()
                 .where(Source_code.c.acid == divid)

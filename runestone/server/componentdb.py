@@ -110,6 +110,10 @@ def setup(app):
         courses = Table("courses", meta, autoload=True, autoload_with=engine)
 
 
+def get_engine_meta():
+    return engine, meta
+
+
 def reset_questions(app, env, docnames):
     if sess:
         basecourse = env.config.html_context.get("basecourse")
