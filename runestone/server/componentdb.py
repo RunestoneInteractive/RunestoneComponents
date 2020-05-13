@@ -111,7 +111,7 @@ def setup(app):
 
 
 def get_engine_meta():
-    return engine, meta
+    return engine, meta, sess
 
 
 def reset_questions(app, env, docnames):

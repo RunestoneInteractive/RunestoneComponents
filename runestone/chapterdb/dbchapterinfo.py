@@ -21,7 +21,7 @@ import os.path
 from collections import OrderedDict
 import docutils
 from sqlalchemy import Table, select, and_, or_
-from runestone.server.componentdb import engine, meta, sess
+from runestone.server.componentdb import get_engine_meta
 from sphinx.util import logging
 
 logger = logging.getLogger(__name__)
@@ -43,6 +43,8 @@ def update_database(chaptitles, subtitles, skips, app):
     When the build is completely finished output the information gathered about
     chapters and subchapters into the database.
     """
+    engine, meta, sess = get_engine_meta()
+
     if not sess:
         logger.info("You need to install a DBAPI module - psycopg2 for Postgres")
         logger.info("Or perhaps you have not set your DBURL environment variable")

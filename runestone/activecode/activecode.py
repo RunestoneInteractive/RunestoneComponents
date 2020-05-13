@@ -393,7 +393,7 @@ config values (conf.py):
         course_name = env.config.html_context["course_id"]
         divid = self.options["divid"]
 
-        engine, meta = get_engine_meta()
+        engine, meta, sess = get_engine_meta()
 
         if engine:
             Source_code = Table(

@@ -105,7 +105,10 @@ export default class RunestoneBase {
                 );
         }
         console.log("running " + JSON.stringify(eventInfo));
-        if (typeof pageProgressTracker.updateProgress === "function") {
+        if (
+            typeof pageProgressTracker.updateProgress === "function" &&
+            this.optional == false
+        ) {
             pageProgressTracker.updateProgress(eventInfo.div_id);
         }
     }

@@ -163,7 +163,7 @@ class DataFile(RunestoneIdDirective):
         else:
             self.options["edit"] = "false"
 
-        engine, meta = get_engine_meta()
+        engine, meta, sess = get_engine_meta()
         if engine:
             Source_code = Table(
                 "source_code", meta, autoload=True, autoload_with=engine
