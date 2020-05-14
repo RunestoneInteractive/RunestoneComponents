@@ -185,7 +185,10 @@ def addQuestionToDB(self):
             topics = "{}/{}".format(self.chapter, self.subchapter)
         #        topics = self.options.get('topics', "{}/{}".format(self.chapter, self.subchapter))
         qnumber = self.options.get("qnumber", "")
-        optional = "T" if "optional" in self.options else "F"
+        if "data-optional" in self.options.get("optional", ""):
+            optional = "T"
+        else:
+            optional = "F"
 
         id_ = self.options["divid"]
         sel = select([questions]).where(
