@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 with open("requirements.txt", "r") as fh:
     dependencies = [l.strip() for l in fh]
 
-VERSION = "4.2.6"
+VERSION = "5.0.0beta"
 setup(
     name="runestone",
     description="Sphinx extensions for writing interactive documents.",
@@ -21,7 +21,7 @@ setup(
     download_url="https://github.com/RunestoneInteractive/RunestoneComponents/tarball/{}".format(
         VERSION
     ),
-    keywords=["runestone", "sphinx", "ebook"],  # arbitrary keywords
+    keywords=["runestone", "sphinx", "ebook", "oer", "education"],  # arbitrary keywords
     classifiers=(
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
