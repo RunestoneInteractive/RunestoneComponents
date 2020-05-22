@@ -186,8 +186,9 @@ def serve(port, listen):
 
         try:
             if pavement.dynamic_pages == True:
-                click.echo(
-                    "Error -- dynamic_pages is True, but this server does not support templates",
+                click.echo(click.style(
+                    """Error -- dynamic_pages is True, but this preview server does not support templates.
+                    Please edit pavement.py and set dynamic_pages=False""", color="red"),
                     err=True,
                 )
                 click.echo("You should update pavement.py and rebuild")
