@@ -5,21 +5,12 @@
 {% endif %}
 
 
-{% set css_files = ['_static/bootstrap-3.0.0/css/bootstrap.min.css', '_static/presenter_mode.css'] + css_files %}
 {% if theme_bootswatch_theme %}
   {% set css_files = css_files +
     ['http://netdna.bootstrapcdn.com/bootswatch/2.3.1/' + theme_bootswatch_theme + '/bootstrap.min.css']
   %}
 {% endif %}
 
-{% set css_files = css_files + [
-    '_static'+'/jquery-ui-1.10.3.custom.min.css',
-    '_static'+'/bootstrap-sphinx.css',
-    '_static'+'/user-highlights.css',
-    '_static/runestone-custom-sphinx-bootstrap.css?v='+runestone_version,
-    '_static'+'/theme-overrides.css',
-  ]
-%}
 
 {%- block doctype -%}
 <!DOCTYPE html>

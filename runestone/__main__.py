@@ -152,7 +152,7 @@ def build(all, wd):
 
     with open('conf.py') as cf:
         ctext = cf.read()
-        if not re.search(r"from runestone import.*setup", ctext):
+        if not re.search(r"from runestone import.*(setup|script_files)", ctext):
             click.echo(click.style("Please update conf.py to import setup from runestone", fg='red'), err=True, color=True)
             click.echo("The current line probably looks like:\nfrom runestone import runestone_static_dirs, runestone_extensions")
             click.echo("Change it to:\nfrom runestone import runestone_static_dirs, runestone_extensions, setup")

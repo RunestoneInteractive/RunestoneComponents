@@ -101,10 +101,22 @@ script_files = [
     "theme.js",
 ]
 
+css_files = [
+    "bootstrap-3.0.0/css/bootstrap.min.css",
+    "presenter_mode.css",
+    "jquery-ui-1.10.3.custom.min.css",
+    "bootstrap-sphinx.css",
+    "user-highlights.css",
+    "runestone-custom-sphinx-bootstrap.css?v=" + runestone_version,
+    "theme-overrides.css",
+]
+
 
 def setup(app):
     for jsfile in script_files:
         app.add_js_file(jsfile)
+    for cssfile in css_files:
+        app.add_css_file(cssfile)
 
 
 def get_master_url():
