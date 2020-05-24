@@ -312,15 +312,15 @@ class ParsonsBlock {
             $(lineDiv).addClass("border_left");
             $(view).prepend(labelDiv);
             $(view).css({
-                "justify-content": "flex-start"
+                "justify-content": "flex-start",
             });
         } else if (this.problem.options.numbered == "right") {
             $(labelDiv).addClass("border_left");
             $(labelDiv).css({
-                float: "right"
+                float: "right",
             });
             $(view).css({
-                "justify-content": "space-between"
+                "justify-content": "space-between",
             });
             $(view).append(labelDiv);
         }
@@ -353,9 +353,7 @@ class ParsonsBlock {
             }
         }
         this.lines.push(line);
-        $(this.view)
-            .children(".lines")[0]
-            .appendChild(line.view);
+        $(this.view).children(".lines")[0].appendChild(line.view);
     }
     // Add the contents of that block to myself and then delete that block
     consumeBlock(block) {
@@ -396,7 +394,7 @@ class ParsonsBlock {
         this.indent = 0;
         $(this.view).css({
             "padding-left": "",
-            width: this.problem.areaWidth - 22
+            width: this.problem.areaWidth - 22,
         });
     }
     // Add a label to block and update its view
@@ -410,9 +408,7 @@ class ParsonsBlock {
             $(div).addClass("left-label");
         }
         $(div).append(document.createTextNode(label));
-        $(this.view)
-            .children(".labels")[0]
-            .append(div);
+        $(this.view).children(".labels")[0].append(div);
         if (this.labels.length != 0) {
             $(div).css(
                 "margin-top",
@@ -435,19 +431,19 @@ class ParsonsBlock {
                     {
                         direction: Hammer.DIRECTION_ALL,
                         threshold: 0,
-                        pointers: 1
-                    }
-                ]
-            ]
+                        pointers: 1,
+                    },
+                ],
+            ],
         });
         var that = this;
-        this.hammer.on("panstart", function(event) {
+        this.hammer.on("panstart", function (event) {
             that.panStart(event);
         });
-        this.hammer.on("panend", function(event) {
+        this.hammer.on("panend", function (event) {
             that.panEnd(event);
         });
-        this.hammer.on("panmove", function(event) {
+        this.hammer.on("panmove", function (event) {
             that.panMove(event);
         });
     }
@@ -538,9 +534,8 @@ class ParsonsBlock {
         var blocks = this.problem.sourceBlocks();
         var indexes = [];
         var pairedBin = this.pairedBin();
-        var i;
+        var i, lastBin;
         if (pairedBin >= 0) {
-            var lastBin = undefined;
             for (i = 0; i < blocks.length; i++) {
                 var block = blocks[i];
                 if (block.view.id !== this.view.id) {
@@ -560,11 +555,10 @@ class ParsonsBlock {
                 return indexes;
             }
         }
-        lastBin = undefined;
         for (i = 0; i < blocks.length; i++) {
-            block = blocks[i];
+            let block = blocks[i];
             if (block.view.id !== this.view.id) {
-                blockBin = block.pairedBin();
+                let blockBin = block.pairedBin();
                 if (blockBin !== lastBin) {
                     indexes.push(i);
                 } else if (blockBin == -1) {
@@ -638,13 +632,13 @@ class ParsonsBlock {
     makeTabIndex() {
         $(this.view).attr("tabindex", "0");
         var that = this;
-        $(this.view).focus(function() {
+        $(this.view).focus(function () {
             that.newFocus();
         });
-        $(this.view).blur(function() {
+        $(this.view).blur(function () {
             that.releaseFocus();
         });
-        $(this.view).keydown(function(event) {
+        $(this.view).keydown(function (event) {
             that.keyDown(event);
         });
     }
@@ -766,7 +760,7 @@ class ParsonsBlock {
     }
     // Move block left
     moveLeft() {
-        var index;
+        var index, block;
         if (!this.inSourceArea()) {
             if (this.indent == 0) {
                 // move to source area
@@ -783,7 +777,7 @@ class ParsonsBlock {
                         this.problem.updateView();
                         return this;
                     } else {
-                        var block = blocks[index];
+                        block = blocks[index];
                         if (block.verticalOffset() >= offset) {
                             break;
                         }
@@ -1128,7 +1122,7 @@ export default class Parsons extends RunestoneBase {
     // Based on the data-fields in the original HTML, initialize options
     initializeOptions() {
         var options = {
-            pixelsPerIndent: 30
+            pixelsPerIndent: 30,
         };
         // add maxdist and order if present
         var maxdist = $(this.origElem).data("maxdist");
@@ -1180,7 +1174,7 @@ export default class Parsons extends RunestoneBase {
             html: "prettyprint lang-html",
             c: "prettyprint lang-c",
             "c++": "prettyprint lang-cpp",
-            ruby: "prettyprint lang-rb"
+            ruby: "prettyprint lang-rb",
         }[language];
         if (prettifyLanguage == undefined) {
             prettifyLanguage = "";
@@ -1253,7 +1247,7 @@ export default class Parsons extends RunestoneBase {
         this.checkButton.id = this.counterId + "-check";
         this.parsonsControlDiv.appendChild(this.checkButton);
         this.checkButton.type = "button";
-        this.checkButton.addEventListener("click", function(event) {
+        this.checkButton.addEventListener("click", function (event) {
             event.preventDefault();
             that.checkMe();
         });
@@ -1263,7 +1257,7 @@ export default class Parsons extends RunestoneBase {
         this.resetButton.id = this.counterId + "-reset";
         this.resetButton.type = "button";
         this.parsonsControlDiv.appendChild(this.resetButton);
-        this.resetButton.addEventListener("click", function(event) {
+        this.resetButton.addEventListener("click", function (event) {
             event.preventDefault();
             that.clearFeedback();
             that.resetView();
@@ -1277,7 +1271,7 @@ export default class Parsons extends RunestoneBase {
             this.helpButton.id = this.counterId + "-help";
             this.helpButton.disabled = false; // bje
             this.parsonsControlDiv.appendChild(this.helpButton);
-            this.helpButton.addEventListener("click", function(event) {
+            this.helpButton.addEventListener("click", function (event) {
                 event.preventDefault();
                 that.helpMe();
             });
@@ -1305,7 +1299,7 @@ export default class Parsons extends RunestoneBase {
             // Remove the options from the code
             // only options are #paired or #distractor
             var options = {};
-            textBlock = textBlock.replace(/#(paired|distractor)/, function(
+            textBlock = textBlock.replace(/#(paired|distractor)/, function (
                 mystring,
                 arg1
             ) {
@@ -1346,7 +1340,7 @@ export default class Parsons extends RunestoneBase {
             }
         }
         // Normalize the indents
-        indents = indents.sort(function(a, b) {
+        indents = indents.sort(function (a, b) {
             return a - b;
         });
         for (i = 0; i < this.lines.length; i++) {
@@ -1416,7 +1410,7 @@ export default class Parsons extends RunestoneBase {
         }
         if (this.options.language == "natural") {
             areaWidth = 300;
-            maxFunction = function(item) {
+            maxFunction = function (item) {
                 item.width(areaWidth - 22);
                 var addition = 3.8;
                 if (item.outerHeight(true) != 38)
@@ -1425,7 +1419,7 @@ export default class Parsons extends RunestoneBase {
             };
         } else {
             areaWidth = 300;
-            maxFunction = function(item) {
+            maxFunction = function (item) {
                 var addition = 3.8;
                 if (item.outerHeight(true) != 38) addition = 2.1;
                 areaHeight += item.outerHeight(true) + height_add * addition;
@@ -1443,11 +1437,11 @@ export default class Parsons extends RunestoneBase {
         this.areaHeight = areaHeight;
         $(this.sourceArea).css({
             width: this.areaWidth + 2,
-            height: areaHeight
+            height: areaHeight,
         });
         $(this.answerArea).css({
             width: this.options.pixelsPerIndent * indent + this.areaWidth + 2,
-            height: areaHeight
+            height: areaHeight,
         });
         if (indent > 0 && indent <= 4) {
             $(this.answerArea).addClass("answer" + indent);
@@ -1633,7 +1627,7 @@ export default class Parsons extends RunestoneBase {
             toStore = {
                 source: this.sourceHash(),
                 answer: this.answerHash(),
-                timestamp: new Date()
+                timestamp: new Date(),
             };
             var adaptiveHash = this.adaptiveHash();
             if (adaptiveHash.length > 0) {
@@ -1660,7 +1654,7 @@ export default class Parsons extends RunestoneBase {
         }
         var event = {
             event: "parsonsMove",
-            div_id: this.divid
+            div_id: this.divid,
         };
         var act = activity + "|" + this.sourceHash() + "|" + this.answerHash();
         var adaptiveHash = this.adaptiveHash();
@@ -1679,7 +1673,7 @@ export default class Parsons extends RunestoneBase {
         }
         var event = {
             event: "parsons",
-            div_id: this.divid
+            div_id: this.divid,
         };
         var answerHash = this.answerHash();
         event.answer = answerHash;
@@ -2319,14 +2313,14 @@ export default class Parsons extends RunestoneBase {
     distractorToRemove() {
         var blocks = this.enabledAnswerBlocks();
         var block;
-        for (var i = 0; i < blocks.length; i++) {
+        for (let i = 0; i < blocks.length; i++) {
             block = blocks[i];
             if (block.isDistractor()) {
                 return block;
             }
         }
         blocks = this.enabledSourceBlocks();
-        for (var i = 0; i < blocks.length; i++) {
+        for (let i = 0; i < blocks.length; i++) {
             block = blocks[i];
             if (block.isDistractor()) {
                 return block;
@@ -2376,11 +2370,11 @@ export default class Parsons extends RunestoneBase {
             var that = this;
             $(block.view).css({
                 "border-color": "#000",
-                "background-color": "#fff"
+                "background-color": "#fff",
             });
             $(block.view).animate(
                 {
-                    opacity: 1.0
+                    opacity: 1.0,
                 },
                 {
                     duration:
@@ -2390,18 +2384,18 @@ export default class Parsons extends RunestoneBase {
                         ) *
                             4 +
                         500,
-                    start: function() {
+                    start: function () {
                         that.moving = block;
                         that.movingX = startX;
                         that.movingY = startY;
                         that.updateView();
                     },
-                    progress: function(a, p, c) {
+                    progress: function (a, p, c) {
                         that.movingX = startX * (1 - p) + endX * p;
                         that.movingY = startY * (1 - p) + endY * p;
                         that.updateView();
                     },
-                    complete: function() {
+                    complete: function () {
                         delete that.moving;
                         delete that.movingX;
                         delete that.movingY;
@@ -2410,42 +2404,42 @@ export default class Parsons extends RunestoneBase {
                             {
                                 opacity: 0.3,
                                 "border-color": "#d3d3d3",
-                                "background-color": "#efefef"
+                                "background-color": "#efefef",
                             },
                             {
                                 duration: 1000,
-                                complete: function() {
+                                complete: function () {
                                     $(block.view).css({
                                         opacity: "",
                                         "border-color": "",
-                                        "background-color": ""
+                                        "background-color": "",
                                     });
                                     $(block.view).addClass("disabled");
-                                }
+                                },
                             }
                         );
-                    }
+                    },
                 }
             );
         } else {
             $(block.view).css({
                 "border-color": "#000",
-                "background-color": "#fff"
+                "background-color": "#fff",
             });
             $(block.view).animate(
                 {
                     opacity: 0.3,
                     "border-color": "#d3d3d3",
-                    "background-color": "#efefef"
+                    "background-color": "#efefef",
                 },
                 {
                     duration: 2000,
-                    complete: function() {
+                    complete: function () {
                         $(block.view).css({
                             "border-color": "",
-                            "background-color": ""
+                            "background-color": "",
                         });
-                    }
+                    },
                 }
             );
         }
@@ -2471,16 +2465,16 @@ export default class Parsons extends RunestoneBase {
         this.areaWidth = blockWidth + 22;
         var block, indent;
         var sourceBlocks = this.sourceBlocks();
-        for (var i = 0; i < sourceBlocks.length; i++) {
+        for (let i = 0; i < sourceBlocks.length; i++) {
             block = sourceBlocks[i];
             indent = block.solutionIndent();
             if (indent == 0) {
                 $(block.view).animate(
                     {
-                        width: blockWidth
+                        width: blockWidth,
                     },
                     {
-                        duration: 1000
+                        duration: 1000,
                     }
                 );
             } else {
@@ -2489,10 +2483,10 @@ export default class Parsons extends RunestoneBase {
                         width:
                             blockWidth - indent * this.options.pixelsPerIndent,
                         "padding-left":
-                            indent * this.options.pixelsPerIndent + 10
+                            indent * this.options.pixelsPerIndent + 10,
                     },
                     {
-                        duration: 1000
+                        duration: 1000,
                     }
                 );
             }
@@ -2500,25 +2494,25 @@ export default class Parsons extends RunestoneBase {
         for (var i = 0; i < this.pairedDivs.length; i++) {
             $(this.pairedDivs[i]).animate(
                 {
-                    width: blockWidth + 34
+                    width: blockWidth + 34,
                 },
                 {
-                    duration: 1000
+                    duration: 1000,
                 }
             );
         }
         var answerBlocks = this.answerBlocks();
-        for (var i = 0; i < answerBlocks.length; i++) {
+        for (let i = 0; i < answerBlocks.length; i++) {
             block = answerBlocks[i];
             indent = block.solutionIndent();
             if (indent == 0) {
                 $(block.view).animate(
                     {
                         left: 0,
-                        width: blockWidth
+                        width: blockWidth,
                     },
                     {
-                        duration: 1000
+                        duration: 1000,
                     }
                 );
             } else {
@@ -2528,10 +2522,10 @@ export default class Parsons extends RunestoneBase {
                         width:
                             blockWidth - indent * this.options.pixelsPerIndent,
                         "padding-left":
-                            indent * this.options.pixelsPerIndent + 10
+                            indent * this.options.pixelsPerIndent + 10,
                     },
                     {
-                        duration: 1000
+                        duration: 1000,
                     }
                 );
             }
@@ -2543,39 +2537,39 @@ export default class Parsons extends RunestoneBase {
         this.noindent = true;
         $(this.sourceArea).animate(
             {
-                width: this.areaWidth + 2
+                width: this.areaWidth + 2,
             },
             {
-                duration: 1000
+                duration: 1000,
             }
         );
         $(this.answerArea).animate(
             {
-                width: this.areaWidth + 2
+                width: this.areaWidth + 2,
             },
             {
-                duration: 1000
+                duration: 1000,
             }
         );
         // Change the model (with view)
         $(this.answerArea).animate(
             {
-                opacity: 1.0
+                opacity: 1.0,
             },
             {
                 duration: 1100,
-                complete: function() {
+                complete: function () {
                     $(this.answerArea).css({
-                        opacity: ""
+                        opacity: "",
                     });
                     // Update the model
-                    for (var i = 0; i < sourceBlocks.length; i++) {
+                    for (let i = 0; i < sourceBlocks.length; i++) {
                         sourceBlocks[i].addIndent();
                     }
-                    for (var i = 0; i < answerBlocks.length; i++) {
+                    for (let i = 0; i < answerBlocks.length; i++) {
                         answerBlocks[i].addIndent();
                     }
-                }
+                },
             }
         );
     }
@@ -2591,11 +2585,12 @@ export default class Parsons extends RunestoneBase {
         var answerBlocks = this.answerBlocks();
         var sourceBlocks = this.sourceBlocks();
         var potentials = solutionBlocks.slice(0, solutionBlocks.length - 1);
+        var rating;
         var ratings = [];
         for (var i = 0; i < potentials.length; i++) {
             var block = potentials[i];
             var next = solutionBlocks[i + 1];
-            var rating = (block.lines.length + next.lines.length) * -1;
+            rating = (block.lines.length + next.lines.length) * -1;
             if (answerBlocks.indexOf(next) > -1) {
                 rating += 1;
             }
@@ -2661,18 +2656,18 @@ export default class Parsons extends RunestoneBase {
             var that = this;
             $(block2.view).animate(
                 {
-                    opacity: 1
+                    opacity: 1,
                 },
                 {
                     duration: duration,
-                    start: function() {
+                    start: function () {
                         $(block1.view).css({
                             "border-color": "#000",
-                            "background-color": "#fff"
+                            "background-color": "#fff",
                         });
                         $(block2.view).css({
                             "border-color": "#000",
-                            "background-color": "#fff"
+                            "background-color": "#fff",
                         });
                         block2.lines[0].index += 1000;
                         that.moving = block2;
@@ -2680,12 +2675,12 @@ export default class Parsons extends RunestoneBase {
                         that.movingY = startY;
                         that.updateView();
                     },
-                    progress: function(a, p, c) {
+                    progress: function (a, p, c) {
                         that.movingX = startX * (1 - p) + endX * p;
                         that.movingY = startY * (1 - p) + endY * p;
                         that.updateView();
                     },
-                    complete: function() {
+                    complete: function () {
                         delete that.moving;
                         delete that.movingX;
                         delete that.movingY;
@@ -2695,56 +2690,56 @@ export default class Parsons extends RunestoneBase {
                         $(block1.view).animate(
                             {
                                 "border-color": "#d3d3d3",
-                                "background-color": "#efefef"
+                                "background-color": "#efefef",
                             },
                             {
                                 duration: 1000,
-                                complete: function() {
+                                complete: function () {
                                     $(block1.view).css({
                                         "border-color": "",
-                                        "background-color": ""
+                                        "background-color": "",
                                     });
-                                }
+                                },
                             }
                         );
-                    }
+                    },
                 }
             );
         } else {
             $(block2.view).animate(
                 {
-                    opacity: 1
+                    opacity: 1,
                 },
                 {
                     duration: 1000,
-                    start: function() {
+                    start: function () {
                         $(block1.view).css({
                             "border-color": "#000",
-                            "background-color": "#fff"
+                            "background-color": "#fff",
                         });
                         $(block2.view).css({
                             "border-color": "#000",
-                            "background-color": "#fff"
+                            "background-color": "#fff",
                         });
                     },
-                    complete: function() {
+                    complete: function () {
                         block1.consumeBlock(block2);
                         $(block1.view).animate(
                             {
                                 "border-color": "#d3d3d3",
-                                "background-color": "#efefef"
+                                "background-color": "#efefef",
                             },
                             {
                                 duration: 1000,
-                                complete: function() {
+                                complete: function () {
                                     $(block1.view).css({
                                         "border-color": "",
-                                        "background-color": ""
+                                        "background-color": "",
                                     });
-                                }
+                                },
                             }
                         );
-                    }
+                    },
                 }
             );
         }
@@ -3016,7 +3011,7 @@ export default class Parsons extends RunestoneBase {
                                 left: x,
                                 top: y - movingHeight / 2,
                                 width: baseWidth,
-                                "z-index": 3
+                                "z-index": 3,
                             });
                             positionTop = positionTop + movingHeight;
                         }
@@ -3025,7 +3020,7 @@ export default class Parsons extends RunestoneBase {
                         left: 0,
                         top: positionTop,
                         width: baseWidth,
-                        "z-index": 2
+                        "z-index": 2,
                     });
                     positionTop = positionTop + $(item.view).outerHeight(true);
                 }
@@ -3037,7 +3032,7 @@ export default class Parsons extends RunestoneBase {
                         left: x,
                         top: y - $(this.moving.view).outerHeight(true) / 2,
                         width: baseWidth,
-                        "z-index": 3
+                        "z-index": 3,
                     });
                 }
             } else {
@@ -3047,7 +3042,7 @@ export default class Parsons extends RunestoneBase {
                         left: 0,
                         top: positionTop,
                         width: baseWidth,
-                        "z-index": 2
+                        "z-index": 2,
                     });
                     positionTop = positionTop + $(item.view).outerHeight(true);
                 }
@@ -3086,7 +3081,7 @@ export default class Parsons extends RunestoneBase {
                         overflow: "visible",
                         "font-size": 43,
                         "vertical-align": "middle",
-                        color: "#7e7ee7"
+                        color: "#7e7ee7",
                     });
                     $(div).html(
                         "<span id= 'st' style = 'vertical-align: middle; font-weight: bold; font-size: 15px'>or</span>{"
@@ -3143,7 +3138,7 @@ export default class Parsons extends RunestoneBase {
                                 left: x,
                                 top: y - movingHeight / 2,
                                 width: baseWidth,
-                                "z-index": 3
+                                "z-index": 3,
                             });
                             positionTop = positionTop + movingHeight;
                         }
@@ -3153,7 +3148,7 @@ export default class Parsons extends RunestoneBase {
                         left: indent,
                         top: positionTop,
                         width: width - indent,
-                        "z-index": 2
+                        "z-index": 2,
                     });
                     positionTop = positionTop + $(block.view).outerHeight(true);
                 }
@@ -3165,7 +3160,7 @@ export default class Parsons extends RunestoneBase {
                         left: x,
                         top: y - $(this.moving.view).outerHeight(true) / 2,
                         width: baseWidth,
-                        "z-index": 3
+                        "z-index": 3,
                     });
                 }
             } else {
@@ -3176,7 +3171,7 @@ export default class Parsons extends RunestoneBase {
                         left: indent,
                         top: positionTop,
                         width: width - indent,
-                        "z-index": 2
+                        "z-index": 2,
                     });
                     positionTop = positionTop + $(block.view).outerHeight(true);
                 }
@@ -3221,7 +3216,7 @@ export default class Parsons extends RunestoneBase {
                     window.pageYOffset -
                     movingHeight / 2,
                 width: baseWidth,
-                "z-index": 3
+                "z-index": 3,
             });
         }
         state = newState;
@@ -3262,10 +3257,10 @@ export default class Parsons extends RunestoneBase {
         if (blocksNotInBins + this.pairedBins.length >= 10) {
             this.areaWidth += 5;
             $(this.sourceArea).css({
-                width: $(this.sourceArea).width() + 5
+                width: $(this.sourceArea).width() + 5,
             });
             $(this.answerArea).css({
-                width: $(this.answerArea).width() + 5
+                width: $(this.answerArea).width() + 5,
             });
         }
     }
@@ -3320,13 +3315,13 @@ export default class Parsons extends RunestoneBase {
 
 Parsons.counter = 0;
 
-$(document).bind("runestone:login-complete", function() {
-    $("[data-component=parsons]").each(function(index) {
+$(document).bind("runestone:login-complete", function () {
+    $("[data-component=parsons]").each(function (index) {
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             try {
                 prsList[this.id] = new Parsons({
                     orig: this,
-                    useRunestoneServices: eBookConfig.useRunestoneServices
+                    useRunestoneServices: eBookConfig.useRunestoneServices,
                 });
             } catch (err) {
                 console.log(`Error rendering Parsons Problem ${this.id}
@@ -3340,6 +3335,6 @@ $(document).bind("runestone:login-complete", function() {
 if (typeof window.component_factory === "undefined") {
     window.component_factory = {};
 }
-window.component_factory["parsons"] = function(opts) {
+window.component_factory["parsons"] = function (opts) {
     return new Parsons(opts);
 };
