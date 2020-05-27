@@ -24,7 +24,6 @@
 "use strict";
 
 import RunestoneBase from "../../common/js/runestonebase";
-import "../css/CodeChat.css";
 import CodeMirror from "codemirror";
 import "codemirror/mode/gas/gas.js";
 

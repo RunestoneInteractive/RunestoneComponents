@@ -41,6 +41,7 @@ def runestone_static_dirs():
     module_static_css.append(os.path.join(basedir, "accessibility", "css"))
     module_static_css.append(os.path.join(basedir, "webgldemo", "css"))
     module_static_css.append(os.path.join(basedir, "matrixeq", "css"))
+    module_static_css.append(os.path.join(basedir, "lp", "css"))
     module_static_image = [
         "%s/images" % os.path.join(basedir, x)
         for x in module_paths
