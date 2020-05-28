@@ -348,7 +348,7 @@ def _alink_role(
 ):
 
     # Look for ``title <refname#anchor>``.
-    m = re.search("(.*\s+<[^#]+)(#.+)(>\s*)$", text)
+    m = re.search(r"(.*\s+<[^#]+)(#.+)(>\s*)$", text)
     if not m:
         msg = inliner.reporter.error(
             'Expected "title <refname#anchor>", but saw "{}"'.format(text)
