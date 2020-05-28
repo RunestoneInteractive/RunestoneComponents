@@ -22,6 +22,7 @@ from .webgldemo import WebglDemo
 
 
 import os, socket, pkg_resources
+import CodeChat.CodeToRest
 
 
 def runestone_static_dirs():
@@ -57,6 +58,7 @@ def runestone_static_dirs():
         + module_static_image
         + module_static_bootstrap
         + [os.path.join(basedir, "common/project_template/_static")]
+        + CodeChat.CodeToRest.html_static_path()
     )
 
 
