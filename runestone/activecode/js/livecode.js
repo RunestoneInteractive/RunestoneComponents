@@ -1,5 +1,7 @@
 import { ActiveCode } from "./activecode.js";
 import MD5 from "./md5.js";
+import ResultsToTable from "./extractUnitResults.js";
+import JUnitTestParser from "./extractUnitResults.js";
 
 export default class LiveCode extends ActiveCode {
     constructor(opts) {
@@ -137,25 +139,19 @@ export default class LiveCode extends ActiveCode {
         import org.junit.runner.Result;
         import org.junit.runner.notification.Failure;
 
-        public class TestRunner
-        {
-            public static void main(String[] args)
-            {
+        public class TestRunner {
+            public static void main(String[] args) {
 
                 Result result = JUnitCore.runClasses(${testdrivername.replace(
                     ".java",
                     ".class"
                 )});
-                for (Failure failure : result.getFailures()) {
-                    System.out.println(failure.toString());
-                }
-
-                System.out.println(result.wasSuccessful());
+                System.out.println(CodeTestHelper.getFinalResults());
 
                 int total = result.getRunCount();
                 int fails = result.getFailureCount();
                 int corr  = total - fails;
-                System.out.println("You got " + corr + " out of " + total + " correct. " + 100.0 * corr / total + "%");
+                System.out.println("You got " + corr + " out of " + total + " correct. " + String.format("%.2f", (100.0 * corr / total)) + "%");
             }
         }
 
@@ -233,6 +229,7 @@ export default class LiveCode extends ActiveCode {
         var result;
         host = this.JOBE_SERVER + this.resource;
         var odiv = this.output;
+        var pdiv = this.outDiv;
         $(this.runButton).attr("disabled", "disabled");
         $(this.outDiv).show({ duration: 700, queue: false });
         $(this.errDiv).remove();
@@ -267,18 +264,32 @@ export default class LiveCode extends ActiveCode {
             switch (result.outcome) {
                 case 15:
                     let outstr = result.stdout.replace("&lt;", "<");
-                    $(odiv).html(outstr.replace(/\n/g, "<br>"));
+                    let parsedOutput = new JUnitTestParser(
+                        result.stdout,
+                        this.divid
+                    );
+                    $(odiv).html(parsedOutput.stdout);
+                    let rdiv = document.getElementById(
+                        `${this.divid}_unit_results`
+                    );
+                    if (rdiv) {
+                        rdiv.remove();
+                    }
+                    if (parsedOutput.table) {
+                        pdiv.appendChild(parsedOutput.table);
+                    }
+                    rdiv = document.getElementById(
+                        `${this.divid}_unit_results`
+                    );
+                    if (rdiv) {
+                        rdiv.appendChild(parsedOutput.pctString);
+                    }
                     if (this.suffix) {
-                        let m = outstr.match(
-                            /You got\s+(\d+) out of (\d+) correct.\s+(\d+\.\d+)%/
-                        );
-                        if (m) {
-                            this.logBookEvent({
-                                event: "unittest",
-                                act: m[3],
-                                div_id: this.divid,
-                            });
-                        }
+                        this.logBookEvent({
+                            event: "unittest",
+                            act: parsedOutput.pct,
+                            div_id: this.divid,
+                        });
                     }
                     break;
                 case 11: // compiler error
