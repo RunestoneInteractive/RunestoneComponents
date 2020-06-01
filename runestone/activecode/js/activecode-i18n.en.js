@@ -47,7 +47,7 @@ $.i18n().load({
         msg_activecode_syntax_error:
             "This message indicates that Python can't figure out the syntax of a particular statement.  Some examples are assigning to a literal, or a function call",
         msg_activecode_syntax_error_fix:
-            "Check your assignment statments and make sure that the left hand side of the assignment is a variable, not a literal or a function.",
+            "Check your assignment statements and make sure that the left hand side of the assignment is a variable, not a literal or a function.",
         msg_activecode_key_error:
             "This message indicates that you are trying to access an element of a dictionary, but the dictionary does not have that the key you are using.",
         msg_activecode_key_error_fix:
