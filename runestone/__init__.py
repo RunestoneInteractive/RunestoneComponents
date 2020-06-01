@@ -89,20 +89,17 @@ script_files = [
     "https://cdn.jsdelivr.net/npm/vega-embed@3.14.0/build/vega-embed.js",
     "runestone.js?v=" + runestone_version,
     "jquery-ui-1.10.3.custom.min.js",
-    "jquery-fix.js",
-    "bootstrap-3.0.0/js/bootstrap.min.js",
+    "bootstrap-3.4.1/js/bootstrap.min.js",
+    "jquery-fix.js",  # required by bootstrap theme
     "bootstrap-sphinx.js",
-    "waypoints.min.js",
     "jquery.idle-timer.js",
-    "processing-1.4.1.min.js",
-    "jquery.hotkey.js",
     "jquery-migrate-1.2.1.min.js",
     "presenter_mode.js?v=" + runestone_version,
     "theme.js",
 ]
 
 css_files = [
-    "bootstrap-3.0.0/css/bootstrap.min.css",
+    "bootstrap-3.4.1/css/bootstrap.min.css",
     "presenter_mode.css",
     "jquery-ui-1.10.3.custom.min.css",
     "bootstrap-sphinx.css",

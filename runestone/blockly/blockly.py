@@ -60,7 +60,7 @@ START = """
     <script src='javascript_compressed.js' type="text/javascript"> </script>
     <script src='python_compressed.js' type="text/javascript"> </script>
     <script src='msg/js/en.js' type="text/javascript"> </script>
-    <link rel="stylesheet" href="bootstrap-3.0.0/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="bootstrap-3.4.1/css/bootstrap.min.css" type="text/css" />
     <link rel="stylesheet" href="video.css" type="text/css" />
     <script type="text/javascript">
     // Get the objects we need to do logging from the parent frame.

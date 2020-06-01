@@ -16,16 +16,12 @@ from selenium.webdriver.common.by import By
 from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
 setUpModule, tearDownModule = module_fixture_maker(__file__)
-jquery_url = "http://code.jquery.com/jquery-1.12.4.min.js"
 
 
 class DragAndDropQuestion_Tests(RunestoneTestCase):
     def setUp(self):
         super(DragAndDropQuestion_Tests, self).setUp()
         self.driver.set_script_timeout(5)
-        with open("jquery_load_helper.js") as f:
-            self.load_jquery_js = f.read()
-        self.driver.execute_async_script(self.load_jquery_js, jquery_url)
         with open("drag_and_drop_helper.js") as f:
             self.js = f.read()
 
@@ -137,14 +133,15 @@ class DragAndDropQuestion_Tests(RunestoneTestCase):
             elif target.text == "py":
                 element_id = ""
 
-            self.driver.execute_script(
-                self.js
-                + "$('#"
-                + element_id
-                + "').simulateDragDrop({ dropTarget: 'span:contains(\""
-                + target.text
-                + "\")' });"
-            )
+            if element_id:
+                self.driver.execute_script(
+                    self.js
+                    + "$('#"
+                    + element_id
+                    + "').simulateDragDrop({ dropTarget: 'span:contains(\""
+                    + target.text
+                    + "\")' });"
+                )
 
         btn_check = t1.find_element_by_class_name("btn-success")
         btn_check.click()
