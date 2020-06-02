@@ -2590,32 +2590,32 @@ export default class Parsons extends RunestoneBase {
         for (var i = 0; i < potentials.length; i++) {
             var block = potentials[i];
             var next = solutionBlocks[i + 1];
-            rating = (block.lines.length + next.lines.length) * -1;
-            if (answerBlocks.indexOf(next) > -1) {
+            rating = (block.lines.length + next.lines.length) * -1;               // blocks have more lines of code have lower rating
+            if (answerBlocks.indexOf(next) > -1) {                     // next blocks exist in answer area, rating+1
                 rating += 1;
             }
             var indexOf = answerBlocks.indexOf(block);
-            if (indexOf == -1) {
-            } else if (indexOf == answerBlocks.length - 1) {
+            if (indexOf == -1) {                                       // block not in the answer area. This should add rating + length of answerblock
+            } else if (indexOf == answerBlocks.length - 1) {           // the block is the last one in the answer area, rating+2
                 rating += 2;
             } else {
                 if (
-                    block.lines[block.lines.length - 1].index + 1 ==
+                    block.lines[block.lines.length - 1].index + 1 ==    // there is a close line between this block's last line and the first line of next block, rating+2
                     answerBlocks[indexOf + 1].lines[0].index
                 ) {
                     rating += 2;
                 } else {
-                    rating += 3;
+                    rating += 3;               // else rating+3, I think this need to be changed to rating + distance of two blocks
                 }
             }
-            if (block.minimumLineIndent() == next.minimumLineIndent()) {
+            if (block.minimumLineIndent() == next.minimumLineIndent()) {             // if two blocks have same indent, rating+1
                 rating += 1;
             }
             ratings.push(rating);
         }
         var block1 = potentials[0];
         rating = ratings[0];
-        for (var i = 1; i < potentials.length; i++) {
+        for (var i = 1; i < potentials.length; i++) {                    // select the high rating block
             if (ratings[i] > rating) {
                 block1 = potentials[i];
                 rating = ratings[i];
