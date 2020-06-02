@@ -93,7 +93,6 @@ script_files = [
     "jquery-fix.js",  # required by bootstrap theme
     "bootstrap-sphinx.js",
     "jquery.idle-timer.js",
-    "jquery-migrate-1.2.1.min.js",
     "presenter_mode.js?v=" + runestone_version,
     "theme.js",
 ]
