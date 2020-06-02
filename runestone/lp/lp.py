@@ -179,7 +179,7 @@ class _LpBuildButtonDirective(RunestoneIdDirective):
         self.options["include"] = [x.strip() for x in self.options.get("include", "")]
         # If a language isn't provided, derive it from the file's name.
         env = self.state.document.settings.env
-        self.options.setdefault("language", get_lexer(filename=env.docname).name)
+        self.options.setdefault("language", get_lexer(filename=env.docname).mimetypes[0])
         self.options.setdefault("timelimit", 25000)
         self.options.setdefault("builder", "JOBE")
 
@@ -348,7 +348,7 @@ def _alink_role(
 ):
 
     # Look for ``title <refname#anchor>``.
-    m = re.search("(.*\s+<[^#]+)(#.+)(>\s*)$", text)
+    m = re.search(r"(.*\s+<[^#]+)(#.+)(>\s*)$", text)
     if not m:
         msg = inliner.reporter.error(
             'Expected "title <refname#anchor>", but saw "{}"'.format(text)
@@ -512,6 +512,9 @@ def setup(
 
     # This depends on `CodeChat <https://pythonhosted.org/CodeChat/README.html>`_.
     app.setup_extension("CodeChat.CodeToRestSphinx")
+
+    # Supply a fake CSS file to avoid errors, since the CodeChat's CSS will import this.
+    app.add_autoversioned_javascript("html4css1.css")
 
     # See http://www.sphinx-doc.org/en/stable/extdev/appapi.html#sphinx.application.Sphinx.add_role.
     app.add_role("alink", _alink_role)

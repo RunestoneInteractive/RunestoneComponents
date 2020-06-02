@@ -92,7 +92,7 @@ def depart_mc_node(self, node):
 # author - Barb Ericson
 # author - Anusha
 class MChoice(Assessment):
-    """
+    r"""
     The syntax for a multiple-choice question is:
 
     .. mchoice:: uniqueid

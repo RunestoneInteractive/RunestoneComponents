@@ -166,14 +166,14 @@ def _add_autoversion(
     raise ExtensionError("Unable to find {} in html_static_path.".format(filename))
 
 
-# Convenience method to call ``add_javascript`` using ``add_autoversion``.
+# Convenience method to call ``add_js_file`` using ``add_autoversion``.
 def _add_autoversioned_javascript(self, filename):
-    return self.add_javascript(self.add_autoversion(filename))
+    return self.add_js_file(self.add_autoversion(filename))
 
 
-# Convenience method for calling ``add_stylesheet`` using ``add_autoversion``.
+# Convenience method for calling ``add_css_file`` using ``add_autoversion``.
 def _add_autoversioned_stylesheet(self, filename, *args, **kwargs):
-    return self.add_stylesheet(self.add_autoversion(filename), *args, **kwargs)
+    return self.add_css_file(self.add_autoversion(filename), *args, **kwargs)
 
 
 # Add these methods to the Sphinx application object.
@@ -335,13 +335,11 @@ def add_i18n_js(app, supported_langs, *i18n_resources):
 # Adds JavaScript for the Sculpt in-browser implementation of Python
 def add_skulpt_js(app):
     if first_time(app, "add_skulpt_js"):
-        app.add_autoversioned_javascript("skulpt.min.js")
-        app.add_autoversioned_javascript("skulpt-stdlib.js")
-        app.add_javascript("https://cdn.jsdelivr.net/npm/vega@4.0.0-rc.2/build/vega.js")
-        app.add_javascript(
+        app.add_js_file("https://cdn.jsdelivr.net/npm/vega@4.0.0-rc.2/build/vega.js")
+        app.add_js_file(
             "https://cdn.jsdelivr.net/npm/vega-lite@2.5.0/build/vega-lite.js"
         )
-        app.add_javascript(
+        app.add_js_file(
             "https://cdn.jsdelivr.net/npm/vega-embed@3.14.0/build/vega-embed.js"
         )
 

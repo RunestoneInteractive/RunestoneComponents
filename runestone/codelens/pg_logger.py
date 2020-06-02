@@ -59,7 +59,7 @@ DEBUG = True
 
 BREAKPOINT_STR = "#break"
 
-CLASS_RE = re.compile("class\s+")
+CLASS_RE = re.compile(r"class\s+")
 
 
 # simple sandboxing scheme:

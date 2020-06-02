@@ -150,7 +150,7 @@ def build(all, wd):
     version = require("runestone")[0].version
     print("Building with Runestone {}".format(version))
 
-    with open('conf.py') as cf:
+    with open('conf.py', encoding='utf-8') as cf:
         ctext = cf.read()
         if not re.search(r"from runestone import.*(setup|script_files)", ctext):
             click.echo(click.style("Please update conf.py to import setup from runestone", fg='red'), err=True, color=True)
