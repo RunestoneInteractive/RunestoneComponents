@@ -335,8 +335,6 @@ def add_i18n_js(app, supported_langs, *i18n_resources):
 # Adds JavaScript for the Sculpt in-browser implementation of Python
 def add_skulpt_js(app):
     if first_time(app, "add_skulpt_js"):
-        app.add_autoversioned_javascript("skulpt.min.js")
-        app.add_autoversioned_javascript("skulpt-stdlib.js")
         app.add_js_file("https://cdn.jsdelivr.net/npm/vega@4.0.0-rc.2/build/vega.js")
         app.add_js_file(
             "https://cdn.jsdelivr.net/npm/vega-lite@2.5.0/build/vega-lite.js"
