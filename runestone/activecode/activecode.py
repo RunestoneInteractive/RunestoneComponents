@@ -49,10 +49,10 @@ def setup(app):
 
     app.add_autoversioned_javascript("jquery.highlight.js")
     app.add_autoversioned_javascript("sql-wasm.js")  # todo: only load if we need it
-    app.add_javascript(
+    app.add_js_file(
         "https://cdn.jsdelivr.net/npm/handsontable@7.2.2/dist/handsontable.full.js"
     )
-    app.add_stylesheet(
+    app.add_css_file(
         "https://cdn.jsdelivr.net/npm/handsontable@7.2.2/dist/handsontable.full.min.css"
     )
 

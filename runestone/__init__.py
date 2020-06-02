@@ -22,6 +22,7 @@ from .webgldemo import WebglDemo
 
 
 import os, socket, pkg_resources
+import CodeChat.CodeToRest
 
 
 def runestone_static_dirs():
@@ -40,6 +41,7 @@ def runestone_static_dirs():
     module_static_css.append(os.path.join(basedir, "accessibility", "css"))
     module_static_css.append(os.path.join(basedir, "webgldemo", "css"))
     module_static_css.append(os.path.join(basedir, "matrixeq", "css"))
+    module_static_css.append(os.path.join(basedir, "lp", "css"))
     module_static_image = [
         "%s/images" % os.path.join(basedir, x)
         for x in module_paths
@@ -57,6 +59,7 @@ def runestone_static_dirs():
         + module_static_image
         + module_static_bootstrap
         + [os.path.join(basedir, "common/project_template/_static")]
+        + CodeChat.CodeToRest.html_static_path()
     )
 
 
@@ -93,7 +96,6 @@ script_files = [
     "jquery-fix.js",  # required by bootstrap theme
     "bootstrap-sphinx.js",
     "jquery.idle-timer.js",
-    "jquery-migrate-1.2.1.min.js",
     "presenter_mode.js?v=" + runestone_version,
     "theme.js",
 ]

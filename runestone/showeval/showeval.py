@@ -116,7 +116,7 @@ config values (conf.py):
             if step == True:
                 if line != "":
                     if is_dynamic:
-                        esc_line = str(line).replace("{", "\{")
+                        esc_line = str(line).replace("{", r"\{")
                     else:
                         esc_line = str(line)
                     self.options["steps"].append(esc_line)

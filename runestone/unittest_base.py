@@ -71,7 +71,7 @@ class ModuleFixture(unittest.TestCase):
         self.old_cwd = os.getcwd()
         os.chdir(self.base_path)
         p = subprocess.Popen(
-            ["npm", "run", "build"],
+            ["npm.cmd" if IS_WINDOWS else "npm", "run", "build"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=True,

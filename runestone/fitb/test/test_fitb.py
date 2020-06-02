@@ -103,9 +103,9 @@ class FITBtests(RunestoneTestCase):
         self.click_checkme()
         feedback = self.find_feedback("fill1412")
         self.assertIn("Correct", feedback.text)
-        # Get desiered response from .i18n file loaded based on language attribute in the HTML tag initially set in conf.py 
+        # Get desiered response from .i18n file loaded based on language attribute in the HTML tag initially set in conf.py
         msg_no_answer = self.driver.execute_script("return $.i18n('msg_no_answer')")
-       
+
         self.assertIn(msg_no_answer, feedback.text)
 
     # No answers yet -- no answer provided feedback.
@@ -114,7 +114,7 @@ class FITBtests(RunestoneTestCase):
         self.click_checkme()
         feedback = self.find_feedback("fill1412")
         self.assertIsNotNone(feedback.text)
-        # Get desiered response from .i18n file loaded based on language attribute in the HTML tag initially set in conf.py 
+        # Get desiered response from .i18n file loaded based on language attribute in the HTML tag initially set in conf.py
         msg_no_answer = self.driver.execute_script("return $.i18n('msg_no_answer')")
 
         self.assertIn(msg_no_answer, feedback.text)
@@ -175,7 +175,7 @@ class FITBtests(RunestoneTestCase):
 
     def test_regexescapes1(self):
         self.find_fitb("regexescapes1")
-        self.find_blank(0).send_keys("C:\windows\system")
+        self.find_blank(0).send_keys(r"C:\windows\system")
         self.click_checkme()
         feedback = self.find_feedback("regexescapes1")
         self.assertIn("Correct.", feedback.text)
