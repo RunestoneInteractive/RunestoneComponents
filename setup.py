@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-with open("requirements.txt", "r") as fh:
+with open("requirements.txt", "r", encoding="utf-8") as fh:
     dependencies = [l.strip() for l in fh]
 
 VERSION = "5.0.0"
