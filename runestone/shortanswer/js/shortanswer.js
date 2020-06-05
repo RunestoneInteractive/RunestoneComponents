@@ -116,7 +116,13 @@ export default class ShortAnswer extends RunestoneBase {
         this.fieldSet.appendChild(this.feedbackDiv);
         //this.fieldSet.appendChild(document.createElement("br"));
         $(this.origElem).replaceWith(this.containerDiv);
-        MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.containerDiv]);
+        // This is a stopgap measure for when MathJax is not loaded at all.  There is another
+        // more difficult case that when MathJax is loaded asynchronously we will get here
+        // before MathJax is loaded.  In that case we will need to implement something
+        // like `the solution described here <https://stackoverflow.com/questions/3014018/how-to-detect-when-mathjax-is-fully-loaded>`_
+        if (typeof MathJax !== "undefined") {
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.containerDiv]);
+        }
     }
 
     renderMath(value) {
