@@ -141,7 +141,7 @@ export default class LiveCode extends ActiveCode {
 
         public class TestRunner {
             public static void main(String[] args) {
-
+                CodeTestHelper.resetFinalResults();
                 Result result = JUnitCore.runClasses(${testdrivername.replace(
                     ".java",
                     ".class"

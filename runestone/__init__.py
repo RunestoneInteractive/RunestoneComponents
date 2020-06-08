@@ -1,3 +1,6 @@
+# *********************************
+# |docname| - Runestone Module init
+# *********************************
 from .activecode import ActiveCode
 from .animation import Animation
 from .mchoice import MChoice, QuestionNumber
@@ -23,8 +26,15 @@ from .webgldemo import WebglDemo
 
 import os, socket, pkg_resources
 import CodeChat.CodeToRest
+from sphinx.errors import ExtensionError
 
 
+# TODO: clean up - many of the folders are not needed as the files are imported by webpack
+#
+# runestone_static_dirs()
+# -----------------------
+# Users can call this to get a list of all static directories in the runestone package
+# normally this is just used by the `conf.py` file for building a runestone book
 def runestone_static_dirs():
     basedir = os.path.dirname(__file__)
     module_paths = [
@@ -63,6 +73,10 @@ def runestone_static_dirs():
     )
 
 
+# runestone_extensions()
+# -----------------------
+# Users can call this to get a list of all extensions provided by runestone
+# normally this is just used by the `conf.py` file for building a runestone book
 def runestone_extensions():
     basedir = os.path.dirname(__file__)
     module_paths = [
@@ -78,44 +92,27 @@ def runestone_extensions():
     return modules
 
 
-runestone_version = version = pkg_resources.get_distribution("runestone").version
-script_files = [
-    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.emitter.bidi.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.emitter.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.fallbacks.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.messagestore.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.parser.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.language.js",
-    "https://cdn.jsdelivr.net/npm/vega@4.0.0-rc.2/build/vega.js",
-    "https://cdn.jsdelivr.net/npm/vega-lite@2.5.0/build/vega-lite.js",
-    "https://cdn.jsdelivr.net/npm/vega-embed@3.14.0/build/vega-embed.js",
-    "runestone.js?v=" + runestone_version,
-    "jquery-ui-1.10.3.custom.min.js",
-    "bootstrap-3.4.1/js/bootstrap.min.js",
-    "jquery-fix.js",  # required by bootstrap theme
-    "bootstrap-sphinx.js",
-    "jquery.idle-timer.js",
-    "presenter_mode.js?v=" + runestone_version,
-    "theme.js",
-]
-
-css_files = [
-    "bootstrap-3.4.1/css/bootstrap.min.css",
-    "presenter_mode.css",
-    "jquery-ui-1.10.3.custom.min.css",
-    "bootstrap-sphinx.css",
-    "user-highlights.css",
-    "runestone-custom-sphinx-bootstrap.css?v=" + runestone_version,
-    "theme-overrides.css",
-]
-
-
+# setup(app)
+# ----------
+#
 def setup(app):
+    """
+    A normal Runestone project will import this function into its conf.py
+    This setup will run after all of the extensions, so it is a good place
+    for us to include our common javascript and css files.
+    This could be expanded if there is additional initialization or customization
+    we wanted to do for all projects.
+    """
     for jsfile in script_files:
-        app.add_js_file(jsfile)
+        try:
+            app.add_autoversioned_javascript(jsfile)
+        except ExtensionError:
+            app.add_js_file(jsfile)
     for cssfile in css_files:
-        app.add_css_file(cssfile)
+        try:
+            app.add_autoversioned_stylesheet(cssfile)
+        except ExtensionError:
+            app.add_css_file(cssfile)
 
 
 def get_master_url():
@@ -179,6 +176,43 @@ def build(options):
         print("Error in building code {}".format(rc))
 
     return rc
+
+
+#
+# Module variables
+# ----------------
+runestone_version = version = pkg_resources.get_distribution("runestone").version
+
+script_files = [
+    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.emitter.bidi.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.emitter.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.fallbacks.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.messagestore.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.parser.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.language.js",
+    "https://cdn.jsdelivr.net/npm/vega@4.0.0-rc.2/build/vega.js",
+    "https://cdn.jsdelivr.net/npm/vega-lite@2.5.0/build/vega-lite.js",
+    "https://cdn.jsdelivr.net/npm/vega-embed@3.14.0/build/vega-embed.js",
+    "runestone.js",
+    "jquery-ui-1.10.3.custom.min.js",
+    "bootstrap-3.4.1/js/bootstrap.min.js",
+    "jquery-fix.js",  # required by bootstrap theme
+    "bootstrap-sphinx.js",
+    "jquery.idle-timer.js",
+    "presenter_mode.js",
+    "theme.js",
+]
+
+css_files = [
+    "bootstrap-3.4.1/css/bootstrap.min.css",
+    "presenter_mode.css",
+    "jquery-ui-1.10.3.custom.min.css",
+    "bootstrap-sphinx.css",
+    "user-highlights.css",
+    "runestone-custom-sphinx-bootstrap.css?v=" + runestone_version,
+    "theme-overrides.css",
+]
 
 
 cmap = {
