@@ -26,7 +26,6 @@ from runestone.common.runestonedirective import (
     RunestoneIdDirective,
     RunestoneNode,
     add_i18n_js,
-    add_skulpt_js,
 )
 
 try:

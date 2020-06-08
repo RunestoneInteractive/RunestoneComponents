@@ -133,6 +133,9 @@ def _add_autoversion(
     # TODO: Cache the path and CRC to speed computing it.
     #
     # Search for this file by looking through all HTML static paths. The HTML builder hasn't been initilized, so the ``html_static_path`` doesn't show up yet as ``config.html_static_path``.
+    # Some uses of this don't discriminate files versus urls. So if it starts with http just return it as we are not going to calculate a crc for something not on our server.
+    if filename[:4] == "http":
+        return filename
     for path in self.config._raw_config["html_static_path"]:
         full_path = path
         # Transform a relative path into an absolute path if necessary.
@@ -330,18 +333,6 @@ def add_i18n_js(app, supported_langs, *i18n_resources):
                 app.add_autoversioned_javascript(
                     res + "." + app.config.language + ".js"
                 )
-
-
-# Adds JavaScript for the Sculpt in-browser implementation of Python
-def add_skulpt_js(app):
-    if first_time(app, "add_skulpt_js"):
-        app.add_js_file("https://cdn.jsdelivr.net/npm/vega@4.0.0-rc.2/build/vega.js")
-        app.add_js_file(
-            "https://cdn.jsdelivr.net/npm/vega-lite@2.5.0/build/vega-lite.js"
-        )
-        app.add_js_file(
-            "https://cdn.jsdelivr.net/npm/vega-embed@3.14.0/build/vega-embed.js"
-        )
 
 
 # Some nodes have a line number of None. Look through their children to find the node's line number.

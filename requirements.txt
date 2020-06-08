@@ -9,9 +9,8 @@ babel==2.8.0              # via sphinx
 certifi==2020.4.5.1       # via requests
 chardet==3.0.4            # via requests
 click==7.1.2              # via -r requirements.in
-codechat==1.8.1           # via -r requirements.in
+codechat==1.8.2           # via -r requirements.in
 cogapp==3.0.0             # via -r requirements.in
-colorama==0.4.3           # via sphinx
 docutils==0.16            # via codechat, sphinx
 idna==2.9                 # via requests
 imagesize==1.2.0          # via sphinx

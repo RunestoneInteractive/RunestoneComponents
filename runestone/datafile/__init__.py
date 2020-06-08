@@ -25,7 +25,6 @@ from runestone.server.componentdb import get_engine_meta
 from runestone.common.runestonedirective import (
     RunestoneIdDirective,
     RunestoneNode,
-    add_skulpt_js,
 )
 
 
