@@ -2,6 +2,7 @@ dist: xenial
 language: python
 python:
 - '3.7'
+- '3.8'
 node_js: "13.8"
 install: "npm install"
 
