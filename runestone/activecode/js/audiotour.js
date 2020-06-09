@@ -3,6 +3,8 @@ import RunestoneBase from "../../common/js/runestonebase.js";
 // function to display the audio tours
 export default class AudioTour extends RunestoneBase {
     constructor(divid, code, bnum, audio_text) {
+        // Bug Fix: If a class extends another class, this is undefined UNTIL super is called
+        super();
         this.audio_tour = null;
         this.audio_code = null;
         this.windowcode = null;

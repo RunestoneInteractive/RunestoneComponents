@@ -93,7 +93,7 @@ $.i18n().load({
         msg_activecode_starting: "Click the play button to begin the $1",
         msg_activecode_playing: "Playing the $1",
         msg_activecode_loading_audio:
-            "Loading audio.  Please wait.   If the tour doesn't start soon click on 'Stop Tour' and try again.",
+            "Loading audio.  Please wait.   If the tour doesn't start soon click on the leftmost control button (Play first audio in tour)",
         msg_activecode_pause_current_audio: "Pause current audio",
         msg_activecode_pause_audio: "Pause audio",
         msg_activecode_play_paused_audio: "Play paused audio",
