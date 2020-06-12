@@ -86,10 +86,6 @@
     font-weight: normal;
 }
 
-.ac_caption:before {
-    content: "ActiveCode: " counter(activecode) " ";
-    counter-increment: activecode;
-}
 
 .active_out {
     background-color: #dcdcdc;
