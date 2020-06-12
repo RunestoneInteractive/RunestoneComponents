@@ -263,7 +263,6 @@ export default class LiveCode extends ActiveCode {
             });
             switch (result.outcome) {
                 case 15:
-                    let outstr = result.stdout.replace("&lt;", "<");
                     let parsedOutput = new JUnitTestParser(
                         result.stdout,
                         this.divid
