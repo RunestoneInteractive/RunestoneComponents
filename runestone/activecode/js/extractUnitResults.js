@@ -65,6 +65,8 @@ export default class JUnitTestParser {
             pctString.innerHTML = match[0];
             this.pctString = pctString;
             this.pct = match[3];
+            this.passed = match[1];
+            this.failed = match[2] - match[1];
         }
         output = output.replace("Starting Tests", "");
         output = output.replace("Ending Tests", "");
