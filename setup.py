@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 with open("requirements.txt", "r", encoding="utf-8") as fh:
     dependencies = [l.strip() for l in fh]
 
-VERSION = "5.0.3"
+VERSION = "5.0.4"
 setup(
     name="runestone",
     description="Sphinx extensions for writing interactive documents.",
