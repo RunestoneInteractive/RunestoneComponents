@@ -105,9 +105,9 @@ div.ExecutionVisualizer table#pyCodeOutput .lineNo {
 /* Runestone custom modifications */
 
 body {
+    counter-reset: rscomponent;
     padding-top: 60px;
     background-color: var(--outerBackground);
-    counter-reset: rscomponent;
 }
 
 pre {
@@ -996,8 +996,8 @@ textarea#lp-result {
 }
 
 .runestone_caption:before {
-    content: "Activity: "counter(rscomponent) " -- ";
     counter-increment: rscomponent;
+    content: "Activity: "counter(rscomponent) " -- ";
 }
 
 body {

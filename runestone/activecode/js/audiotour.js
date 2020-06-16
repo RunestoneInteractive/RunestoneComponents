@@ -3,6 +3,8 @@ import RunestoneBase from "../../common/js/runestonebase.js";
 // function to display the audio tours
 export default class AudioTour extends RunestoneBase {
     constructor(divid, code, bnum, audio_text) {
+        // Bug Fix: If a class extends another class, this is undefined UNTIL super is called
+        super();
         this.audio_tour = null;
         this.audio_code = null;
         this.windowcode = null;
@@ -35,7 +37,7 @@ export default class AudioTour extends RunestoneBase {
         var bval = [];
         var atype = audio_text.replaceAll("*doubleq*", '"');
         var audio_type = atype.split("*atype*");
-        for (var i = 0; i < audio_type.length - 1; i++) {
+        for (let i = 0; i < audio_type.length - 1; i++) {
             audio_hash[i] = audio_type[i];
             var aword = audio_type[i].split(";");
             bval.push(aword[0]);
@@ -48,7 +50,7 @@ export default class AudioTour extends RunestoneBase {
             codeArray[0] +
             "</div>";
         var num_lines = codeArray.length;
-        for (var i = 1; i < num_lines; i++) {
+        for (let i = 1; i < num_lines; i++) {
             if (i < 9) {
                 first =
                     first +
@@ -182,7 +184,7 @@ export default class AudioTour extends RunestoneBase {
             this.stop_button
         );
         $("#" + divid + " .ac_code_div").append(this.audio_tour);
-        $("#" + divid + " .ac_code_div").css("width", "50%");
+        $("#" + divid + " .ac_code_div").css("width", "100%");
         $("#" + divid + " .CodeMirror.cm-s-default.ui-resizable").hide();
         $("#" + divid + " .ac_opt.btn.btn-default:last-child").hide();
         $(this.stop_button).click(
@@ -508,7 +510,7 @@ export default class AudioTour extends RunestoneBase {
         // if paused and clicked then continue from current
         if (this.elem.paused) {
             // calcualte the time left to play in milliseconds
-            counter = (this.elem.duration - this.elem.currentTime) * 1000;
+            let counter = (this.elem.duration - this.elem.currentTime) * 1000;
             this.elem.play(); // start the audio from current spot
             this.pause_audio.className =
                 "btn-default glyphicon glyphicon-pause";
@@ -553,7 +555,7 @@ export default class AudioTour extends RunestoneBase {
     processLines(divid, lnum, color) {
         var comma = lnum.split(",");
         if (comma.length > 1) {
-            for (i = 0; i < comma.length; i++) {
+            for (let i = 0; i < comma.length; i++) {
                 this.setBackgroundForLines(divid, comma[i], color);
             }
         } else {
@@ -571,13 +573,14 @@ export default class AudioTour extends RunestoneBase {
     // set the background to the passed color
     setBackgroundForLines(divid, lnum, color) {
         var hyphen = lnum.split("-");
+        var str;
         // if a range of lines
         if (hyphen.length > 1) {
             var start = parseInt(hyphen[0]);
             var end = parseInt(hyphen[1]) + 1;
             for (var k = start; k < end; k++) {
                 //alert(k);
-                var str = "#" + divid + "_l" + k;
+                str = "#" + divid + "_l" + k;
                 if ($(str).text() != "") {
                     $(str).css("background-color", color);
                 }
@@ -585,7 +588,7 @@ export default class AudioTour extends RunestoneBase {
             }
         } else {
             //alert(lnum);
-            var str = "#" + divid + "_l" + lnum;
+            str = "#" + divid + "_l" + lnum;
             $(str).css("background-color", color);
             //$(str).effect("highlight",{},(dur*1000)+4500);
         }

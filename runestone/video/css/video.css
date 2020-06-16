@@ -18,12 +18,3 @@ img.bookfig {
     font-weight: bold;
 }
 
-.cl_caption:before {
-    content: "CodeLens: " counter(codelens) " ";
-    counter-increment: codelens;
-}
-
-body {
-    counter-reset: activecode codelens;
-}
-

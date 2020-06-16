@@ -92,12 +92,15 @@ class Video(RunestoneIdDirective):
     optional_arguments = 1
     final_argument_whitespace = True
     has_content = True
-    option_spec = {
-        "controls": directives.flag,
-        "loop": directives.flag,
-        "thumb": directives.uri,
-        "preload": directives.flag,
-    }
+    option_spec = RunestoneIdDirective.option_spec.copy()
+    option_spec.update(
+        {
+            "controls": directives.flag,
+            "loop": directives.flag,
+            "thumb": directives.uri,
+            "preload": directives.flag,
+        }
+    )
 
     def run(self):
         """
@@ -175,13 +178,16 @@ class IframeVideo(RunestoneIdDirective):
     required_arguments = 1
     optional_arguments = 0
     final_argument_whitespace = False
-    option_spec = {
-        "height": directives.nonnegative_int,
-        "width": directives.nonnegative_int,
-        "align": align,
-        "http": httpOption,
-        "divid": directives.unchanged,
-    }
+    option_spec = RunestoneIdDirective.option_spec.copy()
+    option_spec.update(
+        {
+            "height": directives.nonnegative_int,
+            "width": directives.nonnegative_int,
+            "align": align,
+            "http": httpOption,
+            "divid": directives.unchanged,
+        }
+    )
     default_width = 500
     default_height = 281
 
@@ -227,7 +233,7 @@ class Youtube(IframeVideo):
     </div>
     """
 
-    option_spec = IframeVideo.option_spec
+    option_spec = IframeVideo.option_spec.copy()
     option_spec.update(
         {"start": directives.nonnegative_int, "end": directives.nonnegative_int}
     )
