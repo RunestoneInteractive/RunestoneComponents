@@ -17,6 +17,7 @@ setUpModule, tearDownModule = module_fixture_maker(__file__)
 
 
 class ParsonsTests(RunestoneTestCase):
+    maxDiff = None
     def test_general(self):
 
         self.driver.get(self.host + "/index.html")
@@ -142,31 +143,35 @@ class ParsonsTests(RunestoneTestCase):
         self.wait_for_animation("#parsons-1-block-1")
         checkme.click()
         self.assertTrue(self.wait_and_close_alert())
-        helpBtn.click()
+        helpBtn.click()                 # remove the incorrect block
         self.assertTrue(self.wait_and_close_alert())
         self.wait_for_animation("#parsons-1-block-4")
         b4 = source.find_element_by_id("parsons-1-block-4")
         self.assertEqual(b4.get_attribute("class"), "block disabled")
-        helpBtn.click()  # provide Indentation
-        self.assertTrue(self.wait_and_close_alert())
-        self.wait_for_animation("#parsons-1-block-4")
+
+        #helpBtn.click()  # provide Indentation    (should not be used)
+        #self.assertTrue(self.wait_and_close_alert())
+        #self.wait_for_animation("#parsons-1-block-4")
+
         helpBtn.click()  # Combine blocks
         self.assertTrue(self.wait_and_close_alert())
-        self.wait_for_animation("#parsons-1-block-1")
-        l6 = source.find_element_by_id("parsons-1-line-6")
+        self.wait_for_animation("#parsons-1-block-3")
+        l5 = answer.find_element_by_id("parsons-1-line-5")           #This needs to be changed
         # There seems to be a timing issue -- a bit of delay makes this pass.
         time.sleep(0.1)
-        self.assertEqual(l6.get_attribute("class"), "prettyprint lang-py indent1")
-        self.assertFalse(self.f_exists("parsons-1-block-1"))
-        b0 = answer.find_element_by_id("parsons-1-block-0")
-        l1 = b0.find_element_by_id("parsons-1-line-1")
-        l2 = b0.find_element_by_id("parsons-1-line-2")
-        self.assertIsNotNone(l1)
-        self.assertIsNotNone(l2)
+        self.assertEqual(l5.get_attribute("class"), "prettyprint lang-py")
+        self.assertFalse(self.f_exists("parsons-1-block-3"))     #changed to 3                       
+        b2 = answer.find_element_by_id("parsons-1-block-2")
+        l3 = b2.find_element_by_id("parsons-1-line-3")        # Test these three lines are in one block    
+        l4 = b2.find_element_by_id("parsons-1-line-4")
+        l5 = b2.find_element_by_id("parsons-1-line-5")
+        self.assertIsNotNone(l3)
+        self.assertIsNotNone(l4)
+        self.assertIsNotNone(l5)
 
         # Help is finished helping
-        self.wait_for_animation("#parsons-1-block-0")
-        parsons_problem = self.driver.find_element_by_id("parsons-1")
+        self.wait_for_animation("#parsons-1-block-2")
+        # parsons_problem = self.driver.find_element_by_id("parsons-1")
         answer_initial = answer.get_attribute("innerHTML")
         source_initial = source.get_attribute("innerHTML")
         helpBtn.click()
@@ -203,6 +208,111 @@ class ParsonsTests(RunestoneTestCase):
         nlb = self.driver.find_element_by_id("parsons-4-block-1")
         self.assertEqual(len(nlb.find_elements_by_class_name("labels")), 0)  # no label
         self.assertEqual(len(nlb.find_elements_by_class_name("lines")), 1)  # has lines
+
+    def test_indentation(self):
+        self.driver.get(self.host + "/index.html")
+        self.driver.execute_script("window.localStorage.clear();")
+
+        source = self.driver.find_element_by_id("parsons-1-source")
+        answer = self.driver.find_element_by_id("parsons-1-answer")
+        reset = self.driver.find_element_by_id("parsons-1-reset")
+        reset.click()
+        checkme = self.driver.find_element_by_id("parsons-1-check")
+
+        # try three distinct full attempts => help should casue pop up then cause stuff to happen
+        ActionChains(self.driver).drag_and_drop(
+            source.find_element_by_id("parsons-1-block-4"), answer
+        ).perform()
+        ActionChains(self.driver).drag_and_drop(
+            source.find_element_by_id("parsons-1-block-2"),
+            answer.find_element_by_id("parsons-1-block-4"),
+        ).perform()
+        ActionChains(self.driver).drag_and_drop(
+            source.find_element_by_id("parsons-1-block-1"),
+            answer.find_element_by_id("parsons-1-block-2"),
+        ).perform()
+        ActionChains(self.driver).drag_and_drop(
+            source.find_element_by_id("parsons-1-block-0"),
+            answer.find_element_by_id("parsons-1-block-1"),
+        ).perform()
+        self.wait_for_animation("#parsons-1-block-0")
+        checkme.click()
+        reset.click()
+        ActionChains(self.driver).drag_and_drop(
+            source.find_element_by_id("parsons-1-block-2"), answer
+        ).perform()
+        ActionChains(self.driver).drag_and_drop(
+            source.find_element_by_id("parsons-1-block-4"),
+            answer.find_element_by_id("parsons-1-block-2"),
+        ).perform()
+        ActionChains(self.driver).drag_and_drop(
+            source.find_element_by_id("parsons-1-block-1"),
+            answer.find_element_by_id("parsons-1-block-2"),
+        ).perform()
+        ActionChains(self.driver).drag_and_drop(
+            source.find_element_by_id("parsons-1-block-0"),
+            answer.find_element_by_id("parsons-1-block-1"),
+        ).perform()
+        self.wait_for_animation("#parsons-1-block-0")
+        checkme.click()
+        reset.click()
+        ActionChains(self.driver).drag_and_drop(
+            source.find_element_by_id("parsons-1-block-3"), answer
+        ).perform()
+        ActionChains(self.driver).drag_and_drop(
+            source.find_element_by_id("parsons-1-block-2"),
+            answer.find_element_by_id("parsons-1-block-3"),
+        ).perform()
+        ActionChains(self.driver).drag_and_drop(
+            source.find_element_by_id("parsons-1-block-1"),
+            answer.find_element_by_id("parsons-1-block-2"),
+        ).perform()
+        ActionChains(self.driver).drag_and_drop(
+            source.find_element_by_id("parsons-1-block-0"),
+            answer.find_element_by_id("parsons-1-block-1"),
+        ).perform()
+        ActionChains(self.driver).drag_and_drop_by_offset(
+            answer.find_element_by_id("parsons-1-block-0"), -50, 0
+        ).perform()
+        ActionChains(self.driver).drag_and_drop_by_offset(
+            answer.find_element_by_id("parsons-1-block-1"), -50, 0
+        ).perform()
+        ActionChains(self.driver).drag_and_drop_by_offset(
+            answer.find_element_by_id("parsons-1-block-2"), -50, 0
+        ).perform()
+        ActionChains(self.driver).drag_and_drop_by_offset(
+            answer.find_element_by_id("parsons-1-block-3"), -50, 0
+        ).perform()
+        self.wait_for_animation("#parsons-1-block-3")
+        checkme.click()
+        self.assertTrue(self.wait_and_close_alert())
+        #b0 = answer.find_element_by_id("parsons-1-block-0")
+        b1 = answer.find_element_by_id("parsons-1-block-1")
+        b2 = answer.find_element_by_id("parsons-1-block-2")
+        b3 = answer.find_element_by_id("parsons-1-block-3")
+        #self.assertEqual(b0.get_attribute("class"), "block indentLeft")
+        self.assertEqual(b1.get_attribute("class"), "block indentRight")
+        self.assertEqual(b2.get_attribute("class"), "block indentRight")
+        self.assertEqual(b3.get_attribute("class"), "block indentRight")
+
+        helpBtn = self.driver.find_element_by_id("parsons-1-help")
+        helpBtn.click()                                   # Combine blocks
+        self.assertTrue(self.wait_and_close_alert())
+        self.wait_for_animation("#parsons-1-block-1")
+        self.wait_for_animation("#parsons-1-block-0")
+        checkme.click()
+        self.assertEqual(b2.get_attribute("class"), "block indentRight")
+        self.assertEqual(b3.get_attribute("class"), "block indentRight")
+
+        helpBtn.click()                                  # No more change
+        self.assertTrue(self.wait_and_close_alert())
+        checkme.click()
+        self.assertEqual(b2.get_attribute("class"), "block indentRight")
+        self.assertEqual(b3.get_attribute("class"), "block indentRight")
+
+
+
+
 
     def wait_for_animation(self, selector):
         is_animation_in_progress = self.is_element_animated(selector)
