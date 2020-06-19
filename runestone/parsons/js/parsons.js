@@ -1080,7 +1080,7 @@ export default class Parsons extends RunestoneBase {
         this.divid = orig.id;
         // Set the storageId (key for storing data)
         // var storageId = eBookConfig.email;
-        var storageId = localStorageKey();               // Change here for LocalStorageKey
+        var storageId = super.localStorageKey();               // Change here for LocalStorageKey
         /*
         if (storageId == undefined) {
             storageId = this.divid;
@@ -1658,6 +1658,7 @@ export default class Parsons extends RunestoneBase {
         var event = {
             event: "parsonsMove",
             div_id: this.divid,
+            storageid: super.localStorageKey(),
         };
         var act = activity + "|" + this.sourceHash() + "|" + this.answerHash();
         var adaptiveHash = this.adaptiveHash();
@@ -2254,7 +2255,7 @@ export default class Parsons extends RunestoneBase {
     //    userRating = 0..100 how good the person is at solving problems
     initializeAdaptive() {
         // this.adaptiveId = eBookConfig.email;
-        this.adaptiveId = localStorageKey();             // Changed here for LocalStorageKey
+        this.adaptiveId = super.localStorageKey();             // Changed here for LocalStorageKey
         // if (this.adaptiveId == undefined) {
         //     this.adaptiveId = "parsons";
         // } else {
