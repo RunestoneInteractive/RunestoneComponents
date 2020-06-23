@@ -185,8 +185,15 @@ export default class SQLActiveCode extends ActiveCode {
         return result;
     }
     testOneAssert(row, col, oper, expected, result_table) {
-        let actual = result_table.values[row][col];
+        // make sure row and col are in bounds
+        let actual;
         let output = "";
+        try {
+            actual = result_table.values[row][col];
+        } catch (e) {
+            output = `Failed Not enough data to check row ${row} or column ${col}`;
+            return output;
+        }
         const operators = {
             "==": function (operand1, operand2) {
                 return operand1 == operand2;
