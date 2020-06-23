@@ -1079,15 +1079,7 @@ export default class Parsons extends RunestoneBase {
         this.useRunestoneServices = opts.useRunestoneServices;
         this.divid = orig.id;
         // Set the storageId (key for storing data)
-        // var storageId = eBookConfig.email;
-        var storageId = super.localStorageKey();               // Change here for LocalStorageKey
-        /*
-        if (storageId == undefined) {
-            storageId = this.divid;
-        } else {
-            storageId += this.divid;
-        }
-        */
+        var storageId = super.localStorageKey();
         this.storageId = storageId;
         this.children = this.origElem.childNodes; // this contains all of the child elements of the entire tag...
         this.contentArray = [];
@@ -2254,13 +2246,7 @@ export default class Parsons extends RunestoneBase {
     //    checkCount = how many times it has been checked before correct
     //    userRating = 0..100 how good the person is at solving problems
     initializeAdaptive() {
-        // this.adaptiveId = eBookConfig.email;
-        this.adaptiveId = super.localStorageKey();             // Changed here for LocalStorageKey
-        // if (this.adaptiveId == undefined) {
-        //     this.adaptiveId = "parsons";
-        // } else {
-        //     this.adaptiveId = this.adaptiveId + "-parsons";
-        // }
+        this.adaptiveId = super.localStorageKey();
         this.canHelp = true;
         //this.helpCount = -3; // Number of checks before help is offered
         this.checkCount = 0;

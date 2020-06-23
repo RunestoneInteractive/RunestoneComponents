@@ -149,20 +149,16 @@ class ParsonsTests(RunestoneTestCase):
         b4 = source.find_element_by_id("parsons-1-block-4")
         self.assertEqual(b4.get_attribute("class"), "block disabled")
 
-        #helpBtn.click()  # provide Indentation    (should not be used)
-        #self.assertTrue(self.wait_and_close_alert())
-        #self.wait_for_animation("#parsons-1-block-4")
-
         helpBtn.click()  # Combine blocks
         self.assertTrue(self.wait_and_close_alert())
         self.wait_for_animation("#parsons-1-block-3")
-        l5 = answer.find_element_by_id("parsons-1-line-5")           #This needs to be changed
+        l5 = answer.find_element_by_id("parsons-1-line-5")
         # There seems to be a timing issue -- a bit of delay makes this pass.
         time.sleep(0.1)
         self.assertEqual(l5.get_attribute("class"), "prettyprint lang-py")
-        self.assertFalse(self.f_exists("parsons-1-block-3"))     #changed to 3                       
+        self.assertFalse(self.f_exists("parsons-1-block-3"))                    
         b2 = answer.find_element_by_id("parsons-1-block-2")
-        l3 = b2.find_element_by_id("parsons-1-line-3")        # Test these three lines are in one block    
+        l3 = b2.find_element_by_id("parsons-1-line-3")    
         l4 = b2.find_element_by_id("parsons-1-line-4")
         l5 = b2.find_element_by_id("parsons-1-line-5")
         self.assertIsNotNone(l3)
@@ -171,7 +167,6 @@ class ParsonsTests(RunestoneTestCase):
 
         # Help is finished helping
         self.wait_for_animation("#parsons-1-block-2")
-        # parsons_problem = self.driver.find_element_by_id("parsons-1")
         answer_initial = answer.get_attribute("innerHTML")
         source_initial = source.get_attribute("innerHTML")
         helpBtn.click()
@@ -286,11 +281,9 @@ class ParsonsTests(RunestoneTestCase):
         self.wait_for_animation("#parsons-1-block-3")
         checkme.click()
         self.assertTrue(self.wait_and_close_alert())
-        #b0 = answer.find_element_by_id("parsons-1-block-0")
         b1 = answer.find_element_by_id("parsons-1-block-1")
         b2 = answer.find_element_by_id("parsons-1-block-2")
         b3 = answer.find_element_by_id("parsons-1-block-3")
-        #self.assertEqual(b0.get_attribute("class"), "block indentLeft")
         self.assertEqual(b1.get_attribute("class"), "block indentRight")
         self.assertEqual(b2.get_attribute("class"), "block indentRight")
         self.assertEqual(b3.get_attribute("class"), "block indentRight")
@@ -309,10 +302,6 @@ class ParsonsTests(RunestoneTestCase):
         checkme.click()
         self.assertEqual(b2.get_attribute("class"), "block indentRight")
         self.assertEqual(b3.get_attribute("class"), "block indentRight")
-
-
-
-
 
     def wait_for_animation(self, selector):
         is_animation_in_progress = self.is_element_animated(selector)
