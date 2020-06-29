@@ -29,7 +29,12 @@ export default class ACFactory {
         if (opts.timed == true) {
             if (lang === "python") {
                 return new TimedActiveCode(opts);
-            } else if (lang === "java" || lang === "cpp" || lang === "c") {
+            } else if (
+                lang === "java" ||
+                lang === "cpp" ||
+                lang === "c" ||
+                lang === "python3"
+            ) {
                 return new TimedLiveCode(opts);
             } else if (lang === "javascript") {
                 return new TimedJSActiveCode(opts);
