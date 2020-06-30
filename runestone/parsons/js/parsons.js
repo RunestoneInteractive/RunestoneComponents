@@ -1079,12 +1079,7 @@ export default class Parsons extends RunestoneBase {
         this.useRunestoneServices = opts.useRunestoneServices;
         this.divid = orig.id;
         // Set the storageId (key for storing data)
-        var storageId = eBookConfig.email;
-        if (storageId == undefined) {
-            storageId = this.divid;
-        } else {
-            storageId += this.divid;
-        }
+        var storageId = super.localStorageKey();
         this.storageId = storageId;
         this.children = this.origElem.childNodes; // this contains all of the child elements of the entire tag...
         this.contentArray = [];
@@ -1655,6 +1650,7 @@ export default class Parsons extends RunestoneBase {
         var event = {
             event: "parsonsMove",
             div_id: this.divid,
+            storageid: super.localStorageKey(),
         };
         var act = activity + "|" + this.sourceHash() + "|" + this.answerHash();
         var adaptiveHash = this.adaptiveHash();
@@ -2250,12 +2246,7 @@ export default class Parsons extends RunestoneBase {
     //    checkCount = how many times it has been checked before correct
     //    userRating = 0..100 how good the person is at solving problems
     initializeAdaptive() {
-        this.adaptiveId = eBookConfig.email;
-        if (this.adaptiveId == undefined) {
-            this.adaptiveId = "parsons";
-        } else {
-            this.adaptiveId = this.adaptiveId + "-parsons";
-        }
+        this.adaptiveId = super.localStorageKey();
         this.canHelp = true;
         //this.helpCount = -3; // Number of checks before help is offered
         this.checkCount = 0;
@@ -2573,66 +2564,123 @@ export default class Parsons extends RunestoneBase {
             }
         );
     }
+    
+    // first check if any solution blocks are in the source still (left side) and not
+    // in the answer
+    getSolutionBlockInSource() {
+        var solutionBlocks = this.solutionBlocks();
+        var answerBlocks = this.answerBlocks();
+        var sourceBlocks = this.sourceBlocks();
+        var solBlock = null;
+        var currBlock = null;
+        
+        // loop through sourceBlocks and return a block if it is not in the solution
+        for (var i = 0; i < sourceBlocks.length; i++) {
+        
+            // get the current block from the source
+            currBlock = sourceBlocks[i];
+            
+            // if currBlock is in the solution and isn't the first block and isn't in the answer
+            if (solutionBlocks.indexOf(currBlock) > 0 && answerBlocks.indexOf(currBlock) < 0) {
+                return currBlock
+            }
+        }
+        // didn't find any block in the source that is in the solution
+        return null; 
+    }
+    
+    
+    // Find a block2 that is furthest from block1 in the answer
+    // don't use the very first block in the solution as block2
+    getFurthestBlock() {
+    
+        var solutionBlocks = this.solutionBlocks();
+        var answerBlocks = this.answerBlocks();
+        var maxDist = 0;
+        var dist = 0;
+        var maxBlock = null;
+        var currBlock = null;
+        var indexSol = 0;
+        var prevBlock = null;
+        var indexPrev = 0;
+    
+        
+        // loop through the blocks in the answer
+        for (var i = 0; i < answerBlocks.length; i++) {
+            currBlock = answerBlocks[i];
+            indexSol = solutionBlocks.indexOf(currBlock);
+            if (indexSol > 0) {
+                prevBlock = solutionBlocks[indexSol - 1];
+                indexPrev = answerBlocks.indexOf(prevBlock);
+                //alert("my index " + i + " index prev " + indexPrev);
+                
+                // calculate the distance in the answer
+                dist = Math.abs(i - indexPrev);
+                if (dist > maxDist) {
+                    maxDist = dist;
+                    maxBlock = currBlock;
+                }
+            } 
+        }
+        return maxBlock;   
+    }
+    
     // Combine blocks together
     combineBlocks() {
+    
+        var solutionBlocks = this.solutionBlocks();
+        var answerBlocks = this.answerBlocks();
+        var sourceBlocks = this.sourceBlocks();
+    
         // Alert the user to what is happening
         var feedbackArea = $(this.messageDiv);
         feedbackArea.fadeIn(500);
         feedbackArea.attr("class", "alert alert-info");
         feedbackArea.html($.i18n("msg_parson_combined_blocks"));
-        // Use heuristics to figure out which block to combine
-        var solutionBlocks = this.solutionBlocks();
-        var answerBlocks = this.answerBlocks();
-        var sourceBlocks = this.sourceBlocks();
-        var potentials = solutionBlocks.slice(0, solutionBlocks.length - 1);
-        var rating;
-        var ratings = [];
-        for (var i = 0; i < potentials.length; i++) {
-            var block = potentials[i];
-            var next = solutionBlocks[i + 1];
-            rating = (block.lines.length + next.lines.length) * -1;
-            if (answerBlocks.indexOf(next) > -1) {
-                rating += 1;
-            }
-            var indexOf = answerBlocks.indexOf(block);
-            if (indexOf == -1) {
-            } else if (indexOf == answerBlocks.length - 1) {
-                rating += 2;
-            } else {
-                if (
-                    block.lines[block.lines.length - 1].index + 1 ==
-                    answerBlocks[indexOf + 1].lines[0].index
-                ) {
-                    rating += 2;
-                } else {
-                    rating += 3;
-                }
-            }
-            if (block.minimumLineIndent() == next.minimumLineIndent()) {
-                rating += 1;
-            }
-            ratings.push(rating);
+        var block1 = null;
+        var block2 = null;
+        
+        // get a solution block that is still in source (not answer), if any
+        block2 = this.getSolutionBlockInSource();
+        
+        // if none in source get block that is furthest from block1
+        if (block2 == null) {
+            block2 = this.getFurthestBlock();
         }
-        var block1 = potentials[0];
-        rating = ratings[0];
-        for (var i = 1; i < potentials.length; i++) {
-            if (ratings[i] > rating) {
-                block1 = potentials[i];
-                rating = ratings[i];
-            }
-        }
-        var block2 = solutionBlocks[solutionBlocks.indexOf(block1) + 1];
-        // Combine blocks (after move)
+        
+        // get block1 (above block2) in solution
+        var index = solutionBlocks.indexOf(block2);
+        block1 = solutionBlocks[index - 1];
+           
+        // get index of each in answer
         var index1 = answerBlocks.indexOf(block1);
-        var index2, move, subtract;
-        if (index1 > -1) {
-            index2 = answerBlocks.indexOf(block2);
-        } else {
+        var index2 = answerBlocks.indexOf(block2);
+        var move = false;
+        
+        // if both in answer set move based on if directly above each other
+        if (index1 >= 0 && index2 >= 0)
+        {
+            move =  index1 + 1 !== index2;
+            
+        // else if both in source set move again based on if above each other
+        } else if (index1 < 0 && index2 < 0) {
             index1 = sourceBlocks.indexOf(block1);
             index2 = sourceBlocks.indexOf(block2);
+            move =  index1 + 1 !== index2;
+            
+        // one in source and one in answer so must move
+        } else {
+            move = true;
+            if (index1 < 0) {
+                index1 = sourceBlocks.indexOf(block1);
+            }
+            if (index2 < 0) {
+                index2 = sourceBlocks.indexOf(block2);
+            }
         }
-        move = index1 + 1 !== index2;
-        subtract = index2 > -1 && index2 < index1;
+       
+        var subtract = index2 < index1; // is block2 higher
+
         if (move) {
             // Move the block
             var startX = block2.pageXCenter() - 1;
@@ -2647,19 +2695,13 @@ export default class Parsons extends RunestoneBase {
             } else {
                 endY += block2.view.getBoundingClientRect().height / 2;
             }
-            var duration =
-                Math.sqrt(
-                    Math.pow(endY - startY, 2) + Math.pow(endX - startX, 2)
-                ) *
-                    4 +
-                500;
             var that = this;
             $(block2.view).animate(
                 {
                     opacity: 1,
                 },
                 {
-                    duration: duration,
+                    duration: 1000, // 1 seccond
                     start: function () {
                         $(block1.view).css({
                             "border-color": "#000",
@@ -2746,7 +2788,6 @@ export default class Parsons extends RunestoneBase {
     }
     // Adapt the problem to be easier
     //  * remove a distractor until none are present
-    //  * provide indentation
     //  * combine blocks until 3 are left
     makeEasier() {
         var distractorToRemove = this.distractorToRemove();
@@ -2757,10 +2798,6 @@ export default class Parsons extends RunestoneBase {
             alert($.i18n("msg_parson_remove_incorrect"));
             this.removeDistractor(distractorToRemove);
             this.logMove("removedDistractor-" + distractorToRemove.hash());
-        } else if (this.usesIndentation()) {
-            alert($.i18n("msg_parson_will_provide_indent"));
-            this.removeIndentation();
-            this.logMove("removedIndentation");
         } else {
             var numberOfBlocks = this.numberOfBlocks(false);
             if (numberOfBlocks > 3) {
