@@ -473,7 +473,8 @@ export default class LiveCode extends ActiveCode {
                 lang: myVars.lang,
             });
         }).fail(function (jqxhr, textStatus, error) {
-            targetDiv.innerHTML =
+            let targetDivError = document.getElementById(targetDiv);
+            targetDivError.innerHTML =
                 "Sorry, an error occurred while creating your visualization.";
             console.log("Get Trace Failed -- ");
             console.log(error);
