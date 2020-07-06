@@ -119,14 +119,19 @@ def manifest_data_to_db(course_name, manifest_path):
 
             for question in subchapter.findall("./question"):
                 dbtext = ET.tostring(question.find("./"))
-                el = question.find(".//*[@data-component]")
+                el = question.find(".//*[@data-component]") or question.find("./div")
+                print(dbtext)
                 idchild = el.attrib["id"]
+                try:
+                    qtype = el.attrib["data-component"]
+                except:
+                    qtype = "webwork"
                 valudict = dict(
                     base_course=course_name,
                     name=idchild,
                     timestamp=datetime.datetime.now(),
                     is_private="F",
-                    question_type=el.attrib["data-component"],
+                    question_type=qtype,
                     htmlsrc=dbtext.decode("utf8"),
                     from_source="T",
                     subchapter=subchapter.find("./id").text,
