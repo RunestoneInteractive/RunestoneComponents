@@ -195,6 +195,11 @@ def addQuestionToDB(self):
             and_(questions.c.name == id_, questions.c.base_course == basecourse)
         )
         res = sess.execute(sel).first()
+
+        if not self.explain_text:
+            self.explain_text = self.get_explain_text()
+        et = " ".join(self.explain_text)[:80]
+
         try:
             if res:
                 stmt = (
@@ -215,6 +220,7 @@ def addQuestionToDB(self):
                         from_source="T",
                         qnumber=qnumber,
                         optional=optional,
+                        description=et,
                     )
                 )
                 sess.execute(stmt)
@@ -235,6 +241,8 @@ def addQuestionToDB(self):
                     topic=topics,
                     from_source="T",
                     qnumber=qnumber,
+                    optional=optional,
+                    description=et,
                 )
 
                 sess.execute(ins)
