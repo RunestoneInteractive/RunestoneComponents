@@ -228,6 +228,7 @@ class RunestoneDirective(Directive):
         self.options["optional"] = (
             "data-optional=true" if "optional" in self.options else ""
         )
+        self.explain_text = []
 
 
 # This is a base class for all Runestone directives which require a divid as their first parameter.
@@ -270,6 +271,13 @@ class RunestoneIdDirective(RunestoneDirective):
             else:
                 if self.options["qnumber"]:
                     self.content[0] = self.options["qnumber"] + ": " + self.content[0]
+
+    def get_explain_text(self):
+        try:
+            idx = self.content.index("")  # find the first blank line in the contents
+        except ValueError:
+            idx = len(self.content)
+        return self.content[:idx]
 
     def run(self):
         # Make sure the runestone directive at least requires an ID.
