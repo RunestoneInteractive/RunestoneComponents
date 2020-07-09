@@ -1,6 +1,12 @@
 import RunestoneBase from "../../common/js/runestonebase";
 
-let rb = new RunestoneBase();
+class WebWork extends RunestoneBase {
+    constructor(opts) {
+        super(opts);
+    }
+}
+
+let rb = new WebWork();
 
 function logWebWork(e, data) {
     var correct = false;
@@ -34,6 +40,14 @@ function logShowCorrect(e, data) {
         act: "show",
     });
 }
+
+if (typeof window.component_factory === "undefined") {
+    window.component_factory = {};
+}
+
+window.component_factory.webwork = function (opts) {
+    return new WebWork();
+};
 
 $(document).ready(function () {
     $("body").on("runestone_ww_check", logWebWork);
