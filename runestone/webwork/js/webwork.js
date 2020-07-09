@@ -7,12 +7,12 @@ function logWebWork(e, data) {
     let correctCount = 0;
     let qCount = 0;
     let actString = "check:";
-    for (let k of Object.keys(data.answers)) {
+    for (let k of Object.keys(data.rh_result.answers)) {
         qCount += 1;
-        if (data.answers[k].score == 1) {
+        if (data.rh_result.answers[k].score == 1) {
             correctCount += 1;
         }
-        actString += `actual:${data.answers[k].student_ans}:expected:${data.answers[k].correct_value}:`;
+        actString += `actual:${data.rh_result.answers[k].student_ans}:expected:${data.rh_result.answers[k].correct_value}:`;
     }
     let pct = correctCount / qCount;
     actString += `correct:${correctCount}:count:${qCount}:pct:${pct}`;
