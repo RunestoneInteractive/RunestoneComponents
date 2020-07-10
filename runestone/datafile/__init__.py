@@ -18,6 +18,8 @@ from __future__ import print_function
 __author__ = "isaiahmayerchak"
 
 import os.path
+import base64
+import pathlib
 from docutils import nodes
 from docutils.parsers.rst import directives
 from sqlalchemy import Table
@@ -44,6 +46,12 @@ TEMPLATE = u"""
 %(filecontent)s</pre></div>
 """
 
+IMG_TEMPLATE = """
+<div class="runestone datafile">
+<div class="datafile_caption">Data file: <code>%(divid)s</code></div>
+<img data-component="datafile" data-isimage=%(image)s id=%(divid)s %(hidden)s src='data:image/%(imtype)s;base64, %(filecontent)s'/></div>
+"""
+
 
 class DataFileNode(nodes.General, nodes.Element, RunestoneNode):
     def __init__(self, content, **kwargs):
@@ -60,13 +68,17 @@ class DataFileNode(nodes.General, nodes.Element, RunestoneNode):
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
 def visit_df_node(self, node):
-    res = TEMPLATE
+    print(node.df_content.keys())
+    if "image" in node.df_content:
+        res = IMG_TEMPLATE
+    else:
+        res = TEMPLATE
     res = res % node.df_content
 
     res = res.replace(
         "u'", "'"
     )  # hack:  there must be a better way to include the list and avoid unicode strings
-
+    print(res)
     self.body.append(res)
 
 
@@ -93,6 +105,7 @@ class DataFile(RunestoneIdDirective):
    :cols: If editable, number of columns--default is 20
    :rows: If editable, number of rows--default is 40
    :hide: Flag that sets a non-editable datafile to be hidden
+   :image: Flag that says this file is an image implies :fromfile: will be used
    :fromfile: path to file that contains the data
    """
 
@@ -106,6 +119,7 @@ class DataFile(RunestoneIdDirective):
             "edit": directives.flag,
             "rows": directives.positive_int,
             "cols": directives.positive_int,
+            "image": directives.flag,
             "fromfile": directives.unchanged,
         }
     )
@@ -120,6 +134,7 @@ class DataFile(RunestoneIdDirective):
                 :cols: If editable, number of columns--default is 20
                 :rows: If editable, number of rows--default is 40
                 :hide: Flag that sets a non-editable datafile to be hidden
+                :image:
                 :fromfile: path to file that contains the data
         """
         super(DataFile, self).run()
@@ -132,21 +147,28 @@ class DataFile(RunestoneIdDirective):
 
         if "fromfile" in self.options:
             ffpath = os.path.dirname(self.srcpath)
-            print(self.srcpath, os.getcwd())
             filename = os.path.join(env.srcdir, ffpath, self.options["fromfile"])
-            with open(filename, "rb") as f:
-                self.content = [x[:-1].decode("utf8") for x in f.readlines()]
-
+            if "image" in self.options:
+                self.options["imtype"] = pathlib.Path(filename).suffix[1:]
+                with open(filename, "rb") as f:
+                    self.content = base64.b64encode(f.read()).decode("utf8")
+            else:
+                with open(filename, "rb") as f:
+                    self.content = [x[:-1].decode("utf8") for x in f.readlines()]
         if "cols" in self.options:
             self.options["cols"] = self.options["cols"]
         else:
-            self.options["cols"] = min(65, max([len(x) for x in self.content]))
+            if "image" not in self.options:
+                self.options["cols"] = min(65, max([len(x) for x in self.content]))
         if "rows" in self.options:
             self.options["rows"] = self.options["rows"]
         else:
             self.options["rows"] = 20
 
-        if self.content:
+        if "image" in self.options:
+            source = self.content
+            self.options["image"] = "true"
+        elif self.content:
             source = "\n".join(self.content) + "\n"
         else:
             source = "\n"

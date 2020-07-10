@@ -22,6 +22,7 @@ class DataFile extends RunestoneBase {
         this.origElem = orig;
         this.divid = orig.id;
         this.dataEdit = false;
+        this.isImage = $(orig).data("isimage");
         if ($(this.origElem).data("edit") === true) {
             this.dataEdit = true;
         }
@@ -32,10 +33,12 @@ class DataFile extends RunestoneBase {
         // Users can specify numbers of rows/columns when editing is true
         this.numberOfRows = $(this.origElem).data("rows");
         this.numberOfCols = $(this.origElem).data("cols");
-        if (this.dataEdit) {
-            this.createTextArea();
-        } else {
-            this.createPre();
+        if (!this.isImage) {
+            if (this.dataEdit) {
+                this.createTextArea();
+            } else {
+                this.createPre();
+            }
         }
     }
     /*=====================================
