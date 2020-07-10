@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-from __future__ import print_function
 
 __author__ = "isaiahmayerchak"
 
@@ -68,7 +67,6 @@ class DataFileNode(nodes.General, nodes.Element, RunestoneNode):
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
 def visit_df_node(self, node):
-    print(node.df_content.keys())
     if "image" in node.df_content:
         res = IMG_TEMPLATE
     else:
@@ -78,7 +76,6 @@ def visit_df_node(self, node):
     res = res.replace(
         "u'", "'"
     )  # hack:  there must be a better way to include the list and avoid unicode strings
-    print(res)
     self.body.append(res)
 
 
