@@ -179,7 +179,9 @@ class _LpBuildButtonDirective(RunestoneIdDirective):
         self.options["include"] = [x.strip() for x in self.options.get("include", "")]
         # If a language isn't provided, derive it from the file's name.
         env = self.state.document.settings.env
-        self.options.setdefault("language", get_lexer(filename=env.docname).mimetypes[0])
+        self.options.setdefault(
+            "language", get_lexer(filename=env.docname).mimetypes[0]
+        )
         self.options.setdefault("timelimit", 25000)
         self.options.setdefault("builder", "JOBE")
 
