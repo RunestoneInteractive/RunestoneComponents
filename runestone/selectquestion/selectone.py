@@ -65,10 +65,12 @@ class SelectQuestion(RunestoneIdDirective):
 
         env = self.state.document.settings.env
         is_dynamic = env.config.html_context.get("dynamic_pages", False)
-        if not is_dynamic:
-            raise ValueError(
-                "The selectquestion directive can only be used when dynamic_pages is True"
-            )
+        if is_dynamic:
+            self.options["message"] = "Loading ..."
+        else:
+            self.options[
+                "message"
+            ] = "The selectquestion directive only works with dynamic pages"
 
         if len(self.arguments) > 0:
             self.question_bank_id = self.arguments[0].strip()

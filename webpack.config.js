@@ -28,6 +28,7 @@ module.exports = (env) => {
             "./runestone/lp/js/lp.js",
             "./runestone/codelens/js/codelens.js",
             "./runestone/webwork/js/webwork.js",
+            "./runestone/selectquestion/js/selectone.js",
         ],
         mode: env.MODE,
         devtool: env.MODE === "development" ? "inline-source-map" : "none",
