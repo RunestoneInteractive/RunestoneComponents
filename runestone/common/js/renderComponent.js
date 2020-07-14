@@ -1,3 +1,5 @@
+import TimedMC from "../../mchoice/js/timedmc";
+
 export function renderRunestoneComponent(componentSrc, whereDiv, moreOpts) {
     /**
      *  The easy part is adding the componentSrc to the existing div.
@@ -57,4 +59,44 @@ export function renderRunestoneComponent(componentSrc, whereDiv, moreOpts) {
             }
         }
     }
+}
+
+export function renderTimedComponent(componentSrc, moreOpts) {
+    /* The important distinction is that the component does not really need to be rendered
+    into the page, in fact, due to the async nature of getting the source the list of questions
+    is made and the original html is replaced by the look of the exam.
+    */
+
+    let patt = /..\/_images/g;
+    componentSrc = componentSrc.replace(
+        patt,
+        `${eBookConfig.app}/books/published/${eBookConfig.basecourse}/_images`
+    );
+
+    let componentKind = $($(componentSrc).find("[data-component]")[0]).data(
+        "component"
+    );
+
+    let origId = $(componentSrc).find("[data-component]").first().attr("id");
+
+    // Double check -- if the component source is not in the DOM, then briefly add it
+    // and call the constructor.
+    let hdiv;
+    if (!document.getElementById(origId)) {
+        hdiv = $("<div/>", {
+            css: { display: "none" },
+        }).appendTo("body");
+        hdiv.html(componentSrc);
+    }
+
+    let ret;
+    let opts = {
+        orig: document.getElementById(origId),
+    };
+
+    if (componentKind == "multiplechoice") {
+        ret = new TimedMC(opts);
+    }
+    hdiv.remove();
+    return ret;
 }
