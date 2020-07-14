@@ -4,10 +4,10 @@ import RunestoneBase from "../../common/js/runestonebase";
 export default class SelectOne extends RunestoneBase {
     constructor(opts) {
         super(opts);
-        this.divid = $(opts.orig).data("questionid");
+        this.questions = $(opts.orig).data("questionlist");
         let newid = `q_${Math.floor(Math.random() * 1000000)}`;
         opts.orig.id = newid;
-        let data = { questionid: this.divid };
+        let data = { questions: this.questions };
 
         $.getJSON("/runestone/ajax/get_question_source", data, function (
             htmlsrc
