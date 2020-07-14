@@ -47,15 +47,11 @@ class SelectQuestion(RunestoneIdDirective):
     """
 
     required_arguments = 0
-    optional_arguments = 1
+    optional_arguments = 10
     has_content = False
     option_spec = RunestoneIdDirective.option_spec.copy()
     option_spec.update(
-        {
-            "fromlist": directives.unchanged,
-            "proficiency": directives.unchanged,
-            "basecourse": directives.flag,
-        }
+        {"proficiency": directives.unchanged, "basecourse": directives.flag,}
     )
 
     def __init__(self, *args, **kwargs):
@@ -73,18 +69,10 @@ class SelectQuestion(RunestoneIdDirective):
             ] = "The selectquestion directive only works with dynamic pages"
 
         if len(self.arguments) > 0:
-            self.question_bank_id = self.arguments[0].strip()
-
-            # todo: validate that question is in the database
-            self.options["selector"] = f"data-questionid={self.question_bank_id}"
-            print(self.options)
-
-        if len(self.arguments) > 0 and "fromlist" in self.options:
-            raise KeyError("You must Provide a single id OR list of ids, not both")
-
-        if "fromlist" in self.options:
-            self.question_bank_choices = self.options["fromlist"].split(",")
+            self.question_bank_choices = ",".join(self.arguments)
             self.options["selector"] = f"data-questionlist={self.question_bank_choices}"
+
+            # todo: validate that question(s) are in the database
 
         if "proficiency" in self.options:
             pass
