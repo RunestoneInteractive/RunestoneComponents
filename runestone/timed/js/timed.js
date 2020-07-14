@@ -18,6 +18,7 @@ import ACFactory from "../../activecode/js/acfactory.js";
 import TimedClickableArea from "../../clickableArea/js/timedclickable";
 import TimedDragNDrop from "../../dragndrop/js/timeddnd.js";
 import TimedParsons from "../../parsons/js/timedparsons.js";
+import SelectOne from "../../selectquestion/js/selectone";
 
 export var TimedList = {}; // Timed dictionary
 
@@ -389,11 +390,15 @@ export default class Timed extends RunestoneBase {
                 useRunestoneServices: eBookConfig.useRunestoneServices,
                 timed: true,
             };
-            if ($(tmpChild).children("[data-component]")) {
+            if ($(tmpChild).children("[data-component]").length > 0) {
                 tmpChild = $(tmpChild).children("[data-component]")[0];
                 opts.orig = tmpChild;
             }
-            if ($(tmpChild).is("[data-component=multiplechoice]")) {
+            if ($(tmpChild).is("[data-component=selectquestion]")) {
+                this.renderedQuestionArray.push({
+                    question: new SelectOne(opts),
+                });
+            } else if ($(tmpChild).is("[data-component=multiplechoice]")) {
                 this.renderedQuestionArray.push({
                     question: new TimedMC(opts),
                 });
