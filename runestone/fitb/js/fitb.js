@@ -148,7 +148,7 @@ export default class FITB extends RunestoneBase {
                 this.renderFITBFeedback();
             }
         } else {
-            this.startEvaluation(true);
+            this.startEvaluation(false);
         }
     }
     checkLocalStorage() {
