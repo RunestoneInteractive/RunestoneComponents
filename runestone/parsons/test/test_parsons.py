@@ -303,6 +303,8 @@ class ParsonsTests(RunestoneTestCase):
         self.assertEqual(b2.get_attribute("class"), "block indentRight")
         self.assertEqual(b3.get_attribute("class"), "block indentRight")
 
+
+
     def wait_for_animation(self, selector):
         is_animation_in_progress = self.is_element_animated(selector)
         while is_animation_in_progress is True:

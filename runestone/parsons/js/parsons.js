@@ -1465,6 +1465,7 @@ export default class Parsons extends RunestoneBase {
         var lineNumbers = [];
         var pairedDivs = [];
         var j;
+        // This is add style to paired bins
         if (this.pairDistractors || !this.options.adaptive) {
             for (i = bins.length - 1; i > -1; i--) {
                 bin = bins[i];
@@ -1938,6 +1939,13 @@ export default class Parsons extends RunestoneBase {
             }
         }
         originalBlocks = unorderedBlocks;
+
+        /*
+        if (this.recentAttempts < 2) {
+            this.pairDistractors = false;
+        } else {
+            this.pairDistractors = true;
+        }*/
         // Trim the distractors
         var removedBlocks = [];
         if (this.options.maxdist !== undefined) {
@@ -1969,12 +1977,13 @@ export default class Parsons extends RunestoneBase {
             }
         }
         if (this.options.order === undefined) {
+            console.log(unorderedBlocks);
             // Shuffle, respecting paired distractors
             var chunks = [],
                 chunk = [];
             for (i = 0; i < unorderedBlocks.length; i++) {
                 block = unorderedBlocks[i];
-                if (block.lines[0].paired) {
+                if (block.lines[0].paired && this.pairDistractors) {
                     chunk.push(block);
                 } else {
                     chunk = [];
@@ -1995,6 +2004,7 @@ export default class Parsons extends RunestoneBase {
                     blocks.push(chunk[0]);
                 }
             }
+            console.log(blocks);
         } else {
             // Order according to order specified
             for (i = 0; i < this.options.order.length; i++) {
@@ -2007,7 +2017,7 @@ export default class Parsons extends RunestoneBase {
                 }
             }
         }
-        this.pairDistractors = true;
+        // this.pairDistractors = true;
         if (this.options.adaptive) {
             this.limitDistractors = true;
             blocks = this.adaptBlocks(blocks);

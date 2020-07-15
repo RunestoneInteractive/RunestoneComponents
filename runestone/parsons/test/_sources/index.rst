@@ -30,6 +30,7 @@ SECTION 1: Parsons Problem
 
 
 Section 2: Labeling
+:::::::::::::::::::::::::::::
 
 * Numbers right
 * Numbers left
@@ -91,3 +92,4 @@ Section 2: Labeling
       return fib(num - 1) + fib(num - 2)
    =====
       return fib(num - 1) * fib(num - 2) #paired
+
