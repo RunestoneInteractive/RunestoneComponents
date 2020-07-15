@@ -1940,12 +1940,6 @@ export default class Parsons extends RunestoneBase {
         }
         originalBlocks = unorderedBlocks;
 
-        /*
-        if (this.recentAttempts < 2) {
-            this.pairDistractors = false;
-        } else {
-            this.pairDistractors = true;
-        }*/
         // Trim the distractors
         var removedBlocks = [];
         if (this.options.maxdist !== undefined) {
@@ -1977,7 +1971,6 @@ export default class Parsons extends RunestoneBase {
             }
         }
         if (this.options.order === undefined) {
-            console.log(unorderedBlocks);
             // Shuffle, respecting paired distractors
             var chunks = [],
                 chunk = [];
@@ -2004,7 +1997,6 @@ export default class Parsons extends RunestoneBase {
                     blocks.push(chunk[0]);
                 }
             }
-            console.log(blocks);
         } else {
             // Order according to order specified
             for (i = 0; i < this.options.order.length; i++) {
