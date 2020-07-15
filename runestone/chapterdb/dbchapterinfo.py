@@ -161,7 +161,12 @@ def env_updated(app, env):
         doctree = env.get_doctree(docname)
         for section in doctree.traverse(docutils.nodes.section):
             updated_docs.append(docname)
-            title = section.next_node(docutils.nodes.Titular)
+            # Find the section number of the current document. See `../common/question_number.py` for details.
+            secnum_tuple = env.toc_secnumbers.get(docname, {}).get("")
+            # Gievn a section number as a tuple, such as ``(1, 2, 3)``, turn this into the string "1.2.3 ".
+            secnum_str = ".".join(map(str, secnum_tuple)) + " " if secnum_tuple else ""
+            # Prepend it to the title.
+            title = secnum_str + section.next_node(docutils.nodes.Titular).astext()
             # ``docname`` is stored with Unix-style forward slashes, even on Windows. Therefore, we can't use ``os.path.basename`` or ``os.sep``.
             splits = docname.split("/")
             # If the docname is ``'index'``, then set ``chap_id`` to an empty string.
@@ -175,7 +180,7 @@ def env_updated(app, env):
                 continue
             if chap_id not in chap_titles:
                 if subchap_id == "toctree":
-                    chap_titles[chap_id] = title.astext()
+                    chap_titles[chap_id] = title
                 else:
                     chap_titles[chap_id] = chap_id
                     logger.warning(docname + " Using a substandard chapter title")
@@ -183,7 +188,7 @@ def env_updated(app, env):
             if chap_id not in subchap_titles:
                 subchap_titles[chap_id] = OrderedDict()
             if subchap_id not in subchap_titles[chap_id] and subchap_id != "toctree":
-                subchap_titles[chap_id][subchap_id] = title.astext()
+                subchap_titles[chap_id][subchap_id] = title
 
     update_database(chap_titles, subchap_titles, skips, app)
 
