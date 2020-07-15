@@ -395,39 +395,22 @@ export default class Timed extends RunestoneBase {
                 opts.orig = tmpChild;
             }
             if ($(tmpChild).is("[data-component=selectquestion]")) {
+                // SelectOne is async and will replace itself in this array with
+                // the actual selected question
+                opts.rqa = this.renderedQuestionArray;
                 this.renderedQuestionArray.push({
                     question: new SelectOne(opts),
-                });
-            } else if ($(tmpChild).is("[data-component=multiplechoice]")) {
-                this.renderedQuestionArray.push({
-                    question: new TimedMC(opts),
-                });
-            } else if ($(tmpChild).is("[data-component=fillintheblank]")) {
-                var newFITB = new TimedFITB(opts);
-                this.renderedQuestionArray.push({
-                    question: newFITB,
-                });
-            } else if ($(tmpChild).is("[data-component=dragndrop]")) {
-                this.renderedQuestionArray.push({
-                    question: new TimedDragNDrop(opts),
-                });
-            } else if ($(tmpChild).is("[data-component=clickablearea]")) {
-                this.renderedQuestionArray.push({
-                    question: new TimedClickableArea(opts),
-                });
-            } else if ($(tmpChild).is("[data-component=shortanswer]")) {
-                this.renderedQuestionArray.push({
-                    question: new TimedShortAnswer(opts),
-                });
-            } else if ($(tmpChild).is("[data-component=parsons]")) {
-                this.renderedQuestionArray.push({
-                    question: new TimedParsons(opts),
                 });
             } else if ($(tmpChild).is("[data-component=activecode]")) {
                 let lang = $(tmpChild).data("lang");
                 this.renderedQuestionArray.push({
                     wrapper: tmpChild.parentElement,
                     question: ACFactory.createActiveCode(tmpChild, lang, opts),
+                });
+            } else if ($(tmpChild).is("[data-component]")) {
+                let componentKind = $(tmpChild).data("component");
+                this.renderedQuestionArray.push({
+                    question: new window.component_factory[componentKind](opts),
                 });
             } else if ($(tmpChild).is("[data-childcomponent]")) {
                 // this is for when a directive has a wrapper element that isn't actually part of the javascript object

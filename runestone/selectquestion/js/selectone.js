@@ -1,6 +1,6 @@
 import {
     renderRunestoneComponent,
-    renderTimedComponent,
+    createTimedComponent,
 } from "../../common/js/renderComponent";
 import RunestoneBase from "../../common/js/runestonebase";
 
@@ -12,20 +12,26 @@ export default class SelectOne extends RunestoneBase {
         opts.orig.id = newid;
         let data = { questions: this.questions };
         let self = this;
-        //$.ajaxSetup({ async: false });
         $.getJSON("/runestone/ajax/get_question_source", data, function (
             htmlsrc
         ) {
             let res;
             if (opts.timed) {
-                res = renderTimedComponent(htmlsrc, {});
+                res = createTimedComponent(htmlsrc, { timed: true });
+                // replace the entry in the timed exam's list of components
+                // with the component created by createTimedComponent
+                for (let component of opts.rqa) {
+                    if (component.question == self) {
+                        component.question = res;
+                        break;
+                    }
+                }
+                self.realComponent = res;
+                self.containerDiv = res.containerDiv;
             } else {
                 res = renderRunestoneComponent(htmlsrc, newid, {});
             }
-            self.realComponent = res;
-            self.containerDiv = res.containerDiv;
         });
-        //$.ajaxSetup({ async: true });
     }
 }
 

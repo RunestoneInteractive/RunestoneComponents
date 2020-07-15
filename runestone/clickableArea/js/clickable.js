@@ -444,10 +444,3 @@ $(document).bind("runestone:login-complete", function () {
         }
     });
 });
-
-if (typeof window.component_factory === "undefined") {
-    window.component_factory = {};
-}
-window.component_factory.clickablearea = function (opts) {
-    return new ClickableArea(opts);
-};

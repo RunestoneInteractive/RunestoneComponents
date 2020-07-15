@@ -48,3 +48,13 @@ export default class TimedFITB extends FITB {
         this.startEvaluation(logFlag);
     }
 }
+
+if (typeof window.component_factory === "undefined") {
+    window.component_factory = {};
+}
+window.component_factory.fillintheblank = function (opts) {
+    if (opts.timed) {
+        return new TimedFITB(opts);
+    }
+    return new FITB(opts);
+};

@@ -53,3 +53,13 @@ export default class TimedDragNDrop extends DragNDrop {
         }
     }
 }
+
+if (typeof window.component_factory === "undefined") {
+    window.component_factory = {};
+}
+window.component_factory["dragndrop"] = function (opts) {
+    if (opts.timed) {
+        return new TimedDragNDrop(opts);
+    }
+    return new DragNDrop(opts);
+};
