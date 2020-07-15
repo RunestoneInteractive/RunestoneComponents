@@ -2564,7 +2564,7 @@ export default class Parsons extends RunestoneBase {
             }
         );
     }
-    
+
     // first check if any solution blocks are in the source still (left side) and not
     // in the answer
     getSolutionBlockInSource() {
@@ -2573,27 +2573,27 @@ export default class Parsons extends RunestoneBase {
         var sourceBlocks = this.sourceBlocks();
         var solBlock = null;
         var currBlock = null;
-        
+
         // loop through sourceBlocks and return a block if it is not in the solution
         for (var i = 0; i < sourceBlocks.length; i++) {
-        
             // get the current block from the source
             currBlock = sourceBlocks[i];
-            
+
             // if currBlock is in the solution and isn't the first block and isn't in the answer
-            if (solutionBlocks.indexOf(currBlock) > 0 && answerBlocks.indexOf(currBlock) < 0) {
-                return currBlock
+            if (
+                solutionBlocks.indexOf(currBlock) > 0 &&
+                answerBlocks.indexOf(currBlock) < 0
+            ) {
+                return currBlock;
             }
         }
         // didn't find any block in the source that is in the solution
-        return null; 
+        return null;
     }
-    
-    
+
     // Find a block2 that is furthest from block1 in the answer
     // don't use the very first block in the solution as block2
     getFurthestBlock() {
-    
         var solutionBlocks = this.solutionBlocks();
         var answerBlocks = this.answerBlocks();
         var maxDist = 0;
@@ -2603,8 +2603,7 @@ export default class Parsons extends RunestoneBase {
         var indexSol = 0;
         var prevBlock = null;
         var indexPrev = 0;
-    
-        
+
         // loop through the blocks in the answer
         for (var i = 0; i < answerBlocks.length; i++) {
             currBlock = answerBlocks[i];
@@ -2613,25 +2612,24 @@ export default class Parsons extends RunestoneBase {
                 prevBlock = solutionBlocks[indexSol - 1];
                 indexPrev = answerBlocks.indexOf(prevBlock);
                 //alert("my index " + i + " index prev " + indexPrev);
-                
+
                 // calculate the distance in the answer
                 dist = Math.abs(i - indexPrev);
                 if (dist > maxDist) {
                     maxDist = dist;
                     maxBlock = currBlock;
                 }
-            } 
+            }
         }
-        return maxBlock;   
+        return maxBlock;
     }
-    
+
     // Combine blocks together
     combineBlocks() {
-    
         var solutionBlocks = this.solutionBlocks();
         var answerBlocks = this.answerBlocks();
         var sourceBlocks = this.sourceBlocks();
-    
+
         // Alert the user to what is happening
         var feedbackArea = $(this.messageDiv);
         feedbackArea.fadeIn(500);
@@ -2639,36 +2637,35 @@ export default class Parsons extends RunestoneBase {
         feedbackArea.html($.i18n("msg_parson_combined_blocks"));
         var block1 = null;
         var block2 = null;
-        
+
         // get a solution block that is still in source (not answer), if any
         block2 = this.getSolutionBlockInSource();
-        
+
         // if none in source get block that is furthest from block1
         if (block2 == null) {
             block2 = this.getFurthestBlock();
         }
-        
+
         // get block1 (above block2) in solution
         var index = solutionBlocks.indexOf(block2);
         block1 = solutionBlocks[index - 1];
-           
+
         // get index of each in answer
         var index1 = answerBlocks.indexOf(block1);
         var index2 = answerBlocks.indexOf(block2);
         var move = false;
-        
+
         // if both in answer set move based on if directly above each other
-        if (index1 >= 0 && index2 >= 0)
-        {
-            move =  index1 + 1 !== index2;
-            
-        // else if both in source set move again based on if above each other
+        if (index1 >= 0 && index2 >= 0) {
+            move = index1 + 1 !== index2;
+
+            // else if both in source set move again based on if above each other
         } else if (index1 < 0 && index2 < 0) {
             index1 = sourceBlocks.indexOf(block1);
             index2 = sourceBlocks.indexOf(block2);
-            move =  index1 + 1 !== index2;
-            
-        // one in source and one in answer so must move
+            move = index1 + 1 !== index2;
+
+            // one in source and one in answer so must move
         } else {
             move = true;
             if (index1 < 0) {
@@ -2678,7 +2675,7 @@ export default class Parsons extends RunestoneBase {
                 index2 = sourceBlocks.indexOf(block2);
             }
         }
-       
+
         var subtract = index2 < index1; // is block2 higher
 
         if (move) {
@@ -3368,10 +3365,3 @@ $(document).bind("runestone:login-complete", function () {
         }
     });
 });
-
-if (typeof window.component_factory === "undefined") {
-    window.component_factory = {};
-}
-window.component_factory["parsons"] = function (opts) {
-    return new Parsons(opts);
-};

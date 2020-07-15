@@ -157,3 +157,15 @@ export default class TimedMC extends MultipleChoice {
         }
     }
 }
+
+if (typeof window.component_factory === "undefined") {
+    window.component_factory = {};
+}
+
+window.component_factory.multiplechoice = function (opts) {
+    if (opts.timed) {
+        return new TimedMC(opts);
+    } else {
+        return new MultipleChoice(opts);
+    }
+};

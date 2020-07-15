@@ -28,8 +28,10 @@ from runestone.common.runestonedirective import (
 
 
 TEMPLATE = """
-<div class="runestone" data-component="selectquestion" {selector}>
+<div class="runestone alert alert-warning">
+<div data-component="selectquestion" {selector}>
     <p>Loading ...</p>
+</div>
 </div>
 """
 

@@ -273,11 +273,3 @@ $(document).ready(function () {
         }
     });
 });
-
-if (typeof window.component_factory === "undefined") {
-    window.component_factory = {};
-}
-
-window.component_factory.shortanswer = function (opts) {
-    return new ShortAnswer(opts);
-};

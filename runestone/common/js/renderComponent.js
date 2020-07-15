@@ -61,7 +61,7 @@ export function renderRunestoneComponent(componentSrc, whereDiv, moreOpts) {
     }
 }
 
-export function renderTimedComponent(componentSrc, moreOpts) {
+export function createTimedComponent(componentSrc, moreOpts) {
     /* The important distinction is that the component does not really need to be rendered
     into the page, in fact, due to the async nature of getting the source the list of questions
     is made and the original html is replaced by the look of the exam.
@@ -92,11 +92,13 @@ export function renderTimedComponent(componentSrc, moreOpts) {
     let ret;
     let opts = {
         orig: document.getElementById(origId),
+        timed: true,
     };
 
-    if (componentKind == "multiplechoice") {
-        ret = new TimedMC(opts);
+    if (componentKind in window.component_factory) {
+        ret = new window.component_factory[componentKind](opts);
     }
+    $(ret.containerDiv).addClass("runestone alert alert-warning");
     hdiv.remove();
     return ret;
 }
