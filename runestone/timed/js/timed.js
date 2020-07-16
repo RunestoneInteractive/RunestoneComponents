@@ -73,30 +73,43 @@ export default class Timed extends RunestoneBase {
         this.getNewChildren();
         this.renderTimedAssess();
     }
+
     getNewChildren() {
         this.newChildren = [];
         for (var i = 0; i < this.origElem.childNodes.length; i++) {
             this.newChildren.push(this.origElem.childNodes[i]);
         }
     }
+
     /*===============================
     === Generating new Timed HTML ===
     ===============================*/
     renderTimedAssess() {
-        this.renderContainer();
-        this.renderTimer();
-        this.renderControlButtons();
-        this.assessDiv.appendChild(this.timedDiv); // This can't be appended in renderContainer because then it renders above the timer and control buttons.
-        this.createRenderedQuestionArray();
-        if (this.renderedQuestionArray.length > 1) this.renderNavControls();
-        this.renderSubmitButton();
-        this.renderFeedbackContainer();
-        this.useRunestoneServices = eBookConfig.useRunestoneServices;
-        // Replace intermediate HTML with rendered HTML
-        $(this.origElem).replaceWith(this.assessDiv);
-        // check if already taken and if so show results
-        this.tookTimedExam();
+        // create renderedQuestionArray returns a promise
+        //
+        let p = this.createRenderedQuestionArray();
+        p.then(
+            function () {
+                if (this.random) {
+                    this.randomizeRQA();
+                }
+                this.renderContainer();
+                this.renderTimer();
+                this.renderControlButtons();
+                this.assessDiv.appendChild(this.timedDiv); // This can't be appended in renderContainer because then it renders above the timer and control buttons.
+                if (this.renderedQuestionArray.length > 1)
+                    this.renderNavControls();
+                this.renderSubmitButton();
+                this.renderFeedbackContainer();
+                this.useRunestoneServices = eBookConfig.useRunestoneServices;
+                // Replace intermediate HTML with rendered HTML
+                $(this.origElem).replaceWith(this.assessDiv);
+                // check if already taken and if so show results
+                this.tookTimedExam();
+            }.bind(this)
+        );
     }
+
     renderContainer() {
         this.assessDiv = document.createElement("div"); // container for the entire Timed Component
         if (this.fullwidth) {
@@ -119,6 +132,7 @@ export default class Timed extends RunestoneBase {
             style: "display:none",
         });
     }
+
     renderTimer() {
         this.wrapperDiv = document.createElement("div");
         this.timerContainer = document.createElement("P");
@@ -127,6 +141,7 @@ export default class Timed extends RunestoneBase {
         this.wrapperDiv.appendChild(this.timerContainer);
         this.showTime();
     }
+
     renderControlButtons() {
         this.controlDiv = document.createElement("div");
         $(this.controlDiv).attr({
@@ -188,6 +203,7 @@ export default class Timed extends RunestoneBase {
         this.assessDiv.appendChild(this.wrapperDiv);
         this.assessDiv.appendChild(this.controlDiv);
     }
+
     renderNavControls() {
         this.pagNavList = document.createElement("ul");
         $(this.pagNavList).addClass("pagination");
@@ -236,6 +252,7 @@ export default class Timed extends RunestoneBase {
         this.navDiv.appendChild(this.qNumList);
         this.navBtnListeners();
     }
+
     navBtnListeners() {
         // Next and Prev Listener
         this.pagNavList.addEventListener(
@@ -382,63 +399,86 @@ export default class Timed extends RunestoneBase {
         // this finds all the assess questions in this timed assessment and calls their constructor method
         // Also adds them to this.renderedQuestionArray
         // todo:  This needs to be updated to account for the runestone div wrapper.
-        var opts;
-        for (var i = 0; i < this.newChildren.length; i++) {
-            var tmpChild = this.newChildren[i];
-            opts = {
-                orig: tmpChild,
-                useRunestoneServices: eBookConfig.useRunestoneServices,
-                timed: true,
-            };
-            if ($(tmpChild).children("[data-component]").length > 0) {
-                tmpChild = $(tmpChild).children("[data-component]")[0];
-                opts.orig = tmpChild;
-            }
-            if ($(tmpChild).is("[data-component=selectquestion]")) {
-                // SelectOne is async and will replace itself in this array with
-                // the actual selected question
-                opts.rqa = this.renderedQuestionArray;
-                this.renderedQuestionArray.push({
-                    question: new SelectOne(opts),
-                });
-            } else if ($(tmpChild).is("[data-component=activecode]")) {
-                let lang = $(tmpChild).data("lang");
-                this.renderedQuestionArray.push({
-                    wrapper: tmpChild.parentElement,
-                    question: ACFactory.createActiveCode(tmpChild, lang, opts),
-                });
-            } else if ($(tmpChild).is("[data-component]")) {
-                let componentKind = $(tmpChild).data("component");
-                this.renderedQuestionArray.push({
-                    question: new window.component_factory[componentKind](opts),
-                });
-            } else if ($(tmpChild).is("[data-childcomponent]")) {
-                // this is for when a directive has a wrapper element that isn't actually part of the javascript object
-                // for example, activecode has a wrapper div that contains the question for the element
-                var child = $("#" + $(tmpChild).data("childcomponent"));
-                if ($(child[0]).is("[data-component=activecode]")) {
-                    // create & insert new JS object back into wrapper div-- we're simulating the parsing that would happen outside of a timed exam
-                    opts.orig = child[0];
-                    let lang = $(child[0]).data("lang");
-                    var newAC = ACFactory.createActiveCode(
-                        child[0],
-                        lang,
-                        opts
-                    );
-                    $(child[0]).remove();
-                    var tmp = tmpChild.childNodes[0];
-                    $(tmp).after(newAC.containerDiv);
-                    this.renderedQuestionArray.push({
-                        wrapper: tmpChild,
-                        question: newAC,
+        // To accommodate the selectquestion type -- which is async! we need to wrap
+        // all of this in a promise, so that we don't continue to render the timed
+        // exam until all of the questions have been realized.
+        let retp = new Promise(
+            function (resolve, reject) {
+                var opts;
+                let pArray = [];
+                for (var i = 0; i < this.newChildren.length; i++) {
+                    var tmpChild = this.newChildren[i];
+                    opts = {
+                        orig: tmpChild,
+                        useRunestoneServices: eBookConfig.useRunestoneServices,
+                        timed: true,
+                    };
+                    if ($(tmpChild).children("[data-component]").length > 0) {
+                        tmpChild = $(tmpChild).children("[data-component]")[0];
+                        opts.orig = tmpChild;
+                    }
+                    if ($(tmpChild).is("[data-component=selectquestion]")) {
+                        // SelectOne is async and will replace itself in this array with
+                        // the actual selected question
+                        opts.rqa = this.renderedQuestionArray;
+                        let newq = new SelectOne(opts);
+                        this.renderedQuestionArray.push({
+                            question: newq,
+                        });
+                        pArray.push(newq.initialize());
+                    } else if ($(tmpChild).is("[data-component=activecode]")) {
+                        let lang = $(tmpChild).data("lang");
+                        this.renderedQuestionArray.push({
+                            wrapper: tmpChild.parentElement,
+                            question: ACFactory.createActiveCode(
+                                tmpChild,
+                                lang,
+                                opts
+                            ),
+                        });
+                    } else if ($(tmpChild).is("[data-component]")) {
+                        let componentKind = $(tmpChild).data("component");
+                        this.renderedQuestionArray.push({
+                            question: new window.component_factory[
+                                componentKind
+                            ](opts),
+                        });
+                    } else if ($(tmpChild).is("[data-childcomponent]")) {
+                        // this is for when a directive has a wrapper element that isn't actually part of the javascript object
+                        // for example, activecode has a wrapper div that contains the question for the element
+                        var child = $("#" + $(tmpChild).data("childcomponent"));
+                        if ($(child[0]).is("[data-component=activecode]")) {
+                            // create & insert new JS object back into wrapper div-- we're simulating the parsing that would happen outside of a timed exam
+                            opts.orig = child[0];
+                            let lang = $(child[0]).data("lang");
+                            var newAC = ACFactory.createActiveCode(
+                                child[0],
+                                lang,
+                                opts
+                            );
+                            $(child[0]).remove();
+                            var tmp = tmpChild.childNodes[0];
+                            $(tmp).after(newAC.containerDiv);
+                            this.renderedQuestionArray.push({
+                                wrapper: tmpChild,
+                                question: newAC,
+                            });
+                        }
+                    }
+                }
+                // when all promises are resolved
+                if (pArray.length === 0) {
+                    resolve("Done");
+                } else {
+                    Promise.all(pArray).then(function () {
+                        resolve("Done");
                     });
                 }
-            }
-        }
-        if (this.random) {
-            this.randomizeRQA();
-        }
+            }.bind(this)
+        );
+        return retp;
     }
+
     randomizeRQA() {
         var currentIndex = this.renderedQuestionArray.length,
             temporaryValue,
