@@ -77,7 +77,9 @@ class SelectQuestion(RunestoneIdDirective):
 
         if "fromid" in self.options:
             self.question_bank_choices = self.options["fromid"]
-            self.options["selector"] = f"data-questionlist={self.question_bank_choices}"
+            self.options[
+                "selector"
+            ] = f"data-questionlist='{self.question_bank_choices}'"
 
             # todo: validate that question(s) are in the database
 
