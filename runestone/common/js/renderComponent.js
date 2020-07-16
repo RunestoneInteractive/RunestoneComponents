@@ -101,7 +101,7 @@ export function createTimedComponent(componentSrc, moreOpts) {
     }
 
     if (componentKind in window.component_factory) {
-        ret = new window.component_factory[componentKind](opts);
+        ret = window.component_factory[componentKind](opts);
     }
     $(ret.containerDiv).addClass("runestone alert alert-warning");
     hdiv.remove();
