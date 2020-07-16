@@ -94,6 +94,11 @@ export function createTimedComponent(componentSrc, moreOpts) {
         orig: document.getElementById(origId),
         timed: true,
     };
+    if (typeof moreOpts !== "undefined") {
+        for (let key in moreOpts) {
+            opts[key] = moreOpts[key];
+        }
+    }
 
     if (componentKind in window.component_factory) {
         ret = new window.component_factory[componentKind](opts);

@@ -9,15 +9,15 @@ export default class SelectOne extends RunestoneBase {
         super(opts);
         this.origOpts = opts;
         this.questions = $(opts.orig).data("questionlist");
-        this.newid = `q_${Math.floor(Math.random() * 1000000)}`;
-        opts.orig.id = this.newid;
+        this.selector_id = $(opts.orig).first().attr("id");
+        opts.orig.id = this.selector_id;
     }
 
     initialize() {
         let self = this;
-        let data = { questions: this.questions };
+        let data = { questions: this.questions, selector_id: this.selector_id };
         let opts = this.origOpts;
-        let newid = this.newid;
+        let selectorId = this.selector_id;
         let myPromise = new Promise(
             function (resolve, reject) {
                 $.getJSON(
@@ -28,6 +28,7 @@ export default class SelectOne extends RunestoneBase {
                         if (opts.timed) {
                             res = createTimedComponent(htmlsrc, {
                                 timed: true,
+                                selector_id: selectorId,
                             });
                             // replace the entry in the timed exam's list of components
                             // with the component created by createTimedComponent
@@ -40,7 +41,13 @@ export default class SelectOne extends RunestoneBase {
                             self.realComponent = res;
                             self.containerDiv = res.containerDiv;
                         } else {
-                            res = renderRunestoneComponent(htmlsrc, newid, {});
+                            res = renderRunestoneComponent(
+                                htmlsrc,
+                                selectorId,
+                                {
+                                    selector_id: selectorId,
+                                }
+                            );
                         }
                         resolve("done");
                     }

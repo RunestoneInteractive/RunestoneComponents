@@ -32,6 +32,9 @@ export default class RunestoneBase {
             } else {
                 this.optional = false;
             }
+            if (opts.selector_id) {
+                this.selector_id = opts.selector_id;
+            }
         }
     }
 
