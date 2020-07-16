@@ -3,6 +3,9 @@ import Parsons from "./parsons";
 export default class TimedParsons extends Parsons {
     constructor(opts) {
         super(opts);
+        // todo -- make this configurable
+        this.nofeedback = true;
+        this.hideFeedback();
     }
     checkCorrectTimed() {
         return this.correct ? "T" : "F";
