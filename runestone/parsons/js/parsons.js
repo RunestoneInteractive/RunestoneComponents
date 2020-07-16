@@ -82,8 +82,13 @@ class LineBasedGrader {
         var problem = this.problem;
         problem.clearFeedback();
         var correct = false;
+        var feedbackArea;
         var answerArea = $(problem.answerArea);
-        var feedbackArea = $(problem.messageDiv);
+        if (this.nofeedback === true) {
+            feedbackArea = $("#doesnotexist");
+        } else {
+            feedbackArea = $(problem.messageDiv);
+        }
         var solutionLines = problem.solution;
         var answerLines = problem.answerLines();
         var i;
@@ -2193,6 +2198,9 @@ export default class Parsons extends RunestoneBase {
             this.clearFeedback();
             if (this.adaptiveId == undefined) {
                 this.adaptiveId = this.storageId;
+            }
+            if (this.nofeedback) {
+                this.grader.nofeedback = this.nofeedback;
             }
             var grade = this.grader.grade();
             if (grade == "correct") {
