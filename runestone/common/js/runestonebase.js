@@ -137,6 +137,7 @@ export default class RunestoneBase {
                     .getJSON(
                         eBookConfig.ajaxURL + "getAssessResults",
                         data,
+                        // defined in in RunestoneBase
                         this.repopulateFromStorage.bind(this)
                     )
                     .fail(
@@ -160,6 +161,17 @@ export default class RunestoneBase {
         // initialization can happen even when there's no history to be loaded
         return null;
     }
+
+    /**
+     * repopulateFromStorage is called after a successful API call is made to ``getAssessResults`` in
+     * the checkServer method in this class
+     *
+     * ``restoreAnswers,`` ``setLocalStorage`` and ``checkLocalStorage`` are defined in the child classes.
+     *
+     * @param {*} data - a JSON object representing the data needed to restore a previous answer for a component
+     * @param {*} status - the http status
+     * @param {*} whatever - ignored
+     */
     repopulateFromStorage(data, status, whatever) {
         // decide whether to use the server's answer (if there is one) or to load from storage
         if (data !== null && this.shouldUseServer(data)) {
