@@ -29,7 +29,7 @@ from runestone.common.runestonedirective import (
 
 TEMPLATE = """
 <div class="runestone alert alert-warning">
-<div data-component="selectquestion" {selector}>
+<div data-component="selectquestion" id={component_id} {selector}>
     <p>Loading ...</p>
 </div>
 </div>
@@ -42,18 +42,23 @@ def setup(app):
 
 class SelectQuestion(RunestoneIdDirective):
     """
-    .. selectquestion::  [fromid]
-       :fromlist: given a list of ids randomly choose one
+    .. selectquestion:: uniqueid
+       :fromid: [id [, id]+ ]
        :proficiency: randomly choose a question that tests a particular proficiency
        :basecourse: restrict question choices to the current base course
+       :alwaysrandom: choose a new random question every time if possible
     """
 
-    required_arguments = 0
-    optional_arguments = 10
+    required_arguments = 1
+    optional_arguments = 0
     has_content = False
     option_spec = RunestoneIdDirective.option_spec.copy()
     option_spec.update(
-        {"proficiency": directives.unchanged, "basecourse": directives.flag,}
+        {
+            "fromid": directives.unchanged,
+            "proficiency": directives.unchanged,
+            "basecourse": directives.flag,
+        }
     )
 
     def __init__(self, *args, **kwargs):
@@ -70,11 +75,13 @@ class SelectQuestion(RunestoneIdDirective):
                 "message"
             ] = "The selectquestion directive only works with dynamic pages"
 
-        if len(self.arguments) > 0:
-            self.question_bank_choices = ",".join(self.arguments)
+        if "fromid" in self.options:
+            self.question_bank_choices = self.options["fromid"]
             self.options["selector"] = f"data-questionlist={self.question_bank_choices}"
 
             # todo: validate that question(s) are in the database
+
+        self.options["component_id"] = self.arguments[0].strip()
 
         if "proficiency" in self.options:
             pass
