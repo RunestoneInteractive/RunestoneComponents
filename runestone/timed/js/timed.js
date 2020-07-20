@@ -97,19 +97,25 @@ export default class Timed extends RunestoneBase {
                 course_name: eBookConfig.course,
             };
             console.log(sendInfo);
-            jQuery.getJSON(
-                eBookConfig.ajaxURL + "tookTimedAssessment",
-                sendInfo,
-                function (data, status) {
-                    self.taken = data.tookAssessment;
-                    self.assessmentTaken = self.taken;
-                    if (!self.taken) {
-                        localStorage.clear();
+            if (eBookConfig.useRunestoneServices) {
+                jQuery.getJSON(
+                    eBookConfig.ajaxURL + "tookTimedAssessment",
+                    sendInfo,
+                    function (data, status) {
+                        self.taken = data.tookAssessment;
+                        self.assessmentTaken = self.taken;
+                        if (!self.taken) {
+                            localStorage.clear();
+                        }
+                        resolve();
                     }
-                    resolve();
-                }
-            );
-        });
+                ); // end getJSON
+            } else {
+                self.taken = false;
+                self.assessmentTaken = false;
+                resolve();
+            }
+        }); // end promise
         return p;
     }
 
