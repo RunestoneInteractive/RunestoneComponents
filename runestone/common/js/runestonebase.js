@@ -35,6 +35,12 @@ export default class RunestoneBase {
             if (opts.selector_id) {
                 this.selector_id = opts.selector_id;
             }
+            if (typeof opts.assessmentTaken !== "undefined") {
+                this.assessmentTaken = opts.assessmentTaken;
+            } else {
+                // default to true as this is only provided from a timedAssessment
+                this.assessmentTaken = true;
+            }
         }
     }
 
@@ -132,7 +138,7 @@ export default class RunestoneBase {
             if (this.sid) {
                 data.sid = this.sid;
             }
-            if (!eBookConfig.practice_mode) {
+            if (!eBookConfig.practice_mode && this.assessmentTaken) {
                 jQuery
                     .getJSON(
                         eBookConfig.ajaxURL + "getAssessResults",

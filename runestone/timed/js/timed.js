@@ -71,7 +71,11 @@ export default class Timed extends RunestoneBase {
         this.currentQuestionIndex = 0; // Which question is currently displaying on the page
         this.renderedQuestionArray = []; // list of all problems
         this.getNewChildren();
-        this.renderTimedAssess();
+        this.checkAssessmentStatus().then(
+            function () {
+                this.renderTimedAssess();
+            }.bind(this)
+        );
     }
 
     getNewChildren() {
@@ -79,6 +83,34 @@ export default class Timed extends RunestoneBase {
         for (var i = 0; i < this.origElem.childNodes.length; i++) {
             this.newChildren.push(this.origElem.childNodes[i]);
         }
+    }
+
+    checkAssessmentStatus() {
+        // Has the user taken this exam?  Inquiring minds want to know
+        // If a user has not taken this exam then we want to make sure
+        // that if a question has been seen by the student before we do
+        // not populate previous answers.
+        let self = this;
+        let p = new Promise(function (resolve, reject) {
+            let sendInfo = {
+                div_id: self.divid,
+                course_name: eBookConfig.course,
+            };
+            console.log(sendInfo);
+            jQuery.getJSON(
+                eBookConfig.ajaxURL + "tookTimedAssessment",
+                sendInfo,
+                function (data, status) {
+                    self.taken = data.tookAssessment;
+                    self.assessmentTaken = self.taken;
+                    if (!self.taken) {
+                        localStorage.clear();
+                    }
+                    resolve();
+                }
+            );
+        });
+        return p;
     }
 
     /*===============================
@@ -105,7 +137,7 @@ export default class Timed extends RunestoneBase {
                 // Replace intermediate HTML with rendered HTML
                 $(this.origElem).replaceWith(this.assessDiv);
                 // check if already taken and if so show results
-                this.tookTimedExam();
+                this.tookTimedExam(); // rename to renderPossibleResults
             }.bind(this)
         );
     }
@@ -412,6 +444,7 @@ export default class Timed extends RunestoneBase {
                         orig: tmpChild,
                         useRunestoneServices: eBookConfig.useRunestoneServices,
                         timed: true,
+                        assessmentTaken: this.taken,
                     };
                     if ($(tmpChild).children("[data-component]").length > 0) {
                         tmpChild = $(tmpChild).children("[data-component]")[0];
@@ -653,6 +686,7 @@ export default class Timed extends RunestoneBase {
             );
         }
     }
+
     showTime() {
         if (this.showTimer) {
             var mins = Math.floor(this.timeLimit / 60);
@@ -690,6 +724,7 @@ export default class Timed extends RunestoneBase {
             $(this.timerContainer).hide();
         }
     }
+
     increment() {
         // if running (not paused) and not taken
         if (this.running === 1 && !this.taken) {
@@ -757,6 +792,7 @@ export default class Timed extends RunestoneBase {
         });
         this.checkServer("timedExam");
     }
+
     finishAssessment() {
         $("#relations-next").show(); // show the next page button for now
         $("#relations-prev").show(); // show the previous button for now
