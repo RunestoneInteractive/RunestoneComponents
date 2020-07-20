@@ -84,10 +84,10 @@ class LineBasedGrader {
         var correct = false;
         var feedbackArea;
         var answerArea = $(problem.answerArea);
-        if (this.nofeedback === true) {
-            feedbackArea = $("#doesnotexist");
-        } else {
+        if (this.showfeedback === true) {
             feedbackArea = $(problem.messageDiv);
+        } else {
+            feedbackArea = $("#doesnotexist");
         }
         var solutionLines = problem.solution;
         var answerLines = problem.answerLines();
@@ -140,7 +140,7 @@ class LineBasedGrader {
                         );
                     }
                     correct = true;
-                } else {
+                } else if (this.showfeedback == true) {
                     // Incorrect Indention
                     state = "incorrectIndent";
                     var incorrectBlocks = [];
@@ -190,8 +190,10 @@ class LineBasedGrader {
                 answerArea.addClass("incorrect");
                 feedbackArea.fadeIn(500);
                 feedbackArea.attr("class", "alert alert-danger");
-                for (i = 0; i < notInSolution.length; i++) {
-                    $(notInSolution[i].view).addClass("incorrectPosition");
+                if (this.showfeedback === true) {
+                    for (i = 0; i < notInSolution.length; i++) {
+                        $(notInSolution[i].view).addClass("incorrectPosition");
+                    }
                 }
                 feedbackArea.html($.i18n("msg_parson_wrong_order"));
             }
@@ -1100,6 +1102,7 @@ export default class Parsons extends RunestoneBase {
         }
         this.initializeOptions();
         this.grader = new LineBasedGrader(this);
+        this.grader.showfeedback = this.showfeedback;
         var fulltext = $(this.origElem).html();
         var delimiter = this.question.outerHTML;
         var temp = fulltext.split(delimiter);
@@ -2198,9 +2201,6 @@ export default class Parsons extends RunestoneBase {
             this.clearFeedback();
             if (this.adaptiveId == undefined) {
                 this.adaptiveId = this.storageId;
-            }
-            if (this.nofeedback) {
-                this.grader.nofeedback = this.nofeedback;
             }
             var grade = this.grader.grade();
             if (grade == "correct") {

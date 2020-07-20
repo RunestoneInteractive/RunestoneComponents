@@ -24,6 +24,7 @@ export default class RunestoneBase {
         if (opts) {
             this.sid = opts.sid;
             this.graderactive = opts.graderactive;
+            this.showfeedback = true;
             if (opts.enforceDeadline) {
                 this.deadline = opts.deadline;
             }
@@ -38,7 +39,7 @@ export default class RunestoneBase {
             if (typeof opts.assessmentTaken !== "undefined") {
                 this.assessmentTaken = opts.assessmentTaken;
             } else {
-                // default to true as this is only provided from a timedAssessment
+                // default to true as this opt is only provided from a timedAssessment
                 this.assessmentTaken = true;
             }
         }
