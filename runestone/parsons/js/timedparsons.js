@@ -4,7 +4,12 @@ export default class TimedParsons extends Parsons {
     constructor(opts) {
         super(opts);
         // todo -- make this configurable
-        this.nofeedback = true;
+        if (opts.timedfeedback) {
+            this.showfeedback = true;
+        } else {
+            this.showfeedback = false;
+        }
+        this.grader.showfeedback = this.showfeedback;
         this.hideFeedback();
     }
     checkCorrectTimed() {

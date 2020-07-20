@@ -21,6 +21,7 @@ def setup(app):
     app.add_directive("timed", TimedDirective)
     app.add_node(TimedNode, html=(visit_timed_node, depart_timed_node))
 
+
 class TimedNode(nodes.General, nodes.Element, RunestoneNode):
     def __init__(self, content, **kwargs):
         super(TimedNode, self).__init__(**kwargs)
@@ -42,10 +43,10 @@ def visit_timed_node(self, node):
     else:
         node.timed_options["noresult"] = ""
 
-    if "nofeedback" in node.timed_options:
-        node.timed_options["nofeedback"] = "data-no-feedback"
+    if "timedfeedback" in node.timed_options:
+        node.timed_options["timedfeedback"] = "data-timedfeedback=true"
     else:
-        node.timed_options["nofeedback"] = ""
+        node.timed_options["timedfeedback"] = ""
 
     if "notimer" in node.timed_options:
         node.timed_options["notimer"] = "data-no-timer"
@@ -70,7 +71,7 @@ def depart_timed_node(self, node):
 
 # Templates to be formatted by node options
 TEMPLATE_START = """
-    <ul data-component="timedAssessment" %(timelimit)s id="%(divid)s" %(noresult)s %(nofeedback)s %(notimer)s %(fullwidth)s>
+    <ul data-component="timedAssessment" %(timelimit)s id="%(divid)s" %(noresult)s %(timedfeedback)s %(notimer)s %(fullwidth)s>
     """
 
 TEMPLATE_END = """</ul>
@@ -82,7 +83,7 @@ class TimedDirective(RunestoneIdDirective):
 .. timed:: identifier
     :timelimit: Number of minutes student has to take the timed assessment--if not provided, no time limit
     :noresult: Boolean, doesn't display score
-    :nofeedback: Boolean, doesn't display feedback
+    :timedfeedback: Boolean, Show feedback even in timed mode
     :notimer: Boolean, doesn't show timer
     :fullwidth: Boolean, allows the items in the timed assessment to take the full width of the screen...
 
@@ -95,7 +96,7 @@ class TimedDirective(RunestoneIdDirective):
     option_spec = {
         "timelimit": directives.positive_int,
         "noresult": directives.flag,
-        "nofeedback": directives.flag,
+        "timedfeedback": directives.flag,
         "fullwidth": directives.flag,
         "notimer": directives.flag,
     }
@@ -108,7 +109,7 @@ class TimedDirective(RunestoneIdDirective):
             .. timed:: identifier
                 :timelimit: Number of minutes student has to take the timed assessment--if not provided, no time limit
                 :noresult: Boolean, doesn't display score
-                :nofeedback: Boolean, doesn't display feedback
+                :timedfeedback: Boolean, show feedback
                 :notimer: Boolean, doesn't show timer
                 :fullwidth: Boolean, allows the items in the timed assessment to take the full width of the screen
             ...
