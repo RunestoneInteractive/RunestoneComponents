@@ -607,7 +607,7 @@ export default class Timed extends RunestoneBase {
             }
             $(window).on("beforeunload", function () {
                 // this actual value gets ignored by newer browsers
-                return "Are you sure you want to leave?";
+                return "Are you sure you want to leave?  Your work will be lost!";
             });
         } else {
             this.handlePrevAssessment();
