@@ -11,9 +11,9 @@ import SQLActiveCode from "./activecode_sql";
 
 var TimedActiveCodeMixin = {
     timedInit: function (opts) {
+        this.isTimed = true;
         this.hideButtons();
         this.addHistoryScrubber();
-        this.isTimed = true;
         this.needsReinitialization = true; // the run button click listener needs to be reinitialized
         this.containerDiv.classList.add("timedComponent");
         window.edList[this.divid] = this;

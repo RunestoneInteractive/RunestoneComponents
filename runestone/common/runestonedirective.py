@@ -206,6 +206,8 @@ class RunestoneDirective(Directive):
         "optional": directives.flag,
         "prim_comp": directives.unchanged,
         "supp_comp": directives.unchanged,
+        "from_source": directives.unchanged,
+        "basecourse": directives.unchanged,
     }
 
     def __init__(self, *args, **kwargs):

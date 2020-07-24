@@ -137,7 +137,7 @@ export class ActiveCode extends RunestoneBase {
         }
         var editor = CodeMirror(codeDiv, {
             value: this.code,
-            lineNumbers: true,
+            lineNumbers: true ? !this.isTimed : false,
             mode: edmode,
             indentUnit: 4,
             matchBrackets: true,
@@ -563,7 +563,7 @@ export class ActiveCode extends RunestoneBase {
             $(scrubberDiv).insertAfter(this.runButton);
             deferred.resolve();
         }.bind(this);
-        if (eBookConfig.practice_mode) {
+        if (eBookConfig.practice_mode || this.isTimed) {
             helper();
         } else {
             jQuery
