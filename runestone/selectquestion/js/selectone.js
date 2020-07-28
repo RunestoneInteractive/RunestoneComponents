@@ -62,12 +62,15 @@ export default class SelectOne extends RunestoneBase {
                             // with the component created by createTimedComponent
                             for (let component of opts.rqa) {
                                 if (component.question == self) {
-                                    component.question = res;
+                                    component.question = res.question;
+                                    component.wrapper = res.wrapper;
                                     break;
                                 }
                             }
-                            self.realComponent = res;
-                            self.containerDiv = res.containerDiv;
+                            self.realComponent = res.question;
+                            self.wrapper = res.wrapper;
+                            self.containerDiv = res.question.containerDiv;
+                            self.realComponent.selectorId = selectorId;
                         } else {
                             // just render this component on the page in its usual place
                             res = renderRunestoneComponent(
