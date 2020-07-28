@@ -104,6 +104,10 @@ export function createTimedComponent(componentSrc, moreOpts) {
         ret = window.component_factory[componentKind](opts);
     }
     $(ret.containerDiv).addClass("runestone alert alert-warning");
+    let wrapper = hdiv.find("[data-childcomponent]");
+    let rdict = {};
+    if (wrapper.length > 0) rdict.wrapper = wrapper;
     hdiv.remove();
-    return ret;
+    rdict.question = ret;
+    return rdict;
 }
