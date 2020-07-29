@@ -311,10 +311,10 @@ export default class AudioTour extends RunestoneBase {
             // akey+".mp3' type='audio/mpeg'><source src='http://ice-web.cc.gatech.edu/ce21/audio/"+akey+
             // ".ogg' type='audio/ogg'>Your browser does not support the audio tag</audio>";
             //var dir =
-                "http://media.interactivepython.org/" +
-                eBookConfig.basecourse.toLowerCase() +
-                "/audio/";
-            var dir = ""
+            //    "http://media.interactivepython.org/" +
+            //    eBookConfig.basecourse.toLowerCase() +
+            //    "/audio/";
+            var dir = "../_static/audio/"
             str += "<audio id=" + akey + " preload='auto' >";
             str += "<source src='" + dir + akey + ".wav' type='audio/wav'>";
             str += "<source src='" + dir + akey + ".mp3' type='audio/mpeg'>";
