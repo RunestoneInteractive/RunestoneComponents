@@ -1,3 +1,6 @@
+# ********************************
+# |docname| - LP module definition
+# ********************************
 from runestone.lp import inlinesyntaxhighlight, lp
 
 
