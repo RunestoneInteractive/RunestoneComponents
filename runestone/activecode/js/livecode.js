@@ -79,6 +79,15 @@ export default class LiveCode extends ActiveCode {
         } else {
             source = this.buildProg(true);
         }
+        // Validate the data is convertable to Base64. If not then error out now
+        try {
+            let contentsb64 = btoa(source);
+        } catch (e) {
+            alert(
+                "Error: Bad Characters in the activecode window. Likely a quote character that has been copy/pasted. 🙁"
+            );
+            return;
+        }
         var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
         history_dfd = __ret.history_dfd;
         saveCode = __ret.saveCode;
