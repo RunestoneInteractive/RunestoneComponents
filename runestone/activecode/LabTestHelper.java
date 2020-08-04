@@ -1,3 +1,6 @@
+// *********
+// |docname|
+// *********
 import java.io.*;
 import java.lang.reflect.*;
 
@@ -11,9 +14,9 @@ import org.junit.Test;
  *
  * @author  Kate McDonnell
  * @version 2020-04-27
- * 
+ *
  * This class provides helper methods to make writing test classes easier. Most of them are for simplifying output.
- * 
+ *
  */
 public class LabTestHelper
 {
@@ -58,18 +61,18 @@ public class LabTestHelper
         catch (Exception e) {
             return "Other issue.";
         }
-        
+
         return "Method " + methodName + " does not exist";
     }
-    
-    
-    
+
+
+
 
     protected String cleanString(String orig)   //\\s+
     {
         return orig.replaceAll("\\s+"," ").replaceAll("[^A-Za-z0-9 ]", "").trim();
     }
-    
+
     protected String cleanStringIgnoreCase(String orig)   //\\s+
     {
         return cleanString(orig.toLowerCase());
@@ -80,8 +83,8 @@ public class LabTestHelper
         return failMessage(msg, 70);
     }
 
-    
-    
+
+
     protected String failMessage(String msg, int maxWidth)
     {
         String stars = repeat("*", maxWidth*2);

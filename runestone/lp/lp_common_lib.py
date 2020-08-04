@@ -1,12 +1,9 @@
 # .. Copyright (C) 2019 Bryan A. Jones.
 #
-#
-# .. highlight:: python
-#
-# ********************************************************************************
-# lp_common_lib.py - Definitions of shared data in the literate programming system
-# ********************************************************************************
-# This file contains a definition and supporting classes for a data structure used to export data from Sphinx to the Flask database for the books.
+# *************************************************************************
+# |docname| - Definitions of shared data in the literate programming system
+# *************************************************************************
+# # This file contains a definition and supporting classes for a data structure used to export data from Sphinx to the Flask database for the books.
 #
 # Imports
 # =======

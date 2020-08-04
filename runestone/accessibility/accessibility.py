@@ -1,6 +1,11 @@
-"""This extension adds an accessibiligy stylesheet.
+"""
+*********
+|docname|
+*********
 
-By the 'accessibility_style' config value (in conf.py of 
+This extension adds an accessibiligy stylesheet.
+
+By the 'accessibility_style' config value (in conf.py of
 an interactive book project) you can select what accessibility stylesheet
 you want to add ('normal', 'light', 'darkest' or 'none')
 
