@@ -104,6 +104,10 @@ def get_sim_str_sim30(
     optional_commands="",
 ):
 
+    # Spaces in file names break the simulator.
+    if ' ' in elf_file:
+        raise ValueError("sim30 does not support spaces in file names, which occurs in {}.".format(elf_file))
+
     return (
         # In SIM30, type ? to get help. See also :alink:`the manual <asmguide#page=218>`.
         #
@@ -126,7 +130,7 @@ def get_sim_str_sim30(
         # ``BS <location> ...[locations] -Breakpoint Set``
         "BS _done\n"
         # Include any other setup (stimulus file, pin assignments, etc.).
-        "{}\n"
+        "{}"
         # Run the program. From the help:
         # ; ``E  -Execute``
         "E 10000\n"
@@ -167,7 +171,7 @@ def get_sim_str_mdb(
         # Set a breakpoint at the end of the program (the label ``_done``).
         "break _done\n"
         # Include any other setup (stimulus file, pin assignments, etc.).
-        "{}\n"
+        "{}"
         # Run the program. Wait a time in ms for it to finish.
         "run\n"
         "wait 6000\n"
