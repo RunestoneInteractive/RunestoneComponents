@@ -1,11 +1,8 @@
 # .. Copyright (C) 2019 Bryan A. Jones.
 #
-#
-# .. highlight:: python
-#
-# **************************************************************************
-# lp.py - A Runestone extension for authoring literate programming questions
-# **************************************************************************
+# ******************************************************************************
+# |docname| - A Runestone extension for authoring literate programming questions
+# ******************************************************************************
 #
 # Imports
 # =======
