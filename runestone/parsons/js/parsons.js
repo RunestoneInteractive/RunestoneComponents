@@ -1420,6 +1420,7 @@ export default class Parsons extends RunestoneBase {
             maxFunction($(blocks[i].view));
         }
 
+        // const value used
         const LABEL_WIDTH_TEMP_BUFFER = 35;
         const ADDITIONAL_WIDTH_ADD = 24;
         const ONE_LINE_HEIGHT = 38;
@@ -2000,6 +2001,7 @@ export default class Parsons extends RunestoneBase {
             }
         }
 
+        // This is necessary, set the pairDistractors value before blocks get shuffled
         if (this.recentAttempts < 2) {
             // 1 Try
             this.pairDistractors = false;
