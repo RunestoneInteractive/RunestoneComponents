@@ -374,6 +374,9 @@ def addAssignmentQuestionToDB(
     sorting_priority=0,
 ):
 
+    if not dburl:
+        return
+
     question_id = getQuestionID(basecourse, question_name)
     assignment_id = getAssignmentID(basecourse, assignment_name)
 
@@ -444,6 +447,9 @@ def addAssignmentToDB(
     visible="F",
     time_limit=None,
 ):
+
+    if not dburl:
+        return
 
     course_id = getCourseID(course_name)
     last_changed = datetime.now()
