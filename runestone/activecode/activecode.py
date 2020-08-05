@@ -21,7 +21,13 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from .textfield import *
 from sqlalchemy import Table
-from runestone.server.componentdb import addQuestionToDB, addHTMLToDB, get_engine_meta
+from runestone.server.componentdb import (
+    addQuestionToDB,
+    addHTMLToDB,
+    get_engine_meta,
+    maybeAddToAssignment,
+    maybeAddToAssignment,
+)
 from runestone.common.runestonedirective import (
     RunestoneIdDirective,
     RunestoneNode,
@@ -434,6 +440,7 @@ config values (conf.py):
         acnode.source, acnode.line = self.state_machine.get_source_and_line(self.lineno)
         self.add_name(acnode)  # make this divid available as a target for :ref:
 
+        maybeAddToAssignment(self)
         if explain_text:
             self.state.nested_parse(explain_text, self.content_offset, acnode)
 

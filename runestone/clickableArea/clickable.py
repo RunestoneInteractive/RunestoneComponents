@@ -18,7 +18,11 @@ __author__ = "isaiahmayerchak"
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
+from runestone.server.componentdb import (
+    addQuestionToDB,
+    addHTMLToDB,
+    maybeAddToAssignment,
+)
 from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
 
 
@@ -176,5 +180,7 @@ config values (conf.py):
 
         env = self.state.document.settings.env
         self.options["divclass"] = env.config.clickable_div_class
+
+        maybeAddToAssignment(self)
 
         return [clickNode]

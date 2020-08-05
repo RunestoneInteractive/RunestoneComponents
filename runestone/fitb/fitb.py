@@ -24,7 +24,11 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from sphinx.util import logging
 
-from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
+from runestone.server.componentdb import (
+    addQuestionToDB,
+    addHTMLToDB,
+    maybeAddToAssignment,
+)
 from runestone.common import RunestoneIdDirective, RunestoneNode, get_node_line
 
 from runestone.common.runestonedirective import add_i18n_js
@@ -314,6 +318,8 @@ class FillInTheBlank(RunestoneIdDirective):
 
             # Add all the feedback for this blank to the feedbackArray.
             fitbNode.feedbackArray.append(blankArray)
+
+        maybeAddToAssignment(self)
 
         return [fitbNode]
 

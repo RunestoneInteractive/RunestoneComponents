@@ -19,7 +19,11 @@ __author__ = "isaiahmayerchak"
 from docutils import nodes
 from docutils.parsers.rst import directives
 from runestone.mchoice import Assessment
-from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
+from runestone.server.componentdb import (
+    addQuestionToDB,
+    addHTMLToDB,
+    maybeAddToAssignment,
+)
 from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
 
 
@@ -122,5 +126,7 @@ config values (conf.py):
             self.options["divclass"] = env.config.shortanswer_optional_div_class
         else:
             self.options["divclass"] = env.config.shortanswer_div_class
+
+        maybeAddToAssignment(self)
 
         return [journal_node]

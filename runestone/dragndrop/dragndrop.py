@@ -19,7 +19,11 @@ __author__ = "isaiahmayerchak"
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
-from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
+from runestone.server.componentdb import (
+    addQuestionToDB,
+    addHTMLToDB,
+    maybeAddToAssignment,
+)
 from runestone.common.runestonedirective import (
     RunestoneIdDirective,
     RunestoneNode,
@@ -185,5 +189,7 @@ config values (conf.py):
         dndNode.template_start = TEMPLATE_START
         dndNode.template_option = TEMPLATE_OPTION
         dndNode.template_end = TEMPLATE_END
+
+        maybeAddToAssignment(self)
 
         return [dndNode]

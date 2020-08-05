@@ -1,4 +1,12 @@
-# Copyright (C) 2016  Bradley N. Miller
+# *******************************
+# |docname| - Add Questions to DB
+# *******************************
+#
+#
+
+# License
+# -------
+# Copyright (C) 2016-2020  Bradley N. Miller
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,6 +32,7 @@ from os import environ
 import re
 from sqlalchemy import create_engine, Table, MetaData, select, and_
 from sqlalchemy.orm.session import sessionmaker
+
 from runestone.common.runestonedirective import RunestoneDirective
 
 
@@ -72,7 +81,10 @@ def get_dburl(outer={}):
     raise RuntimeError("Cannot configure a Database URL!")
 
 
-# create a global DB query engine to share for the rest of the file
+# Create a global DB query engine to share for the rest of the file
+# We declare the variables here, but they don't get any values until setup is called.
+# otherwise any import of runestone ends up trying to create database connections
+# when it may not be necessary.
 dburl = None
 engine = None
 meta = None
@@ -80,10 +92,16 @@ sess = None
 questions = None
 assignment_questions = None
 courses = None
+assignments = None
+
+# setup
+# -----
+#
+# Here we connect two key functions to events in the build process.
 
 
 def setup(app):
-    global dburl, engine, meta, sess, questions, assignment_questions, courses
+    global dburl, engine, meta, sess, questions, assignments, assignment_questions, courses
 
     app.connect("env-before-read-docs", reset_questions)
     app.connect("build-finished", finalize_updates)
@@ -104,6 +122,7 @@ def setup(app):
         # If no exceptions are raised, then set up the database.
         meta = MetaData()
         questions = Table("questions", meta, autoload=True, autoload_with=engine)
+        assignments = Table("assignments", meta, autoload=True, autoload_with=engine)
         assignment_questions = Table(
             "assignment_questions", meta, autoload=True, autoload_with=engine
         )
@@ -114,6 +133,13 @@ def get_engine_meta():
     return engine, meta, sess
 
 
+# Reset Questions
+# ---------------
+# We need to be able to tell the difference between questions that are
+# part of the book and questions that are contributed by instructors
+# so wheenver we build the book, we mark all questions for this base course
+# with ``from_source = 'F'`` Then as the book is built and questions are updated
+# those in the book get ``from_source = 'T'`` set.
 def reset_questions(app, env, docnames):
     if sess:
         basecourse = env.config.html_context.get("basecourse")
@@ -130,6 +156,10 @@ def reset_questions(app, env, docnames):
         sess.execute(stmt)
 
 
+# finalize updates
+# ----------------
+# If nothing has gone wrong during the build, then commit all the changes
+# otherwise rollback to make sure we have everything consistent
 def finalize_updates(app, excpt):
     if sess:
         if excpt is None:
@@ -266,6 +296,19 @@ def getQuestionID(base_course, name):
         return None
 
 
+def getAssignmentID(base_course, name):
+
+    course = getCourseID(base_course)
+    sel = select([assignments]).where(
+        and_(assignments.c.name == name, assignments.c.course == course)
+    )
+    res = sess.execute(sel).first()
+    if res:
+        return res["id"]
+    else:
+        return None
+
+
 def getOrInsertQuestionForPage(
     base_course=None,
     name=None,
@@ -316,16 +359,24 @@ def getOrInsertQuestionForPage(
         return res.inserted_primary_key[0]
 
 
+# Add a question to an Assignment
+# -------------------------------
+#
 def addAssignmentQuestionToDB(
-    question_id,
-    assignment_id,
+    question_name,
+    assignment_name,
     points,
+    basecourse,
     activities_required=0,
     autograde=None,
     which_to_grade=None,
     reading_assignment=None,
     sorting_priority=0,
 ):
+
+    question_id = getQuestionID(basecourse, question_name)
+    assignment_id = getAssignmentID(basecourse, assignment_name)
+
     # now insert or update the assignment_questions row
     sel = select([assignment_questions]).where(
         and_(
@@ -358,16 +409,43 @@ def addAssignmentQuestionToDB(
         sess.execute(ins)
 
 
+def maybeAddToAssignment(self):
+    if self.in_exam:
+        # this must come after this question has been added to the DB
+        addAssignmentQuestionToDB(
+            self.options["divid"],
+            self.in_exam,  # assignment_name
+            self.int_points,
+            self.basecourse,
+            autograde="",
+            which_to_grade="last_answer",
+        )
+
+
 def getCourseID(coursename):
     sel = select([courses]).where(courses.c.course_name == coursename)
     res = sess.execute(sel).first()
     return res["id"]
 
 
+# Add an Assignment
+# ------------------
+# Historically we had two directives ``.. assignment::`` and ``.. usageassignment::``
+# These allowed you to create assignments from the source for a book.
+# However, these were deprecated in 2017. Version 3.0.4 is the most recent version
+# prior to deprecation.  Recently (2020) work on the
+# exam generator has renewed the need for similar functionality.
 def addAssignmentToDB(
-    name=None, course_id=None, assignment_type_id=None, deadline=None, points=None
+    name=None,
+    course_name=None,
+    deadline=None,
+    points=None,
+    is_timed="F",
+    visible="F",
+    time_limit=None,
 ):
 
+    course_id = getCourseID(course_name)
     last_changed = datetime.now()
     sel = select([assignments]).where(
         and_(assignments.c.name == name, assignments.c.course == course_id)
@@ -377,7 +455,13 @@ def addAssignmentToDB(
         stmt = (
             assignments.update()
             .where(assignments.c.id == res["id"])
-            .values(assignment_type=assignment_type_id, duedate=deadline, points=points)
+            .values(
+                duedate=deadline,
+                points=points,
+                is_timed=is_timed,
+                visible=visible,
+                time_limit=time_limit,
+            )
         )
         sess.execute(stmt)
         a_id = res["id"]
@@ -392,9 +476,11 @@ def addAssignmentToDB(
         ins = assignments.insert().values(
             course=course_id,
             name=name,
-            assignment_type=assignment_type_id,
             duedate=deadline,
             points=points,
+            is_timed=is_timed,
+            visible=visible,
+            time_limit=time_limit,
         )
         res = sess.execute(ins)
         a_id = res.inserted_primary_key[0]
