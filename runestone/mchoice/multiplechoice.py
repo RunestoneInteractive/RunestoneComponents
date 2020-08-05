@@ -19,7 +19,11 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from .assessbase import Assessment
 from runestone.common.runestonedirective import RunestoneNode, get_node_line
-from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
+from runestone.server.componentdb import (
+    addQuestionToDB,
+    addHTMLToDB,
+    maybeAddToAssignment,
+)
 
 
 class MChoiceNode(nodes.General, nodes.Element, RunestoneNode):
@@ -304,6 +308,7 @@ class MChoice(Assessment):
             # Store the correct answers.
             self.options["correct"] = ",".join(correct_answers)
 
+        maybeAddToAssignment(self)
         # Check that a correct answer was provided.
         if not self.options.get("correct"):
             raise self.error("No correct answer specified.")

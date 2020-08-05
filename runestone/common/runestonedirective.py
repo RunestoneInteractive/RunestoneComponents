@@ -208,6 +208,7 @@ class RunestoneDirective(Directive):
         "supp_comp": directives.unchanged,
         "from_source": directives.unchanged,
         "basecourse": directives.unchanged,
+        "points": directives.positive_int,
     }
 
     def __init__(self, *args, **kwargs):
@@ -230,6 +231,11 @@ class RunestoneDirective(Directive):
         self.options["optional"] = (
             "data-optional=true" if "optional" in self.options else ""
         )
+        if "points" in self.options:
+            self.int_points = int(self.options["points"])
+        else:
+            self.int_points = 1
+
         self.explain_text = []
 
 
@@ -310,6 +316,8 @@ class RunestoneIdDirective(RunestoneDirective):
             # Add a new entry.
             id_to_page[id_] = Struct(docname=env.docname, lineno=self.lineno)
             page_to_id[env.docname].add(id_)
+
+        self.in_exam = getattr(env, "in_timed", "")
 
 
 # returns True when called first time with particular parameters' values

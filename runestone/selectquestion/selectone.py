@@ -1,3 +1,13 @@
+# *********************************
+# |docname| - An indirect directive
+# *********************************
+#
+# This directive lets you specify a question by random selection
+# Given a list of question ids, it will randomly select one of those ids
+# to present to the student.
+# given a competency it will select a random question from all questions that
+# test for that competency.
+
 # Copyright (C) 2020  Runestone Interactive LLC
 #
 # This program is free software: you can redistribute it and/or modify
@@ -16,10 +26,24 @@
 
 __author__ = "bmiller"
 
+# Imports from standard libarary
+# ------------------------------
+
+# Imports from third party libraries
+# ----------------------------------
 from docutils import nodes
 from docutils.parsers.rst import directives
 from sqlalchemy import Table
-from runestone.server.componentdb import addQuestionToDB, addHTMLToDB, get_engine_meta
+
+# local imports
+# -------------
+from runestone.server.componentdb import (
+    addAssignmentQuestionToDB,
+    addQuestionToDB,
+    addHTMLToDB,
+    get_engine_meta,
+    maybeAddToAssignment,
+)
 from runestone.common.runestonedirective import (
     RunestoneIdDirective,
     RunestoneNode,
@@ -29,7 +53,7 @@ from runestone.common.runestonedirective import (
 
 TEMPLATE = """
 <div class="runestone alert alert-warning">
-<div data-component="selectquestion" id={component_id} {selector}>
+<div data-component="selectquestion" id={component_id} {selector} {points}>
     <p>Loading ...</p>
 </div>
 </div>
@@ -47,6 +71,7 @@ class SelectQuestion(RunestoneIdDirective):
        :proficiency: randomly choose a question that tests a particular proficiency
        :basecourse: restrict question choices to the current base course
        :alwaysrandom: choose a new random question every time if possible
+       :points: number of points for this question
     """
 
     required_arguments = 1
@@ -66,6 +91,8 @@ class SelectQuestion(RunestoneIdDirective):
 
     def run(self):
 
+        super(SelectQuestion, self).run()
+        addQuestionToDB(self)
         env = self.state.document.settings.env
         is_dynamic = env.config.html_context.get("dynamic_pages", False)
         if is_dynamic:
@@ -87,6 +114,13 @@ class SelectQuestion(RunestoneIdDirective):
 
         if "proficiency" in self.options:
             pass
+
+        if "points" in self.options:
+            self.options["points"] = f"data-points={self.options['points']}"
+        else:
+            self.options["points"] = ""
+
+        maybeAddToAssignment(self)
 
         res = TEMPLATE.format(**self.options)
 
