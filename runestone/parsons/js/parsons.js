@@ -1404,36 +1404,66 @@ export default class Parsons extends RunestoneBase {
             height_add = 1;
         }
         if (this.options.language == "natural") {
-            areaWidth = 300;
+            areaWidth = 0;
             maxFunction = function (item) {
                 item.width(areaWidth - 22);
-                var addition = 3.8;
-                if (item.outerHeight(true) != 38)
-                    addition = (2.1 * (item.outerHeight(true) - 38)) / 21;
-                areaHeight += item.outerHeight(true) + height_add * addition;
             };
         } else {
-            areaWidth = 300;
+            areaWidth = 0;
             maxFunction = function (item) {
-                var addition = 3.8;
-                if (item.outerHeight(true) != 38) addition = 2.1;
-                areaHeight += item.outerHeight(true) + height_add * addition;
+                console.log("This width is " + item.width());
+                console.log(item);
                 areaWidth = Math.max(areaWidth, item.outerWidth(true));
             };
         }
         for (i = 0; i < blocks.length; i++) {
             maxFunction($(blocks[i].view));
         }
+
+        // const value used
+        const LABEL_WIDTH_TEMP_BUFFER = 35;
+        const ADDITIONAL_WIDTH_ADD = 24;
+        const ONE_LINE_HEIGHT = 38;
+        const ADDITIONAL_HEIGHT_FOR_MARGIN_1LINE = 5.8;
+        const ADDITIONAL_HEIGHT_FOR_MARGIN_2LINE = 4.1;
+        const ADDITIONAL_BORDER_AREA = 2;
+
         this.areaWidth = areaWidth;
         if (this.options.numbered != undefined) {
-            this.areaWidth += 25;
-            //areaHeight += (blocks.length);
+            this.areaWidth += LABEL_WIDTH_TEMP_BUFFER;
         }
+        this.areaWidth += ADDITIONAL_WIDTH_ADD;
+
+        $(this.sourceArea).css({
+            width: this.areaWidth + ADDITIONAL_BORDER_AREA,
+        });
+
+        if (this.options.language == "natural") {
+            maxFunction = function (item) {
+                let addition = ADDITIONAL_HEIGHT_FOR_MARGIN_1LINE;
+                if (item.outerHeight(true) != ONE_LINE_HEIGHT)
+                    addition = (2.1 * (item.outerHeight(true) - ONE_LINE_HEIGHT)) / 21;
+                areaHeight += item.outerHeight(true) + height_add * addition;
+            };
+        } else {
+            maxFunction = function (item) {
+                let addition = ADDITIONAL_HEIGHT_FOR_MARGIN_1LINE;
+                if (item.outerHeight(true) != ONE_LINE_HEIGHT)
+                    addition = ADDITIONAL_HEIGHT_FOR_MARGIN_2LINE;
+                let hh = item.outerHeight(true);
+                areaHeight += item.outerHeight(true) + height_add * addition;
+            };
+        }
+        for (i = 0; i < blocks.length; i++) {
+            maxFunction($(blocks[i].view));
+            console.log(areaHeight);
+        }
+
         this.areaHeight = areaHeight;
         $(this.sourceArea).css({
-            width: this.areaWidth + 2,
             height: areaHeight,
         });
+
         $(this.answerArea).css({
             width: this.options.pixelsPerIndent * indent + this.areaWidth + 2,
             height: areaHeight,
@@ -1970,6 +2000,15 @@ export default class Parsons extends RunestoneBase {
                 blocks = [];
             }
         }
+
+        // This is necessary, set the pairDistractors value before blocks get shuffled
+        if (this.recentAttempts < 2) {
+            // 1 Try
+            this.pairDistractors = false;
+        } else {
+            this.pairDistractors = true;
+        }
+
         if (this.options.order === undefined) {
             // Shuffle, respecting paired distractors
             var chunks = [],
@@ -1989,7 +2028,7 @@ export default class Parsons extends RunestoneBase {
                 chunk = chunks[i];
                 if (chunk.length > 1) {
                     // shuffle paired distractors
-                    chunk = this.shuffled(chunk);
+                    chunk = this.shuffled(chunk);                                  
                     for (j = 0; j < chunk.length; j++) {
                         blocks.push(chunk[j]);
                     }
@@ -2009,7 +2048,7 @@ export default class Parsons extends RunestoneBase {
                 }
             }
         }
-        // this.pairDistractors = true;
+
         if (this.options.adaptive) {
             this.limitDistractors = true;
             blocks = this.adaptBlocks(blocks);
@@ -3293,6 +3332,27 @@ export default class Parsons extends RunestoneBase {
             blocks[i].addLabel(label, 0);
             binChildren++;
         }
+        
+        var max_label_width = 0;
+        for (var i = 0; i < blocks.length; i++) {
+            let label = $(blocks[i].view).children(".labels")[0];
+            let label_width = $(label).outerWidth(true);
+            if (label_width > max_label_width) {
+                max_label_width = label_width;
+            }
+        }
+
+        const LABEL_WIDTH_TEMP_BUFFER = 35;
+
+        this.areaWidth -= LABEL_WIDTH_TEMP_BUFFER;
+        this.areaWidth = this.areaWidth + max_label_width;
+        $(this.sourceArea).css({
+            width: $(this.sourceArea).width() - LABEL_WIDTH_TEMP_BUFFER + max_label_width,
+        });
+        $(this.answerArea).css({
+            width: $(this.answerArea).width() - LABEL_WIDTH_TEMP_BUFFER + max_label_width,
+        });
+        /*
         if (blocksNotInBins + this.pairedBins.length >= 10) {
             this.areaWidth += 5;
             $(this.sourceArea).css({
@@ -3301,7 +3361,7 @@ export default class Parsons extends RunestoneBase {
             $(this.answerArea).css({
                 width: $(this.answerArea).width() + 5,
             });
-        }
+        }*/
     }
     // Put all the blocks back into the source area, reshuffling as necessary
     resetView() {
