@@ -75,7 +75,6 @@ export default class SQLActiveCode extends ActiveCode {
     }
     runProg() {
         var result_mess = "success";
-        var res;
         var result;
         var scrubber_dfd, history_dfd, saveCode;
         // Clear any old results
@@ -94,19 +93,45 @@ export default class SQLActiveCode extends ActiveCode {
             );
             return;
         }
-        try {
-            res = this.db.exec(query);
-        } catch (error) {
-            result_mess = error.toString();
-            $(this.output).text(error);
-            $(this.output).css("visibility", "visible");
-            $(this.outDiv).show();
+
+        // we need multiple outputs, not one - let's just hide this
+        $(this.output).css("visibility", "hidden");
+
+        let queries = parseSQL(query);
+        let results = [];
+        for (let q of queries) {
+            try {
+                let prefix = q.substr(0, 6).toLowerCase();
+                if (prefix === "select") {
+                    let stmt = this.db.prepare(q);
+                    let columns = stmt.getColumnNames();
+                    let data = [];
+                    while (stmt.step()) {
+                        data.push(stmt.get());
+                    }
+                    stmt.free();
+                    results.push({ status: "success", columns: columns, values: data, rowcount: data.length });
+                } else if (prefix === "insert" || prefix === "update" || prefix === "delete") {
+                    this.db.run(q);
+                    results.push({ status: "success", operation: prefix, rowcount: this.db.getRowsModified() });
+                } else {
+                    // DDL, presumably
+                    this.db.run(q);
+                    results.push({ status: "success" });
+                }
+            } catch (error) {
+                results.push({ status: "failure", message: error.toString() });
+            }
         }
+        if (results.length === 0) {
+            results.push({ status: "failure", message: "No queries submitted." });
+        }
+
         this.logRunEvent({
             div_id: this.divid,
             code: this.editor.getValue(),
             lang: this.language,
-            errinfo: result_mess,
+            errinfo: results[results.length - 1].status,
             to_save: saveCode,
             prefix: this.pretext,
             suffix: this.suffix,
@@ -124,26 +149,56 @@ export default class SQLActiveCode extends ActiveCode {
             }
             $(this.historyScrubber).slider("enable");
         });
-        if (result_mess != "success") {
-            return;
-        }
-        // Create a nice table to show the result of the query
-        if (res[0].values.length > 100) {
-            $(this.output).text(
-                "Result set is longer than 100 rows limiting output to first 100"
-            );
-        }
+
         respDiv = document.createElement("div");
         respDiv.id = divid;
         this.outDiv.appendChild(respDiv);
         $(this.outDiv).show();
-        createTable(res[0], respDiv);
+        for (let r of results) {
+            let section = document.createElement("div");
+            section.setAttribute("class", "ac_sql_result");
+            respDiv.appendChild(section);
+            if (r.status === "success") {
+                if (r.values) {
+                    let tableDiv = document.createElement("div");
+                    section.appendChild(tableDiv);
+                    // kludge: approximate height of result
+                    let height = (r.values.length + 2) * 24;
+                    if (height > 350) height = 350;
+                    if (results.length > 1 && height > 200) height = 200;
+                    createTable(r, tableDiv, height);
+                    let messageBox = document.createElement("pre");
+                    messageBox.textContent = "" + r.rowcount + " rows returned.";
+                    messageBox.setAttribute("class", "ac_sql_result_success");
+                    section.appendChild(messageBox);
+                } else if (r.rowcount) {
+                    let messageBox = document.createElement("pre");
+                    messageBox.textContent = "" + r.rowcount + " rows " + r.operation + "ed.";
+                    messageBox.setAttribute("class", "ac_sql_result_success");
+                    section.appendChild(messageBox);
+                } else {
+                    let messageBox = document.createElement("pre");
+                    messageBox.textContent = "Operation succeeded.";
+                    messageBox.setAttribute("class", "ac_sql_result_success");
+                    section.appendChild(messageBox);
+                }
+            } else {
+                let messageBox = document.createElement("pre");
+                messageBox.textContent = r.message;
+                messageBox.setAttribute("class", "ac_sql_result_failure");
+                section.appendChild(messageBox);
+            }
+        }
+
         // Now handle autograding
         if (this.suffix) {
-            result = this.autograde(res[0]);
+            result = this.autograde(results[results.length - 1]);
             $(this.output).text(result);
+        } else {
+            $(this.output).css("visibility", "hidden");
         }
     }
+
     autograde(result_table) {
         var tests = this.suffix.split(/\n/);
         this.passed = 0;
@@ -220,12 +275,13 @@ export default class SQLActiveCode extends ActiveCode {
     }
 }
 
-function createTable(tableData, container) {
+function createTable(tableData, container, height) {
     var hot = new Handsontable(container, {
         data: tableData.values,
         rowHeaders: false,
         colHeaders: tableData.columns,
-        height: 350,
+        editor: false,
+        height: height,
         width: "100%",
         maxRows: 100,
         filters: false,
@@ -234,4 +290,34 @@ function createTable(tableData, container) {
     });
 
     return hot;
+}
+
+// sql-js exec() method is currently inadequate for effective reporting
+// of multiple query results.  So, parse the input ourselves to split
+// into individual queries where we can control the reporting.
+// ** THIS MAY NOT BE AS EQUIVALENT TO LETTING SQLITE DO THE PARSING. **
+function parseSQL(sql) {
+    let multiline_comment = /\/\*[\s\S]*?\*\//m;
+    let single_line_comment = /--.*/;
+
+    // First, strip out all comments (avoids some nasty edge cases)
+    while (true) {
+        // earliest start of comment wins
+        let mm = multiline_comment.exec(sql);
+        let sm = single_line_comment.exec(sql);
+        let match = mm;
+        if (mm && sm) {
+            if (sm.index < mm.index) match = sm;
+        } else if (sm) {
+            match = sm;
+        }
+        if (match) {
+            sql = sql.substr(0, match.index) + " " + sql.substr(match.index + match[0].length);
+        }
+        else {
+            break;
+        }
+    }
+
+    return sql.split(";").map(q => q.trim()).filter(q => q.length !== 0);
 }
