@@ -29,6 +29,7 @@ export default class SelectOne extends RunestoneBase {
         super(opts);
         this.origOpts = opts;
         this.questions = $(opts.orig).data("questionlist");
+        this.proficiency = $(opts.orig).data("proficiency");
         this.selector_id = $(opts.orig).first().attr("id");
         opts.orig.id = this.selector_id;
     }
@@ -41,7 +42,12 @@ export default class SelectOne extends RunestoneBase {
      */
     initialize() {
         let self = this;
-        let data = { questions: this.questions, selector_id: this.selector_id };
+        let data = { selector_id: this.selector_id };
+        if (this.questions) {
+            data.questions = this.questions;
+        } else if (this.proficiency) {
+            data.proficiency = this.proficiency;
+        }
         let opts = this.origOpts;
         let selectorId = this.selector_id;
         let myPromise = new Promise(

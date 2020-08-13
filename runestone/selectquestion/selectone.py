@@ -53,7 +53,7 @@ from runestone.common.runestonedirective import (
 
 TEMPLATE = """
 <div class="runestone alert alert-warning">
-<div data-component="selectquestion" id={component_id} {selector} {points}>
+<div data-component="selectquestion" id={component_id} {selector} {points} {proficiency}>
     <p>Loading ...</p>
 </div>
 </div>
@@ -107,13 +107,19 @@ class SelectQuestion(RunestoneIdDirective):
             self.options[
                 "selector"
             ] = f"data-questionlist='{self.question_bank_choices}'"
+        else:
+            self.options["selector"] = ""
 
             # todo: validate that question(s) are in the database
 
         self.options["component_id"] = self.arguments[0].strip()
 
         if "proficiency" in self.options:
-            pass
+            self.options[
+                "proficiency"
+            ] = f"""data-proficiency='{self.options["proficiency"]}'"""
+        else:
+            self.options["proficiency"] = ""
 
         if "points" in self.options:
             self.options["points"] = f"data-points={self.options['points']}"
