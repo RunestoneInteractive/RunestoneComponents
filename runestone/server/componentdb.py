@@ -23,7 +23,7 @@
 #
 from __future__ import print_function
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 __author__ = "bmiller"
 
@@ -420,7 +420,7 @@ def maybeAddToAssignment(self):
             self.in_exam,  # assignment_name
             self.int_points,
             self.basecourse,
-            autograde="",
+            autograde="pct_correct",
             which_to_grade="last_answer",
         )
 
@@ -457,6 +457,8 @@ def addAssignmentToDB(
         and_(assignments.c.name == name, assignments.c.course == course_id)
     )
     res = sess.execute(sel).first()
+    if deadline is None:
+        deadline = datetime.now() + timedelta(weeks=1)
     if res:
         stmt = (
             assignments.update()
@@ -467,6 +469,7 @@ def addAssignmentToDB(
                 is_timed=is_timed,
                 visible=visible,
                 time_limit=time_limit,
+                from_source="T",
             )
         )
         sess.execute(stmt)
@@ -487,6 +490,7 @@ def addAssignmentToDB(
             is_timed=is_timed,
             visible=visible,
             time_limit=time_limit,
+            from_source="T",
         )
         res = sess.execute(ins)
         a_id = res.inserted_primary_key[0]

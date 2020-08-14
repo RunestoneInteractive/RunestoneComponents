@@ -122,8 +122,10 @@ class SelectQuestion(RunestoneIdDirective):
             self.options["proficiency"] = ""
 
         if "points" in self.options:
+            self.int_points = int(self.options["points"])
             self.options["points"] = f"data-points={self.options['points']}"
         else:
+            self.int_points = 1
             self.options["points"] = ""
 
         maybeAddToAssignment(self)
