@@ -1,3 +1,9 @@
+/*
+*********
+|docname|
+*********
+*/
+
 /* Variables holding theme colors */
 :root {
 	--codebuttons: #474949;
@@ -28,7 +34,7 @@ li.dropdown a.dropdown-toggle {
 }
 
 /*
-Bootstrap button styling  
+Bootstrap button styling
 */
 
 /* Default Button */

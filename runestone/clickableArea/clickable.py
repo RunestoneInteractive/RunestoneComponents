@@ -147,6 +147,7 @@ config values (conf.py):
                 --Content--
         """
         super(ClickableArea, self).run()
+        self.explain_text = [self.options["question"]]
         addQuestionToDB(self)
 
         self.assert_has_content()

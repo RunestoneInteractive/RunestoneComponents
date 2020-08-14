@@ -135,7 +135,7 @@ export default class ShortAnswer extends RunestoneBase {
     }
 
     submitJournal() {
-        let value = $("#" + this.divid + "_solution").val();
+        let value = $(document.getElementById(this.divid + "_solution")).val();
         this.renderMath(value);
         this.setLocalStorage({
             answer: value,

@@ -1316,6 +1316,7 @@ var languageExtensions = {
     python3: "py",
     cpp: "cpp",
     c: "c",
+    sql: "sql",
 };
 
 var errorText = {};

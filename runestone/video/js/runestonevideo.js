@@ -3,6 +3,18 @@
 import RunestoneBase from "../../common/js/runestonebase";
 import "../css/video.css";
 
+class RunestoneVideo extends RunestoneBase {
+    constructor(opts) {
+        super(opts);
+        if (document.getElementById("youtubescript") == null) {
+            let script = document.createElement("script");
+            script.id = "youtubescript";
+            script.src = "https://www.youtube.com/player_api";
+            document.body.appendChild(script);
+        }
+    }
+}
+
 window.onPlayerStateChange = function (event) {
     let rb = new RunestoneBase();
     let videoTime = event.target.getCurrentTime();
@@ -50,3 +62,14 @@ $(document).ready(function () {
     script.src = "https://www.youtube.com/player_api";
     document.body.appendChild(script);
 });
+
+if (typeof window.component_factory === "undefined") {
+    window.component_factory = {};
+}
+window.component_factory.youtube = function (opts) {
+    return new RunestoneVideo(opts);
+};
+
+window.component_factory.vimeo = function (opts) {
+    return new RunestoneVideo(opts);
+};

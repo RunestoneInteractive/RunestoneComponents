@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 
 from sqlalchemy import create_engine, Table, MetaData, and_
 from sqlalchemy.orm.session import sessionmaker
+from sqlalchemy.sql import text
 from sphinx.util import logging
 
 logger = logging.getLogger(__name__)
@@ -90,7 +91,10 @@ def manifest_data_to_db(course_name, manifest_path):
                 chapter.find("./title").text, subchapter.find("./title").text
             )
             res = sess.execute(
-                f"""select * from questions where name='{name}' and base_course='{course_name}'"""
+                text(
+                    """select * from questions where name = :name and base_course = :course_name"""
+                ),
+                dict(name=name, course_name=course_name),
             ).first()
             valudict = dict(
                 base_course=course_name,

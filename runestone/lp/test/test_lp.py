@@ -15,15 +15,14 @@ from pathlib import Path
 from time import sleep
 from unittest import TestCase
 
-#
+
 # Third-party imports
 # -------------------
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
 
-#
+
 # Local imports
 # -------------
 from runestone.lp.lp import (
