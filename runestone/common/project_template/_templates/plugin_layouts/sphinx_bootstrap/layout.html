@@ -269,6 +269,15 @@
 
 </script>
 
+<!-- Ad Serving Headers Only serve ads to Anonymous Users -->
+{% if dynamic_pages == 'True' %}
+    {% raw %}
+        {{ if response.serve_ad and settings.adsenseid: }}
+         <script data-ad-client="{{=settings.adsenseid}}" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        {{ pass }}
+    {% endraw %}
+{% endif %}
+
 {% if minimal_outside_links != 'True' %}
 <div id="fb-root"></div>
 <script>

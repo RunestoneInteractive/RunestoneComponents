@@ -20,6 +20,7 @@ import { pageProgressTracker } from "./bookfuncs.js";
 
 export default class RunestoneBase {
     constructor(opts) {
+        this.optional = false;
         if (opts) {
             this.sid = opts.sid;
             this.graderactive = opts.graderactive;

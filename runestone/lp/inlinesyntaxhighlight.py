@@ -17,9 +17,9 @@
 #
 # .. highlight:: python
 #
-# *********************************************************************************
-# inlinesyntaxhighlight.py - Syntax highlighting for inline literal and code blocks
-# *********************************************************************************
+# ******************************************************************
+# |docname| - Syntax highlighting for inline literal and code blocks
+# ******************************************************************
 # This is a heavily modified version of https://bitbucket.org/klorenz/sphinxcontrib-inlinesyntaxhighlight.
 from docutils import nodes
 import re

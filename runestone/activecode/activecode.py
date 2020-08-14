@@ -1,3 +1,6 @@
+# *********
+# |docname|
+# *********
 # Copyright (C) 2011  Bradley N. Miller
 #
 # This program is free software: you can redistribute it and/or modify
@@ -216,8 +219,6 @@ config values (conf.py):
     def run(self):
         super(ActiveCode, self).run()
 
-        addQuestionToDB(self)
-
         env = self.state.document.settings.env
         # keep track of how many activecodes we have....
         # could be used to automatically make a unique id for them.
@@ -235,6 +236,9 @@ config values (conf.py):
             source = "\n".join(self.content)
         else:
             source = "\n"
+
+        self.explain_text = explain_text or ["Not an Exercise"]
+        addQuestionToDB(self)
 
         self.options["initialcode"] = source
         str = source.replace("\n", "*nline*")

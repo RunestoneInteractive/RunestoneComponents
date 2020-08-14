@@ -79,6 +79,15 @@ export default class LiveCode extends ActiveCode {
         } else {
             source = this.buildProg(true);
         }
+        // Validate the data is convertable to Base64. If not then error out now
+        try {
+            let contentsb64 = btoa(source);
+        } catch (e) {
+            alert(
+                "Error: Bad Characters in the activecode window. Likely a quote character that has been copy/pasted. 🙁"
+            );
+            return;
+        }
         var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
         history_dfd = __ret.history_dfd;
         saveCode = __ret.saveCode;
@@ -102,7 +111,7 @@ export default class LiveCode extends ActiveCode {
         }
         $(this.output).html($.i18n("msg_activecode_compiling_running"));
         var files = [];
-        var content;
+        var content, base64;
         if (this.datafile != undefined) {
             var ids = this.datafile.split(",");
             for (var i = 0; i < ids.length; i++) {
@@ -122,8 +131,18 @@ export default class LiveCode extends ActiveCode {
                 if (fileExtension === "jar") {
                     files = files.concat(this.parseJavaClasses(content));
                 } else if (["jpg", "png", "gif"].indexOf(fileExtension) > -1) {
-                    var base64 = file.toDataURL("image/" + fileExtension);
-                    base64 = base64.substring(base64.indexOf(",") + 1);
+                    if (file) {
+                        if (file.toDataURL) {
+                            base64 = file.toDataURL("image/" + fileExtension);
+                            base64 = base64.substring(base64.indexOf(",") + 1);
+                        } else {
+                            base64 = file.src.substring(
+                                file.src.indexOf(",") + 1
+                            );
+                        }
+                    } else {
+                        base64 = content;
+                    }
                     files.push({ name: fileName, content: base64 });
                 } else {
                     // if no className or un recognized className it is treated as an individual file
@@ -473,7 +492,8 @@ export default class LiveCode extends ActiveCode {
                 lang: myVars.lang,
             });
         }).fail(function (jqxhr, textStatus, error) {
-            targetDiv.innerHTML =
+            let targetDivError = document.getElementById(targetDiv);
+            targetDivError.innerHTML =
                 "Sorry, an error occurred while creating your visualization.";
             console.log("Get Trace Failed -- ");
             console.log(error);

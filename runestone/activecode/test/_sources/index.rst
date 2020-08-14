@@ -11,6 +11,15 @@ ActiveCode Test
 
 End of test1
 
+.. activecode:: test1a
+
+   This question has multiple lines of explanatory
+   text prior to the editing area or scaffolded code.
+   ~~~~
+   print("Hello World")
+
+
+
 
 .. datafile:: Shape.java
     :hide:

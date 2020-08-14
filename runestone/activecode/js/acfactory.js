@@ -29,7 +29,12 @@ export default class ACFactory {
         if (opts.timed == true) {
             if (lang === "python") {
                 return new TimedActiveCode(opts);
-            } else if (lang === "java" || lang === "cpp" || lang === "c") {
+            } else if (
+                lang === "java" ||
+                lang === "cpp" ||
+                lang === "c" ||
+                lang === "python3"
+            ) {
                 return new TimedLiveCode(opts);
             } else if (lang === "javascript") {
                 return new TimedJSActiveCode(opts);
@@ -100,9 +105,13 @@ export default class ACFactory {
         var divid = eBookConfig.course + "_scratch_ac";
         divid = divid.replace(/[#.]/g, ""); // in case book title has characters that will mess up our selectors
         eBookConfig.scratchDiv = divid;
+        let stdin = "";
         var lang = eBookConfig.acDefaultLanguage
             ? eBookConfig.acDefaultLanguage
             : "python";
+        if (lang === "java" || lang === "cpp" || lang === "python3") {
+            stdin = `data-stdin="text for stdin"`;
+        }
         // generate the HTML
         var html = `<div id="ac_modal_${divid}" class="modal fade">
               <div class="modal-dialog scratch-ac-modal">
@@ -112,7 +121,7 @@ export default class ACFactory {
                     <h4 class="modal-title">Scratch ActiveCode</h4>
                   </div>
                   <div class="modal-body">
-                  <textarea data-component="activecode" data-codelens="true" id="${divid}" data-lang="${lang}">
+                  <textarea data-component="activecode" data-codelens="true" id="${divid}" data-lang="${lang}" ${stdin}>
 
 
 

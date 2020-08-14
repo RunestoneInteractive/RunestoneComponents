@@ -1,10 +1,13 @@
-
+# *********
+# |docname|
+# *********
 import sys
 import os
 import shutil
 import getpass
 import six
 import click
+import pathlib
 import re
 from paver.easy import sh
 from pkg_resources import resource_string, resource_filename, require
@@ -147,15 +150,30 @@ def build(all, wd):
     else:
         os.chdir(findProjectRoot())
     sys.path.insert(0, os.getcwd())
+    if not pathlib.Path(resource_filename("runestone", "dist/runestone.js")).exists():
+        click.echo("Error -- You are missing runestone.js please make sure")
+        click.echo("you have runestone installed correctly")
+        sys.exit(-1)
+
     version = require("runestone")[0].version
     print("Building with Runestone {}".format(version))
 
-    with open('conf.py', encoding='utf-8') as cf:
+    with open("conf.py", encoding="utf-8") as cf:
         ctext = cf.read()
         if not re.search(r"from runestone import.*(setup|script_files)", ctext):
-            click.echo(click.style("Please update conf.py to import setup from runestone", fg='red'), err=True, color=True)
-            click.echo("The current line probably looks like:\nfrom runestone import runestone_static_dirs, runestone_extensions")
-            click.echo("Change it to:\nfrom runestone import runestone_static_dirs, runestone_extensions, setup")
+            click.echo(
+                click.style(
+                    "Please update conf.py to import setup from runestone", fg="red"
+                ),
+                err=True,
+                color=True,
+            )
+            click.echo(
+                "The current line probably looks like:\nfrom runestone import runestone_static_dirs, runestone_extensions"
+            )
+            click.echo(
+                "Change it to:\nfrom runestone import runestone_static_dirs, runestone_extensions, setup"
+            )
             sys.exit(1)
 
     import pavement
@@ -186,9 +204,12 @@ def serve(port, listen):
 
         try:
             if pavement.dynamic_pages == True:
-                click.echo(click.style(
-                    """Error -- dynamic_pages is True, but this preview server does not support templates.
-                    Please edit pavement.py and set dynamic_pages=False""", color="red"),
+                click.echo(
+                    click.style(
+                        """Error -- dynamic_pages is True, but this preview server does not support templates.
+                    Please edit pavement.py and set dynamic_pages=False""",
+                        color="red",
+                    ),
                     err=True,
                 )
                 click.echo("You should update pavement.py and rebuild")
@@ -309,7 +330,11 @@ def update():
 
 @cli.command(short_help="Process runestone-manifest.xml file")
 @click.option("--course", help="Name of the course (base course)")
-@click.option("--manifest", default="runestone-manifest.xml", help="path to runestone-manifest.xml file")
+@click.option(
+    "--manifest",
+    default="runestone-manifest.xml",
+    help="path to runestone-manifest.xml file",
+)
 def process_manifest(course, manifest):
     """Populate a runestone database with meta data about a course created with the PreTeXt processor
 

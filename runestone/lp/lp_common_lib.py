@@ -1,12 +1,9 @@
 # .. Copyright (C) 2019 Bryan A. Jones.
 #
-#
-# .. highlight:: python
-#
-# ********************************************************************************
-# lp_common_lib.py - Definitions of shared data in the literate programming system
-# ********************************************************************************
-# This file contains a definition and supporting classes for a data structure used to export data from Sphinx to the Flask database for the books.
+# *************************************************************************
+# |docname| - Definitions of shared data in the literate programming system
+# *************************************************************************
+# # This file contains a definition and supporting classes for a data structure used to export data from Sphinx to the Flask database for the books.
 #
 # Imports
 # =======
@@ -15,9 +12,14 @@
 #
 # Standard library
 # ----------------
-import os.path
-import io
 import json
+import os.path
+from pathlib import Path
+import random
+
+
+# Seed the random number generator.
+random.seed()
 
 
 # Given a file, return the inline comment token based on the file extension.
@@ -50,7 +52,7 @@ def read_sphinx_config(
 ):
 
     try:
-        with io.open(os.path.join(dir_, SPHINX_CONFIG_NAME), encoding="utf-8") as f:
+        with open(os.path.join(dir_, SPHINX_CONFIG_NAME), encoding="utf-8") as f:
             return json.loads(f.read())
     except IOError:
         return None
@@ -98,6 +100,8 @@ def get_sim_str_sim30(
     elf_file,
     # The name of an output file for UART output.
     uart_out_file,
+    # Additional, optional commands.
+    optional_commands="",
 ):
 
     return (
@@ -117,17 +121,19 @@ def get_sim_str_sim30(
         # Reset the processor. From the help:
         # ``RP -Reset processor POR``
         "RP\n"
-        # Set a breakpoint at the end of the program (the label ``done``).
+        # Set a breakpoint at the end of the program (the label ``_done``).
         # From the help:
         # ``BS <location> ...[locations] -Breakpoint Set``
-        "BS done\n"
+        "BS _done\n"
+        # Include any other setup (stimulus file, pin assignments, etc.).
+        "{}\n"
         # Run the program. From the help:
         # ; ``E  -Execute``
         "E 10000\n"
         # Quit. From the help:
         # ``Q  -Quit``
         "Q\n"
-    ).format(sim_mcu, elf_file, uart_out_file)
+    ).format(sim_mcu, elf_file, uart_out_file, optional_commands)
 
 
 # Return the string needed to run a simulation under MDB.
@@ -153,13 +159,13 @@ def get_sim_str_mdb(
         "set uart1io.output file\n"
         "set uart1io.uartioenabled true\n"
         'set uart1io.outputfile "{}"\n'
-        # Configure the clock to match the setup in the PIC24 libary ``lib/include/pic24_clockfreq.h`` named ``SIM_CLOCK``.
+        # Configure the clock to match the setup in the PIC24 library ``lib/include/pic24_clockfreq.h`` named ``SIM_CLOCK``.
         "set oscillator.frequency 1\n"
         "set oscillator.frequencyunit Mega\n"
         # Load in the program.
         'program "{}"\n'
-        # Set a breakpoint at the end of the program (the label ``done``).
-        "break done\n"
+        # Set a breakpoint at the end of the program (the label ``_done``).
+        "break _done\n"
         # Include any other setup (stimulus file, pin assignments, etc.).
         "{}\n"
         # Run the program. Wait a time in ms for it to finish.
@@ -167,4 +173,25 @@ def get_sim_str_mdb(
         "wait 6000\n"
         # Exit the simulator.
         "quit\n"
-    ).format(sim_mcu, uart_out_file, elf_file, optional_commands)
+    ).format(
+        sim_mcu,
+        # MDB starting in MPLAB X v5.35 doesn't understand Windows-style paths (although using \\ instead of \ does work). It does work with Posix paths.
+        Path(uart_out_file).as_posix(),
+        Path(elf_file).as_posix(),
+        optional_commands,
+    )
+
+
+# Get a verification code (a random, 32-bit value).
+def get_verification_code():
+    return random.randrange(0, 2 ** 32)
+
+
+# Returns True if a simulation produced the correct answer.
+def check_sim_out(out_str, verification_code):
+    sl = out_str.splitlines()
+    second_to_last_line = sl[-2] if len(sl) >= 1 else ""
+    third_to_last_line = sl[-3] if len(sl) >= 2 else ""
+    return (third_to_last_line == "Correct.") and (
+        second_to_last_line == "{}".format(verification_code)
+    )
