@@ -53,7 +53,7 @@ from runestone.common.runestonedirective import (
 
 TEMPLATE = """
 <div class="runestone alert alert-warning">
-<div data-component="selectquestion" id={component_id} {selector} {points} {proficiency}>
+<div data-component="selectquestion" id={component_id} {selector} {points} {proficiency} {min_difficulty} {max_difficulty}>
     <p>Loading ...</p>
 </div>
 </div>
@@ -72,6 +72,13 @@ class SelectQuestion(RunestoneIdDirective):
        :basecourse: restrict question choices to the current base course
        :alwaysrandom: choose a new random question every time if possible
        :points: number of points for this question
+       :min_difficulty: minimum difficulty level
+       :max_difficulty: maximum difficulty level
+
+       Difficulty is measured in one of two ways. For things like multiple choice and
+       fill in the blank, we can use the % of students that get the answer correct on
+       the first try.  For Code that is a little unreasonable, so we use the number
+       of
     """
 
     required_arguments = 1
@@ -83,6 +90,8 @@ class SelectQuestion(RunestoneIdDirective):
             "fromid": directives.unchanged,
             "proficiency": directives.unchanged,
             "basecourse": directives.flag,
+            "min_difficulty": directives.unchanged,
+            "max_difficulty": directives.unchanged,
         }
     )
 
@@ -127,6 +136,20 @@ class SelectQuestion(RunestoneIdDirective):
         else:
             self.int_points = 1
             self.options["points"] = ""
+
+        if "min_difficulty" in self.options:
+            self.options[
+                "min_difficulty"
+            ] = f"data-minDifficulty={self.options['min_difficulty']}"
+        else:
+            self.options["min_difficulty"] = ""
+
+        if "max_difficulty" in self.options:
+            self.options[
+                "max_difficulty"
+            ] = f"data-maxDifficulty={self.options['max_difficulty']}"
+        else:
+            self.options["max_difficulty"] = ""
 
         maybeAddToAssignment(self)
 
