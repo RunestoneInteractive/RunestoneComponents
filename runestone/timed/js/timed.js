@@ -535,6 +535,7 @@ export default class Timed extends RunestoneBase {
             this.renderedQuestionArray[randomIndex] = temporaryValue;
         }
     }
+
     renderTimedQuestion() {
         var currentWrapper = this.renderedQuestionArray[
             this.currentQuestionIndex
@@ -562,6 +563,7 @@ export default class Timed extends RunestoneBase {
             currentQuestion.reinitializeListeners();
         }
     }
+
     /*=================================
     === Timer and control Functions ===
     =================================*/
@@ -605,8 +607,11 @@ export default class Timed extends RunestoneBase {
                     JSON.stringify(storageObj)
                 );
             }
-            $(window).on("beforeunload", function () {
+            $(window).on("beforeunload", function (event) {
                 // this actual value gets ignored by newer browsers
+                event.preventDefault();
+                event.returnValue =
+                    "Are you sure you want to leave?  Your work will be lost! And you will need your instructor to reset the exam!";
                 return "Are you sure you want to leave?  Your work will be lost!";
             });
         } else {
@@ -946,7 +951,7 @@ export default class Timed extends RunestoneBase {
             // error while parsing; likely due to bad value stored in storage
             console.log(err.message);
             localStorage.removeItem(this.localStorageKey());
-            return;
+            return true;
         }
         var serverDate = new Date(data.timestamp);
         if (serverDate < storageDate) {
