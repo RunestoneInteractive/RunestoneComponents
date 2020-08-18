@@ -209,6 +209,8 @@ class RunestoneDirective(Directive):
         "from_source": directives.unchanged,
         "basecourse": directives.unchanged,
         "points": directives.positive_int,
+        "pct_on_first": directives.unchanged,
+        "mean_clicks_to_correct": directives.unchanged,
     }
 
     def __init__(self, *args, **kwargs):
