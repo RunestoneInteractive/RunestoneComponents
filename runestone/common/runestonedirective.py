@@ -30,14 +30,14 @@ from sphinx import application
 from sphinx.errors import ExtensionError
 
 UNNUMBERED_DIRECTIVES = [
-    "activecode",
+    #    "activecode",
     "reveal",
-    "video",
-    "youtube",
-    "vimeo",
-    "codelens",
-    "showeval",
-    "poll",
+    #    "video",
+    #    "youtube",
+    #    "vimeo",
+    #   "codelens",
+    #   "showeval",
+    #   "poll",
     "tabbed",
     "tab",
     "timed",
@@ -253,7 +253,7 @@ class RunestoneIdDirective(RunestoneDirective):
             return ""
 
         env.assesscounter += 1
-
+        print(f" assesscounter = {env.assesscounter}")
         res = "Q-%d"
 
         if hasattr(env, "assessprefix"):
@@ -298,6 +298,7 @@ class RunestoneIdDirective(RunestoneDirective):
             id_ = self.options["divid"]
 
         self.options["qnumber"] = self.getNumber()
+        print(f"{id_} is number {self.options['qnumber']}")
 
         # Get references to `runestone data`_.
         env = self.state.document.settings.env

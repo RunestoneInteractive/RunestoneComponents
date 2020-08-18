@@ -21,7 +21,7 @@ read -p "Did you update/commit the version in setup.py " yn
 done
 
 rm dist/*
-
+npm run build
 python setup.py sdist
 pip wheel --no-index --no-deps --global-option bdist_wheel  --wheel-dir dist dist/*.tar.gz
 

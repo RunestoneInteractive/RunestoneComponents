@@ -134,6 +134,10 @@ export class ActiveCode extends RunestoneBase {
             edmode = "text/x-java";
         } else if (edmode === "cpp") {
             edmode = "text/x-c++src";
+        } else if (edmode === "c") {
+            edmode = "text/x-csrc";
+        } else if (edmode === "python3") {
+            edmode = "python";
         }
         var editor = CodeMirror(codeDiv, {
             value: this.code,
