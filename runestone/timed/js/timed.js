@@ -818,6 +818,8 @@ export default class Timed extends RunestoneBase {
         this.done = 1;
         this.taken = 1;
         this.submitTimedProblems(true); // log results
+        // todo call the autograder to record the score for this student
+        // endpoint is assignments/student_autograde
         this.checkScore();
         this.displayScore();
         this.storeScore();
