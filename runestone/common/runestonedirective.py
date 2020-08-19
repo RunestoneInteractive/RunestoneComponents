@@ -199,7 +199,7 @@ class RunestoneDirective(Directive):
     option_spec = {
         "author": directives.unchanged,
         "tags": directives.unchanged,
-        "difficulty": directives.positive_int,
+        "difficulty": directives.unchanged,
         "autograde": directives.unchanged,
         "practice": directives.unchanged,
         "topics": directives.unchanged,
@@ -208,9 +208,13 @@ class RunestoneDirective(Directive):
         "supp_comp": directives.unchanged,
         "from_source": directives.unchanged,
         "basecourse": directives.unchanged,
+        "chapter": directives.unchanged,
+        "subchapter": directives.unchanged,
         "points": directives.positive_int,
         "pct_on_first": directives.unchanged,
         "mean_clicks_to_correct": directives.unchanged,
+        "total_students_attempting": directives.unchanged,
+        "num_students_correct": directives.unchanged,
     }
 
     def __init__(self, *args, **kwargs):
@@ -218,18 +222,27 @@ class RunestoneDirective(Directive):
         env = self.state.document.settings.env
         self.srcpath = env.docname
         # Rather tha use ``os.sep`` to split ``self.srcpath``, use ``'/'``, because Sphinx internally stores filesnames using this separator, even on Windows.
+
         split_docname = self.srcpath.split("/")
         if len(split_docname) < 2:
             # TODO: Warn about this? Something like ``self.state.document.settings.env``?
             split_docname.append("")
-        self.subchapter = split_docname[-1]
-        self.chapter = split_docname[-2]
-        self.basecourse = self.state.document.settings.env.config.html_context.get(
-            "basecourse", "unknown"
-        )
-        self.options["basecourse"] = self.basecourse
-        self.options["chapter"] = self.chapter
-        self.options["subchapter"] = self.subchapter
+        if "subchapter" not in self.options:
+            self.subchapter = split_docname[-1]
+            self.options["subchapter"] = self.subchapter
+        else:
+            self.subchapter = self.options["subchapter"]
+        if "chapter" not in self.options:
+            self.chapter = split_docname[-2]
+            self.options["chapter"] = self.chapter
+        else:
+            self.chapter = self.options["chapter"]
+
+        if "basecourse" not in self.options:
+            self.basecourse = self.state.document.settings.env.config.html_context.get(
+                "basecourse", "unknown"
+            )
+            self.options["basecourse"] = self.basecourse
         self.options["optional"] = (
             "data-optional=true" if "optional" in self.options else ""
         )

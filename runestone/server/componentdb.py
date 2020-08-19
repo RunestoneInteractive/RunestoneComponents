@@ -93,6 +93,7 @@ questions = None
 assignment_questions = None
 courses = None
 assignments = None
+competency = None
 
 # setup
 # -----
@@ -101,7 +102,7 @@ assignments = None
 
 
 def setup(app):
-    global dburl, engine, meta, sess, questions, assignments, assignment_questions, courses
+    global dburl, engine, meta, sess, questions, assignments, assignment_questions, courses, competency
 
     app.connect("env-before-read-docs", reset_questions)
     app.connect("build-finished", finalize_updates)
@@ -127,6 +128,7 @@ def setup(app):
             "assignment_questions", meta, autoload=True, autoload_with=engine
         )
         courses = Table("courses", meta, autoload=True, autoload_with=engine)
+        competency = Table("competency", meta, autoload=True, autoload_with=engine)
 
 
 def get_engine_meta():
@@ -186,11 +188,14 @@ def logSource(self):
 def addQuestionToDB(self):
     # ``self`` must be a RunestoneDirective.
     assert isinstance(self, RunestoneDirective)
-
+    question_id = False
     if dburl:
-        basecourse = self.state.document.settings.env.config.html_context.get(
-            "basecourse", "unknown"
-        )
+        if "basecourse" in self.options:
+            basecourse = self.options["basecourse"]
+        else:
+            basecourse = self.state.document.settings.env.config.html_context.get(
+                "basecourse", "unknown"
+            )
         if basecourse == "unknown":
             raise self.severe("Cannot update database because basecourse is unknown")
             return
@@ -230,6 +235,13 @@ def addQuestionToDB(self):
             self.explain_text = self.get_explain_text()
         et = " ".join(self.explain_text)[:80]
 
+        # check for additional meta data to add
+        meta_opts = {}
+        if "pct_on_first" in self.options:
+            meta_opts["pct_on_first"] = self.options["pct_on_first"]
+        if "mean_clicks_to_correct" in self.options:
+            meta_opts["mean_clicks_to_correct"] = self.options["mean_clicks_to_correct"]
+
         try:
             if res:
                 stmt = (
@@ -243,7 +255,7 @@ def addQuestionToDB(self):
                         subchapter=self.subchapter,
                         autograde=autograde,
                         author=author,
-                        difficulty=difficulty,
+                        difficulty=round(float(difficulty)),
                         chapter=self.chapter,
                         practice=practice,
                         topic=topics,
@@ -251,9 +263,11 @@ def addQuestionToDB(self):
                         qnumber=qnumber,
                         optional=optional,
                         description=et,
+                        **meta_opts,
                     )
                 )
                 sess.execute(stmt)
+                question_id = res["id"]
             else:
                 ins = questions.insert().values(
                     base_course=basecourse,
@@ -265,7 +279,7 @@ def addQuestionToDB(self):
                     subchapter=self.subchapter,
                     autograde=autograde,
                     author=author,
-                    difficulty=difficulty,
+                    difficulty=round(float(difficulty)),
                     chapter=self.chapter,
                     practice=practice,
                     topic=topics,
@@ -273,15 +287,37 @@ def addQuestionToDB(self):
                     qnumber=qnumber,
                     optional=optional,
                     description=et,
+                    **meta_opts,
                 )
 
-                sess.execute(ins)
+                question_id = sess.execute(ins)
+                question_id = question_id.inserted_primary_key[0]
         except UnicodeEncodeError:
             raise self.severe(
                 "Bad character in directive {} in {}/{}. This will not be saved to the DB".format(
                     id_, self.chapter, self.subchapter
                 )
             )
+
+        # check for prim_comp and supp_comp and add them to the competency table.
+        prim_comps = []
+        supp_comps = []
+        if "prim_comp" in self.options:
+            prim_comps = [x.strip() for x in self.options["prim_comp"].split(",")]
+        if "supp_comp" in self.options:
+            supp_comps = [x.strip() for x in self.options["supp_comp"].split(",")]
+
+        if question_id:
+            for comp in prim_comps:
+                ins = competency.insert().values(
+                    competency=comp, question=question_id, is_primary="T",
+                )
+                sess.execute(ins)
+            for comp in supp_comps:
+                ins = competency.insert().values(
+                    competency=comp, question=question_id, is_primary="F",
+                )
+                sess.execute(ins)
 
 
 def getQuestionID(base_course, name):
