@@ -122,6 +122,7 @@ class TimedDirective(RunestoneIdDirective):
         "timelimit": directives.positive_int,
         "noresult": directives.flag,
         "timedfeedback": directives.flag,
+        "nofeedback": directives.flag,  # backward compatibility
         "fullwidth": directives.flag,
         "notimer": directives.flag,
     }
