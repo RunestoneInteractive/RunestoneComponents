@@ -118,7 +118,7 @@ class ModuleFixture(unittest.TestCase):
                 if len(data) <= 1:
                     continue
                 ptokill = int(data[1])
-                mylogger.warning(
+                mylogger.warn(
                     "Attempting to kill a stale runestone serve process: {}".format(
                         ptokill
                     )
