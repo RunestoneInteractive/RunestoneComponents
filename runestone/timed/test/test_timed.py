@@ -1,9 +1,9 @@
-#import warnings
-#warnings.filterwarnings("ignore", category=DeprecationWarning) 
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning) 
 import unittest
 import time
 from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
-#from selenium import webdriver
+from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
