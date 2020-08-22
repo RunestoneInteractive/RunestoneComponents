@@ -29,10 +29,10 @@ class TimedTests(RunestoneTestCase):
         finish = self.driver.find_element_by_id("finish")
         finish.click()
 
-        #alert = self.driver.switch_to_alert()
-        #alert.accept()
+        alert = self.driver.switch_to_alert()
+        alert.accept()
 
-        #fb = t1.find_element_by_id("time_test_1_q1_eachFeedback_1")
-        #self.assertIsNotNone(fb)
-        #cnamestr = fb.get_attribute("class")
-        #self.assertEqual(cnamestr, "eachFeedback alert alert-danger")
+        fb = t1.find_element_by_id("time_test_1_q1_eachFeedback_1")
+        self.assertIsNotNone(fb)
+        cnamestr = fb.get_attribute("class")
+        self.assertEqual(cnamestr, "eachFeedback alert alert-danger")
