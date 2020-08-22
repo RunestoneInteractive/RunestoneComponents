@@ -27,7 +27,7 @@ class TimedTests(RunestoneTestCase):
         t1.find_element_by_id("time_test_1_q1_opt_3").click()
 
         finish = self.driver.find_element_by_id("finish")
-        #finish.click()
+        finish.click()
 
         #alert = self.driver.switch_to_alert()
         #alert.accept()
