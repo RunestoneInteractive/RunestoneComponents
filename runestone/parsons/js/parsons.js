@@ -1872,6 +1872,9 @@ export default class Parsons extends RunestoneBase {
                 }
             }
         }
+        
+        //test comment to see why I can't do a pull request successfully
+
         for (i = 0; i < nBlocksToCombine; i++) {
             // combine one set of blocks
             var best = -10;
