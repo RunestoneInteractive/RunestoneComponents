@@ -68,7 +68,8 @@ config values (conf.py):
     optional_arguments = 0
     final_argument_whitespace = True
     has_content = True
-    option_spec = {"trace_mode": directives.unchanged_required}
+    option_spec = RunestoneIdDirective.option_spec.copy()
+    option_spec.update({"trace_mode": directives.unchanged_required})
 
     def run(self):
         """

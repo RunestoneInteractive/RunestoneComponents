@@ -99,6 +99,9 @@ competency = None
 # -----
 #
 # Here we connect two key functions to events in the build process.
+# reset_questions and finalize updates
+# this ensures that the database is in sync with the directives in the source
+#
 
 
 def setup(app):
@@ -106,6 +109,11 @@ def setup(app):
 
     app.connect("env-before-read-docs", reset_questions)
     app.connect("build-finished", finalize_updates)
+    # the `qbank` option is for the QuestionBank
+    # it allows us to populate the database from the question bank
+    # but we don't care about populating chapter and subchapter tables and others
+    # so we commit each question.
+    app.add_config_value("qbank", False, "html")
     try:
         dburl = get_dburl()
         engine = create_engine(dburl, client_encoding="utf8", convert_unicode=True)
@@ -189,6 +197,8 @@ def addQuestionToDB(self):
     # ``self`` must be a RunestoneDirective.
     assert isinstance(self, RunestoneDirective)
     question_id = False
+    qbank = self.state.document.settings.env.config.qbank
+
     if dburl:
         if "basecourse" in self.options:
             basecourse = self.options["basecourse"]
@@ -225,6 +235,8 @@ def addQuestionToDB(self):
         else:
             optional = "F"
 
+        from_source = self.options.get("from_source", "T")
+
         id_ = self.options["divid"]
         sel = select([questions]).where(
             and_(questions.c.name == id_, questions.c.base_course == basecourse)
@@ -259,7 +271,7 @@ def addQuestionToDB(self):
                         chapter=self.chapter,
                         practice=practice,
                         topic=topics,
-                        from_source="T",
+                        from_source=from_source,
                         qnumber=qnumber,
                         optional=optional,
                         description=et,
@@ -283,7 +295,7 @@ def addQuestionToDB(self):
                     chapter=self.chapter,
                     practice=practice,
                     topic=topics,
-                    from_source="T",
+                    from_source=from_source,
                     qnumber=qnumber,
                     optional=optional,
                     description=et,
@@ -292,6 +304,8 @@ def addQuestionToDB(self):
 
                 question_id = sess.execute(ins)
                 question_id = question_id.inserted_primary_key[0]
+            if qbank:
+                sess.commit()
         except UnicodeEncodeError:
             raise self.severe(
                 "Bad character in directive {} in {}/{}. This will not be saved to the DB".format(

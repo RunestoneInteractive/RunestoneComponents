@@ -106,21 +106,24 @@ config values (conf.py):
     required_arguments = 1
     optional_arguments = 0
     has_content = True
-    option_spec = {
-        "scale": directives.positive_int,
-        "allowcomment": directives.flag,
-        "option_1": directives.unchanged,
-        "option_2": directives.unchanged,
-        "option_3": directives.unchanged,
-        "option_4": directives.unchanged,
-        "option_5": directives.unchanged,
-        "option_6": directives.unchanged,
-        "option_7": directives.unchanged,
-        "option_8": directives.unchanged,
-        "option_9": directives.unchanged,
-        "option_10": directives.unchanged,
-        "results": directives.unchanged,
-    }
+    option_spec = RunestoneIdDirective.option_spec.copy()
+    option_spec.update(
+        {
+            "scale": directives.positive_int,
+            "allowcomment": directives.flag,
+            "option_1": directives.unchanged,
+            "option_2": directives.unchanged,
+            "option_3": directives.unchanged,
+            "option_4": directives.unchanged,
+            "option_5": directives.unchanged,
+            "option_6": directives.unchanged,
+            "option_7": directives.unchanged,
+            "option_8": directives.unchanged,
+            "option_9": directives.unchanged,
+            "option_10": directives.unchanged,
+            "results": directives.unchanged,
+        }
+    )
 
     def run(self):
         """
