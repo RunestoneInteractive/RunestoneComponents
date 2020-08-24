@@ -297,7 +297,7 @@ class ParsonsBlock {
             sharedIndent = Math.min(sharedIndent, lines[i].indent);
         }
         var lineDiv = document.createElement("div");
-        $(lineDiv).addClass("lines");
+        $(lineDiv).addClass("parsonlines");
         $(view).append(lineDiv);
         for (i = 0; i < lines.length; i++) {
             var line = lines[i];
