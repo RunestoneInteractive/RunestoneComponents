@@ -183,11 +183,9 @@ class ParsonsTests(RunestoneTestCase):
         # right label block
         rlb = self.driver.find_element_by_id("parsons-2-block-1")
         self.assertEqual(len(rlb.find_elements_by_class_name("labels")), 1)  # has label
-        self.assertEqual(
-            len(rlb.find_elements_by_class_name("parsonlines")), 1
-        )  # has lines
+        self.assertEqual(len(rlb.find_elements_by_class_name("lines")), 1)  # has lines
         children = rlb.find_elements_by_xpath("*")
-        self.assertTrue("parsonlines" in children[0].get_attribute("class").split())
+        self.assertTrue("lines" in children[0].get_attribute("class").split())
         self.assertTrue(
             "labels" in children[1].get_attribute("class").split()
         )  # label on right
@@ -195,11 +193,9 @@ class ParsonsTests(RunestoneTestCase):
         # left label block
         llb = self.driver.find_element_by_id("parsons-3-block-1")
         self.assertEqual(len(llb.find_elements_by_class_name("labels")), 1)  # has label
-        self.assertEqual(
-            len(llb.find_elements_by_class_name("parsonlines")), 1
-        )  # has lines
+        self.assertEqual(len(llb.find_elements_by_class_name("lines")), 1)  # has lines
         children = llb.find_elements_by_xpath("*")
-        self.assertTrue("parsonlines" in children[1].get_attribute("class").split())
+        self.assertTrue("lines" in children[1].get_attribute("class").split())
         self.assertTrue(
             "labels" in children[0].get_attribute("class").split()
         )  # label on left
@@ -207,9 +203,7 @@ class ParsonsTests(RunestoneTestCase):
         # no label block
         nlb = self.driver.find_element_by_id("parsons-4-block-1")
         self.assertEqual(len(nlb.find_elements_by_class_name("labels")), 0)  # no label
-        self.assertEqual(
-            len(nlb.find_elements_by_class_name("parsonlines")), 1
-        )  # has lines
+        self.assertEqual(len(nlb.find_elements_by_class_name("lines")), 1)  # has lines
 
     def test_indentation(self):
         self.driver.get(self.host + "/index.html")

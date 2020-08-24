@@ -314,7 +314,7 @@
     vertical-align: top;
 }
 
-.parsonlines {
+. runestone .lines {
     display: inline-block;
     align-self: left;
 }
