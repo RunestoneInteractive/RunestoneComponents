@@ -303,6 +303,9 @@ export default class LiveCode extends ActiveCode {
                         rdiv.appendChild(parsedOutput.pctString);
                     }
                     if (this.suffix) {
+                        if (parsedOutput.pct === undefined) {
+                            parsedOutput.pct = parsedOutput.passed = parsedOutput.failed = 0;
+                        }
                         this.logBookEvent({
                             event: "unittest",
                             act: `percent:${parsedOutput.pct}:passed:${parsedOutput.passed}:failed:${parsedOutput.failed}`,
