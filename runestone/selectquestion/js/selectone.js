@@ -32,6 +32,7 @@ export default class SelectOne extends RunestoneBase {
         this.proficiency = $(opts.orig).data("proficiency");
         this.minDifficulty = $(opts.orig).data("minDifficulty");
         this.maxDifficulty = $(opts.orig).data("maxDifficulty");
+        this.points = $(opts.orig).data("points");
         this.selector_id = $(opts.orig).first().attr("id");
         opts.orig.id = this.selector_id;
     }
@@ -56,6 +57,9 @@ export default class SelectOne extends RunestoneBase {
         if (this.maxDifficulty) {
             data.maxDifficulty = this.maxDifficulty;
         }
+        if (this.points) {
+            data.points = this.points;
+        }
         let opts = this.origOpts;
         let selectorId = this.selector_id;
         let myPromise = new Promise(
@@ -71,6 +75,7 @@ export default class SelectOne extends RunestoneBase {
                             res = createTimedComponent(htmlsrc, {
                                 timed: true,
                                 selector_id: selectorId,
+                                useRunestoneServices: true,
                             });
                             // replace the entry in the timed assessment's list of components
                             // with the component created by createTimedComponent
@@ -92,6 +97,7 @@ export default class SelectOne extends RunestoneBase {
                                 selectorId,
                                 {
                                     selector_id: selectorId,
+                                    useRunestoneServices: true,
                                 }
                             );
                         }

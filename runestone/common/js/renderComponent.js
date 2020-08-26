@@ -24,7 +24,7 @@ export function renderRunestoneComponent(componentSrc, whereDiv, moreOpts) {
     opt.orig = jQuery(`#${whereDiv} [data-component]`)[0];
     if (opt.orig) {
         opt.lang = $(opt.orig).data("lang");
-        opt.useRunestoneServices = false;
+        opt.useRunestoneServices = true;
         opt.graderactive = false;
         opt.python3 = true;
         if (typeof moreOpts !== "undefined") {
