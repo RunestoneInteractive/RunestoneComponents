@@ -317,21 +317,41 @@ def addQuestionToDB(self):
         prim_comps = []
         supp_comps = []
         if "prim_comp" in self.options:
-            prim_comps = [x.strip() for x in self.options["prim_comp"].split(",")]
+            prim_comps = [
+                x.strip() for x in self.options["prim_comp"].split(",") if x != ""
+            ]
         if "supp_comp" in self.options:
-            supp_comps = [x.strip() for x in self.options["supp_comp"].split(",")]
+            supp_comps = [
+                x.strip() for x in self.options["supp_comp"].split(",") if x != ""
+            ]
 
         if question_id:
             for comp in prim_comps:
-                ins = competency.insert().values(
-                    competency=comp, question=question_id, is_primary="T",
+                sel = select([competency]).where(
+                    and_(
+                        competency.c.competency == comp,
+                        competency.c.question == question_id,
+                    )
                 )
-                sess.execute(ins)
+                res = sess.execute(sel).first()
+                if not res:
+                    ins = competency.insert().values(
+                        competency=comp, question=question_id, is_primary="T",
+                    )
+                    sess.execute(ins)
             for comp in supp_comps:
-                ins = competency.insert().values(
-                    competency=comp, question=question_id, is_primary="F",
+                sel = select([competency]).where(
+                    and_(
+                        competency.c.competency == comp,
+                        competency.c.question == question_id,
+                    )
                 )
-                sess.execute(ins)
+                res = sess.execute(sel).first()
+                if not res:
+                    ins = competency.insert().values(
+                        competency=comp, question=question_id, is_primary="F",
+                    )
+                    sess.execute(ins)
 
 
 def getQuestionID(base_course, name):
