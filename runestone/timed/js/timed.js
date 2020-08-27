@@ -188,7 +188,6 @@ export default class Timed extends RunestoneBase {
         });
         this.startBtn = document.createElement("button");
         this.pauseBtn = document.createElement("button");
-        this.resetBtn = document.createElement("button");
         $(this.startBtn).attr({
             class: "btn btn-success",
             id: "start",
@@ -219,25 +218,8 @@ export default class Timed extends RunestoneBase {
             }.bind(this),
             false
         );
-        $(this.resetBtn).attr({
-            class: "btn btn-default",
-            id: "reset",
-            disabled: "true",
-            tabindex: "1",
-            role: "button",
-        });
-        this.resetBtn.textContent = "Reset";
-        this.resetBtn.addEventListener(
-            "click",
-            function () {
-                this.checkResetability();
-            }.bind(this),
-            false
-        );
-        $(this.resetBtn).hide();
         this.controlDiv.appendChild(this.startBtn);
         this.controlDiv.appendChild(this.pauseBtn);
-        this.controlDiv.appendChild(this.resetBtn);
         this.assessDiv.appendChild(this.wrapperDiv);
         this.assessDiv.appendChild(this.controlDiv);
     }
@@ -644,59 +626,6 @@ export default class Timed extends RunestoneBase {
             }
         }
     }
-    checkResetability() {
-        /* Reset is only available if there is no record of a completed exam and the
-           localStorage does not reflect a partially completed exam */
-        let sendInfo = {
-            div_id: this.divid,
-            course: eBookConfig.course,
-        };
-        $(this.resetBtn).attr({
-            disabled: true,
-        });
-        console.log(sendInfo);
-        jQuery.getJSON(
-            eBookConfig.ajaxURL + "checkTimedReset",
-            sendInfo,
-            this.resetExam.bind(this)
-        );
-    }
-    resetExam(result, status, ignore) {
-        console.log(result);
-        if (result.canReset === true) {
-            if (
-                confirm(
-                    "Only reset the exam if you experienced techinical difficulties. Your instructor will be notified of this reset."
-                )
-            ) {
-                this.logBookEvent({
-                    event: "timedExam",
-                    act: "reset",
-                    div_id: this.divid,
-                    course: eBookConfig.course,
-                    correct: this.score,
-                    incorrect: this.incorrect,
-                    skipped: this.skipped,
-                    time: this.timeTaken,
-                    reset: true,
-                });
-                localStorage.clear(); // Clear records of exam from localStorage
-                /* Prevent using server's record of the reset as the exam results when the page reloads */
-                localStorage.setItem(
-                    this.localStorageKey(),
-                    JSON.stringify({
-                        answer: [-1],
-                        timestamp: new Date(),
-                    })
-                );
-                location.reload();
-            }
-        } else {
-            alert(
-                "This exam does not qualify to be reset. Contact your instructor with any questions."
-            );
-        }
-    }
 
     showTime() {
         if (this.showTimer) {
@@ -875,7 +804,7 @@ export default class Timed extends RunestoneBase {
             } else if (correct == "F") {
                 this.incorrect++;
                 this.incorrectStr = this.incorrectStr + (i + 1) + ", ";
-            } else if (correct === null) {
+            } else if (correct === null || correct === "I") {
                 this.skipped++;
                 this.skippedStr = this.skippedStr + (i + 1) + ", ";
             } else {
@@ -1048,10 +977,6 @@ export default class Timed extends RunestoneBase {
         }
         if (this.taken) {
             if (this.skipped === this.renderedQuestionArray.length) {
-                $(this.resetBtn).show();
-                $(this.resetBtn).attr({
-                    disabled: false,
-                });
                 this.showFeedback = false;
             }
             this.handlePrevAssessment();
