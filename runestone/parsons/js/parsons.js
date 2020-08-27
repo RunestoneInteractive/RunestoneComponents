@@ -1672,7 +1672,7 @@ export default class Parsons extends RunestoneBase {
     //   correct: The answer given matches the solution
     //   incorrect*: The answer is wrong for various reasons
     logAnswer(answer) {
-        if (!this.useRunestoneServices) {
+        if (eBookConfig.logLevel == 0) {
             return this;
         }
         var event = {
