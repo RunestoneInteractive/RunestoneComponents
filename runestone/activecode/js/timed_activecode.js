@@ -51,6 +51,8 @@ var TimedActiveCodeMixin = {
     },
 
     checkCorrectTimed: function () {
+        // pct_correct is set by the unittest/gui.py module in skulpt.
+        // it relies on finding this object in the edList
         if (this.pct_correct) {
             if (this.pct_correct >= 100.0) {
                 return "T";
@@ -68,11 +70,12 @@ var TimedActiveCodeMixin = {
 
     processTimedSubmission: function (logFlag) {
         $(this.runButton).hide();
+        $(this.runButton).click();
         $(`#${this.divid}_unit_results`).show();
         $(this.codeDiv).addClass("ac-disabled");
     },
 
-    reinitializeListeners: function () {
+    reinitializeListeners: function (taken) {
         // re-attach the run button listener
         $(this.runButton).click(this.runProg.bind(this));
         $(this.codeDiv).show();
@@ -87,6 +90,9 @@ var TimedActiveCodeMixin = {
                 slide: this.slideit.bind(this),
                 change: this.slideit.bind(this),
             });
+        }
+        if (taken) {
+            $(`#${this.divid}_unit_results`).show();
         }
     },
 };

@@ -560,7 +560,7 @@ export default class Timed extends RunestoneBase {
         // If the timed component has listeners, those might need to be reinitialized
         // This flag will only be set in the elements that need it--it will be undefined in the others and thus evaluate to false
         if (currentQuestion.needsReinitialization) {
-            currentQuestion.reinitializeListeners();
+            currentQuestion.reinitializeListeners(this.taken);
         }
     }
 

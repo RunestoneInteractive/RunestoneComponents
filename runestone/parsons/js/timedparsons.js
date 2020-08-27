@@ -11,6 +11,8 @@ export default class TimedParsons extends Parsons {
         }
         this.grader.showfeedback = this.showfeedback;
         this.hideFeedback();
+        $(this.checkButton).hide();
+        $(this.helpButton).hide();
     }
     checkCorrectTimed() {
         return this.correct ? "T" : "F";
@@ -22,6 +24,7 @@ export default class TimedParsons extends Parsons {
         if (logFlag) {
             this.setLocalStorage();
         }
+        this.checkMe();
         this.correct = this.grader.grade() == "correct";
         this.disable();
     }
