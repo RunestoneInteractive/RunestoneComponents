@@ -53,7 +53,7 @@ from runestone.common.runestonedirective import (
 
 TEMPLATE = """
 <div class="runestone alert alert-warning">
-<div data-component="selectquestion" id={component_id} {selector} {points} {proficiency} {min_difficulty} {max_difficulty}>
+<div data-component="selectquestion" id={component_id} {selector} {points} {proficiency} {min_difficulty} {max_difficulty} {autogradable} {not_seen_ever}>
     <p>Loading ...</p>
 </div>
 </div>
@@ -92,6 +92,8 @@ class SelectQuestion(RunestoneIdDirective):
             "basecourse": directives.flag,
             "min_difficulty": directives.unchanged,
             "max_difficulty": directives.unchanged,
+            "autogradable": directives.flag,
+            "not_seen_ever": directives.flag,
         }
     )
 
@@ -150,6 +152,16 @@ class SelectQuestion(RunestoneIdDirective):
             ] = f"data-maxDifficulty={self.options['max_difficulty']}"
         else:
             self.options["max_difficulty"] = ""
+
+        if "autogradable" in self.options:
+            self.options["autogradable"] = "data-autogradable=true"
+        else:
+            self.options["autogradable"] = ""
+
+        if "not_seen_ever" in self.options:
+            self.options["not_seen_ever"] = "data-not_seen_ever=true"
+        else:
+            self.options["not_seen_ever"] = ""
 
         maybeAddToAssignment(self)
 

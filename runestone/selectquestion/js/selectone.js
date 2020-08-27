@@ -33,6 +33,8 @@ export default class SelectOne extends RunestoneBase {
         this.minDifficulty = $(opts.orig).data("minDifficulty");
         this.maxDifficulty = $(opts.orig).data("maxDifficulty");
         this.points = $(opts.orig).data("points");
+        this.autogradable = $(opts.orig).data("autogradable");
+        this.not_seen_ever = $(opts.orig).data("not_seen_ever");
         this.selector_id = $(opts.orig).first().attr("id");
         opts.orig.id = this.selector_id;
     }
@@ -59,6 +61,12 @@ export default class SelectOne extends RunestoneBase {
         }
         if (this.points) {
             data.points = this.points;
+        }
+        if (this.autogradable) {
+            data.autogradable = this.autogradable;
+        }
+        if (this.not_seen_ever) {
+            data.not_seen_ever = this.not_seen_ever;
         }
         let opts = this.origOpts;
         let selectorId = this.selector_id;
