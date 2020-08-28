@@ -88,6 +88,11 @@ def visit_timed_node(self, node):
     else:
         node.timed_options["fullwidth"] = ""
 
+    if "nopause" in node.timed_options:
+        node.timed_options["nopause"] = "data-no-pause"
+    else:
+        node.timed_options["nopause"] = ""
+
     res = TEMPLATE_START % node.timed_options
     self.body.append(res)
 
@@ -101,7 +106,7 @@ def depart_timed_node(self, node):
 
 # Templates to be formatted by node options
 TEMPLATE_START = """
-    <ul data-component="timedAssessment" %(timelimit)s id="%(divid)s" %(noresult)s %(nofeedback)s %(timedfeedback)s %(notimer)s %(fullwidth)s>
+    <ul data-component="timedAssessment" %(timelimit)s id="%(divid)s" %(noresult)s %(nofeedback)s %(timedfeedback)s %(notimer)s %(fullwidth)s %(nopause)s>
     """
 
 TEMPLATE_END = """</ul>
@@ -115,6 +120,7 @@ class TimedDirective(RunestoneIdDirective):
     :noresult: Boolean, doesn't display score
     :timedfeedback: Boolean, Show feedback even in timed mode
     :notimer: Boolean, doesn't show timer
+    :nopause: Boolean do not show a pause button
     :fullwidth: Boolean, allows the items in the timed assessment to take the full width of the screen...
 
     """
@@ -130,6 +136,7 @@ class TimedDirective(RunestoneIdDirective):
         "nofeedback": directives.flag,  # backward compatibility
         "fullwidth": directives.flag,
         "notimer": directives.flag,
+        "nopause": directives.flag,
     }
 
     def run(self):

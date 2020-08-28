@@ -58,6 +58,11 @@ export default class Timed extends RunestoneBase {
         if ($(this.origElem).is("[data-fullwidth]")) {
             this.fullwidth = true;
         }
+        this.nopause = false;
+        if ($(this.origElem).is("[data-no-pause]")) {
+            this.nopause = true;
+        }
+
         this.running = 0;
         this.paused = 0;
         this.done = 0;
@@ -219,7 +224,9 @@ export default class Timed extends RunestoneBase {
             false
         );
         this.controlDiv.appendChild(this.startBtn);
-        this.controlDiv.appendChild(this.pauseBtn);
+        if (!this.nopause) {
+            this.controlDiv.appendChild(this.pauseBtn);
+        }
         this.assessDiv.appendChild(this.wrapperDiv);
         this.assessDiv.appendChild(this.controlDiv);
     }
