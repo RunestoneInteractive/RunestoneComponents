@@ -73,6 +73,11 @@ def visit_timed_node(self, node):
     else:
         node.timed_options["timedfeedback"] = ""
 
+    if "nofeedback" in node.timed_options:
+        node.timed_options["nofeedback"] = "data-no-feedback"
+    else:
+        node.timed_options["nofeedback"] = ""
+
     if "notimer" in node.timed_options:
         node.timed_options["notimer"] = "data-no-timer"
     else:
@@ -96,7 +101,7 @@ def depart_timed_node(self, node):
 
 # Templates to be formatted by node options
 TEMPLATE_START = """
-    <ul data-component="timedAssessment" %(timelimit)s id="%(divid)s" %(noresult)s %(timedfeedback)s %(notimer)s %(fullwidth)s>
+    <ul data-component="timedAssessment" %(timelimit)s id="%(divid)s" %(noresult)s %(nofeedback)s %(timedfeedback)s %(notimer)s %(fullwidth)s>
     """
 
 TEMPLATE_END = """</ul>
