@@ -76,6 +76,13 @@ export default class SelectOne extends RunestoneBase {
                     "/runestone/ajax/get_question_source",
                     data,
                     function (htmlsrc) {
+                        if (htmlsrc.indexOf("No preview") >= 0) {
+                            alert(
+                                `Error: Not able to find a question for ${selectorId} based on the criteria`
+                            );
+                            resolve("done");
+                            return;
+                        }
                         let res;
                         if (opts.timed) {
                             // timed components are not rendered immediately, only when the student
