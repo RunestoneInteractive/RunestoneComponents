@@ -166,5 +166,6 @@ class SelectQuestion(RunestoneIdDirective):
         maybeAddToAssignment(self)
 
         res = TEMPLATE.format(**self.options)
+        addHTMLToDB(self.options["divid"], self.basecourse, res)
 
         return [nodes.raw(self.block_text, res, format="html")]
