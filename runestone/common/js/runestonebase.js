@@ -25,6 +25,9 @@ export default class RunestoneBase {
             this.sid = opts.sid;
             this.graderactive = opts.graderactive;
             this.showfeedback = true;
+            if (opts.timed) {
+                this.isTimed = true;
+            }
             if (opts.enforceDeadline) {
                 this.deadline = opts.deadline;
             }
@@ -229,13 +232,15 @@ export default class RunestoneBase {
     }
     addCaption(elType) {
         //someElement.parentNode.insertBefore(newElement, someElement.nextSibling);
-        var capDiv = document.createElement("p");
-        $(capDiv).html(this.caption + " (" + this.divid + ")");
-        $(capDiv).addClass(`${elType}_caption`);
-        $(capDiv).addClass(`${elType}_caption_text`);
-        this.capDiv = capDiv;
-        //this.outerDiv.parentNode.insertBefore(capDiv, this.outerDiv.nextSibling);
-        this.containerDiv.appendChild(capDiv);
+        if (!this.isTimed) {
+            var capDiv = document.createElement("p");
+            $(capDiv).html(this.caption + " (" + this.divid + ")");
+            $(capDiv).addClass(`${elType}_caption`);
+            $(capDiv).addClass(`${elType}_caption_text`);
+            this.capDiv = capDiv;
+            //this.outerDiv.parentNode.insertBefore(capDiv, this.outerDiv.nextSibling);
+            this.containerDiv.appendChild(capDiv);
+        }
     }
 }
 
