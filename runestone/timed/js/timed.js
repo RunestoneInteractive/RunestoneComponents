@@ -763,22 +763,25 @@ export default class Timed extends RunestoneBase {
         $(this.pauseBtn).attr("disabled", true);
         this.finishButton.disabled = true;
         $(window).off("beforeunload");
-        jQuery.ajax({
-            url: eBookConfig.app + "/assignments/student_autograde",
-            type: "POST",
-            dataType: "JSON",
-            data: {
-                assignment_id: this.divid,
-                is_timed: true,
-            },
-            success: function (retdata) {
-                if (retdata.success == false) {
-                    alert(retdata.message);
-                } else {
-                    alert("Autograded");
-                }
-            },
-        });
+        //
+        setTimeout(function () {
+            jQuery.ajax({
+                url: eBookConfig.app + "/assignments/student_autograde",
+                type: "POST",
+                dataType: "JSON",
+                data: {
+                    assignment_id: this.divid,
+                    is_timed: true,
+                },
+                success: function (retdata) {
+                    if (retdata.success == false) {
+                        console.log(retdata.message);
+                    } else {
+                        console.log("Autgrader completed");
+                    }
+                },
+            });
+        }, 2000);
     }
 
     submitTimedProblems(logFlag) {
@@ -790,6 +793,7 @@ export default class Timed extends RunestoneBase {
             this.hideTimedFeedback();
         }
     }
+
     hideTimedFeedback() {
         for (var i = 0; i < this.renderedQuestionArray.length; i++) {
             var currentQuestion = this.renderedQuestionArray[i].question;
