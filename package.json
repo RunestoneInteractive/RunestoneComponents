@@ -8,7 +8,8 @@
         "build": "webpack --env.MODE=development",
         "watch": "webpack --env.MODE=development --watch",
         "start": "webpack-dev-server --env.MODE=development --open",
-        "serve": "cd dist; python -m http.server 8080; cd .."
+        "serve": "cd dist; python -m http.server 8080; cd ..",
+        "dist": "webpack --env.MODE=production"
     },
     "keywords": [],
     "author": "",
