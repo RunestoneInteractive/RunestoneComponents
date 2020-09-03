@@ -336,7 +336,10 @@ def addQuestionToDB(self):
                 res = sess.execute(sel).first()
                 if not res:
                     ins = competency.insert().values(
-                        competency=comp, question=question_id, is_primary="T",
+                        competency=comp,
+                        question=question_id,
+                        is_primary="T",
+                        question_name=id_,
                     )
                     sess.execute(ins)
             for comp in supp_comps:
@@ -349,7 +352,10 @@ def addQuestionToDB(self):
                 res = sess.execute(sel).first()
                 if not res:
                     ins = competency.insert().values(
-                        competency=comp, question=question_id, is_primary="F",
+                        competency=comp,
+                        question=question_id,
+                        is_primary="F",
+                        question_name=id_,
                     )
                     sess.execute(ins)
 
