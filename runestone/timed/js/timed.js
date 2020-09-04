@@ -764,13 +764,14 @@ export default class Timed extends RunestoneBase {
         this.finishButton.disabled = true;
         $(window).off("beforeunload");
         //
+        let assignment_id = this.divid;
         setTimeout(function () {
             jQuery.ajax({
                 url: eBookConfig.app + "/assignments/student_autograde",
                 type: "POST",
                 dataType: "JSON",
                 data: {
-                    assignment_id: this.divid,
+                    assignment_id: assignment_id,
                     is_timed: true,
                 },
                 success: function (retdata) {

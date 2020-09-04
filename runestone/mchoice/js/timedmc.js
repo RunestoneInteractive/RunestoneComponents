@@ -3,6 +3,7 @@ import MultipleChoice from "./mchoice.js";
 export default class TimedMC extends MultipleChoice {
     constructor(opts) {
         super(opts);
+        $(this.containerDiv).addClass("alert alert-warning runestone");
         this.renderTimedIcon(this.MCContainer);
         this.hideButtons(); // Don't show per-question buttons in a timed assessment
     }

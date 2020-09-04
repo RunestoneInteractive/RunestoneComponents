@@ -5,6 +5,7 @@ import DragNDrop from "./dragndrop.js";
 export default class TimedDragNDrop extends DragNDrop {
     constructor(opts) {
         super(opts);
+        this.finishSettingUp();
         this.renderTimedIcon(this.containerDiv);
         this.hideButtons();
     }
