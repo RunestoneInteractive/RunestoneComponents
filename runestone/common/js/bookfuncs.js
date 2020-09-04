@@ -125,7 +125,8 @@ function timedRefresh() {
             location.href =
                 eBookConfig.app +
                 "/default/user/login?_next=" +
-                location.pathname;
+                location.pathname +
+                location.search;
         }
     });
     $.idleTimer(timeoutPeriod);
