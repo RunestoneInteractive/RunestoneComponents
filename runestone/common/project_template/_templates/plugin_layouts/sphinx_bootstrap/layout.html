@@ -307,6 +307,22 @@
 <div class="container" id="continue-reading"></div>
 
 <div class="container" id="main-content" role="main">
+<!-- Ad Serving for Runestone Campaign -->
+{% if dynamic_pages == 'True' %}
+    {% raw %}
+        {{ if settings.num_banners > 0 and settings.show_rs_banner: }}
+         <div style="width: 100%;">
+            <a href="/runestone/default/donate?banner={{=banner_num}}">
+            <img class="runestone-banner"
+                 src="/runestone/static/images/RunestoneBanner{{=banner_num}}.png"
+                 alt="Please Support Runestone"
+                 style="display: block; width: 728px; margin-left: auto; margin-right: auto; margin-top: 10px;">
+            </a>
+         </div>
+        {{ pass }}
+    {% endraw %}
+{% endif %}
+
   {% block body %}
   {% endblock %}
   <div id=scprogresscontainer>
