@@ -108,7 +108,7 @@ Developing and Hacking
 
 So, you would like to help out with developing the Runestone Components.  Great We welcome all the help we can get.  There is plenty to do no matter what your experience level.  There are a couple of prerequisites.
 
-1. You will need a version of Python, I recommend at least 3.7 or higher.
+1. You will need a version of Python, I currently develop on 3.8 or higher, but test on 3.7 and later.
 2. You will need nodejs and npm as well since there is a LOT of Javascript code in the components.
 
 To get everything set up do the following
