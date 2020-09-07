@@ -36,6 +36,7 @@ export default class SelectOne extends RunestoneBase {
         this.autogradable = $(opts.orig).data("autogradable");
         this.not_seen_ever = $(opts.orig).data("not_seen_ever");
         this.selector_id = $(opts.orig).first().attr("id");
+        this.primaryOnly = $(opts.orig).data("primary");
         opts.orig.id = this.selector_id;
     }
     /**
@@ -67,6 +68,9 @@ export default class SelectOne extends RunestoneBase {
         }
         if (this.not_seen_ever) {
             data.not_seen_ever = this.not_seen_ever;
+        }
+        if (this.primaryOnly) {
+            data.primary = this.primaryOnly;
         }
         let opts = this.origOpts;
         let selectorId = this.selector_id;
