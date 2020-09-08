@@ -492,7 +492,7 @@ def maybeAddToAssignment(self):
 def getCourseID(coursename):
     sel = select([courses]).where(courses.c.course_name == coursename)
     res = sess.execute(sel).first()
-    return res["id"]
+    return res["id"] if res else None
 
 
 # Add an Assignment
