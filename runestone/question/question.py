@@ -16,7 +16,7 @@
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneIdNode
 
 __author__ = "bmiller"
 
@@ -27,10 +27,10 @@ def setup(app):
     app.add_node(QuestionNode, html=(visit_question_node, depart_question_node))
 
 
-class QuestionNode(nodes.General, nodes.Element, RunestoneNode):
+class QuestionNode(nodes.General, nodes.Element, RunestoneIdNode):
     def __init__(self, content, **kwargs):
         super(QuestionNode, self).__init__(**kwargs)
-        self.question_options = content
+        self.runestone_options = content
 
 
 def visit_question_node(self, node):
@@ -39,28 +39,28 @@ def visit_question_node(self, node):
     if not hasattr(env, "questioncounter"):
         env.questioncounter = 0
 
-    if "number" in node.question_options:
-        env.questioncounter = int(node.question_options["number"])
+    if "number" in node.runestone_options:
+        env.questioncounter = int(node.runestone_options["number"])
     else:
         env.questioncounter += 1
 
-    node.question_options["number"] = "start={}".format(env.questioncounter)
+    node.runestone_options["number"] = "start={}".format(env.questioncounter)
 
-    res = TEMPLATE_START % node.question_options
+    res = TEMPLATE_START % node.runestone_options
     self.body.append(res)
 
 
 def depart_question_node(self, node):
     # Set options and format templates accordingly
-    res = TEMPLATE_END % node.question_options
-    delimiter = "_start__{}_".format(node.question_options["divid"])
+    res = TEMPLATE_END % node.runestone_options
+    delimiter = "_start__{}_".format(node.runestone_options["divid"])
 
     self.body.append(res)
 
 
 # Templates to be formatted by node options
 TEMPLATE_START = """
-    <div data-component="question" class="full-width container question" id="%(divid)s" >
+    <div data-component="question" class="full-width container question" data-question_label="%(question_label)s" id="%(divid)s" >
     <ol %(number)s class=arabic><li class="alert alert-warning">
 
     """

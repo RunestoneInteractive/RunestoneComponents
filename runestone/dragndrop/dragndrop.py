@@ -26,7 +26,7 @@ from runestone.server.componentdb import (
 )
 from runestone.common.runestonedirective import (
     RunestoneIdDirective,
-    RunestoneNode,
+    RunestoneIdNode,
     add_i18n_js,
 )
 
@@ -41,7 +41,7 @@ def setup(app):
 
 TEMPLATE_START = """
 <div class="%(divclass)s">
-<ul data-component="dragndrop" id="%(divid)s" %(optional)s>
+<ul data-component="dragndrop" data-question_label="%(question_label)s" id="%(divid)s" %(optional)s>
     <span data-component="question">%(qnumber)s: %(question)s</span>
 	%(feedback)s
 """
@@ -53,7 +53,7 @@ TEMPLATE_OPTION = """
 TEMPLATE_END = """</ul></div>"""
 
 
-class DragNDropNode(nodes.General, nodes.Element, RunestoneNode):
+class DragNDropNode(nodes.General, nodes.Element, RunestoneIdNode):
     def __init__(self, content, **kwargs):
         """
         Arguments:
@@ -61,7 +61,7 @@ class DragNDropNode(nodes.General, nodes.Element, RunestoneNode):
         - `content`:
         """
         super(DragNDropNode, self).__init__(**kwargs)
-        self.dnd_options = content
+        self.runestone_options = content
 
 
 # self for these functions is an instance of the writer class.  For example
@@ -70,17 +70,17 @@ class DragNDropNode(nodes.General, nodes.Element, RunestoneNode):
 def visit_dnd_node(self, node):
     res = TEMPLATE_START
 
-    node.delimiter = "_start__{}_".format(node.dnd_options["divid"])
+    node.delimiter = "_start__{}_".format(node.runestone_options["divid"])
     self.body.append(node.delimiter)
 
-    if "feedback" in node.dnd_options:
-        node.dnd_options["feedback"] = (
-            "<span data-component=feedback>" + node.dnd_options["feedback"] + "</span>"
+    if "feedback" in node.runestone_options:
+        node.runestone_options["feedback"] = (
+            "<span data-component=feedback>" + node.runestone_options["feedback"] + "</span>"
         )
     else:
-        node.dnd_options["feedback"] = ""
+        node.runestone_options["feedback"] = ""
 
-    res = res % node.dnd_options
+    res = res % node.runestone_options
 
     self.body.append(res)
 
@@ -88,22 +88,22 @@ def visit_dnd_node(self, node):
 def depart_dnd_node(self, node):
     res = ""
     # Add all of the possible answers
-    okeys = list(node.dnd_options.keys())
+    okeys = list(node.runestone_options.keys())
     okeys.sort()
     for k in okeys:
         if "match" in k:
             x, label = k.split("_")
-            node.dnd_options["dnd_label"] = label
-            dragE, dropE = node.dnd_options[k].split("|||")
-            node.dnd_options["dragText"] = dragE
-            node.dnd_options["dropText"] = dropE
-            res += node.template_option % node.dnd_options
-    res += node.template_end % node.dnd_options
+            node.runestone_options["dnd_label"] = label
+            dragE, dropE = node.runestone_options[k].split("|||")
+            node.runestone_options["dragText"] = dragE
+            node.runestone_options["dropText"] = dropE
+            res += node.template_option % node.runestone_options
+    res += node.template_end % node.runestone_options
     self.body.append(res)
 
     addHTMLToDB(
-        node.dnd_options["divid"],
-        node.dnd_options["basecourse"],
+        node.runestone_options["divid"],
+        node.runestone_options["basecourse"],
         "".join(self.body[self.body.index(node.delimiter) + 1 :]),
     )
 

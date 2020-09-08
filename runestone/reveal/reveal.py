@@ -17,7 +17,7 @@ __author__ = "isaiahmayerchak"
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneIdNode
 
 # add directives/javascript/css
 def setup(app):
@@ -26,39 +26,39 @@ def setup(app):
     app.add_node(RevealNode, html=(visit_reveal_node, depart_reveal_node))
 
 
-class RevealNode(nodes.General, nodes.Element, RunestoneNode):
+class RevealNode(nodes.General, nodes.Element, RunestoneIdNode):
     def __init__(self, content, **kwargs):
         super(RevealNode, self).__init__(**kwargs)
-        self.reveal_options = content
+        self.runestone_options = content
 
 
 def visit_reveal_node(self, node):
     # Set options and format templates accordingly
 
-    if "modal" in node.reveal_options:
-        node.reveal_options["modal"] = "data-modal"
+    if "modal" in node.runestone_options:
+        node.runestone_options["modal"] = "data-modal"
     else:
-        node.reveal_options["modal"] = ""
+        node.runestone_options["modal"] = ""
 
-    if "modaltitle" in node.reveal_options:
-        temp = node.reveal_options["modaltitle"]
-        node.reveal_options["modaltitle"] = """data-title=""" + '"' + temp + '"'
+    if "modaltitle" in node.runestone_options:
+        temp = node.runestone_options["modaltitle"]
+        node.runestone_options["modaltitle"] = """data-title=""" + '"' + temp + '"'
     else:
-        node.reveal_options["modaltitle"] = ""
+        node.runestone_options["modaltitle"] = ""
 
-    if node.reveal_options["instructoronly"] and node.reveal_options["is_dynamic"]:
+    if node.runestone_options["instructoronly"] and node.runestone_options["is_dynamic"]:
         res = DYNAMIC_PREFIX
     else:
         res = ""
 
-    res += TEMPLATE_START % node.reveal_options
+    res += TEMPLATE_START % node.runestone_options
     self.body.append(res)
 
 
 def depart_reveal_node(self, node):
     # Set options and format templates accordingly
-    res = TEMPLATE_END % node.reveal_options
-    if node.reveal_options["instructoronly"] and node.reveal_options["is_dynamic"]:
+    res = TEMPLATE_END % node.runestone_options
+    if node.runestone_options["instructoronly"] and node.runestone_options["is_dynamic"]:
         res += DYNAMIC_SUFFIX
 
     self.body.append(res)
@@ -69,7 +69,7 @@ DYNAMIC_PREFIX = """
 {{ if is_instructor: }}
 """
 TEMPLATE_START = """
-    <div data-component="reveal" id="%(divid)s" %(modal)s %(modaltitle)s %(showtitle)s %(hidetitle)s %(instructoronly)s>
+    <div data-component="reveal" data-question_label="%(question_label)s" id="%(divid)s" %(modal)s %(modaltitle)s %(showtitle)s %(hidetitle)s %(instructoronly)s>
     """
 TEMPLATE_END = """
     </div>

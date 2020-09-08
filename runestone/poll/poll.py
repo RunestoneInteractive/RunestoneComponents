@@ -18,7 +18,7 @@ __author__ = "isaiahmayerchak"
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneIdNode
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 
 
@@ -31,7 +31,7 @@ def setup(app):
 
 TEMPLATE_START = """
 <div class="runestone">
-<ul data-component="poll" id=%(divid)s %(comment)s class='%(divclass)s' data-results='%(results)s' %(optional)s>
+<ul data-component="poll" id=%(divid)s %(comment)s class='%(divclass)s' data-results='%(results)s' data-question_label="%(question_label)s" %(optional)s>
 %(question)s
 """
 
@@ -42,7 +42,7 @@ TEMPLATE_OPTION = """
 TEMPLATE_END = """</ul></div>"""
 
 
-class PollNode(nodes.General, nodes.Element, RunestoneNode):
+class PollNode(nodes.General, nodes.Element, RunestoneIdNode):
     def __init__(self, content, **kwargs):
         """
         Arguments:
@@ -50,7 +50,7 @@ class PollNode(nodes.General, nodes.Element, RunestoneNode):
         - `content`:
         """
         super(PollNode, self).__init__(**kwargs)
-        self.poll_content = content
+        self.runestone_options = content
 
 
 # self for these functions is an instance of the writer class.  For example
@@ -58,24 +58,28 @@ class PollNode(nodes.General, nodes.Element, RunestoneNode):
 # The node that is passed as a parameter is an instance of our node class.
 def visit_poll_node(self, node):
     res = TEMPLATE_START
-    res = res % node.poll_content
+    res = res % node.runestone_options
 
-    if node.poll_content["scale"] == "":
-        okeys = list(node.poll_content.keys())
+    if node.runestone_options["scale"] == "":
+        okeys = list(node.runestone_options.keys())
         okeys.sort()
         i = 1
         for k in okeys:
             if "option_" in k:
-                node.poll_content["optiontext"] = f"{i}. " + node.poll_content[k]
+                node.runestone_options["optiontext"] = (
+                    f"{i}. " + node.runestone_options[k]
+                )
                 i += 1
-                res += TEMPLATE_OPTION % node.poll_content
+                res += TEMPLATE_OPTION % node.runestone_options
     else:
-        for i in range(node.poll_content["scale"]):
-            node.poll_content["optiontext"] = i + 1
-            res += TEMPLATE_OPTION % node.poll_content
+        for i in range(node.runestone_options["scale"]):
+            node.runestone_options["optiontext"] = i + 1
+            res += TEMPLATE_OPTION % node.runestone_options
     res += TEMPLATE_END
 
-    addHTMLToDB(node.poll_content["divid"], node.poll_content["basecourse"], res)
+    addHTMLToDB(
+        node.runestone_options["divid"], node.runestone_options["basecourse"], res
+    )
     self.body.append(res)
 
 

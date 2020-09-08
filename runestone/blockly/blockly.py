@@ -18,7 +18,7 @@ __author__ = "bmiller"
 
 import os
 from docutils import nodes
-from runestone.common import RunestoneIdDirective, RunestoneNode
+from runestone.common import RunestoneIdDirective, RunestoneIdNode
 
 
 # try:
@@ -40,7 +40,7 @@ def setup(app):
 
 
 #'
-class BlocklyNode(nodes.General, nodes.Element, RunestoneNode):
+class BlocklyNode(nodes.General, nodes.Element, RunestoneIdNode):
     def __init__(self, content, **kwargs):
         """
 
@@ -49,7 +49,7 @@ class BlocklyNode(nodes.General, nodes.Element, RunestoneNode):
         - `content`:
         """
         super(BlocklyNode, self).__init__(**kwargs)
-        self.ac_components = content
+        self.runestone_options = content
 
 
 START = """
@@ -155,9 +155,9 @@ END = """
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
 def visit_block_node(self, node):
-    res = START % (node.ac_components)
+    res = START % (node.runestone_options)
     res += CTRL_START
-    for ctrl in node.ac_components["controls"]:
+    for ctrl in node.runestone_options["controls"]:
         if ctrl == "variables":
             res += '<category name="Variables" custom="VARIABLE"></category>'
         elif ctrl == "":
@@ -169,11 +169,11 @@ def visit_block_node(self, node):
         else:
             res += '<block type="%s"></block>\n' % (ctrl)
     res += CTRL_END
-    res += END % (node.ac_components)
+    res += END % (node.runestone_options)
     path = os.path.join(
-        node.ac_components["blocklyHomePrefix"],
+        node.runestone_options["blocklyHomePrefix"],
         "_static",
-        node.ac_components["divid"] + ".html",
+        node.runestone_options["divid"] + ".html",
     )
     final = (
         '<iframe class="blk-iframe" seamless src="%s" width="600" '

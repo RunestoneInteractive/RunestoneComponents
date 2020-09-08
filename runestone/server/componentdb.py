@@ -30,10 +30,15 @@ __author__ = "bmiller"
 import os
 from os import environ
 import re
+from sphinx.util import logging
 from sqlalchemy import create_engine, Table, MetaData, select, and_
 from sqlalchemy.orm.session import sessionmaker
 
-from runestone.common.runestonedirective import RunestoneDirective
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneIdNode
+
+
+logger = logging.getLogger(__name__)
+
 
 
 def get_dburl(outer={}):
@@ -229,7 +234,6 @@ def addQuestionToDB(self):
         else:
             topics = "{}/{}".format(self.chapter, self.subchapter)
         #        topics = self.options.get('topics', "{}/{}".format(self.chapter, self.subchapter))
-        qnumber = self.options.get("qnumber", "")
         if "data-optional" in self.options.get("optional", ""):
             optional = "T"
         else:
@@ -272,7 +276,6 @@ def addQuestionToDB(self):
                         practice=practice,
                         topic=topics,
                         from_source=from_source,
-                        qnumber=qnumber,
                         optional=optional,
                         description=et,
                         **meta_opts,
@@ -296,7 +299,6 @@ def addQuestionToDB(self):
                     practice=practice,
                     topic=topics,
                     from_source=from_source,
-                    qnumber=qnumber,
                     optional=optional,
                     description=et,
                     **meta_opts,
@@ -346,6 +348,33 @@ def addQuestionToDB(self):
                     question_name=id_,
                 )
                 sess.execute(ins)
+
+
+def addQNumberToDB(app, node, qnumber):
+    # ``self`` must be a RunestoneIdNode to contain a question number.
+    assert isinstance(node, RunestoneIdNode)
+
+    if not dburl:
+        return
+
+    basecourse = app.env.config.html_context.get(
+        "basecourse"
+    )
+    if not basecourse:
+        logger.error("Cannot update database because basecourse is unknown.", location=node)
+        return
+
+    stmt = (
+        questions.update()
+        .where(and_(
+            questions.c.name == node.runestone_options["divid"],
+            questions.c.base_course == basecourse
+        ))
+        .values(
+            qnumber=qnumber,
+        )
+    )
+    sess.execute(stmt)
 
 
 def getQuestionID(base_course, name):

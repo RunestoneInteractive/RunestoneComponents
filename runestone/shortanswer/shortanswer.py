@@ -24,7 +24,7 @@ from runestone.server.componentdb import (
     addHTMLToDB,
     maybeAddToAssignment,
 )
-from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneIdNode
 
 
 def setup(app):
@@ -38,7 +38,7 @@ def setup(app):
 
 TEXT_START = """
 <div class="runestone">
-<div data-component="shortanswer" class="%(divclass)s" id=%(divid)s %(optional)s %(mathjax)s>
+<div data-component="shortanswer" data-question_label="%(question_label)s" class="%(divclass)s" id=%(divid)s %(optional)s %(mathjax)s>
 """
 
 TEXT_END = """
@@ -47,18 +47,18 @@ TEXT_END = """
 """
 
 
-class JournalNode(nodes.General, nodes.Element, RunestoneNode):
+class JournalNode(nodes.General, nodes.Element, RunestoneIdNode):
     def __init__(self, options, **kwargs):
         super(JournalNode, self).__init__(**kwargs)
-        self.journalnode_components = options
+        self.runestone_options = options
 
 
 def visit_journal_node(self, node):
-    div_id = node.journalnode_components["divid"]
-    components = dict(node.journalnode_components)
+    div_id = node.runestone_options["divid"]
+    components = dict(node.runestone_options)
     components.update({"divid": div_id})
 
-    node.delimiter = "_start__{}_".format(node.journalnode_components["divid"])
+    node.delimiter = "_start__{}_".format(node.runestone_options["divid"])
     self.body.append(node.delimiter)
 
     res = TEXT_START % components
@@ -68,13 +68,13 @@ def visit_journal_node(self, node):
 
 def depart_journal_node(self, node):
 
-    components = dict(node.journalnode_components)
+    components = dict(node.runestone_options)
 
     res = TEXT_END % components
     self.body.append(res)
 
     addHTMLToDB(
-        node.journalnode_components["divid"],
+        node.runestone_options["divid"],
         components["basecourse"],
         "".join(self.body[self.body.index(node.delimiter) + 1 :]),
     )

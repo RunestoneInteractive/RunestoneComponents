@@ -50,6 +50,11 @@ class RunestoneNode(nodes.Node):
     pass
 
 
+# Provide a class which all Runestone ID nodes will inherit from.
+class RunestoneIdNode(RunestoneNode):
+    pass
+
+
 # Notes
 # env = self.state.document.settings.env
 # env.config.html_context['course_id']
@@ -186,8 +191,12 @@ application.Sphinx.add_autoversioned_stylesheet = _add_autoversioned_stylesheet
 
 
 def setup(app):
+    # Avoid a circular import. Ick.
+    from .question_number import _insert_qnum
+
     # See http://www.sphinx-doc.org/en/stable/extdev/appapi.html#event-env-purge-doc.
     app.connect("env-purge-doc", _purge_runestone_data)
+    app.connect("doctree-resolved", _insert_qnum)
     app.add_role("skipreading", SkipReading)
     # See http://www.sphinx-doc.org/en/stable/extdev/appapi.html#sphinx.application.Sphinx.add_config_value.
     app.add_config_value("runestone_server_side_grading", False, "env")
@@ -403,3 +412,12 @@ def SkipReading(
     inliner.document.settings.env.skipreading.add(docname)
 
     return ([], [])
+
+
+# Return the Sphinx environment given a node object.
+def env_from_node(node):
+    # Ascend the node tree until we find a node with a ``document``.
+    node_with_document = node
+    while not node_with_document.document:
+        node_with_document = node_with_document.parent
+    return node_with_document.document.settings.env
