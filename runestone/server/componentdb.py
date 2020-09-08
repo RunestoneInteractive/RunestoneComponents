@@ -326,38 +326,26 @@ def addQuestionToDB(self):
             ]
 
         if question_id:
+            # Remove all competency info for this question,
+            # then update it
+            stmt2 = competency.delete().where(competency.c.question == question_id)
+            sess.execute(stmt2)
             for comp in prim_comps:
-                sel = select([competency]).where(
-                    and_(
-                        competency.c.competency == comp,
-                        competency.c.question == question_id,
-                    )
+                ins = competency.insert().values(
+                    competency=comp,
+                    question=question_id,
+                    is_primary="T",
+                    question_name=id_,
                 )
-                res = sess.execute(sel).first()
-                if not res:
-                    ins = competency.insert().values(
-                        competency=comp,
-                        question=question_id,
-                        is_primary="T",
-                        question_name=id_,
-                    )
-                    sess.execute(ins)
+                sess.execute(ins)
             for comp in supp_comps:
-                sel = select([competency]).where(
-                    and_(
-                        competency.c.competency == comp,
-                        competency.c.question == question_id,
-                    )
+                ins = competency.insert().values(
+                    competency=comp,
+                    question=question_id,
+                    is_primary="F",
+                    question_name=id_,
                 )
-                res = sess.execute(sel).first()
-                if not res:
-                    ins = competency.insert().values(
-                        competency=comp,
-                        question=question_id,
-                        is_primary="F",
-                        question_name=id_,
-                    )
-                    sess.execute(ins)
+                sess.execute(ins)
 
 
 def getQuestionID(base_course, name):
