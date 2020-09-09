@@ -1201,8 +1201,26 @@ export default class Parsons extends RunestoneBase {
         this.containerDiv.id = this.counterId;
         this.parsTextDiv = document.createElement("div");
         $(this.parsTextDiv).addClass("parsons-text");
-        this.parsTextDiv.innerHTML = this.question.innerHTML;
-        this.containerDiv.appendChild(this.parsTextDiv);
+        // Images within Parsons problem description were bumping things and causing display misalignment
+        // This if-else section moves images to beneath the problem description to fix misalignment 
+        // Also added '.parsons .parsons-img{}' to parsons.css - Vincent Qiu (September 2020)
+        if (this.question.innerHTML.includes("<img")) {
+            var imgString = this.question.innerHTML.substring(this.question.innerHTML.indexOf("<img"),this.question.innerHTML.indexOf(">") + 1);
+            var textWithoutImg = this.question.innerHTML.replace(imgString,'');
+            if (imgString.includes('align="left"')) {
+                imgString = imgString.replace('align="left"','');
+            }
+            this.parsTextDiv.innerHTML = textWithoutImg;
+            this.containerDiv.appendChild(this.parsTextDiv);
+            this.parsImgDiv = document.createElement("div");
+            $(this.parsImgDiv).addClass("parsons-img");
+            this.parsImgDiv.innerHTML = imgString;
+            this.containerDiv.appendChild(this.parsImgDiv);
+        }
+        else {
+            this.parsTextDiv.innerHTML = this.question.innerHTML;
+            this.containerDiv.appendChild(this.parsTextDiv);
+        }
         this.keyboardTip = document.createElement("div");
         $(this.keyboardTip).attr("role", "tooltip");
         this.keyboardTip.id = this.counterId + "-tip";
