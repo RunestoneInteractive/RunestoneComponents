@@ -1491,7 +1491,7 @@ export default class Parsons extends RunestoneBase {
                 var maxInnerText;
                 var maxInnerLength = 0;
                 var i;
-                var widthLimit = 500;
+                var widthLimit = 475;
                 var longCount = 0;
                 for (i = 0; i < linesItem[linesIndex].children.length; i++) {
                     pixelsPerIndent = linesItem[linesIndex].children[i].pixelsPerIndent;
@@ -1504,7 +1504,7 @@ export default class Parsons extends RunestoneBase {
                     }
                 }
                 areaWidth = Math.max(areaWidth, maxInnerLength + 40);
-                // Set width limit to 500 and determine how much additional height is needed to accommodate the forced text overflow - Vincent Qiu (September 2020)
+                // Set width limit and determine how much additional height is needed to accommodate the forced text overflow - Vincent Qiu (September 2020)
                 if (areaWidth > widthLimit) {
                     areaWidth = widthLimit;
                     areaHeight += longCount * additionalHeight;
