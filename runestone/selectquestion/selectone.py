@@ -53,7 +53,7 @@ from runestone.common.runestonedirective import (
 
 TEMPLATE = """
 <div class="runestone alert alert-warning">
-<div data-component="selectquestion" id={component_id} {selector} {points} {proficiency} {min_difficulty} {max_difficulty} {autogradable} {not_seen_ever}>
+<div data-component="selectquestion" id={component_id} {selector} {points} {proficiency} {min_difficulty} {max_difficulty} {autogradable} {not_seen_ever} {primary}>
     <p>Loading ...</p>
 </div>
 </div>
@@ -69,6 +69,7 @@ class SelectQuestion(RunestoneIdDirective):
     .. selectquestion:: uniqueid
        :fromid: [id [, id]+ ]
        :proficiency: randomly choose a question that tests a particular proficiency
+       :primary: Only match on primary proficiencies
        :basecourse: restrict question choices to the current base course
        :alwaysrandom: choose a new random question every time if possible
        :points: number of points for this question
@@ -94,6 +95,7 @@ class SelectQuestion(RunestoneIdDirective):
             "max_difficulty": directives.unchanged,
             "autogradable": directives.flag,
             "not_seen_ever": directives.flag,
+            "primary": directives.flag,
         }
     )
 
@@ -162,6 +164,11 @@ class SelectQuestion(RunestoneIdDirective):
             self.options["not_seen_ever"] = "data-not_seen_ever=true"
         else:
             self.options["not_seen_ever"] = ""
+
+        if "primary" in self.options:
+            self.options["primary"] = "data-primary=true"
+        else:
+            self.options["primary"] = ""
 
         maybeAddToAssignment(self)
 
