@@ -40,7 +40,9 @@ class ShowEvalNode(nodes.General, nodes.Element, RunestoneIdNode):
 def visit_showeval_node(self, node):
     html = CODE % node.runestone_options
     self.body.append(html)
-    addHTMLToDB(node.runestone_options["divid"], node.runestone_options["basecourse"], html)
+    addHTMLToDB(
+        node.runestone_options["divid"], node.runestone_options["basecourse"], html
+    )
 
 
 def depart_showeval_node(self, node):

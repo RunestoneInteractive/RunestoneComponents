@@ -19,13 +19,18 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneDirective
+from runestone.common.runestonedirective import (
+    RunestoneIdDirective,
+    RunestoneDirective,
+    RunestoneIdNode,
+)
 
 
 def setup(app):
     app.add_directive("video", Video)
     app.add_directive("youtube", Youtube)
     app.add_directive("vimeo", Vimeo)
+    app.add_node(VideoNode, html=(visit_video_node, depart_video_node))
 
 
 CODE = """\
@@ -73,6 +78,25 @@ INLINE = """\
 </script>
 """
 SOURCE = """<source src="%s" type="video/%s"></source>"""
+
+
+class VideoNode(nodes.General, nodes.Element, RunestoneIdNode):
+    def __init__(self, content, **kwargs):
+        super().__init__(**kwargs)
+        self.runestone_options = content
+        self.template = kwargs["template"]
+
+
+def visit_video_node(self, node):
+    html = node.template % node.runestone_options
+    self.body.append(html)
+    addHTMLToDB(
+        node.runestone_options["divid"], node.runestone_options["basecourse"], html
+    )
+
+
+def depart_video_node(self, node):
+    pass
 
 
 class Video(RunestoneIdDirective):
@@ -205,9 +229,12 @@ class IframeVideo(RunestoneIdDirective):
         if not self.options.get("divid"):
             self.options["divid"] = self.arguments[0]
 
-        res = self.html % self.options
-        addHTMLToDB(self.options["divid"], self.options["basecourse"], res)
-        raw_node = nodes.raw(self.block_text, res, format="html")
+        # res = self.html % self.options
+        # addHTMLToDB(self.options["divid"], self.options["basecourse"], res)
+        raw_node = VideoNode(
+            self.options, rawsource=self.block_text, template=self.html
+        )
+        # nodes.raw(self.block_text, res, format="html")
         raw_node.source, raw_node.line = self.state_machine.get_source_and_line(
             self.lineno
         )
@@ -228,8 +255,11 @@ class Youtube(IframeVideo):
 
     html = """
     <div class="runestone" style="margin-left: auto; margin-right:auto">
-        <div id="%(divid)s" data-component="youtube" class="align-%(align)s youtube-video" data-video-height="%(height)d" data-video-width="%(width)d" data-video-videoid="%(video_id)s" data-video-divid="%(divid)s" data-video-start="%(start)d" data-video-end="%(end)s" ></div>
-        <p class="runestone_caption"><span class="runestone_caption_text">Video: (%(divid)s)</span> </p>
+        <div id="%(divid)s" data-component="youtube" class="align-%(align)s youtube-video"
+            data-video-height="%(height)d" data-question_label="%(question_label)s"
+            data-video-width="%(width)d" data-video-videoid="%(video_id)s"
+            data-video-divid="%(divid)s" data-video-start="%(start)d"
+            data-video-end="%(end)s" ></div>
     </div>
     """
 
