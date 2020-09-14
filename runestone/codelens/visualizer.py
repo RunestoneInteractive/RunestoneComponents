@@ -23,7 +23,7 @@ import json
 import six
 import requests
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common.runestonedirective import RunestoneIdDirective
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneIdNode
 
 
 def setup(app):
@@ -33,13 +33,14 @@ def setup(app):
 
     app.add_config_value("codelens_div_class", "alert alert-warning cd_section", "html")
     app.add_config_value("trace_url", "http://tracer.runestone.academy:5000", "html")
+    app.add_node(CodeLensNode, html=(visit_codelens_node, depart_codelens_node))
 
 
 #  data-tracefile="pytutor-embed-demo/java.json"
 
 VIS = """
 <div class="runestone" style="max-width: none;">
-    <div class="%(divclass)s">
+    <div class="%(divclass)s" data-question_label="%(question_label)s">
         <div class="pytutorVisualizer" id="%(divid)s"
            data-params='{"embeddedMode": true, "lang": "%(language)s", "jumpToEnd": false}'>
         </div>
@@ -60,6 +61,32 @@ allTraceData["%(divid)s"] = %(tracedata)s;
 </script>
 </div>
 """
+
+
+class CodeLensNode(nodes.General, nodes.Element, RunestoneIdNode):
+    def __init__(self, content, **kwargs):
+        super().__init__(**kwargs)
+        self.runestone_options = content
+
+
+def visit_codelens_node(self, node):
+    html = VIS
+    if "caption" not in node.runestone_options:
+        node.runestone_options["caption"] = node.runestone_options["question_label"]
+    if "tracedata" in node.runestone_options:
+        html += DATA
+    else:
+        html += "</div>"
+    html = html % node.runestone_options
+
+    self.body.append(html)
+    addHTMLToDB(
+        node.runestone_options["divid"], node.runestone_options["basecourse"], html
+    )
+
+
+def depart_codelens_node(self, node):
+    pass
 
 
 # Some documentation to help the author.
@@ -202,21 +229,11 @@ config values (conf.py):
                 else:
                     raise ValueError("language not supported")
 
-        res = VIS
-        if "caption" not in self.options:
-            self.options["caption"] = ""
-        if "tracedata" in self.options:
-            res += DATA
-        else:
-            res += "</div>"
-        addHTMLToDB(
-            self.options["divid"], self.options["basecourse"], res % self.options
-        )
-        raw_node = nodes.raw(self.block_text, res % self.options, format="html")
-        raw_node.source, raw_node.line = self.state_machine.get_source_and_line(
+        cl_node = CodeLensNode(self.options, rawsource=self.block_text)
+        cl_node.source, cl_node.line = self.state_machine.get_source_and_line(
             self.lineno
         )
-        return [raw_node]
+        return [cl_node]
 
     def inject_questions(self, curTrace):
         if "breakline" not in self.options:
