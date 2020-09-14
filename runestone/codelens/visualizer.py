@@ -44,7 +44,7 @@ VIS = """
         <div class="pytutorVisualizer" id="%(divid)s"
            data-params='{"embeddedMode": true, "lang": "%(language)s", "jumpToEnd": false}'>
         </div>
-        <p class="runestone_caption"><span class="runestone_caption_text">CodeLens: %(caption)s (%(divid)s)</span> </p>
+        <p class="runestone_caption"><span class="runestone_caption_text">Activity: CodeLens %(caption)s (%(divid)s)</span> </p>
     </div>
 """
 
