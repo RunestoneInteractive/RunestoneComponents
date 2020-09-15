@@ -238,7 +238,7 @@ export default class RunestoneBase {
         if (!this.isTimed) {
             var capDiv = document.createElement("p");
             if (this.question_label) {
-                this.caption = `Activity: ${this.question_label} ${this.caption}  (${this.divid})`;
+                this.caption = `Activity: ${this.question_label} ${this.caption}  <span class="runestone_caption_divid">(${this.divid})</span>`;
                 $(capDiv).html(this.caption);
                 $(capDiv).addClass(`${elType}_caption`);
             } else {
