@@ -40,7 +40,6 @@ from runestone.common.runestonedirective import RunestoneDirective, RunestoneIdN
 logger = logging.getLogger(__name__)
 
 
-
 def get_dburl(outer={}):
     """
     Return a nicely formatted database connection URL
@@ -108,9 +107,11 @@ competency = None
 # this ensures that the database is in sync with the directives in the source
 #
 
+table_info = {}
+
 
 def setup(app):
-    global dburl, engine, meta, sess, questions, assignments, assignment_questions, courses, competency
+    global dburl, engine, meta, sess, questions, assignments, assignment_questions, courses, competency, chapters, sub_chapters, table_info
 
     app.connect("env-before-read-docs", reset_questions)
     app.connect("build-finished", finalize_updates)
@@ -119,6 +120,7 @@ def setup(app):
     # but we don't care about populating chapter and subchapter tables and others
     # so we commit each question.
     app.add_config_value("qbank", False, "html")
+    logger.info("Connecting to DB")
     try:
         dburl = get_dburl()
         engine = create_engine(dburl, client_encoding="utf8", convert_unicode=True)
@@ -142,10 +144,25 @@ def setup(app):
         )
         courses = Table("courses", meta, autoload=True, autoload_with=engine)
         competency = Table("competency", meta, autoload=True, autoload_with=engine)
+        chapters = Table("chapters", meta, autoload=True, autoload_with=engine)
+        sub_chapters = Table("sub_chapters", meta, autoload=True, autoload_with=engine)
+        table_info = {
+            "chapters": chapters,
+            "sub_chapters": sub_chapters,
+            "competency": competency,
+            "courses": courses,
+            "assignment_questions": assignment_questions,
+            "assignments": assignments,
+            "questions": questions,
+        }
 
 
 def get_engine_meta():
     return engine, meta, sess
+
+
+def get_table_meta():
+    return table_info
 
 
 # Reset Questions
@@ -157,6 +174,7 @@ def get_engine_meta():
 # those in the book get ``from_source = 'T'`` set.
 def reset_questions(app, env, docnames):
     if sess:
+        logger.info("Resetting questions")
         basecourse = env.config.html_context.get("basecourse")
         stmt = (
             questions.update()
@@ -169,6 +187,9 @@ def reset_questions(app, env, docnames):
             .values(from_source="F")
         )
         sess.execute(stmt)
+        # also remove the chapter info
+        logger.info("Deleteing chapter info for {}".format(basecourse))
+        sess.execute(chapters.delete().where(chapters.c.course_id == basecourse))
 
 
 # finalize updates
@@ -357,22 +378,22 @@ def addQNumberToDB(app, node, qnumber):
     if not dburl:
         return
 
-    basecourse = app.env.config.html_context.get(
-        "basecourse"
-    )
+    basecourse = app.env.config.html_context.get("basecourse")
     if not basecourse:
-        logger.error("Cannot update database because basecourse is unknown.", location=node)
+        logger.error(
+            "Cannot update database because basecourse is unknown.", location=node
+        )
         return
 
     stmt = (
         questions.update()
-        .where(and_(
-            questions.c.name == node.runestone_options["divid"],
-            questions.c.base_course == basecourse
-        ))
-        .values(
-            qnumber=qnumber,
+        .where(
+            and_(
+                questions.c.name == node.runestone_options["divid"],
+                questions.c.base_course == basecourse,
+            )
         )
+        .values(qnumber=qnumber,)
     )
     sess.execute(stmt)
 
