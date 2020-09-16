@@ -155,6 +155,53 @@ def update_database(chaptitles, subtitles, skips, chap_numbers, subchap_numbers,
     # sess.commit()
 
 
+def update_chap_titledb(title, chap_id, chap_num, app):
+    engine, meta, sess = get_engine_meta()
+    table_info = get_table_meta()
+
+    if not sess:
+        logger.info("You need to install a DBAPI module - psycopg2 for Postgres")
+        logger.info("Or perhaps you have not set your DBURL environment variable")
+        return
+
+    chapters = table_info["chapters"]
+    sub_chapters = table_info["sub_chapters"]
+    questions = table_info["questions"]
+
+    # chapters = Table("chapters", meta, autoload=True, autoload_with=engine)
+    # sub_chapters = Table("sub_chapters", meta, autoload=True, autoload_with=engine)
+    # questions = Table("questions", meta, autoload=True, autoload_with=engine)
+
+    basecourse = app.config.html_context.get("basecourse", "unknown")
+    dynamic_pages = app.config.html_context.get("dynamic_pages", False)
+    if dynamic_pages:
+        cname = basecourse
+    else:
+        cname = app.env.config.html_context.get("course_id", "unknown")
+
+    sel = select([chapters]).where(
+        and_(chapters.c.course_id == cname, chapters.c.chapter_label == chap_id)
+    )
+    res = sess.execute(sel).first()
+    if not res:
+        ins = chapters.insert().values(
+            chapter_name=title,
+            course_id=cname,
+            chapter_label=chap,
+            chapter_num=chap_num,
+        )
+        res = sess.execute(ins)
+    else:
+        upd = (
+            chapters.update()
+            .where(
+                and_(chapters.c.course_id == cname, chapters.c.chapter_label == chap_id)
+            )
+            .values(chapter_name=title)
+        )
+        sess.execute(upd)
+
+
 import pdb
 
 
@@ -162,7 +209,21 @@ def env_updated(app, doctree, docname):
     """
     This may be the best place to walk the completed document with TOC
     """
+    # ``docname`` is stored with Unix-style forward slashes, even on Windows. Therefore, we can't use ``os.path.basename`` or ``os.sep``.
+    splits = docname.split("/")
+    # If the docname is ``'index'``, then set ``chap_id`` to an empty string.
+    chap_id = splits[-2] if len(splits) > 1 else ""
+    subchap_id = splits[-1]
+
     if "toctree" in docname:
+        secnum_tuple = app.env.toc_secnumbers.get(docname, {}).get("")
+        chap_num = secnum_tuple[0] if secnum_tuple else 999
+        chap_title = (
+            doctree.traverse(docutils.nodes.section)[0]
+            .next_node(docutils.nodes.Titular)
+            .astext()
+        )
+        update_chap_titledb(chap_title, chap_id, chap_num, app)
         return []
 
     chap_titles = OrderedDict()
@@ -178,11 +239,7 @@ def env_updated(app, doctree, docname):
         secnum_str = ".".join(map(str, secnum_tuple)) + " " if secnum_tuple else ""
         # Prepend it to the title.
         title = secnum_str + section.next_node(docutils.nodes.Titular).astext()
-        # ``docname`` is stored with Unix-style forward slashes, even on Windows. Therefore, we can't use ``os.path.basename`` or ``os.sep``.
-        splits = docname.split("/")
-        # If the docname is ``'index'``, then set ``chap_id`` to an empty string.
-        chap_id = splits[-2] if len(splits) > 1 else ""
-        subchap_id = splits[-1]
+        # pdb.set_trace()
 
         if hasattr(app.env, "skipreading") and docname in app.env.skipreading:
             skips[(chap_id, subchap_id)] = True
@@ -203,7 +260,6 @@ def env_updated(app, doctree, docname):
                 secnum_tuple[1] if secnum_tuple else 0
             )
 
-    # pdb.set_trace()
     update_database(
         chap_titles, subchap_titles, skips, chap_numbers, subchap_numbers, app
     )
