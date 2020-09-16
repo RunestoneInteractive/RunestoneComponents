@@ -408,7 +408,7 @@ def SkipReading(
     if not hasattr(inliner.document.settings.env, "skipreading"):
         inliner.document.settings.env.skipreading = set()
 
-    print("ADDING {} to skipreading".format(docname))
+    # print("ADDING {} to skipreading".format(docname))
     inliner.document.settings.env.skipreading.add(docname)
 
     return ([], [])
