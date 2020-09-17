@@ -742,13 +742,11 @@ export class ActiveCode extends RunestoneBase {
                     body =
                         "<h4>Grade Report</h4>" +
                         "<p>This question: " +
-                        report["grade"] +
-                        " out of " +
-                        report["max"] +
-                        "</p>" +
-                        "<p>" +
-                        report["comment"] +
-                        "</p>";
+                        report["grade"];
+                    if (report["max"]) {
+                        body += " out of " + report["max"];
+                    }
+                    body += "</p>" + "<p>" + report["comment"] + "</p>";
                 } else {
                     body =
                         "<h4>Grade Report</h4>" +
