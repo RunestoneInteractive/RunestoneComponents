@@ -2059,13 +2059,22 @@ export default class Parsons extends RunestoneBase {
                 blocks = [];
             }
         }
+
+        // This is necessary, set the pairDistractors value before blocks get shuffled - William Li (August 2020)
+        if (this.recentAttempts < 2) {
+            // 1 Try
+            this.pairDistractors = false;
+        } else {
+            this.pairDistractors = true;
+        }
+
         if (this.options.order === undefined) {
             // Shuffle, respecting paired distractors
             var chunks = [],
                 chunk = [];
             for (i = 0; i < unorderedBlocks.length; i++) {
                 block = unorderedBlocks[i];
-                if (block.lines[0].paired) {
+                if (block.lines[0].paired && this.pairDistractors) { // William Li (August 2020)
                     chunk.push(block);
                 } else {
                     chunk = [];
