@@ -61,15 +61,15 @@ module.exports = (env) => {
         },
         plugins: [
             new CleanWebpackPlugin(),
-            new CopyPlugin([
-                {
-                    from: "static",
-                },
-            ]),
-            new HtmlWebpackPlugin({
-                inject: "head",
-                template: "public/index.html",
-            }),
+            // new CopyPlugin([
+            //     {
+            //         from: "static",
+            //     },
+            // ]),
+            // new HtmlWebpackPlugin({
+            //     inject: "head",
+            //     template: "public/index.html",
+            // }),
         ],
     };
 };
