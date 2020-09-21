@@ -209,11 +209,13 @@ def finalize_updates(app, excpt):
                 app.env.subchap_numbers,
                 app,
             )
+            logger.info("Committing changes")
             sess.commit()
         except Exception as e:
-            logger.error(e)
+            logger.error(f"Error while updating database -- details {e}")
             sess.rollback()
     elif sess:
+        logger.error("Rolling back database changes from build")
         sess.rollback()
 
 
@@ -769,8 +771,7 @@ def update_chapter_subchapter(
                     question_type="page",
                     from_source="T",
                     name=q_name,
-                    timestamp=datetime.datetime.now(),
+                    timestamp=datetime.now(),
                     base_course=basecourse,
                 )
                 sess.execute(ins)
-    sess.commit()
