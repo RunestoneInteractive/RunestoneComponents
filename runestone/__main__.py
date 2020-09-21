@@ -152,7 +152,8 @@ def build(all, wd):
     sys.path.insert(0, os.getcwd())
     if not pathlib.Path(resource_filename("runestone", "dist/runestone.js")).exists():
         click.echo("Error -- You are missing runestone.js please make sure")
-        click.echo("you have runestone installed correctly")
+        click.echo("you have runestone installed correctly.")
+        click.echo("In a development environment run npm run build")
         sys.exit(-1)
 
     version = require("runestone")[0].version
@@ -163,7 +164,9 @@ def build(all, wd):
         if not re.search(r"from runestone import.*(setup|script_files)", ctext):
             click.echo(
                 click.style(
-                    "Please update conf.py to import setup from runestone", fg="red"
+                    """Please update conf.py to import setup or script_files and css_files
+                    from runestone. If you do not import setup you must provide your own.""",
+                    fg="red",
                 ),
                 err=True,
                 color=True,
