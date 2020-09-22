@@ -17,7 +17,7 @@ __author__ = "isaiahmayerchak"
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneIdNode
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
 
 # add directives/javascript/css
 def setup(app):
@@ -26,7 +26,7 @@ def setup(app):
     app.add_node(RevealNode, html=(visit_reveal_node, depart_reveal_node))
 
 
-class RevealNode(nodes.General, nodes.Element, RunestoneIdNode):
+class RevealNode(nodes.General, nodes.Element, RunestoneNode):
     def __init__(self, content, **kwargs):
         super(RevealNode, self).__init__(**kwargs)
         self.runestone_options = content
@@ -46,7 +46,10 @@ def visit_reveal_node(self, node):
     else:
         node.runestone_options["modaltitle"] = ""
 
-    if node.runestone_options["instructoronly"] and node.runestone_options["is_dynamic"]:
+    if (
+        node.runestone_options["instructoronly"]
+        and node.runestone_options["is_dynamic"]
+    ):
         res = DYNAMIC_PREFIX
     else:
         res = ""
@@ -58,7 +61,10 @@ def visit_reveal_node(self, node):
 def depart_reveal_node(self, node):
     # Set options and format templates accordingly
     res = TEMPLATE_END % node.runestone_options
-    if node.runestone_options["instructoronly"] and node.runestone_options["is_dynamic"]:
+    if (
+        node.runestone_options["instructoronly"]
+        and node.runestone_options["is_dynamic"]
+    ):
         res += DYNAMIC_SUFFIX
 
     self.body.append(res)
@@ -69,7 +75,7 @@ DYNAMIC_PREFIX = """
 {{ if is_instructor: }}
 """
 TEMPLATE_START = """
-    <div data-component="reveal" data-question_label="%(question_label)s" id="%(divid)s" %(modal)s %(modaltitle)s %(showtitle)s %(hidetitle)s %(instructoronly)s>
+    <div data-component="reveal" id="%(divid)s" %(modal)s %(modaltitle)s %(showtitle)s %(hidetitle)s %(instructoronly)s>
     """
 TEMPLATE_END = """
     </div>
@@ -79,7 +85,7 @@ DYNAMIC_SUFFIX = """
 """
 
 
-class RevealDirective(RunestoneIdDirective):
+class RevealDirective(RunestoneDirective):
     """
 .. reveal:: identifier
    :showtitle: Text on the 'show' button--default is "Show"
@@ -96,7 +102,7 @@ class RevealDirective(RunestoneIdDirective):
     optional_arguments = 0
     final_argument_whitespace = True
     has_content = True
-    option_spec = RunestoneIdDirective.option_spec.copy()
+    option_spec = RunestoneDirective.option_spec.copy()
     option_spec.update(
         {
             "showtitle": directives.unchanged,
@@ -122,9 +128,11 @@ class RevealDirective(RunestoneIdDirective):
             Content
             ...
             """
-        super(RevealDirective, self).run()
+        # super(RevealDirective, self).run()
         env = self.state.document.settings.env
         self.assert_has_content()  # make sure reveal has something in it
+
+        self.options["divid"] = self.arguments[0]
 
         if not "showtitle" in self.options:
             self.options["showtitle"] = 'data-showtitle="Show"'
