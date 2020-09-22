@@ -155,7 +155,7 @@ class ActiveCodeTests(RunestoneTestCase):
         out = t2.find_element_by_id("alt_kiva_bar1_stdout")
         self.assertIsNotNone(out)
         self.assertTrue("mark = bar" in out.text)
-        self.assertTrue("{'type': 'nominal', 'field': 'customer'}" in out.text)
+        self.assertTrue("{'field': 'customer', 'type': 'nominal'}" in out.text)
         can = t2.find_element_by_tag_name("canvas")
         self.assertIsNotNone(can)
 
