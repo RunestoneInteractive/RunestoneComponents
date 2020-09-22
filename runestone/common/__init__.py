@@ -3,5 +3,6 @@ from .runestonedirective import (
     RunestoneDirective,
     RunestoneIdDirective,
     RunestoneNode,
+    RunestoneIdNode,
     get_node_line,
 )

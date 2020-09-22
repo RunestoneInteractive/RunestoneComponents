@@ -23,7 +23,7 @@ from runestone.server.componentdb import (
     addHTMLToDB,
     maybeAddToAssignment,
 )
-from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneIdNode
 
 
 def setup(app):
@@ -36,7 +36,7 @@ def setup(app):
 
 TEMPLATE = """
 <div class="runestone">
-<div data-component="clickablearea" class="%(divclass)s" id="%(divid)s" %(optional)s %(table)s %(correct)s %(incorrect)s>
+<div data-component="clickablearea" class="%(divclass)s" id="%(divid)s" data-question_label="%(question_label)s" %(optional)s %(table)s %(correct)s %(incorrect)s>
 <span data-question>%(qnumber)s: %(question)s</span>%(feedback)s%(clickcode)s
 """
 TEMPLATE_END = """
@@ -45,7 +45,7 @@ TEMPLATE_END = """
 """
 
 
-class ClickableAreaNode(nodes.General, nodes.Element, RunestoneNode):
+class ClickableAreaNode(nodes.General, nodes.Element, RunestoneIdNode):
     def __init__(self, content, **kwargs):
         """
         Arguments:
@@ -53,7 +53,7 @@ class ClickableAreaNode(nodes.General, nodes.Element, RunestoneNode):
         - `content`:
         """
         super(ClickableAreaNode, self).__init__(**kwargs)
-        self.ca_options = content
+        self.runestone_options = content
 
 
 # self for these functions is an instance of the writer class.  For example
@@ -62,38 +62,38 @@ class ClickableAreaNode(nodes.General, nodes.Element, RunestoneNode):
 def visit_ca_node(self, node):
     res = TEMPLATE
 
-    node.delimiter = "_start__{}_".format(node.ca_options["divid"])
+    node.delimiter = "_start__{}_".format(node.runestone_options["divid"])
     self.body.append(node.delimiter)
 
-    if "feedback" in node.ca_options:
-        node.ca_options["feedback"] = (
-            "<span data-feedback>" + node.ca_options["feedback"] + "</span>"
+    if "feedback" in node.runestone_options:
+        node.runestone_options["feedback"] = (
+            "<span data-feedback>" + node.runestone_options["feedback"] + "</span>"
         )
     else:
-        node.ca_options["feedback"] = ""
+        node.runestone_options["feedback"] = ""
 
-    if "iscode" not in node.ca_options:
-        node.ca_options["correct"] = "data-cc=" + '"' + node.ca_options["correct"] + '"'
-        node.ca_options["incorrect"] = (
-            "data-ci=" + '"' + node.ca_options["incorrect"] + '"'
+    if "iscode" not in node.runestone_options:
+        node.runestone_options["correct"] = "data-cc=" + '"' + node.runestone_options["correct"] + '"'
+        node.runestone_options["incorrect"] = (
+            "data-ci=" + '"' + node.runestone_options["incorrect"] + '"'
         )
     else:
-        node.ca_options["correct"] = ""
-        node.ca_options["incorrect"] = ""
+        node.runestone_options["correct"] = ""
+        node.runestone_options["incorrect"] = ""
 
-    res = res % node.ca_options
+    res = res % node.runestone_options
 
     self.body.append(res)
 
 
 def depart_ca_node(self, node):
     res = ""
-    res = TEMPLATE_END % node.ca_options
+    res = TEMPLATE_END % node.runestone_options
     self.body.append(res)
 
     addHTMLToDB(
-        node.ca_options["divid"],
-        node.ca_options["basecourse"],
+        node.runestone_options["divid"],
+        node.runestone_options["basecourse"],
         "".join(self.body[self.body.index(node.delimiter) + 1 :]),
     )
 

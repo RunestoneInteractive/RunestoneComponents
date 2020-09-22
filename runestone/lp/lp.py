@@ -33,11 +33,15 @@ from CodeChat.CodeToRest import get_lexer
 #
 # Local imports
 # -------------
-from ..common.runestonedirective import RunestoneIdDirective, RunestoneNode
+from ..common.runestonedirective import (
+    RunestoneIdDirective,
+    RunestoneIdNode,
+    env_from_node,
+)
 from .lp_common_lib import STUDENT_SOURCE_PATH, code_here_comment, SPHINX_CONFIG_NAME
 from ..server.componentdb import addQuestionToDB, addHTMLToDB
 
-#
+
 # Directives
 # ----------
 #
@@ -84,7 +88,6 @@ def _remove_code_solutions(
     return "".join(lines)
 
 
-#
 # _assert_has_no_content
 # """"""""""""""""""""""
 # An almost-copy of ``docutils.parsers.rst.Directive.assert_has_content``. It throws an ERROR-level DirectiveError if the directive has contents.
@@ -95,7 +98,6 @@ def _assert_has_no_content(self):
         )
 
 
-#
 # _source_read
 # ^^^^^^^^^^^^
 # The source-read_ event occurs when a source file is read. If it's code, this
@@ -139,9 +141,55 @@ TEXTAREA_REPLACEMENT_STRING = """
 ..
 
 """
-#
+
+
 # _LpBuildButtonDirective
 # ^^^^^^^^^^^^^^^^^^^^^^^
+class LpNode(nodes.General, nodes.Element, RunestoneIdNode):
+    def __init__(self, content, **kwargs):
+        super().__init__(**kwargs)
+        self.runestone_options = content
+
+
+def visit_lp_node(self, node):
+    # Save the HTML that's been generated so far. We want to know only what's generated inside the LP directive.
+    self.context.append(self.body)
+    self.body = []
+
+
+def depart_lp_node(self, node):
+    env = env_from_node(node)
+    id_ = node.runestone_options["divid"]
+    html = """<div class="runestone">
+    {}
+    <input type="button" value="Save and run" class="btn btn-success" data-component="lp_build" data-question_label="%(question_label)s" data-lang="{}" id="{}" />
+    <br />
+    <textarea readonly id="lp-result"></textarea>
+    <br />
+    <div></div>
+</div>""".format(
+        "".join(self.body), node.runestone_options["language"], id_
+    )
+    self.body = self.context.pop() + [html]
+
+    addHTMLToDB(
+        id_,
+        node.runestone_options["basecourse"],
+        html,
+        json.dumps(
+            dict(
+                # Provide these to the server, indicating how to build.
+                language=node.runestone_options["language"],
+                builder=node.runestone_options["builder"],
+                timelimit=node.runestone_options["timelimit"],
+                include=node.runestone_options["include"],
+                source_path=node.runestone_options["source_path"],
+                sphinx_base_path=env.app.confdir,
+            )
+        ),
+    )
+
+
 # This inserts a "save and run" button, along with the HTML/JavaScript which causes the current page to be tested by compiling and running it with its test bench, then reporting the results to the user. It must only be used on pages that are a program and have a test bench associated with them. Only one should appear on a given page.
 class _LpBuildButtonDirective(RunestoneIdDirective):
     # The required argument is an id_ for this question.
@@ -149,7 +197,7 @@ class _LpBuildButtonDirective(RunestoneIdDirective):
     # No optional arguments.
     optional_arguments = 0
     # Per http://docutils.sourceforge.net/docs/howto/rst-directives.html, True if content is allowed. However, this isn't checked or enforced.
-    has_content = False
+    has_content = True
     # Options. Everything but language is currently ignored. This is based on activecode, so in the future similar support would be provided for these options.
     option_spec = RunestoneIdDirective.option_spec.copy()
     option_spec.update(
@@ -168,8 +216,6 @@ class _LpBuildButtonDirective(RunestoneIdDirective):
         super(_LpBuildButtonDirective, self).run()
         _assert_has_no_content(self)
         addQuestionToDB(self)
-        # Gather arguments.
-        id_ = self.options["divid"]
 
         # Process options
         ##===============
@@ -181,39 +227,18 @@ class _LpBuildButtonDirective(RunestoneIdDirective):
         )
         self.options.setdefault("timelimit", 25000)
         self.options.setdefault("builder", "JOBE")
+        self.options["source_path"] = env.docname
 
-        # Generate HTML for the lp build directive. Pass the language, so client-side JS can use the correct syntax highligher.
-        html = """<div class="runestone">
-    <input type="button" value="Save and run" class="btn btn-success" data-component="lp_build" data-lang="{}" id="{}" />
-    <br />
-    <textarea readonly id="lp-result"></textarea>
-    <br />
-    <div></div>
-</div>""".format(
-            self.options["language"], id_
-        )
-        addHTMLToDB(
-            id_,
-            self.options["basecourse"],
-            html,
-            json.dumps(
-                dict(
-                    # Provide these to the server, indicating how to build.
-                    language=self.options["language"],
-                    builder=self.options["builder"],
-                    timelimit=self.options["timelimit"],
-                    include=self.options["include"],
-                    source_path=env.docname,
-                    sphinx_base_path=env.app.confdir,
-                )
-            ),
-        )
-        raw_node = nodes.raw(self.block_text, html, format="html")
-        raw_node.source, raw_node.line = self.state_machine.get_source_and_line(
+        lp_node = LpNode(self.options, rawsource=self.block_text)
+        lp_node.source, lp_node.line = self.state_machine.get_source_and_line(
             self.lineno
         )
+        # Insert the question number.
+        self.content.append(self.options["qnumber"], "lp")
+        # Parse it, since the number may be a role.
+        self.state.nested_parse(self.content, self.content_offset, lp_node)
 
-        return [raw_node]
+        return [lp_node]
 
 
 # Remove code solutions and feedback from source files. Also, produce a Pygments-highlighted version of each source file.
@@ -230,15 +255,15 @@ def _doctree_resolved(app, doctree, docname):
         # See if any Runestone questions exist in this source file.
         # Remove feedback from source files.
         runestone_directives_to_remove = []
-        for node in doctree.traverse(RunestoneNode):
-            # See if any parent of this node is a RunestoneNode; if so, skip it.
+        for node in doctree.traverse(RunestoneIdNode):
+            # See if any parent of this node is a RunestoneIdNode; if so, skip it.
             parent_node = node.parent
             while parent_node:
-                if isinstance(parent_node, RunestoneNode):
+                if isinstance(parent_node, RunestoneIdNode):
                     break
                 parent_node = parent_node.parent
             else:
-                # None of the node's ancestors are RunestoneNodes. Add to our list.
+                # None of the node's ancestors are RunestoneIdNodes. Add to our list.
                 # Some nodes don't define enough information to remove them. Skip.
                 if node.line and node.rawsource:
                     runestone_directives_to_remove += [
@@ -521,6 +546,8 @@ def setup(
 
     # See http://www.sphinx-doc.org/en/stable/extdev/appapi.html#sphinx.application.Sphinx.add_transform.
     app.add_transform(ExternalAnchorTargets)
+
+    app.add_node(LpNode, html=(visit_lp_node, depart_lp_node))
 
     # See http://www.sphinx-doc.org/en/stable/extdev/appapi.html#sphinx.application.Sphinx.add_directive.
     app.add_directive("lp_build", _LpBuildButtonDirective)

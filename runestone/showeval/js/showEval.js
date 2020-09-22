@@ -26,7 +26,7 @@ export class ShowEval {
         this.steps = steps.slice();
         this.currentStep = 0;
         this.createTrace = $(opts.orig).data("tracemode"); // TODO - reset doesn't work for traces
-        this.rb = new RunestoneBase();
+        this.rb = new RunestoneBase(opts);
         // create elements
         this.currentStepDiv = $("<div>").addClass("currentStepDiv");
         this.container.append(this.currentStepDiv);

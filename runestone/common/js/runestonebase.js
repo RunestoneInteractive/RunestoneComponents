@@ -45,6 +45,9 @@ export default class RunestoneBase {
                 // default to true as this opt is only provided from a timedAssessment
                 this.assessmentTaken = true;
             }
+            if ($(opts.orig).data("question_label")) {
+                this.question_label = $(opts.orig).data("question_label");
+            }
         }
     }
 
@@ -234,9 +237,15 @@ export default class RunestoneBase {
         //someElement.parentNode.insertBefore(newElement, someElement.nextSibling);
         if (!this.isTimed) {
             var capDiv = document.createElement("p");
-            $(capDiv).html(this.caption + " (" + this.divid + ")");
-            $(capDiv).addClass(`${elType}_caption`);
-            $(capDiv).addClass(`${elType}_caption_text`);
+            if (this.question_label) {
+                this.caption = `Activity: ${this.question_label} ${this.caption}  <span class="runestone_caption_divid">(${this.divid})</span>`;
+                $(capDiv).html(this.caption);
+                $(capDiv).addClass(`${elType}_caption`);
+            } else {
+                $(capDiv).html(this.caption + " (" + this.divid + ")");
+                $(capDiv).addClass(`${elType}_caption`);
+                $(capDiv).addClass(`${elType}_caption_text`);
+            }
             this.capDiv = capDiv;
             //this.outerDiv.parentNode.insertBefore(capDiv, this.outerDiv.nextSibling);
             this.containerDiv.appendChild(capDiv);

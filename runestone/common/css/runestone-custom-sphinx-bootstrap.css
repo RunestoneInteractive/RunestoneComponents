@@ -995,10 +995,14 @@ textarea#lp-result {
     text-align: center;
 }
 
-.runestone_caption:before {
+.runestone_caption_divid {
+    opacity: 50%;
+}
+
+/* .runestone_caption:before {
     counter-increment: rscomponent;
     content: "Activity: "counter(rscomponent) " -- ";
-}
+} */
 
 body {
     color: var(--bodyFont);

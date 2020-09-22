@@ -29,7 +29,7 @@ from runestone.server.componentdb import (
     addHTMLToDB,
     maybeAddToAssignment,
 )
-from runestone.common import RunestoneIdDirective, RunestoneNode, get_node_line
+from runestone.common import RunestoneIdDirective, RunestoneNode, RunestoneIdNode, get_node_line
 
 from runestone.common.runestonedirective import add_i18n_js
 
@@ -46,7 +46,7 @@ def setup(app):
     app.add_config_value("fitb_div_class", "runestone", "html")
 
 
-class FITBNode(nodes.General, nodes.Element, RunestoneNode):
+class FITBNode(nodes.General, nodes.Element, RunestoneIdNode):
     def __init__(self, content, **kwargs):
         """
 
@@ -55,17 +55,17 @@ class FITBNode(nodes.General, nodes.Element, RunestoneNode):
         - `content`:
         """
         super(FITBNode, self).__init__(**kwargs)
-        self.fitb_options = content
+        self.runestone_options = content
         # Create a data structure of feedback.
         self.feedbackArray = []
 
 
 def visit_fitb_node(self, node):
 
-    node.delimiter = "_start__{}_".format(node.fitb_options["divid"])
+    node.delimiter = "_start__{}_".format(node.runestone_options["divid"])
     self.body.append(node.delimiter)
 
-    res = node.template_start % node.fitb_options
+    res = node.template_start % node.runestone_options
     self.body.append(res)
 
 
@@ -93,18 +93,18 @@ def depart_fitb_node(self, node):
     while not node_with_document.document:
         node_with_document = node_with_document.parent
     # Supply client-side grading info if we're not grading on the server.
-    node.fitb_options["json"] = (
+    node.runestone_options["json"] = (
         "false"
         if node_with_document.document.settings.env.config.runestone_server_side_grading
         else json_feedback
     )
-    res = node.template_end % node.fitb_options
+    res = node.template_end % node.runestone_options
     self.body.append(res)
 
     # add HTML to the Database and clean up
     addHTMLToDB(
-        node.fitb_options["divid"],
-        node.fitb_options["basecourse"],
+        node.runestone_options["divid"],
+        node.runestone_options["basecourse"],
         "".join(self.body[self.body.index(node.delimiter) + 1 :]),
         json_feedback,
     )
@@ -156,7 +156,7 @@ class FillInTheBlank(RunestoneIdDirective):
 
         TEMPLATE_START = """
         <div class="%(divclass)s">
-        <div data-component="fillintheblank" id="%(divid)s" %(optional)s>
+        <div data-component="fillintheblank" data-question_label="%(question_label)s" id="%(divid)s" %(optional)s>
             """
 
         TEMPLATE_END = """

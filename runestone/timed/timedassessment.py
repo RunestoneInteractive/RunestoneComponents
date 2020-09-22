@@ -36,7 +36,7 @@ __author__ = "isaiahmayerchak"
 # -------
 from docutils import nodes
 from docutils.parsers.rst import directives
-from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneIdNode
 from runestone.server.componentdb import addAssignmentToDB
 
 # Timed Assessment Implementation
@@ -47,66 +47,77 @@ def setup(app):
     app.add_node(TimedNode, html=(visit_timed_node, depart_timed_node))
 
 
-class TimedNode(nodes.General, nodes.Element, RunestoneNode):
+class TimedNode(nodes.General, nodes.Element, RunestoneIdNode):
     def __init__(self, content, **kwargs):
         super(TimedNode, self).__init__(**kwargs)
-        self.timed_options = content
+        self.runestone_options = content
 
 
 def visit_timed_node(self, node):
     # Set options and format templates accordingly
 
-    if "timelimit" not in node.timed_options:
-        node.timed_options["timelimit"] = ""
+    if "timelimit" not in node.runestone_options:
+        node.runestone_options["timelimit"] = ""
     else:
-        node.timed_options["timelimit"] = "data-time=" + str(
-            node.timed_options["timelimit"]
+        node.runestone_options["timelimit"] = "data-time=" + str(
+            node.runestone_options["timelimit"]
         )
 
-    if "noresult" in node.timed_options:
-        node.timed_options["noresult"] = "data-no-result"
+    if "noresult" in node.runestone_options:
+        node.runestone_options["noresult"] = "data-no-result"
     else:
-        node.timed_options["noresult"] = ""
+        node.runestone_options["noresult"] = ""
 
-    if "timedfeedback" in node.timed_options:
-        node.timed_options["timedfeedback"] = "data-timedfeedback=true"
+        node.runestone_options["noresult"] = ""
+
+    if "timedfeedback" in node.runestone_options:
+        node.runestone_options["timedfeedback"] = "data-timedfeedback=true"
     else:
-        node.timed_options["timedfeedback"] = ""
+        node.runestone_options["timedfeedback"] = ""
 
-    if "nofeedback" in node.timed_options:
-        node.timed_options["nofeedback"] = "data-no-feedback"
+    if "notimer" in node.runestone_options:
+        node.runestone_options["notimer"] = "data-no-timer"
     else:
-        node.timed_options["nofeedback"] = ""
+        node.runestone_options["notimer"] = ""
 
-    if "notimer" in node.timed_options:
-        node.timed_options["notimer"] = "data-no-timer"
+        node.runestone_options["timedfeedback"] = ""
+
+    if "nofeedback" in node.runestone_options:
+        node.runestone_options["nofeedback"] = "data-no-feedback"
     else:
-        node.timed_options["notimer"] = ""
+        node.runestone_options["nofeedback"] = ""
 
-    if "fullwidth" in node.timed_options:
-        node.timed_options["fullwidth"] = "data-fullwidth"
+    if "notimer" in node.runestone_options:
+        node.runestone_options["notimer"] = "data-no-timer"
     else:
-        node.timed_options["fullwidth"] = ""
+        node.runestone_options["notimer"] = ""
 
-    if "nopause" in node.timed_options:
-        node.timed_options["nopause"] = "data-no-pause"
+    if "fullwidth" in node.runestone_options:
+        node.runestone_options["fullwidth"] = "data-fullwidth"
     else:
-        node.timed_options["nopause"] = ""
+        node.runestone_options["fullwidth"] = ""
 
-    res = TEMPLATE_START % node.timed_options
+        node.runestone_options["fullwidth"] = ""
+
+    if "nopause" in node.runestone_options:
+        node.runestone_options["nopause"] = "data-no-pause"
+    else:
+        node.runestone_options["nopause"] = ""
+
+    res = TEMPLATE_START % node.runestone_options
     self.body.append(res)
 
 
 def depart_timed_node(self, node):
     # Set options and format templates accordingly
-    res = TEMPLATE_END % node.timed_options
+    res = TEMPLATE_END % node.runestone_options
 
     self.body.append(res)
 
 
 # Templates to be formatted by node options
 TEMPLATE_START = """
-    <ul data-component="timedAssessment" %(timelimit)s id="%(divid)s" %(noresult)s %(nofeedback)s %(timedfeedback)s %(notimer)s %(fullwidth)s %(nopause)s>
+    <ul data-component="timedAssessment" data-question_label="%(question_label)s" %(timelimit)s id="%(divid)s" %(noresult)s %(nofeedback)s %(timedfeedback)s %(notimer)s %(fullwidth)s %(nopause)s>
     """
 
 TEMPLATE_END = """</ul>
