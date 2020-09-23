@@ -203,6 +203,7 @@ export default class Timed extends RunestoneBase {
         this.startBtn.addEventListener(
             "click",
             function () {
+                $(this.finishButton).hide(); // hide the finish button for now
                 this.renderTimedQuestion();
                 this.startAssessment();
             }.bind(this),
@@ -575,7 +576,6 @@ export default class Timed extends RunestoneBase {
             $("#relations-next").hide(); // hide the next page button for now
             $("#relations-prev").hide(); // hide the previous button for now
             $(this.startBtn).hide();
-            $(this.finishButton).hide(); // hide the finish button for now
             $(this.pauseBtn).attr("disabled", false);
             if (this.running === 0 && this.paused === 0) {
                 this.running = 1;
