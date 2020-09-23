@@ -35,7 +35,7 @@ window.LPList = {};
 // FITB constructor
 class LP extends RunestoneBase {
     constructor(opts) {
-        super();
+        super(opts);
         this.useRunestoneServices = opts.useRunestoneServices;
         // Store the DOM element (the input) for the "Test" button.
         this.element = opts.orig;
