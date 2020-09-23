@@ -61,7 +61,7 @@ def env_updated(app, doctree, docname):
         chap_num = secnum_tuple[0] if secnum_tuple else 999
         app.env.chap_numbers[chap_id] = chap_num
         chap_title = (
-            doctree.traverse(docutils.nodes.section)[0]
+            list(doctree.traverse(docutils.nodes.section))[0]
             .next_node(docutils.nodes.Titular)
             .astext()
         )

@@ -188,9 +188,6 @@ def reset_questions(app, env, docnames):
             .values(from_source="F")
         )
         sess.execute(stmt)
-        # also remove the chapter info
-        logger.info("Deleteing chapter info for {}".format(basecourse))
-        sess.execute(chapters.delete().where(chapters.c.course_id == basecourse))
 
 
 # finalize updates
@@ -200,20 +197,23 @@ def reset_questions(app, env, docnames):
 def finalize_updates(app, excpt):
 
     if sess and excpt is None:
-        try:
-            update_chapter_subchapter(
-                app.env.chap_titles,
-                app.env.subchap_titles,
-                app.env.skips,
-                app.env.chap_numbers,
-                app.env.subchap_numbers,
-                app,
-            )
-            logger.info("Committing changes")
-            sess.commit()
-        except Exception as e:
-            logger.error(f"Error while updating database -- details {e}")
-            sess.rollback()
+        if hasattr(app.env, "chap_titles"):
+            try:
+                update_chapter_subchapter(
+                    app.env.chap_titles,
+                    app.env.subchap_titles,
+                    app.env.skips,
+                    app.env.chap_numbers,
+                    app.env.subchap_numbers,
+                    app,
+                )
+                logger.info("Committing changes")
+                sess.commit()
+            except Exception as e:
+                logger.error(f"Error while updating database -- details {e}")
+                sess.rollback()
+        else:
+            logger.info("Skipping chapter DB update, no new information.")
     elif sess:
         logger.error("Rolling back database changes from build")
         sess.rollback()
@@ -682,11 +682,19 @@ def update_chapter_subchapter(
     sub_chapters = table_info["sub_chapters"]
     questions = table_info["questions"]
 
+    basecourse = app.config.html_context.get("basecourse", "unknown")
+
+    # Remove the chapter / subchapter info
+    logger.info("Deleteing Chapter / Subchapter info for {}".format(basecourse))
+    logger.info(
+        "Warning - always use build --all to ensure chapter info is consistent!"
+    )
+    sess.execute(chapters.delete().where(chapters.c.course_id == basecourse))
+
     # chapters = Table("chapters", meta, autoload=True, autoload_with=engine)
     # sub_chapters = Table("sub_chapters", meta, autoload=True, autoload_with=engine)
     # questions = Table("questions", meta, autoload=True, autoload_with=engine)
 
-    basecourse = app.config.html_context.get("basecourse", "unknown")
     dynamic_pages = app.config.html_context.get("dynamic_pages", False)
     if dynamic_pages:
         cname = basecourse
