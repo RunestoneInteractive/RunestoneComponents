@@ -19,6 +19,7 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
 
+
 # add directives/javascript/css
 def setup(app):
     app.add_directive("reveal", RevealDirective)
@@ -134,13 +135,13 @@ class RevealDirective(RunestoneDirective):
 
         self.options["divid"] = self.arguments[0]
 
-        if not "showtitle" in self.options:
+        if "showtitle" not in self.options:
             self.options["showtitle"] = 'data-showtitle="Show"'
         else:
             self.options["showtitle"] = (
                 """data-showtitle=""" + '"' + self.options["showtitle"] + '"'
             )
-        if not "hidetitle" in self.options:
+        if "hidetitle" not in self.options:
             self.options["hidetitle"] = 'data-hidetitle="Hide"'
         else:
             self.options["hidetitle"] = (
