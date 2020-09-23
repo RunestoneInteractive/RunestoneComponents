@@ -242,9 +242,18 @@ class ParsonsLine {
     }
     // Initialize what width the line would naturally have (without indent)
     initializeWidth() {
+        // this.width does not appear to be used anywhere later
+        // since changing the value of this.width appears to have no effect. - Vincent Qiu (September 2020)
         this.width =
             $(this.view).outerWidth(true) -
             this.problem.options.pixelsPerIndent * this.indent;
+
+        // Pass this information on to be used in class Parsons function initializeAreas
+        // to manually determine appropriate widths - Vincent Qiu (September 2020)
+        this.view.fontSize = window.getComputedStyle(this.view, null).getPropertyValue('font-size');
+        this.view.fontFamily = window.getComputedStyle(this.view, null).getPropertyValue('font-family');
+        this.view.pixelsPerIndent = this.problem.options.pixelsPerIndent;
+        this.view.indent = this.indent;
     }
     // Answer the block that this line is currently in
     block() {
@@ -1192,8 +1201,26 @@ export default class Parsons extends RunestoneBase {
         this.containerDiv.id = this.counterId;
         this.parsTextDiv = document.createElement("div");
         $(this.parsTextDiv).addClass("parsons-text");
-        this.parsTextDiv.innerHTML = this.question.innerHTML;
-        this.containerDiv.appendChild(this.parsTextDiv);
+        // Images within Parsons problem description were bumping things and causing display misalignment
+        // This if-else section moves images to beneath the problem description to fix misalignment 
+        // Also added '.parsons .parsons-img{}' to parsons.css - Vincent Qiu (September 2020)
+        if (this.question.innerHTML.includes("<img")) {
+            var imgString = this.question.innerHTML.substring(this.question.innerHTML.indexOf("<img"),this.question.innerHTML.indexOf(">") + 1);
+            var textWithoutImg = this.question.innerHTML.replace(imgString,'');
+            if (imgString.includes('align="left"')) {
+                imgString = imgString.replace('align="left"','');
+            }
+            this.parsTextDiv.innerHTML = textWithoutImg;
+            this.containerDiv.appendChild(this.parsTextDiv);
+            this.parsImgDiv = document.createElement("div");
+            $(this.parsImgDiv).addClass("parsons-img");
+            this.parsImgDiv.innerHTML = imgString;
+            this.containerDiv.appendChild(this.parsImgDiv);
+        }
+        else {
+            this.parsTextDiv.innerHTML = this.question.innerHTML;
+            this.containerDiv.appendChild(this.parsTextDiv);
+        }
         this.keyboardTip = document.createElement("div");
         $(this.keyboardTip).attr("role", "tooltip");
         this.keyboardTip.id = this.counterId + "-tip";
@@ -1422,12 +1449,67 @@ export default class Parsons extends RunestoneBase {
             };
         } else {
             areaWidth = 300;
+            // This maxFunction is how Parsons areas width and height were being calculated previously,
+            // but at some point .outerHeight and .outerWidth stopped returning correct values
+            // causing lines to overflow and display awkwardly. - Vincent Qiu (September 2020)
+            // maxFunction = function (item) {
+            //     var addition = 3.8;
+            //     if (item.outerHeight(true) != 38) addition = 2.1;
+            //     areaHeight += item.outerHeight(true) + height_add * addition;
+            //     areaWidth = Math.max(areaWidth, item.outerWidth(true));
+            // };
+
+            // This new maxFunction is how Parsons areas width and height are being calculated now manually - Vincent Qiu (September 2020)
             maxFunction = function (item) {
                 var addition = 3.8;
-                if (item.outerHeight(true) != 38) addition = 2.1;
-                areaHeight += item.outerHeight(true) + height_add * addition;
-                areaWidth = Math.max(areaWidth, item.outerWidth(true));
-            };
+
+                // Determine which index within the Parsons block JavaScript object contains the text lines and consequently the passed through data - Vincent Qiu (September 2020)
+                var linesIndex;
+                var linesItem = item[0].children;
+                for (linesIndex = 0; linesIndex < item[0].children.length; linesIndex++) {
+                    if(item[0].children[linesIndex].className.includes("lines")) {
+                        break;
+                    }
+                }
+
+                // Create a canvas and set the passed through fontSize and fontFamily in order to later measure text width - Vincent Qiu (September 2020)
+                var fontSize = linesItem[linesIndex].children[0].fontSize;
+                var fontFamily = linesItem[linesIndex].children[0].fontFamily.split(",")[2];
+                var tempCanvas = document.createElement("canvas");
+                var tempCanvasCtx = tempCanvas.getContext("2d");
+                tempCanvasCtx.font = fontSize + fontFamily;
+
+                // Increment Parsons area height based on number of lines of text in the current Parsons block - Vincent Qiu (September 2020)
+                var singleHeight = 40;
+                var additionalHeight = 20;
+                areaHeight += Math.ceil(singleHeight + (linesItem[linesIndex].children.length - 1) * additionalHeight + height_add * addition);
+
+                // Determine the longest text line in the current Parsons block and calculate its width - Vincent Qiu (September 2020)
+                var itemLength;
+                var pixelsPerIndent;
+                var indent;
+                var maxInnerText;
+                var maxInnerLength = 0;
+                var i;
+                var widthLimit = 475;
+                var longCount = 0;
+                for (i = 0; i < linesItem[linesIndex].children.length; i++) {
+                    pixelsPerIndent = linesItem[linesIndex].children[i].pixelsPerIndent;
+                    indent = linesItem[linesIndex].children[i].indent;
+                    itemLength = Math.ceil(pixelsPerIndent * indent + tempCanvasCtx.measureText(linesItem[linesIndex].children[i].innerText).width);
+                    longCount += Math.floor(itemLength / widthLimit);
+                    if (itemLength > maxInnerLength) {
+                        maxInnerText = linesItem[linesIndex].children[i].innerText;
+                        maxInnerLength = itemLength;
+                    }
+                }
+                areaWidth = Math.max(areaWidth, maxInnerLength + 40);
+                // Set width limit and determine how much additional height is needed to accommodate the forced text overflow - Vincent Qiu (September 2020)
+                if (areaWidth > widthLimit) {
+                    areaWidth = widthLimit;
+                    areaHeight += longCount * additionalHeight;
+                }
+            }
         }
         for (i = 0; i < blocks.length; i++) {
             maxFunction($(blocks[i].view));
@@ -1437,7 +1519,8 @@ export default class Parsons extends RunestoneBase {
             this.areaWidth += 25;
             //areaHeight += (blocks.length);
         }
-        this.areaHeight = areaHeight;
+        // + 40 to areaHeight to provide some additional buffer in case any text overflow still happens - Vincent Qiu (September 2020)
+        this.areaHeight = areaHeight + 40;
         $(this.sourceArea).css({
             width: this.areaWidth + 2,
             height: areaHeight,
@@ -1976,13 +2059,22 @@ export default class Parsons extends RunestoneBase {
                 blocks = [];
             }
         }
+
+        // This is necessary, set the pairDistractors value before blocks get shuffled - William Li (August 2020)
+        if (this.recentAttempts < 2) {
+            // 1 Try
+            this.pairDistractors = false;
+        } else {
+            this.pairDistractors = true;
+        }
+
         if (this.options.order === undefined) {
             // Shuffle, respecting paired distractors
             var chunks = [],
                 chunk = [];
             for (i = 0; i < unorderedBlocks.length; i++) {
                 block = unorderedBlocks[i];
-                if (block.lines[0].paired) {
+                if (block.lines[0].paired && this.pairDistractors) { // William Li (August 2020)
                     chunk.push(block);
                 } else {
                     chunk = [];
