@@ -938,6 +938,7 @@ export class ActiveCode extends RunestoneBase {
     toggleEditorVisibility() {}
     addErrorMessage(err) {
         // Add the error message
+        this.errLastRun = true;
         var errHead = $("<h3>").html("Error");
         this.eContainer = this.outerDiv.appendChild(
             document.createElement("div")
@@ -1272,6 +1273,7 @@ export class ActiveCode extends RunestoneBase {
                     );
                 }
                 $(this.historyScrubber).slider("enable");
+                this.errLastRun = false;
                 this.logRunEvent({
                     div_id: this.divid,
                     code: this.editor.getValue(),

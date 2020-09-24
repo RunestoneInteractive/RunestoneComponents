@@ -59,6 +59,8 @@ var TimedActiveCodeMixin = {
             } else {
                 return "F";
             }
+        } else if (this.errLastRun) {
+            return "F";
         } else {
             return "I"; // we ignore this in the grading if no unittests
         }
