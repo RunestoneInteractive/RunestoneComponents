@@ -1497,7 +1497,7 @@ export default class Parsons extends RunestoneBase {
                 var fontFamily = linesItem[linesIndex].children[0].fontFamily;
                 var tempCanvas = document.createElement("canvas");
                 var tempCanvasCtx = tempCanvas.getContext("2d");
-                tempCanvasCtx.font = fontSize + fontFamily;
+                tempCanvasCtx.font = fontSize + " " + fontFamily;
 
                 // Increment Parsons area height based on number of lines of text in the current Parsons block - Vincent Qiu (September 2020)
                 var singleHeight = 40;
