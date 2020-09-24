@@ -251,9 +251,29 @@ class ParsonsLine {
         // Pass this information on to be used in class Parsons function initializeAreas
         // to manually determine appropriate widths - Vincent Qiu (September 2020)
         this.view.fontSize = window.getComputedStyle(this.view, null).getPropertyValue('font-size');
-        this.view.fontFamily = window.getComputedStyle(this.view, null).getPropertyValue('font-family');
         this.view.pixelsPerIndent = this.problem.options.pixelsPerIndent;
         this.view.indent = this.indent;
+
+        // Figure out which typeface will be rendered by comparing text widths to browser default - Vincent Qiu (September 2020)
+        var tempCanvas = document.createElement("canvas");
+        var tempCanvasCtx = tempCanvas.getContext("2d");
+        var possibleFonts = window.getComputedStyle(this.view, null).getPropertyValue('font-family').split(", ");
+        var fillerText = "abcdefghijklmnopqrstuvwxyz0123456789,./!@#$%^&*-+";
+        tempCanvasCtx.font = this.view.fontSize + " serif";
+        var serifWidth = tempCanvasCtx.measureText(fillerText).width;
+        for (var i = 0; i < possibleFonts.length; i++) {
+            if (possibleFonts[i].includes('"')) {
+                possibleFonts[i] = possibleFonts[i].replaceAll('"',"");
+            }
+            if (possibleFonts[i].includes("'")) {
+                possibleFonts[i] = possibleFonts[i].replaceAll("'","");
+            }
+            tempCanvasCtx.font = this.view.fontSize + " " + possibleFonts[i];
+            if (tempCanvasCtx.measureText(fillerText).width !== serifWidth) {
+                this.view.fontFamily = possibleFonts[i];
+                break;
+            }
+        }
     }
     // Answer the block that this line is currently in
     block() {
@@ -1472,9 +1492,9 @@ export default class Parsons extends RunestoneBase {
                     }
                 }
 
-                // Create a canvas and set the passed through fontSize and fontFamily in order to later measure text width - Vincent Qiu (September 2020)
+                // Create a canvas and set the passed through fontSize and fontFamily in order to measure text width - Vincent Qiu (September 2020)
                 var fontSize = linesItem[linesIndex].children[0].fontSize;
-                var fontFamily = linesItem[linesIndex].children[0].fontFamily.split(",")[2];
+                var fontFamily = linesItem[linesIndex].children[0].fontFamily;
                 var tempCanvas = document.createElement("canvas");
                 var tempCanvasCtx = tempCanvas.getContext("2d");
                 tempCanvasCtx.font = fontSize + fontFamily;
