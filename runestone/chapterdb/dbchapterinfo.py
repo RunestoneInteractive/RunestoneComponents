@@ -23,6 +23,7 @@ import pdb
 from sphinx.util import logging
 
 logger = logging.getLogger(__name__)
+logger.setLevel(30)
 
 ignored_chapters = ["", "FrontBackMatter", "Appendices"]
 
@@ -95,8 +96,21 @@ def env_updated(app, doctree, docname):
             app.env.subchap_numbers[chap_id] = OrderedDict()
         if subchap_id not in app.env.subchap_titles[chap_id]:
             app.env.subchap_titles[chap_id][subchap_id] = title
-            app.env.subchap_numbers[chap_id][subchap_id] = (
-                secnum_tuple[1] if secnum_tuple else 0
+            app.env.subchap_numbers[chap_id][subchap_id] = make_subchap_num(
+                secnum_tuple
+            )
+            logger.debug(
+                f"{chap_id} - {subchap_id} {app.env.subchap_numbers[chap_id][subchap_id]}    {secnum_tuple}                "
             )
 
     return []
+
+
+def make_subchap_num(sn_tuple):
+    if not sn_tuple:
+        return 0
+
+    if len(sn_tuple) > 2:
+        return sn_tuple[1] * 100 + sn_tuple[2]
+    elif len(sn_tuple) == 2:
+        return sn_tuple[1] * 100
