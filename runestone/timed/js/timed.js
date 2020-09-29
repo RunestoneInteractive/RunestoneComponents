@@ -700,7 +700,7 @@ export default class Timed extends RunestoneBase {
                         });
                         this.running = 0;
                         this.done = 1;
-                        if (this.taken === 0) {
+                        if (!this.taken) {
                             this.taken = 1;
                             window.alert(
                                 "Sorry, but you ran out of time.  Your current answers have been saved"

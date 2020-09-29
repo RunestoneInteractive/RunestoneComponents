@@ -13,6 +13,7 @@ export default class TimedParsons extends Parsons {
         this.hideFeedback();
         $(this.checkButton).hide();
         $(this.helpButton).hide();
+        $(this.resetButton).hide();
     }
     checkCorrectTimed() {
         return this.correct ? "T" : "F";
