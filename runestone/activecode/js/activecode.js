@@ -15,6 +15,7 @@ import "codemirror/mode/xml/xml.js";
 import "codemirror/mode/javascript/javascript.js";
 import "codemirror/mode/sql/sql.js";
 import "codemirror/mode/clike/clike.js";
+import "codemirror/mode/octave/octave.js";
 import "./activecode-i18n.en.js";
 import "./../css/activecode.css";
 import "codemirror/lib/codemirror.css";
