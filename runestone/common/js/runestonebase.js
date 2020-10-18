@@ -199,7 +199,8 @@ export default class RunestoneBase {
         if (
             data.correct === "T" ||
             localStorage.length === 0 ||
-            this.graderactive === true
+            this.graderactive === true ||
+            this.isTimed
         ) {
             return true;
         }
