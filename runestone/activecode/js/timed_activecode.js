@@ -72,7 +72,7 @@ var TimedActiveCodeMixin = {
 
     processTimedSubmission: function (logFlag) {
         $(this.runButton).hide();
-        $(this.runButton).click();
+        this.runProg(true, logFlag); // true means no GUI
         $(`#${this.divid}_unit_results`).show();
         $(this.codeDiv).addClass("ac-disabled");
     },

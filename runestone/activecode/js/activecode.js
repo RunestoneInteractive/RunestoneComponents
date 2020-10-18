@@ -1215,7 +1215,13 @@ export class ActiveCode extends RunestoneBase {
             saveCode: saveCode,
         };
     }
-    runProg() {
+    runProg(noUI, logResults) {
+        if (typeof logResults === "undefined") {
+            logResults = true;
+        }
+        if (typeof noUI !== "boolean") {
+            noUI = false;
+        }
         var prog = this.buildProg(true);
         var saveCode = "True";
         var scrubber_dfd, history_dfd, skulpt_run_dfd;
@@ -1239,6 +1245,7 @@ export class ActiveCode extends RunestoneBase {
             jsonpSites: ["https://itunes.apple.com"],
         });
         Sk.divid = this.divid;
+        Sk.logResults = logResults;
         if (this.graderactive && this.containerDiv.closest(".loading")) {
             Sk.gradeContainer = this.containerDiv.closest(".loading").id;
         } else {
@@ -1247,32 +1254,43 @@ export class ActiveCode extends RunestoneBase {
         this.setTimeLimit();
         (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = this.graphics;
         Sk.canvas = this.graphics.id; //todo: get rid of this here and in image
-        $(this.runButton).attr("disabled", "disabled");
-        $(this.historyScrubber).off("slidechange");
-        $(this.historyScrubber).slider("disable");
-        $(this.outDiv).show({
-            duration: 700,
-            queue: false,
-        });
-        var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
-        history_dfd = __ret.history_dfd;
-        saveCode = __ret.saveCode;
+        let promise_list = [];
+        if (!noUI) {
+            $(this.runButton).attr("disabled", "disabled");
+            $(this.historyScrubber).off("slidechange");
+            $(this.historyScrubber).slider("disable");
+            $(this.outDiv).show({
+                duration: 700,
+                queue: false,
+            });
+            var __ret = this.manage_scrubber(
+                scrubber_dfd,
+                history_dfd,
+                saveCode
+            );
+            history_dfd = __ret.history_dfd;
+            saveCode = __ret.saveCode;
+            promise_list.push(history_dfd);
+        }
         skulpt_run_dfd = Sk.misceval.asyncToPromise(function () {
             return Sk.importMainWithBody("<stdin>", false, prog, true);
         });
+        promise_list.push(skulpt_run_dfd);
         // Make sure that the history scrubber is fully initialized AND the code has been run
         // before we start logging stuff.
         var self = this;
-        Promise.all([skulpt_run_dfd, history_dfd]).then(
+        Promise.all(promise_list).then(
             function (mod) {
                 $(this.runButton).removeAttr("disabled");
-                if (this.slideit) {
-                    $(this.historyScrubber).on(
-                        "slidechange",
-                        this.slideit.bind(this)
-                    );
+                if (!noUI) {
+                    if (this.slideit) {
+                        $(this.historyScrubber).on(
+                            "slidechange",
+                            this.slideit.bind(this)
+                        );
+                    }
+                    $(this.historyScrubber).slider("enable");
                 }
-                $(this.historyScrubber).slider("enable");
                 this.errLastRun = false;
                 this.logRunEvent({
                     div_id: this.divid,
@@ -1286,25 +1304,27 @@ export class ActiveCode extends RunestoneBase {
                 }); // Log the run event
             }.bind(this),
             function (err) {
-                history_dfd.done(function () {
-                    $(self.runButton).removeAttr("disabled");
-                    $(self.historyScrubber).on(
-                        "slidechange",
-                        self.slideit.bind(self)
-                    );
-                    $(self.historyScrubber).slider("enable");
-                    self.logRunEvent({
-                        div_id: self.divid,
-                        code: self.editor.getValue(),
-                        lang: self.langauge,
-                        errinfo: err.toString(),
-                        to_save: saveCode,
-                        prefix: self.pretext,
-                        suffix: self.suffix,
-                        partner: self.partner,
-                    }); // Log the run event
-                    self.addErrorMessage(err);
-                });
+                if (typeof history_dfd !== "undefined") {
+                    history_dfd.done(function () {
+                        $(self.runButton).removeAttr("disabled");
+                        $(self.historyScrubber).on(
+                            "slidechange",
+                            self.slideit.bind(self)
+                        );
+                        $(self.historyScrubber).slider("enable");
+                        self.logRunEvent({
+                            div_id: self.divid,
+                            code: self.editor.getValue(),
+                            lang: self.langauge,
+                            errinfo: err.toString(),
+                            to_save: saveCode,
+                            prefix: self.pretext,
+                            suffix: self.suffix,
+                            partner: self.partner,
+                        }); // Log the run event
+                        self.addErrorMessage(err);
+                    });
+                }
             }
         );
         if (typeof window.allVisualizers != "undefined") {

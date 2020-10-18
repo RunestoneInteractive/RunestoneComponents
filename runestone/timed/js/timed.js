@@ -204,6 +204,10 @@ export default class Timed extends RunestoneBase {
             "click",
             function () {
                 $(this.finishButton).hide(); // hide the finish button for now
+                let mess = document.createElement("p");
+                mess.innerHTML =
+                    "<strong>Warning: You will lose all of your work if you close this tab or the browser.</strong>  Make sure you click the Finish Exam button to submit your work!";
+                this.controlDiv.appendChild(mess);
                 this.renderTimedQuestion();
                 this.startAssessment();
             }.bind(this),
@@ -354,6 +358,12 @@ export default class Timed extends RunestoneBase {
                 }
                 var target = $(event.target).text();
                 this.currentQuestionIndex = parseInt(target) - 1;
+                if (
+                    this.currentQuestionIndex >
+                    this.renderedQuestionArray.length
+                ) {
+                    console.log(`Error: bad index for ${target}`);
+                }
                 $(
                     "ul#pageNums > ul > li:eq(" +
                         this.currentQuestionIndex +
@@ -527,7 +537,13 @@ export default class Timed extends RunestoneBase {
     }
 
     renderTimedQuestion() {
-        var currentWrapper = this.renderedQuestionArray[
+        if (this.currentQuestionIndex >= this.renderedQuestionArray.length) {
+            // sometimes the user clicks in the event area for the qNumList
+            // But misses a number in that case the text is the concatenation
+            // of all the numbers in the list!
+            return;
+        }
+        let currentWrapper = this.renderedQuestionArray[
             this.currentQuestionIndex
         ].wrapper;
         var currentQuestion = this.renderedQuestionArray[
@@ -598,6 +614,7 @@ export default class Timed extends RunestoneBase {
             }
             $(window).on("beforeunload", function (event) {
                 // this actual value gets ignored by newer browsers
+                alert("foo");
                 event.preventDefault();
                 event.returnValue =
                     "Are you sure you want to leave?  Your work will be lost! And you will need your instructor to reset the exam!";
