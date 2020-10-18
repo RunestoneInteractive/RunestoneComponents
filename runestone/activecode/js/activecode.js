@@ -138,6 +138,8 @@ export class ActiveCode extends RunestoneBase {
             edmode = "text/x-csrc";
         } else if (edmode === "python3") {
             edmode = "python";
+        } else if (edmode === "octave" || edmode === "MATLAB") {
+            edmode = "text/x-octave";
         }
         var editor = CodeMirror(codeDiv, {
             value: this.code,
@@ -1345,6 +1347,7 @@ var languageExtensions = {
     cpp: "cpp",
     c: "c",
     sql: "sql",
+    octave: "m",
 };
 
 var errorText = {};
