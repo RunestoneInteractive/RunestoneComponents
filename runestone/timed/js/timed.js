@@ -579,7 +579,9 @@ export default class Timed extends RunestoneBase {
         $(this.finishButton).attr("disabled", true);
         this.running = 0;
         this.done = 1;
-        if (this.showResults) {
+        // showFeedback sand showResults should both be true before we show the
+        // questions and their state of correctness.
+        if (this.showResults && this.showFeedback) {
             $(this.timedDiv).show();
             this.submitTimedProblems(false); // do not log these results
         } else {
@@ -718,10 +720,15 @@ export default class Timed extends RunestoneBase {
                         this.running = 0;
                         this.done = 1;
                         if (!this.taken) {
-                            this.taken = 1;
-                            window.alert(
-                                "Sorry, but you ran out of time.  Your current answers have been saved"
-                            );
+                            this.taken = true;
+                            // embed the message in the page -- an alert actually prevents
+                            // the answers from being submitted and if a student closes their
+                            // laptop then the answers will not be submitted ever!  Even when they
+                            // reopen the laptop their session cookie is likely invalid.
+                            let mess = document.createElement("h1");
+                            mess.innerHTML =
+                                "Sorry but you ran out of time. Your answers are being submitted";
+                            this.controlDiv.appendChild(mess);
                             this.finishAssessment();
                         }
                     }
@@ -898,7 +905,7 @@ export default class Timed extends RunestoneBase {
     }
     shouldUseServer(data) {
         // We override the RunestoneBase version because there is no "correct" attribute, and there are 2 possible localStorage schemas
-        // --we also want to default to local storage because it contains more information
+        // --we also want to default to local storage because it contains more information specifically which questions are correct, incorrect, and skipped.
         var storageDate;
         if (localStorage.length === 0) return true;
         var storageObj = localStorage.getItem(this.localStorageKey());
@@ -937,6 +944,7 @@ export default class Timed extends RunestoneBase {
         }
         return true;
     }
+
     checkLocalStorage() {
         var len = localStorage.length;
         if (len > 0) {
