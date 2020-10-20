@@ -76,7 +76,7 @@ DYNAMIC_PREFIX = """
 {{ if is_instructor: }}
 """
 TEMPLATE_START = """
-    <div data-component="reveal" id="%(divid)s" %(modal)s %(modaltitle)s %(showtitle)s %(hidetitle)s %(instructoronly)s>
+    <div data-component="reveal" id="%(divid)s" %(modal)s %(modaltitle)s %(showtitle)s %(hidetitle)s %(instructoronly)s style="visibility: hidden;">
     """
 TEMPLATE_END = """
     </div>

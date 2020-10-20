@@ -79,7 +79,8 @@ TEMPLATE_END = """
 <textarea data-component="activecode" id=%(divid)s data-lang="%(language)s" data-question_label="%(question_label)s" %(autorun)s
     %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s %(chatcodes)s %(optional)s
     data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(tie)s %(dburl)s %(nopair)s
-    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(hidehistory)s %(wasmuri)s>
+    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(hidehistory)s %(wasmuri)s
+    style="visibility: hidden;">
 %(initialcode)s
 </textarea>
 </div>

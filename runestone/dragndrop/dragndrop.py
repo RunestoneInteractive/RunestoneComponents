@@ -41,7 +41,7 @@ def setup(app):
 
 TEMPLATE_START = """
 <div class="%(divclass)s">
-<ul data-component="dragndrop" data-question_label="%(question_label)s" id="%(divid)s" %(optional)s>
+<ul data-component="dragndrop" data-question_label="%(question_label)s" id="%(divid)s" %(optional)s style="visibility: hidden;">
     <span data-component="question">%(qnumber)s: %(question)s</span>
 	%(feedback)s
 """
@@ -75,7 +75,9 @@ def visit_dnd_node(self, node):
 
     if "feedback" in node.runestone_options:
         node.runestone_options["feedback"] = (
-            "<span data-component=feedback>" + node.runestone_options["feedback"] + "</span>"
+            "<span data-component=feedback>"
+            + node.runestone_options["feedback"]
+            + "</span>"
         )
     else:
         node.runestone_options["feedback"] = ""

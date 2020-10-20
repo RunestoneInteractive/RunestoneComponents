@@ -36,7 +36,7 @@ def setup(app):
 
 TEMPLATE = """
 <div class="runestone">
-<div data-component="clickablearea" class="%(divclass)s" id="%(divid)s" data-question_label="%(question_label)s" %(optional)s %(table)s %(correct)s %(incorrect)s>
+<div data-component="clickablearea" class="%(divclass)s" id="%(divid)s" data-question_label="%(question_label)s" %(optional)s %(table)s %(correct)s %(incorrect)s style="visibility: hidden;">
 <span data-question>%(qnumber)s: %(question)s</span>%(feedback)s%(clickcode)s
 """
 TEMPLATE_END = """
@@ -73,7 +73,9 @@ def visit_ca_node(self, node):
         node.runestone_options["feedback"] = ""
 
     if "iscode" not in node.runestone_options:
-        node.runestone_options["correct"] = "data-cc=" + '"' + node.runestone_options["correct"] + '"'
+        node.runestone_options["correct"] = (
+            "data-cc=" + '"' + node.runestone_options["correct"] + '"'
+        )
         node.runestone_options["incorrect"] = (
             "data-ci=" + '"' + node.runestone_options["incorrect"] + '"'
         )

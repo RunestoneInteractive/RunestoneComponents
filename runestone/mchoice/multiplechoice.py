@@ -18,7 +18,11 @@ __author__ = "bmiller"
 from docutils import nodes
 from docutils.parsers.rst import directives
 from .assessbase import Assessment
-from runestone.common.runestonedirective import RunestoneNode, RunestoneIdNode, get_node_line
+from runestone.common.runestonedirective import (
+    RunestoneNode,
+    RunestoneIdNode,
+    get_node_line,
+)
 from runestone.server.componentdb import (
     addQuestionToDB,
     addHTMLToDB,
@@ -192,7 +196,7 @@ class MChoice(Assessment):
 
         TEMPLATE_START = """
             <div class="%(divclass)s">
-            <ul data-component="multiplechoice" data-question_label="%(question_label)s" data-multipleanswers="%(multipleAnswers)s" %(random)s id="%(divid)s" %(optional)s>
+            <ul data-component="multiplechoice" data-question_label="%(question_label)s" data-multipleanswers="%(multipleAnswers)s" %(random)s id="%(divid)s" %(optional)s style="visibility: hidden;">
             """
 
         OPTION = """

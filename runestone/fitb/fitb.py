@@ -29,7 +29,12 @@ from runestone.server.componentdb import (
     addHTMLToDB,
     maybeAddToAssignment,
 )
-from runestone.common import RunestoneIdDirective, RunestoneNode, RunestoneIdNode, get_node_line
+from runestone.common import (
+    RunestoneIdDirective,
+    RunestoneNode,
+    RunestoneIdNode,
+    get_node_line,
+)
 
 from runestone.common.runestonedirective import add_i18n_js
 
@@ -156,7 +161,7 @@ class FillInTheBlank(RunestoneIdDirective):
 
         TEMPLATE_START = """
         <div class="%(divclass)s">
-        <div data-component="fillintheblank" data-question_label="%(question_label)s" id="%(divid)s" %(optional)s>
+        <div data-component="fillintheblank" data-question_label="%(question_label)s" id="%(divid)s" %(optional)s style="visibility: hidden;">
             """
 
         TEMPLATE_END = """
