@@ -76,6 +76,11 @@ export default class Timed extends RunestoneBase {
         this.currentQuestionIndex = 0; // Which question is currently displaying on the page
         this.renderedQuestionArray = []; // list of all problems
         this.getNewChildren();
+        // One small step to eliminate students from doing view source
+        // this won't stop anyone with determination but may prevent casual peeking
+        document.body.oncontextmenu = function () {
+            return false;
+        };
         this.checkAssessmentStatus().then(
             function () {
                 this.renderTimedAssess();
