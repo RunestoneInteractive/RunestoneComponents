@@ -569,8 +569,10 @@ export class ActiveCode extends RunestoneBase {
             this.historyScrubber = scrubber;
             $(scrubberDiv).insertAfter(this.runButton);
             deferred.resolve();
-        }.bind(this);
+        }.bind(this); // end definition of helper
+
         if (eBookConfig.practice_mode || this.isTimed) {
+            // todo: if already taken we should restore history.
             helper();
         } else {
             jQuery

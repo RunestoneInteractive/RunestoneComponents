@@ -466,6 +466,7 @@ export default class Timed extends RunestoneBase {
                         // the actual selected question
                         opts.rqa = this.renderedQuestionArray;
                         let newq = new SelectOne(opts);
+                        newq.timedWrapper = this;
                         this.renderedQuestionArray.push({
                             question: newq,
                         });
@@ -480,6 +481,9 @@ export default class Timed extends RunestoneBase {
                                 opts
                             ),
                         });
+                        this.renderedQuestionArray[
+                            this.renderedQuestionArray.length - 1
+                        ].question.timedWrapper = this;
                     } else if ($(tmpChild).is("[data-component]")) {
                         let componentKind = $(tmpChild).data("component");
                         this.renderedQuestionArray.push({
@@ -487,6 +491,9 @@ export default class Timed extends RunestoneBase {
                                 componentKind
                             ](opts),
                         });
+                        this.renderedQuestionArray[
+                            this.renderedQuestionArray.length - 1
+                        ].question.timedWrapper = this;
                     } else if ($(tmpChild).is("[data-childcomponent]")) {
                         // this is for when a directive has a wrapper element that isn't actually part of the javascript object
                         // for example, activecode has a wrapper div that contains the question for the element
@@ -507,6 +514,9 @@ export default class Timed extends RunestoneBase {
                                 wrapper: tmpChild,
                                 question: newAC,
                             });
+                            this.renderedQuestionArray[
+                                this.renderedQuestionArray.length - 1
+                            ].question.timedWrapper = this;
                         }
                     }
                 }
