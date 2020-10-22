@@ -45,6 +45,11 @@ export default class RunestoneBase {
                 // default to true as this opt is only provided from a timedAssessment
                 this.assessmentTaken = true;
             }
+            if (typeof opts.timedWrapper !== "undefined") {
+                this.timedWrapper = opts.timedWrapper;
+            } else {
+                this.timedWrapper = null;
+            }
             if ($(opts.orig).data("question_label")) {
                 this.question_label = $(opts.orig).data("question_label");
             }

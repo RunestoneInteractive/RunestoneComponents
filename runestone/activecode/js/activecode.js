@@ -571,8 +571,11 @@ export class ActiveCode extends RunestoneBase {
             deferred.resolve();
         }.bind(this); // end definition of helper
 
-        if (eBookConfig.practice_mode || this.isTimed) {
-            // todo: if already taken we should restore history.
+        if (
+            eBookConfig.practice_mode ||
+            (this.isTimed && !this.assessmentTaken)
+        ) {
+            // If this is timed and already taken we should restore history info
             helper();
         } else {
             jQuery
