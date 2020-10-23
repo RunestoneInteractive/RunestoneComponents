@@ -1230,6 +1230,7 @@ export class ActiveCode extends RunestoneBase {
         if (typeof noUI !== "boolean") {
             noUI = false;
         }
+        this.isAnswered = true;
         var prog = this.buildProg(true);
         var saveCode = "True";
         var scrubber_dfd, history_dfd, skulpt_run_dfd;

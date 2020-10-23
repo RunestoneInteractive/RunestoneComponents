@@ -300,9 +300,6 @@ export default class Timed extends RunestoneBase {
             "click",
             function (event) {
                 if (
-                    $("div#timed_Test form input[name='group1']").is(
-                        ":checked"
-                    ) ||
                     this.renderedQuestionArray[this.currentQuestionIndex]
                         .question.isAnswered
                 ) {
@@ -350,7 +347,8 @@ export default class Timed extends RunestoneBase {
             "click",
             function (event) {
                 if (
-                    $("div#timed_Test form input[name='group1']").is(":checked")
+                    this.renderedQuestionArray[this.currentQuestionIndex]
+                        .question.isAnswered
                 ) {
                     $(
                         "ul#pageNums > ul > li:eq(" +

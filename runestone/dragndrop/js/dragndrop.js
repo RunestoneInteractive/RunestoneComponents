@@ -115,6 +115,7 @@ export default class DragNDrop extends RunestoneBase {
         }
     }
     addDragDivListeners() {
+        let self = this;
         this.draggableDiv.addEventListener(
             "dragover",
             function (ev) {
@@ -128,6 +129,7 @@ export default class DragNDrop extends RunestoneBase {
         this.draggableDiv.addEventListener(
             "drop",
             function (ev) {
+                self.isAnswered = true;
                 ev.preventDefault();
                 if ($(this.draggableDiv).hasClass("possibleDrop")) {
                     $(this.draggableDiv).removeClass("possibleDrop");
@@ -215,6 +217,7 @@ export default class DragNDrop extends RunestoneBase {
     }
     setEventListeners(dgSpan, dpSpan) {
         // Adds HTML5 "drag and drop" UI functionality
+        let self = this;
         dgSpan.addEventListener("dragstart", function (ev) {
             ev.dataTransfer.setData("draggableID", ev.target.id);
         });
@@ -224,6 +227,7 @@ export default class DragNDrop extends RunestoneBase {
         dgSpan.addEventListener(
             "drop",
             function (ev) {
+                self.isAnswered = true;
                 ev.preventDefault();
                 var data = ev.dataTransfer.getData("draggableID");
                 var draggedSpan = document.getElementById(data);
@@ -240,6 +244,7 @@ export default class DragNDrop extends RunestoneBase {
         dpSpan.addEventListener(
             "dragover",
             function (ev) {
+                self.isAnswered = true;
                 ev.preventDefault();
                 if ($(ev.target).hasClass("possibleDrop")) {
                     return;
@@ -253,6 +258,7 @@ export default class DragNDrop extends RunestoneBase {
             }.bind(this)
         );
         dpSpan.addEventListener("dragleave", function (ev) {
+            self.isAnswered = true;
             ev.preventDefault();
             if (!$(ev.target).hasClass("possibleDrop")) {
                 return;
@@ -262,6 +268,7 @@ export default class DragNDrop extends RunestoneBase {
         dpSpan.addEventListener(
             "drop",
             function (ev) {
+                self.isAnswered = true;
                 ev.preventDefault();
                 if ($(ev.target).hasClass("possibleDrop")) {
                     $(ev.target).removeClass("possibleDrop");

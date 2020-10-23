@@ -250,23 +250,28 @@ class ParsonsLine {
 
         // Pass this information on to be used in class Parsons function initializeAreas
         // to manually determine appropriate widths - Vincent Qiu (September 2020)
-        this.view.fontSize = window.getComputedStyle(this.view, null).getPropertyValue('font-size');
+        this.view.fontSize = window
+            .getComputedStyle(this.view, null)
+            .getPropertyValue("font-size");
         this.view.pixelsPerIndent = this.problem.options.pixelsPerIndent;
         this.view.indent = this.indent;
 
         // Figure out which typeface will be rendered by comparing text widths to browser default - Vincent Qiu (September 2020)
         var tempCanvas = document.createElement("canvas");
         var tempCanvasCtx = tempCanvas.getContext("2d");
-        var possibleFonts = window.getComputedStyle(this.view, null).getPropertyValue('font-family').split(", ");
+        var possibleFonts = window
+            .getComputedStyle(this.view, null)
+            .getPropertyValue("font-family")
+            .split(", ");
         var fillerText = "abcdefghijklmnopqrstuvwxyz0123456789,./!@#$%^&*-+";
         tempCanvasCtx.font = this.view.fontSize + " serif";
         var serifWidth = tempCanvasCtx.measureText(fillerText).width;
         for (var i = 0; i < possibleFonts.length; i++) {
             if (possibleFonts[i].includes('"')) {
-                possibleFonts[i] = possibleFonts[i].replaceAll('"',"");
+                possibleFonts[i] = possibleFonts[i].replaceAll('"', "");
             }
             if (possibleFonts[i].includes("'")) {
-                possibleFonts[i] = possibleFonts[i].replaceAll("'","");
+                possibleFonts[i] = possibleFonts[i].replaceAll("'", "");
             }
             tempCanvasCtx.font = this.view.fontSize + " " + possibleFonts[i];
             if (tempCanvasCtx.measureText(fillerText).width !== serifWidth) {
@@ -732,6 +737,7 @@ class ParsonsBlock {
     }
     // Called when a block is dropped
     panEnd(event) {
+        this.problem.isAnswered = true;
         delete this.problem.moving;
         delete this.problem.movingX;
         delete this.problem.movingY;
@@ -1222,13 +1228,16 @@ export default class Parsons extends RunestoneBase {
         this.parsTextDiv = document.createElement("div");
         $(this.parsTextDiv).addClass("parsons-text");
         // Images within Parsons problem description were bumping things and causing display misalignment
-        // This if-else section moves images to beneath the problem description to fix misalignment 
+        // This if-else section moves images to beneath the problem description to fix misalignment
         // Also added '.parsons .parsons-img{}' to parsons.css - Vincent Qiu (September 2020)
         if (this.question.innerHTML.includes("<img")) {
-            var imgString = this.question.innerHTML.substring(this.question.innerHTML.indexOf("<img"),this.question.innerHTML.indexOf(">") + 1);
-            var textWithoutImg = this.question.innerHTML.replace(imgString,'');
+            var imgString = this.question.innerHTML.substring(
+                this.question.innerHTML.indexOf("<img"),
+                this.question.innerHTML.indexOf(">") + 1
+            );
+            var textWithoutImg = this.question.innerHTML.replace(imgString, "");
             if (imgString.includes('align="left"')) {
-                imgString = imgString.replace('align="left"','');
+                imgString = imgString.replace('align="left"', "");
             }
             this.parsTextDiv.innerHTML = textWithoutImg;
             this.containerDiv.appendChild(this.parsTextDiv);
@@ -1236,8 +1245,7 @@ export default class Parsons extends RunestoneBase {
             $(this.parsImgDiv).addClass("parsons-img");
             this.parsImgDiv.innerHTML = imgString;
             this.containerDiv.appendChild(this.parsImgDiv);
-        }
-        else {
+        } else {
             this.parsTextDiv.innerHTML = this.question.innerHTML;
             this.containerDiv.appendChild(this.parsTextDiv);
         }
@@ -1486,8 +1494,14 @@ export default class Parsons extends RunestoneBase {
                 // Determine which index within the Parsons block JavaScript object contains the text lines and consequently the passed through data - Vincent Qiu (September 2020)
                 var linesIndex;
                 var linesItem = item[0].children;
-                for (linesIndex = 0; linesIndex < item[0].children.length; linesIndex++) {
-                    if(item[0].children[linesIndex].className.includes("lines")) {
+                for (
+                    linesIndex = 0;
+                    linesIndex < item[0].children.length;
+                    linesIndex++
+                ) {
+                    if (
+                        item[0].children[linesIndex].className.includes("lines")
+                    ) {
                         break;
                     }
                 }
@@ -1502,7 +1516,12 @@ export default class Parsons extends RunestoneBase {
                 // Increment Parsons area height based on number of lines of text in the current Parsons block - Vincent Qiu (September 2020)
                 var singleHeight = 40;
                 var additionalHeight = 20;
-                areaHeight += Math.ceil(singleHeight + (linesItem[linesIndex].children.length - 1) * additionalHeight + height_add * addition);
+                areaHeight += Math.ceil(
+                    singleHeight +
+                        (linesItem[linesIndex].children.length - 1) *
+                            additionalHeight +
+                        height_add * addition
+                );
 
                 // Determine the longest text line in the current Parsons block and calculate its width - Vincent Qiu (September 2020)
                 var itemLength;
@@ -1514,12 +1533,19 @@ export default class Parsons extends RunestoneBase {
                 var widthLimit = 475;
                 var longCount = 0;
                 for (i = 0; i < linesItem[linesIndex].children.length; i++) {
-                    pixelsPerIndent = linesItem[linesIndex].children[i].pixelsPerIndent;
+                    pixelsPerIndent =
+                        linesItem[linesIndex].children[i].pixelsPerIndent;
                     indent = linesItem[linesIndex].children[i].indent;
-                    itemLength = Math.ceil(pixelsPerIndent * indent + tempCanvasCtx.measureText(linesItem[linesIndex].children[i].innerText).width);
+                    itemLength = Math.ceil(
+                        pixelsPerIndent * indent +
+                            tempCanvasCtx.measureText(
+                                linesItem[linesIndex].children[i].innerText
+                            ).width
+                    );
                     longCount += Math.floor(itemLength / widthLimit);
                     if (itemLength > maxInnerLength) {
-                        maxInnerText = linesItem[linesIndex].children[i].innerText;
+                        maxInnerText =
+                            linesItem[linesIndex].children[i].innerText;
                         maxInnerLength = itemLength;
                     }
                 }
@@ -1529,7 +1555,7 @@ export default class Parsons extends RunestoneBase {
                     areaWidth = widthLimit;
                     areaHeight += longCount * additionalHeight;
                 }
-            }
+            };
         }
         for (i = 0; i < blocks.length; i++) {
             maxFunction($(blocks[i].view));
@@ -2094,7 +2120,8 @@ export default class Parsons extends RunestoneBase {
                 chunk = [];
             for (i = 0; i < unorderedBlocks.length; i++) {
                 block = unorderedBlocks[i];
-                if (block.lines[0].paired && this.pairDistractors) { // William Li (August 2020)
+                if (block.lines[0].paired && this.pairDistractors) {
+                    // William Li (August 2020)
                     chunk.push(block);
                 } else {
                     chunk = [];

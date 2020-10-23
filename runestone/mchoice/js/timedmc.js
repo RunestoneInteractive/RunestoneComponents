@@ -4,6 +4,7 @@ export default class TimedMC extends MultipleChoice {
     constructor(opts) {
         super(opts);
         $(this.containerDiv).addClass("alert alert-warning runestone");
+        this.needsReinitialization = true;
         this.renderTimedIcon(this.MCContainer);
         this.hideButtons(); // Don't show per-question buttons in a timed assessment
     }
@@ -155,6 +156,15 @@ export default class TimedMC extends MultipleChoice {
             this.processMCMASubmission(logFlag);
         } else {
             this.processMCMFSubmission(logFlag);
+        }
+    }
+    reinitializeListeners() {
+        let self = this;
+        let answerFunc = function () {
+            self.isAnswered = true;
+        };
+        for (let opt of this.optionArray) {
+            opt.input.onclick = answerFunc;
         }
     }
 }

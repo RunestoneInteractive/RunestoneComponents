@@ -69,6 +69,10 @@ export default class ShortAnswer extends RunestoneBase {
         $(this.jLabel).addClass("radio-inline");
         this.jOptionsDiv.appendChild(this.jLabel);
         this.jTextArea = document.createElement("textarea");
+        let self = this;
+        this.jTextArea.onchange = function () {
+            self.isAnswered = true;
+        };
         this.jTextArea.id = this.divid + "_solution";
         $(this.jTextArea).attr("aria-label", "textarea");
         $(this.jTextArea).css("display:inline, width:530px");
