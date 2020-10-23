@@ -55,7 +55,7 @@ export default class FITB extends RunestoneBase {
         $(this.origElem).replaceWith(this.containerDiv);
     }
     renderFITBInput() {
-        // creates the blank and appends it to the parent div
+        // The text [input] elements are created by the template.
         this.containerDiv = document.createElement("div");
         $(this.containerDiv).addClass("alert alert-warning");
         this.containerDiv.id = this.divid;
@@ -68,7 +68,20 @@ export default class FITB extends RunestoneBase {
         ba.attr("class", "form form-control selectwidthauto");
         ba.attr("aria-label", "input area");
         this.blankArray = ba.toArray();
+        // When a blank is changed mark this component as interacted with.
+        // And set a class on the component in case we want to render components that have been used
+        // differently
+        for (let blank of this.blankArray) {
+            $(blank).change(this.recordAnswered.bind(this));
+        }
     }
+
+    recordAnswered() {
+        this.isAnswered = true;
+        //let rcontainer = this.containerDiv.closest(".runestone");
+        //rcontainer.addClass("answered");
+    }
+
     renderFITBButtons() {
         // "submit" button and "compare me" button
         this.submitButton = document.createElement("button");
