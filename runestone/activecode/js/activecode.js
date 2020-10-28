@@ -37,9 +37,8 @@ var chatcodesServer = "chat.codes";
 export class ActiveCode extends RunestoneBase {
     constructor(opts) {
         super(opts);
-        //RunestoneBase.prototype.init.apply(this, arguments);
         var suffStart;
-        var orig = opts.orig;
+        var orig = $(opts.orig).find("textarea");
         this.useRunestoneServices = opts.useRunestoneServices;
         this.python3 = opts.python3;
         this.alignVertical = opts.vertical;

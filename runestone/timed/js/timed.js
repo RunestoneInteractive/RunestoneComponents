@@ -19,7 +19,6 @@ import TimedClickableArea from "../../clickableArea/js/timedclickable";
 import TimedDragNDrop from "../../dragndrop/js/timeddnd.js";
 import TimedParsons from "../../parsons/js/timedparsons.js";
 import SelectOne from "../../selectquestion/js/selectone";
-import "../css/timed.css";
 
 export var TimedList = {}; // Timed dictionary
 
@@ -173,11 +172,8 @@ export default class Timed extends RunestoneBase {
         $(this.navDiv).attr({
             style: "text-align:center",
         });
-        this.switchContainer = document.createElement("div");
-        this.switchContainer.classList.add("switchcontainer");
         this.switchDiv = document.createElement("div"); // is replaced by the questions
-        this.timedDiv.appendChild(this.switchContainer);
-        this.switchContainer.appendChild(this.switchDiv);
+        this.timedDiv.appendChild(this.switchDiv);
         this.timedDiv.appendChild(this.navDiv);
         $(this.timedDiv).attr({
             id: "timed_Test",
@@ -300,8 +296,7 @@ export default class Timed extends RunestoneBase {
             "click",
             function (event) {
                 if (
-                    this.renderedQuestionArray[this.currentQuestionIndex]
-                        .question.isAnswered
+                    $("div#timed_Test form input[name='group1']").is(":checked")
                 ) {
                     $(
                         "ul#pageNums > ul > li:eq(" +
@@ -347,8 +342,7 @@ export default class Timed extends RunestoneBase {
             "click",
             function (event) {
                 if (
-                    this.renderedQuestionArray[this.currentQuestionIndex]
-                        .question.isAnswered
+                    $("div#timed_Test form input[name='group1']").is(":checked")
                 ) {
                     $(
                         "ul#pageNums > ul > li:eq(" +
@@ -410,8 +404,7 @@ export default class Timed extends RunestoneBase {
             }.bind(this),
             false
         );
-        this.controlDiv.appendChild(this.finishButton);
-        $(this.finishButton).hide();
+        this.buttonContainer.appendChild(this.finishButton);
         this.timedDiv.appendChild(this.buttonContainer);
     }
     ensureButtonSafety() {
@@ -446,89 +439,73 @@ export default class Timed extends RunestoneBase {
     }
 
     createRenderedQuestionArray() {
-        // this finds all the assess questions in this timed assessment and calls their constructor method
+        // this finds all the assess questions in this timed assessment
+        // We need to make a list of all the questions up front so we can set up navigation
+        // but we do not want to render the questions until the student has navigated
         // Also adds them to this.renderedQuestionArray
+
         // todo:  This needs to be updated to account for the runestone div wrapper.
+
         // To accommodate the selectquestion type -- which is async! we need to wrap
         // all of this in a promise, so that we don't continue to render the timed
         // exam until all of the questions have been realized.
-        let retp = new Promise(
-            function (resolve, reject) {
-                var opts;
-                let pArray = [];
-                for (var i = 0; i < this.newChildren.length; i++) {
-                    var tmpChild = this.newChildren[i];
-                    opts = {
-                        orig: tmpChild,
-                        useRunestoneServices: eBookConfig.useRunestoneServices,
-                        timed: true,
-                        assessmentTaken: this.taken,
-                        timedWrapper: this,
-                    };
-                    if ($(tmpChild).children("[data-component]").length > 0) {
-                        tmpChild = $(tmpChild).children("[data-component]")[0];
-                        opts.orig = tmpChild;
-                    }
-                    if ($(tmpChild).is("[data-component=selectquestion]")) {
-                        // SelectOne is async and will replace itself in this array with
-                        // the actual selected question
-                        opts.rqa = this.renderedQuestionArray;
-                        let newq = new SelectOne(opts);
-                        this.renderedQuestionArray.push({
-                            question: newq,
-                        });
-                        pArray.push(newq.initialize());
-                    } else if ($(tmpChild).is("[data-component=activecode]")) {
-                        let lang = $(tmpChild).data("lang");
-                        this.renderedQuestionArray.push({
-                            wrapper: tmpChild.parentElement,
-                            question: ACFactory.createActiveCode(
-                                tmpChild,
-                                lang,
-                                opts
-                            ),
-                        });
-                    } else if ($(tmpChild).is("[data-component]")) {
-                        let componentKind = $(tmpChild).data("component");
-                        this.renderedQuestionArray.push({
-                            question: new window.component_factory[
-                                componentKind
-                            ](opts),
-                        });
-                    } else if ($(tmpChild).is("[data-childcomponent]")) {
-                        // this is for when a directive has a wrapper element that isn't actually part of the javascript object
-                        // for example, activecode has a wrapper div that contains the question for the element
-                        var child = $("#" + $(tmpChild).data("childcomponent"));
-                        if ($(child[0]).is("[data-component=activecode]")) {
-                            // create & insert new JS object back into wrapper div-- we're simulating the parsing that would happen outside of a timed exam
-                            opts.orig = child[0];
-                            let lang = $(child[0]).data("lang");
-                            var newAC = ACFactory.createActiveCode(
-                                child[0],
-                                lang,
-                                opts
-                            );
-                            $(child[0]).remove();
-                            var tmp = tmpChild.childNodes[0];
-                            $(tmp).after(newAC.containerDiv);
-                            this.renderedQuestionArray.push({
-                                wrapper: tmpChild,
-                                question: newAC,
-                            });
-                        }
-                    }
-                }
-                // when all promises are resolved
-                if (pArray.length === 0) {
-                    resolve("Done");
-                } else {
-                    Promise.all(pArray).then(function () {
-                        resolve("Done");
+        var opts;
+        for (var i = 0; i < this.newChildren.length; i++) {
+            var tmpChild = this.newChildren[i];
+            opts = {
+                orig: tmpChild,
+                useRunestoneServices: eBookConfig.useRunestoneServices,
+                timed: true,
+                assessmentTaken: this.taken,
+            };
+            if ($(tmpChild).children("[data-component]").length > 0) {
+                tmpChild = $(tmpChild).children("[data-component]")[0];
+                opts.orig = tmpChild;
+            }
+            if ($(tmpChild).is("[data-component=selectquestion]")) {
+                // SelectOne is async and will replace itself in this array with
+                // the actual selected question
+                opts.rqa = this.renderedQuestionArray;
+                let newq = new SelectOne(opts);
+                this.renderedQuestionArray.push({
+                    question: newq,
+                });
+                pArray.push(newq.initialize());
+            } else if ($(tmpChild).is("[data-component=activecode]")) {
+                let lang = $(tmpChild).data("lang");
+                this.renderedQuestionArray.push({
+                    wrapper: tmpChild.parentElement,
+                    question: ACFactory.createActiveCode(tmpChild, lang, opts),
+                });
+            } else if ($(tmpChild).is("[data-component]")) {
+                let componentKind = $(tmpChild).data("component");
+                this.renderedQuestionArray.push({
+                    question: new window.component_factory[componentKind](opts),
+                });
+            } else if ($(tmpChild).is("[data-childcomponent]")) {
+                // this is for when a directive has a wrapper element that isn't actually part of the javascript object
+                // for example, activecode has a wrapper div that contains the question for the element
+                var child = $("#" + $(tmpChild).data("childcomponent"));
+                if ($(child[0]).is("[data-component=activecode]")) {
+                    // create & insert new JS object back into wrapper div-- we're simulating the parsing that would happen outside of a timed exam
+                    opts.orig = child[0];
+                    let lang = $(child[0]).data("lang");
+                    var newAC = ACFactory.createActiveCode(
+                        child[0],
+                        lang,
+                        opts
+                    );
+                    $(child[0]).remove();
+                    var tmp = tmpChild.childNodes[0];
+                    $(tmp).after(newAC.containerDiv);
+                    this.renderedQuestionArray.push({
+                        wrapper: tmpChild,
+                        question: newAC,
                     });
                 }
-            }.bind(this)
-        );
-        return retp;
+            }
+        }
+        // when all promises are resolved
     }
 
     randomizeRQA() {
