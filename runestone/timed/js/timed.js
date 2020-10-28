@@ -368,12 +368,14 @@ export default class Timed extends RunestoneBase {
                     }
                 }
                 var target = $(event.target).text();
+                let oldIndex = this.currentQuestionIndex;
                 this.currentQuestionIndex = parseInt(target) - 1;
                 if (
                     this.currentQuestionIndex >
                     this.renderedQuestionArray.length
                 ) {
                     console.log(`Error: bad index for ${target}`);
+                    this.currentQuestionIndex = oldIndex;
                 }
                 $(
                     "ul#pageNums > ul > li:eq(" +
