@@ -1149,7 +1149,7 @@ export default class Parsons extends RunestoneBase {
         this.initializeLines(content);
         this.initializeView();
         // Check the server for an answer to complete things
-        if (this.useRunestoneServices) {
+        if (this.useRunestoneServices || this.graderactive) {
             this.checkServer("parsons");
         } else {
             this.checkLocalStorage();
