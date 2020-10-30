@@ -38,12 +38,12 @@ export class ActiveCode extends RunestoneBase {
     constructor(opts) {
         super(opts);
         var suffStart;
-        var orig = $(opts.orig).find("textarea");
+        var orig = $(opts.orig).find("textarea")[0];
         this.useRunestoneServices = opts.useRunestoneServices;
         this.python3 = opts.python3;
         this.alignVertical = opts.vertical;
         this.origElem = orig;
-        this.divid = orig.id;
+        this.divid = opts.orig.id;
         this.code = $(orig).text() || "\n\n\n\n\n";
         this.language = $(orig).data("lang");
         this.timelimit = $(orig).data("timelimit");

@@ -162,7 +162,7 @@ $(document).ready(function () {
             try {
                 window.edList[this.id] = ACFactory.createActiveCode(
                     this,
-                    $(this).data("lang")
+                    $(this).find("textarea").data("lang")
                 );
             } catch (err) {
                 console.log(`Error rendering ClickableArea Problem ${this.id}

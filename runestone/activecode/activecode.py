@@ -72,7 +72,8 @@ def setup(app):
 
 
 TEMPLATE_START = """
-<div data-component="activecode" id=%(divid)s class="%(divclass)s">
+<div class="%(divclass)s">
+<div data-component="activecode" id=%(divid)s >
 """
 
 TEMPLATE_END = """
@@ -83,6 +84,7 @@ TEMPLATE_END = """
     style="visibility: hidden;">
 %(initialcode)s
 </textarea>
+</div>
 </div>
 """
 
