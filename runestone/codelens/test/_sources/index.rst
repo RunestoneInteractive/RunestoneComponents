@@ -229,3 +229,19 @@ Lets test Java now by providing the source.
     cout << "numStacksCreated: " << Stack::getNumStacksCreated() << endl;
     cout << "publicNumLinksCreated: " << Stack::publicNumLinksCreated << endl;
     }
+
+
+.. codelens:: codelens_question_line
+    :question: After the line with the red arrow is executed, which will be next?
+    :breakline: 3
+    :feedback: Remember that in an if/else statement only one block is executed.
+    :correct: line
+
+    x = 2
+    y = 0
+    if x % 2 == 1:
+        print('x is odd')
+        y = y + x
+    else:
+        print('x is even')
+        y = y - x
