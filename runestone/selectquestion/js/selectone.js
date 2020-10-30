@@ -94,6 +94,7 @@ export default class SelectOne extends RunestoneBase {
                             res = createTimedComponent(htmlsrc, {
                                 timed: true,
                                 selector_id: selectorId,
+                                assessmentTaken: opts.assessmentTaken,
                             });
                             // replace the entry in the timed assessment's list of components
                             // with the component created by createTimedComponent
