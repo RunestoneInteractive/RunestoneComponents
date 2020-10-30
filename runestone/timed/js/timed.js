@@ -295,9 +295,6 @@ export default class Timed extends RunestoneBase {
             "click",
             function (event) {
                 if (
-                    $("div#timed_Test form input[name='group1']").is(
-                        ":checked"
-                    ) ||
                     this.renderedQuestionArray[this.currentQuestionIndex]
                         .question.isAnswered
                 ) {
@@ -345,7 +342,8 @@ export default class Timed extends RunestoneBase {
             "click",
             function (event) {
                 if (
-                    $("div#timed_Test form input[name='group1']").is(":checked")
+                    this.renderedQuestionArray[this.currentQuestionIndex]
+                        .question.isAnswered
                 ) {
                     $(
                         "ul#pageNums > ul > li:eq(" +
@@ -459,7 +457,9 @@ export default class Timed extends RunestoneBase {
         for (var i = 0; i < this.newChildren.length; i++) {
             var tmpChild = this.newChildren[i];
             opts = {
+                state: "prepared",
                 orig: tmpChild,
+                question: {},
                 useRunestoneServices: eBookConfig.useRunestoneServices,
                 timed: true,
                 assessmentTaken: this.taken,
@@ -468,26 +468,8 @@ export default class Timed extends RunestoneBase {
                 tmpChild = $(tmpChild).children("[data-component]")[0];
                 opts.orig = tmpChild;
             }
-            if ($(tmpChild).is("[data-component=selectquestion]")) {
-                // SelectOne is async and will replace itself in this array with
-                // the actual selected question
-                opts.rqa = this.renderedQuestionArray;
-                let newq = new SelectOne(opts);
-                this.renderedQuestionArray.push({
-                    question: newq,
-                });
-                pArray.push(newq.initialize());
-            } else if ($(tmpChild).is("[data-component=activecode]")) {
-                let lang = $(tmpChild).data("lang");
-                this.renderedQuestionArray.push({
-                    wrapper: tmpChild.parentElement,
-                    question: ACFactory.createActiveCode(tmpChild, lang, opts),
-                });
-            } else if ($(tmpChild).is("[data-component]")) {
-                let componentKind = $(tmpChild).data("component");
-                this.renderedQuestionArray.push({
-                    question: new window.component_factory[componentKind](opts),
-                });
+            if ($(tmpChild).is("[data-component]")) {
+                this.renderedQuestionArray.push(opts);
             }
         }
     }
@@ -517,9 +499,31 @@ export default class Timed extends RunestoneBase {
             // of all the numbers in the list!
             return;
         }
-        let currentWrapper = this.renderedQuestionArray[
-            this.currentQuestionIndex
-        ].wrapper;
+        // check the renderedQuestionArray to see if it has been rendered.
+        let opts = this.renderedQuestionArray[this.currentQuestionIndex];
+        if (opts.hasOwnProperty("state") && opts.state === "prepared") {
+            let tmpChild = opts.orig;
+            if ($(tmpChild).is("[data-component=selectquestion]")) {
+                // SelectOne is async and will replace itself in this array with
+                // the actual selected question
+                opts.rqa = this.renderedQuestionArray;
+                let newq = new SelectOne(opts);
+                this.renderedQuestionArray[this.currentQuestionIndex] = {
+                    question: newq,
+                };
+                newq.initialize();
+            } else if ($(tmpChild).is("[data-component=activecode]")) {
+                let lang = $(tmpChild).data("lang");
+                this.renderedQuestionArray[this.currentQuestionIndex] = {
+                    question: ACFactory.createActiveCode(tmpChild, lang, opts),
+                };
+            } else if ($(tmpChild).is("[data-component]")) {
+                let componentKind = $(tmpChild).data("component");
+                this.renderedQuestionArray[this.currentQuestionIndex] = {
+                    question: new window.component_factory[componentKind](opts),
+                };
+            }
+        }
         var currentQuestion = this.renderedQuestionArray[
             this.currentQuestionIndex
         ].question;
@@ -529,14 +533,10 @@ export default class Timed extends RunestoneBase {
                 $(this.finishButton).show();
             }
         }
-        // if the question is actually inside a wrapper (for example, activecode), then we want to display the wrapper, but evaluate the actual question object
-        if (currentWrapper) {
-            $(this.switchDiv).replaceWith(currentWrapper);
-            this.switchDiv = currentWrapper;
-        } else {
-            $(this.switchDiv).replaceWith(currentQuestion.containerDiv);
-            this.switchDiv = currentQuestion.containerDiv;
-        }
+
+        $(this.switchDiv).replaceWith(currentQuestion.containerDiv);
+        this.switchDiv = currentQuestion.containerDiv;
+
         // If the timed component has listeners, those might need to be reinitialized
         // This flag will only be set in the elements that need it--it will be undefined in the others and thus evaluate to false
         if (currentQuestion.needsReinitialization) {

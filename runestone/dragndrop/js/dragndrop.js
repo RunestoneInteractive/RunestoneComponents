@@ -45,8 +45,8 @@ export default class DragNDrop extends RunestoneBase {
             if (
                 $(this.origElem.childNodes[i]).data("component") === "dropzone"
             ) {
-                var tmp = document.getElementById(
-                    $(this.origElem.childNodes[i]).attr("for")
+                var tmp = $(this.origElem).find(
+                    `#${$(this.origElem.childNodes[i]).attr("for")}`
                 );
                 var replaceSpan = document.createElement("span");
                 replaceSpan.innerHTML = tmp.innerHTML;
