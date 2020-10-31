@@ -17,9 +17,8 @@ __author__ = "tconzett"
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common.runestonedirective import RunestoneIdDirective
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneIdNode
 
 
 def setup(app):
@@ -28,10 +27,30 @@ def setup(app):
     app.add_config_value(
         "showeval_div_class", "runestone explainer alert alert-warning", "html"
     )
+    app.add_node(ShowEvalNode, html=(visit_showeval_node, depart_showeval_node))
+
+
+# Create visitors, so we can generate HTML after the doctree is resolve (where the question label is determined).
+class ShowEvalNode(nodes.General, nodes.Element, RunestoneIdNode):
+    def __init__(self, content, **kwargs):
+        super().__init__(**kwargs)
+        self.runestone_options = content
+
+
+def visit_showeval_node(self, node):
+    html = CODE % node.runestone_options
+    self.body.append(html)
+    addHTMLToDB(
+        node.runestone_options["divid"], node.runestone_options["basecourse"], html
+    )
+
+
+def depart_showeval_node(self, node):
+    pass
 
 
 CODE = """
-<div data-childcomponent="showeval" class="%(divclass)s" id="%(divid)s" data-tracemode="%(trace_mode)s" %(optional)s>
+<div data-childcomponent="showeval" data-question_label="%(question_label)s" class="%(divclass)s" id="%(divid)s" data-tracemode="%(trace_mode)s" %(optional)s>
     <button class="btn btn-success" id="%(divid)s_nextStep">Next Step</button>
     <button class="btn btn-default" id ="%(divid)s_reset">Reset</button>
     <div class="evalCont" style="background-color: #FDFDFD;">%(preReqLines)s</div>
@@ -68,7 +87,8 @@ config values (conf.py):
     optional_arguments = 0
     final_argument_whitespace = True
     has_content = True
-    option_spec = {"trace_mode": directives.unchanged_required}
+    option_spec = RunestoneIdDirective.option_spec.copy()
+    option_spec.update({"trace_mode": directives.unchanged_required})
 
     def run(self):
         """
@@ -125,7 +145,4 @@ config values (conf.py):
             else:
                 self.options["preReqLines"] += line + "<br />\n"
 
-        res = CODE % self.options
-
-        addHTMLToDB(self.options["divid"], self.options["basecourse"], res)
-        return [nodes.raw(self.block_text, res, format="html")]
+        return [ShowEvalNode(self.options, rawsource=self.block_text)]

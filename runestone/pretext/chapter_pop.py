@@ -2,6 +2,7 @@ import datetime
 import os
 import sys
 import xml.etree.ElementTree as ET
+import pdb
 
 from sqlalchemy import create_engine, Table, MetaData, and_
 from sqlalchemy.orm.session import sessionmaker
@@ -122,16 +123,28 @@ def manifest_data_to_db(course_name, manifest_path):
             sess.execute(ins)
 
             for question in subchapter.findall("./question"):
-                dbtext = ET.tostring(question.find("./"))
+                dbtext = " ".join(
+                    [ET.tostring(y).decode("utf8") for y in question.findall("*")]
+                )
+                print("looking for data-component")
+                # pdb.set_trace()
                 el = question.find(".//*[@data-component]")
-                idchild = el.attrib["id"]
+                # Unbelievably if find finds something it evals to False!!
+                if el is not None:
+                    idchild = el.attrib["id"]
+                else:
+                    el = question.find("./div")
+                try:
+                    qtype = el.attrib["data-component"]
+                except:
+                    qtype = "webwork"
                 valudict = dict(
                     base_course=course_name,
                     name=idchild,
                     timestamp=datetime.datetime.now(),
                     is_private="F",
-                    question_type=el.attrib["data-component"],
-                    htmlsrc=dbtext.decode("utf8"),
+                    question_type=qtype,
+                    htmlsrc=dbtext,
                     from_source="T",
                     subchapter=subchapter.find("./id").text,
                     chapter=chapter.find("./id").text,

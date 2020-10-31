@@ -18,6 +18,7 @@ setUpModule, tearDownModule = module_fixture_maker(__file__)
 
 class ParsonsTests(RunestoneTestCase):
     maxDiff = None
+
     def test_general(self):
 
         self.driver.get(self.host + "/index.html")
@@ -143,7 +144,7 @@ class ParsonsTests(RunestoneTestCase):
         self.wait_for_animation("#parsons-1-block-1")
         checkme.click()
         self.assertTrue(self.wait_and_close_alert())
-        helpBtn.click()                 # remove the incorrect block
+        helpBtn.click()  # remove the incorrect block
         self.assertTrue(self.wait_and_close_alert())
         self.wait_for_animation("#parsons-1-block-4")
         b4 = source.find_element_by_id("parsons-1-block-4")
@@ -156,9 +157,9 @@ class ParsonsTests(RunestoneTestCase):
         # There seems to be a timing issue -- a bit of delay makes this pass.
         time.sleep(0.1)
         self.assertEqual(l5.get_attribute("class"), "prettyprint lang-py")
-        self.assertFalse(self.f_exists("parsons-1-block-3"))                    
+        self.assertFalse(self.f_exists("parsons-1-block-3"))
         b2 = answer.find_element_by_id("parsons-1-block-2")
-        l3 = b2.find_element_by_id("parsons-1-line-3")    
+        l3 = b2.find_element_by_id("parsons-1-line-3")
         l4 = b2.find_element_by_id("parsons-1-line-4")
         l5 = b2.find_element_by_id("parsons-1-line-5")
         self.assertIsNotNone(l3)
@@ -289,7 +290,7 @@ class ParsonsTests(RunestoneTestCase):
         self.assertEqual(b3.get_attribute("class"), "block indentRight")
 
         helpBtn = self.driver.find_element_by_id("parsons-1-help")
-        helpBtn.click()                                   # Combine blocks
+        helpBtn.click()  # Combine blocks
         self.assertTrue(self.wait_and_close_alert())
         self.wait_for_animation("#parsons-1-block-1")
         self.wait_for_animation("#parsons-1-block-0")
@@ -297,7 +298,7 @@ class ParsonsTests(RunestoneTestCase):
         self.assertEqual(b2.get_attribute("class"), "block indentRight")
         self.assertEqual(b3.get_attribute("class"), "block indentRight")
 
-        helpBtn.click()                                  # No more change
+        helpBtn.click()  # No more change
         self.assertTrue(self.wait_and_close_alert())
         checkme.click()
         self.assertEqual(b2.get_attribute("class"), "block indentRight")

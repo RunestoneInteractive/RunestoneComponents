@@ -11,9 +11,9 @@ import SQLActiveCode from "./activecode_sql";
 
 var TimedActiveCodeMixin = {
     timedInit: function (opts) {
+        this.isTimed = true;
         this.hideButtons();
         this.addHistoryScrubber();
-        this.isTimed = true;
         this.needsReinitialization = true; // the run button click listener needs to be reinitialized
         this.containerDiv.classList.add("timedComponent");
         window.edList[this.divid] = this;
@@ -51,12 +51,16 @@ var TimedActiveCodeMixin = {
     },
 
     checkCorrectTimed: function () {
+        // pct_correct is set by the unittest/gui.py module in skulpt.
+        // it relies on finding this object in the edList
         if (this.pct_correct) {
             if (this.pct_correct >= 100.0) {
                 return "T";
             } else {
                 return "F";
             }
+        } else if (this.errLastRun) {
+            return "F";
         } else {
             return "I"; // we ignore this in the grading if no unittests
         }
@@ -68,16 +72,18 @@ var TimedActiveCodeMixin = {
 
     processTimedSubmission: function (logFlag) {
         $(this.runButton).hide();
+        this.runProg(true, logFlag); // true means no GUI
         $(`#${this.divid}_unit_results`).show();
         $(this.codeDiv).addClass("ac-disabled");
     },
 
-    reinitializeListeners: function () {
+    reinitializeListeners: function (taken) {
         // re-attach the run button listener
         $(this.runButton).click(this.runProg.bind(this));
         $(this.codeDiv).show();
         this.runButton.disabled = false;
         $(this.codeDiv).removeClass("ac-disabled");
+        this.editor.refresh();
         $(this.histButton).click(this.addHistoryScrubber.bind(this));
         if (this.historyScrubber !== null) {
             $(this.historyScrubber).slider({
@@ -86,6 +92,9 @@ var TimedActiveCodeMixin = {
                 slide: this.slideit.bind(this),
                 change: this.slideit.bind(this),
             });
+        }
+        if (taken) {
+            $(`#${this.divid}_unit_results`).show();
         }
     },
 };

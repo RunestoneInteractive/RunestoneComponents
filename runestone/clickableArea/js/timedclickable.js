@@ -5,6 +5,7 @@ import ClickableArea from "./clickable.js";
 export default class TimedClickableArea extends ClickableArea {
     constructor(opts) {
         super(opts);
+        this.restoreAnswers({});
         this.renderTimedIcon(this.containerDiv);
         this.hideButtons();
     }
@@ -58,3 +59,13 @@ export default class TimedClickableArea extends ClickableArea {
         this.clickableEval(logFlag);
     }
 }
+
+if (typeof window.component_factory === "undefined") {
+    window.component_factory = {};
+}
+window.component_factory.clickablearea = function (opts) {
+    if (opts.timed) {
+        return new TimedClickableArea(opts);
+    }
+    return new ClickableArea(opts);
+};

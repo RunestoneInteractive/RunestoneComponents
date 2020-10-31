@@ -10,7 +10,7 @@ window.ssList = {};
 
 class SpreadSheet extends RunestoneBase {
     constructor(opts) {
-        super(SpreadSheet);
+        super(opts);
         let orig = opts.orig;
         this.div_id = orig.id;
         this.sheet_id = `${this.div_id}_sheet`;

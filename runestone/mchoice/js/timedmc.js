@@ -3,6 +3,8 @@ import MultipleChoice from "./mchoice.js";
 export default class TimedMC extends MultipleChoice {
     constructor(opts) {
         super(opts);
+        $(this.containerDiv).addClass("alert alert-warning runestone");
+        this.needsReinitialization = true;
         this.renderTimedIcon(this.MCContainer);
         this.hideButtons(); // Don't show per-question buttons in a timed assessment
     }
@@ -156,4 +158,25 @@ export default class TimedMC extends MultipleChoice {
             this.processMCMFSubmission(logFlag);
         }
     }
+    reinitializeListeners() {
+        let self = this;
+        let answerFunc = function () {
+            self.isAnswered = true;
+        };
+        for (let opt of this.optionArray) {
+            opt.input.onclick = answerFunc;
+        }
+    }
 }
+
+if (typeof window.component_factory === "undefined") {
+    window.component_factory = {};
+}
+
+window.component_factory.multiplechoice = function (opts) {
+    if (opts.timed) {
+        return new TimedMC(opts);
+    } else {
+        return new MultipleChoice(opts);
+    }
+};

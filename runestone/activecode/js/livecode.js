@@ -60,6 +60,7 @@ export default class LiveCode extends ActiveCode {
             c: "test.c",
             python3: "test.py",
             python2: "test.py",
+            octave: "octatest.m",
         };
         var sourcefilename = "";
         var testdrivername = "";
@@ -96,6 +97,7 @@ export default class LiveCode extends ActiveCode {
             "linkargs",
             "runargs",
             "interpreterargs",
+            "memorylimit",
         ];
         var paramobj = {};
         for (let param of paramlist) {
@@ -103,6 +105,10 @@ export default class LiveCode extends ActiveCode {
                 paramobj[param] = eval(this[param]); // needs a list
             }
         }
+        if (this.language === "octave") {
+            paramobj.memorylimit = 200000;
+        }
+
         if (this.stdin) {
             stdin = $(this.stdin_el).val();
         }
@@ -242,6 +248,7 @@ export default class LiveCode extends ActiveCode {
             c: "test.c",
             python3: "test.py",
             python2: "test.py",
+            octave: "octatest.m",
         };
         source = this.editor.getValue();
         xhr = new XMLHttpRequest();
@@ -303,6 +310,9 @@ export default class LiveCode extends ActiveCode {
                         rdiv.appendChild(parsedOutput.pctString);
                     }
                     if (this.suffix) {
+                        if (parsedOutput.pct === undefined) {
+                            parsedOutput.pct = parsedOutput.passed = parsedOutput.failed = 0;
+                        }
                         this.logBookEvent({
                             event: "unittest",
                             act: `percent:${parsedOutput.pct}:passed:${parsedOutput.passed}:failed:${parsedOutput.failed}`,

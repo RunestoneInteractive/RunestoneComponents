@@ -25,6 +25,7 @@ from docutils.parsers.rst import directives
 from runestone.common.runestonedirective import (
     RunestoneNode,
     RunestoneIdDirective,
+    RunestoneIdNode,
     get_node_line,
 )
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
@@ -43,7 +44,7 @@ def setup(app):
 # for what we need to see on the final page.  Although we only care to render interactive
 # textbooks as HTML one could, render the nodes as LaTex or many other languages.
 #
-class SpreadSheetNode(nodes.General, nodes.Element, RunestoneNode):
+class SpreadSheetNode(nodes.General, nodes.Element, RunestoneIdNode):
     def __init__(self, content, **kwargs):
         """
 
@@ -52,7 +53,7 @@ class SpreadSheetNode(nodes.General, nodes.Element, RunestoneNode):
         - `content`:
         """
         super(SpreadSheetNode, self).__init__(**kwargs)
-        self.ss_options = content
+        self.runestone_options = content
 
 
 #
@@ -209,19 +210,20 @@ def as_int_or_float(s):
 
 
 TEMPLATE = """
-<div id="{divid}" data-component="spreadsheet" class="runestone" {autograde} {mindimensions} {colwidths} {coltitles}>
+<div id="{divid}" data-component="spreadsheet" class="runestone" {autograde} {mindimensions} {colwidths} {coltitles} data-question_label="{question_label}">
     <div id="{divid}_sheet"></div>
 
     <script>
         {divid}_data = {data};
         {divid}_asserts = {asserts};
     </script>
+
 </div>
 """
 
 
 def visit_ss_node(self, node):
-    res = TEMPLATE.format(**node.ss_options)
+    res = TEMPLATE.format(**node.runestone_options)
     self.body.append(res)
 
 

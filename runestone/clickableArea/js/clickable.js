@@ -355,7 +355,9 @@ export default class ClickableArea extends RunestoneBase {
                 }
             }
         }
+        let self = this;
         clickable.onclick = function () {
+            self.isAnswered = true;
             if ($(this).hasClass("clickable-clicked")) {
                 $(this).removeClass("clickable-clicked");
                 $(this).removeClass("clickable-incorrect");
@@ -444,10 +446,3 @@ $(document).bind("runestone:login-complete", function () {
         }
     });
 });
-
-if (typeof window.component_factory === "undefined") {
-    window.component_factory = {};
-}
-window.component_factory.clickablearea = function (opts) {
-    return new ClickableArea(opts);
-};

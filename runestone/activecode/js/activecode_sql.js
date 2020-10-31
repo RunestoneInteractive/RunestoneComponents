@@ -6,6 +6,7 @@ var allDburls = {};
 export default class SQLActiveCode extends ActiveCode {
     constructor(opts) {
         super(opts);
+        //  fnprefix sets the path to load the sql-wasm.wasm file
         var fnprefix;
         if (eBookConfig.useRunestoneServices) {
             fnprefix =

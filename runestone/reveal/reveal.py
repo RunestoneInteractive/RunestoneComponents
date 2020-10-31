@@ -17,7 +17,8 @@ __author__ = "isaiahmayerchak"
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
+
 
 # add directives/javascript/css
 def setup(app):
@@ -29,36 +30,42 @@ def setup(app):
 class RevealNode(nodes.General, nodes.Element, RunestoneNode):
     def __init__(self, content, **kwargs):
         super(RevealNode, self).__init__(**kwargs)
-        self.reveal_options = content
+        self.runestone_options = content
 
 
 def visit_reveal_node(self, node):
     # Set options and format templates accordingly
 
-    if "modal" in node.reveal_options:
-        node.reveal_options["modal"] = "data-modal"
+    if "modal" in node.runestone_options:
+        node.runestone_options["modal"] = "data-modal"
     else:
-        node.reveal_options["modal"] = ""
+        node.runestone_options["modal"] = ""
 
-    if "modaltitle" in node.reveal_options:
-        temp = node.reveal_options["modaltitle"]
-        node.reveal_options["modaltitle"] = """data-title=""" + '"' + temp + '"'
+    if "modaltitle" in node.runestone_options:
+        temp = node.runestone_options["modaltitle"]
+        node.runestone_options["modaltitle"] = """data-title=""" + '"' + temp + '"'
     else:
-        node.reveal_options["modaltitle"] = ""
+        node.runestone_options["modaltitle"] = ""
 
-    if node.reveal_options["instructoronly"] and node.reveal_options["is_dynamic"]:
+    if (
+        node.runestone_options["instructoronly"]
+        and node.runestone_options["is_dynamic"]
+    ):
         res = DYNAMIC_PREFIX
     else:
         res = ""
 
-    res += TEMPLATE_START % node.reveal_options
+    res += TEMPLATE_START % node.runestone_options
     self.body.append(res)
 
 
 def depart_reveal_node(self, node):
     # Set options and format templates accordingly
-    res = TEMPLATE_END % node.reveal_options
-    if node.reveal_options["instructoronly"] and node.reveal_options["is_dynamic"]:
+    res = TEMPLATE_END % node.runestone_options
+    if (
+        node.runestone_options["instructoronly"]
+        and node.runestone_options["is_dynamic"]
+    ):
         res += DYNAMIC_SUFFIX
 
     self.body.append(res)
@@ -69,7 +76,7 @@ DYNAMIC_PREFIX = """
 {{ if is_instructor: }}
 """
 TEMPLATE_START = """
-    <div data-component="reveal" id="%(divid)s" %(modal)s %(modaltitle)s %(showtitle)s %(hidetitle)s %(instructoronly)s>
+    <div data-component="reveal" id="%(divid)s" %(modal)s %(modaltitle)s %(showtitle)s %(hidetitle)s %(instructoronly)s style="visibility: hidden;">
     """
 TEMPLATE_END = """
     </div>
@@ -79,7 +86,7 @@ DYNAMIC_SUFFIX = """
 """
 
 
-class RevealDirective(RunestoneIdDirective):
+class RevealDirective(RunestoneDirective):
     """
 .. reveal:: identifier
    :showtitle: Text on the 'show' button--default is "Show"
@@ -96,7 +103,7 @@ class RevealDirective(RunestoneIdDirective):
     optional_arguments = 0
     final_argument_whitespace = True
     has_content = True
-    option_spec = RunestoneIdDirective.option_spec.copy()
+    option_spec = RunestoneDirective.option_spec.copy()
     option_spec.update(
         {
             "showtitle": directives.unchanged,
@@ -122,17 +129,19 @@ class RevealDirective(RunestoneIdDirective):
             Content
             ...
             """
-        super(RevealDirective, self).run()
+        # super(RevealDirective, self).run()
         env = self.state.document.settings.env
         self.assert_has_content()  # make sure reveal has something in it
 
-        if not "showtitle" in self.options:
+        self.options["divid"] = self.arguments[0]
+
+        if "showtitle" not in self.options:
             self.options["showtitle"] = 'data-showtitle="Show"'
         else:
             self.options["showtitle"] = (
                 """data-showtitle=""" + '"' + self.options["showtitle"] + '"'
             )
-        if not "hidetitle" in self.options:
+        if "hidetitle" not in self.options:
             self.options["hidetitle"] = 'data-hidetitle="Hide"'
         else:
             self.options["hidetitle"] = (

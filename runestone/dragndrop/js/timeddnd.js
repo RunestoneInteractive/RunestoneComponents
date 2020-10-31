@@ -5,6 +5,7 @@ import DragNDrop from "./dragndrop.js";
 export default class TimedDragNDrop extends DragNDrop {
     constructor(opts) {
         super(opts);
+        this.finishSettingUp();
         this.renderTimedIcon(this.containerDiv);
         this.hideButtons();
     }
@@ -53,3 +54,13 @@ export default class TimedDragNDrop extends DragNDrop {
         }
     }
 }
+
+if (typeof window.component_factory === "undefined") {
+    window.component_factory = {};
+}
+window.component_factory["dragndrop"] = function (opts) {
+    if (opts.timed) {
+        return new TimedDragNDrop(opts);
+    }
+    return new DragNDrop(opts);
+};

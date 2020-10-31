@@ -30,14 +30,14 @@ from sphinx import application
 from sphinx.errors import ExtensionError
 
 UNNUMBERED_DIRECTIVES = [
-    "activecode",
+    #    "activecode",
     "reveal",
-    "video",
-    "youtube",
-    "vimeo",
-    "codelens",
-    "showeval",
-    "poll",
+    #    "video",
+    #    "youtube",
+    #    "vimeo",
+    #   "codelens",
+    #   "showeval",
+    #   "poll",
     "tabbed",
     "tab",
     "timed",
@@ -47,6 +47,11 @@ UNNUMBERED_DIRECTIVES = [
 
 # Provide a class which all Runestone nodes will inherit from.
 class RunestoneNode(nodes.Node):
+    pass
+
+
+# Provide a class which all Runestone ID nodes will inherit from.
+class RunestoneIdNode(RunestoneNode):
     pass
 
 
@@ -186,8 +191,12 @@ application.Sphinx.add_autoversioned_stylesheet = _add_autoversioned_stylesheet
 
 
 def setup(app):
+    # Avoid a circular import. Ick.
+    from .question_number import _insert_qnum
+
     # See http://www.sphinx-doc.org/en/stable/extdev/appapi.html#event-env-purge-doc.
     app.connect("env-purge-doc", _purge_runestone_data)
+    app.connect("doctree-resolved", _insert_qnum)
     app.add_role("skipreading", SkipReading)
     # See http://www.sphinx-doc.org/en/stable/extdev/appapi.html#sphinx.application.Sphinx.add_config_value.
     app.add_config_value("runestone_server_side_grading", False, "env")
@@ -199,13 +208,22 @@ class RunestoneDirective(Directive):
     option_spec = {
         "author": directives.unchanged,
         "tags": directives.unchanged,
-        "difficulty": directives.positive_int,
+        "difficulty": directives.unchanged,
         "autograde": directives.unchanged,
         "practice": directives.unchanged,
         "topics": directives.unchanged,
         "optional": directives.flag,
         "prim_comp": directives.unchanged,
         "supp_comp": directives.unchanged,
+        "from_source": directives.unchanged,
+        "basecourse": directives.unchanged,
+        "chapter": directives.unchanged,
+        "subchapter": directives.unchanged,
+        "points": directives.positive_int,
+        "pct_on_first": directives.unchanged,
+        "mean_clicks_to_correct": directives.unchanged,
+        "total_students_attempting": directives.unchanged,
+        "num_students_correct": directives.unchanged,
     }
 
     def __init__(self, *args, **kwargs):
@@ -213,21 +231,35 @@ class RunestoneDirective(Directive):
         env = self.state.document.settings.env
         self.srcpath = env.docname
         # Rather tha use ``os.sep`` to split ``self.srcpath``, use ``'/'``, because Sphinx internally stores filesnames using this separator, even on Windows.
+
         split_docname = self.srcpath.split("/")
         if len(split_docname) < 2:
             # TODO: Warn about this? Something like ``self.state.document.settings.env``?
             split_docname.append("")
-        self.subchapter = split_docname[-1]
-        self.chapter = split_docname[-2]
-        self.basecourse = self.state.document.settings.env.config.html_context.get(
-            "basecourse", "unknown"
-        )
-        self.options["basecourse"] = self.basecourse
-        self.options["chapter"] = self.chapter
-        self.options["subchapter"] = self.subchapter
+        if "subchapter" not in self.options:
+            self.subchapter = split_docname[-1]
+            self.options["subchapter"] = self.subchapter
+        else:
+            self.subchapter = self.options["subchapter"]
+        if "chapter" not in self.options:
+            self.chapter = split_docname[-2]
+            self.options["chapter"] = self.chapter
+        else:
+            self.chapter = self.options["chapter"]
+
+        if "basecourse" not in self.options:
+            self.basecourse = self.state.document.settings.env.config.html_context.get(
+                "basecourse", "unknown"
+            )
+            self.options["basecourse"] = self.basecourse
         self.options["optional"] = (
             "data-optional=true" if "optional" in self.options else ""
         )
+        if "points" in self.options:
+            self.int_points = int(self.options["points"])
+        else:
+            self.int_points = 1
+
         self.explain_text = []
 
 
@@ -243,7 +275,7 @@ class RunestoneIdDirective(RunestoneDirective):
             return ""
 
         env.assesscounter += 1
-
+        # print(f" assesscounter = {env.assesscounter}")
         res = "Q-%d"
 
         if hasattr(env, "assessprefix"):
@@ -288,6 +320,7 @@ class RunestoneIdDirective(RunestoneDirective):
             id_ = self.options["divid"]
 
         self.options["qnumber"] = self.getNumber()
+        # print(f"{id_} is number {self.options['qnumber']}")
 
         # Get references to `runestone data`_.
         env = self.state.document.settings.env
@@ -308,6 +341,8 @@ class RunestoneIdDirective(RunestoneDirective):
             # Add a new entry.
             id_to_page[id_] = Struct(docname=env.docname, lineno=self.lineno)
             page_to_id[env.docname].add(id_)
+
+        self.in_exam = getattr(env, "in_timed", "")
 
 
 # returns True when called first time with particular parameters' values
@@ -373,7 +408,16 @@ def SkipReading(
     if not hasattr(inliner.document.settings.env, "skipreading"):
         inliner.document.settings.env.skipreading = set()
 
-    print("ADDING {} to skipreading".format(docname))
+    # print("ADDING {} to skipreading".format(docname))
     inliner.document.settings.env.skipreading.add(docname)
 
     return ([], [])
+
+
+# Return the Sphinx environment given a node object.
+def env_from_node(node):
+    # Ascend the node tree until we find a node with a ``document``.
+    node_with_document = node
+    while not node_with_document.document:
+        node_with_document = node_with_document.parent
+    return node_with_document.document.settings.env

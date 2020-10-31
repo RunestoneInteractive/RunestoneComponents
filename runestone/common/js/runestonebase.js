@@ -24,6 +24,10 @@ export default class RunestoneBase {
         if (opts) {
             this.sid = opts.sid;
             this.graderactive = opts.graderactive;
+            this.showfeedback = true;
+            if (opts.timed) {
+                this.isTimed = true;
+            }
             if (opts.enforceDeadline) {
                 this.deadline = opts.deadline;
             }
@@ -31,6 +35,23 @@ export default class RunestoneBase {
                 this.optional = true;
             } else {
                 this.optional = false;
+            }
+            if (opts.selector_id) {
+                this.selector_id = opts.selector_id;
+            }
+            if (typeof opts.assessmentTaken !== "undefined") {
+                this.assessmentTaken = opts.assessmentTaken;
+            } else {
+                // default to true as this opt is only provided from a timedAssessment
+                this.assessmentTaken = true;
+            }
+            if (typeof opts.timedWrapper !== "undefined") {
+                this.timedWrapper = opts.timedWrapper;
+            } else {
+                this.timedWrapper = null;
+            }
+            if ($(opts.orig).data("question_label")) {
+                this.question_label = $(opts.orig).data("question_label");
             }
         }
     }
@@ -129,11 +150,12 @@ export default class RunestoneBase {
             if (this.sid) {
                 data.sid = this.sid;
             }
-            if (!eBookConfig.practice_mode) {
+            if (!eBookConfig.practice_mode && this.assessmentTaken) {
                 jQuery
                     .getJSON(
                         eBookConfig.ajaxURL + "getAssessResults",
                         data,
+                        // defined in in RunestoneBase
                         this.repopulateFromStorage.bind(this)
                     )
                     .fail(
@@ -157,6 +179,17 @@ export default class RunestoneBase {
         // initialization can happen even when there's no history to be loaded
         return null;
     }
+
+    /**
+     * repopulateFromStorage is called after a successful API call is made to ``getAssessResults`` in
+     * the checkServer method in this class
+     *
+     * ``restoreAnswers,`` ``setLocalStorage`` and ``checkLocalStorage`` are defined in the child classes.
+     *
+     * @param {*} data - a JSON object representing the data needed to restore a previous answer for a component
+     * @param {*} status - the http status
+     * @param {*} whatever - ignored
+     */
     repopulateFromStorage(data, status, whatever) {
         // decide whether to use the server's answer (if there is one) or to load from storage
         if (data !== null && this.shouldUseServer(data)) {
@@ -171,7 +204,8 @@ export default class RunestoneBase {
         if (
             data.correct === "T" ||
             localStorage.length === 0 ||
-            this.graderactive === true
+            this.graderactive === true ||
+            this.isTimed
         ) {
             return true;
         }
@@ -207,13 +241,21 @@ export default class RunestoneBase {
     }
     addCaption(elType) {
         //someElement.parentNode.insertBefore(newElement, someElement.nextSibling);
-        var capDiv = document.createElement("p");
-        $(capDiv).html(this.caption + " (" + this.divid + ")");
-        $(capDiv).addClass(`${elType}_caption`);
-        $(capDiv).addClass(`${elType}_caption_text`);
-        this.capDiv = capDiv;
-        //this.outerDiv.parentNode.insertBefore(capDiv, this.outerDiv.nextSibling);
-        this.containerDiv.appendChild(capDiv);
+        if (!this.isTimed) {
+            var capDiv = document.createElement("p");
+            if (this.question_label) {
+                this.caption = `Activity: ${this.question_label} ${this.caption}  <span class="runestone_caption_divid">(${this.divid})</span>`;
+                $(capDiv).html(this.caption);
+                $(capDiv).addClass(`${elType}_caption`);
+            } else {
+                $(capDiv).html(this.caption + " (" + this.divid + ")");
+                $(capDiv).addClass(`${elType}_caption`);
+                $(capDiv).addClass(`${elType}_caption_text`);
+            }
+            this.capDiv = capDiv;
+            //this.outerDiv.parentNode.insertBefore(capDiv, this.outerDiv.nextSibling);
+            this.containerDiv.appendChild(capDiv);
+        }
     }
 }
 

@@ -28,6 +28,7 @@ module.exports = (env) => {
             "./runestone/lp/js/lp.js",
             "./runestone/codelens/js/codelens.js",
             "./runestone/webwork/js/webwork.js",
+            "./runestone/selectquestion/js/selectone.js",
         ],
         mode: env.MODE,
         devtool: env.MODE === "development" ? "inline-source-map" : "none",
@@ -60,15 +61,15 @@ module.exports = (env) => {
         },
         plugins: [
             new CleanWebpackPlugin(),
-            new CopyPlugin([
-                {
-                    from: "static",
-                },
-            ]),
-            new HtmlWebpackPlugin({
-                inject: "head",
-                template: "public/index.html",
-            }),
+            // new CopyPlugin([
+            //     {
+            //         from: "static",
+            //     },
+            // ]),
+            // new HtmlWebpackPlugin({
+            //     inject: "head",
+            //     template: "public/index.html",
+            // }),
         ],
     };
 };

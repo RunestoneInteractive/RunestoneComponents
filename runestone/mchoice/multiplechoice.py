@@ -1,4 +1,4 @@
-# Copyright (C) 2013  Bradley N. Miller, Barabara Ericson
+# Copyright (C) 2013  Bradley N. Miller, Barbara Ericson
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,11 +18,19 @@ __author__ = "bmiller"
 from docutils import nodes
 from docutils.parsers.rst import directives
 from .assessbase import Assessment
-from runestone.common.runestonedirective import RunestoneNode, get_node_line
-from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
+from runestone.common.runestonedirective import (
+    RunestoneNode,
+    RunestoneIdNode,
+    get_node_line,
+)
+from runestone.server.componentdb import (
+    addQuestionToDB,
+    addHTMLToDB,
+    maybeAddToAssignment,
+)
 
 
-class MChoiceNode(nodes.General, nodes.Element, RunestoneNode):
+class MChoiceNode(nodes.General, nodes.Element, RunestoneIdNode):
     def __init__(self, content, **kwargs):
         """
 
@@ -31,25 +39,27 @@ class MChoiceNode(nodes.General, nodes.Element, RunestoneNode):
         - `content`:
         """
         super(MChoiceNode, self).__init__(**kwargs)
-        self.mc_options = content
+        self.runestone_options = content
 
 
 def visit_mc_node(self, node):
 
-    node.delimiter = "_start__{}_".format(node.mc_options["divid"])
+    node.delimiter = "_start__{}_".format(node.runestone_options["divid"])
     self.body.append(node.delimiter)
 
     res = ""
-    if "random" in node.mc_options:
-        node.mc_options["random"] = "data-random"
+    if "random" in node.runestone_options:
+        node.runestone_options["random"] = "data-random"
     else:
-        node.mc_options["random"] = ""
+        node.runestone_options["random"] = ""
     # Use multiple_answers behavior if explicitly required or if multiple correct answers were provided.
-    if ("multiple_answers" in node.mc_options) or ("," in node.mc_options["correct"]):
-        node.mc_options["multipleAnswers"] = "true"
+    if ("multiple_answers" in node.runestone_options) or (
+        "," in node.runestone_options["correct"]
+    ):
+        node.runestone_options["multipleAnswers"] = "true"
     else:
-        node.mc_options["multipleAnswers"] = "false"
-    res = node.template_start % node.mc_options
+        node.runestone_options["multipleAnswers"] = "false"
+    res = node.template_start % node.runestone_options
 
     self.body.append(res)
 
@@ -58,29 +68,29 @@ def depart_mc_node(self, node):
     res = ""
     currFeedback = ""
     # Add all of the possible answers
-    okeys = list(node.mc_options.keys())
+    okeys = list(node.runestone_options.keys())
     okeys.sort()
     for k in okeys:
         if "answer_" in k:
             x, label = k.split("_")
-            node.mc_options["alabel"] = label
-            node.mc_options["atext"] = node.mc_options[k]
+            node.runestone_options["alabel"] = label
+            node.runestone_options["atext"] = node.runestone_options[k]
             currFeedback = "feedback_" + label
-            node.mc_options["feedtext"] = node.mc_options.get(
+            node.runestone_options["feedtext"] = node.runestone_options.get(
                 currFeedback, ""
-            )  # node.mc_options[currFeedback]
-            if label in node.mc_options["correct"]:
-                node.mc_options["is_correct"] = "data-correct"
+            )  # node.runestone_options[currFeedback]
+            if label in node.runestone_options["correct"]:
+                node.runestone_options["is_correct"] = "data-correct"
             else:
-                node.mc_options["is_correct"] = ""
-            res += node.template_option % node.mc_options
+                node.runestone_options["is_correct"] = ""
+            res += node.template_option % node.runestone_options
 
-    res += node.template_end % node.mc_options
+    res += node.template_end % node.runestone_options
     self.body.append(res)
 
     addHTMLToDB(
-        node.mc_options["divid"],
-        node.mc_options["basecourse"],
+        node.runestone_options["divid"],
+        node.runestone_options["basecourse"],
         "".join(self.body[self.body.index(node.delimiter) + 1 :]),
     )
 
@@ -186,7 +196,7 @@ class MChoice(Assessment):
 
         TEMPLATE_START = """
             <div class="%(divclass)s">
-            <ul data-component="multiplechoice" data-multipleanswers="%(multipleAnswers)s" %(random)s id="%(divid)s" %(optional)s>
+            <ul data-component="multiplechoice" data-question_label="%(question_label)s" data-multipleanswers="%(multipleAnswers)s" %(random)s id="%(divid)s" %(optional)s style="visibility: hidden;">
             """
 
         OPTION = """
@@ -304,6 +314,7 @@ class MChoice(Assessment):
             # Store the correct answers.
             self.options["correct"] = ",".join(correct_answers)
 
+        maybeAddToAssignment(self)
         # Check that a correct answer was provided.
         if not self.options.get("correct"):
             raise self.error("No correct answer specified.")
@@ -352,16 +363,16 @@ def visit_answer_list_item(self, node):
     # _`label`: Turn the index of this item in the answer_bullet_list (see structure_) into a letter.
     label = chr(node.parent.index(node) + ord("a"))
     # Update dict for formatting the HTML.
-    mcNode.mc_options["alabel"] = label
-    if label in mcNode.mc_options["correct"]:
-        mcNode.mc_options["is_correct"] = "data-correct"
+    mcNode.runestone_options["alabel"] = label
+    if label in mcNode.runestone_options["correct"]:
+        mcNode.runestone_options["is_correct"] = "data-correct"
     else:
-        mcNode.mc_options["is_correct"] = ""
+        mcNode.runestone_options["is_correct"] = ""
 
     # Format the HTML.
     self.body.append(
         '<li data-component="answer" %(is_correct)s id="%(divid)s_opt_%(alabel)s">'
-        % mcNode.mc_options
+        % mcNode.runestone_options
     )
 
 
@@ -385,10 +396,10 @@ def visit_feedback_list_item(self, node):
     answer_list_item = node.parent.parent
     mcNode = answer_list_item.parent.parent
     label = chr(answer_list_item.parent.index(answer_list_item) + ord("a"))
-    mcNode.mc_options["alabel"] = label
+    mcNode.runestone_options["alabel"] = label
     self.body.append(
         '</li><li data-component="feedback" id="%(divid)s_opt_%(alabel)s">\n'
-        % mcNode.mc_options
+        % mcNode.runestone_options
     )
 
 

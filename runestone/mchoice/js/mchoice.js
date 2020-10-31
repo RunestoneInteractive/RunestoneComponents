@@ -162,6 +162,10 @@ export default class MultipleChoice extends RunestoneBase {
         if (this.random) {
             this.randomizeAnswers();
         }
+        let self = this;
+        let answerFunc = function () {
+            self.isAnswered = true;
+        };
         for (var j = 0; j < this.answerList.length; j++) {
             var k = this.indexArray[j];
             var optid = this.divid + "_opt_" + k;
@@ -184,6 +188,8 @@ export default class MultipleChoice extends RunestoneBase {
                 input: $(label).find("input")[0],
                 label: label,
             };
+            optObj.input.onclick = answerFunc;
+
             this.optionArray.push(optObj);
             // add the option to the form
             this.optsForm.appendChild(label);
@@ -619,10 +625,3 @@ $(document).bind("runestone:login-complete", function () {
         }
     });
 });
-
-if (typeof window.component_factory === "undefined") {
-    window.component_factory = {};
-}
-window.component_factory.multiplechoice = function (opts) {
-    return new MultipleChoice(opts);
-};

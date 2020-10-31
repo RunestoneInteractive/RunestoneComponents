@@ -276,6 +276,13 @@
     margin-left: auto;
     margin-right: auto;
 }
+
+.parsons .parsons-img {
+    display: inline-block;
+    text-align: center;
+    width: 100%;
+}
+
 .parsons .parsons-controls {
     max-width: 500pt;
     margin-left: auto;
@@ -314,7 +321,7 @@
     vertical-align: top;
 }
 
-.lines {
+.runestone .lines {
     display: inline-block;
     align-self: left;
 }

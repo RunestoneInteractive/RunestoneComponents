@@ -18,6 +18,8 @@ import ACFactory from "../../activecode/js/acfactory.js";
 import TimedClickableArea from "../../clickableArea/js/timedclickable";
 import TimedDragNDrop from "../../dragndrop/js/timeddnd.js";
 import TimedParsons from "../../parsons/js/timedparsons.js";
+import SelectOne from "../../selectquestion/js/selectone";
+import "../css/timed.css";
 
 export var TimedList = {}; // Timed dictionary
 
@@ -57,6 +59,11 @@ export default class Timed extends RunestoneBase {
         if ($(this.origElem).is("[data-fullwidth]")) {
             this.fullwidth = true;
         }
+        this.nopause = false;
+        if ($(this.origElem).is("[data-no-pause]")) {
+            this.nopause = true;
+        }
+
         this.running = 0;
         this.paused = 0;
         this.done = 0;
@@ -70,32 +77,88 @@ export default class Timed extends RunestoneBase {
         this.currentQuestionIndex = 0; // Which question is currently displaying on the page
         this.renderedQuestionArray = []; // list of all problems
         this.getNewChildren();
-        this.renderTimedAssess();
+        // One small step to eliminate students from doing view source
+        // this won't stop anyone with determination but may prevent casual peeking
+        document.body.oncontextmenu = function () {
+            return false;
+        };
+        this.checkAssessmentStatus().then(
+            function () {
+                this.renderTimedAssess();
+            }.bind(this)
+        );
     }
+
     getNewChildren() {
         this.newChildren = [];
         for (var i = 0; i < this.origElem.childNodes.length; i++) {
             this.newChildren.push(this.origElem.childNodes[i]);
         }
     }
+
+    checkAssessmentStatus() {
+        // Has the user taken this exam?  Inquiring minds want to know
+        // If a user has not taken this exam then we want to make sure
+        // that if a question has been seen by the student before we do
+        // not populate previous answers.
+        let self = this;
+        let p = new Promise(function (resolve, reject) {
+            let sendInfo = {
+                div_id: self.divid,
+                course_name: eBookConfig.course,
+            };
+            console.log(sendInfo);
+            if (eBookConfig.useRunestoneServices) {
+                jQuery.getJSON(
+                    eBookConfig.ajaxURL + "tookTimedAssessment",
+                    sendInfo,
+                    function (data, status) {
+                        self.taken = data.tookAssessment;
+                        self.assessmentTaken = self.taken;
+                        if (!self.taken) {
+                            localStorage.clear();
+                        }
+                        resolve();
+                    }
+                ); // end getJSON
+            } else {
+                self.taken = false;
+                self.assessmentTaken = false;
+                resolve();
+            }
+        }); // end promise
+        return p;
+    }
+
     /*===============================
     === Generating new Timed HTML ===
     ===============================*/
     renderTimedAssess() {
-        this.renderContainer();
-        this.renderTimer();
-        this.renderControlButtons();
-        this.assessDiv.appendChild(this.timedDiv); // This can't be appended in renderContainer because then it renders above the timer and control buttons.
-        this.createRenderedQuestionArray();
-        if (this.renderedQuestionArray.length > 1) this.renderNavControls();
-        this.renderSubmitButton();
-        this.renderFeedbackContainer();
-        this.useRunestoneServices = eBookConfig.useRunestoneServices;
-        // Replace intermediate HTML with rendered HTML
-        $(this.origElem).replaceWith(this.assessDiv);
-        // check if already taken and if so show results
-        this.tookTimedExam();
+        // create renderedQuestionArray returns a promise
+        //
+        let p = this.createRenderedQuestionArray();
+        p.then(
+            function () {
+                if (this.random) {
+                    this.randomizeRQA();
+                }
+                this.renderContainer();
+                this.renderTimer();
+                this.renderControlButtons();
+                this.assessDiv.appendChild(this.timedDiv); // This can't be appended in renderContainer because then it renders above the timer and control buttons.
+                if (this.renderedQuestionArray.length > 1)
+                    this.renderNavControls();
+                this.renderSubmitButton();
+                this.renderFeedbackContainer();
+                this.useRunestoneServices = eBookConfig.useRunestoneServices;
+                // Replace intermediate HTML with rendered HTML
+                $(this.origElem).replaceWith(this.assessDiv);
+                // check if already taken and if so show results
+                this.tookTimedExam(); // rename to renderPossibleResults
+            }.bind(this)
+        );
     }
+
     renderContainer() {
         this.assessDiv = document.createElement("div"); // container for the entire Timed Component
         if (this.fullwidth) {
@@ -110,14 +173,18 @@ export default class Timed extends RunestoneBase {
         $(this.navDiv).attr({
             style: "text-align:center",
         });
+        this.switchContainer = document.createElement("div");
+        this.switchContainer.classList.add("switchcontainer");
         this.switchDiv = document.createElement("div"); // is replaced by the questions
-        this.timedDiv.appendChild(this.switchDiv);
+        this.timedDiv.appendChild(this.switchContainer);
+        this.switchContainer.appendChild(this.switchDiv);
         this.timedDiv.appendChild(this.navDiv);
         $(this.timedDiv).attr({
             id: "timed_Test",
             style: "display:none",
         });
     }
+
     renderTimer() {
         this.wrapperDiv = document.createElement("div");
         this.timerContainer = document.createElement("P");
@@ -126,6 +193,7 @@ export default class Timed extends RunestoneBase {
         this.wrapperDiv.appendChild(this.timerContainer);
         this.showTime();
     }
+
     renderControlButtons() {
         this.controlDiv = document.createElement("div");
         $(this.controlDiv).attr({
@@ -134,7 +202,6 @@ export default class Timed extends RunestoneBase {
         });
         this.startBtn = document.createElement("button");
         this.pauseBtn = document.createElement("button");
-        this.resetBtn = document.createElement("button");
         $(this.startBtn).attr({
             class: "btn btn-success",
             id: "start",
@@ -145,6 +212,11 @@ export default class Timed extends RunestoneBase {
         this.startBtn.addEventListener(
             "click",
             function () {
+                $(this.finishButton).hide(); // hide the finish button for now
+                let mess = document.createElement("p");
+                mess.innerHTML =
+                    "<strong>Warning: You will lose all of your work if you close this tab or the browser.</strong>  Make sure you click the Finish Exam button to submit your work!";
+                this.controlDiv.appendChild(mess);
                 this.renderTimedQuestion();
                 this.startAssessment();
             }.bind(this),
@@ -165,28 +237,14 @@ export default class Timed extends RunestoneBase {
             }.bind(this),
             false
         );
-        $(this.resetBtn).attr({
-            class: "btn btn-default",
-            id: "reset",
-            disabled: "true",
-            tabindex: "1",
-            role: "button",
-        });
-        this.resetBtn.textContent = "Reset";
-        this.resetBtn.addEventListener(
-            "click",
-            function () {
-                this.checkResetability();
-            }.bind(this),
-            false
-        );
-        $(this.resetBtn).hide();
         this.controlDiv.appendChild(this.startBtn);
-        this.controlDiv.appendChild(this.pauseBtn);
-        this.controlDiv.appendChild(this.resetBtn);
+        if (!this.nopause) {
+            this.controlDiv.appendChild(this.pauseBtn);
+        }
         this.assessDiv.appendChild(this.wrapperDiv);
         this.assessDiv.appendChild(this.controlDiv);
     }
+
     renderNavControls() {
         this.pagNavList = document.createElement("ul");
         $(this.pagNavList).addClass("pagination");
@@ -235,13 +293,15 @@ export default class Timed extends RunestoneBase {
         this.navDiv.appendChild(this.qNumList);
         this.navBtnListeners();
     }
+
     navBtnListeners() {
         // Next and Prev Listener
         this.pagNavList.addEventListener(
             "click",
             function (event) {
                 if (
-                    $("div#timed_Test form input[name='group1']").is(":checked")
+                    this.renderedQuestionArray[this.currentQuestionIndex]
+                        .question.isAnswered
                 ) {
                     $(
                         "ul#pageNums > ul > li:eq(" +
@@ -287,7 +347,8 @@ export default class Timed extends RunestoneBase {
             "click",
             function (event) {
                 if (
-                    $("div#timed_Test form input[name='group1']").is(":checked")
+                    this.renderedQuestionArray[this.currentQuestionIndex]
+                        .question.isAnswered
                 ) {
                     $(
                         "ul#pageNums > ul > li:eq(" +
@@ -307,7 +368,15 @@ export default class Timed extends RunestoneBase {
                     }
                 }
                 var target = $(event.target).text();
+                let oldIndex = this.currentQuestionIndex;
                 this.currentQuestionIndex = parseInt(target) - 1;
+                if (
+                    this.currentQuestionIndex >
+                    this.renderedQuestionArray.length
+                ) {
+                    console.log(`Error: bad index for ${target}`);
+                    this.currentQuestionIndex = oldIndex;
+                }
                 $(
                     "ul#pageNums > ul > li:eq(" +
                         this.currentQuestionIndex +
@@ -343,7 +412,8 @@ export default class Timed extends RunestoneBase {
             }.bind(this),
             false
         );
-        this.buttonContainer.appendChild(this.finishButton);
+        this.controlDiv.appendChild(this.finishButton);
+        $(this.finishButton).hide();
         this.timedDiv.appendChild(this.buttonContainer);
     }
     ensureButtonSafety() {
@@ -381,76 +451,88 @@ export default class Timed extends RunestoneBase {
         // this finds all the assess questions in this timed assessment and calls their constructor method
         // Also adds them to this.renderedQuestionArray
         // todo:  This needs to be updated to account for the runestone div wrapper.
-        var opts;
-        for (var i = 0; i < this.newChildren.length; i++) {
-            var tmpChild = this.newChildren[i];
-            opts = {
-                orig: tmpChild,
-                useRunestoneServices: eBookConfig.useRunestoneServices,
-                timed: true,
-            };
-            if ($(tmpChild).children("[data-component]")) {
-                tmpChild = $(tmpChild).children("[data-component]")[0];
-                opts.orig = tmpChild;
-            }
-            if ($(tmpChild).is("[data-component=multiplechoice]")) {
-                this.renderedQuestionArray.push({
-                    question: new TimedMC(opts),
-                });
-            } else if ($(tmpChild).is("[data-component=fillintheblank]")) {
-                var newFITB = new TimedFITB(opts);
-                this.renderedQuestionArray.push({
-                    question: newFITB,
-                });
-            } else if ($(tmpChild).is("[data-component=dragndrop]")) {
-                this.renderedQuestionArray.push({
-                    question: new TimedDragNDrop(opts),
-                });
-            } else if ($(tmpChild).is("[data-component=clickablearea]")) {
-                this.renderedQuestionArray.push({
-                    question: new TimedClickableArea(opts),
-                });
-            } else if ($(tmpChild).is("[data-component=shortanswer]")) {
-                this.renderedQuestionArray.push({
-                    question: new TimedShortAnswer(opts),
-                });
-            } else if ($(tmpChild).is("[data-component=parsons]")) {
-                this.renderedQuestionArray.push({
-                    question: new TimedParsons(opts),
-                });
-            } else if ($(tmpChild).is("[data-component=activecode]")) {
-                let lang = $(tmpChild).data("lang");
-                this.renderedQuestionArray.push({
-                    wrapper: tmpChild.parentElement,
-                    question: ACFactory.createActiveCode(tmpChild, lang, opts),
-                });
-            } else if ($(tmpChild).is("[data-childcomponent]")) {
-                // this is for when a directive has a wrapper element that isn't actually part of the javascript object
-                // for example, activecode has a wrapper div that contains the question for the element
-                var child = $("#" + $(tmpChild).data("childcomponent"));
-                if ($(child[0]).is("[data-component=activecode]")) {
-                    // create & insert new JS object back into wrapper div-- we're simulating the parsing that would happen outside of a timed exam
-                    opts.orig = child[0];
-                    let lang = $(child[0]).data("lang");
-                    var newAC = ACFactory.createActiveCode(
-                        child[0],
-                        lang,
-                        opts
-                    );
-                    $(child[0]).remove();
-                    var tmp = tmpChild.childNodes[0];
-                    $(tmp).after(newAC.containerDiv);
-                    this.renderedQuestionArray.push({
-                        wrapper: tmpChild,
-                        question: newAC,
+        // To accommodate the selectquestion type -- which is async! we need to wrap
+        // all of this in a promise, so that we don't continue to render the timed
+        // exam until all of the questions have been realized.
+        let retp = new Promise(
+            function (resolve, reject) {
+                var opts;
+                let pArray = [];
+                for (var i = 0; i < this.newChildren.length; i++) {
+                    var tmpChild = this.newChildren[i];
+                    opts = {
+                        orig: tmpChild,
+                        useRunestoneServices: eBookConfig.useRunestoneServices,
+                        timed: true,
+                        assessmentTaken: this.taken,
+                        timedWrapper: this,
+                    };
+                    if ($(tmpChild).children("[data-component]").length > 0) {
+                        tmpChild = $(tmpChild).children("[data-component]")[0];
+                        opts.orig = tmpChild;
+                    }
+                    if ($(tmpChild).is("[data-component=selectquestion]")) {
+                        // SelectOne is async and will replace itself in this array with
+                        // the actual selected question
+                        opts.rqa = this.renderedQuestionArray;
+                        let newq = new SelectOne(opts);
+                        this.renderedQuestionArray.push({
+                            question: newq,
+                        });
+                        pArray.push(newq.initialize());
+                    } else if ($(tmpChild).is("[data-component=activecode]")) {
+                        let lang = $(tmpChild).data("lang");
+                        this.renderedQuestionArray.push({
+                            wrapper: tmpChild.parentElement,
+                            question: ACFactory.createActiveCode(
+                                tmpChild,
+                                lang,
+                                opts
+                            ),
+                        });
+                    } else if ($(tmpChild).is("[data-component]")) {
+                        let componentKind = $(tmpChild).data("component");
+                        this.renderedQuestionArray.push({
+                            question: new window.component_factory[
+                                componentKind
+                            ](opts),
+                        });
+                    } else if ($(tmpChild).is("[data-childcomponent]")) {
+                        // this is for when a directive has a wrapper element that isn't actually part of the javascript object
+                        // for example, activecode has a wrapper div that contains the question for the element
+                        var child = $("#" + $(tmpChild).data("childcomponent"));
+                        if ($(child[0]).is("[data-component=activecode]")) {
+                            // create & insert new JS object back into wrapper div-- we're simulating the parsing that would happen outside of a timed exam
+                            opts.orig = child[0];
+                            let lang = $(child[0]).data("lang");
+                            var newAC = ACFactory.createActiveCode(
+                                child[0],
+                                lang,
+                                opts
+                            );
+                            $(child[0]).remove();
+                            var tmp = tmpChild.childNodes[0];
+                            $(tmp).after(newAC.containerDiv);
+                            this.renderedQuestionArray.push({
+                                wrapper: tmpChild,
+                                question: newAC,
+                            });
+                        }
+                    }
+                }
+                // when all promises are resolved
+                if (pArray.length === 0) {
+                    resolve("Done");
+                } else {
+                    Promise.all(pArray).then(function () {
+                        resolve("Done");
                     });
                 }
-            }
-        }
-        if (this.random) {
-            this.randomizeRQA();
-        }
+            }.bind(this)
+        );
+        return retp;
     }
+
     randomizeRQA() {
         var currentIndex = this.renderedQuestionArray.length,
             temporaryValue,
@@ -468,8 +550,15 @@ export default class Timed extends RunestoneBase {
             this.renderedQuestionArray[randomIndex] = temporaryValue;
         }
     }
+
     renderTimedQuestion() {
-        var currentWrapper = this.renderedQuestionArray[
+        if (this.currentQuestionIndex >= this.renderedQuestionArray.length) {
+            // sometimes the user clicks in the event area for the qNumList
+            // But misses a number in that case the text is the concatenation
+            // of all the numbers in the list!
+            return;
+        }
+        let currentWrapper = this.renderedQuestionArray[
             this.currentQuestionIndex
         ].wrapper;
         var currentQuestion = this.renderedQuestionArray[
@@ -492,9 +581,10 @@ export default class Timed extends RunestoneBase {
         // If the timed component has listeners, those might need to be reinitialized
         // This flag will only be set in the elements that need it--it will be undefined in the others and thus evaluate to false
         if (currentQuestion.needsReinitialization) {
-            currentQuestion.reinitializeListeners();
+            currentQuestion.reinitializeListeners(this.taken);
         }
     }
+
     /*=================================
     === Timer and control Functions ===
     =================================*/
@@ -504,7 +594,9 @@ export default class Timed extends RunestoneBase {
         $(this.finishButton).attr("disabled", true);
         this.running = 0;
         this.done = 1;
-        if (this.showResults) {
+        // showFeedback sand showResults should both be true before we show the
+        // questions and their state of correctness.
+        if (this.showResults && this.showFeedback) {
             $(this.timedDiv).show();
             this.submitTimedProblems(false); // do not log these results
         } else {
@@ -517,7 +609,6 @@ export default class Timed extends RunestoneBase {
             $("#relations-next").hide(); // hide the next page button for now
             $("#relations-prev").hide(); // hide the previous button for now
             $(this.startBtn).hide();
-            $(this.finishButton).hide(); // hide the finish button for now
             $(this.pauseBtn).attr("disabled", false);
             if (this.running === 0 && this.paused === 0) {
                 this.running = 1;
@@ -538,9 +629,13 @@ export default class Timed extends RunestoneBase {
                     JSON.stringify(storageObj)
                 );
             }
-            $(window).on("beforeunload", function () {
+            $(window).on("beforeunload", function (event) {
                 // this actual value gets ignored by newer browsers
-                return "Are you sure you want to leave?";
+                alert("foo");
+                event.preventDefault();
+                event.returnValue =
+                    "Are you sure you want to leave?  Your work will be lost! And you will need your instructor to reset the exam!";
+                return "Are you sure you want to leave?  Your work will be lost!";
             });
         } else {
             this.handlePrevAssessment();
@@ -572,59 +667,7 @@ export default class Timed extends RunestoneBase {
             }
         }
     }
-    checkResetability() {
-        /* Reset is only available if there is no record of a completed exam and the
-           localStorage does not reflect a partially completed exam */
-        let sendInfo = {
-            div_id: this.divid,
-            course: eBookConfig.course,
-        };
-        $(this.resetBtn).attr({
-            disabled: true,
-        });
-        console.log(sendInfo);
-        jQuery.getJSON(
-            eBookConfig.ajaxURL + "checkTimedReset",
-            sendInfo,
-            this.resetExam.bind(this)
-        );
-    }
-    resetExam(result, status, ignore) {
-        console.log(result);
-        if (result.canReset === true) {
-            if (
-                confirm(
-                    "Only reset the exam if you experienced techinical difficulties. Your instructor will be notified of this reset."
-                )
-            ) {
-                this.logBookEvent({
-                    event: "timedExam",
-                    act: "reset",
-                    div_id: this.divid,
-                    course: eBookConfig.course,
-                    correct: this.score,
-                    incorrect: this.incorrect,
-                    skipped: this.skipped,
-                    time: this.timeTaken,
-                    reset: true,
-                });
-                localStorage.clear(); // Clear records of exam from localStorage
-                /* Prevent using server's record of the reset as the exam results when the page reloads */
-                localStorage.setItem(
-                    this.localStorageKey(),
-                    JSON.stringify({
-                        answer: [-1],
-                        timestamp: new Date(),
-                    })
-                );
-                location.reload();
-            }
-        } else {
-            alert(
-                "This exam does not qualify to be reset. Contact your instructor with any questions."
-            );
-        }
-    }
+
     showTime() {
         if (this.showTimer) {
             var mins = Math.floor(this.timeLimit / 60);
@@ -662,6 +705,7 @@ export default class Timed extends RunestoneBase {
             $(this.timerContainer).hide();
         }
     }
+
     increment() {
         // if running (not paused) and not taken
         if (this.running === 1 && !this.taken) {
@@ -690,11 +734,16 @@ export default class Timed extends RunestoneBase {
                         });
                         this.running = 0;
                         this.done = 1;
-                        if (this.taken === 0) {
-                            this.taken = 1;
-                            window.alert(
-                                "Sorry, but you ran out of time.  Your current answers have been saved"
-                            );
+                        if (!this.taken) {
+                            this.taken = true;
+                            // embed the message in the page -- an alert actually prevents
+                            // the answers from being submitted and if a student closes their
+                            // laptop then the answers will not be submitted ever!  Even when they
+                            // reopen the laptop their session cookie is likely invalid.
+                            let mess = document.createElement("h1");
+                            mess.innerHTML =
+                                "Sorry but you ran out of time. Your answers are being submitted";
+                            this.controlDiv.appendChild(mess);
                             this.finishAssessment();
                         }
                     }
@@ -729,6 +778,7 @@ export default class Timed extends RunestoneBase {
         });
         this.checkServer("timedExam");
     }
+
     finishAssessment() {
         $("#relations-next").show(); // show the next page button for now
         $("#relations-prev").show(); // show the previous button for now
@@ -743,6 +793,8 @@ export default class Timed extends RunestoneBase {
         this.done = 1;
         this.taken = 1;
         this.submitTimedProblems(true); // log results
+        // todo call the autograder to record the score for this student
+        // endpoint is assignments/student_autograde
         this.checkScore();
         this.displayScore();
         this.storeScore();
@@ -750,7 +802,28 @@ export default class Timed extends RunestoneBase {
         $(this.pauseBtn).attr("disabled", true);
         this.finishButton.disabled = true;
         $(window).off("beforeunload");
+        //
+        let assignment_id = this.divid;
+        setTimeout(function () {
+            jQuery.ajax({
+                url: eBookConfig.app + "/assignments/student_autograde",
+                type: "POST",
+                dataType: "JSON",
+                data: {
+                    assignment_id: assignment_id,
+                    is_timed: true,
+                },
+                success: function (retdata) {
+                    if (retdata.success == false) {
+                        console.log(retdata.message);
+                    } else {
+                        console.log("Autgrader completed");
+                    }
+                },
+            });
+        }, 2000);
     }
+
     submitTimedProblems(logFlag) {
         for (var i = 0; i < this.renderedQuestionArray.length; i++) {
             var currentQuestion = this.renderedQuestionArray[i].question;
@@ -760,6 +833,7 @@ export default class Timed extends RunestoneBase {
             this.hideTimedFeedback();
         }
     }
+
     hideTimedFeedback() {
         for (var i = 0; i < this.renderedQuestionArray.length; i++) {
             var currentQuestion = this.renderedQuestionArray[i].question;
@@ -781,7 +855,7 @@ export default class Timed extends RunestoneBase {
             } else if (correct == "F") {
                 this.incorrect++;
                 this.incorrectStr = this.incorrectStr + (i + 1) + ", ";
-            } else if (correct === null) {
+            } else if (correct === null || correct === "I") {
                 this.skipped++;
                 this.skippedStr = this.skippedStr + (i + 1) + ", ";
             } else {
@@ -846,7 +920,7 @@ export default class Timed extends RunestoneBase {
     }
     shouldUseServer(data) {
         // We override the RunestoneBase version because there is no "correct" attribute, and there are 2 possible localStorage schemas
-        // --we also want to default to local storage because it contains more information
+        // --we also want to default to local storage because it contains more information specifically which questions are correct, incorrect, and skipped.
         var storageDate;
         if (localStorage.length === 0) return true;
         var storageObj = localStorage.getItem(this.localStorageKey());
@@ -876,7 +950,7 @@ export default class Timed extends RunestoneBase {
             // error while parsing; likely due to bad value stored in storage
             console.log(err.message);
             localStorage.removeItem(this.localStorageKey());
-            return;
+            return true;
         }
         var serverDate = new Date(data.timestamp);
         if (serverDate < storageDate) {
@@ -885,6 +959,7 @@ export default class Timed extends RunestoneBase {
         }
         return true;
     }
+
     checkLocalStorage() {
         var len = localStorage.length;
         if (len > 0) {
@@ -954,10 +1029,6 @@ export default class Timed extends RunestoneBase {
         }
         if (this.taken) {
             if (this.skipped === this.renderedQuestionArray.length) {
-                $(this.resetBtn).show();
-                $(this.resetBtn).attr({
-                    disabled: false,
-                });
                 this.showFeedback = false;
             }
             this.handlePrevAssessment();

@@ -290,7 +290,7 @@ function processPageState(completionFlag) {
     jQuery.ajax({
         url: eBookConfig.ajaxURL + "updatelastpage",
         data: data,
-        async: false,
+        async: true,
     });
 }
 

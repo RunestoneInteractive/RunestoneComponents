@@ -1,4 +1,12 @@
-# Copyright (C) 2016  Bradley N. Miller
+# *******************************
+# |docname| - Add Questions to DB
+# *******************************
+#
+#
+
+# License
+# -------
+# Copyright (C) 2016-2020  Bradley N. Miller
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,16 +23,22 @@
 #
 from __future__ import print_function
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 __author__ = "bmiller"
 
 import os
 from os import environ
 import re
-from sqlalchemy import create_engine, Table, MetaData, select, and_
+from sphinx.util import logging
+from sqlalchemy import create_engine, Table, MetaData, select, and_, or_
 from sqlalchemy.orm.session import sessionmaker
-from runestone.common.runestonedirective import RunestoneDirective
+import pdb
+
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneIdNode
+
+
+logger = logging.getLogger(__name__)
 
 
 def get_dburl(outer={}):
@@ -72,7 +86,10 @@ def get_dburl(outer={}):
     raise RuntimeError("Cannot configure a Database URL!")
 
 
-# create a global DB query engine to share for the rest of the file
+# Create a global DB query engine to share for the rest of the file
+# We declare the variables here, but they don't get any values until setup is called.
+# otherwise any import of runestone ends up trying to create database connections
+# when it may not be necessary.
 dburl = None
 engine = None
 meta = None
@@ -80,13 +97,31 @@ sess = None
 questions = None
 assignment_questions = None
 courses = None
+assignments = None
+competency = None
+
+# setup
+# -----
+#
+# Here we connect two key functions to events in the build process.
+# reset_questions and finalize updates
+# this ensures that the database is in sync with the directives in the source
+#
+
+table_info = {}
 
 
 def setup(app):
-    global dburl, engine, meta, sess, questions, assignment_questions, courses
+    global dburl, engine, meta, sess, questions, assignments, assignment_questions, courses, competency, chapters, sub_chapters, table_info
 
     app.connect("env-before-read-docs", reset_questions)
     app.connect("build-finished", finalize_updates)
+    # the `qbank` option is for the QuestionBank
+    # it allows us to populate the database from the question bank
+    # but we don't care about populating chapter and subchapter tables and others
+    # so we commit each question.
+    app.add_config_value("qbank", False, "html")
+    logger.info("Connecting to DB")
     try:
         dburl = get_dburl()
         engine = create_engine(dburl, client_encoding="utf8", convert_unicode=True)
@@ -104,18 +139,43 @@ def setup(app):
         # If no exceptions are raised, then set up the database.
         meta = MetaData()
         questions = Table("questions", meta, autoload=True, autoload_with=engine)
+        assignments = Table("assignments", meta, autoload=True, autoload_with=engine)
         assignment_questions = Table(
             "assignment_questions", meta, autoload=True, autoload_with=engine
         )
         courses = Table("courses", meta, autoload=True, autoload_with=engine)
+        competency = Table("competency", meta, autoload=True, autoload_with=engine)
+        chapters = Table("chapters", meta, autoload=True, autoload_with=engine)
+        sub_chapters = Table("sub_chapters", meta, autoload=True, autoload_with=engine)
+        table_info = {
+            "chapters": chapters,
+            "sub_chapters": sub_chapters,
+            "competency": competency,
+            "courses": courses,
+            "assignment_questions": assignment_questions,
+            "assignments": assignments,
+            "questions": questions,
+        }
 
 
 def get_engine_meta():
     return engine, meta, sess
 
 
+def get_table_meta():
+    return table_info
+
+
+# Reset Questions
+# ---------------
+# We need to be able to tell the difference between questions that are
+# part of the book and questions that are contributed by instructors
+# so wheenver we build the book, we mark all questions for this base course
+# with ``from_source = 'F'`` Then as the book is built and questions are updated
+# those in the book get ``from_source = 'T'`` set.
 def reset_questions(app, env, docnames):
     if sess:
+        logger.info("Resetting questions")
         basecourse = env.config.html_context.get("basecourse")
         stmt = (
             questions.update()
@@ -130,12 +190,33 @@ def reset_questions(app, env, docnames):
         sess.execute(stmt)
 
 
+# finalize updates
+# ----------------
+# If nothing has gone wrong during the build, then commit all the changes
+# otherwise rollback to make sure we have everything consistent
 def finalize_updates(app, excpt):
-    if sess:
-        if excpt is None:
-            sess.commit()
+
+    if sess and excpt is None:
+        if hasattr(app.env, "chap_titles"):
+            try:
+                update_chapter_subchapter(
+                    app.env.chap_titles,
+                    app.env.subchap_titles,
+                    app.env.skips,
+                    app.env.chap_numbers,
+                    app.env.subchap_numbers,
+                    app,
+                )
+                logger.info("Committing changes")
+                sess.commit()
+            except Exception as e:
+                logger.error(f"Error while updating database -- details {e}")
+                sess.rollback()
         else:
-            sess.rollback()
+            logger.info("Skipping chapter DB update, no new information.")
+    elif sess:
+        logger.error("Rolling back database changes from build")
+        sess.rollback()
 
 
 def logSource(self):
@@ -156,11 +237,16 @@ def logSource(self):
 def addQuestionToDB(self):
     # ``self`` must be a RunestoneDirective.
     assert isinstance(self, RunestoneDirective)
+    question_id = False
+    qbank = self.state.document.settings.env.config.qbank
 
     if dburl:
-        basecourse = self.state.document.settings.env.config.html_context.get(
-            "basecourse", "unknown"
-        )
+        if "basecourse" in self.options:
+            basecourse = self.options["basecourse"]
+        else:
+            basecourse = self.state.document.settings.env.config.html_context.get(
+                "basecourse", "unknown"
+            )
         if basecourse == "unknown":
             raise self.severe("Cannot update database because basecourse is unknown")
             return
@@ -184,11 +270,12 @@ def addQuestionToDB(self):
         else:
             topics = "{}/{}".format(self.chapter, self.subchapter)
         #        topics = self.options.get('topics', "{}/{}".format(self.chapter, self.subchapter))
-        qnumber = self.options.get("qnumber", "")
         if "data-optional" in self.options.get("optional", ""):
             optional = "T"
         else:
             optional = "F"
+
+        from_source = self.options.get("from_source", "T")
 
         id_ = self.options["divid"]
         sel = select([questions]).where(
@@ -199,6 +286,13 @@ def addQuestionToDB(self):
         if not self.explain_text:
             self.explain_text = self.get_explain_text()
         et = " ".join(self.explain_text)[:80]
+
+        # check for additional meta data to add
+        meta_opts = {}
+        if "pct_on_first" in self.options:
+            meta_opts["pct_on_first"] = self.options["pct_on_first"]
+        if "mean_clicks_to_correct" in self.options:
+            meta_opts["mean_clicks_to_correct"] = self.options["mean_clicks_to_correct"]
 
         try:
             if res:
@@ -213,17 +307,18 @@ def addQuestionToDB(self):
                         subchapter=self.subchapter,
                         autograde=autograde,
                         author=author,
-                        difficulty=difficulty,
+                        difficulty=round(float(difficulty)),
                         chapter=self.chapter,
                         practice=practice,
                         topic=topics,
-                        from_source="T",
-                        qnumber=qnumber,
+                        from_source=from_source,
                         optional=optional,
                         description=et,
+                        **meta_opts,
                     )
                 )
                 sess.execute(stmt)
+                question_id = res["id"]
             else:
                 ins = questions.insert().values(
                     base_course=basecourse,
@@ -235,17 +330,20 @@ def addQuestionToDB(self):
                     subchapter=self.subchapter,
                     autograde=autograde,
                     author=author,
-                    difficulty=difficulty,
+                    difficulty=round(float(difficulty)),
                     chapter=self.chapter,
                     practice=practice,
                     topic=topics,
-                    from_source="T",
-                    qnumber=qnumber,
+                    from_source=from_source,
                     optional=optional,
                     description=et,
+                    **meta_opts,
                 )
 
-                sess.execute(ins)
+                question_id = sess.execute(ins)
+                question_id = question_id.inserted_primary_key[0]
+            if qbank:
+                sess.commit()
         except UnicodeEncodeError:
             raise self.severe(
                 "Bad character in directive {} in {}/{}. This will not be saved to the DB".format(
@@ -253,11 +351,85 @@ def addQuestionToDB(self):
                 )
             )
 
+        # check for prim_comp and supp_comp and add them to the competency table.
+        prim_comps = []
+        supp_comps = []
+        if "prim_comp" in self.options:
+            prim_comps = [
+                x.strip() for x in self.options["prim_comp"].split(",") if x != ""
+            ]
+        if "supp_comp" in self.options:
+            supp_comps = [
+                x.strip() for x in self.options["supp_comp"].split(",") if x != ""
+            ]
+
+        if question_id:
+            # Remove all competency info for this question,
+            # then update it
+            stmt2 = competency.delete().where(competency.c.question == question_id)
+            sess.execute(stmt2)
+            for comp in prim_comps:
+                ins = competency.insert().values(
+                    competency=comp,
+                    question=question_id,
+                    is_primary="T",
+                    question_name=id_,
+                )
+                sess.execute(ins)
+            for comp in supp_comps:
+                ins = competency.insert().values(
+                    competency=comp,
+                    question=question_id,
+                    is_primary="F",
+                    question_name=id_,
+                )
+                sess.execute(ins)
+
+
+def addQNumberToDB(app, node, qnumber):
+    # ``self`` must be a RunestoneIdNode to contain a question number.
+    assert isinstance(node, RunestoneIdNode)
+
+    if not dburl:
+        return
+
+    basecourse = app.env.config.html_context.get("basecourse")
+    if not basecourse:
+        logger.error(
+            "Cannot update database because basecourse is unknown.", location=node
+        )
+        return
+
+    stmt = (
+        questions.update()
+        .where(
+            and_(
+                questions.c.name == node.runestone_options["divid"],
+                questions.c.base_course == basecourse,
+            )
+        )
+        .values(qnumber=qnumber,)
+    )
+    sess.execute(stmt)
+
 
 def getQuestionID(base_course, name):
 
     sel = select([questions]).where(
         and_(questions.c.name == name, questions.c.base_course == base_course)
+    )
+    res = sess.execute(sel).first()
+    if res:
+        return res["id"]
+    else:
+        return None
+
+
+def getAssignmentID(base_course, name):
+
+    course = getCourseID(base_course)
+    sel = select([assignments]).where(
+        and_(assignments.c.name == name, assignments.c.course == course)
     )
     res = sess.execute(sel).first()
     if res:
@@ -316,16 +488,27 @@ def getOrInsertQuestionForPage(
         return res.inserted_primary_key[0]
 
 
+# Add a question to an Assignment
+# -------------------------------
+#
 def addAssignmentQuestionToDB(
-    question_id,
-    assignment_id,
+    question_name,
+    assignment_name,
     points,
+    basecourse,
     activities_required=0,
     autograde=None,
     which_to_grade=None,
     reading_assignment=None,
     sorting_priority=0,
 ):
+
+    if not dburl:
+        return
+
+    question_id = getQuestionID(basecourse, question_name)
+    assignment_id = getAssignmentID(basecourse, assignment_name)
+
     # now insert or update the assignment_questions row
     sel = select([assignment_questions]).where(
         and_(
@@ -358,26 +541,65 @@ def addAssignmentQuestionToDB(
         sess.execute(ins)
 
 
+def maybeAddToAssignment(self):
+    if self.in_exam:
+        # this must come after this question has been added to the DB
+        addAssignmentQuestionToDB(
+            self.options["divid"],
+            self.in_exam,  # assignment_name
+            self.int_points,
+            self.basecourse,
+            autograde="pct_correct",
+            which_to_grade="last_answer",
+        )
+
+
 def getCourseID(coursename):
     sel = select([courses]).where(courses.c.course_name == coursename)
     res = sess.execute(sel).first()
-    return res["id"]
+    return res["id"] if res else None
 
 
+# Add an Assignment
+# ------------------
+# Historically we had two directives ``.. assignment::`` and ``.. usageassignment::``
+# These allowed you to create assignments from the source for a book.
+# However, these were deprecated in 2017. Version 3.0.4 is the most recent version
+# prior to deprecation.  Recently (2020) work on the
+# exam generator has renewed the need for similar functionality.
 def addAssignmentToDB(
-    name=None, course_id=None, assignment_type_id=None, deadline=None, points=None
+    name=None,
+    course_name=None,
+    deadline=None,
+    points=None,
+    is_timed="F",
+    visible="F",
+    time_limit=None,
 ):
 
+    if not dburl:
+        return
+
+    course_id = getCourseID(course_name)
     last_changed = datetime.now()
     sel = select([assignments]).where(
         and_(assignments.c.name == name, assignments.c.course == course_id)
     )
     res = sess.execute(sel).first()
+    if deadline is None:
+        deadline = datetime.now() + timedelta(weeks=1)
     if res:
         stmt = (
             assignments.update()
             .where(assignments.c.id == res["id"])
-            .values(assignment_type=assignment_type_id, duedate=deadline, points=points)
+            .values(
+                duedate=deadline,
+                points=points,
+                is_timed=is_timed,
+                visible=visible,
+                time_limit=time_limit,
+                from_source="T",
+            )
         )
         sess.execute(stmt)
         a_id = res["id"]
@@ -392,9 +614,12 @@ def addAssignmentToDB(
         ins = assignments.insert().values(
             course=course_id,
             name=name,
-            assignment_type=assignment_type_id,
             duedate=deadline,
             points=points,
+            is_timed=is_timed,
+            visible=visible,
+            time_limit=time_limit,
+            from_source="T",
         )
         res = sess.execute(ins)
         a_id = res.inserted_primary_key[0]
@@ -435,3 +660,126 @@ def get_HTML_from_DB(divid, basecourse):
         return res["htmlsrc"]
     else:
         return ""
+
+
+def update_chapter_subchapter(
+    chaptitles, subtitles, skips, chap_numbers, subchap_numbers, app
+):
+    """
+    When the build is completely finished output the information gathered about
+    chapters and subchapters into the database.
+    """
+
+    engine, meta, sess = get_engine_meta()
+    table_info = get_table_meta()
+
+    if not sess:
+        logger.info("You need to install a DBAPI module - psycopg2 for Postgres")
+        logger.info("Or perhaps you have not set your DBURL environment variable")
+        return
+
+    chapters = table_info["chapters"]
+    sub_chapters = table_info["sub_chapters"]
+    questions = table_info["questions"]
+
+    basecourse = app.config.html_context.get("basecourse", "unknown")
+
+    # Remove the chapter / subchapter info
+    logger.info("Deleteing Chapter / Subchapter info for {}".format(basecourse))
+    logger.info(
+        "Warning - always use build --all to ensure chapter info is consistent!"
+    )
+    sess.execute(chapters.delete().where(chapters.c.course_id == basecourse))
+
+    # chapters = Table("chapters", meta, autoload=True, autoload_with=engine)
+    # sub_chapters = Table("sub_chapters", meta, autoload=True, autoload_with=engine)
+    # questions = Table("questions", meta, autoload=True, autoload_with=engine)
+
+    dynamic_pages = app.config.html_context.get("dynamic_pages", False)
+    if dynamic_pages:
+        cname = basecourse
+    else:
+        cname = app.env.config.html_context.get("course_id", "unknown")
+
+    for chap in chaptitles:
+        logger.info(f"Updating Database for {chap}")
+
+        # insert row for chapter in the chapter table and get the id
+        # logger.info("Adding Chapter/subchapter info for {}".format(chap))
+        # check if chapter is already there
+        sel = select([chapters]).where(
+            and_(chapters.c.course_id == cname, chapters.c.chapter_label == chap)
+        )
+        res = sess.execute(sel).first()
+        if not res:
+            ins = chapters.insert().values(
+                chapter_name=chaptitles.get(chap, chap),
+                course_id=cname,
+                chapter_label=chap,
+                chapter_num=chap_numbers[chap],
+            )
+            res = sess.execute(ins)
+            currentRowId = res.inserted_primary_key[0]
+        else:
+            currentRowId = res.id
+
+        for sub in subtitles[chap]:
+            if (chap, sub) in skips:
+                skipreading = "T"
+            else:
+                skipreading = "F"
+            # insert row for subchapter
+            # todo: check if this chapter/subchapter is in the non-reading list
+            q_name = "{}/{}".format(chaptitles.get(chap, chap), subtitles[chap][sub])
+            ins = sub_chapters.insert().values(
+                sub_chapter_name=subtitles[chap][sub],
+                chapter_id=str(currentRowId),
+                sub_chapter_label=sub,
+                skipreading=skipreading,
+                sub_chapter_num=subchap_numbers[chap][sub],
+            )
+            sess.execute(ins)
+            # Three possibilities:
+            # 1) The chapter and subchapter labels match existing, but the q_name doesn't match; because you changed
+            # heading in a file.
+            # 2) The chapter and subchapter labels don't match (new file name), but there is an existing q_name match,
+            # because you renamed the file
+            # 3) Neither match, so insert a new question
+            sel = select([questions]).where(
+                or_(
+                    and_(
+                        questions.c.chapter == chap,
+                        questions.c.subchapter == sub,
+                        questions.c.question_type == "page",
+                        questions.c.base_course == basecourse,
+                    ),
+                    and_(
+                        questions.c.name == q_name,
+                        questions.c.question_type == "page",
+                        questions.c.base_course == basecourse,
+                    ),
+                )
+            )
+            res = sess.execute(sel).first()
+            if res and (
+                (res.name != q_name) or (res.chapter != chap) or (res.subchapter != sub)
+            ):
+                # Something changed
+                upd = (
+                    questions.update()
+                    .where(questions.c.id == res["id"])
+                    .values(name=q_name, chapter=chap, from_source="T", subchapter=sub)
+                )
+                sess.execute(upd)
+            if not res:
+                # this is a new subchapter
+                ins = questions.insert().values(
+                    chapter=chap,
+                    subchapter=sub,
+                    question_type="page",
+                    from_source="T",
+                    name=q_name,
+                    timestamp=datetime.now(),
+                    base_course=basecourse,
+                )
+                sess.execute(ins)

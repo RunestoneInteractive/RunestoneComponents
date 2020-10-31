@@ -24,10 +24,17 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 from .textfield import *
 from sqlalchemy import Table
-from runestone.server.componentdb import addQuestionToDB, addHTMLToDB, get_engine_meta
+from runestone.server.componentdb import (
+    addQuestionToDB,
+    addHTMLToDB,
+    get_engine_meta,
+    maybeAddToAssignment,
+    maybeAddToAssignment,
+)
 from runestone.common.runestonedirective import (
     RunestoneIdDirective,
     RunestoneNode,
+    RunestoneIdNode,
     add_i18n_js,
 )
 
@@ -69,17 +76,18 @@ TEMPLATE_START = """
 """
 
 TEMPLATE_END = """
-<textarea data-component="activecode" id=%(divid)s data-lang="%(language)s" %(autorun)s
+<textarea data-component="activecode" id=%(divid)s data-lang="%(language)s" data-question_label="%(question_label)s" %(autorun)s
     %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s %(chatcodes)s %(optional)s
     data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(tie)s %(dburl)s %(nopair)s
-    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(hidehistory)s %(wasmuri)s>
+    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(hidehistory)s %(wasmuri)s
+    style="visibility: hidden;">
 %(initialcode)s
 </textarea>
 </div>
 """
 
 
-class ActivcodeNode(nodes.General, nodes.Element, RunestoneNode):
+class ActivcodeNode(nodes.General, nodes.Element, RunestoneIdNode):
     def __init__(self, content, **kwargs):
         """
 
@@ -88,7 +96,7 @@ class ActivcodeNode(nodes.General, nodes.Element, RunestoneNode):
         - `content`:
         """
         super(ActivcodeNode, self).__init__(name=content["name"], **kwargs)
-        self.ac_components = content
+        self.runestone_options = content
 
 
 # self for these functions is an instance of the writer class.  For example
@@ -97,15 +105,15 @@ class ActivcodeNode(nodes.General, nodes.Element, RunestoneNode):
 def visit_ac_node(self, node):
     # print self.settings.env.activecodecounter
 
-    # todo:  handle above in node.ac_components
-    # todo handle  'hidecode' not in node.ac_components:
-    # todo:  handle if 'gradebutton' in node.ac_components: res += GRADES
+    # todo:  handle above in node.runestone_options
+    # todo handle  'hidecode' not in node.runestone_options:
+    # todo:  handle if 'gradebutton' in node.runestone_options: res += GRADES
 
-    node.delimiter = "_start__{}_".format(node.ac_components["divid"])
+    node.delimiter = "_start__{}_".format(node.runestone_options["divid"])
 
     self.body.append(node.delimiter)
 
-    res = TEMPLATE_START % node.ac_components
+    res = TEMPLATE_START % node.runestone_options
     self.body.append(res)
 
 
@@ -114,12 +122,12 @@ def depart_ac_node(self, node):
         etc and did not want to do all of the processing in visit_ac_node any finishing touches could be
         added here.
     """
-    res = TEMPLATE_END % node.ac_components
+    res = TEMPLATE_END % node.runestone_options
     self.body.append(res)
 
     addHTMLToDB(
-        node.ac_components["divid"],
-        node.ac_components["basecourse"],
+        node.runestone_options["divid"],
+        node.runestone_options["basecourse"],
         "".join(self.body[self.body.index(node.delimiter) + 1 :]),
     )
 
@@ -437,6 +445,7 @@ config values (conf.py):
         acnode.source, acnode.line = self.state_machine.get_source_and_line(self.lineno)
         self.add_name(acnode)  # make this divid available as a target for :ref:
 
+        maybeAddToAssignment(self)
         if explain_text:
             self.state.nested_parse(explain_text, self.content_offset, acnode)
 

@@ -25,7 +25,7 @@ from sqlalchemy import Table
 from runestone.server.componentdb import get_engine_meta
 from runestone.common.runestonedirective import (
     RunestoneIdDirective,
-    RunestoneNode,
+    RunestoneIdNode,
 )
 
 
@@ -52,7 +52,7 @@ IMG_TEMPLATE = """
 """
 
 
-class DataFileNode(nodes.General, nodes.Element, RunestoneNode):
+class DataFileNode(nodes.General, nodes.Element, RunestoneIdNode):
     def __init__(self, content, **kwargs):
         """
         Arguments:
@@ -60,18 +60,18 @@ class DataFileNode(nodes.General, nodes.Element, RunestoneNode):
         - `content`:
         """
         super(DataFileNode, self).__init__(**kwargs)
-        self.df_content = content
+        self.runestone_options = content
 
 
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
 def visit_df_node(self, node):
-    if "image" in node.df_content:
+    if "image" in node.runestone_options:
         res = IMG_TEMPLATE
     else:
         res = TEMPLATE
-    res = res % node.df_content
+    res = res % node.runestone_options
 
     res = res.replace(
         "u'", "'"

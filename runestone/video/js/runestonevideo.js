@@ -3,15 +3,21 @@
 import RunestoneBase from "../../common/js/runestonebase";
 import "../css/video.css";
 
+var vidList = [];
 class RunestoneVideo extends RunestoneBase {
     constructor(opts) {
         super(opts);
+        this.divid = opts.orig.id;
+        this.container = $(`#${this.divid}`);
+        this.caption = "YouTube";
         if (document.getElementById("youtubescript") == null) {
             let script = document.createElement("script");
             script.id = "youtubescript";
             script.src = "https://www.youtube.com/player_api";
             document.body.appendChild(script);
         }
+        this.containerDiv = this.container[0].parentElement;
+        this.addCaption("runestone");
     }
 }
 
@@ -61,6 +67,17 @@ $(document).ready(function () {
     let script = document.createElement("script");
     script.src = "https://www.youtube.com/player_api";
     document.body.appendChild(script);
+});
+
+$(document).bind("runestone:login-complete", function () {
+    $("[data-component=youtube]").each(function (index) {
+        // MC
+        var opts = {
+            orig: this,
+            useRunestoneServices: eBookConfig.useRunestoneServices,
+        };
+        vidList[this.id] = new RunestoneVideo(opts);
+    });
 });
 
 if (typeof window.component_factory === "undefined") {

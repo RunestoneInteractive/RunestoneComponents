@@ -4,6 +4,7 @@ export default class TimedFITB extends FITB {
         super(opts);
         this.renderTimedIcon(this.inputDiv);
         this.hideButtons();
+        this.needsReinitialization = true;
     }
     hideButtons() {
         $(this.submitButton).hide();
@@ -47,4 +48,20 @@ export default class TimedFITB extends FITB {
         }
         this.startEvaluation(logFlag);
     }
+
+    reinitializeListeners() {
+        for (let blank of this.blankArray) {
+            $(blank).change(this.recordAnswered.bind(this));
+        }
+    }
 }
+
+if (typeof window.component_factory === "undefined") {
+    window.component_factory = {};
+}
+window.component_factory.fillintheblank = function (opts) {
+    if (opts.timed) {
+        return new TimedFITB(opts);
+    }
+    return new FITB(opts);
+};

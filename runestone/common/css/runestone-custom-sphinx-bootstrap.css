@@ -811,65 +811,7 @@ div.ExecutionVisualizer table.visualizer {
 }
 
 
-/* TIMED ASSESSMENT BUTTON STYLES */
-ul#pageNums,
-ul#pageNums li {
-    text-align: center;
-    padding: 10px 0;
-}
 
-
-.pagination>li>a:hover {
-    background-color: #eee !important;
-    color: #000 !important;
-}
-
-
-/* The following override styles in Bootstrap distribution file (bootstrap.min.css) */
-
-.pagination>.active>a,
-.pagination>.active>span {
-    background-color: #428bca !important;
-    color: #ffffff !important;
-}
-
-.col-md-6-override {
-    text-align: center !important;
-    max-width: 100% !important;
-}
-
-/* end */
-
-
-
-.pagination>.answered>a,
-.pagination>.answered>span {
-    background-color: #eee;
-    color: #000;
-}
-
-.pagination>.correctCount>a,
-.pagination>.correctCount>span {
-    background-color: #dff0d8;
-    color: #000000;
-    border-color: #000000;
-}
-
-.pagination>.skippedCount>a,
-.pagination>.skippedCount>span {
-    background-color: #fcf8e3;
-    color: #000000;
-    border-color: #000000;
-}
-
-.pagination>.incorrectCount>a,
-.pagination>.incorrectCount>span {
-    background-color: #f2dede;
-    color: #000000;
-    border-color: #000000;
-}
-
-/* END TIMED ASSESSMENT BUTTON STYLES */
 
 .sltooltip {
     position: absolute;
@@ -995,10 +937,14 @@ textarea#lp-result {
     text-align: center;
 }
 
-.runestone_caption:before {
+.runestone_caption_divid {
+    opacity: 50%;
+}
+
+/* .runestone_caption:before {
     counter-increment: rscomponent;
     content: "Activity: "counter(rscomponent) " -- ";
-}
+} */
 
 body {
     color: var(--bodyFont);

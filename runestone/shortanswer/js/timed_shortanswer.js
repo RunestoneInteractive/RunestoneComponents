@@ -35,3 +35,14 @@ export default class TimedShortAnswer extends ShortAnswer {
         this.jTextArea.disabled = true;
     }
 }
+
+if (typeof window.component_factory === "undefined") {
+    window.component_factory = {};
+}
+
+window.component_factory.shortanswer = function (opts) {
+    if (opts.timed) {
+        return new TimedShortAnswer(opts);
+    }
+    return new ShortAnswer(opts);
+};

@@ -18,8 +18,12 @@ __author__ = "isaiahmayerchak"
 from docutils import nodes
 from docutils.parsers.rst import directives
 from runestone.mchoice import Assessment
-from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common.runestonedirective import RunestoneNode, add_i18n_js
+from runestone.server.componentdb import (
+    addQuestionToDB,
+    addHTMLToDB,
+    maybeAddToAssignment,
+)
+from runestone.common.runestonedirective import RunestoneIdNode, add_i18n_js
 
 
 def setup(app):
@@ -30,22 +34,22 @@ def setup(app):
 
 TEMPLATE = """
         <div class="%(divclass)s" style="max-width: none;">
-        <pre data-component="parsons" id="%(divid)s" %(adaptive)s %(maxdist)s %(order)s %(noindent)s %(language)s %(numbered)s %(optional)s>
+        <pre data-component="parsons" data-question_label="%(question_label)s" id="%(divid)s" %(adaptive)s %(maxdist)s %(order)s %(noindent)s %(language)s %(numbered)s %(optional)s style="visibility: hidden;">
         <span data-question>%(qnumber)s: %(instructions)s</span>%(code)s
         </pre>
         </div>
     """
 
 
-class ParsonsNode(nodes.General, nodes.Element, RunestoneNode):
+class ParsonsNode(nodes.General, nodes.Element, RunestoneIdNode):
     def __init__(self, options, **kwargs):
         super(ParsonsNode, self).__init__(**kwargs)
-        self.parsonsnode_components = options
+        self.runestone_options = options
 
 
 def visit_parsons_node(self, node):
-    div_id = node.parsonsnode_components["divid"]
-    components = dict(node.parsonsnode_components)
+    div_id = node.runestone_options["divid"]
+    components = dict(node.runestone_options)
     components.update({"divid": div_id})
     res = TEMPLATE % components
     addHTMLToDB(div_id, components["basecourse"], res)
@@ -190,6 +194,7 @@ Example:
 
         self.assert_has_content()
 
+        maybeAddToAssignment(self)
         parsons_node = ParsonsNode(self.options, rawsource=self.block_text)
         parsons_node.source, parsons_node.line = self.state_machine.get_source_and_line(
             self.lineno
