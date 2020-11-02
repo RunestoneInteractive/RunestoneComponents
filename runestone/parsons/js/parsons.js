@@ -1743,7 +1743,7 @@ export default class Parsons extends RunestoneBase {
     }
     // RunestoneBase: Sent when the server has data
     restoreAnswers(serverData) {
-        this.loadData(this.newerData(this.localData(), serverData));
+        this.loadData(serverData);
     }
     // RunestoneBase: Load what is in local storage
     checkLocalStorage() {
