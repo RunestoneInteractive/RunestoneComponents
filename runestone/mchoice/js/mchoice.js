@@ -399,6 +399,7 @@ export default class MultipleChoice extends RunestoneBase {
     }
 
     checkCurrentAnswer() {
+        this.getSubmittedOpts();
         if (this.multipleanswers) {
             this.scoreMCMASubmission();
         } else {
@@ -414,6 +415,13 @@ export default class MultipleChoice extends RunestoneBase {
         }
     }
 
+    renderFeedback() {
+        if (this.multipleanswers) {
+            this.renderMCMAFeedBack();
+        } else {
+            this.renderMCMFFeedback();
+        }
+    }
     scoreMCMASubmission() {
         this.correctCount = 0;
         var correctIndex = 0;
@@ -490,10 +498,7 @@ export default class MultipleChoice extends RunestoneBase {
         if (logFlag) {
             this.logMCMFsubmission();
         }
-        this.renderMCMFFeedback(
-            this.givenArray[0] == this.correctIndexList[0],
-            this.singlefeedback
-        );
+        this.renderMCMFFeedback();
         if (this.useRunestoneServices) {
             this.enableMCComparison();
         }
@@ -523,7 +528,10 @@ export default class MultipleChoice extends RunestoneBase {
         });
     }
 
-    renderMCMFFeedback(correct, feedbackText) {
+    renderMCMFFeedback() {
+        let correct = this.givenArray[0] == this.correctIndexList[0];
+        let feedbackText = this.singlefeedback;
+
         if (correct) {
             $(this.feedBackDiv).html("✔️ " + feedbackText);
             $(this.feedBackDiv).attr("class", "alert alert-info"); // use blue for better red/green blue color blindness

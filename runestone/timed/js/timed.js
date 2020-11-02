@@ -516,10 +516,7 @@ export default class Timed extends RunestoneBase {
         // check the renderedQuestionArray to see if it has been rendered.
         let opts = this.renderedQuestionArray[this.currentQuestionIndex];
         let currentQuestion;
-        if (
-            opts.hasOwnProperty("state") &&
-            (opts.state === "prepared" || opts.state === "forreview")
-        ) {
+        if (opts.state === "prepared" || opts.state === "forreview") {
             let tmpChild = opts.orig;
             if ($(tmpChild).is("[data-component=selectquestion]")) {
                 // SelectOne is async and will replace itself in this array with
@@ -540,14 +537,14 @@ export default class Timed extends RunestoneBase {
                 this.renderedQuestionArray[this.currentQuestionIndex] = {
                     question: new window.component_factory[componentKind](opts),
                 };
-                currentQuestion = this.renderedQuestionArray[
-                    this.currentQuestionIndex
-                ].question;
-                if (opts.state === "forreview") {
-                    currentQuestion.checkCurrentAnswer();
-                    currentQuestion.renderFeedback();
-                }
             }
+        }
+
+        currentQuestion = this.renderedQuestionArray[this.currentQuestionIndex]
+            .question;
+        if (opts.state === "forreview") {
+            currentQuestion.checkCurrentAnswer();
+            currentQuestion.renderFeedback();
         }
 
         if (!this.visited.includes(this.currentQuestionIndex)) {
@@ -580,7 +577,7 @@ export default class Timed extends RunestoneBase {
         // questions and their state of correctness.
         if (this.showResults && this.showFeedback) {
             $(this.timedDiv).show();
-            this.restoreAnsweredQuestions; // do not log these results
+            this.restoreAnsweredQuestions(); // do not log these results
         } else {
             $(this.pauseBtn).hide();
             $(this.timerContainer).hide();
@@ -819,8 +816,8 @@ export default class Timed extends RunestoneBase {
     restoreAnsweredQuestions() {
         for (var i = 0; i < this.renderedQuestionArray.length; i++) {
             var currentQuestion = this.renderedQuestionArray[i];
-            if (currentQuestion.status === "prepared") {
-                currentQuestion.status === "forreview";
+            if (currentQuestion.state === "prepared") {
+                currentQuestion.state = "forreview";
             }
         }
     }

@@ -1222,6 +1222,19 @@ export class ActiveCode extends RunestoneBase {
             saveCode: saveCode,
         };
     }
+
+    async checkCurrentAnswer() {
+        return this.runProg();
+    }
+
+    logCurrentAnswer() {
+        // leave this as a no-op until we figure out how to pull out logging
+    }
+
+    renderFeedback() {
+        // leave as no-op as the unittests kind of have to handle their own feedback??
+    }
+
     runProg(noUI, logResults) {
         if (typeof logResults === "undefined") {
             logResults = true;
@@ -1340,6 +1353,8 @@ export class ActiveCode extends RunestoneBase {
                 e.redrawConnectors();
             });
         }
+
+        return skulpt_run_dfd;
     }
 }
 

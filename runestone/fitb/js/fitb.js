@@ -158,7 +158,7 @@ export default class FITB extends RunestoneBase {
                 typeof this.correct !== "undefined" &&
                 typeof this.isCorrectArray !== "undefined"
             ) {
-                this.renderFITBFeedback();
+                this.renderFeedback();
             }
         } else {
             this.startEvaluation(false);
@@ -238,7 +238,7 @@ export default class FITB extends RunestoneBase {
     startEvaluation(logFlag) {
         this.checkCurrentAnswer();
         if (this.feedbackArray) {
-            this.renderFITBFeedback();
+            this.renderFeedback();
         }
         if (logFlag) {
             // Sometimes we don't want to log the answer--for example, when timed exam questions are re-loaded
@@ -254,7 +254,7 @@ export default class FITB extends RunestoneBase {
                     that.correct = data.correct;
                     that.displayFeed = data.displayFeed;
                     that.isCorrectArray = data.isCorrectArray;
-                    that.renderFITBFeedback();
+                    that.renderFeedback();
                 });
             }
         }
@@ -322,7 +322,7 @@ export default class FITB extends RunestoneBase {
             }
         }
     }
-    renderFITBFeedback() {
+    renderFeedback() {
         if (this.correct) {
             $(this.feedBackDiv).attr("class", "alert alert-info");
             for (let j = 0; j < this.blankArray.length; j++) {

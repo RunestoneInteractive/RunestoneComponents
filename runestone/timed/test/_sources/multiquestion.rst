@@ -47,10 +47,10 @@ A Multi Question Exam
 	   Fill in the blanks to make the following sentence: "The red car drove away" The |blank| car drove |blank|.
 
 	   - :red: Correct
-		 :.*: Try red
+             :.*: Try red
 
 	   - :away: Corect
-		 :.*: where did we say the red car was going?
+             :.*: where did we say the red car was going?
 
 
    .. activecode:: timedactive

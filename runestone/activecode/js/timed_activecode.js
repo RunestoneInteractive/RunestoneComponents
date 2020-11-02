@@ -113,7 +113,12 @@ export class TimedActiveCode extends ActiveCode {
         super(opts);
         this.timedInit(opts);
     }
+
+    checkCurrentAnswer() {
+        return this.runProg(true, false);
+    }
 }
+
 Object.assign(TimedActiveCode.prototype, TimedActiveCodeMixin);
 
 export class TimedJSActiveCode extends JSActiveCode {
