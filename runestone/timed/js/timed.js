@@ -515,7 +515,11 @@ export default class Timed extends RunestoneBase {
         }
         // check the renderedQuestionArray to see if it has been rendered.
         let opts = this.renderedQuestionArray[this.currentQuestionIndex];
-        if (opts.hasOwnProperty("state") && opts.state === "prepared") {
+        let currentQuestion;
+        if (
+            opts.hasOwnProperty("state") &&
+            (opts.state === "prepared" || opts.state === "forreview")
+        ) {
             let tmpChild = opts.orig;
             if ($(tmpChild).is("[data-component=selectquestion]")) {
                 // SelectOne is async and will replace itself in this array with
@@ -536,11 +540,16 @@ export default class Timed extends RunestoneBase {
                 this.renderedQuestionArray[this.currentQuestionIndex] = {
                     question: new window.component_factory[componentKind](opts),
                 };
+                currentQuestion = this.renderedQuestionArray[
+                    this.currentQuestionIndex
+                ].question;
+                if (opts.state === "forreview") {
+                    currentQuestion.checkCurrentAnswer();
+                    currentQuestion.renderFeedback();
+                }
             }
         }
-        var currentQuestion = this.renderedQuestionArray[
-            this.currentQuestionIndex
-        ].question;
+
         if (!this.visited.includes(this.currentQuestionIndex)) {
             this.visited.push(this.currentQuestionIndex);
             if (this.visited.length === this.renderedQuestionArray.length) {
@@ -571,7 +580,7 @@ export default class Timed extends RunestoneBase {
         // questions and their state of correctness.
         if (this.showResults && this.showFeedback) {
             $(this.timedDiv).show();
-            this.submitTimedProblems(false); // do not log these results
+            this.restoreAnsweredQuestions; // do not log these results
         } else {
             $(this.pauseBtn).hide();
             $(this.timerContainer).hide();
@@ -790,7 +799,7 @@ export default class Timed extends RunestoneBase {
                     if (retdata.success == false) {
                         console.log(retdata.message);
                     } else {
-                        console.log("Autgrader completed");
+                        console.log("Autograder completed");
                     }
                 },
             });
@@ -804,6 +813,15 @@ export default class Timed extends RunestoneBase {
         }
         if (!this.showFeedback) {
             this.hideTimedFeedback();
+        }
+    }
+
+    restoreAnsweredQuestions() {
+        for (var i = 0; i < this.renderedQuestionArray.length; i++) {
+            var currentQuestion = this.renderedQuestionArray[i];
+            if (currentQuestion.status === "prepared") {
+                currentQuestion.status === "forreview";
+            }
         }
     }
 
