@@ -191,11 +191,8 @@ export default class FITB extends RunestoneBase {
         let key = this.localStorageKey();
         localStorage.setItem(key, JSON.stringify(data));
     }
-    /*==============================
-    === Evaluation of answer and ===
-    ===     display feedback     ===
-    ==============================*/
-    startEvaluation(logFlag) {
+
+    checkCurrentAnswer() {
         // Start of the evaulation chain
         this.isCorrectArray = [];
         this.displayFeed = [];
@@ -205,26 +202,39 @@ export default class FITB extends RunestoneBase {
         // Grade locally if we can't ask the server to grade.
         if (this.feedbackArray) {
             this.evaluateAnswers();
-            this.renderFITBFeedback();
         }
+    }
+
+    logCurrentAnswer() {
+        let answer = JSON.stringify(this.given_arr);
+        // Save the answer locally.
+        this.setLocalStorage({
+            answer: answer,
+            timestamp: new Date(),
+        });
+        var that = this;
+        var ret = this.logBookEvent({
+            event: "fillb",
+            act: answer,
+            answer: answer,
+            correct: this.correct ? "T" : "F",
+            div_id: this.divid,
+        });
+        return ret;
+    }
+
+    /*==============================
+    === Evaluation of answer and ===
+    ===     display feedback     ===
+    ==============================*/
+    startEvaluation(logFlag) {
+        this.checkCurrentAnswer();
         if (logFlag) {
             // Sometimes we don't want to log the answer--for example, when timed exam questions are re-loaded
-            let answer = JSON.stringify(this.given_arr);
-            // Save the answer locally.
-            this.setLocalStorage({
-                answer: answer,
-                timestamp: new Date(),
-            });
-            var that = this;
-            var ret = this.logBookEvent({
-                event: "fillb",
-                act: answer,
-                answer: answer,
-                correct: this.correct ? "T" : "F",
-                div_id: this.divid,
-            });
+            let ret = this.logCurrentAnswer();
             if (!this.feedbackArray) {
                 // On success, update the feedback from the server's grade.
+                let that = this;
                 ret.done(function (data) {
                     that.setLocalStorage({
                         answer: answer,
@@ -337,6 +347,7 @@ export default class FITB extends RunestoneBase {
             MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
         }
     }
+
     /*==================================
     === Functions for compare button ===
     ==================================*/

@@ -402,6 +402,26 @@ export default class MultipleChoice extends RunestoneBase {
         this.givenArray.sort();
     }
 
+    checkCurrentAnswer() {
+        if (this.multipleanswers) {
+            this.scoreMCMASubmission();
+        } else {
+            this.scoreMCMFSubmission();
+        }
+    }
+
+    logCurrentAnswer() {
+        if (this.multipleanswers) {
+            var answer = this.givenArray.join(",");
+            this.logMCMAsubmission({
+                answer: answer,
+                correct: this.correct,
+            });
+        } else {
+            this.logMCMFsubmission();
+        }
+    }
+
     scoreMCMASubmission() {
         this.correctCount = 0;
         var correctIndex = 0;

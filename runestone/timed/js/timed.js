@@ -303,7 +303,14 @@ export default class Timed extends RunestoneBase {
                             this.currentQuestionIndex +
                             ")"
                     ).addClass("answered");
+                    this.renderedQuestionArray[
+                        this.currentQuestionIndex
+                    ].question.checkCurrentAnswer();
+                    this.renderedQuestionArray[
+                        this.currentQuestionIndex
+                    ].question.logCurrentAnswer();
                 }
+                // submit the current question here
                 var target = $(event.target).text();
                 if (target.match(/Next/)) {
                     if ($(this.rightContainer).hasClass("disabled")) {
@@ -350,6 +357,12 @@ export default class Timed extends RunestoneBase {
                             this.currentQuestionIndex +
                             ")"
                     ).addClass("answered");
+                    this.renderedQuestionArray[
+                        this.currentQuestionIndex
+                    ].question.checkCurrentAnswer();
+                    this.renderedQuestionArray[
+                        this.currentQuestionIndex
+                    ].question.logCurrentAnswer();
                 }
                 for (var i = 0; i < this.qNumList.childNodes.length; i++) {
                     for (
@@ -362,6 +375,7 @@ export default class Timed extends RunestoneBase {
                         ).removeClass("active");
                     }
                 }
+
                 var target = $(event.target).text();
                 let oldIndex = this.currentQuestionIndex;
                 this.currentQuestionIndex = parseInt(target) - 1;
