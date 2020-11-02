@@ -47,7 +47,7 @@ export default class DragNDrop extends RunestoneBase {
             ) {
                 var tmp = $(this.origElem).find(
                     `#${$(this.origElem.childNodes[i]).attr("for")}`
-                );
+                )[0];
                 var replaceSpan = document.createElement("span");
                 replaceSpan.innerHTML = tmp.innerHTML;
                 replaceSpan.id = this.divid + tmp.id;
