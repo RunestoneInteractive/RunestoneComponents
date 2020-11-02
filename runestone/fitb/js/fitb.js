@@ -227,8 +227,19 @@ export default class FITB extends RunestoneBase {
     === Evaluation of answer and ===
     ===     display feedback     ===
     ==============================*/
+    /*
+     * keeping this function for backward compatiblitiy
+     * going forward we should be using
+     * checkCurrentAnswer()
+     * logCurrentAnswer()
+     * renderFeedback()
+     * independently.
+     */
     startEvaluation(logFlag) {
         this.checkCurrentAnswer();
+        if (this.feedbackArray) {
+            this.renderFITBFeedback();
+        }
         if (logFlag) {
             // Sometimes we don't want to log the answer--for example, when timed exam questions are re-loaded
             let ret = this.logCurrentAnswer();
