@@ -56,7 +56,11 @@ export default class TimedClickableArea extends ClickableArea {
                 return;
             };
         }
-        this.clickableEval(logFlag);
+        this.checkCurrentAnswer();
+        this.renderFeedback();
+        if (logFlag) {
+            this.logCurrentAnswer();
+        }
     }
 }
 

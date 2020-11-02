@@ -1307,7 +1307,9 @@ export default class Parsons extends RunestoneBase {
         this.checkButton.type = "button";
         this.checkButton.addEventListener("click", function (event) {
             event.preventDefault();
-            that.checkMe();
+            that.checkCurrentAnswer();
+            that.logCurrentAnswer();
+            that.renderFeedback();
         });
         this.resetButton = document.createElement("button");
         $(this.resetButton).attr("class", "btn btn-default");
@@ -1800,7 +1802,7 @@ export default class Parsons extends RunestoneBase {
     // Log the answer to the problem
     //   correct: The answer given matches the solution
     //   incorrect*: The answer is wrong for various reasons
-    logAnswer(answer) {
+    logCurrentAnswer() {
         if (eBookConfig.logLevel == 0) {
             return this;
         }
@@ -1818,7 +1820,7 @@ export default class Parsons extends RunestoneBase {
             event.adaptive = adaptiveHash;
             act = act + "|" + adaptiveHash;
         }
-        if (answer == "correct") {
+        if (this.answer == "correct") {
             act = "correct|" + act;
             event.correct = "T";
         } else {
@@ -2334,15 +2336,18 @@ export default class Parsons extends RunestoneBase {
     ==== ACTION ============================================================
     ===================================================================== */
     // The "Check Me" button was pressed.
-    checkMe() {
+    checkCurrentAnswer() {
         if (!this.hasSolved) {
             this.checkCount++;
             this.clearFeedback();
             if (this.adaptiveId == undefined) {
                 this.adaptiveId = this.storageId;
             }
-            var grade = this.grader.grade();
-            if (grade == "correct") {
+            // TODO - rendering feedback is buried in the grader.grade method.
+            // to disable feedback set this.grader.showfeedback boolean
+            this.grader.showfeedback = false;
+            this.grade = this.grader.grade();
+            if (this.grade == "correct") {
                 this.hasSolved = true;
                 localStorage.setItem(this.adaptiveId + "Solved", true);
                 this.recentAttempts = this.checkCount;
@@ -2356,10 +2361,9 @@ export default class Parsons extends RunestoneBase {
                 this.adaptiveId + this.divid + "Count",
                 this.checkCount
             );
-            this.logAnswer(grade);
             this.setLocalStorage();
             // if not solved and not too short then check if should provide help
-            if (!this.hasSolved && grade !== "incorrectTooShort") {
+            if (!this.hasSolved && this.grade !== "incorrectTooShort") {
                 if (this.canHelp) {
                     // only count the attempt if the answer is different (to prevent gaming)
                     var answerHash = this.answerHash();
@@ -2369,21 +2373,18 @@ export default class Parsons extends RunestoneBase {
                     }
                     // if time to offer help
                     if (this.numDistinct == 3 && !this.gotHelp) {
-                        // activate the help button and wiggle it
-                        //this.helpButton.disabled = false;
-                        //$(this.helpButton).css("position","relative");
-                        //for (var x = 1; x <= 3; x++) {
-                        //	$(this.helpButton)
-                        //		.animate({ left : -5 }, 60)
-                        //		.animate({ left : 5 }, 120)
-                        //		.animate({ left : 0 }, 60);
                         alert($.i18n("msg_parson_help_info"));
-                        //} // end for
                     } // end if
                 } // end if can help
             } // end if not solved
         } // end outer if not solved
     }
+
+    renderFeedback() {
+        this.grader.showfeedback = true;
+        this.grade = this.grader.grade();
+    }
+
     /* =====================================================================
     ==== ADAPTIVE ==========================================================
     ===================================================================== */

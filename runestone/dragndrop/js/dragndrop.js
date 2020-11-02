@@ -165,7 +165,9 @@ export default class DragNDrop extends RunestoneBase {
             type: "button",
         });
         this.submitButton.onclick = function () {
-            this.dragEval(true);
+            this.checkCurrentAnswer();
+            this.renderFeedback();
+            this.logCurrentAnswer(true);
         }.bind(this);
         this.resetButton = document.createElement("button"); // Check me button
         this.resetButton.textContent = $.i18n("msg_dragndrop_reset");
@@ -369,7 +371,8 @@ export default class DragNDrop extends RunestoneBase {
     /*===========================
     == Evaluation and feedback ==
     ===========================*/
-    dragEval(logFlag) {
+
+    checkCurrentAnswer() {
         this.correct = true;
         this.unansweredNum = 0;
         this.incorrectNum = 0;
@@ -392,21 +395,20 @@ export default class DragNDrop extends RunestoneBase {
         }
         this.correctNum = this.dragNum - this.incorrectNum - this.unansweredNum;
         this.setLocalStorage({ correct: this.correct ? "T" : "F" });
-        this.renderFeedback();
-        if (logFlag) {
-            // Sometimes we don't want to log the answers--for example, on re-load of a timed exam
-            let answer = this.pregnantIndexArray.join(";");
-            this.logBookEvent({
-                event: "dragNdrop",
-                act: answer,
-                answer: answer,
-                minHeight: this.minheight,
-                div_id: this.divid,
-                correct: this.correct,
-                correctNum: this.correctNum,
-                dragNum: this.dragNum,
-            });
-        }
+    }
+
+    logCurrentAnswer() {
+        let answer = this.pregnantIndexArray.join(";");
+        this.logBookEvent({
+            event: "dragNdrop",
+            act: answer,
+            answer: answer,
+            minHeight: this.minheight,
+            div_id: this.divid,
+            correct: this.correct,
+            correctNum: this.correctNum,
+            dragNum: this.dragNum,
+        });
     }
     renderFeedback() {
         if (!this.feedBackDiv) {

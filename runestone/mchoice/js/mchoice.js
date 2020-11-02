@@ -335,9 +335,9 @@ export default class MultipleChoice extends RunestoneBase {
                     this.enableMCComparison();
                     this.getSubmittedOpts(); // to populate givenlog for logging
                     if (this.multipleanswers) {
-                        this.logMCMAsubmission(storedData);
+                        this.logMCMAsubmission();
                     } else {
-                        this.logMCMFsubmission(storedData);
+                        this.logMCMFsubmission();
                     }
                 }
             }
@@ -369,11 +369,7 @@ export default class MultipleChoice extends RunestoneBase {
             answer: this.givenArray.join(","),
         });
         if (logFlag) {
-            var answer = this.givenArray.join(",");
-            this.logMCMAsubmission({
-                answer: answer,
-                correct: this.correct,
-            });
+            this.logMCMAsubmission();
         }
         this.renderMCMAFeedBack();
         if (this.useRunestoneServices) {
@@ -412,11 +408,7 @@ export default class MultipleChoice extends RunestoneBase {
 
     logCurrentAnswer() {
         if (this.multipleanswers) {
-            var answer = this.givenArray.join(",");
-            this.logMCMAsubmission({
-                answer: answer,
-                correct: this.correct,
-            });
+            this.logMCMAsubmission();
         } else {
             this.logMCMFsubmission();
         }
@@ -449,12 +441,13 @@ export default class MultipleChoice extends RunestoneBase {
         var numGiven = this.givenArray.length;
         var numCorrect = this.correctCount;
         var numNeeded = this.correctList.length;
+        this.answer = this.givenArray.join(",");
         this.correct = numCorrect === numNeeded && numNeeded === numGiven;
     }
 
-    logMCMAsubmission(data) {
-        var answer = data.answer;
-        var correct = data.correct;
+    logMCMAsubmission() {
+        var answer = this.answer;
+        var correct = this.correct;
         var logAnswer =
             "answer:" + answer + ":" + (correct == "T" ? "correct" : "no");
         this.logBookEvent({

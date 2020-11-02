@@ -46,7 +46,11 @@ export default class TimedDragNDrop extends DragNDrop {
     processTimedSubmission(logFlag) {
         // Disable input & evaluate component
         $(this.resetButton).hide();
-        this.dragEval(logFlag);
+        this.checkCurrentAnswer();
+        if (logFlag) {
+            this.logCurrentAnswer();
+        }
+        this.renderFeedback();
         for (var i = 0; i < this.dragPairArray.length; i++) {
             // No more dragging
             $(this.dragPairArray[i][0]).attr("draggable", "false");

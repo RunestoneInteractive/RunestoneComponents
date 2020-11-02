@@ -99,7 +99,9 @@ export default class ClickableArea extends RunestoneBase {
             type: "button",
         });
         this.submitButton.onclick = function () {
-            this.clickableEval(true);
+            this.checkCurrentAnswer();
+            this.logCurrentAnswer();
+            this.renderFeedback();
         }.bind(this);
         this.containerDiv.appendChild(this.submitButton);
     }
@@ -371,7 +373,7 @@ export default class ClickableArea extends RunestoneBase {
     /*======================================
     == Evaluation and displaying feedback ==
     ======================================*/
-    clickableEval(logFlag) {
+    checkCurrentAnswer() {
         // Evaluation is done by iterating over the correct/incorrect arrays and checking by class
         this.correct = true;
         this.correctNum = 0;
@@ -393,17 +395,17 @@ export default class ClickableArea extends RunestoneBase {
             }
         }
         this.setLocalStorage({ correct: this.correct ? "T" : "F" });
-        if (logFlag) {
-            // Sometimes we don't want to log the answer; for example, on reload of timed exam questions
-            this.logBookEvent({
-                event: "clickableArea",
-                act: this.givenIndexArray.join(";"),
-                div_id: this.divid,
-                correct: this.correct ? "T" : "F",
-            });
-        }
-        this.renderFeedback();
     }
+
+    logCurrentAnswer() {
+        this.logBookEvent({
+            event: "clickableArea",
+            act: this.givenIndexArray.join(";"),
+            div_id: this.divid,
+            correct: this.correct ? "T" : "F",
+        });
+    }
+
     renderFeedback() {
         if (this.correct) {
             $(this.feedBackDiv).html("You are Correct!");

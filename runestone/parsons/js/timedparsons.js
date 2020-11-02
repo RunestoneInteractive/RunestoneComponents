@@ -25,8 +25,12 @@ export default class TimedParsons extends Parsons {
         if (logFlag) {
             this.setLocalStorage();
         }
-        this.checkMe();
-        this.correct = this.grader.grade() == "correct";
+        this.checkCurrentAnswer();
+        if (logFlag) {
+            this.logCurrentAnswer();
+        }
+        this.renderFeedback();
+        this.correct = this.grade;
         this.disable();
     }
 }

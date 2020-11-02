@@ -98,7 +98,9 @@ export default class ShortAnswer extends RunestoneBase {
         this.submitButton.type = "button";
         this.submitButton.textContent = "Save";
         this.submitButton.onclick = function () {
-            this.submitJournal();
+            this.checkCurrentAnswer();
+            this.logCurrentAnswer();
+            this.renderFeedback();
         }.bind(this);
         this.buttonDiv.appendChild(this.submitButton);
         this.randomSpan = document.createElement("span");
@@ -138,7 +140,9 @@ export default class ShortAnswer extends RunestoneBase {
         }
     }
 
-    submitJournal() {
+    checkCurrentAnswer() {}
+
+    logCurrentAnswer() {
         let value = $(document.getElementById(this.divid + "_solution")).val();
         this.renderMath(value);
         this.setLocalStorage({
@@ -150,6 +154,9 @@ export default class ShortAnswer extends RunestoneBase {
             act: value,
             div_id: this.divid,
         });
+    }
+
+    renderFeedback() {
         this.feedbackDiv.innerHTML = "Your answer has been saved.";
         $(this.feedbackDiv).removeClass("alert-danger");
         $(this.feedbackDiv).addClass("alert alert-success");
