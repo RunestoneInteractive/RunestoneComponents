@@ -181,6 +181,7 @@ export class ActiveCode extends RunestoneBase {
                         "border-bottom",
                         "2px solid #b43232"
                     );
+                    this.isAnswered = true;
                     this.logBookEvent({
                         event: "activecode",
                         act: "edit",
@@ -1224,18 +1225,48 @@ export class ActiveCode extends RunestoneBase {
     }
 
     async checkCurrentAnswer() {
-        return this.runProg();
+        this.run_promise = this.runProg();
     }
 
     logCurrentAnswer() {
-        // leave this as a no-op until we figure out how to pull out logging
+        let self = this;
+        this.run_promise.then(function () {
+            self.logRunEvent({
+                div_id: self.divid,
+                code: self.editor.getValue(),
+                lang: self.language,
+                errinfo: self.errinfo,
+                to_save: self.saveCode,
+                prefix: self.pretext,
+                suffix: self.suffix,
+                partner: self.partner,
+            }); // Log the run event
+            // If unit tests were run there will be a unit_results
+            if (self.unit_results) {
+                self.logBookEvent({
+                    act: self.unit_results,
+                    div_id: self.divid,
+                    event: "unittest",
+                });
+            }
+        });
     }
 
     renderFeedback() {
         // leave as no-op as the unittests kind of have to handle their own feedback??
     }
 
-    runProg(noUI, logResults) {
+    /* runProg has several async elements to it.
+     * 1. Skulpt runs the python program asynchronously
+     * 2. The history is restored asynchronously
+     * 3. Logging is asynchronous
+     *
+     * This method returns the skulpt Promise and so the promise will resolve when skulpt is finished.
+     * when finished this.unit_results will contain the results of any unit tests that have been run.
+     * The table of results is constructed and added to the DOM by the python unittest.gui module in skulpt.
+     *
+     */
+    async runProg(noUI, logResults) {
         if (typeof logResults === "undefined") {
             logResults = true;
         }
@@ -1244,8 +1275,8 @@ export class ActiveCode extends RunestoneBase {
         }
         this.isAnswered = true;
         var prog = this.buildProg(true);
-        var saveCode = "True";
-        var scrubber_dfd, history_dfd, skulpt_run_dfd;
+        this.saveCode = "True";
+        var scrubber_dfd, history_dfd;
         $(this.output).text("");
         $(this.eContainer).remove();
         if (this.codelens) {
@@ -1287,16 +1318,16 @@ export class ActiveCode extends RunestoneBase {
             var __ret = this.manage_scrubber(
                 scrubber_dfd,
                 history_dfd,
-                saveCode
+                this.saveCode
             );
             history_dfd = __ret.history_dfd;
-            saveCode = __ret.saveCode;
+            this.saveCode = __ret.saveCode;
             promise_list.push(history_dfd);
         }
-        skulpt_run_dfd = Sk.misceval.asyncToPromise(function () {
+        this.run_promise = Sk.misceval.asyncToPromise(function () {
             return Sk.importMainWithBody("<stdin>", false, prog, true);
         });
-        promise_list.push(skulpt_run_dfd);
+        promise_list.push(this.run_promise);
         // Make sure that the history scrubber is fully initialized AND the code has been run
         // before we start logging stuff.
         var self = this;
@@ -1313,16 +1344,10 @@ export class ActiveCode extends RunestoneBase {
                     $(this.historyScrubber).slider("enable");
                 }
                 this.errLastRun = false;
-                this.logRunEvent({
-                    div_id: this.divid,
-                    code: this.editor.getValue(),
-                    lang: this.language,
-                    errinfo: "success",
-                    to_save: saveCode,
-                    prefix: this.pretext,
-                    suffix: this.suffix,
-                    partner: this.partner,
-                }); // Log the run event
+                this.errinfo = "success";
+                if (logResults) {
+                    this.logCurrentAnswer();
+                }
             }.bind(this),
             function (err) {
                 if (typeof history_dfd !== "undefined") {
@@ -1333,16 +1358,8 @@ export class ActiveCode extends RunestoneBase {
                             self.slideit.bind(self)
                         );
                         $(self.historyScrubber).slider("enable");
-                        self.logRunEvent({
-                            div_id: self.divid,
-                            code: self.editor.getValue(),
-                            lang: self.langauge,
-                            errinfo: err.toString(),
-                            to_save: saveCode,
-                            prefix: self.pretext,
-                            suffix: self.suffix,
-                            partner: self.partner,
-                        }); // Log the run event
+                        self.errinfo = err.toString();
+                        self.logCurrentAnswer(); // todo pull this out.
                         self.addErrorMessage(err);
                     });
                 }
@@ -1354,7 +1371,7 @@ export class ActiveCode extends RunestoneBase {
             });
         }
 
-        return skulpt_run_dfd;
+        return this.run_promise;
     }
 }
 

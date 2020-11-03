@@ -387,7 +387,6 @@ export default class ClickableArea extends RunestoneBase {
         }
         for (let i = 0; i < this.incorrectArray.length; i++) {
             if ($(this.incorrectArray[i]).hasClass("clickable-clicked")) {
-                $(this.incorrectArray[i]).addClass("clickable-incorrect");
                 this.correct = false;
                 this.incorrectNum++;
             } else {
@@ -411,6 +410,15 @@ export default class ClickableArea extends RunestoneBase {
             $(this.feedBackDiv).html("You are Correct!");
             $(this.feedBackDiv).attr("class", "alert alert-info");
         } else {
+            for (let i = 0; i < this.incorrectArray.length; i++) {
+                if ($(this.incorrectArray[i]).hasClass("clickable-clicked")) {
+                    $(this.incorrectArray[i]).addClass("clickable-incorrect");
+                } else {
+                    $(this.incorrectArray[i]).removeClass(
+                        "clickable-incorrect"
+                    );
+                }
+            }
             $(this.feedBackDiv).html(
                 "Incorrect. You clicked on " +
                     this.correctNum +

@@ -383,10 +383,7 @@ export default class DragNDrop extends RunestoneBase {
                     .length
             ) {
                 this.correct = false;
-                $(this.dragPairArray[i][1]).addClass("drop-incorrect");
                 this.incorrectNum++;
-            } else {
-                $(this.dragPairArray[i][1]).removeClass("drop-incorrect");
             }
             if (this.hasNoDragChild(this.dragPairArray[i][1])) {
                 this.unansweredNum++;
@@ -411,6 +408,17 @@ export default class DragNDrop extends RunestoneBase {
         });
     }
     renderFeedback() {
+        for (var i = 0; i < this.dragPairArray.length; i++) {
+            if (
+                !$(this.dragPairArray[i][1]).has(this.dragPairArray[i][0])
+                    .length
+            ) {
+                $(this.dragPairArray[i][1]).addClass("drop-incorrect");
+            } else {
+                $(this.dragPairArray[i][1]).removeClass("drop-incorrect");
+            }
+        }
+
         if (!this.feedBackDiv) {
             this.renderFeedbackDiv();
         }

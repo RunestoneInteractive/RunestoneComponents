@@ -47,15 +47,40 @@ A Multi Question Exam
 	   Fill in the blanks to make the following sentence: "The red car drove away" The |blank| car drove |blank|.
 
 	   - :red: Correct
-             :.*: Try red
+         :.*: Try red
 
 	   - :away: Corect
-             :.*: where did we say the red car was going?
+         :.*: where did we say the red car was going?
 
 
-   .. activecode:: timedactive
-	  :language: python
+   .. activecode:: units2
+	   :nocodelens:
+	
+	   Fix the following code so that it always correctly adds two numbers.
+	   ~~~~
+	   def add(a,b):
+		  return 4
+	
+	   ====
+	   from unittest.gui import TestCaseGui
+	
+	   class myTests(TestCaseGui):
+	
+		   def testOne(self):
+			   self.assertEqual(add(2,2),4,"A feedback string when the test fails")
+			   self.assertAlmostEqual(add(2.0,3.0), 5.0, 5, "Try adding your parameters")
+	
+	   myTests().main()
 
-	  Write a program that prints "hello world" two times.
-	  ~~~~
-	  print("hello world")
+
+   .. parsonsprob:: morning
+   
+	  Put the blocks in order to describe a morning routine.
+	  -----
+	  get up
+	  =====
+	  eat breakfast
+	  =====
+	  brush your teeth
+   
+   

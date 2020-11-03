@@ -322,6 +322,7 @@ export default class FITB extends RunestoneBase {
             }
         }
     }
+
     renderFeedback() {
         if (this.correct) {
             $(this.feedBackDiv).attr("class", "alert alert-info");

@@ -114,8 +114,11 @@ export class TimedActiveCode extends ActiveCode {
         this.timedInit(opts);
     }
 
+    // for timed exams we need to call runProg and tell it that there is
+    // no GUI for sliders or other things. We also do not want it to log
+    // the answers.  See also processTimedSubmission which gets called at the end.
     checkCurrentAnswer() {
-        return this.runProg(true, false);
+        this.run_promise = this.runProg(true, false);
     }
 }
 

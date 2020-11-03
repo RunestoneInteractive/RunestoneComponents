@@ -804,10 +804,22 @@ export default class Timed extends RunestoneBase {
     }
 
     submitTimedProblems(logFlag) {
+        //Because we have submitted each question as we navigate we only need to
+        // send the final version of the question the student is on when they press the
+        // finish exam button.
+
+        var currentQuestion = this.renderedQuestionArray[
+            this.currentQuestionIndex
+        ].question;
+        currentQuestion.checkCurrentAnswer();
+        currentQuestion.logCurrentAnswer();
+        currentQuestion.renderFeedback();
+
         for (var i = 0; i < this.renderedQuestionArray.length; i++) {
-            var currentQuestion = this.renderedQuestionArray[i].question;
-            currentQuestion.processTimedSubmission(logFlag);
+            var currentQuestion = this.renderedQuestionArray[i];
+            currentQuestion.state = "forreview";
         }
+
         if (!this.showFeedback) {
             this.hideTimedFeedback();
         }
