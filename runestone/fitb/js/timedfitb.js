@@ -4,6 +4,7 @@ export default class TimedFITB extends FITB {
         super(opts);
         this.renderTimedIcon(this.inputDiv);
         this.hideButtons();
+        this.needsReinitialization = true;
     }
     hideButtons() {
         $(this.submitButton).hide();
@@ -46,6 +47,12 @@ export default class TimedFITB extends FITB {
             this.blankArray[i].disabled = true;
         }
         this.startEvaluation(logFlag);
+    }
+
+    reinitializeListeners() {
+        for (let blank of this.blankArray) {
+            $(blank).change(this.recordAnswered.bind(this));
+        }
     }
 }
 

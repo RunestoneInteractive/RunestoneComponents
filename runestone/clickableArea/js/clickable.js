@@ -355,7 +355,9 @@ export default class ClickableArea extends RunestoneBase {
                 }
             }
         }
+        let self = this;
         clickable.onclick = function () {
+            self.isAnswered = true;
             if ($(this).hasClass("clickable-clicked")) {
                 $(this).removeClass("clickable-clicked");
                 $(this).removeClass("clickable-incorrect");

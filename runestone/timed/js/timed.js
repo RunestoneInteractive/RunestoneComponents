@@ -19,6 +19,7 @@ import TimedClickableArea from "../../clickableArea/js/timedclickable";
 import TimedDragNDrop from "../../dragndrop/js/timeddnd.js";
 import TimedParsons from "../../parsons/js/timedparsons.js";
 import SelectOne from "../../selectquestion/js/selectone";
+import "../css/timed.css";
 
 export var TimedList = {}; // Timed dictionary
 
@@ -172,8 +173,11 @@ export default class Timed extends RunestoneBase {
         $(this.navDiv).attr({
             style: "text-align:center",
         });
+        this.switchContainer = document.createElement("div");
+        this.switchContainer.classList.add("switchcontainer");
         this.switchDiv = document.createElement("div"); // is replaced by the questions
-        this.timedDiv.appendChild(this.switchDiv);
+        this.timedDiv.appendChild(this.switchContainer);
+        this.switchContainer.appendChild(this.switchDiv);
         this.timedDiv.appendChild(this.navDiv);
         $(this.timedDiv).attr({
             id: "timed_Test",
@@ -296,7 +300,8 @@ export default class Timed extends RunestoneBase {
             "click",
             function (event) {
                 if (
-                    $("div#timed_Test form input[name='group1']").is(":checked")
+                    this.renderedQuestionArray[this.currentQuestionIndex]
+                        .question.isAnswered
                 ) {
                     $(
                         "ul#pageNums > ul > li:eq(" +
@@ -342,7 +347,8 @@ export default class Timed extends RunestoneBase {
             "click",
             function (event) {
                 if (
-                    $("div#timed_Test form input[name='group1']").is(":checked")
+                    this.renderedQuestionArray[this.currentQuestionIndex]
+                        .question.isAnswered
                 ) {
                     $(
                         "ul#pageNums > ul > li:eq(" +
@@ -362,12 +368,14 @@ export default class Timed extends RunestoneBase {
                     }
                 }
                 var target = $(event.target).text();
+                let oldIndex = this.currentQuestionIndex;
                 this.currentQuestionIndex = parseInt(target) - 1;
                 if (
                     this.currentQuestionIndex >
                     this.renderedQuestionArray.length
                 ) {
                     console.log(`Error: bad index for ${target}`);
+                    this.currentQuestionIndex = oldIndex;
                 }
                 $(
                     "ul#pageNums > ul > li:eq(" +
@@ -404,7 +412,8 @@ export default class Timed extends RunestoneBase {
             }.bind(this),
             false
         );
-        this.buttonContainer.appendChild(this.finishButton);
+        this.controlDiv.appendChild(this.finishButton);
+        $(this.finishButton).hide();
         this.timedDiv.appendChild(this.buttonContainer);
     }
     ensureButtonSafety() {
@@ -456,6 +465,7 @@ export default class Timed extends RunestoneBase {
                         useRunestoneServices: eBookConfig.useRunestoneServices,
                         timed: true,
                         assessmentTaken: this.taken,
+                        timedWrapper: this,
                     };
                     if ($(tmpChild).children("[data-component]").length > 0) {
                         tmpChild = $(tmpChild).children("[data-component]")[0];

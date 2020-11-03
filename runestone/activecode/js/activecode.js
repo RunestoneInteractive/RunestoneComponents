@@ -569,8 +569,13 @@ export class ActiveCode extends RunestoneBase {
             this.historyScrubber = scrubber;
             $(scrubberDiv).insertAfter(this.runButton);
             deferred.resolve();
-        }.bind(this);
-        if (eBookConfig.practice_mode || this.isTimed) {
+        }.bind(this); // end definition of helper
+
+        if (
+            eBookConfig.practice_mode ||
+            (this.isTimed && !this.assessmentTaken)
+        ) {
+            // If this is timed and already taken we should restore history info
             helper();
         } else {
             jQuery
@@ -963,7 +968,10 @@ export class ActiveCode extends RunestoneBase {
                 return;
             } else if (errorLine > this.progLines + this.pretextLines) {
                 errText.innerHTML =
-                    "An error occurred after the end of your code. One possible reason is that you have an unclosed parenthesis or string. Another possibility is that there is an error in the hidden test code.";
+                    `An error occurred after the end of your code. 
+One possible reason is that you have an unclosed parenthesis or string. 
+Another possibility is that there is an error in the hidden test code. 
+Yet another is that there is an internal error.  The internal error message is: ${err.message}`;
                 return;
             } else {
                 if (this.pretextLines > 0) {
@@ -1225,6 +1233,7 @@ export class ActiveCode extends RunestoneBase {
         if (typeof noUI !== "boolean") {
             noUI = false;
         }
+        this.isAnswered = true;
         var prog = this.buildProg(true);
         var saveCode = "True";
         var scrubber_dfd, history_dfd, skulpt_run_dfd;
