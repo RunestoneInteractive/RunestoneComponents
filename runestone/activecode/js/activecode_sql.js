@@ -98,32 +98,37 @@ export default class SQLActiveCode extends ActiveCode {
         // we need multiple outputs, not one - let's just hide this
         $(this.output).css("visibility", "hidden");
 
-        let queries = parseSQL(query);
+        let it = this.db.iterateStatements(query);
         let results = [];
-        for (let q of queries) {
-            try {
-                let prefix = q.substr(0, 6).toLowerCase();
-                if (prefix === "select") {
-                    let stmt = this.db.prepare(q);
-                    let columns = stmt.getColumnNames();
+        try {
+            for (let statement of it) {
+                let columns = statement.getColumnNames();
+                if (columns.length > 0) {
+                    // data! probably a SELECT
                     let data = [];
-                    while (stmt.step()) {
-                        data.push(stmt.get());
+                    while (statement.step()) {
+                        data.push(statement.get());
                     }
-                    stmt.free();
                     results.push({ status: "success", columns: columns, values: data, rowcount: data.length });
-                } else if (prefix === "insert" || prefix === "update" || prefix === "delete") {
-                    this.db.run(q);
-                    results.push({ status: "success", operation: prefix, rowcount: this.db.getRowsModified() });
                 } else {
-                    // DDL, presumably
-                    this.db.run(q);
-                    results.push({ status: "success" });
+                    let nsql = statement.getNormalizedSQL();
+                    let prefix = nsql.substr(0,6).toLowerCase();
+                    statement.step();   // execute the query
+                    // Try to detect INSERT/UPDATE/DELETE to give friendly feedback
+                    // on rows modified - unfortunately, this won't catch such queries
+                    // if they use CTEs.  There seems to be no reliable way of knowing
+                    // when a SQLite query actually modified data.
+                    if (prefix === "insert" || prefix === "update" || prefix === "delete") {
+                        results.push({ status: "success", operation: prefix, rowcount: this.db.getRowsModified() });
+                    } else {
+                        results.push({ status: "success" });
+                    }
                 }
-            } catch (error) {
-                results.push({ status: "failure", message: error.toString() });
             }
+        } catch (e) {
+            results.push({ status: "failure", message: e.toString(), sql: it.getRemainingSQL() });
         }
+
         if (results.length === 0) {
             results.push({ status: "failure", message: "No queries submitted." });
         }
@@ -169,12 +174,16 @@ export default class SQLActiveCode extends ActiveCode {
                     if (results.length > 1 && height > 200) height = 200;
                     createTable(r, tableDiv, height);
                     let messageBox = document.createElement("pre");
-                    messageBox.textContent = "" + r.rowcount + " rows returned.";
+                    let rmsg = (r.rowcount !== 1 ? " rows " : " row ");
+                    messageBox.textContent = "" + r.rowcount + rmsg + "returned.";
                     messageBox.setAttribute("class", "ac_sql_result_success");
                     section.appendChild(messageBox);
                 } else if (r.rowcount) {
                     let messageBox = document.createElement("pre");
-                    messageBox.textContent = "" + r.rowcount + " rows " + r.operation + "ed.";
+                    let op = r.operation;
+                    op = op + (op.charAt(op.length - 1) === "e" ? "d." : "ed.");
+                    let rmsg = (r.rowcount !== 1 ? " rows " : " row ");
+                    messageBox.textContent = "" + r.rowcount + rmsg + op;
                     messageBox.setAttribute("class", "ac_sql_result_success");
                     section.appendChild(messageBox);
                 } else {
@@ -291,34 +300,4 @@ function createTable(tableData, container, height) {
     });
 
     return hot;
-}
-
-// sql-js exec() method is currently inadequate for effective reporting
-// of multiple query results.  So, parse the input ourselves to split
-// into individual queries where we can control the reporting.
-// ** THIS MAY NOT BE AS EQUIVALENT TO LETTING SQLITE DO THE PARSING. **
-function parseSQL(sql) {
-    let multiline_comment = /\/\*[\s\S]*?\*\//m;
-    let single_line_comment = /--.*/;
-
-    // First, strip out all comments (avoids some nasty edge cases)
-    while (true) {
-        // earliest start of comment wins
-        let mm = multiline_comment.exec(sql);
-        let sm = single_line_comment.exec(sql);
-        let match = mm;
-        if (mm && sm) {
-            if (sm.index < mm.index) match = sm;
-        } else if (sm) {
-            match = sm;
-        }
-        if (match) {
-            sql = sql.substr(0, match.index) + " " + sql.substr(match.index + match[0].length);
-        }
-        else {
-            break;
-        }
-    }
-
-    return sql.split(";").map(q => q.trim()).filter(q => q.length !== 0);
 }
