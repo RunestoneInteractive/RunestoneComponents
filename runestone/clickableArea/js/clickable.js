@@ -434,6 +434,15 @@ export default class ClickableArea extends RunestoneBase {
             $(this.feedBackDiv).attr("class", "alert alert-danger");
         }
     }
+
+    disableInteraction() {
+        for (var i = 0; i < this.clickableArray.length; i++) {
+            $(this.clickableArray[i]).css("cursor", "initial");
+            this.clickableArray[i].onclick = function () {
+                return;
+            };
+        }
+    }
 }
 
 /*=================================

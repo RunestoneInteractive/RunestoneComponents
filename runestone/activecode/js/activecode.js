@@ -1386,6 +1386,11 @@ export class ActiveCode extends RunestoneBase {
 
         return this.run_promise;
     }
+
+    disableInteraction() {
+        $(this.runButton).hide();
+        $(this.codeDiv).addClass("ac-disabled");
+    }
 }
 
 var languageExtensions = {

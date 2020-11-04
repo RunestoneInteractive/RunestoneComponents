@@ -528,6 +528,15 @@ export default class DragNDrop extends RunestoneBase {
             JSON.stringify(storageObj)
         );
     }
+
+    disableInteraction() {
+        $(this.resetButton).hide();
+        for (var i = 0; i < this.dragPairArray.length; i++) {
+            // No more dragging
+            $(this.dragPairArray[i][0]).attr("draggable", "false");
+            $(this.dragPairArray[i][0]).css("cursor", "initial");
+        }
+    }
 }
 
 /*=================================

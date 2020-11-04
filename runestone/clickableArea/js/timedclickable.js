@@ -50,12 +50,7 @@ export default class TimedClickableArea extends ClickableArea {
 
     processTimedSubmission(logFlag) {
         // Disable input, then evaluate component
-        for (var i = 0; i < this.clickableArray.length; i++) {
-            $(this.clickableArray[i]).css("cursor", "initial");
-            this.clickableArray[i].onclick = function () {
-                return;
-            };
-        }
+        this.disableInteraction();
         this.checkCurrentAnswer();
         this.renderFeedback();
         if (logFlag) {

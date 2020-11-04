@@ -148,10 +148,7 @@ export default class TimedMC extends MultipleChoice {
         }
     }
     processTimedSubmission(logFlag) {
-        // Disable input, then evaluate component
-        for (var i = 0; i < this.optionArray.length; i++) {
-            this.optionArray[i].input.disabled = true;
-        }
+        this.disableInteraction();
         if (this.multipleanswers) {
             this.processMCMASubmission(logFlag);
         } else {

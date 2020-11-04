@@ -413,6 +413,12 @@ export default class FITB extends RunestoneBase {
         var el = $(html);
         el.modal();
     }
+
+    disableInteraction() {
+        for (var i = 0; i < this.blankArray.length; i++) {
+            this.blankArray[i].disabled = true;
+        }
+    }
 }
 
 /*=================================

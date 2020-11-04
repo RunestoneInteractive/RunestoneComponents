@@ -3035,7 +3035,7 @@ export default class Parsons extends RunestoneBase {
         $(this.messageDiv).hide();
     }
     // Disable the interface
-    disable() {
+    disableInteraction() {
         // Disable blocks
         if (this.blocks !== undefined) {
             for (var i = 0; i < this.blocks.length; i++) {

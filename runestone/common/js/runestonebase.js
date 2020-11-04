@@ -257,6 +257,20 @@ export default class RunestoneBase {
             this.containerDiv.appendChild(capDiv);
         }
     }
+
+    checkCurrentAnswer() {
+        console.log("Each comonent should provide an implementation");
+    }
+
+    logCurrentAnswer() {
+        console.log("Each comonent should provide an implementation");
+    }
+    renderFeedback() {
+        console.log("Each comonent should provide an implementation");
+    }
+    disableInteraction() {
+        console.log("Each comonent should provide an implementation");
+    }
 }
 
 window.RunestoneBase = RunestoneBase;

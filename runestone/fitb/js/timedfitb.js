@@ -43,9 +43,7 @@ export default class TimedFITB extends FITB {
     }
     processTimedSubmission(logFlag) {
         // Disable input, then evaluate component
-        for (var i = 0; i < this.blankArray.length; i++) {
-            this.blankArray[i].disabled = true;
-        }
+        this.disableInteraction();
         this.startEvaluation(logFlag);
     }
 

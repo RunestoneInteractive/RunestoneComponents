@@ -627,6 +627,12 @@ export default class MultipleChoice extends RunestoneBase {
             this.compareModal.bind(this)
         );
     }
+
+    disableInteraction() {
+        for (var i = 0; i < this.optionArray.length; i++) {
+            this.optionArray[i].input.disabled = true;
+        }
+    }
 }
 
 /*=================================

@@ -262,6 +262,10 @@ export default class ShortAnswer extends RunestoneBase {
         $(this.feedbackDiv).removeClass("alert-danger");
         $(this.feedbackDiv).addClass("alert alert-success");
     }
+
+    disableInteraction() {
+        this.jTextArea.disabled = true;
+    }
 }
 
 /*=================================

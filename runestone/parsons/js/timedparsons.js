@@ -31,7 +31,7 @@ export default class TimedParsons extends Parsons {
         }
         this.renderFeedback();
         this.correct = this.grade;
-        this.disable();
+        this.disableInteraction();
     }
 }
 

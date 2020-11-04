@@ -32,7 +32,6 @@ export default class TimedShortAnswer extends ShortAnswer {
     processTimedSubmission() {
         // Disable input & evaluate component
         this.submitJournal();
-        this.jTextArea.disabled = true;
     }
 }
 

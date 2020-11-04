@@ -545,6 +545,7 @@ export default class Timed extends RunestoneBase {
         if (opts.state === "forreview") {
             currentQuestion.checkCurrentAnswer();
             currentQuestion.renderFeedback();
+            currentQuestion.disableInteraction();
         }
 
         if (!this.visited.includes(this.currentQuestionIndex)) {
