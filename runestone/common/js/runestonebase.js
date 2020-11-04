@@ -10,6 +10,7 @@
  *    - checkLocalStorage
  *    - setLocalStorage
  *    - restoreAnswers
+ *      disableInteraction
  *
  * 4. provide a Selenium based unit test
  *
@@ -56,7 +57,7 @@ export default class RunestoneBase {
         }
     }
 
-    logBookEvent(eventInfo) {
+    async logBookEvent(eventInfo) {
         if (this.graderactive) {
             return;
         }
@@ -89,7 +90,7 @@ export default class RunestoneBase {
         }
         return post_return;
     }
-    logRunEvent(eventInfo) {
+    async logRunEvent(eventInfo) {
         if (this.graderactive) {
             return;
         }
@@ -100,7 +101,7 @@ export default class RunestoneBase {
             eventInfo.save_code = "True";
         }
         if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
-            jQuery
+            let post_promise = jQuery
                 .post(eBookConfig.ajaxURL + "runlog.json", eventInfo) // Log the run event
                 .done(
                     function (data, status, whatever) {
@@ -133,9 +134,10 @@ export default class RunestoneBase {
         ) {
             pageProgressTracker.updateProgress(eventInfo.div_id);
         }
+        return post_promise;
     }
     /* Checking/loading from storage */
-    checkServer(eventInfo) {
+    async checkServer(eventInfo) {
         // Check if the server has stored answer
         if (this.useRunestoneServices || this.graderactive) {
             let data = {};
@@ -258,18 +260,30 @@ export default class RunestoneBase {
         }
     }
 
-    checkCurrentAnswer() {
-        console.log("Each comonent should provide an implementation");
+    hasUserActivity() {
+        return this.isAnswered;
     }
 
-    logCurrentAnswer() {
-        console.log("Each comonent should provide an implementation");
+    checkCurrentAnswer() {
+        console.log(
+            "Each component should provide an implementation of checkCurrentAnswer"
+        );
+    }
+
+    async logCurrentAnswer() {
+        console.log(
+            "Each component should provide an implementation of logCurrentAnswer"
+        );
     }
     renderFeedback() {
-        console.log("Each comonent should provide an implementation");
+        console.log(
+            "Each component should provide an implementation of renderFeedback"
+        );
     }
     disableInteraction() {
-        console.log("Each comonent should provide an implementation");
+        console.log(
+            "Each component should provide an implementation of disableInteraction"
+        );
     }
 }
 
