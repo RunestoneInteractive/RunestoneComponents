@@ -1253,7 +1253,20 @@ export class ActiveCode extends RunestoneBase {
     }
 
     renderFeedback() {
-        // leave as no-op as the unittests kind of have to handle their own feedback??
+        // The python unit test code builds the table as it is running the tests
+        // In "normal" usage this is displayed immediately.
+        // However in exam mode we make a div which is offscreen
+        if (this.unit_results_divid.indexOf("_offscreen_") > 0) {
+            let urDivid = `${this.divid}_offscreen_unit_results`;
+            let unitFeedback = document.getElementById(urDivid);
+            let tmp = document.body.removeChild(unitFeedback);
+            if ($(this.containerDiv).find(`#${urDivid}`).length > 0) {
+                tmp = $(this.containerDiv).find(`#${urDivid}`)[0];
+            } else {
+                this.containerDiv.appendChild(tmp);
+            }
+            $(tmp).show();
+        }
     }
 
     /* runProg has several async elements to it.
