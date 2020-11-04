@@ -1783,9 +1783,6 @@ export default class Parsons extends RunestoneBase {
     //   removeIndentation: "Help Me" removed indentation
     //   combineBlocks: "Help Me" combined blocks
     logMove(activity) {
-        if (!this.useRunestoneServices) {
-            return this;
-        }
         var event = {
             event: "parsonsMove",
             div_id: this.divid,
@@ -1803,9 +1800,6 @@ export default class Parsons extends RunestoneBase {
     //   correct: The answer given matches the solution
     //   incorrect*: The answer is wrong for various reasons
     logCurrentAnswer() {
-        if (eBookConfig.logLevel == 0) {
-            return this;
-        }
         var event = {
             event: "parsons",
             div_id: this.divid,
