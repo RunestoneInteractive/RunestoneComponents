@@ -291,6 +291,7 @@ export default class Timed extends RunestoneBase {
         this.navBtnListeners();
     }
 
+    // set up events for navigation
     navBtnListeners() {
         // Next and Prev Listener
         this.pagNavList.addEventListener(
@@ -308,9 +309,11 @@ export default class Timed extends RunestoneBase {
                     this.renderedQuestionArray[
                         this.currentQuestionIndex
                     ].question.checkCurrentAnswer();
-                    this.renderedQuestionArray[
-                        this.currentQuestionIndex
-                    ].question.logCurrentAnswer();
+                    if (!this.done) {
+                        this.renderedQuestionArray[
+                            this.currentQuestionIndex
+                        ].question.logCurrentAnswer();
+                    }
                 }
                 // submit the current question here
                 var target = $(event.target).text();
@@ -362,9 +365,11 @@ export default class Timed extends RunestoneBase {
                     this.renderedQuestionArray[
                         this.currentQuestionIndex
                     ].question.checkCurrentAnswer();
-                    this.renderedQuestionArray[
-                        this.currentQuestionIndex
-                    ].question.logCurrentAnswer();
+                    if (!this.done) {
+                        this.renderedQuestionArray[
+                            this.currentQuestionIndex
+                        ].question.logCurrentAnswer();
+                    }
                 }
                 for (var i = 0; i < this.qNumList.childNodes.length; i++) {
                     for (
@@ -770,8 +775,6 @@ export default class Timed extends RunestoneBase {
         this.done = 1;
         this.taken = 1;
         this.submitTimedProblems(true); // log results
-        // todo call the autograder to record the score for this student
-        // endpoint is assignments/student_autograde
         this.checkScore();
         this.displayScore();
         this.storeScore();
