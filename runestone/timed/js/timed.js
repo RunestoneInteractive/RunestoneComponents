@@ -529,15 +529,10 @@ export default class Timed extends RunestoneBase {
                     question: newq,
                 };
                 await newq.initialize();
-            } else if ($(tmpChild).is("[data-component=activecode]")) {
-                let lang = $(tmpChild).data("lang");
-                this.renderedQuestionArray[this.currentQuestionIndex] = {
-                    question: ACFactory.createActiveCode(tmpChild, lang, opts),
-                };
             } else if ($(tmpChild).is("[data-component]")) {
                 let componentKind = $(tmpChild).data("component");
                 this.renderedQuestionArray[this.currentQuestionIndex] = {
-                    question: new window.component_factory[componentKind](opts),
+                    question: window.component_factory[componentKind](opts),
                 };
             }
         }
