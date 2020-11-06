@@ -79,9 +79,11 @@ export default class Timed extends RunestoneBase {
         this.getNewChildren();
         // One small step to eliminate students from doing view source
         // this won't stop anyone with determination but may prevent casual peeking
-        document.body.oncontextmenu = function () {
-            return false;
-        };
+        if (!eBookConfig.enableDebug) {
+            document.body.oncontextmenu = function () {
+                return false;
+            };
+        }
         this.checkAssessmentStatus().then(
             function () {
                 this.renderTimedAssess();
@@ -506,7 +508,7 @@ export default class Timed extends RunestoneBase {
         }
     }
 
-    renderTimedQuestion() {
+    async renderTimedQuestion() {
         if (this.currentQuestionIndex >= this.renderedQuestionArray.length) {
             // sometimes the user clicks in the event area for the qNumList
             // But misses a number in that case the text is the concatenation
@@ -526,7 +528,7 @@ export default class Timed extends RunestoneBase {
                 this.renderedQuestionArray[this.currentQuestionIndex] = {
                     question: newq,
                 };
-                newq.initialize();
+                await newq.initialize();
             } else if ($(tmpChild).is("[data-component=activecode]")) {
                 let lang = $(tmpChild).data("lang");
                 this.renderedQuestionArray[this.currentQuestionIndex] = {

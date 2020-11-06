@@ -86,6 +86,12 @@
     font-weight: normal;
 }
 
+.ac_question {
+    background-color: rgb(224, 236, 217);
+    padding-left: 10px;
+    padding-top: 10px;
+    margin: 5px;
+}
 
 .active_out {
     background-color: #dcdcdc;

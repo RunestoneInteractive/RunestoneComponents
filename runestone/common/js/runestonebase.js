@@ -61,11 +61,12 @@ export default class RunestoneBase {
         if (this.graderactive) {
             return;
         }
+        let post_return = Promise.resolve();
         eventInfo.course = eBookConfig.course;
         eventInfo.clientLoginStatus = eBookConfig.isLoggedIn;
         eventInfo.timezoneoffset = new Date().getTimezoneOffset() / 60;
         if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
-            var post_return = jQuery.post(
+            post_return = jQuery.post(
                 eBookConfig.ajaxURL + "hsblog",
                 eventInfo,
                 function (jsondata) {
@@ -91,6 +92,7 @@ export default class RunestoneBase {
         return post_return;
     }
     async logRunEvent(eventInfo) {
+        let post_promise = Promise.resolve("done");
         if (this.graderactive) {
             return;
         }
@@ -101,7 +103,7 @@ export default class RunestoneBase {
             eventInfo.save_code = "True";
         }
         if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
-            let post_promise = jQuery
+            post_promise = jQuery
                 .post(eBookConfig.ajaxURL + "runlog.json", eventInfo) // Log the run event
                 .done(
                     function (data, status, whatever) {

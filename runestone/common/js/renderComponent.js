@@ -88,6 +88,7 @@ export function createTimedComponent(componentSrc, moreOpts) {
         }).appendTo("body");
         hdiv.html(componentSrc);
     }
+    // at this point hdiv is a jquery object
 
     let ret;
     let opts = {
@@ -103,11 +104,8 @@ export function createTimedComponent(componentSrc, moreOpts) {
     if (componentKind in window.component_factory) {
         ret = window.component_factory[componentKind](opts);
     }
-    $(ret.containerDiv).addClass("runestone alert alert-warning");
-    let wrapper = hdiv.find("[data-childcomponent]");
+
     let rdict = {};
-    if (wrapper.length > 0) rdict.wrapper = wrapper;
-    hdiv.remove();
     rdict.question = ret;
     return rdict;
 }

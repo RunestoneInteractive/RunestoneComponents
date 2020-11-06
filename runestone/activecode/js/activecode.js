@@ -51,6 +51,7 @@ export class ActiveCode extends RunestoneBase {
         this.hidecode = $(orig).data("hidecode");
         this.chatcodes = $(orig).data("chatcodes");
         this.hidehistory = $(orig).data("hidehistory");
+        this.question = $(opts.orig).find(`#${this.divid}_question`)[0];
         this.tie = $(orig).data("tie");
         this.dburl = $(orig).data("dburl");
         this.runButton = null;
@@ -487,6 +488,13 @@ export class ActiveCode extends RunestoneBase {
             doc.on("op", updateChatCodesChannels);
         }
         $(this.outerDiv).prepend(ctrlDiv);
+        if (this.question) {
+            if ($(this.question).html().match(/^\s+$/)) {
+                $(this.question).remove();
+            } else {
+                $(this.outerDiv).prepend(this.question);
+            }
+        }
         this.controlDiv = ctrlDiv;
     }
     enableSaveLoad() {
