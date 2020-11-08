@@ -95,9 +95,6 @@ export default class SQLActiveCode extends ActiveCode {
             return;
         }
 
-        // we need multiple outputs, not one - let's just hide this
-        $(this.output).css("visibility", "hidden");
-
         let it = this.db.iterateStatements(query);
         let results = [];
         try {
@@ -165,17 +162,20 @@ export default class SQLActiveCode extends ActiveCode {
             section.setAttribute("class", "ac_sql_result");
             respDiv.appendChild(section);
             if (r.status === "success") {
-                if (r.values) {
+                if (r.columns) {
                     let tableDiv = document.createElement("div");
                     section.appendChild(tableDiv);
-                    // kludge: approximate height of result
-                    let height = (r.values.length + 2) * 24;
-                    if (height > 350) height = 350;
-                    if (results.length > 1 && height > 200) height = 200;
-                    createTable(r, tableDiv, height);
+                    let maxHeight = 350;
+                    if (results.length > 1) maxHeight = 200;  // max height smaller if lots of results
+                    createTable(r, tableDiv, maxHeight);
                     let messageBox = document.createElement("pre");
                     let rmsg = (r.rowcount !== 1 ? " rows " : " row ");
-                    messageBox.textContent = "" + r.rowcount + rmsg + "returned.";
+                    let msg = "" + r.rowcount + rmsg + "returned";
+                    if (r.rowcount > 100) {
+                        msg = msg + " (only first 100 rows displayed)"
+                    }
+                    msg = msg + ".";
+                    messageBox.textContent = msg;
                     messageBox.setAttribute("class", "ac_sql_result_success");
                     section.appendChild(messageBox);
                 } else if (r.rowcount) {
@@ -285,19 +285,41 @@ export default class SQLActiveCode extends ActiveCode {
     }
 }
 
-function createTable(tableData, container, height) {
+function createTable(tableData, container, maxHeight) {
+    let data = tableData.values;
+    let trimRows = undefined;
+    if (data.length === 0) {
+        // kludge: no column headers will show up unless we do this
+        data = [ tableData.columns.map(e => null) ];
+        trimRows = [0];
+    }
+
     var hot = new Handsontable(container, {
-        data: tableData.values,
+        data: data,
+        trimRows: trimRows,
+        width: "100%",
+        height: maxHeight,
+        autoRowSize: true,
+        autoColumnSize: {useHeaders: true},
         rowHeaders: false,
         colHeaders: tableData.columns,
         editor: false,
-        height: height,
-        width: "100%",
         maxRows: 100,
         filters: false,
         dropdownMenu: false,
         licenseKey: "non-commercial-and-evaluation",
     });
+
+    // calculate actual height and resize
+    let actualHeight = 40;  // header height + small margin
+    if (tableData.values.length > 0) {
+        for (let i = 0; i < data.length; i++) {
+            actualHeight = actualHeight + hot.getRowHeight(i);
+            if (actualHeight > maxHeight) break;
+        }
+    }
+
+    hot.updateSettings({ height: actualHeight });
 
     return hot;
 }
