@@ -976,7 +976,10 @@ export class ActiveCode extends RunestoneBase {
                 return;
             } else if (errorLine > this.progLines + this.pretextLines) {
                 errText.innerHTML =
-                    "An error occurred after the end of your code. One possible reason is that you have an unclosed parenthesis or string. Another possibility is that there is an error in the hidden test code.";
+                    `An error occurred after the end of your code. 
+One possible reason is that you have an unclosed parenthesis or string. 
+Another possibility is that there is an error in the hidden test code. 
+Yet another is that there is an internal error.  The internal error message is: ${err.message}`;
                 return;
             } else {
                 if (this.pretextLines > 0) {
