@@ -774,7 +774,7 @@ export default class Timed extends RunestoneBase {
         this.running = 0;
         this.done = 1;
         this.taken = 1;
-        this.submitTimedProblems(true); // log results
+        this.finalizeProblems(true); // log results
         this.checkScore();
         this.displayScore();
         this.storeScore();
@@ -804,8 +804,8 @@ export default class Timed extends RunestoneBase {
         }, 2000);
     }
 
-    submitTimedProblems(logFlag) {
-        //Because we have submitted each question as we navigate we only need to
+    finalizeProblems(logFlag) {
+        // Because we have submitted each question as we navigate we only need to
         // send the final version of the question the student is on when they press the
         // finish exam button.
 
@@ -818,6 +818,7 @@ export default class Timed extends RunestoneBase {
 
         for (var i = 0; i < this.renderedQuestionArray.length; i++) {
             var currentQuestion = this.renderedQuestionArray[i];
+            // set the state to forreview so we know that feedback may be appropriate
             currentQuestion.state = "forreview";
         }
 

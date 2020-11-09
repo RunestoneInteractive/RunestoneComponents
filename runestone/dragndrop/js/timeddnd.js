@@ -43,15 +43,6 @@ export default class TimedDragNDrop extends DragNDrop {
     hideFeedback() {
         $(this.feedBackDiv).hide();
     }
-    processTimedSubmission(logFlag) {
-        // Disable input & evaluate component
-        this.checkCurrentAnswer();
-        if (logFlag) {
-            this.logCurrentAnswer();
-        }
-        this.renderFeedback();
-        this.disableInteraction();
-    }
 }
 
 if (typeof window.component_factory === "undefined") {

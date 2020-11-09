@@ -70,12 +70,6 @@ var TimedActiveCodeMixin = {
         $(this.output).css("visibility", "hidden");
     },
 
-    processTimedSubmission: function (logFlag) {
-        this.runProg(true, logFlag); // true means no GUI
-        $(`#${this.divid}_unit_results`).show();
-        this.disableInteraction();
-    },
-
     reinitializeListeners: function (taken) {
         // re-attach the run button listener
         $(this.runButton).click(this.runProg.bind(this));
@@ -115,7 +109,7 @@ export class TimedActiveCode extends ActiveCode {
 
     // for timed exams we need to call runProg and tell it that there is
     // no GUI for sliders or other things. We also do not want it to log
-    // the answers.  See also processTimedSubmission which gets called at the end.
+    // the answers.
     checkCurrentAnswer() {
         this.run_promise = this.runProg(true, false);
     }

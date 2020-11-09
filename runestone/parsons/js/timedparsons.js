@@ -21,18 +21,6 @@ export default class TimedParsons extends Parsons {
     hideFeedback() {
         $(this.messageDiv).hide();
     }
-    processTimedSubmission(logFlag) {
-        if (logFlag) {
-            this.setLocalStorage();
-        }
-        this.checkCurrentAnswer();
-        if (logFlag) {
-            this.logCurrentAnswer();
-        }
-        this.renderFeedback();
-        this.correct = this.grade;
-        this.disableInteraction();
-    }
 }
 
 if (typeof window.component_factory === "undefined") {
