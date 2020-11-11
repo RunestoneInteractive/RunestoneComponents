@@ -391,6 +391,7 @@ export default class DragNDrop extends RunestoneBase {
             }
         }
         this.correctNum = this.dragNum - this.incorrectNum - this.unansweredNum;
+        this.percent = this.correctNum / this.dragPairArray.length;
         this.setLocalStorage({ correct: this.correct ? "T" : "F" });
     }
 

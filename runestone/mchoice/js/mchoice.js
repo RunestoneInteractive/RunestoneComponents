@@ -451,6 +451,13 @@ export default class MultipleChoice extends RunestoneBase {
         var numNeeded = this.correctList.length;
         this.answer = this.givenArray.join(",");
         this.correct = numCorrect === numNeeded && numNeeded === numGiven;
+        if (numGiven === numNeeded) {
+            this.percent = numCorrect / numNeeded;
+        } else if (numGiven < numNeeded) {
+            this.percent = (numCorrect - (numNeeded - numGiven)) / numNeeded;
+        } else {
+            this.percent = (numCorrect - numGiven - numNeeded) / numNeeded;
+        }
     }
 
     logMCMAsubmission() {
@@ -507,9 +514,11 @@ export default class MultipleChoice extends RunestoneBase {
     scoreMCMFSubmission() {
         if (this.givenArray[0] == this.correctIndexList[0]) {
             this.correct = true;
+            this.percent = 1.0;
         } else if (this.givenArray[0] != null) {
             // if given is null then the question wasn"t answered and should be counted as skipped
             this.correct = false;
+            this.percent = 0.0;
         }
     }
 

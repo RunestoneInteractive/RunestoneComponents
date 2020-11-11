@@ -321,6 +321,8 @@ export default class FITB extends RunestoneBase {
                 }
             }
         }
+        this.percent =
+            this.isCorrectArray.filter(Boolean).length / this.blankArray.length;
     }
 
     renderFeedback() {

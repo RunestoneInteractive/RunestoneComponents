@@ -103,11 +103,17 @@ class LineBasedGrader {
         } else {
             // Determine whether the code is in the correct order
             var isCorrectOrder = false;
+            this.correctLength = false;
             if (answerLines.length == solutionLines.length) {
+                this.correctLength = true;
                 isCorrectOrder = true;
+                this.correctLines = 0;
+                this.solutionLength = solutionLines.length;
                 for (i = 0; i < solutionLines.length; i++) {
                     if (answerLines[i].text !== solutionLines[i].text) {
                         isCorrectOrder = false;
+                    } else {
+                        this.correctLines += 1;
                     }
                 }
             }
@@ -124,7 +130,8 @@ class LineBasedGrader {
                         indentLeft.push(answerLines[i]);
                     }
                 }
-                if (indentLeft.length + indentRight.length == 0) {
+                this.incorrectIndents = indentLeft.length + indentRight.length;
+                if (this.incorrectIndents == 0) {
                     // Perfect
                     state = "correct";
                     answerArea.addClass("correct");
