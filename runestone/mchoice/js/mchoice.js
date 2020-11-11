@@ -456,7 +456,7 @@ export default class MultipleChoice extends RunestoneBase {
         } else if (numGiven < numNeeded) {
             this.percent = (numCorrect - (numNeeded - numGiven)) / numNeeded;
         } else {
-            this.percent = (numCorrect - numGiven - numNeeded) / numNeeded;
+            this.percent = (numCorrect - (numGiven - numNeeded)) / numNeeded;
         }
     }
 

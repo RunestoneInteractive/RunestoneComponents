@@ -65,6 +65,9 @@ export default class RunestoneBase {
         eventInfo.course = eBookConfig.course;
         eventInfo.clientLoginStatus = eBookConfig.isLoggedIn;
         eventInfo.timezoneoffset = new Date().getTimezoneOffset() / 60;
+        if (this.percent) {
+            eventInfo.percent = this.percent;
+        }
         if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
             post_return = jQuery.post(
                 eBookConfig.ajaxURL + "hsblog",

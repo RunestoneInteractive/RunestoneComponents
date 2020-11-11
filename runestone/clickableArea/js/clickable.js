@@ -393,7 +393,8 @@ export default class ClickableArea extends RunestoneBase {
                 $(this.incorrectArray[i]).removeClass("clickable-incorrect");
             }
         }
-        this.percent = this.correctNum / (this.correctNum + this.incorrectNum);
+        this.percent =
+            (this.correctNum - this.incorrectNum) / this.correctArray.length;
         this.setLocalStorage({ correct: this.correct ? "T" : "F" });
     }
 
