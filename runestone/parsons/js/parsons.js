@@ -93,6 +93,8 @@ class LineBasedGrader {
         var answerLines = problem.answerLines();
         var i;
         var state;
+        this.percentLines = answerLines.length / solutionLines.length;
+        // TODO move this to renderFeedback
         if (answerLines.length < solutionLines.length) {
             state = "incorrectTooShort";
             // too little code
@@ -100,112 +102,129 @@ class LineBasedGrader {
             feedbackArea.fadeIn(500);
             feedbackArea.attr("class", "alert alert-danger");
             feedbackArea.html($.i18n("msg_parson_too_short"));
-        } else {
-            // Determine whether the code is in the correct order
-            var isCorrectOrder = false;
-            this.correctLength = false;
-            if (answerLines.length == solutionLines.length) {
-                this.correctLength = true;
-                isCorrectOrder = true;
-                this.correctLines = 0;
-                this.solutionLength = solutionLines.length;
-                for (i = 0; i < solutionLines.length; i++) {
-                    if (answerLines[i].text !== solutionLines[i].text) {
-                        isCorrectOrder = false;
-                    } else {
-                        this.correctLines += 1;
-                    }
-                }
-            }
-            if (isCorrectOrder) {
-                // Determine whether it is the correct indention
-                var indentLeft = [];
-                var indentRight = [];
-                for (i = 0; i < solutionLines.length; i++) {
-                    if (answerLines[i].viewIndent() < solutionLines[i].indent) {
-                        indentRight.push(answerLines[i]);
-                    } else if (
-                        answerLines[i].viewIndent() > solutionLines[i].indent
-                    ) {
-                        indentLeft.push(answerLines[i]);
-                    }
-                }
-                this.incorrectIndents = indentLeft.length + indentRight.length;
-                if (this.incorrectIndents == 0) {
-                    // Perfect
-                    state = "correct";
-                    answerArea.addClass("correct");
-                    feedbackArea.fadeIn(100);
-                    feedbackArea.attr("class", "alert alert-info");
-                    if (problem.checkCount > 1) {
-                        feedbackArea.html(
-                            $.i18n("msg_parson_correct", problem.checkCount)
-                        );
-                    } else {
-                        feedbackArea.html(
-                            $.i18n("msg_parson_correct_first_try")
-                        );
-                    }
-                    correct = true;
-                } else if (this.showfeedback == true) {
-                    // Incorrect Indention
-                    state = "incorrectIndent";
-                    var incorrectBlocks = [];
-                    for (i = 0; i < indentLeft.length; i++) {
-                        block = indentLeft[i].block();
-                        if (incorrectBlocks.indexOf(block) == -1) {
-                            incorrectBlocks.push(block);
-                            $(block.view).addClass("indentLeft");
-                        }
-                    }
-                    for (i = 0; i < indentRight.length; i++) {
-                        block = indentRight[i].block();
-                        if (incorrectBlocks.indexOf(block) == -1) {
-                            incorrectBlocks.push(block);
-                            $(block.view).addClass("indentRight");
-                        }
-                    }
-                    feedbackArea.fadeIn(500);
-                    feedbackArea.attr("class", "alert alert-danger");
-                    if (incorrectBlocks.length == 1) {
-                        feedbackArea.html($.i18n("msg_parson_wrong_indent"));
-                    } else {
-                        feedbackArea.html($.i18n("msg_parson_wrong_indents"));
-                    }
-                }
+        }
+
+        // Determine whether the code that is there is in the correct order
+        var isCorrectOrder = false;
+        this.correctLength = false;
+        if (answerLines.length == solutionLines.length) {
+            this.correctLength = true;
+        }
+        // Now figure out whether the order is correct or not.
+        isCorrectOrder = true;
+        this.correctLines = 0;
+        this.solutionLength = solutionLines.length;
+        let loopLimit = Math.min(solutionLines.length, answerLines.length);
+        for (i = 0; i < loopLimit; i++) {
+            if (answerLines[i].text !== solutionLines[i].text) {
+                isCorrectOrder = false;
             } else {
-                // Incorrect: indicate which blocks to move
-                state = "incorrectMoveBlocks";
-                var answerBlocks = problem.answerBlocks();
-                var inSolution = [];
-                var inSolutionIndexes = [];
-                var notInSolution = [];
-                for (i = 0; i < answerBlocks.length; i++) {
-                    var block = answerBlocks[i];
-                    var index = solutionLines.indexOf(block.lines[0]);
-                    if (index == -1) {
-                        notInSolution.push(block);
-                    } else {
-                        inSolution.push(block);
-                        inSolutionIndexes.push(index);
-                    }
-                }
-                var lisIndexes = this.inverseLISIndices(inSolutionIndexes);
-                for (i = 0; i < lisIndexes.length; i++) {
-                    notInSolution.push(inSolution[lisIndexes[i]]);
-                }
-                answerArea.addClass("incorrect");
-                feedbackArea.fadeIn(500);
-                feedbackArea.attr("class", "alert alert-danger");
-                if (this.showfeedback === true) {
-                    for (i = 0; i < notInSolution.length; i++) {
-                        $(notInSolution[i].view).addClass("incorrectPosition");
-                    }
-                }
-                feedbackArea.html($.i18n("msg_parson_wrong_order"));
+                this.correctLines += 1;
             }
         }
+
+        // Determine whether it is the correct indention
+        var indentLeft = [];
+        var indentRight = [];
+        for (i = 0; i < loopLimit; i++) {
+            if (answerLines[i].viewIndent() < solutionLines[i].indent) {
+                indentRight.push(answerLines[i]);
+            } else if (answerLines[i].viewIndent() > solutionLines[i].indent) {
+                indentLeft.push(answerLines[i]);
+            }
+        }
+        this.incorrectIndents = indentLeft.length + indentRight.length;
+        if (
+            this.incorrectIndents == 0 &&
+            isCorrectOrder &&
+            this.correctLength
+        ) {
+            // Perfect
+            state = "correct";
+            answerArea.addClass("correct");
+            feedbackArea.fadeIn(100);
+            feedbackArea.attr("class", "alert alert-info");
+            if (problem.checkCount > 1) {
+                feedbackArea.html(
+                    $.i18n("msg_parson_correct", problem.checkCount)
+                );
+            } else {
+                feedbackArea.html($.i18n("msg_parson_correct_first_try"));
+            }
+            correct = true;
+        } else if (
+            this.showfeedback == true &&
+            isCorrectOrder &&
+            this.correctLength
+        ) {
+            // Incorrect Indention
+            state = "incorrectIndent";
+            var incorrectBlocks = [];
+            for (i = 0; i < indentLeft.length; i++) {
+                block = indentLeft[i].block();
+                if (incorrectBlocks.indexOf(block) == -1) {
+                    incorrectBlocks.push(block);
+                    $(block.view).addClass("indentLeft");
+                }
+            }
+            for (i = 0; i < indentRight.length; i++) {
+                block = indentRight[i].block();
+                if (incorrectBlocks.indexOf(block) == -1) {
+                    incorrectBlocks.push(block);
+                    $(block.view).addClass("indentRight");
+                }
+            }
+            feedbackArea.fadeIn(500);
+            feedbackArea.attr("class", "alert alert-danger");
+            if (incorrectBlocks.length == 1) {
+                feedbackArea.html($.i18n("msg_parson_wrong_indent"));
+            } else {
+                feedbackArea.html($.i18n("msg_parson_wrong_indents"));
+            }
+        }
+        if (!isCorrectOrder && state != "incorrectTooShort") {
+            // Incorrect: indicate which blocks to move
+            state = "incorrectMoveBlocks";
+            var answerBlocks = problem.answerBlocks();
+            var inSolution = [];
+            var inSolutionIndexes = [];
+            var notInSolution = [];
+            for (i = 0; i < answerBlocks.length; i++) {
+                var block = answerBlocks[i];
+                var index = solutionLines.indexOf(block.lines[0]);
+                if (index == -1) {
+                    notInSolution.push(block);
+                } else {
+                    inSolution.push(block);
+                    inSolutionIndexes.push(index);
+                }
+            }
+            var lisIndexes = this.inverseLISIndices(inSolutionIndexes);
+            for (i = 0; i < lisIndexes.length; i++) {
+                notInSolution.push(inSolution[lisIndexes[i]]);
+            }
+            answerArea.addClass("incorrect");
+            feedbackArea.fadeIn(500);
+            feedbackArea.attr("class", "alert alert-danger");
+            if (this.showfeedback === true) {
+                for (i = 0; i < notInSolution.length; i++) {
+                    $(notInSolution[i].view).addClass("incorrectPosition");
+                }
+            }
+            feedbackArea.html($.i18n("msg_parson_wrong_order"));
+        }
+        this.calculatePercent();
         return state;
+    }
+
+    calculatePercent() {
+        let numLines = this.percentLines * 0.2;
+        let lines = this.problem.answerLines().length;
+        let numCorrectBlocks = (this.correctLines / lines) * 0.4;
+        let numCorrectIndents =
+            ((this.correctLines - this.incorrectIndents) / lines) * 0.4;
+
+        this.problem.percent = numLines + numCorrectBlocks + numCorrectIndents;
     }
 }
 
