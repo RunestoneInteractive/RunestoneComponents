@@ -22,6 +22,7 @@ Components
     :maxdepth: 1
     :glob:
 
+    runestone/overview
     runestone/*/toctree
     runestone/__init__.py
     runestone/__main__.py
