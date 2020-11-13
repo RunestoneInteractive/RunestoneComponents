@@ -39,9 +39,9 @@ export default class Timed extends RunestoneBase {
             this.startingTime = this.timeLimit;
             this.limitedTime = true;
         }
-        this.showFeedback = false;
+        this.showFeedback = true;
         if ($(this.origElem).is("[data-no-feedback]")) {
-            this.showFeedback = true;
+            this.showFeedback = false;
         }
         this.showResults = true;
         if ($(this.origElem).is("[data-no-result]")) {
