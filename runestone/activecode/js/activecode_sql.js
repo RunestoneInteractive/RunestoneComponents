@@ -143,6 +143,7 @@ export default class SQLActiveCode extends ActiveCode {
         if (this.suffix) {
             result = this.autograde(res[0]);
             $(this.output).text(result);
+            $(this.output).css("visibility", "visible");
         }
     }
     autograde(result_table) {
