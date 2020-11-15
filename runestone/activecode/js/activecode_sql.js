@@ -106,28 +106,48 @@ export default class SQLActiveCode extends ActiveCode {
                     while (statement.step()) {
                         data.push(statement.get());
                     }
-                    results.push({ status: "success", columns: columns, values: data, rowcount: data.length });
+                    results.push({
+                        status: "success",
+                        columns: columns,
+                        values: data,
+                        rowcount: data.length,
+                    });
                 } else {
                     let nsql = statement.getNormalizedSQL();
-                    let prefix = nsql.substr(0,6).toLowerCase();
-                    statement.step();   // execute the query
+                    let prefix = nsql.substr(0, 6).toLowerCase();
+                    statement.step(); // execute the query
                     // Try to detect INSERT/UPDATE/DELETE to give friendly feedback
                     // on rows modified - unfortunately, this won't catch such queries
                     // if they use CTEs.  There seems to be no reliable way of knowing
                     // when a SQLite query actually modified data.
-                    if (prefix === "insert" || prefix === "update" || prefix === "delete") {
-                        results.push({ status: "success", operation: prefix, rowcount: this.db.getRowsModified() });
+                    if (
+                        prefix === "insert" ||
+                        prefix === "update" ||
+                        prefix === "delete"
+                    ) {
+                        results.push({
+                            status: "success",
+                            operation: prefix,
+                            rowcount: this.db.getRowsModified(),
+                        });
                     } else {
                         results.push({ status: "success" });
                     }
                 }
             }
         } catch (e) {
-            results.push({ status: "failure", message: e.toString(), sql: it.getRemainingSQL() });
+            results.push({
+                status: "failure",
+                message: e.toString(),
+                sql: it.getRemainingSQL(),
+            });
         }
 
         if (results.length === 0) {
-            results.push({ status: "failure", message: "No queries submitted." });
+            results.push({
+                status: "failure",
+                message: "No queries submitted.",
+            });
         }
 
         this.logRunEvent({
@@ -166,13 +186,13 @@ export default class SQLActiveCode extends ActiveCode {
                     let tableDiv = document.createElement("div");
                     section.appendChild(tableDiv);
                     let maxHeight = 350;
-                    if (results.length > 1) maxHeight = 200;  // max height smaller if lots of results
+                    if (results.length > 1) maxHeight = 200; // max height smaller if lots of results
                     createTable(r, tableDiv, maxHeight);
                     let messageBox = document.createElement("pre");
-                    let rmsg = (r.rowcount !== 1 ? " rows " : " row ");
+                    let rmsg = r.rowcount !== 1 ? " rows " : " row ";
                     let msg = "" + r.rowcount + rmsg + "returned";
                     if (r.rowcount > 100) {
-                        msg = msg + " (only first 100 rows displayed)"
+                        msg = msg + " (only first 100 rows displayed)";
                     }
                     msg = msg + ".";
                     messageBox.textContent = msg;
@@ -182,7 +202,7 @@ export default class SQLActiveCode extends ActiveCode {
                     let messageBox = document.createElement("pre");
                     let op = r.operation;
                     op = op + (op.charAt(op.length - 1) === "e" ? "d." : "ed.");
-                    let rmsg = (r.rowcount !== 1 ? " rows " : " row ");
+                    let rmsg = r.rowcount !== 1 ? " rows " : " row ";
                     messageBox.textContent = "" + r.rowcount + rmsg + op;
                     messageBox.setAttribute("class", "ac_sql_result_success");
                     section.appendChild(messageBox);
@@ -204,6 +224,7 @@ export default class SQLActiveCode extends ActiveCode {
         if (this.suffix) {
             result = this.autograde(results[results.length - 1]);
             $(this.output).text(result);
+            $(this.output).css("visibility", "visible");
         } else {
             $(this.output).css("visibility", "hidden");
         }
@@ -290,7 +311,7 @@ function createTable(tableData, container, maxHeight) {
     let trimRows = undefined;
     if (data.length === 0) {
         // kludge: no column headers will show up unless we do this
-        data = [ tableData.columns.map(e => null) ];
+        data = [tableData.columns.map((e) => null)];
         trimRows = [0];
     }
 
@@ -300,7 +321,7 @@ function createTable(tableData, container, maxHeight) {
         width: "100%",
         height: maxHeight,
         autoRowSize: true,
-        autoColumnSize: {useHeaders: true},
+        autoColumnSize: { useHeaders: true },
         rowHeaders: false,
         colHeaders: tableData.columns,
         editor: false,
@@ -311,7 +332,7 @@ function createTable(tableData, container, maxHeight) {
     });
 
     // calculate actual height and resize
-    let actualHeight = 40;  // header height + small margin
+    let actualHeight = 40; // header height + small margin
     if (tableData.values.length > 0) {
         for (let i = 0; i < data.length; i++) {
             actualHeight = actualHeight + hot.getRowHeight(i);
