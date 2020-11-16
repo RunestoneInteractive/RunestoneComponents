@@ -226,7 +226,16 @@ export class ActiveCode extends RunestoneBase {
         $(butt).addClass("btn btn-success run-button");
         ctrlDiv.appendChild(butt);
         this.runButton = butt;
-        $(butt).click(this.runProg.bind(this));
+        $(butt).click(
+            async function () {
+                await this.runProg();
+                if (this.logResults) {
+                    this.logCurrentAnswer();
+                }
+                this.renderFeedback();
+            }.bind(this)
+        );
+
         $(butt).attr("type", "button");
         if (this.enabledownload || eBookConfig.downloadsEnabled) {
             butt = document.createElement("button");
@@ -975,8 +984,7 @@ export class ActiveCode extends RunestoneBase {
                     "An error occurred in the hidden, included code. Sorry we can't give you a more helpful error message";
                 return;
             } else if (errorLine > this.progLines + this.pretextLines) {
-                errText.innerHTML =
-                    `An error occurred after the end of your code. 
+                errText.innerHTML = `An error occurred after the end of your code. 
 One possible reason is that you have an unclosed parenthesis or string. 
 Another possibility is that there is an error in the hidden test code. 
 Yet another is that there is an internal error.  The internal error message is: ${err.message}`;
@@ -1267,7 +1275,10 @@ Yet another is that there is an internal error.  The internal error message is: 
         // The python unit test code builds the table as it is running the tests
         // In "normal" usage this is displayed immediately.
         // However in exam mode we make a div which is offscreen
-        if (this.unit_results_divid.indexOf("_offscreen_") > 0) {
+        if (
+            this.unit_results_divid &&
+            this.unit_results_divid.indexOf("_offscreen_") > 0
+        ) {
             let urDivid = `${this.divid}_offscreen_unit_results`;
             let unitFeedback = document.getElementById(urDivid);
             let tmp = document.body.removeChild(unitFeedback);
@@ -1292,7 +1303,9 @@ Yet another is that there is an internal error.  The internal error message is: 
      */
     async runProg(noUI, logResults) {
         if (typeof logResults === "undefined") {
-            logResults = true;
+            this.logResults = true;
+        } else {
+            this.logResults = logResults;
         }
         if (typeof noUI !== "boolean") {
             noUI = false;
@@ -1369,9 +1382,6 @@ Yet another is that there is an internal error.  The internal error message is: 
                 }
                 this.errLastRun = false;
                 this.errinfo = "success";
-                if (logResults) {
-                    this.logCurrentAnswer();
-                }
             }.bind(this),
             function (err) {
                 if (typeof history_dfd !== "undefined") {
@@ -1383,7 +1393,6 @@ Yet another is that there is an internal error.  The internal error message is: 
                         );
                         $(self.historyScrubber).slider("enable");
                         self.errinfo = err.toString();
-                        self.logCurrentAnswer(); // todo pull this out.
                         self.addErrorMessage(err);
                     });
                 }

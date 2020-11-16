@@ -70,12 +70,18 @@ export default class SQLActiveCode extends ActiveCode {
             }
         });
     }
-    runProg() {
-        var result_mess = "success";
-        var result;
-        var scrubber_dfd, history_dfd, saveCode;
+    async runProg(noUI, logResults) {
+        if (typeof logResults === "undefined") {
+            this.logResults = true;
+        } else {
+            this.logResults = logResults;
+        }
+        if (typeof noUI !== "boolean") {
+            noUI = false;
+        }
+        var scrubber_dfd, history_dfd;
         // Clear any old results
-        saveCode = "True";
+        this.saveCode = "True";
         let divid = this.divid + "_sql_out";
         let respDiv = document.getElementById(divid);
         if (respDiv) {
@@ -92,7 +98,7 @@ export default class SQLActiveCode extends ActiveCode {
         }
 
         let it = this.db.iterateStatements(query);
-        let results = [];
+        this.results = [];
         try {
             for (let statement of it) {
                 let columns = statement.getColumnNames();
@@ -102,7 +108,7 @@ export default class SQLActiveCode extends ActiveCode {
                     while (statement.step()) {
                         data.push(statement.get());
                     }
-                    results.push({
+                    this.results.push({
                         status: "success",
                         columns: columns,
                         values: data,
@@ -121,59 +127,59 @@ export default class SQLActiveCode extends ActiveCode {
                         prefix === "update" ||
                         prefix === "delete"
                     ) {
-                        results.push({
+                        this.results.push({
                             status: "success",
                             operation: prefix,
                             rowcount: this.db.getRowsModified(),
                         });
                     } else {
-                        results.push({ status: "success" });
+                        this.results.push({ status: "success" });
                     }
                 }
             }
         } catch (e) {
-            results.push({
+            this.results.push({
                 status: "failure",
                 message: e.toString(),
                 sql: it.getRemainingSQL(),
             });
         }
 
-        if (results.length === 0) {
-            results.push({
+        if (this.results.length === 0) {
+            this.results.push({
                 status: "failure",
                 message: "No queries submitted.",
             });
         }
 
-        this.logRunEvent({
-            div_id: this.divid,
-            code: this.editor.getValue(),
-            lang: this.language,
-            errinfo: results[results.length - 1].status,
-            to_save: saveCode,
-            prefix: this.pretext,
-            suffix: this.suffix,
-            partner: this.partner,
-        }); // Log the run event
-        var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
+        var __ret = this.manage_scrubber(
+            scrubber_dfd,
+            history_dfd,
+            this.saveCode
+        );
         history_dfd = __ret.history_dfd;
-        saveCode = __ret.saveCode;
-        history_dfd.then(function () {
-            if (this.slideit) {
-                $(this.historyScrubber).on(
-                    "slidechange",
-                    this.slideit.bind(this)
-                );
-            }
-            $(this.historyScrubber).slider("enable");
-        });
+        this.saveCode = __ret.saveCode;
+        history_dfd
+            .then(
+                function () {
+                    if (this.slideit) {
+                        $(this.historyScrubber).on(
+                            "slidechange",
+                            this.slideit.bind(this)
+                        );
+                    }
+                    $(this.historyScrubber).slider("enable");
+                }.bind(this)
+            )
+            .catch(function (e) {
+                console.log(`Failed to update scrubber ${e}`);
+            });
 
         respDiv = document.createElement("div");
         respDiv.id = divid;
         this.outDiv.appendChild(respDiv);
         $(this.outDiv).show();
-        for (let r of results) {
+        for (let r of this.results) {
             let section = document.createElement("div");
             section.setAttribute("class", "ac_sql_result");
             respDiv.appendChild(section);
@@ -182,7 +188,7 @@ export default class SQLActiveCode extends ActiveCode {
                     let tableDiv = document.createElement("div");
                     section.appendChild(tableDiv);
                     let maxHeight = 350;
-                    if (results.length > 1) maxHeight = 200; // max height smaller if lots of results
+                    if (this.results.length > 1) maxHeight = 200; // max height smaller if lots of results
                     createTable(r, tableDiv, maxHeight);
                     let messageBox = document.createElement("pre");
                     let rmsg = r.rowcount !== 1 ? " rows " : " row ";
@@ -218,11 +224,42 @@ export default class SQLActiveCode extends ActiveCode {
 
         // Now handle autograding
         if (this.suffix) {
-            result = this.autograde(results[results.length - 1]);
-            $(this.output).text(result);
-            $(this.output).css("visibility", "visible");
+            this.testResult = this.autograde(
+                this.results[this.results.length - 1]
+            );
         } else {
             $(this.output).css("visibility", "hidden");
+        }
+
+        return Promise.resolve("done");
+    }
+
+    logCurrentAnswer() {
+        this.logRunEvent({
+            div_id: this.divid,
+            code: this.editor.getValue(),
+            lang: this.language,
+            errinfo: this.results[this.results.length - 1].status,
+            to_save: this.saveCode,
+            prefix: this.pretext,
+            suffix: this.suffix,
+            partner: this.partner,
+        }); // Log the run event
+
+        if (this.unit_results) {
+            this.logBookEvent({
+                event: "unittest",
+                div_id: this.divid,
+                course: eBookConfig.course,
+                act: this.unit_results,
+            });
+        }
+    }
+
+    renderFeedback() {
+        if (this.testResult) {
+            $(this.output).text(this.testResult);
+            $(this.output).css("visibility", "visible");
         }
     }
 
@@ -258,12 +295,8 @@ export default class SQLActiveCode extends ActiveCode {
         result += `You passed ${this.passed} out of ${
             this.passed + this.failed
         } tests for ${pct}%`;
-        this.logBookEvent({
-            event: "unittest",
-            div_id: this.divid,
-            course: eBookConfig.course,
-            act: `percent:${pct}:passed:${this.passed}:failed:${this.failed}`,
-        });
+        this.unit_results = `percent:${pct}:passed:${this.passed}:failed:${this.failed}`;
+
         return result;
     }
     testOneAssert(row, col, oper, expected, result_table) {
