@@ -49,7 +49,7 @@ export default class LiveCode extends ActiveCode {
      * In order to check for supplemental files in java and deal with asynchronicity
      * I split the original runProg into two functions: runProg and runProg_callback
      */
-    runProg() {
+    async runProg() {
         var stdin;
         var scrubber_dfd, history_dfd;
         var source;
@@ -232,24 +232,14 @@ export default class LiveCode extends ActiveCode {
                     instance.runProg_callback(data);
                 })
                 .catch(function (err) {
-                    // console.log("Error: " + err);
+                    console.log("Error: " + err);
                 });
         }
     }
-    runProg_callback(data) {
-        var xhr, stdin;
-        var runspec = {};
-        var scrubber_dfd, history_dfd;
-        var host, source, editor;
+    async runProg_callback(data) {
+        var xhr;
+        var host, source;
         var saveCode = "True";
-        var sfilemap = {
-            java: "",
-            cpp: "test.cpp",
-            c: "test.c",
-            python3: "test.py",
-            python2: "test.py",
-            octave: "octatest.m",
-        };
         source = this.editor.getValue();
         xhr = new XMLHttpRequest();
         var result;
@@ -288,7 +278,7 @@ export default class LiveCode extends ActiveCode {
                 partner: this.partner,
             });
             switch (result.outcome) {
-                case 15:
+                case 15: {
                     let parsedOutput = new JUnitTestParser(
                         result.stdout,
                         this.divid
@@ -320,6 +310,7 @@ export default class LiveCode extends ActiveCode {
                         });
                     }
                     break;
+                }
                 case 11: // compiler error
                     $(odiv).html($.i18n("msg_activecode_were_compiling_err"));
                     this.addJobeErrorMessage(result.cmpinfo);
@@ -358,6 +349,7 @@ export default class LiveCode extends ActiveCode {
         }.bind(this);
         xhr.send(data);
     }
+
     addJobeErrorMessage(err) {
         var errHead = $("<h3>").html("Error");
         var eContainer = this.outerDiv.appendChild(
