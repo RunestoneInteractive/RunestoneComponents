@@ -7,13 +7,13 @@ export default class SQLActiveCode extends ActiveCode {
     constructor(opts) {
         super(opts);
         //  fnprefix sets the path to load the sql-wasm.wasm file
+        var bookprefix;
         var fnprefix;
         if (eBookConfig.useRunestoneServices) {
-            fnprefix =
-                "/runestone/books/published/" +
-                eBookConfig.basecourse +
-                "/_static";
+            bookprefix = `${eBookConfig.app}/books/published/${eBookConfig.basecourse}`;
+            fnprefix = bookprefix + "/_static";
         } else {
+            bookprefix = "";
             fnprefix = "/_static";
         }
         this.config = {
@@ -23,12 +23,8 @@ export default class SQLActiveCode extends ActiveCode {
         initSqlJs(this.config).then(function (SQL) {
             // set up call to load database asynchronously if given
             if (self.dburl) {
-                if (!self.dburl.startsWith("http")) {
-                    self.dburl =
-                        window.location.protocol +
-                        "//" +
-                        window.location.host +
-                        self.dburl;
+                if (self.dburl.startsWith("/_static")) {
+                    self.dburl = `${bookprefix}${self.dburl}`;
                 }
                 $(self.runButton).attr("disabled", "disabled");
                 let buttonText = $(self.runButton).text();
