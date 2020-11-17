@@ -5,8 +5,8 @@ import JUnitTestParser from "./extractUnitResults.js";
 
 export default class LiveCode extends ActiveCode {
     constructor(opts) {
+        var orig = $(opts.orig).find("textarea")[0];
         super(opts);
-        var orig = opts.orig;
         this.stdin = $(orig).data("stdin");
         this.datafile = $(orig).data("datafile");
         this.sourcefile = $(orig).data("sourcefile");
