@@ -44,12 +44,28 @@ export default class LiveCode extends ActiveCode {
         this.stdin_el = input;
     }
     createErrorOutput() {}
+
+    /*  Main runProg method for livecode
+     *
+     */
+    async runProg() {
+        await this.runSetup();
+        try {
+            let res = await this.submitToJobe();
+            let runResults = await res.json();
+            this.processJobeResponse(runResults);
+        } catch (e) {
+            this.addJobeErrorMessage($.i18n("msg_activecode_server_comm_err"));
+            $(this.runButton).removeAttr("disabled");
+        }
+        return Promise.resolve("done");
+    }
     /**
      * Note:
      * In order to check for supplemental files in java and deal with asynchronicity
      * I split the original runProg into two functions: runProg and runProg_callback
      */
-    async runProg() {
+    async runSetup() {
         var stdin;
         var scrubber_dfd, history_dfd;
         var source;
@@ -64,9 +80,11 @@ export default class LiveCode extends ActiveCode {
         };
         var sourcefilename = "";
         var testdrivername = "";
+        var file_checkp;
 
+        // extract the class names so files can be named properly
         if (this.suffix && this.language == "java") {
-            let classMatch = new RegExp(/public class\s+(\w+)[\s+\{]/);
+            let classMatch = new RegExp(/public class\s+(\w+)[\s+{]/);
             source = this.buildProg(false);
             let m = source.match(classMatch);
             if (m) {
@@ -80,18 +98,21 @@ export default class LiveCode extends ActiveCode {
         } else {
             source = this.buildProg(true);
         }
-        // Validate the data is convertable to Base64. If not then error out now
+        // Validate the data is convertible to Base64. If not then error out now
         try {
-            let contentsb64 = btoa(source);
+            btoa(source);
         } catch (e) {
             alert(
                 "Error: Bad Characters in the activecode window. Likely a quote character that has been copy/pasted. 🙁"
             );
             return;
         }
+
         var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
         history_dfd = __ret.history_dfd;
         saveCode = __ret.saveCode;
+
+        // assemble parameters for JOBE
         var paramlist = [
             "compileargs",
             "linkargs",
@@ -115,6 +136,7 @@ export default class LiveCode extends ActiveCode {
         if (!this.sourcefile) {
             this.sourcefile = sfilemap[this.language];
         }
+
         $(this.output).html($.i18n("msg_activecode_compiling_running"));
         var files = [];
         var content, base64;
@@ -179,7 +201,6 @@ export default class LiveCode extends ActiveCode {
                 System.out.println("You got " + corr + " out of " + total + " correct. " + String.format("%.2f", (100.0 * corr / total)) + "%");
             }
         }
-
         `;
         if (this.suffix && this.language == "java") {
             files.push({ name: sourcefilename, content: source });
@@ -202,8 +223,8 @@ export default class LiveCode extends ActiveCode {
             runspec.input = stdin;
         }
         if (files.length === 0) {
-            let data = JSON.stringify({ run_spec: runspec });
-            this.runProg_callback(data);
+            this.json_runspec = JSON.stringify({ run_spec: runspec });
+            file_checkp = Promise.resolve("ready");
         } else {
             runspec["file_list"] = [];
             var promises = [];
@@ -224,130 +245,107 @@ export default class LiveCode extends ActiveCode {
                     })
                 );
             }
-            let data = JSON.stringify({ run_spec: runspec });
+            this.json_runspec = JSON.stringify({ run_spec: runspec });
             this.div2id = instance.div2id;
-            Promise.all(promises)
-                .then(function () {
-                    // console.log("All files on Server");
-                    instance.runProg_callback(data);
-                })
-                .catch(function (err) {
-                    console.log("Error: " + err);
-                });
+            file_checkp = Promise.all(promises).catch(function (err) {
+                console.log("Error: " + err);
+            });
         }
+        return file_checkp;
     }
-    async runProg_callback(data) {
-        var xhr;
-        var host, source;
-        var saveCode = "True";
-        source = this.editor.getValue();
-        xhr = new XMLHttpRequest();
-        var result;
-        host = this.JOBE_SERVER + this.resource;
-        var odiv = this.output;
-        var pdiv = this.outDiv;
+
+    /* Submit the assembled job to the JOBE server and await the results.
+     *
+     */
+    async submitToJobe() {
+        var data = this.json_runspec;
+        let host = this.JOBE_SERVER + this.resource;
         $(this.runButton).attr("disabled", "disabled");
         $(this.outDiv).show({ duration: 700, queue: false });
         $(this.errDiv).remove();
         $(this.output).css("visibility", "visible");
-        xhr.open("POST", host, true);
-        xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
-        xhr.setRequestHeader("Accept", "application/json");
-        xhr.setRequestHeader("X-API-KEY", this.API_KEY);
-        xhr.onload = function () {
-            var logresult;
-            $(this.runButton).removeAttr("disabled");
-            try {
-                result = JSON.parse(xhr.responseText);
-            } catch (e) {
-                result = {};
-                result.outcome = -1;
-            }
-            if (result.outcome === 15) {
-                logresult = "success";
-            } else {
-                logresult = result.outcome;
-            }
-            this.logRunEvent({
-                div_id: this.divid,
-                code: source,
-                errinfo: logresult,
-                to_save: saveCode,
-                lang: this.language,
-                event: "livecode",
-                partner: this.partner,
-            });
-            switch (result.outcome) {
-                case 15: {
-                    let parsedOutput = new JUnitTestParser(
-                        result.stdout,
-                        this.divid
-                    );
-                    $(odiv).html(parsedOutput.stdout);
-                    let rdiv = document.getElementById(
-                        `${this.divid}_unit_results`
-                    );
-                    if (rdiv) {
-                        rdiv.remove();
-                    }
-                    if (parsedOutput.table) {
-                        pdiv.appendChild(parsedOutput.table);
-                    }
-                    rdiv = document.getElementById(
-                        `${this.divid}_unit_results`
-                    );
-                    if (rdiv) {
-                        rdiv.appendChild(parsedOutput.pctString);
-                    }
-                    if (this.suffix) {
-                        if (parsedOutput.pct === undefined) {
-                            parsedOutput.pct = parsedOutput.passed = parsedOutput.failed = 0;
-                        }
-                        this.logBookEvent({
-                            event: "unittest",
-                            act: `percent:${parsedOutput.pct}:passed:${parsedOutput.passed}:failed:${parsedOutput.failed}`,
-                            div_id: this.divid,
-                        });
-                    }
-                    break;
-                }
-                case 11: // compiler error
-                    $(odiv).html($.i18n("msg_activecode_were_compiling_err"));
-                    this.addJobeErrorMessage(result.cmpinfo);
-                    break;
-                case 12: // run time error
-                    $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
-                    if (result.stderr) {
-                        this.addJobeErrorMessage(result.stderr);
-                    }
-                    break;
-                case 13: // time limit
-                    $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
-                    this.addJobeErrorMessage(
-                        $.i18n("msg_activecode_time_limit_exc")
-                    );
-                    break;
-                default:
-                    if (result.stderr) {
-                        $(odiv).html(result.stderr.replace(/\n/g, "<br>"));
-                    } else {
-                        this.addJobeErrorMessage(
-                            $.i18n(
-                                "msg_activecode_server_err",
-                                xhr.status,
-                                xhr.statusText
-                            )
-                        );
-                    }
-            }
-            // todo: handle server busy and timeout errors too
-        }.bind(this);
+
+        let headers = new Headers({
+            "Content-type": "application/json; charset=utf-8",
+            Accept: "application/json",
+            "X-API-KEY": this.API_KEY,
+        });
+        let request = new Request(host, {
+            method: "POST",
+            headers: headers,
+            body: data,
+        });
+        return fetch(request);
+
         ///$("#" + divid + "_errinfo").remove();
-        xhr.onerror = function () {
-            this.addJobeErrorMessage($.i18n("msg_activecode_server_comm_err"));
-            $(this.runButton).removeAttr("disabled");
-        }.bind(this);
-        xhr.send(data);
+    }
+
+    processJobeResponse(result) {
+        var logresult;
+        var odiv = this.output;
+        $(this.runButton).removeAttr("disabled");
+        if (result.outcome === 15) {
+            logresult = "success";
+        } else {
+            logresult = result.outcome;
+        }
+        this.saveCode = "True";
+        this.errinfo = logresult;
+        switch (result.outcome) {
+            case 15: {
+                let parsedOutput = new JUnitTestParser(
+                    result.stdout,
+                    this.divid
+                );
+                $(odiv).html(parsedOutput.stdout);
+                if (this.suffix) {
+                    if (parsedOutput.pct === undefined) {
+                        parsedOutput.pct = parsedOutput.passed = parsedOutput.failed = 0;
+                    }
+                    this.unit_results = `percent:${parsedOutput.pct}:passed:${parsedOutput.passed}:failed:${parsedOutput.failed}`;
+                }
+                break;
+            }
+            case 11: // compiler error
+                $(odiv).html($.i18n("msg_activecode_were_compiling_err"));
+                this.addJobeErrorMessage(result.cmpinfo);
+                break;
+            case 12: // run time error
+                $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
+                if (result.stderr) {
+                    this.addJobeErrorMessage(result.stderr);
+                }
+                break;
+            case 13: // time limit
+                $(odiv).html(result.stdout.replace(/\n/g, "<br>"));
+                this.addJobeErrorMessage(
+                    $.i18n("msg_activecode_time_limit_exc")
+                );
+                break;
+            default:
+                if (result.stderr) {
+                    $(odiv).html(result.stderr.replace(/\n/g, "<br>"));
+                } else {
+                    this.addJobeErrorMessage(
+                        $.i18n("msg_activecode_server_err")
+                    );
+                }
+        }
+        // todo: handle server busy and timeout errors too
+    }
+
+    renderFeedback() {
+        let rdiv = document.getElementById(`${this.divid}_unit_results`);
+        if (rdiv) {
+            rdiv.remove();
+        }
+        if (this.parsedOutput.table) {
+            this.outDiv.appendChild(this.parsedOutput.table);
+        }
+        rdiv = document.getElementById(`${this.divid}_unit_results`);
+        if (rdiv) {
+            rdiv.appendChild(this.parsedOutput.pctString);
+        }
     }
 
     addJobeErrorMessage(err) {
