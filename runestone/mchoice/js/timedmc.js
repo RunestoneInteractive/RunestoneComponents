@@ -30,6 +30,9 @@ export default class TimedMC extends MultipleChoice {
         $(this.submitButton).hide();
         $(this.compareButton).hide();
     }
+
+    // These methods override the methods in the base class. Called from renderFeedback()
+    //
     renderMCMAFeedBack() {
         this.feedbackTimedMC();
     }
@@ -39,7 +42,9 @@ export default class TimedMC extends MultipleChoice {
     feedbackTimedMC() {
         for (var i = 0; i < this.indexArray.length; i++) {
             var tmpindex = this.indexArray[i];
-            $(this.feedBackEachArray[i]).text(this.feedbackList[i]);
+            $(this.feedBackEachArray[i]).text(
+                String.fromCharCode(65 + i) + ". " + this.feedbackList[i]
+            );
             var tmpid = this.answerList[tmpindex].id;
             if (this.correctList.indexOf(tmpid) >= 0) {
                 this.feedBackEachArray[i].classList.add(
@@ -55,47 +60,10 @@ export default class TimedMC extends MultipleChoice {
         }
     }
     renderMCFormOpts() {
-        this.optionArray = []; // array with an object for each option containing the input and label for that option
+        super.renderMCFormOpts();
         this.feedBackEachArray = [];
-        var input_type = "radio";
-        if (this.multipleanswers) {
-            input_type = "checkbox";
-        }
-        // this.indexArray is used to index through the answers
-        // it is just 0-n normally, but the order is shuffled if the random option is present
-        this.indexArray = [];
-        for (var i = 0; i < this.answerList.length; i++) {
-            this.indexArray.push(i);
-        }
-        if (this.random) {
-            this.randomizeAnswers();
-        }
         for (var j = 0; j < this.answerList.length; j++) {
             var k = this.indexArray[j];
-            var optid = this.divid + "_opt_" + k;
-            // Create the input
-            var input = document.createElement("input");
-            input.type = input_type;
-            input.name = "group1";
-            input.value = String(k);
-            input.id = optid;
-            // Create the label for the input
-            var label = document.createElement("label");
-            var labelspan = document.createElement("span");
-            label.appendChild(input);
-            label.appendChild(labelspan);
-            $(labelspan).html(
-                String.fromCharCode(65 + j) + ". " + this.answerList[k].content
-            );
-            // create the object to store in optionArray
-            var optObj = {
-                input: input,
-                label: label,
-            };
-            this.optionArray.push(optObj);
-            // add the option to the form
-            this.optsForm.appendChild(label);
-            this.optsForm.appendChild(document.createElement("br"));
             var feedBackEach = document.createElement("div");
             feedBackEach.id = this.divid + "_eachFeedback_" + k;
             feedBackEach.classList.add("eachFeedback");
@@ -147,17 +115,7 @@ export default class TimedMC extends MultipleChoice {
             $(this.feedBackEachArray[i]).hide();
         }
     }
-    processTimedSubmission(logFlag) {
-        // Disable input, then evaluate component
-        for (var i = 0; i < this.optionArray.length; i++) {
-            this.optionArray[i].input.disabled = true;
-        }
-        if (this.multipleanswers) {
-            this.processMCMASubmission(logFlag);
-        } else {
-            this.processMCMFSubmission(logFlag);
-        }
-    }
+
     reinitializeListeners() {
         let self = this;
         let answerFunc = function () {

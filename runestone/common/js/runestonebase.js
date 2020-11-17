@@ -10,6 +10,7 @@
  *    - checkLocalStorage
  *    - setLocalStorage
  *    - restoreAnswers
+ *      disableInteraction
  *
  * 4. provide a Selenium based unit test
  *
@@ -56,15 +57,19 @@ export default class RunestoneBase {
         }
     }
 
-    logBookEvent(eventInfo) {
+    async logBookEvent(eventInfo) {
         if (this.graderactive) {
             return;
         }
+        let post_return = Promise.resolve();
         eventInfo.course = eBookConfig.course;
         eventInfo.clientLoginStatus = eBookConfig.isLoggedIn;
         eventInfo.timezoneoffset = new Date().getTimezoneOffset() / 60;
+        if (this.percent) {
+            eventInfo.percent = this.percent;
+        }
         if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
-            var post_return = jQuery.post(
+            post_return = jQuery.post(
                 eBookConfig.ajaxURL + "hsblog",
                 eventInfo,
                 function (jsondata) {
@@ -89,7 +94,8 @@ export default class RunestoneBase {
         }
         return post_return;
     }
-    logRunEvent(eventInfo) {
+    async logRunEvent(eventInfo) {
+        let post_promise = Promise.resolve("done");
         if (this.graderactive) {
             return;
         }
@@ -100,7 +106,7 @@ export default class RunestoneBase {
             eventInfo.save_code = "True";
         }
         if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
-            jQuery
+            post_promise = jQuery
                 .post(eBookConfig.ajaxURL + "runlog.json", eventInfo) // Log the run event
                 .done(
                     function (data, status, whatever) {
@@ -133,9 +139,10 @@ export default class RunestoneBase {
         ) {
             pageProgressTracker.updateProgress(eventInfo.div_id);
         }
+        return post_promise;
     }
     /* Checking/loading from storage */
-    checkServer(eventInfo) {
+    async checkServer(eventInfo) {
         // Check if the server has stored answer
         if (this.useRunestoneServices || this.graderactive) {
             let data = {};
@@ -256,6 +263,32 @@ export default class RunestoneBase {
             //this.outerDiv.parentNode.insertBefore(capDiv, this.outerDiv.nextSibling);
             this.containerDiv.appendChild(capDiv);
         }
+    }
+
+    hasUserActivity() {
+        return this.isAnswered;
+    }
+
+    checkCurrentAnswer() {
+        console.log(
+            "Each component should provide an implementation of checkCurrentAnswer"
+        );
+    }
+
+    async logCurrentAnswer() {
+        console.log(
+            "Each component should provide an implementation of logCurrentAnswer"
+        );
+    }
+    renderFeedback() {
+        console.log(
+            "Each component should provide an implementation of renderFeedback"
+        );
+    }
+    disableInteraction() {
+        console.log(
+            "Each component should provide an implementation of disableInteraction"
+        );
     }
 }
 

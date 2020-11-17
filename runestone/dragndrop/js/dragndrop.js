@@ -45,9 +45,9 @@ export default class DragNDrop extends RunestoneBase {
             if (
                 $(this.origElem.childNodes[i]).data("component") === "dropzone"
             ) {
-                var tmp = document.getElementById(
-                    $(this.origElem.childNodes[i]).attr("for")
-                );
+                var tmp = $(this.origElem).find(
+                    `#${$(this.origElem.childNodes[i]).attr("for")}`
+                )[0];
                 var replaceSpan = document.createElement("span");
                 replaceSpan.innerHTML = tmp.innerHTML;
                 replaceSpan.id = this.divid + tmp.id;
@@ -165,7 +165,9 @@ export default class DragNDrop extends RunestoneBase {
             type: "button",
         });
         this.submitButton.onclick = function () {
-            this.dragEval(true);
+            this.checkCurrentAnswer();
+            this.renderFeedback();
+            this.logCurrentAnswer(true);
         }.bind(this);
         this.resetButton = document.createElement("button"); // Check me button
         this.resetButton.textContent = $.i18n("msg_dragndrop_reset");
@@ -369,7 +371,8 @@ export default class DragNDrop extends RunestoneBase {
     /*===========================
     == Evaluation and feedback ==
     ===========================*/
-    dragEval(logFlag) {
+
+    checkCurrentAnswer() {
         this.correct = true;
         this.unansweredNum = 0;
         this.incorrectNum = 0;
@@ -380,10 +383,7 @@ export default class DragNDrop extends RunestoneBase {
                     .length
             ) {
                 this.correct = false;
-                $(this.dragPairArray[i][1]).addClass("drop-incorrect");
                 this.incorrectNum++;
-            } else {
-                $(this.dragPairArray[i][1]).removeClass("drop-incorrect");
             }
             if (this.hasNoDragChild(this.dragPairArray[i][1])) {
                 this.unansweredNum++;
@@ -391,24 +391,35 @@ export default class DragNDrop extends RunestoneBase {
             }
         }
         this.correctNum = this.dragNum - this.incorrectNum - this.unansweredNum;
+        this.percent = this.correctNum / this.dragPairArray.length;
         this.setLocalStorage({ correct: this.correct ? "T" : "F" });
-        this.renderFeedback();
-        if (logFlag) {
-            // Sometimes we don't want to log the answers--for example, on re-load of a timed exam
-            let answer = this.pregnantIndexArray.join(";");
-            this.logBookEvent({
-                event: "dragNdrop",
-                act: answer,
-                answer: answer,
-                minHeight: this.minheight,
-                div_id: this.divid,
-                correct: this.correct,
-                correctNum: this.correctNum,
-                dragNum: this.dragNum,
-            });
-        }
+    }
+
+    logCurrentAnswer() {
+        let answer = this.pregnantIndexArray.join(";");
+        this.logBookEvent({
+            event: "dragNdrop",
+            act: answer,
+            answer: answer,
+            minHeight: this.minheight,
+            div_id: this.divid,
+            correct: this.correct,
+            correctNum: this.correctNum,
+            dragNum: this.dragNum,
+        });
     }
     renderFeedback() {
+        for (var i = 0; i < this.dragPairArray.length; i++) {
+            if (
+                !$(this.dragPairArray[i][1]).has(this.dragPairArray[i][0])
+                    .length
+            ) {
+                $(this.dragPairArray[i][1]).addClass("drop-incorrect");
+            } else {
+                $(this.dragPairArray[i][1]).removeClass("drop-incorrect");
+            }
+        }
+
         if (!this.feedBackDiv) {
             this.renderFeedbackDiv();
         }
@@ -517,6 +528,15 @@ export default class DragNDrop extends RunestoneBase {
             this.localStorageKey(),
             JSON.stringify(storageObj)
         );
+    }
+
+    disableInteraction() {
+        $(this.resetButton).hide();
+        for (var i = 0; i < this.dragPairArray.length; i++) {
+            // No more dragging
+            $(this.dragPairArray[i][0]).attr("draggable", "false");
+            $(this.dragPairArray[i][0]).css("cursor", "initial");
+        }
     }
 }
 

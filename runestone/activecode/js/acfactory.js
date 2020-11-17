@@ -123,12 +123,15 @@ export default class ACFactory {
                     <h4 class="modal-title">Scratch ActiveCode</h4>
                   </div>
                   <div class="modal-body">
-                  <textarea data-component="activecode" data-codelens="true" id="${divid}" data-lang="${lang}" ${stdin}>
+                  <div data-component="activecode" id=${divid}>
+                  <div id=${divid}_question class="ac_question"><p>Use this area for writing code or taking notes.</p></div>
+                  <textarea data-codelens="true" data-lang="${lang}" ${stdin}>
 
 
 
 
                   </textarea>
+                  </div>
                   </div>
                 </div>
               </div>
@@ -162,7 +165,7 @@ $(document).ready(function () {
             try {
                 window.edList[this.id] = ACFactory.createActiveCode(
                     this,
-                    $(this).data("lang")
+                    $(this).find("textarea").data("lang")
                 );
             } catch (err) {
                 console.log(`Error rendering ClickableArea Problem ${this.id}

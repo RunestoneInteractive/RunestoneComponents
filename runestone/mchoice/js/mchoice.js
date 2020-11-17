@@ -335,9 +335,9 @@ export default class MultipleChoice extends RunestoneBase {
                     this.enableMCComparison();
                     this.getSubmittedOpts(); // to populate givenlog for logging
                     if (this.multipleanswers) {
-                        this.logMCMAsubmission(storedData);
+                        this.logMCMAsubmission();
                     } else {
-                        this.logMCMFsubmission(storedData);
+                        this.logMCMFsubmission();
                     }
                 }
             }
@@ -369,11 +369,7 @@ export default class MultipleChoice extends RunestoneBase {
             answer: this.givenArray.join(","),
         });
         if (logFlag) {
-            var answer = this.givenArray.join(",");
-            this.logMCMAsubmission({
-                answer: answer,
-                correct: this.correct,
-            });
+            this.logMCMAsubmission();
         }
         this.renderMCMAFeedBack();
         if (this.useRunestoneServices) {
@@ -402,6 +398,30 @@ export default class MultipleChoice extends RunestoneBase {
         this.givenArray.sort();
     }
 
+    checkCurrentAnswer() {
+        this.getSubmittedOpts();
+        if (this.multipleanswers) {
+            this.scoreMCMASubmission();
+        } else {
+            this.scoreMCMFSubmission();
+        }
+    }
+
+    logCurrentAnswer() {
+        if (this.multipleanswers) {
+            this.logMCMAsubmission();
+        } else {
+            this.logMCMFsubmission();
+        }
+    }
+
+    renderFeedback() {
+        if (this.multipleanswers) {
+            this.renderMCMAFeedBack();
+        } else {
+            this.renderMCMFFeedback();
+        }
+    }
     scoreMCMASubmission() {
         this.correctCount = 0;
         var correctIndex = 0;
@@ -429,12 +449,20 @@ export default class MultipleChoice extends RunestoneBase {
         var numGiven = this.givenArray.length;
         var numCorrect = this.correctCount;
         var numNeeded = this.correctList.length;
+        this.answer = this.givenArray.join(",");
         this.correct = numCorrect === numNeeded && numNeeded === numGiven;
+        if (numGiven === numNeeded) {
+            this.percent = numCorrect / numNeeded;
+        } else if (numGiven < numNeeded) {
+            this.percent = (numCorrect - (numNeeded - numGiven)) / numNeeded;
+        } else {
+            this.percent = (numCorrect - (numGiven - numNeeded)) / numNeeded;
+        }
     }
 
-    logMCMAsubmission(data) {
-        var answer = data.answer;
-        var correct = data.correct;
+    logMCMAsubmission() {
+        var answer = this.answer;
+        var correct = this.correct;
         var logAnswer =
             "answer:" + answer + ":" + (correct == "T" ? "correct" : "no");
         this.logBookEvent({
@@ -477,10 +505,7 @@ export default class MultipleChoice extends RunestoneBase {
         if (logFlag) {
             this.logMCMFsubmission();
         }
-        this.renderMCMFFeedback(
-            this.givenArray[0] == this.correctIndexList[0],
-            this.singlefeedback
-        );
+        this.renderMCMFFeedback();
         if (this.useRunestoneServices) {
             this.enableMCComparison();
         }
@@ -489,9 +514,11 @@ export default class MultipleChoice extends RunestoneBase {
     scoreMCMFSubmission() {
         if (this.givenArray[0] == this.correctIndexList[0]) {
             this.correct = true;
+            this.percent = 1.0;
         } else if (this.givenArray[0] != null) {
             // if given is null then the question wasn"t answered and should be counted as skipped
             this.correct = false;
+            this.percent = 0.0;
         }
     }
 
@@ -510,7 +537,10 @@ export default class MultipleChoice extends RunestoneBase {
         });
     }
 
-    renderMCMFFeedback(correct, feedbackText) {
+    renderMCMFFeedback() {
+        let correct = this.givenArray[0] == this.correctIndexList[0];
+        let feedbackText = this.singlefeedback;
+
         if (correct) {
             $(this.feedBackDiv).html("✔️ " + feedbackText);
             $(this.feedBackDiv).attr("class", "alert alert-info"); // use blue for better red/green blue color blindness
@@ -605,6 +635,12 @@ export default class MultipleChoice extends RunestoneBase {
             data,
             this.compareModal.bind(this)
         );
+    }
+
+    disableInteraction() {
+        for (var i = 0; i < this.optionArray.length; i++) {
+            this.optionArray[i].input.disabled = true;
+        }
     }
 }
 

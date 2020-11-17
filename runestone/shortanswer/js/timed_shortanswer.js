@@ -29,11 +29,6 @@ export default class TimedShortAnswer extends ShortAnswer {
     hideFeedback() {
         $(this.feedbackDiv).hide();
     }
-    processTimedSubmission() {
-        // Disable input & evaluate component
-        this.submitJournal();
-        this.jTextArea.disabled = true;
-    }
 }
 
 if (typeof window.component_factory === "undefined") {

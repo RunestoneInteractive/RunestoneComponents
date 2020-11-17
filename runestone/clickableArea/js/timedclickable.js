@@ -47,17 +47,6 @@ export default class TimedClickableArea extends ClickableArea {
     hideFeedback() {
         $(this.feedBackDiv).hide();
     }
-
-    processTimedSubmission(logFlag) {
-        // Disable input, then evaluate component
-        for (var i = 0; i < this.clickableArray.length; i++) {
-            $(this.clickableArray[i]).css("cursor", "initial");
-            this.clickableArray[i].onclick = function () {
-                return;
-            };
-        }
-        this.clickableEval(logFlag);
-    }
 }
 
 if (typeof window.component_factory === "undefined") {

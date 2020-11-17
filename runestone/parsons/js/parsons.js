@@ -23,7 +23,7 @@
 
 import RunestoneBase from "../../common/js/runestonebase.js";
 import "./parsons-i18n.en.js";
-import "./hammer.min.js";
+import Hammer from "./hammer.min.js";
 import "./prettify.js";
 import "../css/parsons.css";
 import "../css/prettify.css";
@@ -54,7 +54,7 @@ class LineBasedGrader {
         // Figure out the longest one
         var longestSubsequenceLength = -1;
         var longestSubsequence;
-        for (var i in allSubsequences) {
+        for (let i in allSubsequences) {
             var subs = allSubsequences[i];
             if (subs.length > longestSubsequenceLength) {
                 longestSubsequenceLength = subs.length;
@@ -64,7 +64,7 @@ class LineBasedGrader {
         // Create the inverse indexes
         var indexes = [];
         var lIndex = 0;
-        for (var i = 0; i < arr.length; i++) {
+        for (let i = 0; i < arr.length; i++) {
             if (lIndex > longestSubsequence.length) {
                 indexes.push(i);
             } else {
@@ -81,124 +81,75 @@ class LineBasedGrader {
     grade() {
         var problem = this.problem;
         problem.clearFeedback();
-        var correct = false;
-        var feedbackArea;
-        var answerArea = $(problem.answerArea);
-        if (this.showfeedback === true) {
-            feedbackArea = $(problem.messageDiv);
-        } else {
-            feedbackArea = $("#doesnotexist");
-        }
+        this.correctLines = 0;
+        this.percentLines = 0;
+        this.incorrectIndents = 0;
         var solutionLines = problem.solution;
         var answerLines = problem.answerLines();
         var i;
         var state;
+        this.percentLines = answerLines.length / solutionLines.length;
         if (answerLines.length < solutionLines.length) {
             state = "incorrectTooShort";
-            // too little code
-            answerArea.addClass("incorrect");
-            feedbackArea.fadeIn(500);
-            feedbackArea.attr("class", "alert alert-danger");
-            feedbackArea.html($.i18n("msg_parson_too_short"));
+            this.correctLength = false;
+        } else if (answerLines.length == solutionLines.length) {
+            this.correctLength = true;
         } else {
-            // Determine whether the code is in the correct order
-            var isCorrectOrder = false;
-            if (answerLines.length == solutionLines.length) {
-                isCorrectOrder = true;
-                for (i = 0; i < solutionLines.length; i++) {
-                    if (answerLines[i].text !== solutionLines[i].text) {
-                        isCorrectOrder = false;
-                    }
-                }
-            }
-            if (isCorrectOrder) {
-                // Determine whether it is the correct indention
-                var indentLeft = [];
-                var indentRight = [];
-                for (i = 0; i < solutionLines.length; i++) {
-                    if (answerLines[i].viewIndent() < solutionLines[i].indent) {
-                        indentRight.push(answerLines[i]);
-                    } else if (
-                        answerLines[i].viewIndent() > solutionLines[i].indent
-                    ) {
-                        indentLeft.push(answerLines[i]);
-                    }
-                }
-                if (indentLeft.length + indentRight.length == 0) {
-                    // Perfect
-                    state = "correct";
-                    answerArea.addClass("correct");
-                    feedbackArea.fadeIn(100);
-                    feedbackArea.attr("class", "alert alert-info");
-                    if (problem.checkCount > 1) {
-                        feedbackArea.html(
-                            $.i18n("msg_parson_correct", problem.checkCount)
-                        );
-                    } else {
-                        feedbackArea.html(
-                            $.i18n("msg_parson_correct_first_try")
-                        );
-                    }
-                    correct = true;
-                } else if (this.showfeedback == true) {
-                    // Incorrect Indention
-                    state = "incorrectIndent";
-                    var incorrectBlocks = [];
-                    for (i = 0; i < indentLeft.length; i++) {
-                        block = indentLeft[i].block();
-                        if (incorrectBlocks.indexOf(block) == -1) {
-                            incorrectBlocks.push(block);
-                            $(block.view).addClass("indentLeft");
-                        }
-                    }
-                    for (i = 0; i < indentRight.length; i++) {
-                        block = indentRight[i].block();
-                        if (incorrectBlocks.indexOf(block) == -1) {
-                            incorrectBlocks.push(block);
-                            $(block.view).addClass("indentRight");
-                        }
-                    }
-                    feedbackArea.fadeIn(500);
-                    feedbackArea.attr("class", "alert alert-danger");
-                    if (incorrectBlocks.length == 1) {
-                        feedbackArea.html($.i18n("msg_parson_wrong_indent"));
-                    } else {
-                        feedbackArea.html($.i18n("msg_parson_wrong_indents"));
-                    }
-                }
+            this.correctLength = false;
+        }
+
+        // Determine whether the code **that is there** is in the correct order
+        // If there is too much or too little code this only matters for
+        // calculating a percentage score.
+        let isCorrectOrder = true;
+        this.correctLines = 0;
+        this.solutionLength = solutionLines.length;
+        let loopLimit = Math.min(solutionLines.length, answerLines.length);
+        for (i = 0; i < loopLimit; i++) {
+            if (answerLines[i].text !== solutionLines[i].text) {
+                isCorrectOrder = false;
             } else {
-                // Incorrect: indicate which blocks to move
-                state = "incorrectMoveBlocks";
-                var answerBlocks = problem.answerBlocks();
-                var inSolution = [];
-                var inSolutionIndexes = [];
-                var notInSolution = [];
-                for (i = 0; i < answerBlocks.length; i++) {
-                    var block = answerBlocks[i];
-                    var index = solutionLines.indexOf(block.lines[0]);
-                    if (index == -1) {
-                        notInSolution.push(block);
-                    } else {
-                        inSolution.push(block);
-                        inSolutionIndexes.push(index);
-                    }
-                }
-                var lisIndexes = this.inverseLISIndices(inSolutionIndexes);
-                for (i = 0; i < lisIndexes.length; i++) {
-                    notInSolution.push(inSolution[lisIndexes[i]]);
-                }
-                answerArea.addClass("incorrect");
-                feedbackArea.fadeIn(500);
-                feedbackArea.attr("class", "alert alert-danger");
-                if (this.showfeedback === true) {
-                    for (i = 0; i < notInSolution.length; i++) {
-                        $(notInSolution[i].view).addClass("incorrectPosition");
-                    }
-                }
-                feedbackArea.html($.i18n("msg_parson_wrong_order"));
+                this.correctLines += 1;
             }
         }
+
+        // Determine whether blocks are indented correctly
+        this.indentLeft = [];
+        this.indentRight = [];
+        for (i = 0; i < loopLimit; i++) {
+            if (answerLines[i].viewIndent() < solutionLines[i].indent) {
+                this.indentRight.push(answerLines[i]);
+            } else if (answerLines[i].viewIndent() > solutionLines[i].indent) {
+                this.indentLeft.push(answerLines[i]);
+            }
+        }
+        this.incorrectIndents =
+            this.indentLeft.length + this.indentRight.length;
+        if (
+            this.incorrectIndents == 0 &&
+            isCorrectOrder &&
+            this.correctLength
+        ) {
+            // Perfect
+            state = "correct";
+        } else if (this.correctLength && isCorrectOrder) {
+            state = "incorrectIndent";
+        } else if (!isCorrectOrder && state != "incorrectTooShort") {
+            state = "incorrectMoveBlocks";
+        }
+        this.calculatePercent();
+        this.graderState = state;
         return state;
+    }
+
+    calculatePercent() {
+        let numLines = this.percentLines * 0.2;
+        let lines = this.problem.answerLines().length;
+        let numCorrectBlocks = (this.correctLines / lines) * 0.4;
+        let numCorrectIndents =
+            ((this.correctLines - this.incorrectIndents) / lines) * 0.4;
+
+        this.problem.percent = numLines + numCorrectBlocks + numCorrectIndents;
     }
 }
 
@@ -266,7 +217,7 @@ class ParsonsLine {
         var fillerText = "abcdefghijklmnopqrstuvwxyz0123456789,./!@#$%^&*-+";
         tempCanvasCtx.font = this.view.fontSize + " serif";
         var serifWidth = tempCanvasCtx.measureText(fillerText).width;
-        for (var i = 0; i < possibleFonts.length; i++) {
+        for (let i = 0; i < possibleFonts.length; i++) {
             if (possibleFonts[i].includes('"')) {
                 possibleFonts[i] = possibleFonts[i].replaceAll('"', "");
             }
@@ -282,7 +233,7 @@ class ParsonsLine {
     }
     // Answer the block that this line is currently in
     block() {
-        for (var i = 0; i < this.problem.blocks.length; i++) {
+        for (let i = 0; i < this.problem.blocks.length; i++) {
             var block = this.problem.blocks[i];
             for (var j = 0; j < block.lines.length; j++) {
                 if (block.lines[j] === this) {
@@ -327,13 +278,13 @@ class ParsonsBlock {
         problem.blockIndex += 1;
         $(view).addClass("block");
         var sharedIndent = lines[0].indent;
-        for (var i = 1; i < lines.length; i++) {
+        for (let i = 1; i < lines.length; i++) {
             sharedIndent = Math.min(sharedIndent, lines[i].indent);
         }
         var lineDiv = document.createElement("div");
         $(lineDiv).addClass("lines");
         $(view).append(lineDiv);
-        for (i = 0; i < lines.length; i++) {
+        for (let i = 0; i < lines.length; i++) {
             var line = lines[i];
             var lineIndent;
             if (problem.noindent) {
@@ -377,13 +328,13 @@ class ParsonsBlock {
         } else {
             var lines = this.lines;
             var sharedIndent = lines[0].indent;
-            for (var i = 1; i < lines.length; i++) {
+            for (let i = 1; i < lines.length; i++) {
                 sharedIndent = Math.min(sharedIndent, lines[i].indent);
             }
             if (sharedIndent < line.indent) {
                 $(line.view).addClass("indent" + (line.indent - sharedIndent));
             } else if (sharedIndent > line.indent) {
-                for (var i = 0; i < lines.length; i++) {
+                for (let i = 0; i < lines.length; i++) {
                     $(lines[i].view).removeClass(
                         "indent1 indent2 indent3 indent4"
                     );
@@ -398,7 +349,7 @@ class ParsonsBlock {
     }
     // Add the contents of that block to myself and then delete that block
     consumeBlock(block) {
-        for (var i = 0; i < block.lines.length; i++) {
+        for (let i = 0; i < block.lines.length; i++) {
             this.addLine(block.lines[i]);
         }
         if ($(block.view).attr("tabindex") == "0") {
@@ -406,12 +357,12 @@ class ParsonsBlock {
         }
         $(block.view).detach();
         var newBlocks = [];
-        for (var i = 0; i < this.problem.blocks.length; i++) {
+        for (let i = 0; i < this.problem.blocks.length; i++) {
             if (this.problem.blocks[i] !== block) {
                 newBlocks.push(this.problem.blocks[i]);
             }
         }
-        for (var i = 0; i < block.labels.length; i++) {
+        for (let i = 0; i < block.labels.length; i++) {
             this.addLabel(
                 block.labels[i][0],
                 this.lines.length - block.lines.length + block.labels[i][1]
@@ -424,7 +375,7 @@ class ParsonsBlock {
     // Update the model and view when block is converted to contain indent
     addIndent() {
         // Update the lines model / view
-        for (var i = 0; i < this.lines.length; i++) {
+        for (let i = 0; i < this.lines.length; i++) {
             var line = this.lines[i];
             if (line.indent > 0) {
                 $(line.view).removeClass("indent1 indent2 indent3 indent4");
@@ -524,7 +475,7 @@ class ParsonsBlock {
     // Of all the line indents, return the minimum value
     minimumLineIndent() {
         var minimumLineIndent = this.lines[0].indent;
-        for (var i = 1; i < this.lines.length; i++) {
+        for (let i = 1; i < this.lines.length; i++) {
             minimumLineIndent = Math.min(
                 this.lines[i].indent,
                 minimumLineIndent
@@ -542,7 +493,7 @@ class ParsonsBlock {
         if (pairedBin == -1) {
             return sourceBlocks[sourceBlocks.length - 1];
         }
-        for (var i = sourceBlocks.length - 1; i >= 0; i--) {
+        for (let i = sourceBlocks.length - 1; i >= 0; i--) {
             var block = sourceBlocks[i];
             if (block.pairedBin() == pairedBin) {
                 return block;
@@ -839,10 +790,10 @@ class ParsonsBlock {
     // Move block up
     moveUp() {
         if (this.inSourceArea()) {
-            var blocks = this.problem.sourceBlocks();
+            let blocks = this.problem.sourceBlocks();
             var offset = this.verticalOffset();
             var validSourceIndexes = this.validSourceIndexes();
-            for (var i = 0; i < validSourceIndexes.length; i++) {
+            for (let i = 0; i < validSourceIndexes.length; i++) {
                 var index =
                     validSourceIndexes[validSourceIndexes.length - 1 - i];
                 if (index < blocks.length) {
@@ -861,9 +812,8 @@ class ParsonsBlock {
                 }
             }
         } else {
-            var insert = false;
-            var blocks = this.problem.answerBlocks();
-            for (var i = 0; i < blocks.length; i++) {
+            let blocks = this.problem.answerBlocks();
+            for (let i = 0; i < blocks.length; i++) {
                 if (blocks[i].view.id == this.view.id) {
                     if (i == 0) {
                         return this;
@@ -916,15 +866,14 @@ class ParsonsBlock {
     // Move block down
     moveDown() {
         if (this.inSourceArea()) {
-            var blocks = this.problem.sourceBlocks();
-            var offset = this.verticalOffset();
+            let blocks = this.problem.sourceBlocks();
             var validSourceIndexes = this.validSourceIndexes();
-            for (var i = 0; i < blocks.length; i++) {
+            for (let i = 0; i < blocks.length; i++) {
                 if (blocks[i].view.id == this.view.id) {
                     var myIndex = i;
                 }
             }
-            for (var i = 0; i < validSourceIndexes.length; i++) {
+            for (let i = 0; i < validSourceIndexes.length; i++) {
                 var index = validSourceIndexes[i];
                 if (index == blocks.length) {
                     this.problem.textMoving = true;
@@ -946,8 +895,7 @@ class ParsonsBlock {
                 }
             }
         } else {
-            var insert = false;
-            var blocks = this.problem.answerBlocks();
+            let blocks = this.problem.answerBlocks();
             for (var i = 0; i < blocks.length; i++) {
                 if (blocks[i].view.id == this.view.id) {
                     if (i == blocks.length - 1) {
@@ -1307,7 +1255,9 @@ export default class Parsons extends RunestoneBase {
         this.checkButton.type = "button";
         this.checkButton.addEventListener("click", function (event) {
             event.preventDefault();
-            that.checkMe();
+            that.checkCurrentAnswer();
+            that.logCurrentAnswer();
+            that.renderFeedback();
         });
         this.resetButton = document.createElement("button");
         $(this.resetButton).attr("class", "btn btn-default");
@@ -1454,7 +1404,7 @@ export default class Parsons extends RunestoneBase {
         if (this.options.prettifyLanguage !== "") {
             prettyPrint();
         }
-        for (var i = 0; i < this.lines.length; i++) {
+        for (let i = 0; i < this.lines.length; i++) {
             this.lines[i].initializeWidth();
         }
         // Layout the areas
@@ -1781,9 +1731,6 @@ export default class Parsons extends RunestoneBase {
     //   removeIndentation: "Help Me" removed indentation
     //   combineBlocks: "Help Me" combined blocks
     logMove(activity) {
-        if (!this.useRunestoneServices) {
-            return this;
-        }
         var event = {
             event: "parsonsMove",
             div_id: this.divid,
@@ -1800,10 +1747,7 @@ export default class Parsons extends RunestoneBase {
     // Log the answer to the problem
     //   correct: The answer given matches the solution
     //   incorrect*: The answer is wrong for various reasons
-    logAnswer(answer) {
-        if (eBookConfig.logLevel == 0) {
-            return this;
-        }
+    logCurrentAnswer() {
         var event = {
             event: "parsons",
             div_id: this.divid,
@@ -1818,7 +1762,7 @@ export default class Parsons extends RunestoneBase {
             event.adaptive = adaptiveHash;
             act = act + "|" + adaptiveHash;
         }
-        if (answer == "correct") {
+        if (this.answer == "correct") {
             act = "correct|" + act;
             event.correct = "T";
         } else {
@@ -1910,8 +1854,9 @@ export default class Parsons extends RunestoneBase {
     adaptBlocks(input) {
         var blocks = [];
         var distractors = [];
+        var block;
         for (var i = 0; i < input.length; i++) {
-            var block = input[i];
+            block = input[i];
             if (block.isDistractor()) {
                 distractors.push(block);
             } else {
@@ -1994,7 +1939,7 @@ export default class Parsons extends RunestoneBase {
         }
         //var output = input;
         if (giveIndentation) {
-            for (var i = 0; i < output.length; i++) {
+            for (let i = 0; i < output.length; i++) {
                 output[i].addIndent();
             }
             this.indent = 0;
@@ -2009,12 +1954,12 @@ export default class Parsons extends RunestoneBase {
                 }
             }
         }
-        for (i = 0; i < nBlocksToCombine; i++) {
+        for (let i = 0; i < nBlocksToCombine; i++) {
             // combine one set of blocks
             var best = -10;
             var combineIndex = -10;
             for (j = 0; j < solution.length - 1; j++) {
-                var block = solution[j];
+                block = solution[j];
                 var next = solution[j + 1];
                 var rating = 10 - block.lines.length - next.lines.length;
                 var blockIndent = block.minimumLineIndent();
@@ -2244,7 +2189,7 @@ export default class Parsons extends RunestoneBase {
         }
         var block = solutionLines[0].block();
         solutionBlocks.push(block);
-        for (var i = 1; i < solutionLines.length; i++) {
+        for (let i = 1; i < solutionLines.length; i++) {
             var nextBlock = solutionLines[i].block();
             if (block !== nextBlock) {
                 block = nextBlock;
@@ -2334,15 +2279,18 @@ export default class Parsons extends RunestoneBase {
     ==== ACTION ============================================================
     ===================================================================== */
     // The "Check Me" button was pressed.
-    checkMe() {
+    checkCurrentAnswer() {
         if (!this.hasSolved) {
             this.checkCount++;
             this.clearFeedback();
             if (this.adaptiveId == undefined) {
                 this.adaptiveId = this.storageId;
             }
-            var grade = this.grader.grade();
-            if (grade == "correct") {
+            // TODO - rendering feedback is buried in the grader.grade method.
+            // to disable feedback set this.grader.showfeedback boolean
+            this.grader.showfeedback = false;
+            this.grade = this.grader.grade();
+            if (this.grade == "correct") {
                 this.hasSolved = true;
                 localStorage.setItem(this.adaptiveId + "Solved", true);
                 this.recentAttempts = this.checkCount;
@@ -2356,10 +2304,9 @@ export default class Parsons extends RunestoneBase {
                 this.adaptiveId + this.divid + "Count",
                 this.checkCount
             );
-            this.logAnswer(grade);
             this.setLocalStorage();
             // if not solved and not too short then check if should provide help
-            if (!this.hasSolved && grade !== "incorrectTooShort") {
+            if (!this.hasSolved && this.grade !== "incorrectTooShort") {
                 if (this.canHelp) {
                     // only count the attempt if the answer is different (to prevent gaming)
                     var answerHash = this.answerHash();
@@ -2369,21 +2316,102 @@ export default class Parsons extends RunestoneBase {
                     }
                     // if time to offer help
                     if (this.numDistinct == 3 && !this.gotHelp) {
-                        // activate the help button and wiggle it
-                        //this.helpButton.disabled = false;
-                        //$(this.helpButton).css("position","relative");
-                        //for (var x = 1; x <= 3; x++) {
-                        //	$(this.helpButton)
-                        //		.animate({ left : -5 }, 60)
-                        //		.animate({ left : 5 }, 120)
-                        //		.animate({ left : 0 }, 60);
                         alert($.i18n("msg_parson_help_info"));
-                        //} // end for
                     } // end if
                 } // end if can help
             } // end if not solved
         } // end outer if not solved
     }
+
+    renderFeedback() {
+        this.grader.showfeedback = true;
+        this.grade = this.grader.graderState;
+        var feedbackArea;
+        var answerArea = $(this.answerArea);
+
+        if (this.showfeedback === true) {
+            feedbackArea = $(this.messageDiv);
+        } else {
+            feedbackArea = $("#doesnotexist");
+        }
+
+        if (this.grade === "correct") {
+            answerArea.addClass("correct");
+            feedbackArea.fadeIn(100);
+            feedbackArea.attr("class", "alert alert-info");
+            if (this.checkCount > 1) {
+                feedbackArea.html(
+                    $.i18n("msg_parson_correct", this.checkCount)
+                );
+            } else {
+                feedbackArea.html($.i18n("msg_parson_correct_first_try"));
+            }
+        }
+
+        if (this.grade === "incorrectTooShort") {
+            // too little code
+            answerArea.addClass("incorrect");
+            feedbackArea.fadeIn(500);
+            feedbackArea.attr("class", "alert alert-danger");
+            feedbackArea.html($.i18n("msg_parson_too_short"));
+        }
+
+        if (this.grade === "incorrectIndent") {
+            var incorrectBlocks = [];
+            for (let i = 0; i < this.grader.indentLeft.length; i++) {
+                block = this.grader.indentLeft[i].block();
+                if (incorrectBlocks.indexOf(block) == -1) {
+                    incorrectBlocks.push(block);
+                    $(block.view).addClass("indentLeft");
+                }
+            }
+            for (let i = 0; i < this.grader.indentRight.length; i++) {
+                block = this.grader.indentRight[i].block();
+                if (incorrectBlocks.indexOf(block) == -1) {
+                    incorrectBlocks.push(block);
+                    $(block.view).addClass("indentRight");
+                }
+            }
+            feedbackArea.fadeIn(500);
+            feedbackArea.attr("class", "alert alert-danger");
+            if (incorrectBlocks.length == 1) {
+                feedbackArea.html($.i18n("msg_parson_wrong_indent"));
+            } else {
+                feedbackArea.html($.i18n("msg_parson_wrong_indents"));
+            }
+        }
+
+        if (this.grade === "incorrectMoveBlocks") {
+            var answerBlocks = this.answerBlocks();
+            var inSolution = [];
+            var inSolutionIndexes = [];
+            var notInSolution = [];
+            for (let i = 0; i < answerBlocks.length; i++) {
+                var block = answerBlocks[i];
+                var index = this.solution.indexOf(block.lines[0]);
+                if (index == -1) {
+                    notInSolution.push(block);
+                } else {
+                    inSolution.push(block);
+                    inSolutionIndexes.push(index);
+                }
+            }
+            var lisIndexes = this.grader.inverseLISIndices(inSolutionIndexes);
+            for (let i = 0; i < lisIndexes.length; i++) {
+                notInSolution.push(inSolution[lisIndexes[i]]);
+            }
+            answerArea.addClass("incorrect");
+            feedbackArea.fadeIn(500);
+            feedbackArea.attr("class", "alert alert-danger");
+            if (this.showfeedback === true) {
+                for (let i = 0; i < notInSolution.length; i++) {
+                    $(notInSolution[i].view).addClass("incorrectPosition");
+                }
+            }
+            feedbackArea.html($.i18n("msg_parson_wrong_order"));
+        }
+    }
+
     /* =====================================================================
     ==== ADAPTIVE ==========================================================
     ===================================================================== */
@@ -2629,7 +2657,7 @@ export default class Parsons extends RunestoneBase {
                 );
             }
         }
-        for (var i = 0; i < this.pairedDivs.length; i++) {
+        for (let i = 0; i < this.pairedDivs.length; i++) {
             $(this.pairedDivs[i]).animate(
                 {
                     width: blockWidth + 34,
@@ -3040,7 +3068,7 @@ export default class Parsons extends RunestoneBase {
         $(this.messageDiv).hide();
     }
     // Disable the interface
-    disable() {
+    disableInteraction() {
         // Disable blocks
         if (this.blocks !== undefined) {
             for (var i = 0; i < this.blocks.length; i++) {
@@ -3345,7 +3373,7 @@ export default class Parsons extends RunestoneBase {
                     });
                 }
             } else {
-                for (var i = 0; i < blocks.length; i++) {
+                for (let i = 0; i < blocks.length; i++) {
                     block = blocks[i];
                     indent = block.indent * this.options.pixelsPerIndent;
                     $(block.view).css({
@@ -3408,12 +3436,12 @@ export default class Parsons extends RunestoneBase {
         var binCount = 0;
         var binChildren = 0;
         var blocksNotInBins = 0;
-        for (var i = 0; i < blocks.length; i++) {
+        for (let i = 0; i < blocks.length; i++) {
             if (blocks[i].pairedBin() == -1) {
                 blocksNotInBins++;
             }
         }
-        for (var i = 0; i < blocks.length; i++) {
+        for (let i = 0; i < blocks.length; i++) {
             var currentBin = blocks[i].pairedBin();
             if (currentBin == -1 || currentBin != bin) {
                 bin = currentBin;
@@ -3451,7 +3479,7 @@ export default class Parsons extends RunestoneBase {
         this.clearFeedback();
         var scrollTop = document.body.scrollTop;
         var block;
-        for (var i = 0; i < this.blocks.length; i++) {
+        for (let i = 0; i < this.blocks.length; i++) {
             block = this.blocks[i];
             for (var j = 0; j < block.lines.length; j++) {
                 var children = $(block.lines[j].view).find(".block-label");
@@ -3464,7 +3492,7 @@ export default class Parsons extends RunestoneBase {
         }
         delete this.blocks;
         this.blockIndex = 0;
-        for (var i = 0; i < this.pairedDivs.length; i++) {
+        for (let i = 0; i < this.pairedDivs.length; i++) {
             $(this.pairedDivs[i]).detach();
         }
         $(this.sourceArea).attr("style", "");

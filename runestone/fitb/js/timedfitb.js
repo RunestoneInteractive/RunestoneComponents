@@ -41,13 +41,6 @@ export default class TimedFITB extends FITB {
         }
         this.feedBackDiv.style.display = "none";
     }
-    processTimedSubmission(logFlag) {
-        // Disable input, then evaluate component
-        for (var i = 0; i < this.blankArray.length; i++) {
-            this.blankArray[i].disabled = true;
-        }
-        this.startEvaluation(logFlag);
-    }
 
     reinitializeListeners() {
         for (let blank of this.blankArray) {

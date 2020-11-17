@@ -99,7 +99,9 @@ export default class ClickableArea extends RunestoneBase {
             type: "button",
         });
         this.submitButton.onclick = function () {
-            this.clickableEval(true);
+            this.checkCurrentAnswer();
+            this.logCurrentAnswer();
+            this.renderFeedback();
         }.bind(this);
         this.containerDiv.appendChild(this.submitButton);
     }
@@ -371,7 +373,7 @@ export default class ClickableArea extends RunestoneBase {
     /*======================================
     == Evaluation and displaying feedback ==
     ======================================*/
-    clickableEval(logFlag) {
+    checkCurrentAnswer() {
         // Evaluation is done by iterating over the correct/incorrect arrays and checking by class
         this.correct = true;
         this.correctNum = 0;
@@ -385,30 +387,40 @@ export default class ClickableArea extends RunestoneBase {
         }
         for (let i = 0; i < this.incorrectArray.length; i++) {
             if ($(this.incorrectArray[i]).hasClass("clickable-clicked")) {
-                $(this.incorrectArray[i]).addClass("clickable-incorrect");
                 this.correct = false;
                 this.incorrectNum++;
             } else {
                 $(this.incorrectArray[i]).removeClass("clickable-incorrect");
             }
         }
+        this.percent =
+            (this.correctNum - this.incorrectNum) / this.correctArray.length;
         this.setLocalStorage({ correct: this.correct ? "T" : "F" });
-        if (logFlag) {
-            // Sometimes we don't want to log the answer; for example, on reload of timed exam questions
-            this.logBookEvent({
-                event: "clickableArea",
-                act: this.givenIndexArray.join(";"),
-                div_id: this.divid,
-                correct: this.correct ? "T" : "F",
-            });
-        }
-        this.renderFeedback();
     }
+
+    logCurrentAnswer() {
+        this.logBookEvent({
+            event: "clickableArea",
+            act: this.givenIndexArray.join(";"),
+            div_id: this.divid,
+            correct: this.correct ? "T" : "F",
+        });
+    }
+
     renderFeedback() {
         if (this.correct) {
             $(this.feedBackDiv).html("You are Correct!");
             $(this.feedBackDiv).attr("class", "alert alert-info");
         } else {
+            for (let i = 0; i < this.incorrectArray.length; i++) {
+                if ($(this.incorrectArray[i]).hasClass("clickable-clicked")) {
+                    $(this.incorrectArray[i]).addClass("clickable-incorrect");
+                } else {
+                    $(this.incorrectArray[i]).removeClass(
+                        "clickable-incorrect"
+                    );
+                }
+            }
             $(this.feedBackDiv).html(
                 "Incorrect. You clicked on " +
                     this.correctNum +
@@ -422,6 +434,15 @@ export default class ClickableArea extends RunestoneBase {
                     this.feedback
             );
             $(this.feedBackDiv).attr("class", "alert alert-danger");
+        }
+    }
+
+    disableInteraction() {
+        for (var i = 0; i < this.clickableArray.length; i++) {
+            $(this.clickableArray[i]).css("cursor", "initial");
+            this.clickableArray[i].onclick = function () {
+                return;
+            };
         }
     }
 }

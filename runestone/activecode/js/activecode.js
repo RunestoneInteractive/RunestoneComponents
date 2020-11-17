@@ -37,14 +37,13 @@ var chatcodesServer = "chat.codes";
 export class ActiveCode extends RunestoneBase {
     constructor(opts) {
         super(opts);
-        //RunestoneBase.prototype.init.apply(this, arguments);
         var suffStart;
-        var orig = opts.orig;
+        var orig = $(opts.orig).find("textarea")[0];
         this.useRunestoneServices = opts.useRunestoneServices;
         this.python3 = opts.python3;
         this.alignVertical = opts.vertical;
         this.origElem = orig;
-        this.divid = orig.id;
+        this.divid = opts.orig.id;
         this.code = $(orig).text() || "\n\n\n\n\n";
         this.language = $(orig).data("lang");
         this.timelimit = $(orig).data("timelimit");
@@ -52,6 +51,7 @@ export class ActiveCode extends RunestoneBase {
         this.hidecode = $(orig).data("hidecode");
         this.chatcodes = $(orig).data("chatcodes");
         this.hidehistory = $(orig).data("hidehistory");
+        this.question = $(opts.orig).find(`#${this.divid}_question`)[0];
         this.tie = $(orig).data("tie");
         this.dburl = $(orig).data("dburl");
         this.runButton = null;
@@ -182,6 +182,7 @@ export class ActiveCode extends RunestoneBase {
                         "border-bottom",
                         "2px solid #b43232"
                     );
+                    this.isAnswered = true;
                     this.logBookEvent({
                         event: "activecode",
                         act: "edit",
@@ -487,6 +488,13 @@ export class ActiveCode extends RunestoneBase {
             doc.on("op", updateChatCodesChannels);
         }
         $(this.outerDiv).prepend(ctrlDiv);
+        if (this.question) {
+            if ($(this.question).html().match(/^\s+$/)) {
+                $(this.question).remove();
+            } else {
+                $(this.outerDiv).prepend(this.question);
+            }
+        }
         this.controlDiv = ctrlDiv;
     }
     enableSaveLoad() {
@@ -1226,7 +1234,63 @@ Yet another is that there is an internal error.  The internal error message is: 
             saveCode: saveCode,
         };
     }
-    runProg(noUI, logResults) {
+
+    async checkCurrentAnswer() {
+        this.run_promise = this.runProg();
+    }
+
+    logCurrentAnswer() {
+        let self = this;
+        this.run_promise.then(function () {
+            self.logRunEvent({
+                div_id: self.divid,
+                code: self.editor.getValue(),
+                lang: self.language,
+                errinfo: self.errinfo,
+                to_save: self.saveCode,
+                prefix: self.pretext,
+                suffix: self.suffix,
+                partner: self.partner,
+            }); // Log the run event
+            // If unit tests were run there will be a unit_results
+            if (self.unit_results) {
+                self.logBookEvent({
+                    act: self.unit_results,
+                    div_id: self.divid,
+                    event: "unittest",
+                });
+            }
+        });
+    }
+
+    renderFeedback() {
+        // The python unit test code builds the table as it is running the tests
+        // In "normal" usage this is displayed immediately.
+        // However in exam mode we make a div which is offscreen
+        if (this.unit_results_divid.indexOf("_offscreen_") > 0) {
+            let urDivid = `${this.divid}_offscreen_unit_results`;
+            let unitFeedback = document.getElementById(urDivid);
+            let tmp = document.body.removeChild(unitFeedback);
+            if ($(this.containerDiv).find(`#${urDivid}`).length > 0) {
+                tmp = $(this.containerDiv).find(`#${urDivid}`)[0];
+            } else {
+                this.containerDiv.appendChild(tmp);
+            }
+            $(tmp).show();
+        }
+    }
+
+    /* runProg has several async elements to it.
+     * 1. Skulpt runs the python program asynchronously
+     * 2. The history is restored asynchronously
+     * 3. Logging is asynchronous
+     *
+     * This method returns the skulpt Promise and so the promise will resolve when skulpt is finished.
+     * when finished this.unit_results will contain the results of any unit tests that have been run.
+     * The table of results is constructed and added to the DOM by the python unittest.gui module in skulpt.
+     *
+     */
+    async runProg(noUI, logResults) {
         if (typeof logResults === "undefined") {
             logResults = true;
         }
@@ -1235,8 +1299,8 @@ Yet another is that there is an internal error.  The internal error message is: 
         }
         this.isAnswered = true;
         var prog = this.buildProg(true);
-        var saveCode = "True";
-        var scrubber_dfd, history_dfd, skulpt_run_dfd;
+        this.saveCode = "True";
+        var scrubber_dfd, history_dfd;
         $(this.output).text("");
         $(this.eContainer).remove();
         if (this.codelens) {
@@ -1278,16 +1342,16 @@ Yet another is that there is an internal error.  The internal error message is: 
             var __ret = this.manage_scrubber(
                 scrubber_dfd,
                 history_dfd,
-                saveCode
+                this.saveCode
             );
             history_dfd = __ret.history_dfd;
-            saveCode = __ret.saveCode;
+            this.saveCode = __ret.saveCode;
             promise_list.push(history_dfd);
         }
-        skulpt_run_dfd = Sk.misceval.asyncToPromise(function () {
+        this.run_promise = Sk.misceval.asyncToPromise(function () {
             return Sk.importMainWithBody("<stdin>", false, prog, true);
         });
-        promise_list.push(skulpt_run_dfd);
+        promise_list.push(this.run_promise);
         // Make sure that the history scrubber is fully initialized AND the code has been run
         // before we start logging stuff.
         var self = this;
@@ -1304,16 +1368,10 @@ Yet another is that there is an internal error.  The internal error message is: 
                     $(this.historyScrubber).slider("enable");
                 }
                 this.errLastRun = false;
-                this.logRunEvent({
-                    div_id: this.divid,
-                    code: this.editor.getValue(),
-                    lang: this.language,
-                    errinfo: "success",
-                    to_save: saveCode,
-                    prefix: this.pretext,
-                    suffix: this.suffix,
-                    partner: this.partner,
-                }); // Log the run event
+                this.errinfo = "success";
+                if (logResults) {
+                    this.logCurrentAnswer();
+                }
             }.bind(this),
             function (err) {
                 if (typeof history_dfd !== "undefined") {
@@ -1324,16 +1382,8 @@ Yet another is that there is an internal error.  The internal error message is: 
                             self.slideit.bind(self)
                         );
                         $(self.historyScrubber).slider("enable");
-                        self.logRunEvent({
-                            div_id: self.divid,
-                            code: self.editor.getValue(),
-                            lang: self.langauge,
-                            errinfo: err.toString(),
-                            to_save: saveCode,
-                            prefix: self.pretext,
-                            suffix: self.suffix,
-                            partner: self.partner,
-                        }); // Log the run event
+                        self.errinfo = err.toString();
+                        self.logCurrentAnswer(); // todo pull this out.
                         self.addErrorMessage(err);
                     });
                 }
@@ -1344,6 +1394,13 @@ Yet another is that there is an internal error.  The internal error message is: 
                 e.redrawConnectors();
             });
         }
+
+        return this.run_promise;
+    }
+
+    disableInteraction() {
+        $(this.runButton).hide();
+        $(this.codeDiv).addClass("ac-disabled");
     }
 }
 

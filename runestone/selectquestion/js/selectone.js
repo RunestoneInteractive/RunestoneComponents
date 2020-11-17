@@ -46,7 +46,7 @@ export default class SelectOne extends RunestoneBase {
      * mess things up.
      * @return {Promise} Will resolve after component from DB is reified
      */
-    initialize() {
+    async initialize() {
         let self = this;
         let data = { selector_id: this.selector_id };
         if (this.questions) {
@@ -101,12 +101,10 @@ export default class SelectOne extends RunestoneBase {
                             for (let component of opts.rqa) {
                                 if (component.question == self) {
                                     component.question = res.question;
-                                    component.wrapper = res.wrapper;
                                     break;
                                 }
                             }
                             self.realComponent = res.question;
-                            self.wrapper = res.wrapper;
                             self.containerDiv = res.question.containerDiv;
                             self.realComponent.selectorId = selectorId;
                         } else {
@@ -120,6 +118,7 @@ export default class SelectOne extends RunestoneBase {
                                 }
                             );
                         }
+                        console.log("resolving selectquestion");
                         resolve("done");
                     }
                 );

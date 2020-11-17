@@ -79,9 +79,11 @@ export default class Timed extends RunestoneBase {
         this.getNewChildren();
         // One small step to eliminate students from doing view source
         // this won't stop anyone with determination but may prevent casual peeking
-        document.body.oncontextmenu = function () {
-            return false;
-        };
+        if (!eBookConfig.enableDebug) {
+            document.body.oncontextmenu = function () {
+                return false;
+            };
+        }
         this.checkAssessmentStatus().then(
             function () {
                 this.renderTimedAssess();
@@ -136,27 +138,22 @@ export default class Timed extends RunestoneBase {
     renderTimedAssess() {
         // create renderedQuestionArray returns a promise
         //
-        let p = this.createRenderedQuestionArray();
-        p.then(
-            function () {
-                if (this.random) {
-                    this.randomizeRQA();
-                }
-                this.renderContainer();
-                this.renderTimer();
-                this.renderControlButtons();
-                this.assessDiv.appendChild(this.timedDiv); // This can't be appended in renderContainer because then it renders above the timer and control buttons.
-                if (this.renderedQuestionArray.length > 1)
-                    this.renderNavControls();
-                this.renderSubmitButton();
-                this.renderFeedbackContainer();
-                this.useRunestoneServices = eBookConfig.useRunestoneServices;
-                // Replace intermediate HTML with rendered HTML
-                $(this.origElem).replaceWith(this.assessDiv);
-                // check if already taken and if so show results
-                this.tookTimedExam(); // rename to renderPossibleResults
-            }.bind(this)
-        );
+        this.createRenderedQuestionArray();
+        if (this.random) {
+            this.randomizeRQA();
+        }
+        this.renderContainer();
+        this.renderTimer();
+        this.renderControlButtons();
+        this.assessDiv.appendChild(this.timedDiv); // This can't be appended in renderContainer because then it renders above the timer and control buttons.
+        if (this.renderedQuestionArray.length > 1) this.renderNavControls();
+        this.renderSubmitButton();
+        this.renderFeedbackContainer();
+        this.useRunestoneServices = eBookConfig.useRunestoneServices;
+        // Replace intermediate HTML with rendered HTML
+        $(this.origElem).replaceWith(this.assessDiv);
+        // check if already taken and if so show results
+        this.tookTimedExam(); // rename to renderPossibleResults
     }
 
     renderContainer() {
@@ -294,6 +291,7 @@ export default class Timed extends RunestoneBase {
         this.navBtnListeners();
     }
 
+    // set up events for navigation
     navBtnListeners() {
         // Next and Prev Listener
         this.pagNavList.addEventListener(
@@ -308,7 +306,16 @@ export default class Timed extends RunestoneBase {
                             this.currentQuestionIndex +
                             ")"
                     ).addClass("answered");
+                    this.renderedQuestionArray[
+                        this.currentQuestionIndex
+                    ].question.checkCurrentAnswer();
+                    if (!this.done) {
+                        this.renderedQuestionArray[
+                            this.currentQuestionIndex
+                        ].question.logCurrentAnswer();
+                    }
                 }
+                // submit the current question here
                 var target = $(event.target).text();
                 if (target.match(/Next/)) {
                     if ($(this.rightContainer).hasClass("disabled")) {
@@ -355,6 +362,14 @@ export default class Timed extends RunestoneBase {
                             this.currentQuestionIndex +
                             ")"
                     ).addClass("answered");
+                    this.renderedQuestionArray[
+                        this.currentQuestionIndex
+                    ].question.checkCurrentAnswer();
+                    if (!this.done) {
+                        this.renderedQuestionArray[
+                            this.currentQuestionIndex
+                        ].question.logCurrentAnswer();
+                    }
                 }
                 for (var i = 0; i < this.qNumList.childNodes.length; i++) {
                     for (
@@ -367,6 +382,7 @@ export default class Timed extends RunestoneBase {
                         ).removeClass("active");
                     }
                 }
+
                 var target = $(event.target).text();
                 let oldIndex = this.currentQuestionIndex;
                 this.currentQuestionIndex = parseInt(target) - 1;
@@ -448,89 +464,35 @@ export default class Timed extends RunestoneBase {
     }
 
     createRenderedQuestionArray() {
-        // this finds all the assess questions in this timed assessment and calls their constructor method
+        // this finds all the assess questions in this timed assessment
+        // We need to make a list of all the questions up front so we can set up navigation
+        // but we do not want to render the questions until the student has navigated
         // Also adds them to this.renderedQuestionArray
+
         // todo:  This needs to be updated to account for the runestone div wrapper.
+
         // To accommodate the selectquestion type -- which is async! we need to wrap
         // all of this in a promise, so that we don't continue to render the timed
         // exam until all of the questions have been realized.
-        let retp = new Promise(
-            function (resolve, reject) {
-                var opts;
-                let pArray = [];
-                for (var i = 0; i < this.newChildren.length; i++) {
-                    var tmpChild = this.newChildren[i];
-                    opts = {
-                        orig: tmpChild,
-                        useRunestoneServices: eBookConfig.useRunestoneServices,
-                        timed: true,
-                        assessmentTaken: this.taken,
-                        timedWrapper: this,
-                    };
-                    if ($(tmpChild).children("[data-component]").length > 0) {
-                        tmpChild = $(tmpChild).children("[data-component]")[0];
-                        opts.orig = tmpChild;
-                    }
-                    if ($(tmpChild).is("[data-component=selectquestion]")) {
-                        // SelectOne is async and will replace itself in this array with
-                        // the actual selected question
-                        opts.rqa = this.renderedQuestionArray;
-                        let newq = new SelectOne(opts);
-                        this.renderedQuestionArray.push({
-                            question: newq,
-                        });
-                        pArray.push(newq.initialize());
-                    } else if ($(tmpChild).is("[data-component=activecode]")) {
-                        let lang = $(tmpChild).data("lang");
-                        this.renderedQuestionArray.push({
-                            wrapper: tmpChild.parentElement,
-                            question: ACFactory.createActiveCode(
-                                tmpChild,
-                                lang,
-                                opts
-                            ),
-                        });
-                    } else if ($(tmpChild).is("[data-component]")) {
-                        let componentKind = $(tmpChild).data("component");
-                        this.renderedQuestionArray.push({
-                            question: new window.component_factory[
-                                componentKind
-                            ](opts),
-                        });
-                    } else if ($(tmpChild).is("[data-childcomponent]")) {
-                        // this is for when a directive has a wrapper element that isn't actually part of the javascript object
-                        // for example, activecode has a wrapper div that contains the question for the element
-                        var child = $("#" + $(tmpChild).data("childcomponent"));
-                        if ($(child[0]).is("[data-component=activecode]")) {
-                            // create & insert new JS object back into wrapper div-- we're simulating the parsing that would happen outside of a timed exam
-                            opts.orig = child[0];
-                            let lang = $(child[0]).data("lang");
-                            var newAC = ACFactory.createActiveCode(
-                                child[0],
-                                lang,
-                                opts
-                            );
-                            $(child[0]).remove();
-                            var tmp = tmpChild.childNodes[0];
-                            $(tmp).after(newAC.containerDiv);
-                            this.renderedQuestionArray.push({
-                                wrapper: tmpChild,
-                                question: newAC,
-                            });
-                        }
-                    }
-                }
-                // when all promises are resolved
-                if (pArray.length === 0) {
-                    resolve("Done");
-                } else {
-                    Promise.all(pArray).then(function () {
-                        resolve("Done");
-                    });
-                }
-            }.bind(this)
-        );
-        return retp;
+        var opts;
+        for (var i = 0; i < this.newChildren.length; i++) {
+            var tmpChild = this.newChildren[i];
+            opts = {
+                state: "prepared",
+                orig: tmpChild,
+                question: {},
+                useRunestoneServices: eBookConfig.useRunestoneServices,
+                timed: true,
+                assessmentTaken: this.taken,
+            };
+            if ($(tmpChild).children("[data-component]").length > 0) {
+                tmpChild = $(tmpChild).children("[data-component]")[0];
+                opts.orig = tmpChild;
+            }
+            if ($(tmpChild).is("[data-component]")) {
+                this.renderedQuestionArray.push(opts);
+            }
+        }
     }
 
     randomizeRQA() {
@@ -551,33 +513,53 @@ export default class Timed extends RunestoneBase {
         }
     }
 
-    renderTimedQuestion() {
+    async renderTimedQuestion() {
         if (this.currentQuestionIndex >= this.renderedQuestionArray.length) {
             // sometimes the user clicks in the event area for the qNumList
             // But misses a number in that case the text is the concatenation
             // of all the numbers in the list!
             return;
         }
-        let currentWrapper = this.renderedQuestionArray[
-            this.currentQuestionIndex
-        ].wrapper;
-        var currentQuestion = this.renderedQuestionArray[
-            this.currentQuestionIndex
-        ].question;
+        // check the renderedQuestionArray to see if it has been rendered.
+        let opts = this.renderedQuestionArray[this.currentQuestionIndex];
+        let currentQuestion;
+        if (opts.state === "prepared" || opts.state === "forreview") {
+            let tmpChild = opts.orig;
+            if ($(tmpChild).is("[data-component=selectquestion]")) {
+                // SelectOne is async and will replace itself in this array with
+                // the actual selected question
+                opts.rqa = this.renderedQuestionArray;
+                let newq = new SelectOne(opts);
+                this.renderedQuestionArray[this.currentQuestionIndex] = {
+                    question: newq,
+                };
+                await newq.initialize();
+            } else if ($(tmpChild).is("[data-component]")) {
+                let componentKind = $(tmpChild).data("component");
+                this.renderedQuestionArray[this.currentQuestionIndex] = {
+                    question: window.component_factory[componentKind](opts),
+                };
+            }
+        }
+
+        currentQuestion = this.renderedQuestionArray[this.currentQuestionIndex]
+            .question;
+        if (opts.state === "forreview") {
+            currentQuestion.checkCurrentAnswer();
+            currentQuestion.renderFeedback();
+            currentQuestion.disableInteraction();
+        }
+
         if (!this.visited.includes(this.currentQuestionIndex)) {
             this.visited.push(this.currentQuestionIndex);
             if (this.visited.length === this.renderedQuestionArray.length) {
                 $(this.finishButton).show();
             }
         }
-        // if the question is actually inside a wrapper (for example, activecode), then we want to display the wrapper, but evaluate the actual question object
-        if (currentWrapper) {
-            $(this.switchDiv).replaceWith(currentWrapper);
-            this.switchDiv = currentWrapper;
-        } else {
-            $(this.switchDiv).replaceWith(currentQuestion.containerDiv);
-            this.switchDiv = currentQuestion.containerDiv;
-        }
+
+        $(this.switchDiv).replaceWith(currentQuestion.containerDiv);
+        this.switchDiv = currentQuestion.containerDiv;
+
         // If the timed component has listeners, those might need to be reinitialized
         // This flag will only be set in the elements that need it--it will be undefined in the others and thus evaluate to false
         if (currentQuestion.needsReinitialization) {
@@ -598,7 +580,7 @@ export default class Timed extends RunestoneBase {
         // questions and their state of correctness.
         if (this.showResults && this.showFeedback) {
             $(this.timedDiv).show();
-            this.submitTimedProblems(false); // do not log these results
+            this.restoreAnsweredQuestions(); // do not log these results
         } else {
             $(this.pauseBtn).hide();
             $(this.timerContainer).hide();
@@ -792,9 +774,7 @@ export default class Timed extends RunestoneBase {
         this.running = 0;
         this.done = 1;
         this.taken = 1;
-        this.submitTimedProblems(true); // log results
-        // todo call the autograder to record the score for this student
-        // endpoint is assignments/student_autograde
+        this.finalizeProblems(true); // log results
         this.checkScore();
         this.displayScore();
         this.storeScore();
@@ -817,20 +797,42 @@ export default class Timed extends RunestoneBase {
                     if (retdata.success == false) {
                         console.log(retdata.message);
                     } else {
-                        console.log("Autgrader completed");
+                        console.log("Autograder completed");
                     }
                 },
             });
         }, 2000);
     }
 
-    submitTimedProblems(logFlag) {
+    finalizeProblems(logFlag) {
+        // Because we have submitted each question as we navigate we only need to
+        // send the final version of the question the student is on when they press the
+        // finish exam button.
+
+        var currentQuestion = this.renderedQuestionArray[
+            this.currentQuestionIndex
+        ].question;
+        currentQuestion.checkCurrentAnswer();
+        currentQuestion.logCurrentAnswer();
+        currentQuestion.renderFeedback();
+
         for (var i = 0; i < this.renderedQuestionArray.length; i++) {
-            var currentQuestion = this.renderedQuestionArray[i].question;
-            currentQuestion.processTimedSubmission(logFlag);
+            var currentQuestion = this.renderedQuestionArray[i];
+            // set the state to forreview so we know that feedback may be appropriate
+            currentQuestion.state = "forreview";
         }
+
         if (!this.showFeedback) {
             this.hideTimedFeedback();
+        }
+    }
+
+    restoreAnsweredQuestions() {
+        for (var i = 0; i < this.renderedQuestionArray.length; i++) {
+            var currentQuestion = this.renderedQuestionArray[i];
+            if (currentQuestion.state === "prepared") {
+                currentQuestion.state = "forreview";
+            }
         }
     }
 

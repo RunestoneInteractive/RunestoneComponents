@@ -158,7 +158,7 @@ export default class FITB extends RunestoneBase {
                 typeof this.correct !== "undefined" &&
                 typeof this.isCorrectArray !== "undefined"
             ) {
-                this.renderFITBFeedback();
+                this.renderFeedback();
             }
         } else {
             this.startEvaluation(false);
@@ -191,11 +191,8 @@ export default class FITB extends RunestoneBase {
         let key = this.localStorageKey();
         localStorage.setItem(key, JSON.stringify(data));
     }
-    /*==============================
-    === Evaluation of answer and ===
-    ===     display feedback     ===
-    ==============================*/
-    startEvaluation(logFlag) {
+
+    checkCurrentAnswer() {
         // Start of the evaulation chain
         this.isCorrectArray = [];
         this.displayFeed = [];
@@ -205,26 +202,50 @@ export default class FITB extends RunestoneBase {
         // Grade locally if we can't ask the server to grade.
         if (this.feedbackArray) {
             this.evaluateAnswers();
-            this.renderFITBFeedback();
+        }
+    }
+
+    logCurrentAnswer() {
+        let answer = JSON.stringify(this.given_arr);
+        // Save the answer locally.
+        this.setLocalStorage({
+            answer: answer,
+            timestamp: new Date(),
+        });
+        var that = this;
+        var ret = this.logBookEvent({
+            event: "fillb",
+            act: answer,
+            answer: answer,
+            correct: this.correct ? "T" : "F",
+            div_id: this.divid,
+        });
+        return ret;
+    }
+
+    /*==============================
+    === Evaluation of answer and ===
+    ===     display feedback     ===
+    ==============================*/
+    /*
+     * keeping this function for backward compatiblitiy
+     * going forward we should be using
+     * checkCurrentAnswer()
+     * logCurrentAnswer()
+     * renderFeedback()
+     * independently.
+     */
+    startEvaluation(logFlag) {
+        this.checkCurrentAnswer();
+        if (this.feedbackArray) {
+            this.renderFeedback();
         }
         if (logFlag) {
             // Sometimes we don't want to log the answer--for example, when timed exam questions are re-loaded
-            let answer = JSON.stringify(this.given_arr);
-            // Save the answer locally.
-            this.setLocalStorage({
-                answer: answer,
-                timestamp: new Date(),
-            });
-            var that = this;
-            var ret = this.logBookEvent({
-                event: "fillb",
-                act: answer,
-                answer: answer,
-                correct: this.correct ? "T" : "F",
-                div_id: this.divid,
-            });
+            let ret = this.logCurrentAnswer();
             if (!this.feedbackArray) {
                 // On success, update the feedback from the server's grade.
+                let that = this;
                 ret.done(function (data) {
                     that.setLocalStorage({
                         answer: answer,
@@ -233,7 +254,7 @@ export default class FITB extends RunestoneBase {
                     that.correct = data.correct;
                     that.displayFeed = data.displayFeed;
                     that.isCorrectArray = data.isCorrectArray;
-                    that.renderFITBFeedback();
+                    that.renderFeedback();
                 });
             }
         }
@@ -300,8 +321,11 @@ export default class FITB extends RunestoneBase {
                 }
             }
         }
+        this.percent =
+            this.isCorrectArray.filter(Boolean).length / this.blankArray.length;
     }
-    renderFITBFeedback() {
+
+    renderFeedback() {
         if (this.correct) {
             $(this.feedBackDiv).attr("class", "alert alert-info");
             for (let j = 0; j < this.blankArray.length; j++) {
@@ -337,6 +361,7 @@ export default class FITB extends RunestoneBase {
             MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
         }
     }
+
     /*==================================
     === Functions for compare button ===
     ==================================*/
@@ -389,6 +414,12 @@ export default class FITB extends RunestoneBase {
             "</div>";
         var el = $(html);
         el.modal();
+    }
+
+    disableInteraction() {
+        for (var i = 0; i < this.blankArray.length; i++) {
+            this.blankArray[i].disabled = true;
+        }
     }
 }
 

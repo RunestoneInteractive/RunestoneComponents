@@ -7,13 +7,13 @@ export default class SQLActiveCode extends ActiveCode {
     constructor(opts) {
         super(opts);
         //  fnprefix sets the path to load the sql-wasm.wasm file
+        var bookprefix;
         var fnprefix;
         if (eBookConfig.useRunestoneServices) {
-            fnprefix =
-                "/runestone/books/published/" +
-                eBookConfig.basecourse +
-                "/_static";
+            bookprefix = `${eBookConfig.app}/books/published/${eBookConfig.basecourse}`;
+            fnprefix = bookprefix + "/_static";
         } else {
+            bookprefix = "";
             fnprefix = "/_static";
         }
         this.config = {
@@ -23,12 +23,8 @@ export default class SQLActiveCode extends ActiveCode {
         initSqlJs(this.config).then(function (SQL) {
             // set up call to load database asynchronously if given
             if (self.dburl) {
-                if (!self.dburl.startsWith("http")) {
-                    self.dburl =
-                        window.location.protocol +
-                        "//" +
-                        window.location.host +
-                        self.dburl;
+                if (self.dburl.startsWith("/_static")) {
+                    self.dburl = `${bookprefix}${self.dburl}`;
                 }
                 $(self.runButton).attr("disabled", "disabled");
                 let buttonText = $(self.runButton).text();
@@ -76,7 +72,6 @@ export default class SQLActiveCode extends ActiveCode {
     }
     runProg() {
         var result_mess = "success";
-        var res;
         var result;
         var scrubber_dfd, history_dfd, saveCode;
         // Clear any old results
@@ -95,19 +90,67 @@ export default class SQLActiveCode extends ActiveCode {
             );
             return;
         }
+
+        let it = this.db.iterateStatements(query);
+        let results = [];
         try {
-            res = this.db.exec(query);
-        } catch (error) {
-            result_mess = error.toString();
-            $(this.output).text(error);
-            $(this.output).css("visibility", "visible");
-            $(this.outDiv).show();
+            for (let statement of it) {
+                let columns = statement.getColumnNames();
+                if (columns.length > 0) {
+                    // data! probably a SELECT
+                    let data = [];
+                    while (statement.step()) {
+                        data.push(statement.get());
+                    }
+                    results.push({
+                        status: "success",
+                        columns: columns,
+                        values: data,
+                        rowcount: data.length,
+                    });
+                } else {
+                    let nsql = statement.getNormalizedSQL();
+                    let prefix = nsql.substr(0, 6).toLowerCase();
+                    statement.step(); // execute the query
+                    // Try to detect INSERT/UPDATE/DELETE to give friendly feedback
+                    // on rows modified - unfortunately, this won't catch such queries
+                    // if they use CTEs.  There seems to be no reliable way of knowing
+                    // when a SQLite query actually modified data.
+                    if (
+                        prefix === "insert" ||
+                        prefix === "update" ||
+                        prefix === "delete"
+                    ) {
+                        results.push({
+                            status: "success",
+                            operation: prefix,
+                            rowcount: this.db.getRowsModified(),
+                        });
+                    } else {
+                        results.push({ status: "success" });
+                    }
+                }
+            }
+        } catch (e) {
+            results.push({
+                status: "failure",
+                message: e.toString(),
+                sql: it.getRemainingSQL(),
+            });
         }
+
+        if (results.length === 0) {
+            results.push({
+                status: "failure",
+                message: "No queries submitted.",
+            });
+        }
+
         this.logRunEvent({
             div_id: this.divid,
             code: this.editor.getValue(),
             lang: this.language,
-            errinfo: result_mess,
+            errinfo: results[results.length - 1].status,
             to_save: saveCode,
             prefix: this.pretext,
             suffix: this.suffix,
@@ -125,26 +168,64 @@ export default class SQLActiveCode extends ActiveCode {
             }
             $(this.historyScrubber).slider("enable");
         });
-        if (result_mess != "success") {
-            return;
-        }
-        // Create a nice table to show the result of the query
-        if (res[0].values.length > 100) {
-            $(this.output).text(
-                "Result set is longer than 100 rows limiting output to first 100"
-            );
-        }
+
         respDiv = document.createElement("div");
         respDiv.id = divid;
         this.outDiv.appendChild(respDiv);
         $(this.outDiv).show();
-        createTable(res[0], respDiv);
+        for (let r of results) {
+            let section = document.createElement("div");
+            section.setAttribute("class", "ac_sql_result");
+            respDiv.appendChild(section);
+            if (r.status === "success") {
+                if (r.columns) {
+                    let tableDiv = document.createElement("div");
+                    section.appendChild(tableDiv);
+                    let maxHeight = 350;
+                    if (results.length > 1) maxHeight = 200; // max height smaller if lots of results
+                    createTable(r, tableDiv, maxHeight);
+                    let messageBox = document.createElement("pre");
+                    let rmsg = r.rowcount !== 1 ? " rows " : " row ";
+                    let msg = "" + r.rowcount + rmsg + "returned";
+                    if (r.rowcount > 100) {
+                        msg = msg + " (only first 100 rows displayed)";
+                    }
+                    msg = msg + ".";
+                    messageBox.textContent = msg;
+                    messageBox.setAttribute("class", "ac_sql_result_success");
+                    section.appendChild(messageBox);
+                } else if (r.rowcount) {
+                    let messageBox = document.createElement("pre");
+                    let op = r.operation;
+                    op = op + (op.charAt(op.length - 1) === "e" ? "d." : "ed.");
+                    let rmsg = r.rowcount !== 1 ? " rows " : " row ";
+                    messageBox.textContent = "" + r.rowcount + rmsg + op;
+                    messageBox.setAttribute("class", "ac_sql_result_success");
+                    section.appendChild(messageBox);
+                } else {
+                    let messageBox = document.createElement("pre");
+                    messageBox.textContent = "Operation succeeded.";
+                    messageBox.setAttribute("class", "ac_sql_result_success");
+                    section.appendChild(messageBox);
+                }
+            } else {
+                let messageBox = document.createElement("pre");
+                messageBox.textContent = r.message;
+                messageBox.setAttribute("class", "ac_sql_result_failure");
+                section.appendChild(messageBox);
+            }
+        }
+
         // Now handle autograding
         if (this.suffix) {
-            result = this.autograde(res[0]);
+            result = this.autograde(results[results.length - 1]);
             $(this.output).text(result);
+            $(this.output).css("visibility", "visible");
+        } else {
+            $(this.output).css("visibility", "hidden");
         }
     }
+
     autograde(result_table) {
         var tests = this.suffix.split(/\n/);
         this.passed = 0;
@@ -221,18 +302,41 @@ export default class SQLActiveCode extends ActiveCode {
     }
 }
 
-function createTable(tableData, container) {
+function createTable(tableData, container, maxHeight) {
+    let data = tableData.values;
+    let trimRows = undefined;
+    if (data.length === 0) {
+        // kludge: no column headers will show up unless we do this
+        data = [tableData.columns.map((e) => null)];
+        trimRows = [0];
+    }
+
     var hot = new Handsontable(container, {
-        data: tableData.values,
+        data: data,
+        trimRows: trimRows,
+        width: "100%",
+        height: maxHeight,
+        autoRowSize: true,
+        autoColumnSize: { useHeaders: true },
         rowHeaders: false,
         colHeaders: tableData.columns,
-        height: 350,
-        width: "100%",
+        editor: false,
         maxRows: 100,
         filters: false,
         dropdownMenu: false,
         licenseKey: "non-commercial-and-evaluation",
     });
+
+    // calculate actual height and resize
+    let actualHeight = 40; // header height + small margin
+    if (tableData.values.length > 0) {
+        for (let i = 0; i < data.length; i++) {
+            actualHeight = actualHeight + hot.getRowHeight(i);
+            if (actualHeight > maxHeight) break;
+        }
+    }
+
+    hot.updateSettings({ height: actualHeight });
 
     return hot;
 }

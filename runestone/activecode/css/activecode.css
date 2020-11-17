@@ -86,6 +86,12 @@
     font-weight: normal;
 }
 
+.ac_question {
+    background-color: rgb(224, 236, 217);
+    padding-left: 10px;
+    padding-top: 10px;
+    margin: 5px;
+}
 
 .active_out {
     background-color: #dcdcdc;
@@ -114,4 +120,31 @@
 .ac-feedback {
     border: 1px solid black;
     padding: 3px;
+}
+
+.ac_sql_result {
+    background-color: lightgrey;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.ac_sql_result_success {
+    background-color: transparent;
+    color: green;
+    border: 0px;
+    padding: 0px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    min-height: 0px !important;
+}
+
+.ac_sql_result_failure {
+    background-color: transparent;
+    color: red;
+    border: 0px;
+    padding: 0px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    min-height: 0px !important;
 }
