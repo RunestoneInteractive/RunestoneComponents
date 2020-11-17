@@ -283,6 +283,7 @@ export default class LiveCode extends ActiveCode {
     processJobeResponse(result) {
         var logresult;
         var odiv = this.output;
+        this.parsedOutput = {};
         $(this.runButton).removeAttr("disabled");
         if (result.outcome === 15) {
             logresult = "success";
@@ -293,16 +294,16 @@ export default class LiveCode extends ActiveCode {
         this.errinfo = logresult;
         switch (result.outcome) {
             case 15: {
-                let parsedOutput = new JUnitTestParser(
+                this.parsedOutput = new JUnitTestParser(
                     result.stdout,
                     this.divid
                 );
-                $(odiv).html(parsedOutput.stdout);
+                $(odiv).html(this.parsedOutput.stdout);
                 if (this.suffix) {
-                    if (parsedOutput.pct === undefined) {
-                        parsedOutput.pct = parsedOutput.passed = parsedOutput.failed = 0;
+                    if (this.parsedOutput.pct === undefined) {
+                        this.parsedOutput.pct = this.parsedOutput.passed = this.parsedOutput.failed = 0;
                     }
-                    this.unit_results = `percent:${parsedOutput.pct}:passed:${parsedOutput.passed}:failed:${parsedOutput.failed}`;
+                    this.unit_results = `percent:${this.parsedOutput.pct}:passed:${this.parsedOutput.passed}:failed:${this.parsedOutput.failed}`;
                 }
                 break;
             }
@@ -339,7 +340,7 @@ export default class LiveCode extends ActiveCode {
         if (rdiv) {
             rdiv.remove();
         }
-        if (this.parsedOutput.table) {
+        if (this.parsedOutput && this.parsedOutput.table) {
             this.outDiv.appendChild(this.parsedOutput.table);
         }
         rdiv = document.getElementById(`${this.divid}_unit_results`);
