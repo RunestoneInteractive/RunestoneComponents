@@ -245,6 +245,7 @@ export default class FITB extends RunestoneBase {
             let ret = this.logCurrentAnswer();
             if (!this.feedbackArray) {
                 // On success, update the feedback from the server's grade.
+                let answer = JSON.stringify(this.given_arr);
                 let that = this;
                 ret.done(function (data) {
                     that.setLocalStorage({

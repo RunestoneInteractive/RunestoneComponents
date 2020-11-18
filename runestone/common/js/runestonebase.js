@@ -57,11 +57,10 @@ export default class RunestoneBase {
         }
     }
 
-    async logBookEvent(eventInfo) {
+    logBookEvent(eventInfo) {
         if (this.graderactive) {
             return;
         }
-        let post_return = Promise.resolve();
         eventInfo.course = eBookConfig.course;
         eventInfo.clientLoginStatus = eBookConfig.isLoggedIn;
         eventInfo.timezoneoffset = new Date().getTimezoneOffset() / 60;
@@ -69,7 +68,7 @@ export default class RunestoneBase {
             eventInfo.percent = this.percent;
         }
         if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
-            post_return = jQuery.post(
+            var post_return = jQuery.post(
                 eBookConfig.ajaxURL + "hsblog",
                 eventInfo,
                 function (jsondata) {
