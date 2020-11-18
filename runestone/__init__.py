@@ -11,6 +11,7 @@ from .datafile import DataFile
 from .disqus import DisqusDirective
 from .dragndrop import DragNDrop
 from .fitb import FillInTheBlank
+from .selectquestion import SelectQuestion
 from .matrixeq import MatrixEq
 from .meta import Meta
 from .parsons import ParsonsProblem
@@ -229,6 +230,7 @@ cmap = {
     "parsonsprob": ParsonsProblem,
     "poll": Poll,
     "reveal": RevealDirective,
+    "selectquestion": SelectQuestion,
     "shortanswer": JournalDirective,
     "showeval": ShowEval,
     "tabbed": TabbedStuffDirective,
