@@ -69,20 +69,16 @@ export default class RunestoneBase {
             eventInfo.percent = this.percent;
         }
         if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
-            post_return = jQuery.post(
-                eBookConfig.ajaxURL + "hsblog",
-                eventInfo,
-                function (jsondata) {
-                    if (jsondata.log == false) {
-                        alert(jsondata.message);
-                        location.href =
-                            eBookConfig.app +
-                            "/default/user/login?_next=" +
-                            location.pathname;
-                    }
-                },
-                "json"
-            );
+            let headers = new Headers({
+                "Content-type": "application/json; charset=utf-8",
+                Accept: "application/json",
+            });
+            let request = new Request(eBookConfig.ajaxURL + "hsblog", {
+                method: "POST",
+                headers: headers,
+                body: JSON.stringify(eventInfo),
+            });
+            post_return = fetch(request);
         }
         console.log("logging event " + JSON.stringify(eventInfo));
         if (

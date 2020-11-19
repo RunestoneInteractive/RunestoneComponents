@@ -205,14 +205,13 @@ export default class FITB extends RunestoneBase {
         }
     }
 
-    logCurrentAnswer() {
+    async logCurrentAnswer() {
         let answer = JSON.stringify(this.given_arr);
         // Save the answer locally.
         this.setLocalStorage({
             answer: answer,
             timestamp: new Date(),
         });
-        var that = this;
         var ret = this.logBookEvent({
             event: "fillb",
             act: answer,
@@ -235,27 +234,25 @@ export default class FITB extends RunestoneBase {
      * renderFeedback()
      * independently.
      */
-    startEvaluation(logFlag) {
+    async startEvaluation(logFlag) {
         this.checkCurrentAnswer();
         if (this.feedbackArray) {
             this.renderFeedback();
         }
         if (logFlag) {
             // Sometimes we don't want to log the answer--for example, when timed exam questions are re-loaded
-            let ret = this.logCurrentAnswer();
+            let ret = await this.logCurrentAnswer();
             if (!this.feedbackArray) {
                 // On success, update the feedback from the server's grade.
-                let that = this;
-                ret.done(function (data) {
-                    that.setLocalStorage({
-                        answer: answer,
-                        timestamp: data.timestamp,
-                    });
-                    that.correct = data.correct;
-                    that.displayFeed = data.displayFeed;
-                    that.isCorrectArray = data.isCorrectArray;
-                    that.renderFeedback();
+                let data = await ret.json();
+                this.setLocalStorage({
+                    answer: JSON.stringify(this.given_arr),
+                    timestamp: data.timestamp,
                 });
+                this.correct = data.correct;
+                this.displayFeed = data.displayFeed;
+                this.isCorrectArray = data.isCorrectArray;
+                this.renderFeedback();
             }
         }
         if (this.useRunestoneServices) {
