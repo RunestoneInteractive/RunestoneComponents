@@ -78,7 +78,10 @@ export default class RunestoneBase {
                 headers: headers,
                 body: JSON.stringify(eventInfo),
             });
-            post_return = fetch(request);
+            post_return = await fetch(request);
+            if (!post_return.ok) {
+                throw new Error("Failed to save the log entry");
+            }
         }
         console.log("logging event " + JSON.stringify(eventInfo));
         if (
@@ -98,35 +101,24 @@ export default class RunestoneBase {
         eventInfo.course = eBookConfig.course;
         eventInfo.clientLoginStatus = eBookConfig.isLoggedIn;
         eventInfo.timezoneoffset = new Date().getTimezoneOffset() / 60;
-        if (this.forceSave || !"to_save" in eventInfo) {
+        if (this.forceSave || "to_save" in eventInfo === false) {
             eventInfo.save_code = "True";
         }
         if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
-            post_promise = jQuery
-                .post(eBookConfig.ajaxURL + "runlog.json", eventInfo) // Log the run event
-                .done(
-                    function (data, status, whatever) {
-                        // data = JSON.parse(data);
-                        if (data.message) {
-                            alert(data.message);
-                            if (data.log == false) {
-                                location.href =
-                                    eBookConfig.app +
-                                    "/default/user/login?_next=" +
-                                    location.pathname;
-                            }
-                        }
-                        this.forceSave = false;
-                    }.bind(this)
-                )
-                .fail(
-                    function () {
-                        alert(
-                            "WARNING:  Your code was not saved!  Please Try again."
-                        );
-                        this.forceSave = true;
-                    }.bind(this)
-                );
+            let headers = new Headers({
+                "Content-type": "application/json; charset=utf-8",
+                Accept: "application/json",
+            });
+            let request = new Request(eBookConfig.ajaxURL + "runlog.json", {
+                method: "POST",
+                headers: headers,
+                body: JSON.stringify(eventInfo),
+            });
+            post_promise = await fetch(request);
+            post_promise = await fetch(request);
+            if (!post_promise.ok) {
+                throw new Error("Failed to log the run");
+            }
         }
         console.log("running " + JSON.stringify(eventInfo));
         if (
