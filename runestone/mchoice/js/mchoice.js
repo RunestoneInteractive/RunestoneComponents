@@ -1,4 +1,4 @@
-/*==========================================
+p; /*==========================================
 ========      Master mchoice.js     =========
 ============================================
 ===  This file contains the JS for the   ===
@@ -453,10 +453,8 @@ export default class MultipleChoice extends RunestoneBase {
         this.correct = numCorrect === numNeeded && numNeeded === numGiven;
         if (numGiven === numNeeded) {
             this.percent = numCorrect / numNeeded;
-        } else if (numGiven < numNeeded) {
-            this.percent = (numCorrect - (numNeeded - numGiven)) / numNeeded;
         } else {
-            this.percent = (numCorrect - (numGiven - numNeeded)) / numNeeded;
+            this.percent = numCorrect / Math.max(numGiven, numNeeded);
         }
     }
 

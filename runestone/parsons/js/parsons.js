@@ -88,7 +88,9 @@ class LineBasedGrader {
         var answerLines = problem.answerLines();
         var i;
         var state;
-        this.percentLines = answerLines.length / solutionLines.length;
+        this.percentLines =
+            Math.min(answerLines.length, solutionLines.length) /
+            Math.max(answerLines.length, solutionLines.length);
         if (answerLines.length < solutionLines.length) {
             state = "incorrectTooShort";
             this.correctLength = false;
@@ -1466,7 +1468,8 @@ export default class Parsons extends RunestoneBase {
                 // Increment Parsons area height based on number of lines of text in the current Parsons block - Vincent Qiu (September 2020)
                 var singleHeight = 40;
                 var additionalHeight = 20;
-                areaHeight += Math.ceil( // For future more accurate height display, this calculation should also be conditionally based on fontFamily
+                areaHeight += Math.ceil(
+                    // For future more accurate height display, this calculation should also be conditionally based on fontFamily
                     singleHeight +
                         (linesItem[linesIndex].children.length - 1) *
                             additionalHeight +
