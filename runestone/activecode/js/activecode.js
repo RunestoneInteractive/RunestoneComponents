@@ -91,6 +91,11 @@ export class ActiveCode extends RunestoneBase {
         if (this.includes !== undefined) {
             this.includes = this.includes.split(/\s+/);
         }
+        let prefixEnd = this.code.indexOf("^^^^");
+        if (prefixEnd > -1) {
+            this.prefix = this.code.substring(0, prefixEnd);
+            this.code = this.code.substring(prefixEnd + 5);
+        }
         suffStart = this.code.indexOf("====");
         if (suffStart > -1) {
             this.suffix = this.code.substring(suffStart + 5);
@@ -1171,6 +1176,9 @@ Yet another is that there is an internal error.  The internal error message is: 
         // assemble code from prefix, suffix, and editor for running.
         var pretext;
         var prog = this.editor.getValue() + "\n";
+        if (this.prefix) {
+            prog = this.prefix + prog;
+        }
         this.pretext = "";
         this.pretextLines = 0;
         this.progLines = prog.match(/\n/g).length + 1;

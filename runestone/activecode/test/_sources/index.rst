@@ -19,6 +19,19 @@ End of test1
    print("Hello World")
 
 
+.. activecode:: testprefixcode
+
+   This is a question that has some hidden prefix code.
+   ~~~~
+   for ch in "prefix":
+       print(ch)
+   hide = True
+   ^^^^
+   # Your code Here
+   print("My Code")
+   ====
+   if hide:
+      print("hidden code")
 
 
 .. datafile:: Shape.java

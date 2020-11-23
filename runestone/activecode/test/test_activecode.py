@@ -32,6 +32,32 @@ class ActiveCodeTests(RunestoneTestCase):
         output = t1.find_element_by_class_name("ac_output")
         self.assertEqual(output.text.strip(), "Hello World")
 
+    def test_hidden(self):
+        """
+        1. Get the outer div id of the activecode component
+        2. Find the run button using its class name
+        3. Run the example
+        4. Check the output from the ac_output element
+        :return:
+        """
+        self.driver.get(self.host + "/index.html")
+        wait = WebDriverWait(self.driver, 10)
+        try:
+            wait.until(EC.presence_of_element_located((By.ID, "testprefixcode")))
+        except:
+            text = self.driver.page_source
+            print(text[:300])
+        t1 = self.driver.find_element_by_id("testprefixcode")
+        self.assertIsNotNone(t1)
+        rb = t1.find_element_by_class_name("run-button")
+        self.assertIsNotNone(rb)
+        rb.click()
+        output = t1.find_element_by_class_name("ac_output")
+        self.assertIn("My Code", output.text.strip())
+        self.assertIn("hidden code", output.text.strip())
+        self.assertIn("i\nx", output.text.strip())
+    
+
     def test_history(self):
         """
         1. Get the outer div id of the activecode component
