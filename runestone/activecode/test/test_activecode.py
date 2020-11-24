@@ -76,11 +76,22 @@ class ActiveCodeTests(RunestoneTestCase):
         self.driver.execute_script(
             """window.edList['test1'].editor.setValue("print('GoodBye')")"""
         )
-        time.sleep(2)
         WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable((By.CLASS_NAME, "run-button"))
         )
-        rb.click()
+        try:
+            rb.click()
+        except ElementClickInterceptedException:
+            interceptor = self.driver.find_element_by_class_name("navbar-collapse")
+            driver.executed_script(
+                """
+            var el = arguments[0];
+            el.parentNode.removeChild(el);
+            """,
+                interceptor,
+            )
+            rb.click()
+
         output = t1.find_element_by_class_name("ac_output")
         self.assertEqual(output.text.strip(), "GoodBye")
         move = ActionChains(self.driver)
