@@ -2,6 +2,7 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import ElementClickInterceptedException
 import time
 from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
@@ -70,7 +71,20 @@ class ActiveCodeTests(RunestoneTestCase):
         self.assertIsNotNone(t1)
         rb = t1.find_element_by_class_name("run-button")
         self.assertIsNotNone(rb)
-        rb.click()
+        try:
+            rb.click()
+        except ElementClickInterceptedException:
+            # interceptor = self.driver.find_element_by_class_name("navbar-collapse")
+            # self.driver.execute_script(
+            #     """
+            # var el = arguments[0];
+            # el.parentNode.removeChild(el);
+            # """,
+            #     interceptor,
+            # )
+            window.scrollTo(0, 0);
+            rb.click()
+            
         ta = t1.find_element_by_class_name("cm-s-default")
         self.assertIsNotNone(ta)
         self.driver.execute_script(
@@ -83,7 +97,7 @@ class ActiveCodeTests(RunestoneTestCase):
             rb.click()
         except ElementClickInterceptedException:
             interceptor = self.driver.find_element_by_class_name("navbar-collapse")
-            driver.executed_script(
+            self.driver.executed_script(
                 """
             var el = arguments[0];
             el.parentNode.removeChild(el);
