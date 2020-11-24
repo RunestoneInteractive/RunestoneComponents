@@ -56,7 +56,6 @@ class ActiveCodeTests(RunestoneTestCase):
         self.assertIn("My Code", output.text.strip())
         self.assertIn("hidden code", output.text.strip())
         self.assertIn("i\nx", output.text.strip())
-    
 
     def test_history(self):
         """
@@ -77,6 +76,7 @@ class ActiveCodeTests(RunestoneTestCase):
         self.driver.execute_script(
             """window.edList['test1'].editor.setValue("print('GoodBye')")"""
         )
+        time.sleep(2)
         WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable((By.CLASS_NAME, "run-button"))
         )
