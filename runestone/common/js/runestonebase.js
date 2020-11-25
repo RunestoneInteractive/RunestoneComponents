@@ -55,6 +55,10 @@ export default class RunestoneBase {
                 this.question_label = $(opts.orig).data("question_label");
             }
         }
+        this.jsonHeaders = new Headers({
+            "Content-type": "application/json; charset=utf-8",
+            Accept: "application/json",
+        });
     }
 
     async logBookEvent(eventInfo) {
@@ -69,13 +73,9 @@ export default class RunestoneBase {
             eventInfo.percent = this.percent;
         }
         if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
-            let headers = new Headers({
-                "Content-type": "application/json; charset=utf-8",
-                Accept: "application/json",
-            });
             let request = new Request(eBookConfig.ajaxURL + "hsblog", {
                 method: "POST",
-                headers: headers,
+                headers: this.jsonHeaders,
                 body: JSON.stringify(eventInfo),
             });
             post_return = await fetch(request);
@@ -105,13 +105,9 @@ export default class RunestoneBase {
             eventInfo.save_code = "True";
         }
         if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
-            let headers = new Headers({
-                "Content-type": "application/json; charset=utf-8",
-                Accept: "application/json",
-            });
             let request = new Request(eBookConfig.ajaxURL + "runlog.json", {
                 method: "POST",
-                headers: headers,
+                headers: this.jsonHeaders,
                 body: JSON.stringify(eventInfo),
             });
             post_promise = await fetch(request);
