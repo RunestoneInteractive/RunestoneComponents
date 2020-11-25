@@ -111,7 +111,6 @@ export default class RunestoneBase {
                 body: JSON.stringify(eventInfo),
             });
             post_promise = await fetch(request);
-            post_promise = await fetch(request);
             if (!post_promise.ok) {
                 throw new Error("Failed to log the run");
             }

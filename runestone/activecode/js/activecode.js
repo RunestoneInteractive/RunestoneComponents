@@ -536,26 +536,25 @@ export class ActiveCode extends RunestoneBase {
     // add an initial load history button
     // if there is no edit then there is no append   to_save (True/False)
     async addHistoryScrubber(pos_last) {
-        var data = {
+        let deferred = Promise.resolve();
+        var reqData = {
             acid: this.divid,
         };
-        var deferred = jQuery.Deferred();
         if (this.sid !== undefined) {
-            data["sid"] = this.sid;
+            reqData["sid"] = this.sid;
         }
         console.log("before get hist");
-
         if (
             eBookConfig.practice_mode ||
             (this.isTimed && !this.assessmentTaken)
         ) {
             // If this is timed and already taken we should restore history info
-            helper();
+            this.renderScrubber();
         } else {
             let request = new Request(eBookConfig.ajaxURL + "gethist.json", {
                 method: "POST",
                 headers: this.jsonHeaders,
-                body: JSON.stringify(data),
+                body: JSON.stringify(reqData),
             });
             let response = await fetch(request);
             let data = await response.json();
@@ -567,12 +566,15 @@ export class ActiveCode extends RunestoneBase {
                     );
                 }
             }
-            helper();
+            deferred = new Promise((resolve, reject) => {
+                this.renderScrubber(pos_last);
+                resolve("done");
+            });
         }
         return deferred;
     }
 
-    helper() {
+    renderScrubber(pos_last) {
         console.log("making a new scrubber");
         var scrubberDiv = document.createElement("div");
         $(scrubberDiv).css("display", "inline-block");
@@ -635,7 +637,6 @@ export class ActiveCode extends RunestoneBase {
         this.histButton = null;
         this.historyScrubber = scrubber;
         $(scrubberDiv).insertAfter(this.runButton);
-        deferred.resolve();
     } // end definition of helper
 
     createOutput() {
@@ -657,7 +658,7 @@ export class ActiveCode extends RunestoneBase {
         $(this.graphics).on(
             "DOMNodeInserted",
             "canvas",
-            function (e) {
+            function () {
                 $(this.graphics).addClass("visible-ac-canvas");
             }.bind(this)
         );
