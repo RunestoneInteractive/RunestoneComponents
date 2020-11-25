@@ -220,6 +220,7 @@ export class ActiveCode extends RunestoneBase {
             $(this.codeDiv).css("display", "none");
         }
     }
+
     createControls() {
         var ctrlDiv = document.createElement("div");
         var butt;
@@ -240,267 +241,39 @@ export class ActiveCode extends RunestoneBase {
                 this.renderFeedback();
             }.bind(this)
         );
-
         $(butt).attr("type", "button");
+
         if (this.enabledownload || eBookConfig.downloadsEnabled) {
-            butt = document.createElement("button");
-            $(butt).text("Download");
-            $(butt).addClass("btn save-button");
-            ctrlDiv.appendChild(butt);
-            this.downloadButton = butt;
-            $(butt).click(this.downloadFile.bind(this, this.language));
-            $(butt).attr("type", "button");
+            this.addDownloadButton(ctrlDiv);
         }
         if (!this.hidecode && !this.hidehistory) {
-            butt = document.createElement("button");
-            $(butt).text($.i18n("msg_activecode_load_history"));
-            $(butt).addClass("btn btn-default");
-            $(butt).attr("type", "button");
-            ctrlDiv.appendChild(butt);
-            this.histButton = butt;
-            $(butt).click(this.addHistoryScrubber.bind(this));
-            if (this.graderactive) {
-                this.addHistoryScrubber(true);
-            }
+            this.addHistoryButton(ctrlDiv);
         }
         if ($(this.origElem).data("gradebutton") && !this.graderactive) {
-            butt = document.createElement("button");
-            $(butt).addClass("ac_opt btn btn-default");
-            $(butt).text($.i18n("msg_activecode_show_feedback"));
-            $(butt).css("margin-left", "10px");
-            $(butt).attr("type", "button");
-            this.gradeButton = butt;
-            ctrlDiv.appendChild(butt);
-            $(butt).click(this.createGradeSummary.bind(this));
+            this.addFeedbackButton(ctrlDiv);
         }
         // Show/Hide Code
         if (this.hidecode) {
-            $(this.runButton).attr("disabled", "disabled");
-            butt = document.createElement("button");
-            $(butt).addClass("ac_opt btn btn-default");
-            $(butt).text($.i18n("msg_activecode_show_code"));
-            $(butt).css("margin-left", "10px");
-            $(butt).attr("type", "button");
-            this.showHideButt = butt;
-            ctrlDiv.appendChild(butt);
-            $(butt).click(
-                function () {
-                    $(this.codeDiv).toggle();
-                    if (this.historyScrubber == null) {
-                        this.addHistoryScrubber(true);
-                    } else {
-                        $(this.historyScrubber.parentElement).toggle();
-                    }
-                    if (
-                        $(this.showHideButt).text() ==
-                        $.i18n("msg_activecode_show_code")
-                    ) {
-                        $(this.showHideButt).text(
-                            $.i18n("msg_activecode_hide_code")
-                        );
-                    } else {
-                        $(this.showHideButt).text(
-                            $.i18n("msg_activecode_show_code")
-                        );
-                    }
-                    if ($(this.runButton).attr("disabled")) {
-                        $(this.runButton).removeAttr("disabled");
-                    } else {
-                        $(this.runButton).attr("disabled", "disabled");
-                    }
-                }.bind(this)
-            );
+            this.enableHideShow(ctrlDiv);
         }
         // CodeLens
         if ($(this.origElem).data("codelens") && !this.graderactive) {
-            butt = document.createElement("button");
-            $(butt).addClass("ac_opt btn btn-default");
-            $(butt).text($.i18n("msg_activecode_show_codelens"));
-            $(butt).css("margin-left", "10px");
-            this.clButton = butt;
-            ctrlDiv.appendChild(butt);
-            $(butt).click(this.showCodelens.bind(this));
+            this.enableCodeLens(ctrlDiv);
         }
-        // TIE
-        if (this.tie) {
-            butt = document.createElement("button");
-            $(butt).addClass("ac_opt btn btn-default");
-            $(butt).text("Open Code Coach");
-            this.tieButt = butt;
-            ctrlDiv.appendChild(butt);
-            $(butt).click(this.showTIE.bind(this));
-        }
-        // CodeCoach
-        // bnm - disable code coach until it is revamped  2017-7-22
-        // if (this.useRunestoneServices && $(this.origElem).data("coach")) {
-        //     butt = document.createElement("button");
-        //     $(butt).addClass("ac_opt btn btn-default");
-        //     $(butt).text("Code Coach");
-        //     $(butt).css("margin-left", "10px");
-        //     this.coachButton = butt;
-        //     ctrlDiv.appendChild(butt);
-        //     $(butt).click(this.showCodeCoach.bind(this));
-        // }
         // Audio Tour
         if ($(this.origElem).data("audio")) {
-            butt = document.createElement("button");
-            $(butt).addClass("ac_opt btn btn-default");
-            $(butt).text($.i18n("msg_activecode_audio_tour"));
-            $(butt).css("margin-left", "10px");
-            this.atButton = butt;
-            ctrlDiv.appendChild(butt);
-            $(butt).click(
-                function () {
-                    new AudioTour(
-                        this.divid,
-                        this.code,
-                        1,
-                        $(this.origElem).data("audio")
-                    );
-                }.bind(this)
-            );
+            this.enableAudioTours(ctrlDiv);
         }
         if (eBookConfig.isInstructor) {
-            let butt = document.createElement("button");
-            $(butt).addClass("btn btn-info");
-            $(butt).text("Share Code");
-            $(butt).css("margin-left", "10px");
-            this.shareButt = butt;
-            ctrlDiv.appendChild(butt);
-            $(butt).click(
-                function () {
-                    if (
-                        !confirm(
-                            "You are about to share this code with ALL of your students.  Are you sure you want to continue?"
-                        )
-                    ) {
-                        return;
-                    }
-                    let data = {
-                        divid: this.divid,
-                        code: this.editor.getValue(),
-                        lang: this.language,
-                    };
-                    $.post(
-                        "/runestone/ajax/broadcast_code.json",
-                        data,
-                        function (status) {
-                            if (status.mess === "success") {
-                                alert(
-                                    `Shared Code with ${status.share_count} students`
-                                );
-                            } else {
-                                alert("Sharing Failed");
-                            }
-                        },
-                        "json"
-                    );
-                }.bind(this)
-            );
+            this.enableInstructorSharing(ctrlDiv);
         }
         if (this.enablePartner) {
-            var checkPartner = document.createElement("input");
-            checkPartner.type = "checkbox";
-            checkPartner.id = `${this.divid}_part`;
-            ctrlDiv.appendChild(checkPartner);
-            var plabel = document.createElement("label");
-            plabel.for = `${this.divid}_part`;
-            $(plabel).text("Pair?");
-            ctrlDiv.appendChild(plabel);
-            $(checkPartner).click(
-                function () {
-                    if (this.partner) {
-                        this.partner = false;
-                        $(partnerTextBox).hide();
-                        this.partner = "";
-                        partnerTextBox.value = "";
-                        $(plabel).text("Pair?");
-                    } else {
-                        let didAgree = localStorage.getItem("partnerAgree");
-                        if (!didAgree) {
-                            didAgree = confirm(
-                                "Pair Programming should only be used with the consent of your instructor." +
-                                    "Your partner must be a registered member of the class and have agreed to pair with you." +
-                                    "By clicking OK you certify that both of these conditions have been met."
-                            );
-                            if (didAgree) {
-                                localStorage.setItem("partnerAgree", "true");
-                            } else {
-                                return;
-                            }
-                        }
-                        this.partner = true;
-                        $(plabel).text("with: ");
-                        $(partnerTextBox).show();
-                    }
-                }.bind(this)
-            );
-            var partnerTextBox = document.createElement("input");
-            partnerTextBox.type = "text";
-            ctrlDiv.appendChild(partnerTextBox);
-            $(partnerTextBox).hide();
-            $(partnerTextBox).change(
-                function () {
-                    this.partner = partnerTextBox.value;
-                }.bind(this)
-            );
+            this.setupPartner(ctrlDiv);
         }
         if (this.chatcodes && eBookConfig.enable_chatcodes) {
-            var chatBar = document.createElement("div");
-            var channels = document.createElement("span");
-            var topic = window.location.host + "-" + this.divid;
-            ctrlDiv.appendChild(chatBar);
-            $(chatBar).text("Chat: ");
-            $(chatBar).append(channels);
-            butt = document.createElement("a");
-            $(butt).addClass("ac_opt btn btn-default");
-            $(butt).text("Create Channel");
-            $(butt).css("margin-left", "10px");
-            $(butt).attr("type", "button");
-            $(butt).attr("target", "_blank");
-            $(butt).attr(
-                "href",
-                "http://" +
-                    chatcodesServer +
-                    "/new?" +
-                    $.param({
-                        topic: window.location.host + "-" + this.divid,
-                        code: this.editor.getValue(),
-                        lang: "Python",
-                    })
-            );
-            this.chatButton = butt;
-            chatBar.appendChild(butt);
-            var updateChatCodesChannels = function () {
-                var data = doc.data;
-                var i = 1;
-                $(channels).html("");
-                data["channels"].forEach(function (channel) {
-                    if (!channel.archived && topic === channel.topic) {
-                        var link = $("<a />");
-                        var href =
-                            "http://" +
-                            chatcodesServer +
-                            "/" +
-                            channel.channelName;
-                        link.attr({
-                            href: href,
-                            target: "_blank",
-                        });
-                        link.text(" " + channel.channelName + "(" + i + ") ");
-                        $(channels).append(link);
-                        i++;
-                    }
-                });
-                if (i === 1) {
-                    $(channels).text(
-                        "(no active converstations on this problem)"
-                    );
-                }
-            };
-            doc.subscribe(updateChatCodesChannels);
-            doc.on("op", updateChatCodesChannels);
+            this.enableChatCodes(ctrlDiv);
         }
+
         $(this.outerDiv).prepend(ctrlDiv);
         if (this.question) {
             if ($(this.question).html().match(/^\s+$/)) {
@@ -511,6 +284,250 @@ export class ActiveCode extends RunestoneBase {
         }
         this.controlDiv = ctrlDiv;
     }
+
+    addFeedbackButton(ctrlDiv) {
+        let butt = document.createElement("button");
+        $(butt).addClass("ac_opt btn btn-default");
+        $(butt).text($.i18n("msg_activecode_show_feedback"));
+        $(butt).css("margin-left", "10px");
+        $(butt).attr("type", "button");
+        this.gradeButton = butt;
+        ctrlDiv.appendChild(butt);
+        $(butt).click(this.createGradeSummary.bind(this));
+    }
+
+    addHistoryButton(ctrlDiv) {
+        let butt = document.createElement("button");
+        $(butt).text($.i18n("msg_activecode_load_history"));
+        $(butt).addClass("btn btn-default");
+        $(butt).attr("type", "button");
+        ctrlDiv.appendChild(butt);
+        this.histButton = butt;
+        $(butt).click(this.addHistoryScrubber.bind(this));
+        if (this.graderactive) {
+            this.addHistoryScrubber(true);
+        }
+    }
+
+    addDownloadButton(ctrlDiv) {
+        let butt = document.createElement("button");
+        $(butt).text("Download");
+        $(butt).addClass("btn save-button");
+        ctrlDiv.appendChild(butt);
+        this.downloadButton = butt;
+        $(butt).click(this.downloadFile.bind(this, this.language));
+        $(butt).attr("type", "button");
+    }
+
+    enableHideShow(ctrlDiv) {
+        $(this.runButton).attr("disabled", "disabled");
+        let butt = document.createElement("button");
+        $(butt).addClass("ac_opt btn btn-default");
+        $(butt).text($.i18n("msg_activecode_show_code"));
+        $(butt).css("margin-left", "10px");
+        $(butt).attr("type", "button");
+        this.showHideButt = butt;
+        ctrlDiv.appendChild(butt);
+        $(butt).click(
+            function () {
+                $(this.codeDiv).toggle();
+                if (this.historyScrubber == null) {
+                    this.addHistoryScrubber(true);
+                } else {
+                    $(this.historyScrubber.parentElement).toggle();
+                }
+                if (
+                    $(this.showHideButt).text() ==
+                    $.i18n("msg_activecode_show_code")
+                ) {
+                    $(this.showHideButt).text(
+                        $.i18n("msg_activecode_hide_code")
+                    );
+                } else {
+                    $(this.showHideButt).text(
+                        $.i18n("msg_activecode_show_code")
+                    );
+                }
+                if ($(this.runButton).attr("disabled")) {
+                    $(this.runButton).removeAttr("disabled");
+                } else {
+                    $(this.runButton).attr("disabled", "disabled");
+                }
+            }.bind(this)
+        );
+    }
+
+    enableCodeLens(ctrlDiv) {
+        let butt = document.createElement("button");
+        $(butt).addClass("ac_opt btn btn-default");
+        $(butt).text($.i18n("msg_activecode_show_codelens"));
+        $(butt).css("margin-left", "10px");
+        this.clButton = butt;
+        ctrlDiv.appendChild(butt);
+        $(butt).click(this.showCodelens.bind(this));
+    }
+
+    enableAudioTours(ctrlDiv) {
+        let butt = document.createElement("button");
+        $(butt).addClass("ac_opt btn btn-default");
+        $(butt).text($.i18n("msg_activecode_audio_tour"));
+        $(butt).css("margin-left", "10px");
+        this.atButton = butt;
+        ctrlDiv.appendChild(butt);
+        $(butt).click(
+            function () {
+                new AudioTour(
+                    this.divid,
+                    this.code,
+                    1,
+                    $(this.origElem).data("audio")
+                );
+            }.bind(this)
+        );
+    }
+
+    enableInstructorSharing(ctrlDiv) {
+        let butt = document.createElement("button");
+        $(butt).addClass("btn btn-info");
+        $(butt).text("Share Code");
+        $(butt).css("margin-left", "10px");
+        this.shareButt = butt;
+        ctrlDiv.appendChild(butt);
+        $(butt).click(
+            async function () {
+                if (
+                    !confirm(
+                        "You are about to share this code with ALL of your students.  Are you sure you want to continue?"
+                    )
+                ) {
+                    return;
+                }
+                let data = {
+                    divid: this.divid,
+                    code: this.editor.getValue(),
+                    lang: this.language,
+                };
+                let request = new Request(
+                    eBookConfig.ajaxURL + "broadcast_code.json",
+                    {
+                        method: "POST",
+                        headers: this.jsonHeaders,
+                        body: JSON.stringify(data),
+                    }
+                );
+                let post_promise = await fetch(request);
+                let status = await post_promise.json();
+                if (status.mess === "success") {
+                    alert(`Shared Code with ${status.share_count} students`);
+                } else {
+                    alert("Sharing Failed");
+                }
+            }.bind(this)
+        );
+    }
+
+    setupPartner(ctrlDiv) {
+        var checkPartner = document.createElement("input");
+        checkPartner.type = "checkbox";
+        checkPartner.id = `${this.divid}_part`;
+        ctrlDiv.appendChild(checkPartner);
+        var plabel = document.createElement("label");
+        plabel.for = `${this.divid}_part`;
+        $(plabel).text("Pair?");
+        ctrlDiv.appendChild(plabel);
+        $(checkPartner).click(
+            function () {
+                if (this.partner) {
+                    this.partner = false;
+                    $(partnerTextBox).hide();
+                    this.partner = "";
+                    partnerTextBox.value = "";
+                    $(plabel).text("Pair?");
+                } else {
+                    let didAgree = localStorage.getItem("partnerAgree");
+                    if (!didAgree) {
+                        didAgree = confirm(
+                            "Pair Programming should only be used with the consent of your instructor." +
+                                "Your partner must be a registered member of the class and have agreed to pair with you." +
+                                "By clicking OK you certify that both of these conditions have been met."
+                        );
+                        if (didAgree) {
+                            localStorage.setItem("partnerAgree", "true");
+                        } else {
+                            return;
+                        }
+                    }
+                    this.partner = true;
+                    $(plabel).text("with: ");
+                    $(partnerTextBox).show();
+                }
+            }.bind(this)
+        );
+        var partnerTextBox = document.createElement("input");
+        partnerTextBox.type = "text";
+        ctrlDiv.appendChild(partnerTextBox);
+        $(partnerTextBox).hide();
+        $(partnerTextBox).change(
+            function () {
+                this.partner = partnerTextBox.value;
+            }.bind(this)
+        );
+    }
+
+    // This is probably obsolete.  Not sure if anyone at Michigan will come back
+    // to working on this again.
+    enableChatCodes(ctrlDiv) {
+        var chatBar = document.createElement("div");
+        var channels = document.createElement("span");
+        var topic = window.location.host + "-" + this.divid;
+        ctrlDiv.appendChild(chatBar);
+        $(chatBar).text("Chat: ");
+        $(chatBar).append(channels);
+        let butt = document.createElement("a");
+        $(butt).addClass("ac_opt btn btn-default");
+        $(butt).text("Create Channel");
+        $(butt).css("margin-left", "10px");
+        $(butt).attr("type", "button");
+        $(butt).attr("target", "_blank");
+        $(butt).attr(
+            "href",
+            "http://" +
+                chatcodesServer +
+                "/new?" +
+                $.param({
+                    topic: window.location.host + "-" + this.divid,
+                    code: this.editor.getValue(),
+                    lang: "Python",
+                })
+        );
+        this.chatButton = butt;
+        chatBar.appendChild(butt);
+        var updateChatCodesChannels = function () {
+            var data = doc.data;
+            var i = 1;
+            $(channels).html("");
+            data["channels"].forEach(function (channel) {
+                if (!channel.archived && topic === channel.topic) {
+                    var link = $("<a />");
+                    var href =
+                        "http://" + chatcodesServer + "/" + channel.channelName;
+                    link.attr({
+                        href: href,
+                        target: "_blank",
+                    });
+                    link.text(" " + channel.channelName + "(" + i + ") ");
+                    $(channels).append(link);
+                    i++;
+                }
+            });
+            if (i === 1) {
+                $(channels).text("(no active converstations on this problem)");
+            }
+        };
+        doc.subscribe(updateChatCodesChannels);
+        doc.on("op", updateChatCodesChannels);
+    }
+
     enableSaveLoad() {
         $(this.runButton).text($.i18n("msg_activecode_save_run"));
     }
@@ -518,7 +535,7 @@ export class ActiveCode extends RunestoneBase {
     //  -- still call runlog, but add a parameter to not save the code
     // add an initial load history button
     // if there is no edit then there is no append   to_save (True/False)
-    addHistoryScrubber(pos_last) {
+    async addHistoryScrubber(pos_last) {
         var data = {
             acid: this.divid,
         };
@@ -527,71 +544,6 @@ export class ActiveCode extends RunestoneBase {
             data["sid"] = this.sid;
         }
         console.log("before get hist");
-        var helper = function () {
-            console.log("making a new scrubber");
-            var scrubberDiv = document.createElement("div");
-            $(scrubberDiv).css("display", "inline-block");
-            $(scrubberDiv).css("margin-left", "10px");
-            $(scrubberDiv).css("margin-right", "10px");
-            $(scrubberDiv).css({
-                "min-width": "200px",
-                "max-width": "300px",
-            });
-            var scrubber = document.createElement("div");
-            this.timestampP = document.createElement("span");
-            this.slideit = function () {
-                this.editor.setValue(this.history[$(scrubber).slider("value")]);
-                var curVal = this.timestamps[$(scrubber).slider("value")];
-                let pos = $(scrubber).slider("value");
-                let outOf = this.history.length;
-                $(this.timestampP).text(`${curVal} - ${pos + 1} of ${outOf}`);
-                this.logBookEvent({
-                    event: "activecode",
-                    act: "slide:" + curVal,
-                    div_id: this.divid,
-                });
-            };
-            $(scrubber).slider({
-                max: this.history.length - 1,
-                value: this.history.length - 1,
-            });
-            $(scrubber).css("margin", "10px");
-            $(scrubber).on("slide", this.slideit.bind(this));
-            $(scrubber).on("slidechange", this.slideit.bind(this));
-            scrubberDiv.appendChild(scrubber);
-            scrubberDiv.appendChild(this.timestampP);
-            // If there is a deadline set then position the scrubber at the last submission
-            // prior to the deadline
-            if (this.deadline) {
-                let i = 0;
-                let done = false;
-                while (i < this.history.length && !done) {
-                    if (new Date(this.timestamps[i]) > this.deadline) {
-                        done = true;
-                    } else {
-                        i += 1;
-                    }
-                }
-                i = i - 1;
-                scrubber.value = Math.max(i, 0);
-                this.editor.setValue(this.history[scrubber.value]);
-                $(scrubber).slider("value", scrubber.value);
-            } else if (pos_last) {
-                scrubber.value = this.history.length - 1;
-                this.editor.setValue(this.history[scrubber.value]);
-            } else {
-                scrubber.value = 0;
-            }
-            let pos = $(scrubber).slider("value");
-            let outOf = this.history.length;
-            let ts = this.timestamps[$(scrubber).slider("value")];
-            $(this.timestampP).text(`${ts} - ${pos + 1} of ${outOf}`);
-            $(this.histButton).remove();
-            this.histButton = null;
-            this.historyScrubber = scrubber;
-            $(scrubberDiv).insertAfter(this.runButton);
-            deferred.resolve();
-        }.bind(this); // end definition of helper
 
         if (
             eBookConfig.practice_mode ||
@@ -600,27 +552,92 @@ export class ActiveCode extends RunestoneBase {
             // If this is timed and already taken we should restore history info
             helper();
         } else {
-            jQuery
-                .getJSON(
-                    eBookConfig.ajaxURL + "gethist.json",
-                    data,
-                    function (data, status, whatever) {
-                        if (data.history !== undefined) {
-                            this.history = this.history.concat(data.history);
-                            for (let t in data.timestamps) {
-                                this.timestamps.push(
-                                    new Date(
-                                        data.timestamps[t]
-                                    ).toLocaleString()
-                                );
-                            }
-                        }
-                    }.bind(this)
-                )
-                .always(helper); // For an explanation, please look at https://stackoverflow.com/questions/336859/var-functionname-function-vs-function-functionname
+            let request = new Request(eBookConfig.ajaxURL + "gethist.json", {
+                method: "POST",
+                headers: this.jsonHeaders,
+                body: JSON.stringify(data),
+            });
+            let response = await fetch(request);
+            let data = await response.json();
+            if (data.history !== undefined) {
+                this.history = this.history.concat(data.history);
+                for (let t in data.timestamps) {
+                    this.timestamps.push(
+                        new Date(data.timestamps[t]).toLocaleString()
+                    );
+                }
+            }
+            helper();
         }
         return deferred;
     }
+
+    helper() {
+        console.log("making a new scrubber");
+        var scrubberDiv = document.createElement("div");
+        $(scrubberDiv).css("display", "inline-block");
+        $(scrubberDiv).css("margin-left", "10px");
+        $(scrubberDiv).css("margin-right", "10px");
+        $(scrubberDiv).css({
+            "min-width": "200px",
+            "max-width": "300px",
+        });
+        var scrubber = document.createElement("div");
+        this.timestampP = document.createElement("span");
+        this.slideit = function () {
+            this.editor.setValue(this.history[$(scrubber).slider("value")]);
+            var curVal = this.timestamps[$(scrubber).slider("value")];
+            let pos = $(scrubber).slider("value");
+            let outOf = this.history.length;
+            $(this.timestampP).text(`${curVal} - ${pos + 1} of ${outOf}`);
+            this.logBookEvent({
+                event: "activecode",
+                act: "slide:" + curVal,
+                div_id: this.divid,
+            });
+        };
+        $(scrubber).slider({
+            max: this.history.length - 1,
+            value: this.history.length - 1,
+        });
+        $(scrubber).css("margin", "10px");
+        $(scrubber).on("slide", this.slideit.bind(this));
+        $(scrubber).on("slidechange", this.slideit.bind(this));
+        scrubberDiv.appendChild(scrubber);
+        scrubberDiv.appendChild(this.timestampP);
+        // If there is a deadline set then position the scrubber at the last submission
+        // prior to the deadline
+        if (this.deadline) {
+            let i = 0;
+            let done = false;
+            while (i < this.history.length && !done) {
+                if (new Date(this.timestamps[i]) > this.deadline) {
+                    done = true;
+                } else {
+                    i += 1;
+                }
+            }
+            i = i - 1;
+            scrubber.value = Math.max(i, 0);
+            this.editor.setValue(this.history[scrubber.value]);
+            $(scrubber).slider("value", scrubber.value);
+        } else if (pos_last) {
+            scrubber.value = this.history.length - 1;
+            this.editor.setValue(this.history[scrubber.value]);
+        } else {
+            scrubber.value = 0;
+        }
+        let pos = $(scrubber).slider("value");
+        let outOf = this.history.length;
+        let ts = this.timestamps[$(scrubber).slider("value")];
+        $(this.timestampP).text(`${ts} - ${pos + 1} of ${outOf}`);
+        $(this.histButton).remove();
+        this.histButton = null;
+        this.historyScrubber = scrubber;
+        $(scrubberDiv).insertAfter(this.runButton);
+        deferred.resolve();
+    } // end definition of helper
+
     createOutput() {
         // Create a parent div with two elements:  pre for standard output and a div
         // to hold turtle graphics output.  We use a div in case the turtle changes from
