@@ -107,7 +107,11 @@ export default class LiveCode extends ActiveCode {
             return;
         }
 
-        var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
+        var __ret = await this.manage_scrubber(
+            scrubber_dfd,
+            history_dfd,
+            saveCode
+        );
         history_dfd = __ret.history_dfd;
         saveCode = __ret.saveCode;
 

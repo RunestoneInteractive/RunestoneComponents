@@ -141,22 +141,25 @@ export default class RunestoneBase {
                 data.sid = this.sid;
             }
             if (!eBookConfig.practice_mode && this.assessmentTaken) {
-                jQuery
-                    .getJSON(
-                        eBookConfig.ajaxURL + "getAssessResults",
-                        data,
-                        // defined in in RunestoneBase
-                        this.repopulateFromStorage.bind(this)
-                    )
-                    .fail(
-                        function () {
-                            try {
-                                this.checkLocalStorage();
-                            } catch (err) {
-                                console.log(err);
-                            }
-                        }.bind(this)
-                    );
+                let request = new Request(
+                    eBookConfig.ajaxURL + "getAssessResults",
+                    {
+                        method: "POST",
+                        body: JSON.stringify(data),
+                        headers: this.jsonHeaders,
+                    }
+                );
+                try {
+                    let response = await fetch(request);
+                    let data = await response.json();
+                    this.repopulateFromStorage(data);
+                } catch (err) {
+                    try {
+                        this.checkLocalStorage();
+                    } catch (err) {
+                        console.log(err);
+                    }
+                }
             } else {
                 this.loadData({});
             }
@@ -180,7 +183,7 @@ export default class RunestoneBase {
      * @param {*} status - the http status
      * @param {*} whatever - ignored
      */
-    repopulateFromStorage(data, status, whatever) {
+    repopulateFromStorage(data) {
         // decide whether to use the server's answer (if there is one) or to load from storage
         if (data !== null && this.shouldUseServer(data)) {
             this.restoreAnswers(data);

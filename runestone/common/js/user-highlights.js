@@ -286,6 +286,7 @@ function processPageState(completionFlag) {
     };
     $(document).ajaxError(function (e, jqhxr, settings, exception) {
         console.log("Request Failed for " + settings.url);
+        console.log(e);
     });
     jQuery.ajax({
         url: eBookConfig.ajaxURL + "updatelastpage",
