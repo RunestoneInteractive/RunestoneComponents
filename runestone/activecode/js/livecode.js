@@ -485,7 +485,7 @@ export default class LiveCode extends ActiveCode {
         var targetDiv = this.codelens.id;
 
         let request = new Request("/runestone/proxy/pytutor_trace", {
-            method: "GET",
+            method: "POST",
             body: JSON.stringify(myVars),
             headers: this.jsonHeaders,
         });
