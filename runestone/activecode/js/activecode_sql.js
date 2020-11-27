@@ -89,7 +89,7 @@ export default class SQLActiveCode extends ActiveCode {
         }
         $(this.output).text("");
         // Run this query
-        let query = this.buildProg(false); // false --> Do not include suffix
+        let query = await this.buildProg(false); // false --> Do not include suffix
         if (!this.db) {
             $(this.output).text(
                 `Error: Database not initialized! DBURL: ${this.dburl}`
@@ -152,28 +152,24 @@ export default class SQLActiveCode extends ActiveCode {
             });
         }
 
-        var __ret = this.manage_scrubber(
-            scrubber_dfd,
-            history_dfd,
-            this.saveCode
-        );
-        history_dfd = __ret.history_dfd;
-        this.saveCode = __ret.saveCode;
-        history_dfd
-            .then(
-                function () {
-                    if (this.slideit) {
-                        $(this.historyScrubber).on(
-                            "slidechange",
-                            this.slideit.bind(this)
-                        );
-                    }
-                    $(this.historyScrubber).slider("enable");
-                }.bind(this)
-            )
-            .catch(function (e) {
-                console.log(`Failed to update scrubber ${e}`);
-            });
+        try {
+            var __ret = await this.manage_scrubber(
+                scrubber_dfd,
+                history_dfd,
+                this.saveCode
+            );
+            history_dfd = __ret.history_dfd;
+            this.saveCode = __ret.saveCode;
+            if (this.slideit) {
+                $(this.historyScrubber).on(
+                    "slidechange",
+                    this.slideit.bind(this)
+                );
+            }
+            $(this.historyScrubber).slider("enable");
+        } catch (e) {
+            console.log(`Failed to update scrubber ${e}`);
+        }
 
         respDiv = document.createElement("div");
         respDiv.id = divid;

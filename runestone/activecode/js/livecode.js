@@ -1,6 +1,5 @@
 import { ActiveCode } from "./activecode.js";
 import MD5 from "./md5.js";
-import ResultsToTable from "./extractUnitResults.js";
 import JUnitTestParser from "./extractUnitResults.js";
 
 export default class LiveCode extends ActiveCode {
@@ -85,7 +84,7 @@ export default class LiveCode extends ActiveCode {
         // extract the class names so files can be named properly
         if (this.suffix && this.language == "java") {
             let classMatch = new RegExp(/public class\s+(\w+)[\s+{]/);
-            source = this.buildProg(false);
+            source = await this.buildProg(false);
             let m = source.match(classMatch);
             if (m) {
                 sourcefilename = m[1] + ".java";
@@ -96,7 +95,7 @@ export default class LiveCode extends ActiveCode {
                 testdrivername = m[1] + ".java";
             }
         } else {
-            source = this.buildProg(true);
+            source = await this.buildProg(true);
         }
         // Validate the data is convertible to Base64. If not then error out now
         try {
@@ -453,7 +452,7 @@ export default class LiveCode extends ActiveCode {
         xhr.send(data);
     }
 
-    showCodelens() {
+    async showCodelens() {
         let clMess = "";
         if (this.codelens.style.display == "none") {
             this.codelens.style.display = "block";
@@ -470,7 +469,7 @@ export default class LiveCode extends ActiveCode {
             this.codelens.removeChild(cl);
             this.codelens.innerHTML = clMess;
         }
-        var code = this.buildProg(false);
+        var code = await this.buildProg(false);
         if (code.match(/System.exit/)) {
             alert(
                 "Sorry... System.exit breaks the visualizer temporarily removing"
@@ -485,20 +484,28 @@ export default class LiveCode extends ActiveCode {
         }
         var targetDiv = this.codelens.id;
 
-        $.getJSON("/runestone/proxy/pytutor_trace", myVars, function (data) {
+        let request = new Request("/runestone/proxy/pytutor_trace", {
+            method: "GET",
+            body: JSON.stringify(myVars),
+            headers: this.jsonHeaders,
+        });
+        try {
+            let response = await fetch(request);
+            let data = await response.json();
             let vis = addVisualizerToPage(data, targetDiv, {
                 startingInstruction: 0,
                 editCodeBaseURL: null,
                 hideCode: false,
                 lang: myVars.lang,
             });
-        }).fail(function (jqxhr, textStatus, error) {
+        } catch (error) {
             let targetDivError = document.getElementById(targetDiv);
             targetDivError.innerHTML =
                 "Sorry, an error occurred while creating your visualization.";
             console.log("Get Trace Failed -- ");
             console.log(error);
-        });
+        }
+
         this.logBookEvent({
             event: "codelens",
             act: "view",

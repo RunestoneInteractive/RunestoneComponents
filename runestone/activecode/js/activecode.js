@@ -531,6 +531,7 @@ export class ActiveCode extends RunestoneBase {
     enableSaveLoad() {
         $(this.runButton).text($.i18n("msg_activecode_save_run"));
     }
+
     // Activecode -- If the code has not changed wrt the scrubber position value then don't save the code or reposition the scrubber
     //  -- still call runlog, but add a parameter to not save the code
     // add an initial load history button
@@ -556,19 +557,27 @@ export class ActiveCode extends RunestoneBase {
                 headers: this.jsonHeaders,
                 body: JSON.stringify(reqData),
             });
-            let response = await fetch(request);
-            let data = await response.json();
-            if (data.history !== undefined) {
-                this.history = this.history.concat(data.history);
-                for (let t in data.timestamps) {
-                    this.timestamps.push(
-                        new Date(data.timestamps[t]).toLocaleString()
-                    );
+            try {
+                let response = await fetch(request);
+                let data = await response.json();
+                if (data.history !== undefined) {
+                    this.history = this.history.concat(data.history);
+                    for (let t in data.timestamps) {
+                        this.timestamps.push(
+                            new Date(data.timestamps[t]).toLocaleString()
+                        );
+                    }
                 }
+            } catch (e) {
+                console.log("unable to fetch history");
             }
             deferred = new Promise((resolve, reject) => {
-                this.renderScrubber(pos_last);
-                resolve("done");
+                try {
+                    this.renderScrubber(pos_last);
+                    resolve("done");
+                } catch (e) {
+                    reject(e);
+                }
             });
         }
         return deferred;
@@ -683,12 +692,14 @@ export class ActiveCode extends RunestoneBase {
         $(clearDiv).css("clear", "both"); // needed to make parent div resize properly
         this.outerDiv.appendChild(clearDiv);
     }
+
     disableSaveLoad() {
         $(this.saveButton).addClass("disabled");
         $(this.saveButton).attr("title", "Login to save your code");
         $(this.loadButton).addClass("disabled");
         $(this.loadButton).attr("title", "Login to load your code");
     }
+
     downloadFile(lang) {
         var fnb = this.divid;
         var d = new Date();
@@ -723,103 +734,112 @@ export class ActiveCode extends RunestoneBase {
             alert("Your browser does not support the HTML5 Blob.");
         }
     }
-    loadEditor() {
-        var loadEditor = function (data, status, whatever) {
-            // function called when contents of database are returned successfully
-            var res = eval(data)[0];
-            if (res.source) {
-                this.editor.setValue(res.source);
-                setTimeout(
-                    function () {
-                        this.editor.refresh();
-                    }.bind(this),
-                    500
-                );
-                $(this.loadButton).tooltip({
-                    placement: "bottom",
-                    title: $.i18n("msg_activecode_loaded_code"),
-                    trigger: "manual",
-                });
-            } else {
-                $(this.loadButton).tooltip({
-                    placement: "bottom",
-                    title: $.i18n("msg_activecode_no_saved_code"),
-                    trigger: "manual",
-                });
-            }
-            $(this.loadButton).tooltip("show");
-            setTimeout(
-                function () {
-                    $(this.loadButton).tooltip("destroy");
-                }.bind(this),
-                4000
-            );
-        }.bind(this);
+
+    async loadEditor() {
         var data = {
             acid: this.divid,
         };
         if (this.sid !== undefined) {
             data["sid"] = this.sid;
         }
-        // This function needs to be chainable for when we want to do things like run the activecode
-        // immediately after loading the previous input (such as in a timed exam)
-        var dfd = jQuery.Deferred();
+
+        let request = new Request(eBookConfig.ajaxURL + "getprog", {
+            method: "POST",
+            headers: this.jsonHeaders,
+            body: JSON.stringify(data),
+        });
+        let response = await fetch(request);
+        let res = await response.json();
+
+        if (res.source) {
+            this.editor.setValue(res.source);
+            setTimeout(
+                function () {
+                    this.editor.refresh();
+                }.bind(this),
+                500
+            );
+            $(this.loadButton).tooltip({
+                placement: "bottom",
+                title: $.i18n("msg_activecode_loaded_code"),
+                trigger: "manual",
+            });
+        } else {
+            $(this.loadButton).tooltip({
+                placement: "bottom",
+                title: $.i18n("msg_activecode_no_saved_code"),
+                trigger: "manual",
+            });
+        }
+
         this.logBookEvent({
             event: "activecode",
             act: "load",
             div_id: this.divid,
         }); // Log the run event
-        jQuery
-            .get(eBookConfig.ajaxURL + "getprog", data, loadEditor)
-            .done(function () {
-                dfd.resolve();
-            });
-        return dfd;
+
+        $(this.loadButton).tooltip("show");
+        setTimeout(
+            function () {
+                $(this.loadButton).tooltip("destroy");
+            }.bind(this),
+            4000
+        );
+
+        return response;
     }
-    createGradeSummary() {
+
+    async createGradeSummary() {
         // get grade and comments for this assignment
         // get summary of all grades for this student
         // display grades in modal window
-        var showGradeSummary = function (data, status, whatever) {
-            var report = eval(data)[0];
-            var body;
-            // check for report['message']
-            if (report) {
-                if (report["version"] == 2) {
-                    // new version; would be better to embed this in HTML for the activecode
-                    body =
-                        "<h4>Grade Report</h4>" +
-                        "<p>This question: " +
-                        report["grade"];
-                    if (report["released"]) {
-                        body += " out of " + report["max"];
-                    }
-                    body += "</p> <p>";
-                    if (report["released"] == false) {
-                        body += "Preliminary Comments: ";
-                    }
-                    body += report["comment"] + "</p>";
-                } else {
-                    body =
-                        "<h4>Grade Report</h4>" +
-                        "<p>This assignment: " +
-                        report["grade"] +
-                        "</p>" +
-                        "<p>" +
-                        report["comment"] +
-                        "</p>" +
-                        "<p>Number of graded assignments: " +
-                        report["count"] +
-                        "</p>" +
-                        "<p>Average score: " +
-                        report["avg"] +
-                        "</p>";
+        var data = {
+            div_id: this.divid,
+        };
+        let request = new Request(eBookConfig.ajaxURL + "getassignmentgrade", {
+            method: "POST",
+            headers: this.jsonHeaders,
+            body: JSON.stringify(data),
+        });
+        let response = await fetch(request);
+        let report = await response.json();
+        var body;
+        // check for report['message']
+        if (report) {
+            if (report["version"] == 2) {
+                // new version; would be better to embed this in HTML for the activecode
+                body =
+                    "<h4>Grade Report</h4>" +
+                    "<p>This question: " +
+                    report["grade"];
+                if (report["released"]) {
+                    body += " out of " + report["max"];
                 }
+                body += "</p> <p>";
+                if (report["released"] == false) {
+                    body += "Preliminary Comments: ";
+                }
+                body += report["comment"] + "</p>";
             } else {
                 body =
-                    "<h4>The server did not return any grade information</h4>";
+                    "<h4>Grade Report</h4>" +
+                    "<p>This assignment: " +
+                    report["grade"] +
+                    "</p>" +
+                    "<p>" +
+                    report["comment"] +
+                    "</p>" +
+                    "<p>Number of graded assignments: " +
+                    report["count"] +
+                    "</p>" +
+                    "<p>Average score: " +
+                    report["avg"] +
+                    "</p>";
             }
-            var html = `<div class="modal fade">
+        } else {
+            body = "<h4>The server did not return any grade information</h4>";
+        }
+        var html = `<div class="modal fade">
                   <div class="modal-dialog compare-modal">
                     <div class="modal-content">
                       <div class="modal-header">
@@ -832,21 +852,12 @@ export class ActiveCode extends RunestoneBase {
                     </div>
                   </div>
                 </div>`;
-            var el = $(html);
-            el.modal();
-        };
-        var data = {
-            div_id: this.divid,
-        };
-        jQuery.get(
-            eBookConfig.ajaxURL + "getassignmentgrade",
-            data,
-            showGradeSummary
-        );
+        var el = $(html);
+        el.modal();
+
+        return response;
     }
-    hideCodelens(button, div_id) {
-        this.codelens.style.display = "none";
-    }
+
     showCodelens() {
         if (this.codelens.style.display == "none") {
             this.codelens.style.display = "block";
@@ -934,56 +945,9 @@ export class ActiveCode extends RunestoneBase {
             div_id: this.divid,
         });
     }
-    showTIE() {
-        var tieDiv = document.createElement("div");
-        $(this.tieButt).attr("disabled", "disabled");
-        $(tieDiv).addClass("tie-container");
-        $(tieDiv).data("tie-id", this.divid);
-        var ifm = document.createElement("iframe");
-        $(ifm).addClass("tie-frame");
-        ifm.src = `https://tech-interview-exercises.appspot.com/client/question.html?qid=${this.tie}`;
-        var setIframeDimensions = function () {
-            $(".tie-container").css(
-                "width",
-                $(".tie-container").parent().width()
-            );
-            //    $('.tie-frame').css('width', $('.tie-frame').parent().width() - 120);
-        };
-        ifm.onload = setIframeDimensions;
-        $(function () {
-            $(window).resize(setIframeDimensions);
-        });
-        window.addEventListener(
-            "message",
-            function (evt) {
-                if (
-                    evt.origin != "https://tech-interview-exercises.appspot.com"
-                ) {
-                    return;
-                }
-                // Handle the event accordingly.
-                // evt.data contains the code
-                this.logRunEvent({
-                    div_id: this.divid,
-                    code: JSON.parse(evt.data),
-                    lang: this.language,
-                    errinfo: "TIEresult",
-                    to_save: true,
-                    prefix: this.pretext,
-                    suffix: this.suffix,
-                });
-            }.bind(this),
-            false
-        );
-        this.logBookEvent({
-            event: "tie",
-            act: "open",
-            div_id: this.divid,
-        });
-        tieDiv.appendChild(ifm);
-        this.outerDiv.appendChild(tieDiv);
-    }
+
     toggleEditorVisibility() {}
+
     addErrorMessage(err) {
         // Add the error message
         this.errLastRun = true;
@@ -1171,26 +1135,23 @@ Yet another is that there is an internal error.  The internal error message is: 
         return current.length;
     }
 
-    getIncludedCode(divid) {
-        var result, wresult;
+    async getIncludedCode(divid) {
         if (window.edList[divid]) {
-            return window.edList[divid].editor.getValue();
+            return Promise.resolve(window.edList[divid].editor.getValue());
         } else {
-            wresult = $.ajax({
-                async: false,
-                url: `/runestone/ajax/get_datafile?course_id=${eBookConfig.course}&acid=${divid}`,
-                success: function (data) {
-                    result = JSON.parse(data).data;
-                },
-                error: function (err) {
-                    result = null;
-                },
-            });
-            return result;
+            let request = new Request(
+                `/runestone/ajax/get_datafile?course_id=${eBookConfig.course}&acid=${divid}`,
+                {
+                    method: "GET",
+                    headers: this.jsonHeaders,
+                }
+            );
+            let wresult = await fetch(request);
+            return wresult.json();
         }
     }
 
-    buildProg(useSuffix) {
+    async buildProg(useSuffix) {
         // assemble code from prefix, suffix, and editor for running.
         var pretext;
         var prog = this.editor.getValue() + "\n";
@@ -1204,7 +1165,7 @@ Yet another is that there is an internal error.  The internal error message is: 
             // iterate over the includes, in-order prepending to prog
             pretext = "";
             for (var x = 0; x < this.includes.length; x++) {
-                let iCode = this.getIncludedCode(this.includes[x]);
+                let iCode = await this.getIncludedCode(this.includes[x]);
                 pretext = pretext + iCode + "\n";
             }
             this.pretext = pretext;
@@ -1216,57 +1177,43 @@ Yet another is that there is an internal error.  The internal error message is: 
         if (useSuffix && this.suffix) {
             prog = prog + this.suffix;
         }
-        return prog;
+        return Promise.resolve(prog);
     }
-    manage_scrubber(scrubber_dfd, history_dfd, saveCode) {
+
+    async manage_scrubber(scrubber_dfd, history_dfd, saveCode) {
         if (this.historyScrubber === null && !this.autorun) {
-            scrubber_dfd = this.addHistoryScrubber();
-        } else {
-            scrubber_dfd = jQuery.Deferred();
-            scrubber_dfd.resolve();
+            scrubber_dfd = await this.addHistoryScrubber();
         }
-        history_dfd = jQuery.Deferred();
-        scrubber_dfd
-            .done(
-                function () {
-                    if (
-                        this.historyScrubber &&
-                        this.history[$(this.historyScrubber).slider("value")] !=
-                            this.editor.getValue()
-                    ) {
-                        saveCode = "True";
-                        this.history.push(this.editor.getValue());
-                        this.timestamps.push(new Date().toLocaleString());
-                        $(this.historyScrubber).slider(
-                            "option",
-                            "max",
-                            this.history.length - 1
-                        );
-                        $(this.historyScrubber).slider(
-                            "option",
-                            "value",
-                            this.history.length - 1
-                        );
-                        this.slideit();
-                    } else {
-                        saveCode = "False";
-                    }
-                    if (this.historyScrubber == null) {
-                        saveCode = "False";
-                    }
-                    history_dfd.resolve();
-                }.bind(this)
-            )
-            .fail(function () {
-                console.log(
-                    "Scrubber deferred failed - this should not happen"
-                );
-                history_dfd.resolve();
-            });
-        return {
+        if (
+            this.historyScrubber &&
+            this.history[$(this.historyScrubber).slider("value")] !=
+                this.editor.getValue()
+        ) {
+            saveCode = "True";
+            this.history.push(this.editor.getValue());
+            this.timestamps.push(new Date().toLocaleString());
+            $(this.historyScrubber).slider(
+                "option",
+                "max",
+                this.history.length - 1
+            );
+            $(this.historyScrubber).slider(
+                "option",
+                "value",
+                this.history.length - 1
+            );
+            this.slideit();
+        } else {
+            saveCode = "False";
+        }
+        if (this.historyScrubber == null) {
+            saveCode = "False";
+        }
+        history_dfd = Promise.resolve({
             history_dfd: history_dfd,
             saveCode: saveCode,
-        };
+        });
+        return history_dfd;
     }
 
     async checkCurrentAnswer() {
@@ -1337,7 +1284,7 @@ Yet another is that there is an internal error.  The internal error message is: 
             noUI = false;
         }
         this.isAnswered = true;
-        var prog = this.buildProg(true);
+        var prog = await this.buildProg(true);
         this.saveCode = "True";
         var scrubber_dfd, history_dfd;
         $(this.output).text("");
@@ -1378,14 +1325,14 @@ Yet another is that there is an internal error.  The internal error message is: 
                 duration: 700,
                 queue: false,
             });
-            var __ret = this.manage_scrubber(
+            var __ret = await this.manage_scrubber(
                 scrubber_dfd,
                 history_dfd,
                 this.saveCode
             );
             history_dfd = __ret.history_dfd;
             this.saveCode = __ret.saveCode;
-            promise_list.push(history_dfd);
+            promise_list.push(__ret);
         }
         this.run_promise = Sk.misceval.asyncToPromise(function () {
             return Sk.importMainWithBody("<stdin>", false, prog, true);
