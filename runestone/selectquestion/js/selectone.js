@@ -74,57 +74,47 @@ export default class SelectOne extends RunestoneBase {
         }
         let opts = this.origOpts;
         let selectorId = this.selector_id;
-        let myPromise = new Promise(
-            function (resolve, reject) {
-                $.getJSON(
-                    "/runestone/ajax/get_question_source",
-                    data,
-                    function (htmlsrc) {
-                        if (htmlsrc.indexOf("No preview") >= 0) {
-                            alert(
-                                `Error: Not able to find a question for ${selectorId} based on the criteria`
-                            );
-                            resolve("done");
-                            return;
-                        }
-                        let res;
-                        if (opts.timed) {
-                            // timed components are not rendered immediately, only when the student
-                            // starts the assessment and visits this particular entry.
-                            res = createTimedComponent(htmlsrc, {
-                                timed: true,
-                                selector_id: selectorId,
-                                assessmentTaken: opts.assessmentTaken,
-                            });
-                            // replace the entry in the timed assessment's list of components
-                            // with the component created by createTimedComponent
-                            for (let component of opts.rqa) {
-                                if (component.question == self) {
-                                    component.question = res.question;
-                                    break;
-                                }
-                            }
-                            self.realComponent = res.question;
-                            self.containerDiv = res.question.containerDiv;
-                            self.realComponent.selectorId = selectorId;
-                        } else {
-                            // just render this component on the page in its usual place
-                            res = renderRunestoneComponent(
-                                htmlsrc,
-                                selectorId,
-                                {
-                                    selector_id: selectorId,
-                                    useRunestoneServices: true,
-                                }
-                            );
-                        }
-                        console.log("resolving selectquestion");
-                        resolve("done");
-                    }
-                );
-            }.bind(this)
-        );
-        return myPromise;
+        let request = new Request("/runestone/ajax/get_question_source", {
+            method: "POST",
+            headers: this.jsonHeaders,
+            body: JSON.stringify(data),
+        });
+        let response = await fetch(request);
+        let htmlsrc = await response.json();
+        if (htmlsrc.indexOf("No preview") >= 0) {
+            alert(
+                `Error: Not able to find a question for ${selectorId} based on the criteria`
+            );
+            return response;
+        }
+        let res;
+        if (opts.timed) {
+            // timed components are not rendered immediately, only when the student
+            // starts the assessment and visits this particular entry.
+            res = createTimedComponent(htmlsrc, {
+                timed: true,
+                selector_id: selectorId,
+                assessmentTaken: opts.assessmentTaken,
+            });
+            // replace the entry in the timed assessment's list of components
+            // with the component created by createTimedComponent
+            for (let component of opts.rqa) {
+                if (component.question == self) {
+                    component.question = res.question;
+                    break;
+                }
+            }
+            self.realComponent = res.question;
+            self.containerDiv = res.question.containerDiv;
+            self.realComponent.selectorId = selectorId;
+        } else {
+            // just render this component on the page in its usual place
+            res = renderRunestoneComponent(htmlsrc, selectorId, {
+                selector_id: selectorId,
+                useRunestoneServices: true,
+            });
+        }
+        return response;
     }
 }
 
