@@ -103,10 +103,9 @@ export default class Timed extends RunestoneBase {
         // If a user has not taken this exam then we want to make sure
         // that if a question has been seen by the student before we do
         // not populate previous answers.
-        let self = this;
         let response = Promise.resolve();
         let sendInfo = {
-            div_id: self.divid,
+            div_id: this.divid,
             course_name: eBookConfig.course,
         };
         console.log(sendInfo);
@@ -121,14 +120,14 @@ export default class Timed extends RunestoneBase {
             );
             response = await fetch(request);
             let data = await response.json();
-            self.taken = data.tookAssessment;
-            self.assessmentTaken = self.taken;
-            if (!self.taken) {
+            this.taken = data.tookAssessment;
+            this.assessmentTaken = this.taken;
+            if (!this.taken) {
                 localStorage.clear();
             }
         } else {
-            self.taken = false;
-            self.assessmentTaken = false;
+            this.taken = false;
+            this.assessmentTaken = false;
         }
         return response;
     }
