@@ -82,9 +82,9 @@ class ActiveCodeTests(RunestoneTestCase):
             # """,
             #     interceptor,
             # )
-            window.scrollTo(0, 0);
+            self.driver.execute_script("window.scrollTo(0, 0);")
             rb.click()
-            
+
         ta = t1.find_element_by_class_name("cm-s-default")
         self.assertIsNotNone(ta)
         self.driver.execute_script(
