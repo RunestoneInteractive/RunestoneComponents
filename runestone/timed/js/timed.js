@@ -98,38 +98,39 @@ export default class Timed extends RunestoneBase {
         }
     }
 
-    checkAssessmentStatus() {
+    async checkAssessmentStatus() {
         // Has the user taken this exam?  Inquiring minds want to know
         // If a user has not taken this exam then we want to make sure
         // that if a question has been seen by the student before we do
         // not populate previous answers.
         let self = this;
-        let p = new Promise(function (resolve, reject) {
-            let sendInfo = {
-                div_id: self.divid,
-                course_name: eBookConfig.course,
-            };
-            console.log(sendInfo);
-            if (eBookConfig.useRunestoneServices) {
-                jQuery.getJSON(
-                    eBookConfig.ajaxURL + "tookTimedAssessment",
-                    sendInfo,
-                    function (data, status) {
-                        self.taken = data.tookAssessment;
-                        self.assessmentTaken = self.taken;
-                        if (!self.taken) {
-                            localStorage.clear();
-                        }
-                        resolve();
-                    }
-                ); // end getJSON
-            } else {
-                self.taken = false;
-                self.assessmentTaken = false;
-                resolve();
+        let response = Promise.resolve();
+        let sendInfo = {
+            div_id: self.divid,
+            course_name: eBookConfig.course,
+        };
+        console.log(sendInfo);
+        if (eBookConfig.useRunestoneServices) {
+            let request = new Request(
+                eBookConfig.ajaxURL + "tookTimedAssessment",
+                {
+                    method: "POST",
+                    headers: this.jsonHeaders,
+                    body: JSON.stringify(sendInfo),
+                }
+            );
+            response = await fetch(request);
+            let data = await response.json();
+            self.taken = data.tookAssessment;
+            self.assessmentTaken = self.taken;
+            if (!self.taken) {
+                localStorage.clear();
             }
-        }); // end promise
-        return p;
+        } else {
+            self.taken = false;
+            self.assessmentTaken = false;
+        }
+        return response;
     }
 
     /*===============================
