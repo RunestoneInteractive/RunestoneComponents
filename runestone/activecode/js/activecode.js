@@ -111,6 +111,12 @@ export class ActiveCode extends RunestoneBase {
             this.caption = "ActiveCode";
         }
         this.addCaption("runestone");
+        setTimeout(
+            function () {
+                this.editor.refresh();
+            }.bind(this),
+            1000
+        );
         if (this.autorun) {
             $(document).ready(this.runProg.bind(this));
         }
@@ -733,60 +739,6 @@ export class ActiveCode extends RunestoneBase {
         } else {
             alert("Your browser does not support the HTML5 Blob.");
         }
-    }
-
-    async loadEditor() {
-        var data = {
-            acid: this.divid,
-        };
-        if (this.sid !== undefined) {
-            data["sid"] = this.sid;
-        }
-
-        let request = new Request(eBookConfig.ajaxURL + "getprog", {
-            method: "POST",
-            headers: this.jsonHeaders,
-            body: JSON.stringify(data),
-        });
-        let response = await fetch(request);
-        let res = await response.json();
-
-        if (res.source) {
-            this.editor.setValue(res.source);
-            setTimeout(
-                function () {
-                    this.editor.refresh();
-                }.bind(this),
-                500
-            );
-            $(this.loadButton).tooltip({
-                placement: "bottom",
-                title: $.i18n("msg_activecode_loaded_code"),
-                trigger: "manual",
-            });
-        } else {
-            $(this.loadButton).tooltip({
-                placement: "bottom",
-                title: $.i18n("msg_activecode_no_saved_code"),
-                trigger: "manual",
-            });
-        }
-
-        this.logBookEvent({
-            event: "activecode",
-            act: "load",
-            div_id: this.divid,
-        }); // Log the run event
-
-        $(this.loadButton).tooltip("show");
-        setTimeout(
-            function () {
-                $(this.loadButton).tooltip("destroy");
-            }.bind(this),
-            4000
-        );
-
-        return response;
     }
 
     async createGradeSummary() {
