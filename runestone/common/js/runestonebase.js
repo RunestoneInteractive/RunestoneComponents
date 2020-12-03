@@ -57,11 +57,12 @@ export default class RunestoneBase {
         }
     }
 
+    // This function sends the provided ``eventInfo`` to the ``hsblog`` endpoint of the server. Awaiting this function returns either ``undefined`` (if Runestone services are not available) or the data returned by the server as a JavaScript object (already JSON-decoded).
     async logBookEvent(eventInfo) {
         if (this.graderactive) {
             return;
         }
-        let post_return = Promise.resolve();
+        let post_return;
         eventInfo.course = eBookConfig.course;
         eventInfo.clientLoginStatus = eBookConfig.isLoggedIn;
         eventInfo.timezoneoffset = new Date().getTimezoneOffset() / 60;
@@ -78,10 +79,11 @@ export default class RunestoneBase {
                 headers: headers,
                 body: JSON.stringify(eventInfo),
             });
-            post_return = await fetch(request);
-            if (!post_return.ok) {
+            let response = await fetch(request);
+            if (!response.ok) {
                 throw new Error("Failed to save the log entry");
             }
+            post_return = response.json();
         }
         console.log("logging event " + JSON.stringify(eventInfo));
         if (

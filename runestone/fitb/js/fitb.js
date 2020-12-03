@@ -241,10 +241,9 @@ export default class FITB extends RunestoneBase {
         }
         if (logFlag) {
             // Sometimes we don't want to log the answer--for example, when timed exam questions are re-loaded
-            let ret = await this.logCurrentAnswer();
+            let data = await this.logCurrentAnswer();
             if (!this.feedbackArray) {
                 // On success, update the feedback from the server's grade.
-                let data = await ret.json();
                 this.setLocalStorage({
                     answer: JSON.stringify(this.given_arr),
                     timestamp: data.timestamp,
