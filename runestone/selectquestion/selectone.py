@@ -33,27 +33,22 @@ __author__ = "bmiller"
 # ----------------------------------
 from docutils import nodes
 from docutils.parsers.rst import directives
-from sqlalchemy import Table
 
 # local imports
 # -------------
 from runestone.server.componentdb import (
-    addAssignmentQuestionToDB,
     addQuestionToDB,
     addHTMLToDB,
-    get_engine_meta,
     maybeAddToAssignment,
 )
 from runestone.common.runestonedirective import (
     RunestoneIdDirective,
-    RunestoneNode,
-    add_i18n_js,
 )
 
 
 TEMPLATE = """
 <div class="runestone alert alert-warning">
-<div data-component="selectquestion" id={component_id} {selector} {points} {proficiency} {min_difficulty} {max_difficulty} {autogradable} {not_seen_ever} {primary}>
+<div data-component="selectquestion" id={component_id} {selector} {points} {proficiency} {min_difficulty} {max_difficulty} {autogradable} {not_seen_ever} {primary} {AB}>
     <p>Loading ...</p>
 </div>
 </div>
@@ -96,6 +91,7 @@ class SelectQuestion(RunestoneIdDirective):
             "autogradable": directives.flag,
             "not_seen_ever": directives.flag,
             "primary": directives.flag,
+            "ab": directives.flag,
         }
     )
 
@@ -169,6 +165,11 @@ class SelectQuestion(RunestoneIdDirective):
             self.options["primary"] = "data-primary=true"
         else:
             self.options["primary"] = ""
+
+        if "ab" in self.options:
+            self.options["AB"] = "data-ab=true"
+        else:
+            self.options["AB"] = ""
 
         maybeAddToAssignment(self)
 

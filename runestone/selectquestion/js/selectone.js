@@ -37,6 +37,7 @@ export default class SelectOne extends RunestoneBase {
         this.not_seen_ever = $(opts.orig).data("not_seen_ever");
         this.selector_id = $(opts.orig).first().attr("id");
         this.primaryOnly = $(opts.orig).data("primary");
+        this.isAB = $(opts.orig).data("ab");
         opts.orig.id = this.selector_id;
     }
     /**
@@ -71,6 +72,9 @@ export default class SelectOne extends RunestoneBase {
         }
         if (this.primaryOnly) {
             data.primary = this.primaryOnly;
+        }
+        if (this.isAB) {
+            data.AB = this.isAB;
         }
         let opts = this.origOpts;
         let selectorId = this.selector_id;
