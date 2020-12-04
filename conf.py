@@ -176,12 +176,14 @@ CodeChat_lexer_for_glob = {
     "*.css": "CSS",
     "*.js": "JavaScript",
     "*.html": "HTML",
-    # Perl use # for comments, so pretend these files are Perl.
+    # Perl uses ``#`` for comments, so pretend these files are Perl.
     "*.in": "Perl",
     ".gitignore": "Perl",
     "*.cfg": "INI",
-    # This is actually a Python file.
+    # These are actually a Python files.
     "codechat_config.json": "Python",
+    "conf.tmpl": "Python",
+    "pavement.tmpl": "Python",
 }
 #
 # **CodeChat note::** This is a list of exclude_patterns_ which applies only to
