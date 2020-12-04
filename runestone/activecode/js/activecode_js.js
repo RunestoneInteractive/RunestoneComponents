@@ -55,6 +55,7 @@ export default class JSActiveCode extends ActiveCode {
             this.addErrorMessage(e);
             einfo = e;
         }
+        // Note that, since this isn't awaited, the request may not be complete when this function returns.
         this.logRunEvent({
             div_id: this.divid,
             code: this.editor.getValue(),
@@ -64,6 +65,6 @@ export default class JSActiveCode extends ActiveCode {
             prefix: this.pretext,
             suffix: this.suffix,
             partner: this.partner,
-        }); // Log the run event
+        });
     }
 }
