@@ -70,6 +70,7 @@ class SelectQuestion(RunestoneIdDirective):
        :points: number of points for this question
        :min_difficulty: minimum difficulty level
        :max_difficulty: maximum difficulty level
+       :ab: experiment_name
 
        Difficulty is measured in one of two ways. For things like multiple choice and
        fill in the blank, we can use the % of students that get the answer correct on
@@ -91,7 +92,7 @@ class SelectQuestion(RunestoneIdDirective):
             "autogradable": directives.flag,
             "not_seen_ever": directives.flag,
             "primary": directives.flag,
-            "ab": directives.flag,
+            "ab": directives.unchanged,
         }
     )
 
@@ -167,7 +168,7 @@ class SelectQuestion(RunestoneIdDirective):
             self.options["primary"] = ""
 
         if "ab" in self.options:
-            self.options["AB"] = "data-ab=true"
+            self.options["AB"] = f"data-ab={self.options['ab']}"
         else:
             self.options["AB"] = ""
 
