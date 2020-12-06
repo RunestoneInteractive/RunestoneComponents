@@ -45,10 +45,10 @@ class LP extends RunestoneBase {
         // Store the DOM element (a span) where feedback will be displayed.
         this.feedbackElement = $(this.element).siblings("div");
         // Use a nice editor.
-        var that = this;
+        let that = this;
         this.textAreas = [];
         $(".code_snippet").each(function (index, element) {
-            var editor = CodeMirror.fromTextArea(element, {
+            let editor = CodeMirror.fromTextArea(element, {
                 lineNumbers: true,
                 mode: $(that.element).attr("data-lang"),
                 indentUnit: 4,
@@ -68,16 +68,22 @@ class LP extends RunestoneBase {
         });
         this.checkServer("lp_build");
         // Handle clicks to the "Save and run" button.
-        $(this.element).click(function (eventObject) {
-            $(that.resultElement).val("Building...");
-            $(that.feedbackElement).text("").attr("");
-            // Since the Save and run button was clicked, we assume the code snippets have been changed; therefore, don't store ``correct`` or ``answer.resultString`` because they are out of date.
-            let answer = { code_snippets: that.textareasToData() };
-            that.setLocalStorage({
-                answer: answer,
-                timestamp: new Date(),
-            });
-            that.logBookEvent({
+        $(this.element).click((eventObject) => that.onSaveAndRun(eventObject).then(null));
+    }
+
+    async onSaveAndRun(_eventObject) {
+        $(this.resultElement).val("Building...");
+        $(this.feedbackElement).text("").attr("");
+        // Since the Save and run button was clicked, we assume the code snippets have been changed; therefore, don't store ``correct`` or ``answer.resultString`` because they are out of date.
+        let answer = { code_snippets: this.textareasToData() };
+        this.setLocalStorage({
+            answer: answer,
+            timestamp: new Date(),
+        });
+        // Store the answer that the server returns, which includes additional data (correct/incorrect, feedback from the build, etc.).
+        let serverAnswer;
+        try {
+            serverAnswer = await this.logBookEvent({
                 event: "lp_build",
                 // All values must be strings, or the resulting values on the server side come out confused.
                 answer: JSON.stringify(answer),
@@ -85,24 +91,23 @@ class LP extends RunestoneBase {
                 path: window.location.href
                     .replace(eBookConfig.app, "")
                     .slice(1),
-                div_id: that.divid,
-            })
-                .done(function (data) {
-                    // The server doesn't return the ``code_snippets``, for efficiency. Include those. If an error was returned, note that there is no ``answer`` yet.
-                    if (!("answer" in data)) {
-                        data["answer"] = {};
-                    }
-                    data["answer"]["code_snippets"] = that.textareasToData();
-                    that.displayAnswer(data);
-                    that.setLocalStorage(data);
-                })
-                .fail(function () {
-                    $(that.feedbackElement)
-                        .val("Error contacting server.")
-                        .attr("class", "alert alert-danger");
-                });
-        });
+                div_id: this.divid,
+            });
+        } catch (err) {
+            $(this.feedbackElement)
+                .val(`Error contacting server: {err}.`)
+                .attr("class", "alert alert-danger");
+            return;
+        }
+        // The server doesn't return the ``code_snippets``, for efficiency. Include those. If an error was returned, note that there is no ``answer`` yet.
+        if (!("answer" in serverAnswer)) {
+            serverAnswer["answer"] = {};
+        }
+        serverAnswer["answer"]["code_snippets"] = this.textareasToData();
+        this.displayAnswer(serverAnswer);
+        this.setLocalStorage(serverAnswer);
     }
+
     // Given a single answer, display it.
     displayAnswer(data) {
         if ("errors" in data) {
