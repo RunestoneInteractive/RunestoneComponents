@@ -151,7 +151,7 @@ export default class RunestoneBase {
                 );
                 try {
                     let response = await fetch(request);
-                    let data = await response.json();
+                    data = await response.json();
                     this.repopulateFromStorage(data);
                 } catch (err) {
                     try {
@@ -167,6 +167,7 @@ export default class RunestoneBase {
             this.checkLocalStorage(); // just go right to local storage
         }
     }
+
     loadData(data) {
         // for most classes, loadData doesn't do anything. But for Parsons, and perhaps others in the future,
         // initialization can happen even when there's no history to be loaded
