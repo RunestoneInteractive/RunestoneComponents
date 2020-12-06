@@ -33,7 +33,6 @@ import re
 from sphinx.util import logging
 from sqlalchemy import create_engine, Table, MetaData, select, and_, or_
 from sqlalchemy.orm.session import sessionmaker
-import pdb
 
 from runestone.common.runestonedirective import RunestoneDirective, RunestoneIdNode
 
@@ -723,7 +722,8 @@ def update_chapter_subchapter(
         else:
             currentRowId = res.id
 
-        for sub in subtitles[chap]:
+        # If this chapter doesn't have subchapters, then skip them -- hence, use ``subtitles.get(chap, [])`` instead of ``subtitles[chap]``.
+        for sub in subtitles.get(chap, []):
             if (chap, sub) in skips:
                 skipreading = "T"
             else:
