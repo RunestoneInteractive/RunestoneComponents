@@ -168,6 +168,8 @@ class SelectQuestion(RunestoneIdDirective):
             self.options["primary"] = ""
 
         if "ab" in self.options:
+            if len(self.question_bank_choices.split(",")) != 2:
+                raise self.severe("AB questions must have 2 options for :fromid:")
             self.options["AB"] = f"data-ab={self.options['ab']}"
         else:
             self.options["AB"] = ""
