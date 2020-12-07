@@ -61,11 +61,16 @@ export default class RunestoneBase {
         });
     }
 
+// .. _logBookEvent:
+//
+// logBookEvent
+// ------------
+    // This function sends the provided ``eventInfo`` to the `hsblog endpoint` of the server. Awaiting this function returns either ``undefined`` (if Runestone services are not available) or the data returned by the server as a JavaScript object (already JSON-decoded).
     async logBookEvent(eventInfo) {
         if (this.graderactive) {
             return;
         }
-        let post_return = Promise.resolve();
+        let post_return;
         eventInfo.course = eBookConfig.course;
         eventInfo.clientLoginStatus = eBookConfig.isLoggedIn;
         eventInfo.timezoneoffset = new Date().getTimezoneOffset() / 60;
@@ -78,10 +83,11 @@ export default class RunestoneBase {
                 headers: this.jsonHeaders,
                 body: JSON.stringify(eventInfo),
             });
-            post_return = await fetch(request);
-            if (!post_return.ok) {
+            let response = await fetch(request);
+            if (!response.ok) {
                 throw new Error("Failed to save the log entry");
             }
+            post_return = response.json();
         }
         console.log("logging event " + JSON.stringify(eventInfo));
         if (
@@ -93,8 +99,14 @@ export default class RunestoneBase {
         }
         return post_return;
     }
+
+// .. _logRunEvent:
+//
+// logRunEvent
+// -----------
+    // This function sends the provided ``eventInfo`` to the `runlog endpoint`. When awaited, this function returns the data (decoded from JSON) the server sent back.
     async logRunEvent(eventInfo) {
-        let post_promise = Promise.resolve("done");
+        let post_promise = "done";
         if (this.graderactive) {
             return;
         }
@@ -114,6 +126,7 @@ export default class RunestoneBase {
             if (!post_promise.ok) {
                 throw new Error("Failed to log the run");
             }
+            post_promise = await response.json();
         }
         console.log("running " + JSON.stringify(eventInfo));
         if (

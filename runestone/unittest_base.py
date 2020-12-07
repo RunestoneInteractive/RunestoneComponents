@@ -228,6 +228,8 @@ class RunestoneTestCase(unittest.TestCase):
         # Use the shared module-wide driver.
         self.driver = mf.driver
         self.host = HOST_URL
+        # Add an `implicit wait <https://selenium-python.readthedocs.io/waits.html#implicit-waits>`_.
+        self.driver.implicitly_wait(5)
 
     def tearDown(self):
         # Clear as much as possible, to present an almost-fresh instance of a browser for the next test. (Shutting down then starting up a browswer is very slow.)
