@@ -70,7 +70,9 @@ class ModuleFixture(unittest.TestCase):
         # Change to this directory for running Runestone.
         self.old_cwd = os.getcwd()
         os.chdir(self.base_path)
-        p = subprocess.Popen(
+        # use call so that npm run build completes before we move on to runestone build
+        # otherwise the runestone build may fail due to lack of a runestone.js file!
+        p = subprocess.call(
             ["npm.cmd" if IS_WINDOWS else "npm", "run", "build"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,

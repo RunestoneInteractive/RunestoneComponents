@@ -9,17 +9,17 @@ export default class HTMLActiveCode extends ActiveCode {
         this.editor.setValue(this.code);
     }
 
-    runProg() {
-        var prog = this.buildProg(true);
+    async runProg() {
+        var prog = await this.buildProg(true);
         var scrubber_dfd, history_dfd, saveCode;
         saveCode = "True";
-        var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
+        var __ret = await this.manage_scrubber(
+            scrubber_dfd,
+            history_dfd,
+            saveCode
+        );
         history_dfd = __ret.history_dfd;
         saveCode = __ret.saveCode;
-        //    $('#'+myDiv+'_iframe').remove();
-        //    $('#'+myDiv+'_htmlout').show();
-        //    $('#'+myDiv+'_htmlout').append('<iframe class="activehtml" id="' + myDiv + '_iframe" srcdoc="' +
-        //        prog.replace(/"/g,"'") + '">' + '</iframe>');
         $(this.output).text("");
         if (!this.alignVertical) {
             $(this.codeDiv).switchClass("col-md-12", "col-md-6", {

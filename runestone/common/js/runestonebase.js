@@ -55,6 +55,10 @@ export default class RunestoneBase {
                 this.question_label = $(opts.orig).data("question_label");
             }
         }
+        this.jsonHeaders = new Headers({
+            "Content-type": "application/json; charset=utf-8",
+            Accept: "application/json",
+        });
     }
 
     async logBookEvent(eventInfo) {
@@ -69,13 +73,9 @@ export default class RunestoneBase {
             eventInfo.percent = this.percent;
         }
         if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
-            let headers = new Headers({
-                "Content-type": "application/json; charset=utf-8",
-                Accept: "application/json",
-            });
             let request = new Request(eBookConfig.ajaxURL + "hsblog", {
                 method: "POST",
-                headers: headers,
+                headers: this.jsonHeaders,
                 body: JSON.stringify(eventInfo),
             });
             post_return = await fetch(request);
@@ -105,16 +105,11 @@ export default class RunestoneBase {
             eventInfo.save_code = "True";
         }
         if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
-            let headers = new Headers({
-                "Content-type": "application/json; charset=utf-8",
-                Accept: "application/json",
-            });
             let request = new Request(eBookConfig.ajaxURL + "runlog.json", {
                 method: "POST",
-                headers: headers,
+                headers: this.jsonHeaders,
                 body: JSON.stringify(eventInfo),
             });
-            post_promise = await fetch(request);
             post_promise = await fetch(request);
             if (!post_promise.ok) {
                 throw new Error("Failed to log the run");
@@ -146,22 +141,25 @@ export default class RunestoneBase {
                 data.sid = this.sid;
             }
             if (!eBookConfig.practice_mode && this.assessmentTaken) {
-                jQuery
-                    .getJSON(
-                        eBookConfig.ajaxURL + "getAssessResults",
-                        data,
-                        // defined in in RunestoneBase
-                        this.repopulateFromStorage.bind(this)
-                    )
-                    .fail(
-                        function () {
-                            try {
-                                this.checkLocalStorage();
-                            } catch (err) {
-                                console.log(err);
-                            }
-                        }.bind(this)
-                    );
+                let request = new Request(
+                    eBookConfig.ajaxURL + "getAssessResults",
+                    {
+                        method: "POST",
+                        body: JSON.stringify(data),
+                        headers: this.jsonHeaders,
+                    }
+                );
+                try {
+                    let response = await fetch(request);
+                    data = await response.json();
+                    this.repopulateFromStorage(data);
+                } catch (err) {
+                    try {
+                        this.checkLocalStorage();
+                    } catch (err) {
+                        console.log(err);
+                    }
+                }
             } else {
                 this.loadData({});
             }
@@ -169,6 +167,7 @@ export default class RunestoneBase {
             this.checkLocalStorage(); // just go right to local storage
         }
     }
+
     loadData(data) {
         // for most classes, loadData doesn't do anything. But for Parsons, and perhaps others in the future,
         // initialization can happen even when there's no history to be loaded
@@ -185,7 +184,7 @@ export default class RunestoneBase {
      * @param {*} status - the http status
      * @param {*} whatever - ignored
      */
-    repopulateFromStorage(data, status, whatever) {
+    repopulateFromStorage(data) {
         // decide whether to use the server's answer (if there is one) or to load from storage
         if (data !== null && this.shouldUseServer(data)) {
             this.restoreAnswers(data);

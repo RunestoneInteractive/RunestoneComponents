@@ -178,6 +178,8 @@ class ActiveCode(RunestoneIdDirective):
         then the assignment text should go here.  The assignment text ends with
         the line containing four tilde ~
         ~~~~
+        print("Hidden code before students code - good for scaffolding")
+        ^^^^
         print("hello world")
         ====
         print("Hidden code, such as unit tests come after the four = signs")
@@ -394,6 +396,9 @@ class ActiveCode(RunestoneIdDirective):
             self.options["wasmuri"] = ""
 
         if self.content:
+            if "^^^^" in self.content:
+                idx = self.content.index("^^^^")
+                prefix = "\n".join(self.content[:idx])
             if "====" in self.content:
                 idx = self.content.index("====")
                 source = "\n".join(self.content[:idx])
