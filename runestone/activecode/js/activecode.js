@@ -1162,7 +1162,7 @@ Yet another is that there is an internal error.  The internal error message is: 
             saveCode = "False";
         }
         history_dfd = Promise.resolve({
-            history_dfd: history_dfd,
+            history_dfd: scrubber_dfd,
             saveCode: saveCode,
         });
         return history_dfd;
@@ -1293,36 +1293,33 @@ Yet another is that there is an internal error.  The internal error message is: 
         // Make sure that the history scrubber is fully initialized AND the code has been run
         // before we start logging stuff.
         var self = this;
-        Promise.all(promise_list).then(
-            function (mod) {
-                $(this.runButton).removeAttr("disabled");
-                if (!noUI) {
-                    if (this.slideit) {
-                        $(this.historyScrubber).on(
-                            "slidechange",
-                            this.slideit.bind(this)
-                        );
+        Promise.all(promise_list)
+            .then(
+                function (mod) {
+                    $(this.runButton).removeAttr("disabled");
+                    if (!noUI) {
+                        if (this.slideit) {
+                            $(this.historyScrubber).on(
+                                "slidechange",
+                                this.slideit.bind(this)
+                            );
+                        }
+                        $(this.historyScrubber).slider("enable");
                     }
-                    $(this.historyScrubber).slider("enable");
-                }
-                this.errLastRun = false;
-                this.errinfo = "success";
-            }.bind(this),
-            function (err) {
-                if (typeof history_dfd !== "undefined") {
-                    history_dfd.done(function () {
-                        $(self.runButton).removeAttr("disabled");
-                        $(self.historyScrubber).on(
-                            "slidechange",
-                            self.slideit.bind(self)
-                        );
-                        $(self.historyScrubber).slider("enable");
-                        self.errinfo = err.toString();
-                        self.addErrorMessage(err);
-                    });
-                }
-            }
-        );
+                    this.errLastRun = false;
+                    this.errinfo = "success";
+                }.bind(this)
+            )
+            .catch(function (err) {
+                $(self.runButton).removeAttr("disabled");
+                $(self.historyScrubber).on(
+                    "slidechange",
+                    self.slideit.bind(self)
+                );
+                $(self.historyScrubber).slider("enable");
+                self.errinfo = err.toString();
+                self.addErrorMessage(err);
+            });
         if (typeof window.allVisualizers != "undefined") {
             $.each(window.allVisualizers, function (i, e) {
                 e.redrawConnectors();
