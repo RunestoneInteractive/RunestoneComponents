@@ -1,8 +1,10 @@
 from selenium.webdriver import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import ElementClickInterceptedException
+from selenium.common.exceptions import (
+    ElementClickInterceptedException,
+    TimeoutException,
+)
 import time
 from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
@@ -21,7 +23,7 @@ class ActiveCodeTests(RunestoneTestCase):
         self.driver.get(self.host + "/index.html")
         try:
             self.wait.until(EC.presence_of_element_located((By.ID, "test1")))
-        except:
+        except TimeoutException:
             text = self.driver.page_source
             print(text[:300])
         t1 = self.driver.find_element_by_id("test1")
@@ -47,7 +49,7 @@ class ActiveCodeTests(RunestoneTestCase):
         self.driver.get(self.host + "/index.html")
         try:
             self.wait.until(EC.presence_of_element_located((By.ID, "testprefixcode")))
-        except:
+        except TimeoutException:
             text = self.driver.page_source
             print(text[:300])
         t1 = self.driver.find_element_by_id("testprefixcode")
@@ -143,7 +145,7 @@ class ActiveCodeTests(RunestoneTestCase):
             print("Ouput so far:", output.text)
         try:
             self.assertLess(count, 20)
-        except:
+        except Exception:
             print("WARNING - No response from JOBE server")
 
     def test_activity_count(self):
