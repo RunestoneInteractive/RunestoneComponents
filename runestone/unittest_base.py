@@ -24,6 +24,7 @@ from urllib.error import URLError
 # -------------------
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
 import pytest
 from pyvirtualdisplay import Display
 
@@ -70,14 +71,15 @@ class ModuleFixture(unittest.TestCase):
         # Change to this directory for running Runestone.
         self.old_cwd = os.getcwd()
         os.chdir(self.base_path)
-        # use call so that npm run build completes before we move on to runestone build
+        # use `run` so that `npm run build` completes before we move on to `runestone build`
         # otherwise the runestone build may fail due to lack of a runestone.js file!
-        p = subprocess.call(
+        p = subprocess.run(
             ["npm.cmd" if IS_WINDOWS else "npm", "run", "build"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=True,
         )
+        self.assertFalse(p.returncode)
         # Compile the docs. Save the stdout and stderr for examination.
         p = subprocess.Popen(
             ["runestone", "build", "--all"],
@@ -230,6 +232,9 @@ class RunestoneTestCase(unittest.TestCase):
         self.host = HOST_URL
         # Add an `implicit wait <https://selenium-python.readthedocs.io/waits.html#implicit-waits>`_.
         self.driver.implicitly_wait(5)
+        # For cases where an implicit wait does not help.  For example waiting for text to appear
+        # after running an activecode.  We create an explicit wait object.
+        self.wait = WebDriverWait(self.driver, 5)
 
     def tearDown(self):
         # Clear as much as possible, to present an almost-fresh instance of a browser for the next test. (Shutting down then starting up a browswer is very slow.)

@@ -2,6 +2,9 @@
  *
  * Created by bmiller on 3/19/15.
  */
+/* Define global variables for ESLint */
+/* global Sk */
+
 "use strict";
 
 import RunestoneBase from "../../common/js/runestonebase.js";
@@ -1132,40 +1135,39 @@ Yet another is that there is an internal error.  The internal error message is: 
         return Promise.resolve(prog);
     }
 
-    async manage_scrubber(scrubber_dfd, history_dfd, saveCode) {
+    async manage_scrubber(saveCode) {
+        let scrubber_dfd = false;
         if (this.historyScrubber === null && !this.autorun) {
             scrubber_dfd = await this.addHistoryScrubber();
         }
-        if (
-            this.historyScrubber &&
-            this.history[$(this.historyScrubber).slider("value")] !=
-                this.editor.getValue()
-        ) {
-            saveCode = "True";
-            this.history.push(this.editor.getValue());
-            this.timestamps.push(new Date().toLocaleString());
-            $(this.historyScrubber).slider(
-                "option",
-                "max",
-                this.history.length - 1
-            );
-            $(this.historyScrubber).slider(
-                "option",
-                "value",
-                this.history.length - 1
-            );
-            this.slideit();
-        } else {
-            saveCode = "False";
+        if (scrubber_dfd && scrubber_dfd.ok) {
+            if (
+                this.historyScrubber &&
+                this.history[$(this.historyScrubber).slider("value")] !=
+                    this.editor.getValue()
+            ) {
+                saveCode = "True";
+                this.history.push(this.editor.getValue());
+                this.timestamps.push(new Date().toLocaleString());
+                $(this.historyScrubber).slider(
+                    "option",
+                    "max",
+                    this.history.length - 1
+                );
+                $(this.historyScrubber).slider(
+                    "option",
+                    "value",
+                    this.history.length - 1
+                );
+                this.slideit();
+            } else {
+                saveCode = "False";
+            }
+            if (this.historyScrubber == null) {
+                saveCode = "False";
+            }
         }
-        if (this.historyScrubber == null) {
-            saveCode = "False";
-        }
-        history_dfd = Promise.resolve({
-            history_dfd: scrubber_dfd,
-            saveCode: saveCode,
-        });
-        return history_dfd;
+        return Promise.resolve(saveCode);
     }
 
     async checkCurrentAnswer() {
@@ -1238,7 +1240,6 @@ Yet another is that there is an internal error.  The internal error message is: 
         this.isAnswered = true;
         var prog = await this.buildProg(true);
         this.saveCode = "True";
-        var scrubber_dfd, history_dfd;
         $(this.output).text("");
         $(this.eContainer).remove();
         if (this.codelens) {
@@ -1277,14 +1278,7 @@ Yet another is that there is an internal error.  The internal error message is: 
                 duration: 700,
                 queue: false,
             });
-            var __ret = await this.manage_scrubber(
-                scrubber_dfd,
-                history_dfd,
-                this.saveCode
-            );
-            history_dfd = __ret.history_dfd;
-            this.saveCode = __ret.saveCode;
-            promise_list.push(__ret);
+            this.saveCode = await this.manage_scrubber(this.saveCode);
         }
         this.run_promise = Sk.misceval.asyncToPromise(function () {
             return Sk.importMainWithBody("<stdin>", false, prog, true);
@@ -1295,7 +1289,7 @@ Yet another is that there is an internal error.  The internal error message is: 
         var self = this;
         Promise.all(promise_list)
             .then(
-                function (mod) {
+                function () {
                     $(this.runButton).removeAttr("disabled");
                     if (!noUI) {
                         if (this.slideit) {

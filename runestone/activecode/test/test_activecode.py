@@ -1,8 +1,10 @@
 from selenium.webdriver import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import ElementClickInterceptedException
+from selenium.common.exceptions import (
+    ElementClickInterceptedException,
+    TimeoutException,
+)
 import time
 from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
@@ -19,10 +21,9 @@ class ActiveCodeTests(RunestoneTestCase):
         :return:
         """
         self.driver.get(self.host + "/index.html")
-        wait = WebDriverWait(self.driver, 10)
         try:
-            wait.until(EC.presence_of_element_located((By.ID, "test1")))
-        except:
+            self.wait.until(EC.presence_of_element_located((By.ID, "test1")))
+        except TimeoutException:
             text = self.driver.page_source
             print(text[:300])
         t1 = self.driver.find_element_by_id("test1")
@@ -30,10 +31,9 @@ class ActiveCodeTests(RunestoneTestCase):
         rb = t1.find_element_by_class_name("run-button")
         self.assertIsNotNone(rb)
         rb.click()
-        time.sleep(0.5)
-        wait = WebDriverWait(self.driver, 10)
-        wait.until(
-            EC.text_to_be_present_in_element((By.ID, "test1_stdout"), "Hello")
+        self.wait.until(
+            EC.text_to_be_present_in_element((By.ID, "test1_stdout"), "Hello World"),
+            message="Did not find expected text",
         )
         output = t1.find_element_by_class_name("ac_output")
         self.assertEqual(output.text.strip(), "Hello World")
@@ -47,10 +47,9 @@ class ActiveCodeTests(RunestoneTestCase):
         :return:
         """
         self.driver.get(self.host + "/index.html")
-        wait = WebDriverWait(self.driver, 10)
         try:
-            wait.until(EC.presence_of_element_located((By.ID, "testprefixcode")))
-        except:
+            self.wait.until(EC.presence_of_element_located((By.ID, "testprefixcode")))
+        except TimeoutException:
             text = self.driver.page_source
             print(text[:300])
         t1 = self.driver.find_element_by_id("testprefixcode")
@@ -58,11 +57,12 @@ class ActiveCodeTests(RunestoneTestCase):
         rb = t1.find_element_by_class_name("run-button")
         self.assertIsNotNone(rb)
         rb.click()
-        wait.until(
-            EC.text_to_be_present_in_element((By.ID, "testprefixcode_stdout"), "My")
+        self.wait.until(
+            EC.text_to_be_present_in_element(
+                (By.ID, "testprefixcode_stdout"), "My Code"
+            )
         )
         output = t1.find_element_by_class_name("ac_output")
-        self.assertIn("My Code", output.text.strip())
         self.assertIn("hidden code", output.text.strip())
         self.assertIn("i\nx", output.text.strip())
 
@@ -98,9 +98,7 @@ class ActiveCodeTests(RunestoneTestCase):
         self.driver.execute_script(
             """window.edList['test1'].editor.setValue("print('GoodBye')")"""
         )
-        WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.CLASS_NAME, "run-button"))
-        )
+        self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "run-button")))
         try:
             rb.click()
         except ElementClickInterceptedException:
@@ -147,7 +145,7 @@ class ActiveCodeTests(RunestoneTestCase):
             print("Ouput so far:", output.text)
         try:
             self.assertLess(count, 20)
-        except:
+        except Exception:
             print("WARNING - No response from JOBE server")
 
     def test_activity_count(self):
@@ -179,10 +177,7 @@ class ActiveCodeTests(RunestoneTestCase):
         rb = t2.find_element_by_class_name("run-button")
         self.assertIsNotNone(rb)
         rb.click()
-        wait = WebDriverWait(self.driver, 10)
-        wait.until(
-            EC.text_to_be_present_in_element((By.ID, "sql1_stdout"), "You")
-        )
+        self.wait.until(EC.text_to_be_present_in_element((By.ID, "sql1_stdout"), "You"))
         res = self.driver.find_element_by_id("sql1_sql_out")
         self.assertIsNotNone(res)
         out = self.driver.find_element_by_id("sql1_stdout")
@@ -204,8 +199,7 @@ class ActiveCodeTests(RunestoneTestCase):
         rb = t2.find_element_by_class_name("run-button")
         self.assertIsNotNone(rb)
         rb.click()
-        wait = WebDriverWait(self.driver, 10)
-        wait.until(
+        self.wait.until(
             EC.text_to_be_present_in_element((By.ID, "ac9_13_1_stdout"), "Lind")
         )
         out = t2.find_element_by_id("ac9_13_1_stdout")
@@ -221,11 +215,11 @@ class ActiveCodeTests(RunestoneTestCase):
         rb.click()
         out = t2.find_element_by_id("alt_kiva_bar1_stdout")
         self.assertIsNotNone(out)
-        wait = WebDriverWait(self.driver, 10)
-        wait.until(
-            EC.text_to_be_present_in_element((By.ID, "alt_kiva_bar1_stdout"), "mark")
+        self.wait.until(
+            EC.text_to_be_present_in_element(
+                (By.ID, "alt_kiva_bar1_stdout"), "mark = bar"
+            )
         )
-        self.assertIn("mark = bar", out.text)
         self.assertIn("{'field': 'customer', 'type': 'nominal'}", out.text)
         can = t2.find_element_by_tag_name("canvas")
         self.assertIsNotNone(can)
@@ -237,13 +231,11 @@ class ActiveCodeTests(RunestoneTestCase):
         rb = t2.find_element_by_class_name("run-button")
         self.assertIsNotNone(rb)
         rb.click()
-        wait = WebDriverWait(self.driver, 10)
-        wait.until(
+        self.wait.until(
             EC.text_to_be_present_in_element((By.ID, "ac14_7_2_stdout"), "400")
         )
         out = t2.find_element_by_id("ac14_7_2_stdout")
         self.assertIsNotNone(out)
-        self.assertTrue("400" in out.text)
         self.assertTrue("244" in out.text)
         self.assertTrue(("165 161 158" in out.text) or ("165 162 157" in out.text))
         can = t2.find_element_by_tag_name("canvas")
