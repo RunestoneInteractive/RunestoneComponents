@@ -75,19 +75,19 @@ class ModuleFixture(unittest.TestCase):
         # otherwise the runestone build may fail due to lack of a runestone.js file!
         p = subprocess.run(
             ["npm.cmd" if IS_WINDOWS else "npm", "run", "build"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True,
+            capture_output=True,
+            text=True,
         )
+        print(p.stdout + p.stderr)
         self.assertFalse(p.returncode)
         # Compile the docs. Save the stdout and stderr for examination.
-        p = subprocess.Popen(
+        p = subprocess.run(
             ["runestone", "build", "--all"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True,
+            capture_output=True,
+            text=True,
         )
-        self.build_stdout_data, self.build_stderr_data = p.communicate()
+        self.build_stdout_data = p.stdout
+        self.build_stderr_data = p.stderr
         print(self.build_stdout_data + self.build_stderr_data)
         if self.exit_status_success:
             self.assertFalse(p.returncode)
@@ -99,8 +99,8 @@ class ModuleFixture(unittest.TestCase):
                 # -n: Display addresses numerically. Looking up names is slow.
                 # -o: Include the PID for each connection.
                 ["netstat", "-no"],
-                universal_newlines=True,
-                stdout=subprocess.PIPE,
+                capture_output=True,
+                text=True,
             ).stdout
             # Skip the first four lines, which are headings.
             for connection in netstat_output.splitlines()[4:]:
@@ -114,8 +114,8 @@ class ModuleFixture(unittest.TestCase):
         else:
             lsof_output = subprocess.run(
                 ["lsof", "-i", ":{0}".format(PORT)],
-                universal_newlines=True,
-                stdout=subprocess.PIPE,
+                capture_output=True,
+                text=True,
             ).stdout
             for process in lsof_output.split("\n")[1:]:
                 data = [x for x in process.split(" ") if x != ""]
@@ -194,19 +194,6 @@ class ModuleFixture(unittest.TestCase):
 
         global mf
         mf = None
-
-    # Without this, Python 2.7 produces errors when running unit tests:
-    #
-    #   .. code::
-    #       :number-lines:
-    #
-    #       python -m unittest discover
-    #
-    #       ImportError: Failed to import test module: runestone.tabbedStuff.test.test_tabbedStuff
-    #       Traceback (most recent call last):  (omitted)
-    #       ValueError: no such test method in <class 'runestone.unittest_base.ModuleFixture'>: runTest
-    def runTest(self):
-        pass
 
 
 # Provide a simple way to instantiante a ModuleFixture in a test module. Typical use:
