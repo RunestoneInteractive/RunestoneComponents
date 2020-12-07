@@ -68,8 +68,6 @@ def visit_timed_node(self, node):
     else:
         node.runestone_options["noresult"] = ""
 
-        node.runestone_options["noresult"] = ""
-
     if "timedfeedback" in node.runestone_options:
         node.runestone_options["timedfeedback"] = "data-timedfeedback=true"
     else:
@@ -80,23 +78,14 @@ def visit_timed_node(self, node):
     else:
         node.runestone_options["notimer"] = ""
 
-        node.runestone_options["timedfeedback"] = ""
-
     if "nofeedback" in node.runestone_options:
         node.runestone_options["nofeedback"] = "data-no-feedback"
     else:
         node.runestone_options["nofeedback"] = ""
 
-    if "notimer" in node.runestone_options:
-        node.runestone_options["notimer"] = "data-no-timer"
-    else:
-        node.runestone_options["notimer"] = ""
-
     if "fullwidth" in node.runestone_options:
         node.runestone_options["fullwidth"] = "data-fullwidth"
     else:
-        node.runestone_options["fullwidth"] = ""
-
         node.runestone_options["fullwidth"] = ""
 
     if "nopause" in node.runestone_options:
@@ -126,13 +115,13 @@ TEMPLATE_END = """</ul>
 
 class TimedDirective(RunestoneIdDirective):
     """
-.. timed:: identifier
-    :timelimit: Number of minutes student has to take the timed assessment--if not provided, no time limit
-    :noresult: Boolean, doesn't display score
-    :timedfeedback: Boolean, Show feedback even in timed mode
-    :notimer: Boolean, doesn't show timer
-    :nopause: Boolean do not show a pause button
-    :fullwidth: Boolean, allows the items in the timed assessment to take the full width of the screen...
+    .. timed:: identifier
+        :timelimit: Number of minutes student has to take the timed assessment--if not provided, no time limit
+        :noresult: Boolean, doesn't display score
+        :timedfeedback: Boolean, Show feedback even in timed mode
+        :notimer: Boolean, doesn't show timer
+        :nopause: Boolean do not show a pause button
+        :fullwidth: Boolean, allows the items in the timed assessment to take the full width of the screen...
 
     """
 
@@ -152,17 +141,17 @@ class TimedDirective(RunestoneIdDirective):
 
     def run(self):
         """
-            process the timed directive and generate html for output.
-            :param self:
-            :return:
-            .. timed:: identifier
-                :timelimit: Number of minutes student has to take the timed assessment--if not provided, no time limit
-                :noresult: Boolean, doesn't display score
-                :timedfeedback: Boolean, show feedback
-                :notimer: Boolean, doesn't show timer
-                :fullwidth: Boolean, allows the items in the timed assessment to take the full width of the screen
-            ...
-            """
+        process the timed directive and generate html for output.
+        :param self:
+        :return:
+        .. timed:: identifier
+            :timelimit: Number of minutes student has to take the timed assessment--if not provided, no time limit
+            :noresult: Boolean, doesn't display score
+            :timedfeedback: Boolean, show feedback
+            :notimer: Boolean, doesn't show timer
+            :fullwidth: Boolean, allows the items in the timed assessment to take the full width of the screen
+        ...
+        """
         super(TimedDirective, self).run()
         self.assert_has_content()  # make sure timed has something in it
 
