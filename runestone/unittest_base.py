@@ -82,9 +82,7 @@ class ModuleFixture(unittest.TestCase):
         self.assertFalse(p.returncode)
         # Compile the docs. Save the stdout and stderr for examination.
         p = subprocess.run(
-            ["runestone", "build", "--all"],
-            capture_output=True,
-            text=True,
+            ["runestone", "build", "--all"], capture_output=True, text=True,
         )
         self.build_stdout_data = p.stdout
         self.build_stderr_data = p.stderr
@@ -113,9 +111,7 @@ class ModuleFixture(unittest.TestCase):
                     os.kill(pid, 0)
         else:
             lsof_output = subprocess.run(
-                ["lsof", "-i", ":{0}".format(PORT)],
-                capture_output=True,
-                text=True,
+                ["lsof", "-i", ":{0}".format(PORT)], capture_output=True, text=True,
             ).stdout
             for process in lsof_output.split("\n")[1:]:
                 data = [x for x in process.split(" ") if x != ""]
