@@ -134,6 +134,10 @@ class MultipleChoiceQuestion_Tests(RunestoneTestCase):
         btn_check.click()
         fb = t1.find_element_by_id("question2_feedback")
         self.assertIsNotNone(fb)
+        self.wait.until(
+            EC.text_to_be_present_in_element((By.ID, "question2_feedback"), "✖️"),
+            message="Did not find expected text",
+        )
         cnamestr = fb.get_attribute("class")
         self.assertIn("alert-danger", cnamestr)
 
@@ -149,6 +153,10 @@ class MultipleChoiceQuestion_Tests(RunestoneTestCase):
 
         fb = t1.find_element_by_id("question2_feedback")
         self.assertIsNotNone(fb)
+        self.wait.until(
+            EC.text_to_be_present_in_element((By.ID, "question2_feedback"), "Red"),
+            message="Did not find expected text",
+        )
         cnamestr = fb.get_attribute("class")
         self.assertIn("alert-info", cnamestr)
 

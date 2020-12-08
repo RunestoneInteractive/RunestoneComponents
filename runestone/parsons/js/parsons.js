@@ -160,7 +160,6 @@ export default class Parsons extends RunestoneBase {
     // Based on what is specified in the original HTML, create the HTML view
     initializeView() {
         this.containerDiv = document.createElement("div");
-        $(this.containerDiv).css("max-width", "none");
         $(this.containerDiv).addClass("parsons alert alert-warning");
         this.containerDiv.id = this.counterId;
         this.parsTextDiv = document.createElement("div");
@@ -279,6 +278,7 @@ export default class Parsons extends RunestoneBase {
         this.parsonsControlDiv.appendChild(this.messageDiv);
         $(this.messageDiv).hide();
         $(this.origElem).replaceWith(this.containerDiv);
+        $(this.containerDiv).closest(".sqcontainer").css("max-width", "none");
     }
     // Initialize lines and solution properties
     initializeLines(text) {
