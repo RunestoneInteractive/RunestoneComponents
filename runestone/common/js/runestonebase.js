@@ -140,6 +140,10 @@ export default class RunestoneBase {
     /* Checking/loading from storage */
     async checkServer(eventInfo) {
         // Check if the server has stored answer
+        let self = this;
+        this.checkServerComplete = new Promise(function (resolve, reject) {
+            self.csresolver = resolve;
+        });
         if (this.useRunestoneServices || this.graderactive) {
             let data = {};
             data.div_id = this.divid;
@@ -166,6 +170,7 @@ export default class RunestoneBase {
                     let response = await fetch(request);
                     data = await response.json();
                     this.repopulateFromStorage(data);
+                    this.csresolver("server");
                 } catch (err) {
                     try {
                         this.checkLocalStorage();
@@ -178,6 +183,7 @@ export default class RunestoneBase {
             }
         } else {
             this.checkLocalStorage(); // just go right to local storage
+            this.csresolver("local");
         }
     }
 
