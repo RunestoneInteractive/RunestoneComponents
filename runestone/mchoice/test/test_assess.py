@@ -6,6 +6,7 @@ __author__ = "yasinovskyy"
 
 from unittest import TestCase
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
 mf, setUpModule, tearDownModule = module_fixture_maker(__file__, True)
