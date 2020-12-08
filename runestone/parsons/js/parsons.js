@@ -160,6 +160,7 @@ export default class Parsons extends RunestoneBase {
     // Based on what is specified in the original HTML, create the HTML view
     initializeView() {
         this.containerDiv = document.createElement("div");
+        $(this.containerDiv).css("max-width", "none");
         $(this.containerDiv).addClass("parsons alert alert-warning");
         this.containerDiv.id = this.counterId;
         this.parsTextDiv = document.createElement("div");
@@ -296,13 +297,13 @@ export default class Parsons extends RunestoneBase {
             // Remove the options from the code
             // only options are #paired or #distractor
             var options = {};
-            textBlock = textBlock.replace(/#(paired|distractor)/, function (
-                mystring,
-                arg1
-            ) {
-                options[arg1] = true;
-                return "";
-            });
+            textBlock = textBlock.replace(
+                /#(paired|distractor)/,
+                function (mystring, arg1) {
+                    options[arg1] = true;
+                    return "";
+                }
+            );
             // Create lines
             var lines = [];
             var split = textBlock.split("\n");
