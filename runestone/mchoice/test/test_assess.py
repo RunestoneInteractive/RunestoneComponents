@@ -7,30 +7,13 @@ __author__ = "yasinovskyy"
 from unittest import TestCase
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
+from runestone.unittest_base import (
+    module_fixture_maker,
+    RunestoneTestCase,
+    element_has_css_class,
+)
 
 mf, setUpModule, tearDownModule = module_fixture_maker(__file__, True)
-
-
-class element_has_css_class:
-    """An expectation for checking that an element has a particular css class. From the `Selenium docs <https://selenium-python.readthedocs.io/waits.html#explicit-waits>`_, under the "Custom wait conditions" subheading.
-
-    locator - used to find the element
-
-    returns the WebElement once it has the particular css class.
-    """
-
-    def __init__(self, locator, css_class):
-        self.locator = locator
-        self.css_class = css_class
-
-    def __call__(self, driver):
-        # Find the referenced element.
-        element = driver.find_element(*self.locator)
-        if self.css_class in element.get_attribute("class"):
-            return element
-        else:
-            return False
 
 
 # Look for errors producted by invalid questions.

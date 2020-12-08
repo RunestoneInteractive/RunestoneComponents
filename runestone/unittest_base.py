@@ -35,6 +35,8 @@ mylogger = logging.getLogger()
 # -------------
 # None
 
+# Globals
+# =======
 # Select an unused port for serving web pages to the test suite.
 PORT = "8081"
 # Use the localhost for testing.
@@ -50,6 +52,8 @@ IS_LINUX = sys.platform.startswith("linux")
 mf = None
 
 
+# Code
+# ====
 # Define `module fixtures <https://docs.python.org/2/library/unittest.html#setupmodule-and-teardownmodule>`_ to build the test Runestone project, run the server, then shut it down when the tests complete.
 class ModuleFixture(unittest.TestCase):
     def __init__(
@@ -224,3 +228,29 @@ class RunestoneTestCase(unittest.TestCase):
         self.driver.execute_script("window.localStorage.clear();")
         self.driver.execute_script("window.sessionStorage.clear();")
         self.driver.delete_all_cookies()
+
+
+# An expectation for Selenium, used for checking that an element has a particular css class. From the `Selenium docs <https://selenium-python.readthedocs.io/waits.html#explicit-waits>`_, under the "Custom wait conditions" subheading.
+#
+# locator - used to find the element
+#
+# returns the WebElement once it has the particular css class.
+class element_has_css_class:
+    def __init__(
+        self,
+        # The element to find; this is passed directly to `driver.find_element <https://selenium-python.readthedocs.io/api.html#selenium.webdriver.remote.webdriver.WebDriver.find_element>`_. See the `Selenium docs`_.
+        locator,
+        # The CSS class to look for.
+        css_class,
+    ):
+
+        self.locator = locator
+        self.css_class = css_class
+
+    def __call__(self, driver):
+        # Find the referenced element.
+        element = driver.find_element(*self.locator)
+        if self.css_class in element.get_attribute("class"):
+            return element
+        else:
+            return False
