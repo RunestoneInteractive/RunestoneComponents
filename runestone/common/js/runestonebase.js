@@ -61,10 +61,10 @@ export default class RunestoneBase {
         });
     }
 
-// .. _logBookEvent:
-//
-// logBookEvent
-// ------------
+    // .. _logBookEvent:
+    //
+    // logBookEvent
+    // ------------
     // This function sends the provided ``eventInfo`` to the `hsblog endpoint` of the server. Awaiting this function returns either ``undefined`` (if Runestone services are not available) or the data returned by the server as a JavaScript object (already JSON-decoded).
     async logBookEvent(eventInfo) {
         if (this.graderactive) {
@@ -100,10 +100,10 @@ export default class RunestoneBase {
         return post_return;
     }
 
-// .. _logRunEvent:
-//
-// logRunEvent
-// -----------
+    // .. _logRunEvent:
+    //
+    // logRunEvent
+    // -----------
     // This function sends the provided ``eventInfo`` to the `runlog endpoint`. When awaited, this function returns the data (decoded from JSON) the server sent back.
     async logRunEvent(eventInfo) {
         let post_promise = "done";
@@ -122,8 +122,8 @@ export default class RunestoneBase {
                 headers: this.jsonHeaders,
                 body: JSON.stringify(eventInfo),
             });
-            post_promise = await fetch(request);
-            if (!post_promise.ok) {
+            let response = await fetch(request);
+            if (!response.ok) {
                 throw new Error("Failed to log the run");
             }
             post_promise = await response.json();

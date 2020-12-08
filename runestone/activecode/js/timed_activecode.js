@@ -71,21 +71,10 @@ var TimedActiveCodeMixin = {
     },
 
     reinitializeListeners: function (taken) {
-        // re-attach the run button listener
-        $(this.runButton).click(this.runProg.bind(this));
         $(this.codeDiv).show();
         this.runButton.disabled = false;
         $(this.codeDiv).removeClass("ac-disabled");
         this.editor.refresh();
-        $(this.histButton).click(this.addHistoryScrubber.bind(this));
-        if (this.historyScrubber !== null) {
-            $(this.historyScrubber).slider({
-                max: this.history.length - 1,
-                value: this.history.length - 1,
-                slide: this.slideit.bind(this),
-                change: this.slideit.bind(this),
-            });
-        }
         if (taken) {
             $(`#${this.divid}_unit_results`).show();
         }
