@@ -1,15 +1,36 @@
-"""
-Test Multiple Choice question directive
-"""
+# ****************************************************
+# |docname| - Test Multiple Choice question directive
+# ****************************************************
 
 __author__ = "yasinovskyy"
 
 from unittest import TestCase
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
 mf, setUpModule, tearDownModule = module_fixture_maker(__file__, True)
+
+
+class element_has_css_class:
+    """An expectation for checking that an element has a particular css class. From the `Selenium docs <https://selenium-python.readthedocs.io/waits.html#explicit-waits>`_, under the "Custom wait conditions" subheading.
+
+    locator - used to find the element
+
+    returns the WebElement once it has the particular css class.
+    """
+
+    def __init__(self, locator, css_class):
+        self.locator = locator
+        self.css_class = css_class
+
+    def __call__(self, driver):
+        # Find the referenced element.
+        element = driver.find_element(*self.locator)
+        if self.css_class in element.get_attribute("class"):
+            return element
+        else:
+            return False
+
 
 # Look for errors producted by invalid questions.
 class MultipleChoiceQuestion_Error_Tests(TestCase):
@@ -132,10 +153,9 @@ class MultipleChoiceQuestion_Tests(RunestoneTestCase):
         t1 = self.driver.find_element_by_id("question2")
         btn_check = t1.find_element_by_tag_name("button")
         btn_check.click()
-        fb = t1.find_element_by_id("question2_feedback")
-        self.assertIsNotNone(fb)
-        cnamestr = fb.get_attribute("class")
-        self.assertIn("alert-danger", cnamestr)
+        self.wait.until(
+            element_has_css_class((By.ID, "question2_feedback"), "alert-danger")
+        )
 
     def test_mc2(self):
         """Multiple Choice: Correct answer selected"""
