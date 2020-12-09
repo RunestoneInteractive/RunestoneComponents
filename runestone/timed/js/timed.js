@@ -815,9 +815,10 @@ export default class Timed extends RunestoneBase {
         currentQuestion.checkCurrentAnswer();
         currentQuestion.logCurrentAnswer();
         currentQuestion.renderFeedback();
+        currentQuestion.disableInteraction();
 
         for (var i = 0; i < this.renderedQuestionArray.length; i++) {
-            var currentQuestion = this.renderedQuestionArray[i];
+            let currentQuestion = this.renderedQuestionArray[i];
             // set the state to forreview so we know that feedback may be appropriate
             currentQuestion.state = "forreview";
         }

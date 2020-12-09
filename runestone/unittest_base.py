@@ -35,6 +35,8 @@ mylogger = logging.getLogger()
 # -------------
 # None
 
+# Globals
+# =======
 # Select an unused port for serving web pages to the test suite.
 PORT = "8081"
 # Use the localhost for testing.
@@ -50,6 +52,8 @@ IS_LINUX = sys.platform.startswith("linux")
 mf = None
 
 
+# Code
+# ====
 # Define `module fixtures <https://docs.python.org/2/library/unittest.html#setupmodule-and-teardownmodule>`_ to build the test Runestone project, run the server, then shut it down when the tests complete.
 class ModuleFixture(unittest.TestCase):
     def __init__(
@@ -75,19 +79,17 @@ class ModuleFixture(unittest.TestCase):
         # otherwise the runestone build may fail due to lack of a runestone.js file!
         p = subprocess.run(
             ["npm.cmd" if IS_WINDOWS else "npm", "run", "build"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True,
+            capture_output=True,
+            text=True,
         )
+        print(p.stdout + p.stderr)
         self.assertFalse(p.returncode)
         # Compile the docs. Save the stdout and stderr for examination.
-        p = subprocess.Popen(
-            ["runestone", "build", "--all"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True,
+        p = subprocess.run(
+            ["runestone", "build", "--all"], capture_output=True, text=True,
         )
-        self.build_stdout_data, self.build_stderr_data = p.communicate()
+        self.build_stdout_data = p.stdout
+        self.build_stderr_data = p.stderr
         print(self.build_stdout_data + self.build_stderr_data)
         if self.exit_status_success:
             self.assertFalse(p.returncode)
@@ -99,8 +101,8 @@ class ModuleFixture(unittest.TestCase):
                 # -n: Display addresses numerically. Looking up names is slow.
                 # -o: Include the PID for each connection.
                 ["netstat", "-no"],
-                universal_newlines=True,
-                stdout=subprocess.PIPE,
+                capture_output=True,
+                text=True,
             ).stdout
             # Skip the first four lines, which are headings.
             for connection in netstat_output.splitlines()[4:]:
@@ -113,9 +115,7 @@ class ModuleFixture(unittest.TestCase):
                     os.kill(pid, 0)
         else:
             lsof_output = subprocess.run(
-                ["lsof", "-i", ":{0}".format(PORT)],
-                universal_newlines=True,
-                stdout=subprocess.PIPE,
+                ["lsof", "-i", ":{0}".format(PORT)], capture_output=True, text=True,
             ).stdout
             for process in lsof_output.split("\n")[1:]:
                 data = [x for x in process.split(" ") if x != ""]
@@ -195,19 +195,6 @@ class ModuleFixture(unittest.TestCase):
         global mf
         mf = None
 
-    # Without this, Python 2.7 produces errors when running unit tests:
-    #
-    #   .. code::
-    #       :number-lines:
-    #
-    #       python -m unittest discover
-    #
-    #       ImportError: Failed to import test module: runestone.tabbedStuff.test.test_tabbedStuff
-    #       Traceback (most recent call last):  (omitted)
-    #       ValueError: no such test method in <class 'runestone.unittest_base.ModuleFixture'>: runTest
-    def runTest(self):
-        pass
-
 
 # Provide a simple way to instantiante a ModuleFixture in a test module. Typical use:
 #
@@ -241,3 +228,29 @@ class RunestoneTestCase(unittest.TestCase):
         self.driver.execute_script("window.localStorage.clear();")
         self.driver.execute_script("window.sessionStorage.clear();")
         self.driver.delete_all_cookies()
+
+
+# An expectation for Selenium, used for checking that an element has a particular css class. From the `Selenium docs <https://selenium-python.readthedocs.io/waits.html#explicit-waits>`_, under the "Custom wait conditions" subheading.
+#
+# locator - used to find the element
+#
+# returns the WebElement once it has the particular css class.
+class element_has_css_class:
+    def __init__(
+        self,
+        # The element to find; this is passed directly to `driver.find_element <https://selenium-python.readthedocs.io/api.html#selenium.webdriver.remote.webdriver.WebDriver.find_element>`_. See the `Selenium docs`_.
+        locator,
+        # The CSS class to look for.
+        css_class,
+    ):
+
+        self.locator = locator
+        self.css_class = css_class
+
+    def __call__(self, driver):
+        # Find the referenced element.
+        element = driver.find_element(*self.locator)
+        if self.css_class in element.get_attribute("class"):
+            return element
+        else:
+            return False

@@ -241,9 +241,14 @@ export class ActiveCode extends RunestoneBase {
         $(butt).addClass("btn btn-success run-button");
         ctrlDiv.appendChild(butt);
         this.runButton = butt;
+        console.log("adding click function for run");
         $(butt).click(
             async function () {
-                await this.runProg();
+                try {
+                    await this.runProg();
+                } catch (e) {
+                    console.log(`there was an error ${e} running the code`);
+                }
                 if (this.logResults) {
                     this.logCurrentAnswer();
                 }
@@ -1136,42 +1141,46 @@ Yet another is that there is an internal error.  The internal error message is: 
     }
 
     async manage_scrubber(saveCode) {
-        let scrubber_dfd = false;
         if (this.historyScrubber === null && !this.autorun) {
-            scrubber_dfd = await this.addHistoryScrubber();
+            let response = await this.addHistoryScrubber();
+            if (!response.ok) {
+                console.log("Failed to load history -- this should not fail.");
+            }
         }
-        if (scrubber_dfd && scrubber_dfd.ok) {
-            if (
-                this.historyScrubber &&
-                this.history[$(this.historyScrubber).slider("value")] !=
-                    this.editor.getValue()
-            ) {
-                saveCode = "True";
-                this.history.push(this.editor.getValue());
-                this.timestamps.push(new Date().toLocaleString());
-                $(this.historyScrubber).slider(
-                    "option",
-                    "max",
-                    this.history.length - 1
-                );
-                $(this.historyScrubber).slider(
-                    "option",
-                    "value",
-                    this.history.length - 1
-                );
-                this.slideit();
-            } else {
-                saveCode = "False";
-            }
-            if (this.historyScrubber == null) {
-                saveCode = "False";
-            }
+        if (
+            this.historyScrubber &&
+            this.history[$(this.historyScrubber).slider("value")] !=
+                this.editor.getValue()
+        ) {
+            saveCode = "True";
+            this.history.push(this.editor.getValue());
+            this.timestamps.push(new Date().toLocaleString());
+            $(this.historyScrubber).slider(
+                "option",
+                "max",
+                this.history.length - 1
+            );
+            $(this.historyScrubber).slider(
+                "option",
+                "value",
+                this.history.length - 1
+            );
+            this.slideit();
+        } else {
+            saveCode = "False";
+        }
+        if (this.historyScrubber == null) {
+            saveCode = "False";
         }
         return Promise.resolve(saveCode);
     }
 
     async checkCurrentAnswer() {
-        this.run_promise = this.runProg();
+        try {
+            await this.runProg();
+        } catch (e) {
+            console.log(`error running code ${e}`);
+        }
     }
 
     logCurrentAnswer() {
@@ -1229,6 +1238,7 @@ Yet another is that there is an internal error.  The internal error message is: 
      *
      */
     async runProg(noUI, logResults) {
+        console.log("starting runProg");
         if (typeof logResults === "undefined") {
             this.logResults = true;
         } else {
@@ -1241,7 +1251,10 @@ Yet another is that there is an internal error.  The internal error message is: 
         var prog = await this.buildProg(true);
         this.saveCode = "True";
         $(this.output).text("");
-        $(this.eContainer).remove();
+        while ($(`#${this.divid}_errinfo`).length > 0) {
+            $(`#${this.divid}_errinfo`).remove();
+        }
+        //$(this.eContainer).remove();
         if (this.codelens) {
             this.codelens.style.display = "none";
         }

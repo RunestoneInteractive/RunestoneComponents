@@ -60,10 +60,10 @@ export default class RunestoneBase {
         });
     }
 
-// .. _logBookEvent:
-//
-// logBookEvent
-// ------------
+    // .. _logBookEvent:
+    //
+    // logBookEvent
+    // ------------
     // This function sends the provided ``eventInfo`` to the `hsblog endpoint` of the server. Awaiting this function returns either ``undefined`` (if Runestone services are not available) or the data returned by the server as a JavaScript object (already JSON-decoded).
     async logBookEvent(eventInfo) {
         if (this.graderactive) {
@@ -99,10 +99,10 @@ export default class RunestoneBase {
         return post_return;
     }
 
-// .. _logRunEvent:
-//
-// logRunEvent
-// -----------
+    // .. _logRunEvent:
+    //
+    // logRunEvent
+    // -----------
     // This function sends the provided ``eventInfo`` to the `runlog endpoint`. When awaited, this function returns the data (decoded from JSON) the server sent back.
     async logRunEvent(eventInfo) {
         let post_promise = "done";
@@ -121,8 +121,8 @@ export default class RunestoneBase {
                 headers: this.jsonHeaders,
                 body: JSON.stringify(eventInfo),
             });
-            post_promise = await fetch(request);
-            if (!post_promise.ok) {
+            let response = await fetch(request);
+            if (!response.ok) {
                 throw new Error("Failed to log the run");
             }
             post_promise = await response.json();
@@ -139,6 +139,10 @@ export default class RunestoneBase {
     /* Checking/loading from storage */
     async checkServer(eventInfo) {
         // Check if the server has stored answer
+        let self = this;
+        this.checkServerComplete = new Promise(function (resolve, reject) {
+            self.csresolver = resolve;
+        });
         if (this.useRunestoneServices || this.graderactive) {
             let data = {};
             data.div_id = this.divid;
@@ -165,6 +169,7 @@ export default class RunestoneBase {
                     let response = await fetch(request);
                     data = await response.json();
                     this.repopulateFromStorage(data);
+                    this.csresolver("server");
                 } catch (err) {
                     try {
                         this.checkLocalStorage();
@@ -177,6 +182,7 @@ export default class RunestoneBase {
             }
         } else {
             this.checkLocalStorage(); // just go right to local storage
+            this.csresolver("local");
         }
     }
 

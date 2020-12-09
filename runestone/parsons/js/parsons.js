@@ -278,6 +278,7 @@ export default class Parsons extends RunestoneBase {
         this.parsonsControlDiv.appendChild(this.messageDiv);
         $(this.messageDiv).hide();
         $(this.origElem).replaceWith(this.containerDiv);
+        $(this.containerDiv).closest(".sqcontainer").css("max-width", "none");
     }
     // Initialize lines and solution properties
     initializeLines(text) {
@@ -296,13 +297,13 @@ export default class Parsons extends RunestoneBase {
             // Remove the options from the code
             // only options are #paired or #distractor
             var options = {};
-            textBlock = textBlock.replace(/#(paired|distractor)/, function (
-                mystring,
-                arg1
-            ) {
-                options[arg1] = true;
-                return "";
-            });
+            textBlock = textBlock.replace(
+                /#(paired|distractor)/,
+                function (mystring, arg1) {
+                    options[arg1] = true;
+                    return "";
+                }
+            );
             // Create lines
             var lines = [];
             var split = textBlock.split("\n");
@@ -2058,8 +2059,9 @@ export default class Parsons extends RunestoneBase {
         $(this.messageDiv).hide();
     }
     // Disable the interface
-    disableInteraction() {
+    async disableInteraction() {
         // Disable blocks
+        await this.checkServerComplete;
         if (this.blocks !== undefined) {
             for (var i = 0; i < this.blocks.length; i++) {
                 var block = this.blocks[i];
