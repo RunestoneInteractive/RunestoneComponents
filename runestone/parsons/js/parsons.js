@@ -90,6 +90,7 @@ export default class Parsons extends RunestoneBase {
             this.checkServer("parsons");
         } else {
             this.checkLocalStorage();
+            this.checkServerComplete = Promise.resolve("no server");
         }
         this.caption = "Parsons";
         this.addCaption("runestone");
@@ -661,7 +662,8 @@ export default class Parsons extends RunestoneBase {
                 this.blocksFromHash(answerHash),
                 options
             );
-            this.grader.grade();
+            this.grade = this.grader.grade();
+            this.correct = this.grade;
         }
         // Start the interface
         if (this.needsReinitialization !== true) {
@@ -753,7 +755,7 @@ export default class Parsons extends RunestoneBase {
             event.adaptive = adaptiveHash;
             act = act + "|" + adaptiveHash;
         }
-        if (this.answer == "correct") {
+        if (this.grade == "correct") {
             act = "correct|" + act;
             event.correct = "T";
         } else {
