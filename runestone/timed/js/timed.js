@@ -103,7 +103,6 @@ export default class Timed extends RunestoneBase {
         // If a user has not taken this exam then we want to make sure
         // that if a question has been seen by the student before we do
         // not populate previous answers.
-        let response = Promise.resolve();
         let sendInfo = {
             div_id: this.divid,
             course_name: eBookConfig.course,
@@ -118,24 +117,27 @@ export default class Timed extends RunestoneBase {
                     body: JSON.stringify(sendInfo),
                 }
             );
-            response = await fetch(request);
+            let response = await fetch(request);
             let data = await response.json();
             this.taken = data.tookAssessment;
             this.assessmentTaken = this.taken;
             if (!this.taken) {
                 localStorage.clear();
             }
+            console.log("done with check status");
+            return response;
         } else {
             this.taken = false;
             this.assessmentTaken = false;
+            return Promise.resolve();
         }
-        return response;
     }
 
     /*===============================
     === Generating new Timed HTML ===
     ===============================*/
     renderTimedAssess() {
+        console.log("rendering timed ");
         // create renderedQuestionArray returns a promise
         //
         this.createRenderedQuestionArray();
@@ -153,7 +155,8 @@ export default class Timed extends RunestoneBase {
         // Replace intermediate HTML with rendered HTML
         $(this.origElem).replaceWith(this.assessDiv);
         // check if already taken and if so show results
-        this.tookTimedExam(); // rename to renderPossibleResults
+        this.styleExamElements(); // rename to renderPossibleResults
+        this.checkServer("timedExam");
     }
 
     renderContainer() {
@@ -234,7 +237,9 @@ export default class Timed extends RunestoneBase {
             }.bind(this),
             false
         );
-        this.controlDiv.appendChild(this.startBtn);
+        if (!this.taken) {
+            this.controlDiv.appendChild(this.startBtn);
+        }
         if (!this.nopause) {
             this.controlDiv.appendChild(this.pauseBtn);
         }
@@ -734,7 +739,8 @@ export default class Timed extends RunestoneBase {
             );
         }
     }
-    tookTimedExam() {
+
+    styleExamElements() {
         // Checks if this exam has been taken before
         $(this.timerContainer).css({
             width: "50%",
@@ -758,7 +764,6 @@ export default class Timed extends RunestoneBase {
             "background-color": "black",
             color: "white",
         });
-        this.checkServer("timedExam");
     }
 
     finishAssessment() {
@@ -821,6 +826,7 @@ export default class Timed extends RunestoneBase {
             let currentQuestion = this.renderedQuestionArray[i];
             // set the state to forreview so we know that feedback may be appropriate
             currentQuestion.state = "forreview";
+            currentQuestion.question.disableInteraction();
         }
 
         if (!this.showFeedback) {

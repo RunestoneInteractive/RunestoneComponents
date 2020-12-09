@@ -179,6 +179,7 @@ export default class RunestoneBase {
                 }
             } else {
                 this.loadData({});
+                this.csresolver("not taken");
             }
         } else {
             this.checkLocalStorage(); // just go right to local storage

@@ -221,7 +221,7 @@ class RunestoneTestCase(unittest.TestCase):
         self.driver.implicitly_wait(5)
         # For cases where an implicit wait does not help.  For example waiting for text to appear
         # after running an activecode.  We create an explicit wait object.
-        self.wait = WebDriverWait(self.driver, 5)
+        self.wait = WebDriverWait(self.driver, 10)
 
     def tearDown(self):
         # Clear as much as possible, to present an almost-fresh instance of a browser for the next test. (Shutting down then starting up a browswer is very slow.)

@@ -90,6 +90,7 @@ export default class Parsons extends RunestoneBase {
             this.checkServer("parsons");
         } else {
             this.checkLocalStorage();
+            this.checkServerComplete = Promise.resolve("no server");
         }
         this.caption = "Parsons";
         this.addCaption("runestone");
@@ -661,7 +662,8 @@ export default class Parsons extends RunestoneBase {
                 this.blocksFromHash(answerHash),
                 options
             );
-            this.grader.grade();
+            this.grade = this.grader.grade();
+            this.correct = this.grade;
         }
         // Start the interface
         if (this.needsReinitialization !== true) {
@@ -753,7 +755,7 @@ export default class Parsons extends RunestoneBase {
             event.adaptive = adaptiveHash;
             act = act + "|" + adaptiveHash;
         }
-        if (this.answer == "correct") {
+        if (this.grade == "correct") {
             act = "correct|" + act;
             event.correct = "T";
         } else {
@@ -1283,6 +1285,7 @@ export default class Parsons extends RunestoneBase {
             this.grade = this.grader.grade();
             if (this.grade == "correct") {
                 this.hasSolved = true;
+                this.correct = true;
                 localStorage.setItem(this.adaptiveId + "Solved", true);
                 this.recentAttempts = this.checkCount;
                 this.checkCount = 0;
@@ -2062,6 +2065,7 @@ export default class Parsons extends RunestoneBase {
     async disableInteraction() {
         // Disable blocks
         await this.checkServerComplete;
+        console.log("disabling blocks");
         if (this.blocks !== undefined) {
             for (var i = 0; i < this.blocks.length; i++) {
                 var block = this.blocks[i];
