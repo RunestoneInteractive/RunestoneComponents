@@ -1283,6 +1283,7 @@ export default class Parsons extends RunestoneBase {
             this.grade = this.grader.grade();
             if (this.grade == "correct") {
                 this.hasSolved = true;
+                this.correct = true;
                 localStorage.setItem(this.adaptiveId + "Solved", true);
                 this.recentAttempts = this.checkCount;
                 this.checkCount = 0;
@@ -2062,6 +2063,7 @@ export default class Parsons extends RunestoneBase {
     async disableInteraction() {
         // Disable blocks
         await this.checkServerComplete;
+        console.log("disabling blocks");
         if (this.blocks !== undefined) {
             for (var i = 0; i < this.blocks.length; i++) {
                 var block = this.blocks[i];
