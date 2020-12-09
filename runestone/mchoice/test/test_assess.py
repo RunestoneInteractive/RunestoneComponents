@@ -1,15 +1,20 @@
-"""
-Test Multiple Choice question directive
-"""
+# ****************************************************
+# |docname| - Test Multiple Choice question directive
+# ****************************************************
 
 __author__ = "yasinovskyy"
 
 from unittest import TestCase
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
+from selenium.webdriver.support import expected_conditions as EC
+from runestone.unittest_base import (
+    module_fixture_maker,
+    RunestoneTestCase,
+    element_has_css_class,
+)
 
 mf, setUpModule, tearDownModule = module_fixture_maker(__file__, True)
+
 
 # Look for errors producted by invalid questions.
 class MultipleChoiceQuestion_Error_Tests(TestCase):
@@ -132,14 +137,9 @@ class MultipleChoiceQuestion_Tests(RunestoneTestCase):
         t1 = self.driver.find_element_by_id("question2")
         btn_check = t1.find_element_by_tag_name("button")
         btn_check.click()
-        fb = t1.find_element_by_id("question2_feedback")
-        self.assertIsNotNone(fb)
         self.wait.until(
-            EC.text_to_be_present_in_element((By.ID, "question2_feedback"), "✖️"),
-            message="Did not find expected text",
+            element_has_css_class((By.ID, "question2_feedback"), "alert-danger")
         )
-        cnamestr = fb.get_attribute("class")
-        self.assertIn("alert-danger", cnamestr)
 
     def test_mc2(self):
         """Multiple Choice: Correct answer selected"""
