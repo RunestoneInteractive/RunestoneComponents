@@ -304,6 +304,16 @@ export default class Timed extends RunestoneBase {
             function (event) {
                 if (
                     this.renderedQuestionArray[this.currentQuestionIndex]
+                        .state == "broken_exam"
+                ) {
+                    $(
+                        "ul#pageNums > ul > li:eq(" +
+                            this.currentQuestionIndex +
+                            ")"
+                    ).addClass("broken");
+                }
+                if (
+                    this.renderedQuestionArray[this.currentQuestionIndex]
                         .question.isAnswered
                 ) {
                     $(
@@ -358,6 +368,16 @@ export default class Timed extends RunestoneBase {
         this.qNumList.addEventListener(
             "click",
             function (event) {
+                if (
+                    this.renderedQuestionArray[this.currentQuestionIndex]
+                        .state == "broken_exam"
+                ) {
+                    $(
+                        "ul#pageNums > ul > li:eq(" +
+                            this.currentQuestionIndex +
+                            ")"
+                    ).addClass("broken");
+                }
                 if (
                     this.renderedQuestionArray[this.currentQuestionIndex]
                         .question.isAnswered
@@ -538,13 +558,21 @@ export default class Timed extends RunestoneBase {
                 this.renderedQuestionArray[this.currentQuestionIndex] = {
                     question: newq,
                 };
-                await newq.initialize();
+                try {
+                    await newq.initialize();
+                } catch (e) {
+                    this.renderedQuestionArray[
+                        this.currentQuestionIndex
+                    ].state = "broken_exam";
+                }
             } else if ($(tmpChild).is("[data-component]")) {
                 let componentKind = $(tmpChild).data("component");
                 this.renderedQuestionArray[this.currentQuestionIndex] = {
                     question: window.component_factory[componentKind](opts),
                 };
             }
+        } else if (opts.state === "broken_exam") {
+            return;
         }
 
         currentQuestion = this.renderedQuestionArray[this.currentQuestionIndex]
@@ -562,8 +590,10 @@ export default class Timed extends RunestoneBase {
             }
         }
 
-        $(this.switchDiv).replaceWith(currentQuestion.containerDiv);
-        this.switchDiv = currentQuestion.containerDiv;
+        if (currentQuestion.containerDiv) {
+            $(this.switchDiv).replaceWith(currentQuestion.containerDiv);
+            this.switchDiv = currentQuestion.containerDiv;
+        }
 
         // If the timed component has listeners, those might need to be reinitialized
         // This flag will only be set in the elements that need it--it will be undefined in the others and thus evaluate to false

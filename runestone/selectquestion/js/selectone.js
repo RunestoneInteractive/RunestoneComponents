@@ -89,7 +89,7 @@ export default class SelectOne extends RunestoneBase {
             alert(
                 `Error: Not able to find a question for ${selectorId} based on the criteria`
             );
-            return response;
+            throw new Error(`Unable to find a question for ${selectorId}`);
         }
         let res;
         if (opts.timed) {
