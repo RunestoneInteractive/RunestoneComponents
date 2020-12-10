@@ -1,20 +1,19 @@
-/**
- * Runestone Base Class
- * All runestone components should inherit from RunestoneBase
+/* ********************************
+ * |docname| - Runestone Base Class
+ * ********************************
+ * All runestone components should inherit from RunestoneBase. In addition all runestone components should do the following things:
  *
- * In addition all runestone components should do the following things:
- * 1. Ensure that they are wrapped in a div with the class runestone
- * 2. Write their source AND their generated html to the database if the database is configured
- * 3. properly save and restore their answers using the checkServer mechanism in this base class.
- *    Each component must provide an implementation of
- *    - checkLocalStorage
- *    - setLocalStorage
- *    - restoreAnswers
- *      disableInteraction
+ * 1.   Ensure that they are wrapped in a div with the class runestone
+ * 2.   Write their source AND their generated html to the database if the database is configured
+ * 3.   Properly save and restore their answers using the checkServer mechanism in this base class. Each component must provide an implementation of:
  *
- * 4. provide a Selenium based unit test
+ *      -    checkLocalStorage
+ *      -    setLocalStorage
+ *      -    restoreAnswers
+ *      -    disableInteraction
  *
- **/
+ * 4.   provide a Selenium based unit test
+ */
 
 import { pageProgressTracker } from "./bookfuncs.js";
 //import "./../styles/runestone-custom-sphinx-bootstrap.css";

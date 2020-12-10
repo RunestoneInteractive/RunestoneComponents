@@ -27,7 +27,6 @@ Base Class Provides
 
 All Components
 --------------
-
 * constructor that takes an object of options
 * restoreAnswers
 * setLocalStorage

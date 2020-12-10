@@ -176,12 +176,14 @@ CodeChat_lexer_for_glob = {
     "*.css": "CSS",
     "*.js": "JavaScript",
     "*.html": "HTML",
-    # Perl use # for comments, so pretend these files are Perl.
+    # Perl uses ``#`` for comments, so pretend these files are Perl.
     "*.in": "Perl",
     ".gitignore": "Perl",
     "*.cfg": "INI",
-    # This is actually a Python file.
+    # These are actually a Python files.
     "codechat_config.json": "Python",
+    "conf.tmpl": "Python",
+    "pavement.tmpl": "Python",
 }
 #
 # **CodeChat note::** This is a list of exclude_patterns_ which applies only to
@@ -347,9 +349,10 @@ htmlhelp_basename = "PythonCoursewareProjectdoc"
 # This config value contains the locations and names of other projects that should be linked to in this documentation.
 intersphinx_mapping = {
     "RunestoneServer": (
-        "https://runestoneserver.readthedocs.io/en/latest/",
-        None,
-        # An optional local file location -- useful when updating both Sphinx builds before the updates are pushed to the server.
-        ##"F:/Runestone/web2py/applications/runestone/_build/objects.inv",
+        "https://runestoneserver.readthedocs.io/en/latest/", (
+            None,
+            # An optional local file location -- useful when updating both Sphinx builds before the updates are pushed to the server.
+            ##"C:/Users/bjones/Documents/git/web2py/applications/runestone/_build/objects.inv",
+        )
     )
 }
