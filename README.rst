@@ -12,6 +12,7 @@ RunestoneComponents
 .. image:: https://travis-ci.com/RunestoneInteractive/RunestoneComponents.svg?branch=master
     :target: https://travis-ci.com/RunestoneInteractive/RunestoneComponents
 
+.. image:: https://github.com/RunestoneInteractive/RunestoneComponents/workflows/Python%20package/badge.svg
 
 Packaging of the Runestone components for publishing educational materials using Sphinx and restructuredText. Check out the `Overview <http://interactivepython.org/runestone/static/overview/overview.html>`_ To see all of the extensions in action.
 
