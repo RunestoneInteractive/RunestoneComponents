@@ -176,18 +176,37 @@ export default class Poll extends RunestoneBase {
             );
             var list = $(document.createElement("div"));
             $(list).addClass("results-container");
-            for (var i = 0; i < opt_list.length; i++) {
-                var count = count_list[i];
-                var percent = (count / total) * 100;
-                var text = Math.round(10 * percent) / 10 + "%"; // round percent to 10ths
-                var html =
-                    `<div class="progresscounter">${i + 1}. </div>` +
-                    "<div class='progress'>" +
-                    "<div class='progress-bar progress-bar-success'" +
-                    `style="width: ${percent}%; min-width: 2em;">` +
-                    "<span class='poll-text'>" +
-                    text +
-                    "</span></div></div>";
+            for (var i = 0; i < this.optionList.length; i++) {
+                var count;
+                var percent;
+                if (count_list[i]) {
+                    count = count_list[i];
+                    percent = (count / total) * 100;
+                } else {
+                    count = 0;
+                    percent = 0;
+                }
+                var text = count + " (" + Math.round(10 * percent) / 10 + "%)"; // round percent to 10ths
+                var html;
+                if (percent > 10) {
+                    html =
+                        `<div class="progresscounter">${i + 1}. </div>` +
+                        "<div class='progress'>" +
+                        "<div class='progress-bar progress-bar-success'" +
+                        `style="width: ${percent}%; min-width: 2em;">` +
+                        "<span class='poll-text'>" +
+                        text +
+                        "</span></div></div>";
+                } else {
+                    html =
+                        `<div class="progresscounter">${i + 1}. </div>` +
+                        "<div class='progress'>" +
+                        "<div class='progress-bar progress-bar-success'" +
+                        `style="width: ${percent}%; min-width: 2em;"></div>` +
+                        "<span class='poll-text' style='margin: 0 0 0 10px;'>" +
+                        text +
+                        "</span></div>";
+                }
                 var el = $(html);
                 list.append(el);
             }
