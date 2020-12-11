@@ -218,7 +218,7 @@ class RunestoneTestCase(unittest.TestCase):
         self.driver = mf.driver
         self.host = HOST_URL
         # Add an `implicit wait <https://selenium-python.readthedocs.io/waits.html#implicit-waits>`_.
-        self.driver.implicitly_wait(5)
+        self.driver.implicitly_wait(10)
         # For cases where an implicit wait does not help.  For example waiting for text to appear
         # after running an activecode.  We create an explicit wait object.
         self.wait = WebDriverWait(self.driver, 10)
