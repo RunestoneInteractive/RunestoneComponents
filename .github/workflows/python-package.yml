@@ -23,24 +23,35 @@ jobs:
             - uses: actions/setup-node@v2.1.2
             - uses: act10ns/slack@v1
               with:
-                  status: ${{ job.status }}
+                  status: starting
                   channel: "#builds"
               if: always()
 
             - name: Setup npm and build runestone.js
+              id: create-runestone.js
               run: |
                   npm install
                   npm run build
             - name: Set up Python ${{ matrix.python-version }}
+              id: install-python
               uses: actions/setup-python@v2
               with:
                   python-version: ${{ matrix.python-version }}
             - name: Install dependencies
+              id: install-deps
               run: |
                   python -m pip install --upgrade pip
                   python -m pip install flake8 pytest
                   pip install .
                   if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
             - name: Test with pytest
+              id: pytest
               run: |
                   pytest
+
+            - uses: act10ns/slack@v1
+              with:
+                  status: ${{ job.status }}
+                  steps: ${{ toJson(steps) }}
+                  channel: "#builds"
+              if: always()
