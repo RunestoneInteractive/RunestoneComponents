@@ -28,7 +28,7 @@ jobs:
               if: always()
 
             - name: Setup npm and build runestone.js
-              id: create-runestone.js
+              id: create-runestone-bundle
               run: |
                   npm install
                   npm run build
