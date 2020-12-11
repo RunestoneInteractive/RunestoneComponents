@@ -21,6 +21,12 @@ jobs:
         steps:
             - uses: actions/checkout@v2
             - uses: actions/setup-node@v2.1.2
+            - uses: act10ns/slack@v1
+              with:
+                  status: ${{ job.status }}
+                  channel: "#builds"
+              if: always()
+
             - name: Setup npm and build runestone.js
               run: |
                   npm install
@@ -38,10 +44,3 @@ jobs:
             - name: Test with pytest
               run: |
                   pytest
-
-            - name: Update Slack
-            - uses: act10ns/slack@v1
-              with:
-                  status: ${{ job.status }}
-                  channel: "#builds"
-              if: always()
