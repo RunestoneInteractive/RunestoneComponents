@@ -88,7 +88,9 @@ export default class RunestoneBase {
             }
             post_return = response.json();
         }
-        console.log("logging event " + JSON.stringify(eventInfo));
+        if (!this.isTimed || eBookConfig.debug) {
+            console.log("logging event " + JSON.stringify(eventInfo));
+        }
         if (
             typeof pageProgressTracker.updateProgress === "function" &&
             eventInfo.act != "edit" &&
@@ -127,7 +129,9 @@ export default class RunestoneBase {
             }
             post_promise = await response.json();
         }
-        console.log("running " + JSON.stringify(eventInfo));
+        if (!this.isTimed || eBookConfig.debug) {
+            console.log("running " + JSON.stringify(eventInfo));
+        }
         if (
             typeof pageProgressTracker.updateProgress === "function" &&
             this.optional == false
