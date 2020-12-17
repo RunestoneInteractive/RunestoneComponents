@@ -77,7 +77,7 @@ export default class RunestoneBase {
             eventInfo.percent = this.percent;
         }
         if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
-            let request = new Request(eBookConfig.ajaxURL + "hsblog", {
+            let request = new Request("/logger/bookevent", {
                 method: "POST",
                 headers: this.jsonHeaders,
                 body: JSON.stringify(eventInfo),
