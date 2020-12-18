@@ -5,27 +5,27 @@
 #    pip-compile --output-file=requirements.txt requirements.in
 #
 alabaster==0.7.12         # via sphinx
-babel==2.8.0              # via sphinx
-certifi==2020.4.5.1       # via requests
-chardet==3.0.4            # via requests
+babel==2.9.0              # via sphinx
+certifi==2020.12.5        # via requests
+chardet==4.0.0            # via requests
 click==7.1.2              # via -r requirements.in
-codechat==1.8.2           # via -r requirements.in
+codechat==1.8.3           # via -r requirements.in
 cogapp==3.0.0             # via -r requirements.in
 docutils==0.16            # via codechat, sphinx
-idna==2.9                 # via requests
+idna==2.10                # via requests
 imagesize==1.2.0          # via sphinx
 jinja2==2.11.2            # via sphinx
-lxml==4.5.1               # via codechat
+lxml==4.6.2               # via codechat
 markupsafe==1.1.1         # via jinja2
-packaging==20.4           # via sphinx
+packaging==20.8           # via sphinx
 paver==1.3.4              # via -r requirements.in, sphinxcontrib-paverutils
-pygments==2.6.1           # via codechat, sphinx
+pygments==2.7.3           # via codechat, sphinx
 pyparsing==2.4.7          # via packaging
-pytz==2020.1              # via babel
-requests==2.23.0          # via sphinx
-six==1.15.0               # via -r requirements.in, packaging, paver
+pytz==2020.4              # via babel
+requests==2.25.1          # via sphinx
+six==1.15.0               # via -r requirements.in, paver
 snowballstemmer==2.0.0    # via sphinx
-sphinx==3.0.4             # via -r requirements.in, sphinxcontrib-paverutils
+sphinx==3.3.1             # via -r requirements.in, sphinxcontrib-paverutils
 sphinxcontrib-applehelp==1.0.2  # via sphinx
 sphinxcontrib-devhelp==1.0.2  # via sphinx
 sphinxcontrib-htmlhelp==1.0.3  # via sphinx
@@ -33,8 +33,8 @@ sphinxcontrib-jsmath==1.0.1  # via sphinx
 sphinxcontrib-paverutils==1.17.0  # via -r requirements.in
 sphinxcontrib-qthelp==1.0.3  # via sphinx
 sphinxcontrib-serializinghtml==1.1.4  # via sphinx
-sqlalchemy==1.3.17        # via -r requirements.in
-urllib3==1.25.9           # via requests
+sqlalchemy==1.3.21        # via -r requirements.in
+urllib3==1.26.2           # via requests
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
