@@ -551,7 +551,7 @@ export class ActiveCode extends RunestoneBase {
     // add an initial load history button
     // if there is no edit then there is no append   to_save (True/False)
     async addHistoryScrubber(pos_last) {
-        let deferred = Promise.resolve();
+        let response;
         var reqData = {
             acid: this.divid,
         };
@@ -572,7 +572,7 @@ export class ActiveCode extends RunestoneBase {
                 body: JSON.stringify(reqData),
             });
             try {
-                let response = await fetch(request);
+                response = await fetch(request);
                 let data = await response.json();
                 if (data.history !== undefined) {
                     this.history = this.history.concat(data.history);
@@ -585,16 +585,9 @@ export class ActiveCode extends RunestoneBase {
             } catch (e) {
                 console.log("unable to fetch history");
             }
-            deferred = new Promise((resolve, reject) => {
-                try {
-                    this.renderScrubber(pos_last);
-                    resolve("done");
-                } catch (e) {
-                    reject(e);
-                }
-            });
+            this.renderScrubber(pos_last);
         }
-        return deferred;
+        return "success";
     }
 
     renderScrubber(pos_last) {
@@ -1142,10 +1135,7 @@ Yet another is that there is an internal error.  The internal error message is: 
 
     async manage_scrubber(saveCode) {
         if (this.historyScrubber === null && !this.autorun) {
-            let response = await this.addHistoryScrubber();
-            if (!response.ok) {
-                console.log("Failed to load history -- this should not fail.");
-            }
+            await this.addHistoryScrubber();
         }
         if (
             this.historyScrubber &&
