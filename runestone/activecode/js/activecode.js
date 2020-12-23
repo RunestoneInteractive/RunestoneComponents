@@ -10,6 +10,7 @@
 import RunestoneBase from "../../common/js/runestonebase.js";
 import AudioTour from "./audiotour";
 import "./activecode-i18n.en";
+import "./activecode-i18n.pt-br";
 import CodeMirror from "codemirror";
 import "codemirror/mode/python/python.js";
 import "codemirror/mode/css/css.js";
@@ -931,9 +932,9 @@ export class ActiveCode extends RunestoneBase {
                     "An error occurred in the hidden, included code. Sorry we can't give you a more helpful error message";
                 return;
             } else if (errorLine > this.progLines + this.pretextLines) {
-                errText.innerHTML = `An error occurred after the end of your code. 
-One possible reason is that you have an unclosed parenthesis or string. 
-Another possibility is that there is an error in the hidden test code. 
+                errText.innerHTML = `An error occurred after the end of your code.
+One possible reason is that you have an unclosed parenthesis or string.
+Another possibility is that there is an error in the hidden test code.
 Yet another is that there is an internal error.  The internal error message is: ${err.message}`;
                 return;
             } else {
