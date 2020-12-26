@@ -23,6 +23,7 @@
 
 import RunestoneBase from "../../common/js/runestonebase.js";
 import "./parsons-i18n.en.js";
+import "./parsons-i18n.pt-br.js";
 import "./prettify.js";
 import "../css/parsons.css";
 import "../css/prettify.css";

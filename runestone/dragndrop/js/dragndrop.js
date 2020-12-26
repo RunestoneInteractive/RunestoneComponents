@@ -15,6 +15,7 @@
 import RunestoneBase from "../../common/js/runestonebase.js";
 import "../css/dragndrop.css";
 import "./dragndrop-i18n.en.js";
+import "./dragndrop-i18n.pt-br.js";
 
 export var ddList = {}; // Dictionary that contains all instances of dragndrop objects
 
