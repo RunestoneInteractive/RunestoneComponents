@@ -16,6 +16,7 @@
 
 import RunestoneBase from "../../common/js/runestonebase.js";
 import "./fitb-i18n.en.js";
+import "./fitb-i18n.pt-br.js";
 import "../css/fitb.css";
 
 export var FITBList = {}; // Object containing all instances of FITB that aren't a child of a timed assessment.

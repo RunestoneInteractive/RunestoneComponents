@@ -168,7 +168,7 @@ $(document).ready(function () {
                     $(this).find("textarea").data("lang")
                 );
             } catch (err) {
-                console.log(`Error rendering ClickableArea Problem ${this.id}
+                console.log(`Error rendering Activecode Problem ${this.id}
                 Details: ${err}`);
             }
         }
