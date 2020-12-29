@@ -92,7 +92,7 @@ export class ActiveCode extends RunestoneBase {
         if (this.graderactive) {
             this.hidecode = false;
         }
-        if (this.includes !== undefined) {
+        if (this.includes) {
             this.includes = this.includes.split(/\s+/);
         }
         let prefixEnd = this.code.indexOf("^^^^");
