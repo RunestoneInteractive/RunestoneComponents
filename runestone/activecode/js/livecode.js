@@ -51,6 +51,7 @@ export default class LiveCode extends ActiveCode {
         await this.runSetup();
         try {
             let res = await this.submitToJobe();
+            this.run_promise = Promise.resolve();
             let runResults = await res.json();
             this.processJobeResponse(runResults);
         } catch (e) {

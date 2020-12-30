@@ -65,6 +65,7 @@ export class ActiveCode extends RunestoneBase {
         this.loadButton = null;
         this.outerDiv = null;
         this.partner = "";
+        this.logResults = true;
         if (!eBookConfig.allow_pairs || $(orig).data("nopair")) {
             this.enablePartner = false;
         } else {
