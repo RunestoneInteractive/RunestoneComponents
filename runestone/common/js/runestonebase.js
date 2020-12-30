@@ -70,7 +70,7 @@ export default class RunestoneBase {
             return;
         }
         let post_return;
-        eventInfo.course = eBookConfig.course;
+        eventInfo.course_name = eBookConfig.course;
         eventInfo.clientLoginStatus = eBookConfig.isLoggedIn;
         eventInfo.timezoneoffset = new Date().getTimezoneOffset() / 60;
         if (this.percent) {
