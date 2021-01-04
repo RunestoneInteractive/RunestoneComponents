@@ -79,7 +79,6 @@ export default class SQLActiveCode extends ActiveCode {
         if (typeof noUI !== "boolean") {
             noUI = false;
         }
-        var scrubber_dfd, history_dfd;
         // Clear any old results
         this.saveCode = "True";
         let divid = this.divid + "_sql_out";
@@ -153,13 +152,7 @@ export default class SQLActiveCode extends ActiveCode {
         }
 
         try {
-            var __ret = await this.manage_scrubber(
-                scrubber_dfd,
-                history_dfd,
-                this.saveCode
-            );
-            history_dfd = __ret.history_dfd;
-            this.saveCode = __ret.saveCode;
+            this.saveCode = await this.manage_scrubber(this.saveCode);
             if (this.slideit) {
                 $(this.historyScrubber).on(
                     "slidechange",

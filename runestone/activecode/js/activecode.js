@@ -1164,7 +1164,7 @@ Yet another is that there is an internal error.  The internal error message is: 
         if (this.historyScrubber == null) {
             saveCode = "False";
         }
-        return Promise.resolve(saveCode);
+        return saveCode;
     }
 
     async checkCurrentAnswer() {

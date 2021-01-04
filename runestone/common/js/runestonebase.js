@@ -140,7 +140,12 @@ export default class RunestoneBase {
         }
         return post_promise;
     }
-    /* Checking/loading from storage */
+    /* Checking/loading from storage 
+    **WARNING:**  DO NOT `await` this function!
+    This function, although async, does not explicitly resolve its promise by returning a value.  The reason for this is because it is called by the constructor for nearly every component.  In Javascript constructors cannot be async! 
+    
+    One of the recommended ways to handle the async requirements from within a constructor is to use an attribute as a promise and resolve that attribute at the appropriate time.
+    */
     async checkServer(eventInfo) {
         // Check if the server has stored answer
         let self = this;

@@ -29,11 +29,10 @@ export default class JSActiveCode extends ActiveCode {
         }
         return str;
     }
-    runProg() {
+    async runProg() {
         var _this = this;
         var prog = this.buildProg(true);
         var einfo;
-        var scrubber_dfd, history_dfd;
         var saveCode = "True";
         var write = function (str) {
             _this.output.innerHTML += _this.outputfun(str);
@@ -42,9 +41,7 @@ export default class JSActiveCode extends ActiveCode {
             if (!str) str = "";
             _this.output.innerHTML += _this.outputfun(str) + "<br />";
         };
-        var __ret = this.manage_scrubber(scrubber_dfd, history_dfd, saveCode);
-        history_dfd = __ret.history_dfd;
-        saveCode = __ret.saveCode;
+        saveCode = await this.manage_scrubber(saveCode);
         $(this.eContainer).remove();
         $(this.output).text("");
         $(this.outDiv).show({ duration: 700, queue: false });

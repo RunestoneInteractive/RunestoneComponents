@@ -11,15 +11,8 @@ export default class HTMLActiveCode extends ActiveCode {
 
     async runProg() {
         var prog = await this.buildProg(true);
-        var scrubber_dfd, history_dfd, saveCode;
-        saveCode = "True";
-        var __ret = await this.manage_scrubber(
-            scrubber_dfd,
-            history_dfd,
-            saveCode
-        );
-        history_dfd = __ret.history_dfd;
-        saveCode = __ret.saveCode;
+        let saveCode = "True";
+        saveCode = await this.manage_scrubber(saveCode);
         $(this.output).text("");
         if (!this.alignVertical) {
             $(this.codeDiv).switchClass("col-md-12", "col-md-6", {

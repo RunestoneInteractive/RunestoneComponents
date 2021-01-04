@@ -57,8 +57,9 @@ export default class LiveCode extends ActiveCode {
         } catch (e) {
             this.addJobeErrorMessage($.i18n("msg_activecode_server_comm_err"));
             $(this.runButton).removeAttr("disabled");
+            return `fail: ${e}`;
         }
-        return Promise.resolve("done");
+        return "success";
     }
     /**
      * Note:
@@ -67,7 +68,6 @@ export default class LiveCode extends ActiveCode {
      */
     async runSetup() {
         var stdin;
-        var scrubber_dfd, history_dfd;
         var source;
         var saveCode = "True";
         var sfilemap = {
@@ -108,13 +108,7 @@ export default class LiveCode extends ActiveCode {
             return;
         }
 
-        var __ret = await this.manage_scrubber(
-            scrubber_dfd,
-            history_dfd,
-            saveCode
-        );
-        history_dfd = __ret.history_dfd;
-        saveCode = __ret.saveCode;
+        saveCode = await this.manage_scrubber(saveCode);
 
         // assemble parameters for JOBE
         var paramlist = [
