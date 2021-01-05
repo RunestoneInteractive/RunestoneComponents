@@ -813,7 +813,7 @@ export class ActiveCode extends RunestoneBase {
         return response;
     }
 
-    showCodelens() {
+    async showCodelens() {
         if (this.codelens.style.display == "none") {
             this.codelens.style.display = "block";
             this.clButton.innerText = $.i18n("msg_activecode_hide_codelens");
@@ -826,7 +826,7 @@ export class ActiveCode extends RunestoneBase {
         if (cl) {
             this.codelens.removeChild(cl);
         }
-        var code = this.buildProg(false);
+        var code = await this.buildProg(false);
         var myVars = {};
         myVars.code = code;
         myVars.origin = "opt-frontend.js";
