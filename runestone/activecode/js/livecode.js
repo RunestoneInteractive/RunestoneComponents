@@ -51,6 +51,14 @@ export default class LiveCode extends ActiveCode {
         await this.runSetup();
         try {
             let res = await this.submitToJobe();
+            if (!res.ok) {
+                this.addJobeErrorMessage(
+                    $.i18n(`Server Error: ${res.statusText}`)
+                );
+                this.run_promise = Promise.resolve();
+                $(this.runButton).removeAttr("disabled");
+                return "fail";
+            }
             this.run_promise = Promise.resolve();
             let runResults = await res.json();
             this.processJobeResponse(runResults);

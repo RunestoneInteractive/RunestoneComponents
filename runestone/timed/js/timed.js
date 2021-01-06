@@ -136,7 +136,7 @@ export default class Timed extends RunestoneBase {
     /*===============================
     === Generating new Timed HTML ===
     ===============================*/
-    renderTimedAssess() {
+    async renderTimedAssess() {
         console.log("rendering timed ");
         // create renderedQuestionArray returns a promise
         //
@@ -146,7 +146,7 @@ export default class Timed extends RunestoneBase {
         }
         this.renderContainer();
         this.renderTimer();
-        this.renderControlButtons();
+        await this.renderControlButtons();
         this.assessDiv.appendChild(this.timedDiv); // This can't be appended in renderContainer because then it renders above the timer and control buttons.
         if (this.renderedQuestionArray.length > 1) this.renderNavControls();
         this.renderSubmitButton();
@@ -211,13 +211,13 @@ export default class Timed extends RunestoneBase {
         this.startBtn.textContent = "Start";
         this.startBtn.addEventListener(
             "click",
-            function () {
+            async function () {
                 $(this.finishButton).hide(); // hide the finish button for now
                 let mess = document.createElement("p");
                 mess.innerHTML =
                     "<strong>Warning: You will lose all of your work if you close this tab or the browser.</strong>  Make sure you click the Finish Exam button to submit your work!";
                 this.controlDiv.appendChild(mess);
-                this.renderTimedQuestion();
+                await this.renderTimedQuestion();
                 this.startAssessment();
             }.bind(this),
             false
@@ -301,7 +301,7 @@ export default class Timed extends RunestoneBase {
         // Next and Prev Listener
         this.pagNavList.addEventListener(
             "click",
-            function (event) {
+            async function (event) {
                 if (
                     this.renderedQuestionArray[this.currentQuestionIndex]
                         .state == "broken_exam"
@@ -343,7 +343,7 @@ export default class Timed extends RunestoneBase {
                     }
                     this.currentQuestionIndex--;
                 }
-                this.renderTimedQuestion();
+                await this.renderTimedQuestion();
                 this.ensureButtonSafety();
                 for (var i = 0; i < this.qNumList.childNodes.length; i++) {
                     for (
@@ -367,7 +367,7 @@ export default class Timed extends RunestoneBase {
         // Numbered Listener
         this.qNumList.addEventListener(
             "click",
-            function (event) {
+            async function (event) {
                 if (
                     this.renderedQuestionArray[this.currentQuestionIndex]
                         .state == "broken_exam"
@@ -423,7 +423,7 @@ export default class Timed extends RunestoneBase {
                         this.currentQuestionIndex +
                         ")"
                 ).addClass("active");
-                this.renderTimedQuestion();
+                await this.renderTimedQuestion();
                 this.ensureButtonSafety();
             }.bind(this),
             false
@@ -1012,7 +1012,7 @@ export default class Timed extends RunestoneBase {
             this.taken = 0;
         }
     }
-    restoreAnswers(data) {
+    async restoreAnswers(data) {
         this.taken = 1;
         var tmpArr;
         if (data === "") {
@@ -1072,7 +1072,7 @@ export default class Timed extends RunestoneBase {
             }
             this.handlePrevAssessment();
         }
-        this.renderTimedQuestion();
+        await this.renderTimedQuestion();
         this.displayScore();
         this.showTime();
     }
