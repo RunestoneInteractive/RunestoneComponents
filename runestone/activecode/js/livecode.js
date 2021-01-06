@@ -116,7 +116,7 @@ export default class LiveCode extends ActiveCode {
             return;
         }
 
-        saveCode = await this.manage_scrubber(saveCode);
+        this.saveCode = await this.manage_scrubber(saveCode);
 
         // assemble parameters for JOBE
         var paramlist = [
@@ -296,7 +296,6 @@ export default class LiveCode extends ActiveCode {
         } else {
             logresult = result.outcome;
         }
-        this.saveCode = "True";
         this.errinfo = logresult;
         switch (result.outcome) {
             case 15: {
