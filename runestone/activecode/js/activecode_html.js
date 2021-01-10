@@ -12,7 +12,7 @@ export default class HTMLActiveCode extends ActiveCode {
     async runProg() {
         var prog = await this.buildProg(true);
         let saveCode = "True";
-        saveCode = await this.manage_scrubber(saveCode);
+        this.saveCode = await this.manage_scrubber(saveCode);
         $(this.output).text("");
         if (!this.alignVertical) {
             $(this.codeDiv).switchClass("col-md-12", "col-md-6", {
@@ -25,17 +25,8 @@ export default class HTMLActiveCode extends ActiveCode {
             "<script type=text/javascript>window.onerror = function(msg,url,line) {alert(msg+' on line: '+line);};</script>" +
             prog;
         this.output.srcdoc = prog;
-        this.logRunEvent({
-            div_id: this.divid,
-            code: this.editor.getValue(),
-            errinfo: "success",
-            to_save: saveCode,
-            prefix: this.pretext,
-            suffix: this.suffix,
-            lang: this.language,
-            partner: this.partner,
-        }); // Log the run event
     }
+
     createOutput() {
         this.alignVertical = true;
         var outDiv = document.createElement("div");

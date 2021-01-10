@@ -31,8 +31,7 @@ export default class JSActiveCode extends ActiveCode {
     }
     async runProg() {
         var _this = this;
-        var prog = this.buildProg(true);
-        var einfo;
+        var prog = await this.buildProg(true);
         var saveCode = "True";
         var write = function (str) {
             _this.output.innerHTML += _this.outputfun(str);
@@ -41,27 +40,16 @@ export default class JSActiveCode extends ActiveCode {
             if (!str) str = "";
             _this.output.innerHTML += _this.outputfun(str) + "<br />";
         };
-        saveCode = await this.manage_scrubber(saveCode);
+        this.saveCode = await this.manage_scrubber(saveCode);
         $(this.eContainer).remove();
         $(this.output).text("");
         $(this.outDiv).show({ duration: 700, queue: false });
         try {
             eval(prog);
-            einfo = "success";
+            this.errinfo = "success";
         } catch (e) {
             this.addErrorMessage(e);
-            einfo = e;
+            this.errinfo = e;
         }
-        // Note that, since this isn't awaited, the request may not be complete when this function returns.
-        this.logRunEvent({
-            div_id: this.divid,
-            code: this.editor.getValue(),
-            errinfo: einfo,
-            lang: this.language,
-            to_save: saveCode,
-            prefix: this.pretext,
-            suffix: this.suffix,
-            partner: this.partner,
-        });
     }
 }
