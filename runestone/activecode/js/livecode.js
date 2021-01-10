@@ -61,7 +61,9 @@ export default class LiveCode extends ActiveCode {
             let runResults = await res.json();
             this.processJobeResponse(runResults);
         } catch (e) {
-            this.addJobeErrorMessage($.i18n("msg_activecode_server_comm_err"));
+            this.addJobeErrorMessage(
+                $.i18n("msg_activecode_server_comm_err") + e.toString()
+            );
             $(this.runButton).removeAttr("disabled");
             return `fail: ${e}`;
         }
