@@ -1164,7 +1164,7 @@ Yet another is that there is an internal error.  The internal error message is: 
         if (this.historyScrubber == null) {
             saveCode = "False";
         }
-        return Promise.resolve(saveCode);
+        return saveCode;
     }
 
     async checkCurrentAnswer() {
@@ -1176,27 +1176,24 @@ Yet another is that there is an internal error.  The internal error message is: 
     }
 
     logCurrentAnswer() {
-        let self = this;
-        this.run_promise.then(function () {
-            self.logRunEvent({
-                div_id: self.divid,
-                code: self.editor.getValue(),
-                lang: self.language,
-                errinfo: self.errinfo,
-                to_save: self.saveCode,
-                prefix: self.pretext,
-                suffix: self.suffix,
-                partner: self.partner,
-            }); // Log the run event
-            // If unit tests were run there will be a unit_results
-            if (self.unit_results) {
-                self.logBookEvent({
-                    act: self.unit_results,
-                    div_id: self.divid,
-                    event: "unittest",
-                });
-            }
-        });
+        this.logRunEvent({
+            div_id: this.divid,
+            code: this.editor.getValue(),
+            lang: this.language,
+            errinfo: this.errinfo,
+            to_save: this.saveCode,
+            prefix: this.pretext,
+            suffix: this.suffix,
+            partner: this.partner,
+        }); // Log the run event
+        // If unit tests were run there will be a unit_results
+        if (this.unit_results) {
+            this.logBookEvent({
+                act: this.unit_results,
+                div_id: this.divid,
+                event: "unittest",
+            });
+        }
     }
 
     renderFeedback() {
@@ -1274,7 +1271,6 @@ Yet another is that there is an internal error.  The internal error message is: 
         this.setTimeLimit();
         (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = this.graphics;
         Sk.canvas = this.graphics.id; //todo: get rid of this here and in image
-        let promise_list = [];
         if (!noUI) {
             $(this.runButton).attr("disabled", "disabled");
             $(this.historyScrubber).off("slidechange");
@@ -1285,47 +1281,34 @@ Yet another is that there is an internal error.  The internal error message is: 
             });
             this.saveCode = await this.manage_scrubber(this.saveCode);
         }
-        this.run_promise = Sk.misceval.asyncToPromise(function () {
-            return Sk.importMainWithBody("<stdin>", false, prog, true);
-        });
-        promise_list.push(this.run_promise);
-        // Make sure that the history scrubber is fully initialized AND the code has been run
-        // before we start logging stuff.
-        var self = this;
-        Promise.all(promise_list)
-            .then(
-                function () {
-                    $(this.runButton).removeAttr("disabled");
-                    if (!noUI) {
-                        if (this.slideit) {
-                            $(this.historyScrubber).on(
-                                "slidechange",
-                                this.slideit.bind(this)
-                            );
-                        }
-                        $(this.historyScrubber).slider("enable");
-                    }
-                    this.errLastRun = false;
-                    this.errinfo = "success";
-                }.bind(this)
-            )
-            .catch(function (err) {
-                $(self.runButton).removeAttr("disabled");
-                $(self.historyScrubber).on(
-                    "slidechange",
-                    self.slideit.bind(self)
-                );
-                $(self.historyScrubber).slider("enable");
-                self.errinfo = err.toString();
-                self.addErrorMessage(err);
+        try {
+            await Sk.misceval.asyncToPromise(function () {
+                return Sk.importMainWithBody("<stdin>", false, prog, true);
             });
-        if (typeof window.allVisualizers != "undefined") {
-            $.each(window.allVisualizers, function (i, e) {
-                e.redrawConnectors();
-            });
+            if (!noUI) {
+                if (this.slideit) {
+                    $(this.historyScrubber).on(
+                        "slidechange",
+                        this.slideit.bind(this)
+                    );
+                }
+                $(this.historyScrubber).slider("enable");
+            }
+            this.errLastRun = false;
+            this.errinfo = "success";
+        } catch (err) {
+            $(this.historyScrubber).on("slidechange", this.slideit.bind(this));
+            $(this.historyScrubber).slider("enable");
+            this.errinfo = err.toString();
+            this.addErrorMessage(err);
+        } finally {
+            $(this.runButton).removeAttr("disabled");
+            if (typeof window.allVisualizers != "undefined") {
+                $.each(window.allVisualizers, function (i, e) {
+                    e.redrawConnectors();
+                });
+            }
         }
-
-        return this.run_promise;
     }
 
     disableInteraction() {

@@ -51,7 +51,13 @@ export default class LiveCode extends ActiveCode {
         await this.runSetup();
         try {
             let res = await this.submitToJobe();
-            this.run_promise = Promise.resolve();
+            if (!res.ok) {
+                this.addJobeErrorMessage(
+                    $.i18n(`Server Error: ${res.statusText}`)
+                );
+                $(this.runButton).removeAttr("disabled");
+                return "fail";
+            }
             let runResults = await res.json();
             this.processJobeResponse(runResults);
         } catch (e) {
@@ -59,8 +65,9 @@ export default class LiveCode extends ActiveCode {
                 $.i18n("msg_activecode_server_comm_err") + e.toString()
             );
             $(this.runButton).removeAttr("disabled");
+            return `fail: ${e}`;
         }
-        return Promise.resolve("done");
+        return "success";
     }
     /**
      * Note:
@@ -69,7 +76,6 @@ export default class LiveCode extends ActiveCode {
      */
     async runSetup() {
         var stdin;
-        var scrubber_dfd, history_dfd;
         var source;
         var saveCode = "True";
         var sfilemap = {
@@ -110,13 +116,7 @@ export default class LiveCode extends ActiveCode {
             return;
         }
 
-        var __ret = await this.manage_scrubber(
-            scrubber_dfd,
-            history_dfd,
-            saveCode
-        );
-        history_dfd = __ret.history_dfd;
-        saveCode = __ret.saveCode;
+        this.saveCode = await this.manage_scrubber(saveCode);
 
         // assemble parameters for JOBE
         var paramlist = [
@@ -296,7 +296,6 @@ export default class LiveCode extends ActiveCode {
         } else {
             logresult = result.outcome;
         }
-        this.saveCode = "True";
         this.errinfo = logresult;
         switch (result.outcome) {
             case 15: {

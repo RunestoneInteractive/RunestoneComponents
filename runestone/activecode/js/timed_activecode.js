@@ -99,8 +99,8 @@ export class TimedActiveCode extends ActiveCode {
     // for timed exams we need to call runProg and tell it that there is
     // no GUI for sliders or other things. We also do not want it to log
     // the answers.
-    checkCurrentAnswer() {
-        this.run_promise = this.runProg(true, false);
+    async checkCurrentAnswer() {
+        await this.runProg(true, false);
     }
 }
 
