@@ -329,6 +329,7 @@ div.section {
 .CodeMirror {
     margin: 0 0 1em 0;
     background-color: var(--background);
+    height: auto;
     clear: both;
 }
 
@@ -337,7 +338,7 @@ div.section {
      * height while still relying on max-height (which keeps
      * the CM editors to no more than the size needed
      * unless resized) */
-    max-height: 30em;
+    max-height: 60em;
     min-width: 30em;
 }
 
