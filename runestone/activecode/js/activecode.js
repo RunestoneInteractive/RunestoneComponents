@@ -160,7 +160,7 @@ export class ActiveCode extends RunestoneBase {
         }
         var editor = CodeMirror(codeDiv, {
             value: this.code,
-            lineNumbers: true ? !this.isTimed : false,
+            lineNumbers: true,
             mode: edmode,
             indentUnit: 4,
             matchBrackets: true,
