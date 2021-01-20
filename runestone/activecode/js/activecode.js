@@ -47,6 +47,7 @@ export class ActiveCode extends RunestoneBase {
         this.python3 = opts.python3;
         this.alignVertical = opts.vertical;
         this.origElem = orig;
+        this.origText = this.origElem.textContent;
         this.divid = opts.orig.id;
         this.code = $(orig).text() || "\n\n\n\n\n";
         this.language = $(orig).data("lang");
@@ -187,7 +188,7 @@ export class ActiveCode extends RunestoneBase {
                 ) {
                     // change events can come before any real changes for various reasons, some unknown
                     // this avoids unneccsary log events and updates to the activity counter
-                    if (this.origElem.textContent === editor.getValue()) {
+                    if (this.origText === editor.getValue()) {
                         return;
                     }
                     $(editor.getWrapperElement()).css(
@@ -1116,7 +1117,7 @@ Yet another is that there is an internal error.  The internal error message is: 
         this.pretext = "";
         this.pretextLines = 0;
         this.progLines = prog.match(/\n/g).length + 1;
-        if (this.includes !== undefined) {
+        if (this.includes) {
             // iterate over the includes, in-order prepending to prog
             pretext = "";
             for (var x = 0; x < this.includes.length; x++) {
