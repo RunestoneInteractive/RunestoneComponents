@@ -78,6 +78,7 @@ export default class SelectOne extends RunestoneBase {
         }
         let opts = this.origOpts;
         let selectorId = this.selector_id;
+        console.log("getting question source");
         let request = new Request("/runestone/ajax/get_question_source", {
             method: "POST",
             headers: this.jsonHeaders,
@@ -126,20 +127,21 @@ export default class SelectOne extends RunestoneBase {
  * When the page is loaded and the login checks are complete find and render
  * each selectquestion component that is not part of a timedAssessment.
  **/
-$(document).bind("runestone:login-complete", function () {
-    $("[data-component=selectquestion]").each(function (index) {
+$(document).bind("runestone:login-complete", async function () {
+    let selQuestions = document.querySelectorAll(
+        "[data-component=selectquestion]"
+    );
+    for (let cq of selQuestions) {
         try {
-            if (
-                $(this).closest("[data-component=timedAssessment]").length == 0
-            ) {
+            if ($(cq).closest("[data-component=timedAssessment]").length == 0) {
                 // If this element exists within a timed component, don't render it here
                 let tmp = new SelectOne({ orig: this });
-                tmp.initialize();
+                await tmp.initialize();
             }
         } catch (err) {
             console.log(`Error rendering New Exercise ${this.id}
                          Details: ${err}`);
             console.log(err.stack);
         }
-    });
+    }
 });
