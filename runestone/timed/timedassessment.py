@@ -106,10 +106,12 @@ def depart_timed_node(self, node):
 
 # Templates to be formatted by node options
 TEMPLATE_START = """
+    <div style="max-width: none">
     <ul data-component="timedAssessment" data-question_label="%(question_label)s" %(timelimit)s id="%(divid)s" %(noresult)s %(nofeedback)s %(timedfeedback)s %(notimer)s %(fullwidth)s %(nopause)s>
     """
 
 TEMPLATE_END = """</ul>
+    </div>
     """
 
 
