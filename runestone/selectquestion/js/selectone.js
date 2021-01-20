@@ -135,11 +135,11 @@ $(document).bind("runestone:login-complete", async function () {
         try {
             if ($(cq).closest("[data-component=timedAssessment]").length == 0) {
                 // If this element exists within a timed component, don't render it here
-                let tmp = new SelectOne({ orig: this });
+                let tmp = new SelectOne({ orig: cq });
                 await tmp.initialize();
             }
         } catch (err) {
-            console.log(`Error rendering New Exercise ${this.id}
+            console.log(`Error rendering New Exercise ${cq.id}
                          Details: ${err}`);
             console.log(err.stack);
         }
