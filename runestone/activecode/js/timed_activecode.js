@@ -71,6 +71,10 @@ var TimedActiveCodeMixin = {
     },
 
     reinitializeListeners: function (taken) {
+        if (!this.runButton.onclick) {
+            console.log("reattaching runbuttonhandler");
+            this.runButton.onclick = this.runButtonHander.bind(this);
+        }
         $(this.codeDiv).show();
         this.runButton.disabled = false;
         $(this.codeDiv).removeClass("ac-disabled");
