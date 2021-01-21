@@ -73,13 +73,13 @@ def setup(app):
 
 TEMPLATE_START = """
 <div class="%(divclass)s">
-<div data-component="activecode" id=%(divid)s >
+<div data-component="activecode" id=%(divid)s data-question_label="%(question_label)s">
 <div id=%(divid)s_question class="ac_question col-md-12">
 """
 
 TEMPLATE_END = """
 </div>
-<textarea data-lang="%(language)s" id="%(divid)s_editor" data-question_label="%(question_label)s" %(autorun)s
+<textarea data-lang="%(language)s" id="%(divid)s_editor" %(autorun)s
     %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s %(chatcodes)s %(optional)s
     data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(tie)s %(dburl)s %(nopair)s
     %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(hidehistory)s %(wasmuri)s
