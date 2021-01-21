@@ -1298,8 +1298,13 @@ Yet another is that there is an internal error.  The internal error message is: 
             this.errLastRun = false;
             this.errinfo = "success";
         } catch (err) {
-            $(this.historyScrubber).on("slidechange", this.slideit.bind(this));
-            $(this.historyScrubber).slider("enable");
+            if (!noUI) {
+                $(this.historyScrubber).on(
+                    "slidechange",
+                    this.slideit.bind(this)
+                );
+                $(this.historyScrubber).slider("enable");
+            }
             this.errinfo = err.toString();
             this.addErrorMessage(err);
         } finally {
