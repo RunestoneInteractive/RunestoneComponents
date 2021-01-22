@@ -47,6 +47,7 @@ export class ActiveCode extends RunestoneBase {
         this.python3 = opts.python3;
         this.alignVertical = opts.vertical;
         this.origElem = orig;
+        this.origText = this.origElem.textContent;
         this.divid = opts.orig.id;
         this.code = $(orig).text() || "\n\n\n\n\n";
         this.language = $(orig).data("lang");
@@ -187,7 +188,7 @@ export class ActiveCode extends RunestoneBase {
                 ) {
                     // change events can come before any real changes for various reasons, some unknown
                     // this avoids unneccsary log events and updates to the activity counter
-                    if (this.origElem.textContent === editor.getValue()) {
+                    if (this.origText === editor.getValue()) {
                         return;
                     }
                     $(editor.getWrapperElement()).css(
@@ -232,6 +233,18 @@ export class ActiveCode extends RunestoneBase {
         }
     }
 
+    async runButtonHander() {
+        try {
+            await this.runProg();
+        } catch (e) {
+            console.log(`there was an error ${e} running the code`);
+        }
+        if (this.logResults) {
+            this.logCurrentAnswer();
+        }
+        this.renderFeedback();
+    }
+
     createControls() {
         var ctrlDiv = document.createElement("div");
         var butt;
@@ -244,19 +257,7 @@ export class ActiveCode extends RunestoneBase {
         ctrlDiv.appendChild(butt);
         this.runButton = butt;
         console.log("adding click function for run");
-        $(butt).click(
-            async function () {
-                try {
-                    await this.runProg();
-                } catch (e) {
-                    console.log(`there was an error ${e} running the code`);
-                }
-                if (this.logResults) {
-                    this.logCurrentAnswer();
-                }
-                this.renderFeedback();
-            }.bind(this)
-        );
+        this.runButton.onclick = this.runButtonHander.bind(this);
         $(butt).attr("type", "button");
 
         if (this.enabledownload || eBookConfig.downloadsEnabled) {
@@ -1116,7 +1117,7 @@ Yet another is that there is an internal error.  The internal error message is: 
         this.pretext = "";
         this.pretextLines = 0;
         this.progLines = prog.match(/\n/g).length + 1;
-        if (this.includes !== undefined) {
+        if (this.includes) {
             // iterate over the includes, in-order prepending to prog
             pretext = "";
             for (var x = 0; x < this.includes.length; x++) {
@@ -1272,6 +1273,7 @@ Yet another is that there is an internal error.  The internal error message is: 
         (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = this.graphics;
         Sk.canvas = this.graphics.id; //todo: get rid of this here and in image
         if (!noUI) {
+            this.saveCode = await this.manage_scrubber(this.saveCode);
             $(this.runButton).attr("disabled", "disabled");
             $(this.historyScrubber).off("slidechange");
             $(this.historyScrubber).slider("disable");
@@ -1279,7 +1281,6 @@ Yet another is that there is an internal error.  The internal error message is: 
                 duration: 700,
                 queue: false,
             });
-            this.saveCode = await this.manage_scrubber(this.saveCode);
         }
         try {
             await Sk.misceval.asyncToPromise(function () {
@@ -1297,8 +1298,13 @@ Yet another is that there is an internal error.  The internal error message is: 
             this.errLastRun = false;
             this.errinfo = "success";
         } catch (err) {
-            $(this.historyScrubber).on("slidechange", this.slideit.bind(this));
-            $(this.historyScrubber).slider("enable");
+            if (!noUI) {
+                $(this.historyScrubber).on(
+                    "slidechange",
+                    this.slideit.bind(this)
+                );
+                $(this.historyScrubber).slider("enable");
+            }
             this.errinfo = err.toString();
             this.addErrorMessage(err);
         } finally {
