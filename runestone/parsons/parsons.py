@@ -32,10 +32,15 @@ def setup(app):
     app.add_config_value("parsons_div_class", "runestone", "html")
 
 
-TEMPLATE = """
-        <div class="%(divclass)s" style="max-width: none;">
+TEMPLATE_START = """
+        <div class="%(divclass)s alert alert-warning parsons" style="max-width: none;">
+        <div class="parsons_question parsons-text" >
+    """
+
+TEMPLATE_END = """
+        </div>
         <pre data-component="parsons" data-question_label="%(question_label)s" id="%(divid)s" %(adaptive)s %(maxdist)s %(order)s %(noindent)s %(language)s %(numbered)s %(optional)s style="visibility: hidden;">
-        <span data-question>%(qnumber)s %(instructions)s</span>%(code)s
+        %(code)s
         </pre>
         </div>
     """
@@ -51,46 +56,53 @@ def visit_parsons_node(self, node):
     div_id = node.runestone_options["divid"]
     components = dict(node.runestone_options)
     components.update({"divid": div_id})
-    res = TEMPLATE % components
-    addHTMLToDB(div_id, components["basecourse"], res)
-
+    node.delimiter = "_start__{}_".format(node.runestone_options["divid"])
+    self.body.append(node.delimiter)
+    res = TEMPLATE_START % components
     self.body.append(res)
 
 
 def depart_parsons_node(self, node):
-    pass
+    res = TEMPLATE_END % node.runestone_options
+    self.body.append(res)
+    addHTMLToDB(
+        node.runestone_options["divid"],
+        node.runestone_options["basecourse"],
+        "".join(self.body[self.body.index(node.delimiter) + 1 :]),
+    )
+    self.body.remove(node.delimiter)
 
 
 class ParsonsProblem(Assessment):
     """
-.. parsonsprob:: unqiue_problem_id_here
-   :maxdist:
-   :order:
-   :language:
-   :noindent:
-   :adaptive:
-   :numbered:
+    .. parsonsprob:: unqiue_problem_id_here
+       :maxdist:
+       :order:
+       :language:
+       :noindent:
+       :adaptive:
+       :numbered:
 
-   Solve my really cool parsons problem...if you can.
-   -----
-   def findmax(alist):
-   =====
-      if len(alist) == 0:
-         return None
-   =====
-      curmax = alist[0]
-      for item in alist:
-   =====
-         if item &gt; curmax:
-   =====
-            curmax = item
-   =====
-      return curmax
+       Solve my really cool parsons problem...if you can.
+       -----
+       def findmax(alist):
+       =====
+          if len(alist) == 0:
+             return None
+       =====
+          curmax = alist[0]
+          for item in alist:
+       =====
+             if item &gt; curmax:
+       =====
+                curmax = item
+       =====
+          return curmax
 
 
-config values (conf.py):
+    config values (conf.py):
 
-- parsons_div_class - custom CSS class of the component's outermost div
+    - parsons_div_class - custom CSS class of the component's outermost div
     """
 
     required_arguments = 1
@@ -112,32 +124,32 @@ config values (conf.py):
     def run(self):
         """
 
-   Instructions for solving the problem should be written and then a line with -----
-   signals the beginning of the code.  If you want more than one line in a single
-   code block, seperate your code blocks with =====.
+           Instructions for solving the problem should be written and then a line with -----
+           signals the beginning of the code.  If you want more than one line in a single
+           code block, seperate your code blocks with =====.
 
-   Both the instructions sections and code blocks are optional. If you don't include any
-   =====, the code will assume you want each line to be its own code block.
+           Both the instructions sections and code blocks are optional. If you don't include any
+           =====, the code will assume you want each line to be its own code block.
 
-Example:
+        Example:
 
-.. parsonsprob:: unqiue_problem_id_here
+        .. parsonsprob:: unqiue_problem_id_here
 
-   Solve my really cool parsons problem...if you can.
-   -----
-   def findmax(alist):
-   =====
-      if len(alist) == 0:
-         return None
-   =====
-      curmax = alist[0]
-      for item in alist:
-   =====
-         if item &gt; curmax:
-   =====
-            curmax = item
-   =====
-      return curmax
+           Solve my really cool parsons problem...if you can.
+           -----
+           def findmax(alist):
+           =====
+              if len(alist) == 0:
+                 return None
+           =====
+              curmax = alist[0]
+              for item in alist:
+           =====
+                 if item &gt; curmax:
+           =====
+                    curmax = item
+           =====
+              return curmax
 
 
         """
@@ -182,7 +194,8 @@ Example:
 
         if "-----" in self.content:
             index = self.content.index("-----")
-            self.options["instructions"] = "\n".join(self.content[:index])
+            self.options["instructions"] = self.content[:index]
+            # todo: instructions should be parsed with nested_parse
             self.options["code"] = self.content[index + 1 :]
 
         if "=====" in self.options["code"]:
@@ -199,4 +212,8 @@ Example:
         parsons_node.source, parsons_node.line = self.state_machine.get_source_and_line(
             self.lineno
         )
+        self.state.nested_parse(
+            self.options["instructions"], self.content_offset, parsons_node
+        )
+        # explain_text is a list.
         return [parsons_node]
