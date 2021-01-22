@@ -809,7 +809,7 @@ export default class Timed extends RunestoneBase {
         this.running = 0;
         this.done = 1;
         this.taken = 1;
-        this.finalizeProblems(true); // log results
+        this.finalizeProblems();
         this.checkScore();
         this.displayScore();
         this.storeScore();
@@ -839,7 +839,9 @@ export default class Timed extends RunestoneBase {
         }, 2000);
     }
 
-    finalizeProblems(logFlag) {
+    // finalizeProblems
+    // ----------------
+    finalizeProblems() {
         // Because we have submitted each question as we navigate we only need to
         // send the final version of the question the student is on when they press the
         // finish exam button.
@@ -855,8 +857,10 @@ export default class Timed extends RunestoneBase {
         for (var i = 0; i < this.renderedQuestionArray.length; i++) {
             let currentQuestion = this.renderedQuestionArray[i];
             // set the state to forreview so we know that feedback may be appropriate
-            currentQuestion.state = "forreview";
-            currentQuestion.question.disableInteraction();
+            if (currentQuestion.state !== "broken_exam") {
+                currentQuestion.state = "forreview";
+                currentQuestion.question.disableInteraction();
+            }
         }
 
         if (!this.showFeedback) {
@@ -864,6 +868,8 @@ export default class Timed extends RunestoneBase {
         }
     }
 
+    // restoreAnswerdQuestions
+    // -----------------------
     restoreAnsweredQuestions() {
         for (var i = 0; i < this.renderedQuestionArray.length; i++) {
             var currentQuestion = this.renderedQuestionArray[i];
@@ -873,12 +879,19 @@ export default class Timed extends RunestoneBase {
         }
     }
 
+    // hideTimedFeedback
+    // -----------------
     hideTimedFeedback() {
         for (var i = 0; i < this.renderedQuestionArray.length; i++) {
             var currentQuestion = this.renderedQuestionArray[i].question;
             currentQuestion.hideFeedback();
         }
     }
+
+    // checkScore
+    // ----------
+    // This is a simple all or nothing score of one point per question for
+    // that includes our best guess if a question was skipped.
     checkScore() {
         this.correctStr = "";
         this.skippedStr = "";
