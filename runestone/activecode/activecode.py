@@ -22,20 +22,17 @@ __author__ = "bmiller"
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from .textfield import *
+from .textfield import textfield_role
 from sqlalchemy import Table
 from runestone.server.componentdb import (
     addQuestionToDB,
     addHTMLToDB,
     get_engine_meta,
     maybeAddToAssignment,
-    maybeAddToAssignment,
 )
 from runestone.common.runestonedirective import (
     RunestoneIdDirective,
-    RunestoneNode,
     RunestoneIdNode,
-    add_i18n_js,
 )
 
 try:
