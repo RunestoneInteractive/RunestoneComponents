@@ -77,14 +77,11 @@ export default class Parsons extends RunestoneBase {
         this.grader = new LineBasedGrader(this);
         this.grader.showfeedback = this.showfeedback;
         var fulltext = $(this.origElem).html();
-        var delimiter = this.question.outerHTML;
-        var temp = fulltext.split(delimiter);
-        var content = temp[1];
         this.blockIndex = 0;
         this.checkCount = 0;
         this.numDistinct = 0;
         this.hasSolved = false;
-        this.initializeLines(content);
+        this.initializeLines(fulltext.trim());
         this.initializeView();
         // Check the server for an answer to complete things
         if (this.useRunestoneServices || this.graderactive) {
@@ -166,28 +163,6 @@ export default class Parsons extends RunestoneBase {
         this.containerDiv.id = this.counterId;
         this.parsTextDiv = document.createElement("div");
         $(this.parsTextDiv).addClass("parsons-text");
-        // Images within Parsons problem description were bumping things and causing display misalignment
-        // This if-else section moves images to beneath the problem description to fix misalignment
-        // Also added '.parsons .parsons-img{}' to parsons.css - Vincent Qiu (September 2020)
-        if (this.question.innerHTML.includes("<img")) {
-            var imgString = this.question.innerHTML.substring(
-                this.question.innerHTML.indexOf("<img"),
-                this.question.innerHTML.indexOf(">") + 1
-            );
-            var textWithoutImg = this.question.innerHTML.replace(imgString, "");
-            if (imgString.includes('align="left"')) {
-                imgString = imgString.replace('align="left"', "");
-            }
-            this.parsTextDiv.innerHTML = textWithoutImg;
-            this.containerDiv.appendChild(this.parsTextDiv);
-            this.parsImgDiv = document.createElement("div");
-            $(this.parsImgDiv).addClass("parsons-img");
-            this.parsImgDiv.innerHTML = imgString;
-            this.containerDiv.appendChild(this.parsImgDiv);
-        } else {
-            this.parsTextDiv.innerHTML = this.question.innerHTML;
-            this.containerDiv.appendChild(this.parsTextDiv);
-        }
         this.keyboardTip = document.createElement("div");
         $(this.keyboardTip).attr("role", "tooltip");
         this.keyboardTip.id = this.counterId + "-tip";
