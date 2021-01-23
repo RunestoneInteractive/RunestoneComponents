@@ -53,14 +53,12 @@ var TimedActiveCodeMixin = {
     checkCorrectTimed: function () {
         // pct_correct is set by the unittest/gui.py module in skulpt.
         // it relies on finding this object in the edList
-        if (this.pct_correct) {
+        if (this.isAnswered) {
             if (this.pct_correct >= 100.0) {
                 return "T";
             } else {
                 return "F";
             }
-        } else if (this.errLastRun) {
-            return "F";
         } else {
             return "I"; // we ignore this in the grading if no unittests
         }
@@ -110,7 +108,7 @@ export class TimedActiveCode extends ActiveCode {
     }
 
     // for timed exams we need to call runProg and tell it that there is
-    // no GUI for sliders or other things. We also do not want it to log
+    // no GUI for sliders or other things.
     // the answers.
     async checkCurrentAnswer() {
         await this.runProg(true, false);
