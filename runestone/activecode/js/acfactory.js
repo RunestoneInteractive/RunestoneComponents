@@ -26,6 +26,9 @@ export default class ACFactory {
                 opts[attrname] = addopts[attrname];
             }
         }
+        if (lang === undefined) {
+            lang = $(opts.orig).find("[data-lang]").data("lang");
+        }
         if (opts.timed == true) {
             if (lang === "python") {
                 return new TimedActiveCode(opts);
