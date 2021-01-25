@@ -321,7 +321,7 @@ export default class Timed extends RunestoneBase {
                             this.currentQuestionIndex +
                             ")"
                     ).addClass("answered");
-                    this.renderedQuestionArray[
+                    await this.renderedQuestionArray[
                         this.currentQuestionIndex
                     ].question.checkCurrentAnswer();
                     if (!this.done) {
@@ -387,7 +387,7 @@ export default class Timed extends RunestoneBase {
                             this.currentQuestionIndex +
                             ")"
                     ).addClass("answered");
-                    this.renderedQuestionArray[
+                    await this.renderedQuestionArray[
                         this.currentQuestionIndex
                     ].question.checkCurrentAnswer();
                     if (!this.done) {
@@ -442,13 +442,13 @@ export default class Timed extends RunestoneBase {
         this.finishButton.textContent = "Finish Exam";
         this.finishButton.addEventListener(
             "click",
-            function () {
+            async function () {
                 if (
                     window.confirm(
                         "Clicking OK means you are ready to submit your answers and are finished with this assessment."
                     )
                 ) {
-                    this.finishAssessment();
+                    await this.finishAssessment();
                 }
             }.bind(this),
             false
@@ -578,7 +578,7 @@ export default class Timed extends RunestoneBase {
         currentQuestion = this.renderedQuestionArray[this.currentQuestionIndex]
             .question;
         if (opts.state === "forreview") {
-            currentQuestion.checkCurrentAnswer();
+            await currentQuestion.checkCurrentAnswer();
             currentQuestion.renderFeedback();
             currentQuestion.disableInteraction();
         }
@@ -796,7 +796,7 @@ export default class Timed extends RunestoneBase {
         });
     }
 
-    finishAssessment() {
+    async finishAssessment() {
         $("#relations-next").show(); // show the next page button for now
         $("#relations-prev").show(); // show the previous button for now
         if (!this.showFeedback) {
@@ -809,7 +809,7 @@ export default class Timed extends RunestoneBase {
         this.running = 0;
         this.done = 1;
         this.taken = 1;
-        this.finalizeProblems();
+        await this.finalizeProblems();
         this.checkScore();
         this.displayScore();
         this.storeScore();
@@ -841,7 +841,7 @@ export default class Timed extends RunestoneBase {
 
     // finalizeProblems
     // ----------------
-    finalizeProblems() {
+    async finalizeProblems() {
         // Because we have submitted each question as we navigate we only need to
         // send the final version of the question the student is on when they press the
         // finish exam button.
@@ -849,7 +849,7 @@ export default class Timed extends RunestoneBase {
         var currentQuestion = this.renderedQuestionArray[
             this.currentQuestionIndex
         ].question;
-        currentQuestion.checkCurrentAnswer();
+        await currentQuestion.checkCurrentAnswer();
         currentQuestion.logCurrentAnswer();
         currentQuestion.renderFeedback();
         currentQuestion.disableInteraction();
