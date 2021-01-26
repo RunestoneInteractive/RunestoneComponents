@@ -13,7 +13,7 @@ var TimedActiveCodeMixin = {
     timedInit: async function (opts) {
         this.isTimed = true;
         this.hideButtons();
-        await this.addHistoryScrubber();
+        await this.addHistoryScrubber(true); // position last
         this.needsReinitialization = true; // the run button click listener needs to be reinitialized
         this.containerDiv.classList.add("timedComponent");
         window.edList[this.divid] = this;
@@ -113,11 +113,7 @@ export class TimedActiveCode extends ActiveCode {
     // the answers.
     async checkCurrentAnswer() {
         let noUI = true;
-        if (this.assessmentTaken) {
-            noUI = false;
-            const result = await this.timedInitComplete;
-            await this.manage_scrubber(false);
-        }
+        const result = await this.timedInitComplete;
         await this.runProg(noUI, false);
     }
 }

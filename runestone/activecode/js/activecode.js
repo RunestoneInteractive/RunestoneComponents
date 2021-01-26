@@ -1203,7 +1203,7 @@ Yet another is that there is an internal error.  The internal error message is: 
         // However in exam mode we make a div which is offscreen
         if (
             this.unit_results_divid &&
-            this.unit_results_divid.indexOf("_offscreen_") > 0
+            this.unit_results_divid.indexOf("_offscreen_") > 0 
         ) {
             let urDivid = `${this.divid}_offscreen_unit_results`;
             let unitFeedback = document.getElementById(urDivid);
