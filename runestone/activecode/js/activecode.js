@@ -1201,19 +1201,27 @@ Yet another is that there is an internal error.  The internal error message is: 
         // The python unit test code builds the table as it is running the tests
         // In "normal" usage this is displayed immediately.
         // However in exam mode we make a div which is offscreen
-        if (
-            this.unit_results_divid &&
-            this.unit_results_divid.indexOf("_offscreen_") > 0 
-        ) {
-            let urDivid = `${this.divid}_offscreen_unit_results`;
-            let unitFeedback = document.getElementById(urDivid);
-            let tmp = document.body.removeChild(unitFeedback);
-            if ($(this.containerDiv).find(`#${urDivid}`).length > 0) {
-                tmp = $(this.containerDiv).find(`#${urDivid}`)[0];
+        if (this.unit_results_divid) {
+            if (this.unit_results_divid.indexOf("_offscreen_") > 0) {
+                let urDivid = `${this.divid}_offscreen_unit_results`;
+                let unitFeedback = document.getElementById(urDivid);
+                let tmp = document.body.removeChild(unitFeedback);
+                if ($(this.containerDiv).find(`#${urDivid}`).length > 0) {
+                    tmp = $(this.containerDiv).find(`#${urDivid}`)[0];
+                } else {
+                    this.containerDiv.appendChild(tmp);
+                }
+                $(tmp).show();
             } else {
-                this.containerDiv.appendChild(tmp);
+                let urDivid = this.unit_results_divid;
+                if (
+                    $(this.containerDiv).find(`#${urDivid}`).length == 0 &&
+                    this.divid != urDivid
+                ) {
+                    let urResults = document.getElementById(urDivid);
+                    this.containerDiv.appendChild(urResults);
+                }
             }
-            $(tmp).show();
         }
     }
 
