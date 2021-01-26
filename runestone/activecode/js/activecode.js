@@ -1213,10 +1213,10 @@ Yet another is that there is an internal error.  The internal error message is: 
                 }
                 $(tmp).show();
             } else {
-                let urDivid = this.unit_results_divid;
+                let urDivid = this.divid + "_unit_results";
                 if (
                     $(this.containerDiv).find(`#${urDivid}`).length == 0 &&
-                    this.divid != urDivid
+                    $(this.containerDiv).find(`#${urDivid}_offscreen_unit_results`).length == 0
                 ) {
                     let urResults = document.getElementById(urDivid);
                     this.containerDiv.appendChild(urResults);
