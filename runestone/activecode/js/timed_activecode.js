@@ -10,13 +10,14 @@ import HTMLActiveCode from "./activecode_html";
 import SQLActiveCode from "./activecode_sql";
 
 var TimedActiveCodeMixin = {
-    timedInit: function (opts) {
+    async timedInit: function (opts) {
         this.isTimed = true;
         this.hideButtons();
-        this.addHistoryScrubber();
+        await this.addHistoryScrubber();
         this.needsReinitialization = true; // the run button click listener needs to be reinitialized
         this.containerDiv.classList.add("timedComponent");
         window.edList[this.divid] = this;
+        return true;
     },
 
     hideButtons: function () {
@@ -104,7 +105,7 @@ Object.assign(TimedLiveCode.prototype, TimedActiveCodeMixin);
 export class TimedActiveCode extends ActiveCode {
     constructor(opts) {
         super(opts);
-        this.timedInit(opts);
+        this.timedInitComplete = this.timedInit(opts);
     }
 
     // for timed exams we need to call runProg and tell it that there is
@@ -114,6 +115,7 @@ export class TimedActiveCode extends ActiveCode {
         let noUI = true;
         if (this.assessmentTaken) {
             noUI = false;
+            const result = await this.timedInitComplete;
             await this.manage_scrubber(false);
         }
         await this.runProg(noUI, false);
