@@ -10,7 +10,7 @@ import HTMLActiveCode from "./activecode_html";
 import SQLActiveCode from "./activecode_sql";
 
 var TimedActiveCodeMixin = {
-    async timedInit: function (opts) {
+    timedInit: async function (opts) {
         this.isTimed = true;
         this.hideButtons();
         await this.addHistoryScrubber();
