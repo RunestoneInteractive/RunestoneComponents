@@ -296,139 +296,116 @@ export default class Timed extends RunestoneBase {
         this.navBtnListeners();
     }
 
+    // when moving off of a question in an active exam:
+    // 1. show that the question has been seen, or mark it broken if it is in error.
+    // 2. check and log the current answer
+    async navigateAway() {
+        if (
+            this.renderedQuestionArray[this.currentQuestionIndex].state ==
+            "broken_exam"
+        ) {
+            $(
+                "ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"
+            ).addClass("broken");
+        }
+        if (
+            this.renderedQuestionArray[this.currentQuestionIndex].question
+                .isAnswered
+        ) {
+            $(
+                "ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"
+            ).addClass("answered");
+            await this.renderedQuestionArray[
+                this.currentQuestionIndex
+            ].question.checkCurrentAnswer();
+            if (!this.done) {
+                this.renderedQuestionArray[
+                    this.currentQuestionIndex
+                ].question.logCurrentAnswer();
+            }
+        }
+    }
+    async handleNextPrev(event) {
+        if (!this.taken) {
+            await this.navigateAway();
+        }
+        var target = $(event.target).text();
+        if (target.match(/Next/)) {
+            if ($(this.rightContainer).hasClass("disabled")) {
+                return;
+            }
+            this.currentQuestionIndex++;
+        } else if (target.match(/Prev/)) {
+            if ($(this.leftContainer).hasClass("disabled")) {
+                return;
+            }
+            this.currentQuestionIndex--;
+        }
+        await this.renderTimedQuestion();
+        this.ensureButtonSafety();
+        for (var i = 0; i < this.qNumList.childNodes.length; i++) {
+            for (
+                var j = 0;
+                j < this.qNumList.childNodes[i].childNodes.length;
+                j++
+            ) {
+                $(this.qNumList.childNodes[i].childNodes[j]).removeClass(
+                    "active"
+                );
+            }
+        }
+        $(
+            "ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"
+        ).addClass("active");
+    }
+
+    async handleNumberedNav(event) {
+        if (!this.taken) {
+            await this.navigateAway();
+        }
+        for (var i = 0; i < this.qNumList.childNodes.length; i++) {
+            for (
+                var j = 0;
+                j < this.qNumList.childNodes[i].childNodes.length;
+                j++
+            ) {
+                $(this.qNumList.childNodes[i].childNodes[j]).removeClass(
+                    "active"
+                );
+            }
+        }
+
+        var target = $(event.target).text();
+        let oldIndex = this.currentQuestionIndex;
+        this.currentQuestionIndex = parseInt(target) - 1;
+        if (this.currentQuestionIndex > this.renderedQuestionArray.length) {
+            console.log(`Error: bad index for ${target}`);
+            this.currentQuestionIndex = oldIndex;
+        }
+        $(
+            "ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"
+        ).addClass("active");
+        await this.renderTimedQuestion();
+        this.ensureButtonSafety();
+    }
+
     // set up events for navigation
     navBtnListeners() {
         // Next and Prev Listener
         this.pagNavList.addEventListener(
             "click",
-            async function (event) {
-                if (
-                    this.renderedQuestionArray[this.currentQuestionIndex]
-                        .state == "broken_exam"
-                ) {
-                    $(
-                        "ul#pageNums > ul > li:eq(" +
-                            this.currentQuestionIndex +
-                            ")"
-                    ).addClass("broken");
-                }
-                if (
-                    this.renderedQuestionArray[this.currentQuestionIndex]
-                        .question.isAnswered
-                ) {
-                    $(
-                        "ul#pageNums > ul > li:eq(" +
-                            this.currentQuestionIndex +
-                            ")"
-                    ).addClass("answered");
-                    await this.renderedQuestionArray[
-                        this.currentQuestionIndex
-                    ].question.checkCurrentAnswer();
-                    if (!this.done) {
-                        this.renderedQuestionArray[
-                            this.currentQuestionIndex
-                        ].question.logCurrentAnswer();
-                    }
-                }
-                // submit the current question here
-                var target = $(event.target).text();
-                if (target.match(/Next/)) {
-                    if ($(this.rightContainer).hasClass("disabled")) {
-                        return;
-                    }
-                    this.currentQuestionIndex++;
-                } else if (target.match(/Prev/)) {
-                    if ($(this.leftContainer).hasClass("disabled")) {
-                        return;
-                    }
-                    this.currentQuestionIndex--;
-                }
-                await this.renderTimedQuestion();
-                this.ensureButtonSafety();
-                for (var i = 0; i < this.qNumList.childNodes.length; i++) {
-                    for (
-                        var j = 0;
-                        j < this.qNumList.childNodes[i].childNodes.length;
-                        j++
-                    ) {
-                        $(
-                            this.qNumList.childNodes[i].childNodes[j]
-                        ).removeClass("active");
-                    }
-                }
-                $(
-                    "ul#pageNums > ul > li:eq(" +
-                        this.currentQuestionIndex +
-                        ")"
-                ).addClass("active");
-            }.bind(this),
+            this.handleNextPrev.bind(this),
             false
         );
+
         // Numbered Listener
         this.qNumList.addEventListener(
             "click",
-            async function (event) {
-                if (
-                    this.renderedQuestionArray[this.currentQuestionIndex]
-                        .state == "broken_exam"
-                ) {
-                    $(
-                        "ul#pageNums > ul > li:eq(" +
-                            this.currentQuestionIndex +
-                            ")"
-                    ).addClass("broken");
-                }
-                if (
-                    this.renderedQuestionArray[this.currentQuestionIndex]
-                        .question.isAnswered
-                ) {
-                    $(
-                        "ul#pageNums > ul > li:eq(" +
-                            this.currentQuestionIndex +
-                            ")"
-                    ).addClass("answered");
-                    await this.renderedQuestionArray[
-                        this.currentQuestionIndex
-                    ].question.checkCurrentAnswer();
-                    if (!this.done) {
-                        this.renderedQuestionArray[
-                            this.currentQuestionIndex
-                        ].question.logCurrentAnswer();
-                    }
-                }
-                for (var i = 0; i < this.qNumList.childNodes.length; i++) {
-                    for (
-                        var j = 0;
-                        j < this.qNumList.childNodes[i].childNodes.length;
-                        j++
-                    ) {
-                        $(
-                            this.qNumList.childNodes[i].childNodes[j]
-                        ).removeClass("active");
-                    }
-                }
-
-                var target = $(event.target).text();
-                let oldIndex = this.currentQuestionIndex;
-                this.currentQuestionIndex = parseInt(target) - 1;
-                if (
-                    this.currentQuestionIndex >
-                    this.renderedQuestionArray.length
-                ) {
-                    console.log(`Error: bad index for ${target}`);
-                    this.currentQuestionIndex = oldIndex;
-                }
-                $(
-                    "ul#pageNums > ul > li:eq(" +
-                        this.currentQuestionIndex +
-                        ")"
-                ).addClass("active");
-                await this.renderTimedQuestion();
-                this.ensureButtonSafety();
-            }.bind(this),
+            this.handleNumberedNav.bind(this),
             false
         );
     }
+
     renderSubmitButton() {
         this.buttonContainer = document.createElement("div");
         $(this.buttonContainer).attr({
