@@ -111,7 +111,12 @@ export class TimedActiveCode extends ActiveCode {
     // no GUI for sliders or other things.
     // the answers.
     async checkCurrentAnswer() {
-        await this.runProg(true, false);
+        let noUI = true;
+        if (this.assessmentTaken) {
+            noUI = false;
+            await this.manage_scrubber(false);
+        }
+        await this.runProg(noUI, false);
     }
 }
 
