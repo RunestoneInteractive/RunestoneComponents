@@ -105,6 +105,12 @@ class SelectQuestion(RunestoneIdDirective):
         addQuestionToDB(self)
         env = self.state.document.settings.env
         is_dynamic = env.config.html_context.get("dynamic_pages", False)
+
+        if not (bool("fromid" in self.options) ^ bool("proficiency" in self.options)):
+            raise self.severe(
+                "You must specify either fromid or proficiency but not both"
+            )
+
         if is_dynamic:
             self.options["message"] = "Loading ..."
         else:
