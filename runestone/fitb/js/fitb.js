@@ -256,7 +256,9 @@ export default class FITB extends RunestoneBase {
             }
         }
         if (this.useRunestoneServices) {
-            this.enableCompareButton();
+            if (eBookConfig.enableCompareMe) {
+                this.enableCompareButton();
+            }
         }
     }
     // Inputs:

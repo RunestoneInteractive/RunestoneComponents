@@ -245,6 +245,7 @@
     eBookConfig.activities = {{= XML(activity_info) }}
     eBookConfig.downloadsEnabled = {{=downloads_enabled}};
     eBookConfig.allow_pairs = {{=allow_pairs}}
+    eBookConfig.enableCompareMe = {{=enable_compare_me }};
     {% endraw %}
   {% else %}
     eBookConfig.useRunestoneServices = {% if use_services == 'true' -%}true{%- else -%}false{%- endif -%};
@@ -253,6 +254,7 @@
     eBookConfig.course = '{{course_id}}';
     eBookConfig.basecourse = '{{ basecourse }}';
     eBookConfig.isLoggedIn = false;
+    eBookConfig.enableCompareMe = eBookConfig.useRunestoneServices;
   {% endif %}
   eBookConfig.ajaxURL = eBookConfig.app+'/ajax/';
   eBookConfig.logLevel = {{loglevel}};
