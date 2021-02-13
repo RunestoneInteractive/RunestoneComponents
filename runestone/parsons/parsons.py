@@ -35,7 +35,7 @@ def setup(app):
 TEMPLATE_START = """
         <div class="%(divclass)s"> 
         <div data-component="parsons" id="%(divid)s" class="alert alert-warning parsons" style="max-width: none;">
-        <div class="parsons_question" >
+        <div class="parsons_question parsons-text" >
     """
 
 TEMPLATE_END = """

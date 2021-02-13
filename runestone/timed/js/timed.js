@@ -176,9 +176,9 @@ export default class Timed extends RunestoneBase {
         this.switchContainer = document.createElement("div");
         this.switchContainer.classList.add("switchcontainer");
         this.switchDiv = document.createElement("div"); // is replaced by the questions
+        this.timedDiv.appendChild(this.navDiv);
         this.timedDiv.appendChild(this.switchContainer);
         this.switchContainer.appendChild(this.switchDiv);
-        this.timedDiv.appendChild(this.navDiv);
         $(this.timedDiv).attr({
             id: "timed_Test",
             style: "display:none",
