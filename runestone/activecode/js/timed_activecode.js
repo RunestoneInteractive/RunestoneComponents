@@ -114,7 +114,9 @@ export class TimedActiveCode extends ActiveCode {
     async checkCurrentAnswer() {
         let noUI = true;
         const result = await this.timedInitComplete;
-        await this.runProg(noUI, false);
+        if (this.isAnswered) {
+            await this.runProg(noUI, false);
+        }
     }
 }
 
