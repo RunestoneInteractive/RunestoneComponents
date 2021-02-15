@@ -1093,7 +1093,7 @@ Yet another is that there is an internal error.  The internal error message is: 
 
     async getIncludedCode(divid) {
         if (window.edList[divid]) {
-            return Promise.resolve(window.edList[divid].editor.getValue());
+            return window.edList[divid].editor.getValue();
         } else {
             let request = new Request(
                 `/runestone/ajax/get_datafile?course_id=${eBookConfig.course}&acid=${divid}`,
@@ -1103,7 +1103,8 @@ Yet another is that there is an internal error.  The internal error message is: 
                 }
             );
             let wresult = await fetch(request);
-            return wresult.json();
+            let obj = await wresult.json();
+            return obj.data
         }
     }
 
