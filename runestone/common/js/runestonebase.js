@@ -45,10 +45,21 @@ export default class RunestoneBase {
                 // default to true as this opt is only provided from a timedAssessment
                 this.assessmentTaken = true;
             }
+            // This is for the selectquestion points
+            // If a selectquestion is part of a timed exam it will get
+            // the timedWrapper options.  
             if (typeof opts.timedWrapper !== "undefined") {
                 this.timedWrapper = opts.timedWrapper;
             } else {
-                this.timedWrapper = null;
+                // However sometimes selectquestions
+                // are used in regular assignments.  The hacky way to detect this
+                // is to look for doAssignment in the URL and then grab
+                // the assignment name from the heading.
+                if (location.href.indexOf("doAssignment") >= 0) {
+                    this.timedWrapper = $("h1#assignment_name").text()
+                } else {
+                    this.timedWrapper = null;
+                }
             }
             if ($(opts.orig).data("question_label")) {
                 this.question_label = $(opts.orig).data("question_label");

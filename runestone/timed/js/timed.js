@@ -486,6 +486,7 @@ export default class Timed extends RunestoneBase {
                 useRunestoneServices: eBookConfig.useRunestoneServices,
                 timed: true,
                 assessmentTaken: this.taken,
+                timedWrapper: this.divid,
             };
             if ($(tmpChild).children("[data-component]").length > 0) {
                 tmpChild = $(tmpChild).children("[data-component]")[0];

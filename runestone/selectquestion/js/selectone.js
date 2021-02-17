@@ -76,6 +76,9 @@ export default class SelectOne extends RunestoneBase {
         if (this.ABExperiment) {
             data.AB = this.ABExperiment;
         }
+        if (this.timedWrapper) {
+            data.timedWrapper = this.timedWrapper;
+        }
         let opts = this.origOpts;
         let selectorId = this.selector_id;
         console.log("getting question source");
