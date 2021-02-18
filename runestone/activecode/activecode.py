@@ -79,8 +79,8 @@ TEMPLATE_END = """
 <textarea data-lang="%(language)s" id="%(divid)s_editor" %(autorun)s
     %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s %(chatcodes)s %(optional)s
     data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(tie)s %(dburl)s %(nopair)s
-    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(hidehistory)s %(wasmuri)s
-    style="visibility: hidden;">
+    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(hidehistory)s %(wasmuri)s 
+    %(showlastsql)s style="visibility: hidden;">
 %(initialcode)s
 </textarea>
 </div>
@@ -170,6 +170,7 @@ class ActiveCode(RunestoneIdDirective):
        :enabledownload: -- allow textfield contents to be downloaded as *.py file
        :nopair: -- disable pair programming features
        :dburl: url to load database for sql mode
+       :showlastsql: -- Only show the last sql result in output
 
         If this is a homework problem instead of an example in the text
         then the assignment text should go here.  The assignment text ends with
@@ -224,6 +225,7 @@ class ActiveCode(RunestoneIdDirective):
             "tie": directives.unchanged,
             "nopair": directives.flag,
             "dburl": directives.unchanged,
+            "showlastsql": directives.flag,
         }
     )
 
@@ -360,11 +362,6 @@ class ActiveCode(RunestoneIdDirective):
         else:
             self.options["tie"] = ""
 
-        if "dburl" in self.options:
-            self.options["dburl"] = "data-dburl='{}'".format(self.options["dburl"])
-        else:
-            self.options["dburl"] = ""
-
         for opt, tp in [
             ("compileargs", "cargs"),
             ("linkargs", "largs"),
@@ -375,6 +372,19 @@ class ActiveCode(RunestoneIdDirective):
                 self.options[tp] = 'data-{}="{}"'.format(opt, escape(self.options[opt]))
             else:
                 self.options[tp] = ""
+
+        # SQL Options
+        if "dburl" in self.options:
+            self.options["dburl"] = "data-dburl='{}'".format(self.options["dburl"])
+        else:
+            self.options["dburl"] = ""
+
+        if "showlastsql" in self.options:
+            self.options["showlastsql"] = 'data-showlastsql="true"'
+        else:
+            self.options["showlastsql"] = ""
+
+        # other options
 
         if "gradebutton" not in self.options:
             self.options["gradebutton"] = ""

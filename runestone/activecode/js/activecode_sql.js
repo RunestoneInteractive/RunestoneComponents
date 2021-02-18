@@ -19,6 +19,7 @@ export default class SQLActiveCode extends ActiveCode {
         this.config = {
             locateFile: (filename) => `${fnprefix}/${filename}`,
         };
+        this.showLast = $(this.origElem).data("showlastsql");
         var self = this;
         initSqlJs(this.config).then(function (SQL) {
             // set up call to load database asynchronously if given
@@ -168,7 +169,15 @@ export default class SQLActiveCode extends ActiveCode {
         respDiv.id = divid;
         this.outDiv.appendChild(respDiv);
         $(this.outDiv).show();
-        for (let r of this.results) {
+        // Sometimes we don't want to show a bunch of intermediate results
+        // like when we are including a bunch of previous statements from
+        // other activecodes In that case the showlastsql flag can be set
+        // so we only show the last result
+        let resultArray = this.results;
+        if (this.showLast) {
+            resultArray = this.results.slice(-1)
+        }
+        for (let r of resultArray) {
             let section = document.createElement("div");
             section.setAttribute("class", "ac_sql_result");
             respDiv.appendChild(section);
@@ -177,7 +186,7 @@ export default class SQLActiveCode extends ActiveCode {
                     let tableDiv = document.createElement("div");
                     section.appendChild(tableDiv);
                     let maxHeight = 350;
-                    if (this.results.length > 1) maxHeight = 200; // max height smaller if lots of results
+                    if (resultArray.length > 1) maxHeight = 200; // max height smaller if lots of results
                     createTable(r, tableDiv, maxHeight);
                     let messageBox = document.createElement("pre");
                     let rmsg = r.rowcount !== 1 ? " rows " : " row ";
@@ -281,9 +290,8 @@ export default class SQLActiveCode extends ActiveCode {
         }
         let pct = (100 * this.passed) / (this.passed + this.failed);
         pct = pct.toLocaleString(undefined, { maximumFractionDigits: 2 });
-        result += `You passed ${this.passed} out of ${
-            this.passed + this.failed
-        } tests for ${pct}%`;
+        result += `You passed ${this.passed} out of ${this.passed + this.failed
+            } tests for ${pct}%`;
         this.unit_results = `percent:${pct}:passed:${this.passed}:failed:${this.failed}`;
 
         return result;
