@@ -93,11 +93,18 @@ export default class RunestoneBase {
                 headers: this.jsonHeaders,
                 body: JSON.stringify(eventInfo),
             });
-            let response = await fetch(request);
-            if (!response.ok) {
-                throw new Error("Failed to save the log entry");
+            try {
+                let response = await fetch(request);
+                if (!response.ok) {
+                    throw new Error("Failed to save the log entry");
+                }
+                post_return = response.json();
+            } catch (e) {
+                if (this.isTimed) {
+                    alert(`Error: Your action was not saved! The error was ${e}`);
+                }
+                console.log(`Error: ${e}`);
             }
-            post_return = response.json();
         }
         if (!this.isTimed || eBookConfig.debug) {
             console.log("logging event " + JSON.stringify(eventInfo));
