@@ -577,7 +577,7 @@ export default class Timed extends RunestoneBase {
 
         if (!this.visited.includes(this.currentQuestionIndex)) {
             this.visited.push(this.currentQuestionIndex);
-            if (this.visited.length === this.renderedQuestionArray.length && !done) {
+            if (this.visited.length === this.renderedQuestionArray.length && !this.done) {
                 $(this.finishButton).show();
             }
         }
