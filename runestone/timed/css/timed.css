@@ -37,6 +37,12 @@ ul#pageNums li {
     color: #000;
 }
 
+.pagination > .toolate > a,
+.pagination > .toolate > span {
+    background-color: rgb(236, 203, 54);
+    color: #000;
+}
+
 .pagination > .correctCount > a,
 .pagination > .correctCount > span {
     background-color: #dff0d8;

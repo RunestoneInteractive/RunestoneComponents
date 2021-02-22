@@ -309,6 +309,14 @@ export default class Timed extends RunestoneBase {
             ).addClass("broken");
         }
         if (
+            this.renderedQuestionArray[this.currentQuestionIndex].state ==
+            "exam_ended"
+        ) {
+            $(
+                "ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"
+            ).addClass("toolate");
+        }
+        if (
             this.renderedQuestionArray[this.currentQuestionIndex].question
                 .isAnswered
         ) {
@@ -529,19 +537,25 @@ export default class Timed extends RunestoneBase {
         if (opts.state === "prepared" || opts.state === "forreview") {
             let tmpChild = opts.orig;
             if ($(tmpChild).is("[data-component=selectquestion]")) {
-                // SelectOne is async and will replace itself in this array with
-                // the actual selected question
-                opts.rqa = this.renderedQuestionArray;
-                let newq = new SelectOne(opts);
-                this.renderedQuestionArray[this.currentQuestionIndex] = {
-                    question: newq,
-                };
-                try {
-                    await newq.initialize();
-                } catch (e) {
+                if (this.done) {
                     this.renderedQuestionArray[
                         this.currentQuestionIndex
-                    ].state = "broken_exam";
+                    ].state = "exam_ended";
+                } else {
+                    // SelectOne is async and will replace itself in this array with
+                    // the actual selected question
+                    opts.rqa = this.renderedQuestionArray;
+                    let newq = new SelectOne(opts);
+                    this.renderedQuestionArray[this.currentQuestionIndex] = {
+                        question: newq,
+                    };
+                    try {
+                        await newq.initialize();
+                    } catch (e) {
+                        this.renderedQuestionArray[
+                            this.currentQuestionIndex
+                        ].state = "broken_exam";
+                    }
                 }
             } else if ($(tmpChild).is("[data-component]")) {
                 let componentKind = $(tmpChild).data("component");
@@ -563,7 +577,7 @@ export default class Timed extends RunestoneBase {
 
         if (!this.visited.includes(this.currentQuestionIndex)) {
             this.visited.push(this.currentQuestionIndex);
-            if (this.visited.length === this.renderedQuestionArray.length) {
+            if (this.visited.length === this.renderedQuestionArray.length && !done) {
                 $(this.finishButton).show();
             }
         }
@@ -626,12 +640,20 @@ export default class Timed extends RunestoneBase {
             }
             $(window).on("beforeunload", function (event) {
                 // this actual value gets ignored by newer browsers
-                alert("foo");
+                if (this.done) {
+                    return;
+                }
                 event.preventDefault();
                 event.returnValue =
                     "Are you sure you want to leave?  Your work will be lost! And you will need your instructor to reset the exam!";
                 return "Are you sure you want to leave?  Your work will be lost!";
-            });
+            }.bind(this));
+            window.addEventListener("pagehide", async function (event) {
+                if (!this.done) {
+                    await this.finishAssessment();
+                    console.log("Exam exited by leaving page")
+                }
+            }.bind(this));
         } else {
             this.handlePrevAssessment();
         }
@@ -795,7 +817,7 @@ export default class Timed extends RunestoneBase {
         $(this.pauseBtn).attr("disabled", true);
         this.finishButton.disabled = true;
         $(window).off("beforeunload");
-        //
+        // turn off the pagehide listener
         let assignment_id = this.divid;
         setTimeout(function () {
             jQuery.ajax({
