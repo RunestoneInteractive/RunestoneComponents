@@ -215,8 +215,9 @@ export default class Timed extends RunestoneBase {
                 $(this.finishButton).hide(); // hide the finish button for now
                 let mess = document.createElement("p");
                 mess.innerHTML =
-                    "<strong>Warning: You will lose all of your work if you close this tab or the browser.</strong>  Make sure you click the Finish Exam button to submit your work!";
+                    "<strong>Warning: You will not be able to continue the exam if you close this tab, close the window, or navigate away from this page!</strong>  Make sure you click the Finish Exam button when you are done to submit your work!";
                 this.controlDiv.appendChild(mess);
+                mess.classList.add("examwarning")
                 await this.renderTimedQuestion();
                 this.startAssessment();
             }.bind(this),
