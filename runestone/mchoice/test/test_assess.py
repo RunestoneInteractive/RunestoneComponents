@@ -67,15 +67,12 @@ class MultipleChoiceQuestion_Tests(RunestoneTestCase):
     def test_ma1(self):
         """Multiple Answer: Nothing selected, Check button clicked"""
         self.driver.get(self.host + "/index.html")
+        self.wait_until_ready("question1")
         t1 = self.driver.find_element_by_id("question1")
 
         btn_check = t1.find_element_by_tag_name("button")
         self.assertIsNotNone(btn_check)
-        try:
-            btn_check.click()
-        except:
-            print("Warning -- Selenium Error on click")
-            return
+        btn_check.click()
 
         fb = t1.find_element_by_id("question1_feedback")
         self.assertIsNotNone(fb)
@@ -85,6 +82,7 @@ class MultipleChoiceQuestion_Tests(RunestoneTestCase):
     def test_ma2(self):
         """Multiple Answer: Correct answer(s) selected"""
         self.driver.get(self.host + "/index.html")
+        self.wait_until_ready("question1")
         t1 = self.driver.find_element_by_id("question1")
 
         t1.find_element_by_id("question1_opt_0").click()
@@ -101,6 +99,7 @@ class MultipleChoiceQuestion_Tests(RunestoneTestCase):
     def test_ma3(self):
         """Multiple Answer: Incorrect answer(s) selected"""
         self.driver.get(self.host + "/index.html")
+        self.wait_until_ready("question1")
         t1 = self.driver.find_element_by_id("question1")
 
         t1.find_element_by_id("question1_opt_1").click()
@@ -117,6 +116,7 @@ class MultipleChoiceQuestion_Tests(RunestoneTestCase):
     def test_ma4(self):
         """Multiple Answer: All options clicked one by one"""
         self.driver.get(self.host + "/index.html")
+        self.wait_until_ready("question1")
         t1 = self.driver.find_element_by_id("question1")
 
         answers = t1.find_elements_by_tag_name("label")
@@ -134,6 +134,7 @@ class MultipleChoiceQuestion_Tests(RunestoneTestCase):
     def test_mc1(self):
         """Multiple Choice: Nothing selected"""
         self.driver.get(self.host + "/index.html")
+        self.wait_until_ready("question2")
         t1 = self.driver.find_element_by_id("question2")
         btn_check = t1.find_element_by_tag_name("button")
         btn_check.click()
@@ -144,6 +145,7 @@ class MultipleChoiceQuestion_Tests(RunestoneTestCase):
     def test_mc2(self):
         """Multiple Choice: Correct answer selected"""
         self.driver.get(self.host + "/index.html")
+        self.wait_until_ready("question2")
         t1 = self.driver.find_element_by_id("question2")
 
         t1.find_element_by_id("question2_opt_0").click()
@@ -163,6 +165,7 @@ class MultipleChoiceQuestion_Tests(RunestoneTestCase):
     def test_mc3(self):
         """Multiple Choice: Incorrect answer selected"""
         self.driver.get(self.host + "/index.html")
+        self.wait_until_ready("question2")
         t1 = self.driver.find_element_by_id("question2")
 
         t1.find_element_by_id("question2_opt_1").click()
@@ -178,6 +181,7 @@ class MultipleChoiceQuestion_Tests(RunestoneTestCase):
     def test_mc4(self):
         """Multiple Choice: All options clicked one by one"""
         self.driver.get(self.host + "/index.html")
+        self.wait_until_ready("question2")
         t1 = self.driver.find_element_by_id("question2")
 
         answers = t1.find_elements_by_tag_name("li")

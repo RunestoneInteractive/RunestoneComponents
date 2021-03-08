@@ -76,6 +76,7 @@ export default class ClickableArea extends RunestoneBase {
     renderNewElements() {
         // wrapper function for generating everything
         this.containerDiv = document.createElement("div");
+        this.containerDiv.id = this.origElem.id;
         this.containerDiv.appendChild(this.question);
         $(this.containerDiv).addClass(this.origElem.getAttribute("class"));
         this.newDiv = document.createElement("div");
@@ -85,10 +86,10 @@ export default class ClickableArea extends RunestoneBase {
         }
         this.newDiv.innerHTML = newContent;
         this.containerDiv.appendChild(this.newDiv);
-        this.checkServer("clickableArea");
         this.createButtons();
         this.createFeedbackDiv();
         $(this.origElem).replaceWith(this.containerDiv);
+        this.checkServer("clickableArea").then(() => this.containerDiv.classList.add("runestone-component-ready"));
     }
     createButtons() {
         this.submitButton = document.createElement("button"); // Check me button

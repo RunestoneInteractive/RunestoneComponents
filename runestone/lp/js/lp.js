@@ -66,7 +66,7 @@ class LP extends RunestoneBase {
             // Keep track of it.
             that.textAreas.push(editor);
         });
-        this.checkServer("lp_build");
+        this.checkServer("lp_build").then(() => this.element.classList.add("runestone-component-ready"));
         // Handle clicks to the "Save and run" button.
         $(this.element).click((eventObject) => that.onSaveAndRun(eventObject).then(null));
     }

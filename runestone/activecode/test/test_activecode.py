@@ -3,7 +3,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import (
     ElementClickInterceptedException,
-    TimeoutException,
 )
 import time
 from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
@@ -21,11 +20,7 @@ class ActiveCodeTests(RunestoneTestCase):
         :return:
         """
         self.driver.get(self.host + "/index.html")
-        try:
-            self.wait.until(EC.presence_of_element_located((By.ID, "test1")))
-        except TimeoutException:
-            text = self.driver.page_source
-            print(text[:300])
+        self.wait_until_ready("test1")
         t1 = self.driver.find_element_by_id("test1")
         self.assertIsNotNone(t1)
         rb = t1.find_element_by_class_name("run-button")
@@ -47,11 +42,7 @@ class ActiveCodeTests(RunestoneTestCase):
         :return:
         """
         self.driver.get(self.host + "/index.html")
-        try:
-            self.wait.until(EC.presence_of_element_located((By.ID, "testprefixcode")))
-        except TimeoutException:
-            text = self.driver.page_source
-            print(text[:300])
+        self.wait_until_ready("testprefixcode")
         t1 = self.driver.find_element_by_id("testprefixcode")
         self.assertIsNotNone(t1)
         rb = t1.find_element_by_class_name("run-button")
@@ -75,6 +66,7 @@ class ActiveCodeTests(RunestoneTestCase):
         :return:
         """
         self.driver.get(self.host + "/index.html")
+        self.wait_until_ready("test1")
         t1 = self.driver.find_element_by_id("test1")
         self.assertIsNotNone(t1)
         rb = t1.find_element_by_class_name("run-button")
@@ -129,6 +121,7 @@ class ActiveCodeTests(RunestoneTestCase):
         Code is dependent on supplementary file
         """
         self.driver.get(self.host + "/index.html")
+        self.wait_until_ready("test2")
         t2 = self.driver.find_element_by_id("test2")
         self.assertIsNotNone(t2)
         rb = t2.find_element_by_class_name("run-button")
@@ -150,6 +143,7 @@ class ActiveCodeTests(RunestoneTestCase):
 
     def test_activity_count(self):
         self.driver.get(self.host + "/progresspage.html")
+        self.wait_until_ready("test_p1")
         t2 = self.driver.find_element_by_id("test_p1")
         self.assertIsNotNone(t2)
         rb = t2.find_element_by_class_name("run-button")
@@ -171,6 +165,7 @@ class ActiveCodeTests(RunestoneTestCase):
 
     def test_sql_activecode(self):
         self.driver.get(self.host + "/index.html")
+        self.wait_until_ready("sql1")
         t2 = self.driver.find_element_by_id("sql1")
         self.assertIsNotNone(t2)
         time.sleep(1)
@@ -194,6 +189,7 @@ class ActiveCodeTests(RunestoneTestCase):
 
     def test_readfiles(self):
         self.driver.get(self.host + "/skulptfeatures.html")
+        self.wait_until_ready("ac9_13_1")
         t2 = self.driver.find_element_by_id("ac9_13_1")
         self.assertIsNotNone(t2)
         rb = t2.find_element_by_class_name("run-button")
@@ -208,6 +204,7 @@ class ActiveCodeTests(RunestoneTestCase):
 
     def test_altair(self):
         self.driver.get(self.host + "/skulptfeatures.html")
+        self.wait_until_ready("alt_kiva_bar1")
         t2 = self.driver.find_element_by_id("alt_kiva_bar1")
         self.assertIsNotNone(t2)
         rb = t2.find_element_by_class_name("run-button")
@@ -226,6 +223,7 @@ class ActiveCodeTests(RunestoneTestCase):
 
     def test_image(self):
         self.driver.get(self.host + "/skulptfeatures.html")
+        self.wait_until_ready("ac14_7_2")
         t2 = self.driver.find_element_by_id("ac14_7_2")
         self.assertIsNotNone(t2)
         rb = t2.find_element_by_class_name("run-button")

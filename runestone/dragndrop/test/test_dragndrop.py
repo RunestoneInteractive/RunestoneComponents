@@ -10,9 +10,6 @@ For some reason, question id had to be 3 or above
 
 __author__ = "yasinovskyy"
 
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.by import By
 from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
 
 setUpModule, tearDownModule = module_fixture_maker(__file__)
@@ -28,12 +25,7 @@ class DragAndDropQuestion_Tests(RunestoneTestCase):
     def test_dnd1(self):
         """No selection. Button clicked"""
         self.driver.get(self.host + "/index.html")
-        wait = WebDriverWait(self.driver, 10)
-        try:
-            wait.until(EC.presence_of_element_located((By.ID, "drag-and-drop")))
-        except:
-            text = self.driver.page_source
-            print(text[:300])
+        self.wait_until_ready("question3")
 
         t1 = self.driver.find_element_by_id("drag-and-drop")
 
@@ -52,6 +44,7 @@ class DragAndDropQuestion_Tests(RunestoneTestCase):
     def test_dnd2(self):
         """Terms matched correctly"""
         self.driver.get(self.host + "/index.html")
+        self.wait_until_ready("question3")
         t1 = self.driver.find_element_by_id("drag-and-drop")
 
         targets = self.driver.find_elements_by_class_name("draggable-drop")
@@ -84,6 +77,7 @@ class DragAndDropQuestion_Tests(RunestoneTestCase):
     def test_dnd3(self):
         """Reset button clicked"""
         self.driver.get(self.host + "/index.html")
+        self.wait_until_ready("question3")
         t1 = self.driver.find_element_by_id("drag-and-drop")
 
         targets = self.driver.find_elements_by_class_name("draggable-drop")

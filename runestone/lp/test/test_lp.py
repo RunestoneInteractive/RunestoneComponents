@@ -19,7 +19,6 @@ from unittest import TestCase
 # Third-party imports
 # -------------------
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
@@ -198,12 +197,7 @@ Line 12"""
 class Functional_Test_Lp(RunestoneTestCase):
     def test_1(self):
         self.driver.get(self.host + "/lp_tester.s.html")
-        wait = WebDriverWait(self.driver, 10)
-        try:
-            wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-        except:
-            text = self.driver.page_source
-            print(text[:300])
+        self.wait_until_ready("e1")
 
         snippets = self.driver.find_elements_by_class_name("code_snippet")
         self.assertEqual(len(snippets), 2)
@@ -218,7 +212,7 @@ class Functional_Test_Lp(RunestoneTestCase):
 
         # Click the test button.
         check_button.click()
-        WebDriverWait(self.driver, 10).until(
+        self.wait.until(
             EC.text_to_be_present_in_element_value((By.ID, "lp-result"), "Building...")
         )
 

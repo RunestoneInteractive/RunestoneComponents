@@ -86,12 +86,7 @@ export default class Parsons extends RunestoneBase {
         this.initializeLines(fulltext.trim());
         this.initializeView();
         // Check the server for an answer to complete things
-        if (this.useRunestoneServices || this.graderactive) {
-            this.checkServer("parsons");
-        } else {
-            this.checkLocalStorage();
-            this.checkServerComplete = Promise.resolve("no server");
-        }
+        this.checkServer("parsons").then(() => orig.classList.add("runestone-component-ready"));
         this.caption = "Parsons";
         this.addCaption("runestone");
     }

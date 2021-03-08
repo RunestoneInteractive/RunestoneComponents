@@ -37,7 +37,7 @@ export default class FITB extends RunestoneBase {
             this.scriptSelector(this.origElem).html()
         );
         this.createFITBElement();
-        this.checkServer("fillb");
+        this.checkServer("fillb").then(() => this.containerDiv.classList.add("runestone-component-ready"));
         this.caption = "Fill in the Blank";
         this.addCaption("runestone");
     }

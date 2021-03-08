@@ -20,15 +20,9 @@ class ParsonsTests(RunestoneTestCase):
     maxDiff = None
 
     def test_general(self):
-
         self.driver.get(self.host + "/index.html")
-        wait = WebDriverWait(self.driver, 10)
-        try:
-            wait.until(EC.presence_of_element_located((By.ID, "parsons-1-source")))
-        except:
-            text = self.driver.page_source
-            print(text[:300])
         self.driver.execute_script("window.localStorage.clear();")
+        self.wait_until_ready("Test1")
 
         # Source has correct number of blocks and each block has a label
         source = self.driver.find_element_by_id("parsons-1-source")
@@ -78,6 +72,7 @@ class ParsonsTests(RunestoneTestCase):
     def test_help(self):
         self.driver.get(self.host + "/index.html")
         self.driver.execute_script("window.localStorage.clear();")
+        self.wait_until_ready("Test1")
 
         source = self.driver.find_element_by_id("parsons-1-source")
         answer = self.driver.find_element_by_id("parsons-1-answer")
@@ -179,6 +174,7 @@ class ParsonsTests(RunestoneTestCase):
 
     def test_numbering(self):
         self.driver.get(self.host + "/index.html")
+        self.wait_until_ready("Test2a")
 
         # right label block
         rlb = self.driver.find_element_by_id("parsons-2-block-1")
@@ -208,6 +204,7 @@ class ParsonsTests(RunestoneTestCase):
     def test_indentation(self):
         self.driver.get(self.host + "/index.html")
         self.driver.execute_script("window.localStorage.clear();")
+        self.wait_until_ready("Test1")
 
         source = self.driver.find_element_by_id("parsons-1-source")
         answer = self.driver.find_element_by_id("parsons-1-answer")

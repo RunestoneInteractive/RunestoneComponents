@@ -136,7 +136,6 @@ export class ActiveCode extends RunestoneBase {
         var codeDiv = document.createElement("div");
         $(codeDiv).addClass("ac_code_div col-md-12");
         this.codeDiv = codeDiv;
-        this.containerDiv.id = this.divid;
         this.containerDiv.lang = this.language;
         this.outerDiv = this.containerDiv;
         $(this.origElem).replaceWith(this.containerDiv);
@@ -231,6 +230,8 @@ export class ActiveCode extends RunestoneBase {
         if (this.hidecode) {
             $(this.codeDiv).css("display", "none");
         }
+        // Mark this element as ready.
+        this.containerDiv.parentElement.classList.add("runestone-component-ready");
     }
 
     async runButtonHander() {

@@ -51,6 +51,7 @@ class DataFile extends RunestoneBase {
         $(this.preContainer).attr({ style: "display: " + this.displayClass });
         this.preContainer.innerHTML = this.origElem.innerHTML;
         $(this.origElem).replaceWith(this.preContainer);
+        this.preContainer.classList.add("runestone-component-ready");
     }
     createTextArea() {
         this.textAreaContainer = document.createElement("textarea");
@@ -60,6 +61,7 @@ class DataFile extends RunestoneBase {
         this.textAreaContainer.innerHTML = this.origElem.innerHTML;
         $(this.textAreaContainer).addClass("datafiletextfield");
         $(this.origElem).replaceWith(this.textAreaContainer);
+        this.textAreaContainer.classList.add("runestone-component-ready");
     }
 }
 
