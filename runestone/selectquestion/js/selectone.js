@@ -39,7 +39,6 @@ export default class SelectOne extends RunestoneBase {
         this.primaryOnly = $(opts.orig).data("primary");
         this.ABExperiment = $(opts.orig).data("ab");
         this.toggle = $(opts.orig).data("toggle");
-        this.toggle_first = $(opts.orig).data("toggle_first");
         opts.orig.id = this.selector_id;
     }
     /**
@@ -80,7 +79,6 @@ export default class SelectOne extends RunestoneBase {
         }
         if (this.toggle) {
             data.toggle = this.toggle;
-            data.toggle_first = this.toggle_first;
         }
         let opts = this.origOpts;
         let selectorId = this.selector_id;
@@ -132,7 +130,7 @@ export default class SelectOne extends RunestoneBase {
                 var toggleQuestionSubstring;
                 var toggleQuestionType;
                 for (i = 0; i < toggleQuestions.length; i++) {
-                    toggleQuestionHTMLSrc = await getToggleSrc(toggleQuestions[i]);
+                    toggleQuestionHTMLSrc = await this.getToggleSrc(toggleQuestions[i]);
                     toggleQuestionSubstring = toggleQuestionHTMLSrc.split('data-component="')[1];
                     switch (toggleQuestionSubstring.substring(0, toggleQuestionSubstring.indexOf('"'))) {
                         case ("activecode"):
@@ -164,6 +162,9 @@ export default class SelectOne extends RunestoneBase {
                 toggleFirstID = toggleFirstID.split('"')[0];
                 htmlsrc = toggleUI + htmlsrc + '</div>';
             }
+            console.log(self);
+            console.log(data);
+            console.log(this);
             ///////////////////////////
             // just render this component on the page in its usual place
             res = renderRunestoneComponent(htmlsrc, selectorId, {
@@ -180,13 +181,85 @@ export default class SelectOne extends RunestoneBase {
                         break;
                     }
                 }
-                toggleQuestionSelect.addEventListener("change", function(){
-                    togglePreview(toggleQuestionSelect.parentElement.id)
+                toggleQuestionSelect.addEventListener("change", async function () {
+                    await this.togglePreview(toggleQuestionSelect.parentElement.id);
                 });
             }
             ///////////////////////////
         }
         return response;
+    }
+    
+    async getToggleSrc(toggleQuestionID) {
+        let request = new Request(
+            "/runestone/admin/htmlsrc?acid=" + toggleQuestionID,
+            {
+                method: "GET",
+            }
+        );
+        let response = await fetch(request);
+        let htmlsrc = await response.json();
+        return htmlsrc;
+    }
+
+    async togglePreview(parentID) {
+        var parentDiv = document.getElementById(parentID);
+        var toggleQuestionSelect =  parentDiv.getElementsByTagName("select")[0];
+        var selectedQuestion = toggleQuestionSelect.options[toggleQuestionSelect.selectedIndex].value;
+        var htmlsrc = await this.getToggleSrc(selectedQuestion);
+        let res = renderRunestoneComponent(htmlsrc, "component-preview", {
+            selector_id: "component-preview",
+            useRunestoneServices: true,
+        });
+        // let pd = document.getElementById(preview_div);
+        // pd.appendChild(renderGradingComponents(sid, selectedQuestion));
+
+        let closeButton = document.createElement("button");
+        $(closeButton).text("Close Preview");
+        $(closeButton).addClass("btn btn-default");
+        $(closeButton).click(function (event) {
+            $("#component-preview").html("");
+            toggleQuestionSelect.value = $("#" + parentID).data("toggle_current");
+        });
+        $("#component-preview").append(closeButton);
+
+        let setButton = document.createElement("button");
+        $(setButton).text("Select this Problem");
+        $(setButton).addClass("btn btn-primary");
+        $(setButton).click(async function () {
+            await this.toggleSet(parentID, selectedQuestion, htmlsrc)
+        });
+        $("#component-preview").append(setButton);
+    }
+
+    async toggleSet(parentID, selectedQuestion, htmlsrc) {
+        console.log("within toggleSet function");
+        console.log("parentID is " + parentID);
+        console.log("selectedQuestion is " + selectedQuestion);
+        console.log("----------");
+        console.log(self);
+        console.log(data);
+        console.log(this);
+        var selectorId = parentID + "-toggleSelectedQuestion";
+        document.getElementById(selectorId).innerHTML = ""; // need to check whether this is even necessary
+        let res = renderRunestoneComponent(htmlsrc, selectorId, {
+            selector_id: selectorId,
+            useRunestoneServices: true,
+        });
+        let request = new Request(
+            "/runestone/ajax/update_selected_question?metaid=" + parentID + "&selected=" + selectedQuestion,
+            {
+
+            }
+        );
+        console.log(request);
+        let response = await fetch(request);
+        console.log(response);
+        $("#component-preview").html("");
+        $("#" + parentID).data("toggle_current", selectedQuestion);
+        var toggleQuestions =  document.getElementById(parentID).getElementsByTagName("select")[0];
+        var selectedQuestion = toggleQuestions.options[toggleQuestions.selectedIndex].text;
+        // alert("Problem " + parentID + " has been switched to " + selectedQuestion + ".");
     }
 }
 
@@ -212,70 +285,3 @@ $(document).bind("runestone:login-complete", async function () {
         }
     }
 });
-
-// declare as async function; then use fetch instead of using getJSON - await fetch("/runestone/admin/htmlsrc") - see example in RunestoneComponents; then call await getToggleSrc so that it will wait for htmlsrc to be retrieved before proceeding
-async function getToggleSrc(toggleQuestionID) {
-    let request = new Request(
-        "/runestone/admin/htmlsrc?acid=" + toggleQuestionID,
-        {
-            method: "GET",
-        }
-    );
-    let response = await fetch(request);
-    let data = await response.text();
-    var htmlsrc = data.substring(1, data.length - 1);
-    htmlsrc = htmlsrc.replace(/\\n/g, "");
-    htmlsrc = htmlsrc.replace(/\\/g, "");
-    return htmlsrc;
-}
-
-async function togglePreview(parentID) {
-    var parentDiv = document.getElementById(parentID);
-    var toggleQuestionSelect =  parentDiv.getElementsByTagName("select")[0];
-    var selectedQuestion = toggleQuestionSelect.options[toggleQuestionSelect.selectedIndex].value;
-    var htmlsrc = await getToggleSrc(selectedQuestion);
-    let res = renderRunestoneComponent(htmlsrc, "component-preview", {
-        selector_id: "component-preview",
-        useRunestoneServices: true,
-    });
-    // let pd = document.getElementById(preview_div);
-    // pd.appendChild(renderGradingComponents(sid, selectedQuestion));
-
-    let closeButton = document.createElement("button");
-    $(closeButton).text("Close Preview");
-    $(closeButton).addClass("btn btn-default");
-    $(closeButton).click(function (event) {
-        $("#component-preview").html("");
-        toggleQuestionSelect.value = $("#" + parentID).data("toggle_current");
-    });
-    $("#component-preview").append(closeButton);
-
-    let setButton = document.createElement("button");
-    $(setButton).text("Select this Problem");
-    $(setButton).addClass("btn btn-primary");
-    $(setButton).click(function () {
-        toggleSet(parentID, selectedQuestion, htmlsrc)
-    });
-    $("#component-preview").append(setButton);
-}
-
-async function toggleSet(parentID, selectedQuestion, htmlsrc) {
-    var selectorId = parentID + "-toggleSelectedQuestion";
-    document.getElementById(selectorId).innerHTML = ""; // need to check whether this is even necessary
-    let res = renderRunestoneComponent(htmlsrc, selectorId, {
-        selector_id: selectorId,
-        useRunestoneServices: true,
-    });
-    let request = new Request(
-        "/runestone/ajax/update_selected_question?metaid=" + parentID + "&selected=" + selectedQuestion,
-        {
-
-        }
-    );
-    let response = await fetch(request);
-    $("#component-preview").html("");
-    $("#" + parentID).data("toggle_current", selectedQuestion);
-    var toggleQuestions =  document.getElementById(parentID).getElementsByTagName("select")[0];
-    var selectedQuestion = toggleQuestions.options[toggleQuestions.selectedIndex].text;
-    // alert("Problem " + parentID + " has been switched to " + selectedQuestion + ".");
-}

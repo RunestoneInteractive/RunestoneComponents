@@ -48,7 +48,7 @@ from runestone.common.runestonedirective import (
 
 TEMPLATE = """
 <div class="runestone alert alert-warning sqcontainer">
-<div data-component="selectquestion" id={component_id} {selector} {points} {proficiency} {min_difficulty} {max_difficulty} {autogradable} {not_seen_ever} {primary} {AB} {toggle} {toggle_first}>
+<div data-component="selectquestion" id={component_id} {selector} {points} {proficiency} {min_difficulty} {max_difficulty} {autogradable} {not_seen_ever} {primary} {AB} {toggle}>
     <p>Loading ...</p>
 </div>
 </div>
@@ -71,7 +71,7 @@ class SelectQuestion(RunestoneIdDirective):
        :min_difficulty: minimum difficulty level
        :max_difficulty: maximum difficulty level
        :ab: experiment_name
-       :toggle: allow student to choose which question to answer from the given list, and entering a question ID here will make that question display initially
+       :toggle: allow student to choose which question to answer from the given list, with first question in fromid list being rendered first
 
        Difficulty is measured in one of two ways. For things like multiple choice and
        fill in the blank, we can use the % of students that get the answer correct on
@@ -94,7 +94,7 @@ class SelectQuestion(RunestoneIdDirective):
             "not_seen_ever": directives.flag,
             "primary": directives.flag,
             "ab": directives.unchanged,
-            "toggle": directives.unchanged,
+            "toggle": directives.flag,
         }
     )
 
@@ -183,11 +183,9 @@ class SelectQuestion(RunestoneIdDirective):
             self.options["AB"] = ""
 
         if "toggle" in self.options:
-            self.options["toggle_first"] = f"data-toggle_first={self.options['toggle']}"
             self.options["toggle"] = "data-toggle=true"
         else:
             self.options["toggle"] = ""
-            self.options["toggle_first"] = ""
 
         maybeAddToAssignment(self)
 
