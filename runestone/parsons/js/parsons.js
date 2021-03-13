@@ -55,7 +55,7 @@ export default class Parsons extends RunestoneBase {
     constructor(opts) {
         super(opts);
         var orig = opts.orig; // entire <pre> element that will be replaced by new HTML
-        this.origElem = $(orig).find("pre")[0]
+        this.origElem = $(orig).find("pre")[0];
         // Find the question text and store it in .question
         this.question = $(orig).find(`.parsons_question`)[0];
         this.useRunestoneServices = opts.useRunestoneServices;
@@ -67,7 +67,6 @@ export default class Parsons extends RunestoneBase {
         this.contentArray = [];
         Parsons.counter++; //    Unique identifier
         this.counterId = "parsons-" + Parsons.counter;
-
 
         // for (var i = 0; i < this.children.length; i++) {
         //     if ($(this.children[i]).is("[data-question]")) {
@@ -236,6 +235,7 @@ export default class Parsons extends RunestoneBase {
         this.resetButton.addEventListener("click", function (event) {
             event.preventDefault();
             that.clearFeedback();
+            $(that.checkButton).prop("disabled", false);
             that.resetView();
             that.logMove("reset");
             that.setLocalStorage();
@@ -265,7 +265,6 @@ export default class Parsons extends RunestoneBase {
                 $(this.containerDiv).prepend(this.question);
             }
         }
-
     }
     // Initialize lines and solution properties
     initializeLines(text) {
@@ -446,9 +445,9 @@ export default class Parsons extends RunestoneBase {
                 areaHeight += Math.ceil(
                     // For future more accurate height display, this calculation should also be conditionally based on fontFamily
                     singleHeight +
-                    (linesItem[linesIndex].children.length - 1) *
-                    additionalHeight +
-                    height_add * addition
+                        (linesItem[linesIndex].children.length - 1) *
+                            additionalHeight +
+                        height_add * addition
                 );
 
                 // Determine the longest text line in the current Parsons block and calculate its width - Vincent Qiu (September 2020)
@@ -466,9 +465,9 @@ export default class Parsons extends RunestoneBase {
                     indent = linesItem[linesIndex].children[i].indent;
                     itemLength = Math.ceil(
                         pixelsPerIndent * indent +
-                        tempCanvasCtx.measureText(
-                            linesItem[linesIndex].children[i].innerText
-                        ).width
+                            tempCanvasCtx.measureText(
+                                linesItem[linesIndex].children[i].innerText
+                            ).width
                     );
                     longCount += Math.floor(itemLength / (widthLimit - 29));
                     if (itemLength > maxInnerLength) {
@@ -1272,6 +1271,7 @@ export default class Parsons extends RunestoneBase {
             if (this.grade == "correct") {
                 this.hasSolved = true;
                 this.correct = true;
+                $(this.checkButton).prop("disabled", true);
                 localStorage.setItem(this.adaptiveId + "Solved", true);
                 this.recentAttempts = this.checkCount;
                 this.checkCount = 0;
@@ -1526,9 +1526,9 @@ export default class Parsons extends RunestoneBase {
                     duration:
                         Math.sqrt(
                             Math.pow(endY - startY, 2) +
-                            Math.pow(endX - startX, 2)
+                                Math.pow(endX - startX, 2)
                         ) *
-                        4 +
+                            4 +
                         500,
                     start: function () {
                         that.moving = block;
