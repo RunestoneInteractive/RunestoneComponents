@@ -91,7 +91,7 @@ export class ActiveCode extends RunestoneBase {
                 doc = connection.get("chatcodes", "channels");
             }
         }
-        if (this.graderactive) {
+        if (this.graderactive || this.isTimed) {
             this.hidecode = false;
         }
         if (this.includes) {
@@ -465,8 +465,8 @@ export class ActiveCode extends RunestoneBase {
                     if (!didAgree) {
                         didAgree = confirm(
                             "Pair Programming should only be used with the consent of your instructor." +
-                            "Your partner must be a registered member of the class and have agreed to pair with you." +
-                            "By clicking OK you certify that both of these conditions have been met."
+                                "Your partner must be a registered member of the class and have agreed to pair with you." +
+                                "By clicking OK you certify that both of these conditions have been met."
                         );
                         if (didAgree) {
                             localStorage.setItem("partnerAgree", "true");
@@ -509,13 +509,13 @@ export class ActiveCode extends RunestoneBase {
         $(butt).attr(
             "href",
             "http://" +
-            chatcodesServer +
-            "/new?" +
-            $.param({
-                topic: window.location.host + "-" + this.divid,
-                code: this.editor.getValue(),
-                lang: "Python",
-            })
+                chatcodesServer +
+                "/new?" +
+                $.param({
+                    topic: window.location.host + "-" + this.divid,
+                    code: this.editor.getValue(),
+                    lang: "Python",
+                })
         );
         this.chatButton = butt;
         chatBar.appendChild(butt);
@@ -902,7 +902,7 @@ export class ActiveCode extends RunestoneBase {
         });
     }
 
-    toggleEditorVisibility() { }
+    toggleEditorVisibility() {}
 
     addErrorMessage(err) {
         // Add the error message
@@ -1040,7 +1040,7 @@ Yet another is that there is an internal error.  The internal error message is: 
                     var xl = eval(x);
                     xl = xl.map(pyStr);
                     x = xl.join(" ");
-                } catch (err) { }
+                } catch (err) {}
             }
         }
         $(this.output).css("visibility", "visible");
@@ -1104,7 +1104,7 @@ Yet another is that there is an internal error.  The internal error message is: 
             );
             let wresult = await fetch(request);
             let obj = await wresult.json();
-            return obj.data
+            return obj.data;
         }
     }
 
@@ -1144,7 +1144,7 @@ Yet another is that there is an internal error.  The internal error message is: 
         if (
             this.historyScrubber &&
             this.history[$(this.historyScrubber).slider("value")] !=
-            this.editor.getValue()
+                this.editor.getValue()
         ) {
             saveCode = "True";
             this.history.push(this.editor.getValue());
@@ -1217,7 +1217,9 @@ Yet another is that there is an internal error.  The internal error message is: 
                 let urDivid = this.divid + "_unit_results";
                 if (
                     $(this.containerDiv).find(`#${urDivid}`).length == 0 &&
-                    $(this.containerDiv).find(`#${urDivid}_offscreen_unit_results`).length == 0
+                    $(this.containerDiv).find(
+                        `#${urDivid}_offscreen_unit_results`
+                    ).length == 0
                 ) {
                     let urResults = document.getElementById(urDivid);
                     this.containerDiv.appendChild(urResults);
