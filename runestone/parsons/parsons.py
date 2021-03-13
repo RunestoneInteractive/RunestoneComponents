@@ -197,8 +197,9 @@ class ParsonsProblem(Assessment):
         if "-----" in self.content:
             index = self.content.index("-----")
             self.options["instructions"] = self.content[:index]
-            # todo: instructions should be parsed with nested_parse
             self.options["code"] = self.content[index + 1 :]
+        else:
+            self.options["instructions"] = ["Arrange the blocks"]
 
         if "=====" in self.options["code"]:
             self.options["code"] = "\n".join(self.options["code"])
