@@ -30,7 +30,7 @@ import CodeChat.CodeToRest
 from sphinx.errors import ExtensionError
 
 
-# TODO: clean up - many of the folders are not needed as the files are imported by webpack
+# TODO: clean up - many of the folders are not needed as the files are imported by webpack.
 #
 # runestone_static_dirs()
 # -----------------------
