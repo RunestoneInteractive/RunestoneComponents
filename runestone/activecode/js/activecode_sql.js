@@ -175,7 +175,7 @@ export default class SQLActiveCode extends ActiveCode {
         // so we only show the last result
         let resultArray = this.results;
         if (this.showLast) {
-            resultArray = this.results.slice(-1)
+            resultArray = this.results.slice(-1);
         }
         for (let r of resultArray) {
             let section = document.createElement("div");
@@ -290,10 +290,10 @@ export default class SQLActiveCode extends ActiveCode {
         }
         let pct = (100 * this.passed) / (this.passed + this.failed);
         pct = pct.toLocaleString(undefined, { maximumFractionDigits: 2 });
-        result += `You passed ${this.passed} out of ${this.passed + this.failed
-            } tests for ${pct}%`;
+        result += `You passed ${this.passed} out of ${
+            this.passed + this.failed
+        } tests for ${pct}%`;
         this.unit_results = `percent:${pct}:passed:${this.passed}:failed:${this.failed}`;
-
         return result;
     }
     testOneAssert(row, col, oper, expected, result_table) {
