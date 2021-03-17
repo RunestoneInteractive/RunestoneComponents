@@ -95,7 +95,6 @@ def runestone_extensions():
 
 # setup(app)
 # ----------
-#
 def setup(app):
     """
     A normal Runestone project will import this function into its conf.py
@@ -179,7 +178,6 @@ def build(options):
     return rc
 
 
-#
 # Module variables
 # ----------------
 runestone_version = version = pkg_resources.get_distribution("runestone").version

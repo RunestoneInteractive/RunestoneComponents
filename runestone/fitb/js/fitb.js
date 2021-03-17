@@ -282,8 +282,8 @@ export default class FITB extends RunestoneBase {
                 this.displayFeed.push($.i18n("msg_no_answer"));
                 this.correct = false;
             } else {
-                // Look through all feedback for this blank. The last element in the array always matches.
-                var fbl = this.feedbackArray[i];
+                // Look through all feedback for this blank. The last element in the array always matches. If no feedback for this blank exists, use an empty list.
+                var fbl = this.feedbackArray[i] || [];
                 for (var j = 0; j < fbl.length; j++) {
                     // The last item of feedback always matches.
                     if (j === fbl.length - 1) {
