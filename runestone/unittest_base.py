@@ -22,11 +22,13 @@ from urllib.error import URLError
 
 # Third-party imports
 # -------------------
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
 import pytest
 from pyvirtualdisplay import Display
+from selenium import webdriver
+from selenium.common.exceptions import StaleElementReferenceException
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
 
 logging.basicConfig(level=logging.WARN)
 mylogger = logging.getLogger()
@@ -54,6 +56,12 @@ mf = None
 
 # Code
 # ====
+# Run this once, before all tests, to update the webpacked JS.
+@pytest.fixture(scope="session", autouse=True)
+def run_webpack():
+    subprocess.run(["npm", "run", "build"], check=True)
+
+
 # Define `module fixtures <https://docs.python.org/2/library/unittest.html#setupmodule-and-teardownmodule>`_ to build the test Runestone project, run the server, then shut it down when the tests complete.
 class ModuleFixture(unittest.TestCase):
     def __init__(
@@ -184,6 +192,7 @@ class ModuleFixture(unittest.TestCase):
 
     def tearDownModule(self):
         # Shut down Selenium.
+        self.driver.close()
         self.driver.quit()
         if self.display:
             self.display.stop()
@@ -213,6 +222,13 @@ def module_fixture_maker(module_path, return_mf=False, exit_status_success=True)
 
 # Provide a base test case which sets up the `Selenium <http://selenium-python.readthedocs.io/>`_ driver.
 class RunestoneTestCase(unittest.TestCase):
+    # Wait until a Runestone component has finished rendering itself, given the ID of the component.
+    def wait_until_ready(self, id):
+        # The component is ready when it has the class below.
+        self.wait.until(
+            element_has_css_class((By.ID, id), "runestone-component-ready")
+        )
+
     def setUp(self):
         # Use the shared module-wide driver.
         self.driver = mf.driver
@@ -248,9 +264,11 @@ class element_has_css_class:
         self.css_class = css_class
 
     def __call__(self, driver):
-        # Find the referenced element.
-        element = driver.find_element(*self.locator)
-        if self.css_class in element.get_attribute("class"):
-            return element
-        else:
-            return False
+        # Find the referenced element. Ignore stale elements.
+        try:
+            element = driver.find_element(*self.locator)
+            if self.css_class in element.get_attribute("class"):
+                return element
+        except StaleElementReferenceException:
+            pass
+        return False
