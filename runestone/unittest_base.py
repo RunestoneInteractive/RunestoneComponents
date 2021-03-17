@@ -25,17 +25,16 @@ from urllib.error import URLError
 import pytest
 from pyvirtualdisplay import Display
 from selenium import webdriver
-from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
-logging.basicConfig(level=logging.WARN)
-mylogger = logging.getLogger()
-
 # Local imports
 # -------------
-# None
+from runestone.shared_conftest import element_has_css_class, _SeleniumUtils
+
+logging.basicConfig(level=logging.WARN)
+mylogger = logging.getLogger()
 
 # Globals
 # =======
@@ -59,7 +58,8 @@ mf = None
 # Run this once, before all tests, to update the webpacked JS.
 @pytest.fixture(scope="session", autouse=True)
 def run_webpack():
-    subprocess.run(["npm", "run", "build"], check=True)
+    # Note that Windows requires ``shell=True``, since the command to exeucute is ``npm.cmd``.
+    subprocess.run(["npm", "run", "build"], check=True, shell=IS_WINDOWS)
 
 
 # Define `module fixtures <https://docs.python.org/2/library/unittest.html#setupmodule-and-teardownmodule>`_ to build the test Runestone project, run the server, then shut it down when the tests complete.
@@ -229,6 +229,10 @@ class RunestoneTestCase(unittest.TestCase):
             element_has_css_class((By.ID, id), "runestone-component-ready")
         )
 
+    # Get a page from the local server.
+    def get(self, relative_url):
+        return self.driver.get(f"{self.host}/{relative_url}")
+
     def setUp(self):
         # Use the shared module-wide driver.
         self.driver = mf.driver
@@ -244,31 +248,3 @@ class RunestoneTestCase(unittest.TestCase):
         self.driver.execute_script("window.localStorage.clear();")
         self.driver.execute_script("window.sessionStorage.clear();")
         self.driver.delete_all_cookies()
-
-
-# An expectation for Selenium, used for checking that an element has a particular css class. From the `Selenium docs <https://selenium-python.readthedocs.io/waits.html#explicit-waits>`_, under the "Custom wait conditions" subheading.
-#
-# locator - used to find the element
-#
-# returns the WebElement once it has the particular css class.
-class element_has_css_class:
-    def __init__(
-        self,
-        # The element to find; this is passed directly to `driver.find_element <https://selenium-python.readthedocs.io/api.html#selenium.webdriver.remote.webdriver.WebDriver.find_element>`_. See the `Selenium docs`_.
-        locator,
-        # The CSS class to look for.
-        css_class,
-    ):
-
-        self.locator = locator
-        self.css_class = css_class
-
-    def __call__(self, driver):
-        # Find the referenced element. Ignore stale elements.
-        try:
-            element = driver.find_element(*self.locator)
-            if self.css_class in element.get_attribute("class"):
-                return element
-        except StaleElementReferenceException:
-            pass
-        return False
