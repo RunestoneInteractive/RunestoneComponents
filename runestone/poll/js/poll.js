@@ -25,7 +25,8 @@ export default class Poll extends RunestoneBase {
         this.getQuestionText();
         this.getOptionText(); //populates optionList
         this.renderPoll(); //generates HTML
-        this.checkPollStorage(); //checks localStorage to see if this poll has already been completed by this user
+        // Checks localStorage to see if this poll has already been completed by this user.
+        this.checkPollStorage();
         this.caption = "Poll";
         this.addCaption("runestone");
     }
@@ -59,7 +60,7 @@ export default class Poll extends RunestoneBase {
         this.containerDiv = document.createElement("div");
         this.pollForm = document.createElement("form");
         this.resultsDiv = document.createElement("div");
-        this.containerDiv.id = this.divid + "_container";
+        this.containerDiv.id = this.divid;
         $(this.containerDiv).addClass(this.origElem.getAttribute("class"));
         $(this.pollForm).html(
             `<span style='font-size: Large'>${this.question}</span>`
@@ -212,6 +213,7 @@ export default class Poll extends RunestoneBase {
             }
             $(this.resultsDiv).append(list);
         }
+        this.indicate_component_ready();
     }
     disableOptions() {}
     checkPollStorage() {
@@ -227,7 +229,9 @@ export default class Poll extends RunestoneBase {
                 eBookConfig.ajaxURL + "getpollresults",
                 data,
                 this.showPollResults.bind(this)
-            );
+            ).fail(this.indicate_component_ready.bind(this));
+        } else {
+            this.indicate_component_ready();
         }
     }
 }

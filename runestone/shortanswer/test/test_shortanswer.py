@@ -24,7 +24,7 @@ class ShortAnswerQuestion_Tests(RunestoneTestCase):
     def test_sa2(self):
         """No input. Button clicked"""
         self.driver.get(self.host + "/index.html")
-        sleep(1)
+        sleep(2)
         t1 = self.driver.find_element_by_id("question1")
 
         btn_check = t1.find_element_by_tag_name("button")

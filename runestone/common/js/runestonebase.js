@@ -20,6 +20,7 @@ import { pageProgressTracker } from "./bookfuncs.js";
 
 export default class RunestoneBase {
     constructor(opts) {
+        this.component_ready_promise = new Promise(resolve => this._component_ready_resolve_fn = resolve)
         this.optional = false;
         if (opts) {
             this.sid = opts.sid;
@@ -47,7 +48,7 @@ export default class RunestoneBase {
             }
             // This is for the selectquestion points
             // If a selectquestion is part of a timed exam it will get
-            // the timedWrapper options.  
+            // the timedWrapper options.
             if (typeof opts.timedWrapper !== "undefined") {
                 this.timedWrapper = opts.timedWrapper;
             } else {
@@ -158,13 +159,20 @@ export default class RunestoneBase {
         }
         return post_promise;
     }
-    /* Checking/loading from storage 
+    /* Checking/loading from storage
     **WARNING:**  DO NOT `await` this function!
-    This function, although async, does not explicitly resolve its promise by returning a value.  The reason for this is because it is called by the constructor for nearly every component.  In Javascript constructors cannot be async! 
-    
+    This function, although async, does not explicitly resolve its promise by returning a value.  The reason for this is because it is called by the constructor for nearly every component.  In Javascript constructors cannot be async!
+
     One of the recommended ways to handle the async requirements from within a constructor is to use an attribute as a promise and resolve that attribute at the appropriate time.
     */
-    async checkServer(eventInfo) {
+    async checkServer(
+        // A string specifying the event name to use for querying the :ref:`getAssessResults` endpoint.
+        eventInfo,
+        // If true, this function will invoke ``indicate_component_ready()`` just before it returns. This is provided since most components are ready after this function completes its work.
+        //
+        // TODO: This defaults to false, to avoid causing problems with any components that haven't been updated and tested. After all Runestone components have been updated, default this to true and remove the extra parameter from most calls to this function.
+        will_be_ready = false
+    ) {
         // Check if the server has stored answer
         let self = this;
         this.checkServerComplete = new Promise(function (resolve, reject) {
@@ -212,6 +220,18 @@ export default class RunestoneBase {
             this.checkLocalStorage(); // just go right to local storage
             this.csresolver("local");
         }
+
+        if (will_be_ready) {
+            this.indicate_component_ready();
+        }
+    }
+
+    // This method assumes that ``this.componentDiv`` refers to the ``div`` containing the component, and that this component's ID is set.
+    indicate_component_ready() {
+        // Add a class to indicate the component is now ready.
+        this.containerDiv.classList.add("runestone-component-ready");
+        // Resolve the ``this.component_ready_promise``.
+        this._component_ready_resolve_fn();
     }
 
     loadData(data) {
