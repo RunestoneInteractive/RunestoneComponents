@@ -20,6 +20,7 @@ import { pageProgressTracker } from "./bookfuncs.js";
 
 export default class RunestoneBase {
     constructor(opts) {
+        this.component_ready_promise = new Promise(resolve => this._component_ready_resolve_fn = resolve)
         this.optional = false;
         if (opts) {
             this.sid = opts.sid;
@@ -229,8 +230,8 @@ export default class RunestoneBase {
     indicate_component_ready() {
         // Add a class to indicate the component is now ready.
         this.containerDiv.classList.add("runestone-component-ready");
-        // Produce an event as well.
-        $(document).trigger("runestone:component-ready", this.containerDiv.id);
+        // Resolve the ``this.component_ready_promise``.
+        this._component_ready_resolve_fn();
     }
 
     loadData(data) {
