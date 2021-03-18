@@ -217,7 +217,7 @@ export default class Timed extends RunestoneBase {
                 mess.innerHTML =
                     "<strong>Warning: You will not be able to continue the exam if you close this tab, close the window, or navigate away from this page!</strong>  Make sure you click the Finish Exam button when you are done to submit your work!";
                 this.controlDiv.appendChild(mess);
-                mess.classList.add("examwarning")
+                mess.classList.add("examwarning");
                 await this.renderTimedQuestion();
                 this.startAssessment();
             }.bind(this),
@@ -496,6 +496,7 @@ export default class Timed extends RunestoneBase {
                 timed: true,
                 assessmentTaken: this.taken,
                 timedWrapper: this.divid,
+                initAttempts: 0,
             };
             if ($(tmpChild).children("[data-component]").length > 0) {
                 tmpChild = $(tmpChild).children("[data-component]")[0];
@@ -535,7 +536,11 @@ export default class Timed extends RunestoneBase {
         // check the renderedQuestionArray to see if it has been rendered.
         let opts = this.renderedQuestionArray[this.currentQuestionIndex];
         let currentQuestion;
-        if (opts.state === "prepared" || opts.state === "forreview") {
+        if (
+            opts.state === "prepared" ||
+            opts.state === "forreview" ||
+            (opts.state === "broken_exam" && opts.initAttempts < 3)
+        ) {
             let tmpChild = opts.orig;
             if ($(tmpChild).is("[data-component=selectquestion]")) {
                 if (this.done) {
@@ -553,9 +558,13 @@ export default class Timed extends RunestoneBase {
                     try {
                         await newq.initialize();
                     } catch (e) {
+                        opts.state = "broken_exam";
                         this.renderedQuestionArray[
                             this.currentQuestionIndex
-                        ].state = "broken_exam";
+                        ] = opts;
+                        console.log(
+                            `Error initializing question: Details ${e}`
+                        );
                     }
                 }
             } else if ($(tmpChild).is("[data-component]")) {
@@ -578,7 +587,10 @@ export default class Timed extends RunestoneBase {
 
         if (!this.visited.includes(this.currentQuestionIndex)) {
             this.visited.push(this.currentQuestionIndex);
-            if (this.visited.length === this.renderedQuestionArray.length && !this.done) {
+            if (
+                this.visited.length === this.renderedQuestionArray.length &&
+                !this.done
+            ) {
                 $(this.finishButton).show();
             }
         }
@@ -639,22 +651,28 @@ export default class Timed extends RunestoneBase {
                     JSON.stringify(storageObj)
                 );
             }
-            $(window).on("beforeunload", function (event) {
-                // this actual value gets ignored by newer browsers
-                if (this.done) {
-                    return;
-                }
-                event.preventDefault();
-                event.returnValue =
-                    "Are you sure you want to leave?  Your work will be lost! And you will need your instructor to reset the exam!";
-                return "Are you sure you want to leave?  Your work will be lost!";
-            }.bind(this));
-            window.addEventListener("pagehide", async function (event) {
-                if (!this.done) {
-                    await this.finishAssessment();
-                    console.log("Exam exited by leaving page")
-                }
-            }.bind(this));
+            $(window).on(
+                "beforeunload",
+                function (event) {
+                    // this actual value gets ignored by newer browsers
+                    if (this.done) {
+                        return;
+                    }
+                    event.preventDefault();
+                    event.returnValue =
+                        "Are you sure you want to leave?  Your work will be lost! And you will need your instructor to reset the exam!";
+                    return "Are you sure you want to leave?  Your work will be lost!";
+                }.bind(this)
+            );
+            window.addEventListener(
+                "pagehide",
+                async function (event) {
+                    if (!this.done) {
+                        await this.finishAssessment();
+                        console.log("Exam exited by leaving page");
+                    }
+                }.bind(this)
+            );
         } else {
             this.handlePrevAssessment();
         }
