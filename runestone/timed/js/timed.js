@@ -634,6 +634,7 @@ export default class Timed extends RunestoneBase {
             $(this.pauseBtn).attr("disabled", false);
             if (this.running === 0 && this.paused === 0) {
                 this.running = 1;
+                this.lastTime = Date.now();
                 $(this.timedDiv).show();
                 this.increment();
                 this.logBookEvent({
@@ -747,12 +748,24 @@ export default class Timed extends RunestoneBase {
         if (this.running === 1 && !this.taken) {
             setTimeout(
                 function () {
+                    // When a browser loses focus, setTimeout may not be called on the
+                    // schedule expected.  Browsers are free to save power by lengthening
+                    // the interval to some longer time.  So we cannot just subtract 1
+                    // from the timeLimit we need to measure the elapsed time from the last
+                    // call to the current call and subtract that number of seconds.
+                    let currentTime = Date.now();
                     if (this.limitedTime) {
                         // If there's a time limit, count down to 0
-                        this.timeLimit--;
+                        this.timeLimit =
+                            this.timeLimit -
+                            Math.floor((currentTime - this.lastTime) / 1000);
                     } else {
-                        this.timeLimit++; // Else count up to keep track of how long it took to complete
+                        // Else count up to keep track of how long it took to complete
+                        this.timeLimit =
+                            this.timeLimit +
+                            Math.floor((currentTime - this.lastTime) / 1000);
                     }
+                    this.lastTime = currentTime;
                     localStorage.setItem(
                         eBookConfig.email + ":" + this.divid + "-time",
                         this.timeLimit
