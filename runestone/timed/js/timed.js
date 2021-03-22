@@ -557,6 +557,12 @@ export default class Timed extends RunestoneBase {
                     };
                     try {
                         await newq.initialize();
+                        if (opts.state == "broken_exam") {
+                            // remove the broken class from this question if we get here.
+                            $(
+                                `ul#pageNums > ul > li:eq(${this.currentQuestionIndex})`
+                            ).removeClass("broken");
+                        }
                     } catch (e) {
                         opts.state = "broken_exam";
                         this.renderedQuestionArray[
