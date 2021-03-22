@@ -15,7 +15,7 @@ Spreadsheets Test Page
 
 Cells in the spreadsheet that are graded are initially colored light blue.  When the grade button is pressed a test report is printed out, and the cells that were correct are colored with a light green background.  The cells that were not correct have a light redish background
 
-.. spreadsheet:: ss1
+.. spreadsheet:: test_spreadsheet_1
     :mindimensions: 6,5
     :colwidths: 200,100,100
     :coltitles: 'name','year','price','foo'
@@ -30,7 +30,7 @@ Cells in the spreadsheet that are graded are initially colored light blue.  When
     assert B3 == 1994
 
 
-.. spreadsheet:: ss2
+.. spreadsheet:: test_spreadsheet_2
     :fromcsv: Iris.csv
     :colwidths: 50,100,100,100,100
 
@@ -38,7 +38,7 @@ Cells in the spreadsheet that are graded are initially colored light blue.  When
     assert A151 == 150
 
 
-.. spreadsheet:: ss3
+.. spreadsheet:: test_spreadsheet_3
    :colwidths: 200,200
    :coltitles: 'my formula', 'result'
 
