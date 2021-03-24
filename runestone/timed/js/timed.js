@@ -543,7 +543,7 @@ export default class Timed extends RunestoneBase {
         ) {
             let tmpChild = opts.orig;
             if ($(tmpChild).is("[data-component=selectquestion]")) {
-                if (this.done) {
+                if (this.done && opts.state == "prepared") {
                     this.renderedQuestionArray[
                         this.currentQuestionIndex
                     ].state = "exam_ended";
