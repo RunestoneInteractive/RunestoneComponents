@@ -162,9 +162,6 @@ export default class SelectOne extends RunestoneBase {
                 toggleFirstID = toggleFirstID.split('"')[0];
                 htmlsrc = toggleUI + htmlsrc + '</div>';
             }
-            console.log(self);
-            console.log(data);
-            console.log(this);
             ///////////////////////////
             // just render this component on the page in its usual place
             res = renderRunestoneComponent(htmlsrc, selectorId, {
@@ -183,7 +180,7 @@ export default class SelectOne extends RunestoneBase {
                 }
                 toggleQuestionSelect.addEventListener("change", async function () {
                     await this.togglePreview(toggleQuestionSelect.parentElement.id);
-                });
+                }.bind(this));
             }
             ///////////////////////////
         }
@@ -228,18 +225,11 @@ export default class SelectOne extends RunestoneBase {
         $(setButton).addClass("btn btn-primary");
         $(setButton).click(async function () {
             await this.toggleSet(parentID, selectedQuestion, htmlsrc)
-        });
+        }.bind(this));
         $("#component-preview").append(setButton);
     }
 
     async toggleSet(parentID, selectedQuestion, htmlsrc) {
-        console.log("within toggleSet function");
-        console.log("parentID is " + parentID);
-        console.log("selectedQuestion is " + selectedQuestion);
-        console.log("----------");
-        console.log(self);
-        console.log(data);
-        console.log(this);
         var selectorId = parentID + "-toggleSelectedQuestion";
         document.getElementById(selectorId).innerHTML = ""; // need to check whether this is even necessary
         let res = renderRunestoneComponent(htmlsrc, selectorId, {
@@ -252,14 +242,9 @@ export default class SelectOne extends RunestoneBase {
 
             }
         );
-        console.log(request);
         let response = await fetch(request);
-        console.log(response);
         $("#component-preview").html("");
         $("#" + parentID).data("toggle_current", selectedQuestion);
-        var toggleQuestions =  document.getElementById(parentID).getElementsByTagName("select")[0];
-        var selectedQuestion = toggleQuestions.options[toggleQuestions.selectedIndex].text;
-        // alert("Problem " + parentID + " has been switched to " + selectedQuestion + ".");
     }
 }
 
