@@ -31,7 +31,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 # Local imports
 # -------------
-from runestone.shared_conftest import element_has_css_class, _SeleniumUtils
+from runestone.shared_conftest import element_has_css_class
 
 logging.basicConfig(level=logging.WARN)
 mylogger = logging.getLogger()
@@ -55,13 +55,6 @@ mf = None
 
 # Code
 # ====
-# Run this once, before all tests, to update the webpacked JS.
-@pytest.fixture(scope="session", autouse=True)
-def run_webpack():
-    # Note that Windows requires ``shell=True``, since the command to exeucute is ``npm.cmd``.
-    subprocess.run(["npm", "run", "build"], check=True, shell=IS_WINDOWS)
-
-
 # Define `module fixtures <https://docs.python.org/2/library/unittest.html#setupmodule-and-teardownmodule>`_ to build the test Runestone project, run the server, then shut it down when the tests complete.
 class ModuleFixture(unittest.TestCase):
     def __init__(
@@ -83,15 +76,6 @@ class ModuleFixture(unittest.TestCase):
         # Change to this directory for running Runestone.
         self.old_cwd = os.getcwd()
         os.chdir(self.base_path)
-        # use `run` so that `npm run build` completes before we move on to `runestone build`
-        # otherwise the runestone build may fail due to lack of a runestone.js file!
-        p = subprocess.run(
-            ["npm.cmd" if IS_WINDOWS else "npm", "run", "build"],
-            capture_output=True,
-            text=True,
-        )
-        print(p.stdout + p.stderr)
-        self.assertFalse(p.returncode)
         # Compile the docs. Save the stdout and stderr for examination.
         p = subprocess.run(
             ["runestone", "build", "--all"], capture_output=True, text=True,
@@ -220,7 +204,7 @@ def module_fixture_maker(module_path, return_mf=False, exit_status_success=True)
         return mf.setUpModule, mf.tearDownModule
 
 
-# Provide a base test case which sets up the `Selenium <http://selenium-python.readthedocs.io/>`_ driver.
+# Provide a base test case which sets up the `Selenium <http://selenium-python.readthedocs.io/>`_ driver. TODO: Port all test to the pytest framework, then remove this.
 class RunestoneTestCase(unittest.TestCase):
     # Wait until a Runestone component has finished rendering itself, given the ID of the component.
     def wait_until_ready(self, id):
