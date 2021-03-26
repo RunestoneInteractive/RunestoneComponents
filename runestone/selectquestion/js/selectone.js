@@ -8,6 +8,7 @@ import {
     createTimedComponent,
 } from "../../common/js/renderComponent";
 import RunestoneBase from "../../common/js/runestonebase";
+import "../css/selectquestion.css";
 
 export default class SelectOne extends RunestoneBase {
     /**
@@ -126,12 +127,12 @@ export default class SelectOne extends RunestoneBase {
                 var toggleUI = "";
                 if (!document.getElementById("component-preview")) {
                     toggleUI +=
-                        '<div id="component-preview" class="col-md-6" style="z-index: 999;"></div>';
+                        '<div id="component-preview" class="col-md-6 toggle-preview" style="z-index: 999;"></div>';
                 }
                 toggleUI +=
                     '<label for="' +
                     selectorId +
-                    '-toggleQuestion">Toggle Question:</label><select id="' +
+                    '-toggleQuestion" style="margin-left: 10px">Toggle Question:</label><select id="' +
                     selectorId +
                     '-toggleQuestion">';
                 var i;
@@ -198,6 +199,7 @@ export default class SelectOne extends RunestoneBase {
             });
             ///////////////////////////
             if (data.toggle) {
+                $("#component-preview").hide();
                 var toggleQuestionSelect = document.getElementById(
                     selectorId + "-toggleQuestion"
                 );
@@ -261,6 +263,7 @@ export default class SelectOne extends RunestoneBase {
             toggleQuestionSelect.value = $("#" + parentID).data(
                 "toggle_current"
             );
+            $("#component-preview").hide();
         });
         $("#component-preview").append(closeButton);
 
@@ -270,9 +273,11 @@ export default class SelectOne extends RunestoneBase {
         $(setButton).click(
             async function () {
                 await this.toggleSet(parentID, selectedQuestion, htmlsrc);
+                $("#component-preview").hide();
             }.bind(this)
         );
         $("#component-preview").append(setButton);
+        $("#component-preview").show();
     }
 
     async toggleSet(parentID, selectedQuestion, htmlsrc) {
