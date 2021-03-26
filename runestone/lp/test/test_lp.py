@@ -70,7 +70,7 @@ def sphinx_setup():
 
 # Make sure there were no unexpected warnings in the build.
 def test_1(selenium_module_fixture):
-    assert selenium_module_fixture.build_stderr_data.count("WARNING") == 4
+    assert selenium_module_fixture.build_stderr_data.count("WARNING") == 1
 
 
 # Make sure that the student source files were generated.
