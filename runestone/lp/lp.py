@@ -17,7 +17,7 @@ from os import makedirs
 from pathlib import Path
 import json
 
-#
+
 # Third-party imports
 # -------------------
 import pygments
@@ -30,7 +30,7 @@ from docutils.parsers.rst.states import Struct
 from CodeChat.CodeToRestSphinx import is_source_code
 from CodeChat.CodeToRest import get_lexer
 
-#
+
 # Local imports
 # -------------
 from ..common.runestonedirective import (

@@ -12,8 +12,9 @@
 #
 # Standard library
 # ----------------
-# None.
-#
+import subprocess
+
+
 # Third-party imports
 # -------------------
 import pytest
@@ -23,20 +24,40 @@ import pytest
 # -------------
 # This is necessary to bring in the shared pytest fixture.
 from runestone.shared_conftest import _SeleniumUtils, selenium_driver  # noqa: F401
-from runestone.unittest_base import ModuleFixture, HOST_URL, run_webpack  # noqa: F401
+from runestone.unittest_base import ModuleFixture, HOST_URL, IS_WINDOWS
 
 
 # Fixtures
 # ========
+# Run this once, before all tests, to update the webpacked JS.
+@pytest.fixture(scope="session", autouse=True)
+def run_webpack():
+    # Note that Windows requires ``shell=True``, since the command to execute is ``npm.cmd``.
+    p = subprocess.run(["npm", "run", "build"], text=True, shell=IS_WINDOWS, capture_output=True)
+    print(p.stderr + p.stdout)
+    assert not p.returncode
+
+
+# Provide access to the module fixture, for tests with specific needs.
 @pytest.fixture(scope="module")
-def selenium_driver_session(request):
-    mf = ModuleFixture(request.fspath, True)
+def selenium_module_fixture(request):
+    # Allow tests to specify the ``exit_status_success`` parameter passed to the ModuleFixture constructor by adding the ``@pytest.mark.exit_status_success(False)`` decorator to a test. (Marking it True instead is equivalent to the unmarked, default value.) See the `example <https://docs.pytest.org/en/stable/fixture.html#using-markers-to-pass-data-to-fixtures>`_ and the API docs <https://docs.pytest.org/en/stable/reference.html#pytest.nodes.Node.get_closest_marker>`_.
+    exit_status_success_mark = request.node.get_closest_marker("exit_status_success")
+    exit_status_success = True if exit_status_success_mark is None else exit_status_success_mark.args[0]
+
+    mf = ModuleFixture(request.fspath, exit_status_success)
     mf.setUpModule()
-    yield mf.driver
+    yield mf
     mf.tearDownModule()
 
 
-# Present ``_SeleniumUser`` as a fixture. To use, provide it with a ``_TestUser`` instance.
+# Provide access to the Selenium driver.
+@pytest.fixture(scope="module")
+def selenium_driver_session(selenium_module_fixture):
+    return selenium_module_fixture.driver
+
+
+# Present ``_SeleniumUser`` as a fixture.
 @pytest.fixture
 def selenium_utils(selenium_driver):  # noqa: F811
     return _SeleniumUtils(selenium_driver, HOST_URL)

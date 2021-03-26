@@ -1,8 +1,6 @@
 # ***********************
 # test_lp.py - Unit tests
 # ***********************
-# Require Python 3 to run tests.
-
 #
 # Imports
 # =======
@@ -12,17 +10,11 @@
 # Standard library
 # ----------------
 from pathlib import Path
-from time import sleep
-from unittest import TestCase
-
 
 # Third-party imports
 # -------------------
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-
-
+# None.
+#
 # Local imports
 # -------------
 from runestone.lp.lp import (
@@ -36,9 +28,6 @@ from runestone.lp.lp_common_lib import (
     STUDENT_SOURCE_PATH,
     read_sphinx_config,
 )
-from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
-
-mf, setUpModule, tearDownModule = module_fixture_maker(__file__, True)
 
 
 # Mock classes
@@ -76,61 +65,63 @@ def sphinx_setup():
 
 # Tests
 # =====
+#
 # Test the code solution removal.
-class Unit_Test_Lp(TestCase):
-    # Make sure there were no unexpected warnings in the build.
-    def test_1(self):
-        self.assertEqual(mf.build_stderr_data.count("WARNING"), 1)
 
-    # Make sure that the student source files were generated.
-    def test_1a(self):
-        sphinx_config = read_sphinx_config()
-        sphinx_source_path = sphinx_config["SPHINX_SOURCE_PATH"]
-        sphinx_out_path = sphinx_config["SPHINX_OUT_PATH"]
-        self.assertTrue(sphinx_source_path)
+# Make sure there were no unexpected warnings in the build.
+def test_1(selenium_module_fixture):
+    assert selenium_module_fixture.build_stderr_data.count("WARNING") == 4
 
-        # Check that a HTML version of the source was produced.
-        self.assertTrue((Path(sphinx_out_path) / "lp_tester.s-source.html").exists())
 
-        # Check that the student source has answers removed.
-        with open(
-            str(Path(sphinx_out_path) / STUDENT_SOURCE_PATH / "lp_tester.s"),
-            encoding="utf-8",
-        ) as f:
-            student_source = f.read()
-        self.assertNotIn("_u16_b: .space 2", student_source)
-        self.assertNotIn("mov #0xA15F, W0", student_source)
+# Make sure that the student source files were generated.
+def test_1a(selenium_module_fixture):
+    sphinx_config = read_sphinx_config()
+    sphinx_source_path = sphinx_config["SPHINX_SOURCE_PATH"]
+    sphinx_out_path = sphinx_config["SPHINX_OUT_PATH"]
+    assert sphinx_source_path
 
-    # Test _remove_code_solutions.
-    def test_2(self):
-        # Note: to avoid the tags being recognized when this file is parsed by Sphinx, they're broken apart in the strings below.
-        self.assertEqual(
-            _remove_code_solutions(
-                "foo.s",
-                """# line 1
+    # Check that a HTML version of the source was produced.
+    assert (Path(sphinx_out_path) / "lp_tester.s-source.html").exists()
+
+    # Check that the student source has answers removed.
+    with open(
+        str(Path(sphinx_out_path) / STUDENT_SOURCE_PATH / "lp_tester.s"),
+        encoding="utf-8",
+    ) as f:
+        student_source = f.read()
+    assert "_u16_b: .space 2" not in student_source
+    assert "mov #0xA15F, W0" not in student_source
+
+
+# Test _remove_code_solutions.
+def test_2():
+    # Note: to avoid the tags being recognized when this file is parsed by Sphinx, they're broken apart in the strings below.
+    assert (
+        _remove_code_solutions(
+            "foo.s",
+            """# line 1
 # line 2
 # line 3
 # SOLUTION_"""
-                """BEGIN
+            """BEGIN
 Answer here.
 And here.
 Even more.
 # SOLUTION_"""
-                """END
+            """END
 # line 9
 # line 10
 # line 11
 #  SOLUTION_"""
-                """BEGIN
+            """BEGIN
 More answer stuff.
 # SOLUTION_"""
-                """END
+            """END
 # line 15""",
-                lambda start_line, end_line, file_name: "# Snip "
-                + str(end_line)
-                + "\n",
-            ),
-            """# line 1
+            lambda start_line, end_line, file_name: "# Snip "
+            + str(end_line)
+            + "\n",
+        ) == """# line 1
 # line 2
 # line 3
 # Snip 8
@@ -138,31 +129,34 @@ More answer stuff.
 # line 10
 # line 11
 # Snip 14
-# line 15""",
-        )
+# line 15"""
+    )
 
-    # Test the addition of comments to a string.
-    def test_3(self):
-        self.assertEqual(_add_line_comment_delimiter("1\n2", "foo.py"), "# 1\n# 2")
-        self.assertEqual(_add_line_comment_delimiter("1\n2", "foo.c"), "// 1\n// 2")
 
-    # Test ``_textarea_replacement``.
-    def test_4(self):
-        # Check a mimimum-length replacement.
-        self.assertEqual(
-            _textarea_replacement(3, 4, "foo.py"), TEXTAREA_REPLACEMENT_STRING.format(4)
-        )
+# Test the addition of comments to a string.
+def test_3():
+    assert _add_line_comment_delimiter("1\n2", "foo.py") == "# 1\n# 2"
+    assert _add_line_comment_delimiter("1\n2", "foo.c") == "// 1\n// 2"
 
-        # Check a replcement with added lines.
-        self.assertEqual(_textarea_replacement(3, 22, "foo.py").count("\n"), 20)
 
-    # Test the source-read event callback.
-    def test_5(self):
-        src = [
-            """Line 1
+# Test ``_textarea_replacement``.
+def test_4():
+    # Check a mimimum-length replacement.
+    assert (
+        _textarea_replacement(3, 4, "foo.py") == TEXTAREA_REPLACEMENT_STRING.format(4)
+    )
+
+    # Check a replacement with added lines.
+    assert _textarea_replacement(3, 22, "foo.py").count("\n") == 20
+
+
+# Test the source-read event callback.
+def test_5():
+    src = [
+        """Line 1
 Line 2
 SOLUTION_"""
-            """BEGIN
+        """BEGIN
 Line 4
 Line 5
 Line 6
@@ -171,15 +165,14 @@ Line 8
 Line 9
 Line 10
 SOLUTION_"""
-            """END
+        """END
 Line 12"""
-        ]
-        app, env = sphinx_setup()
-        _source_read(app, env.docname, src)
-        self.assertEqual(
-            src,
-            [
-                """Line 1
+    ]
+    app, env = sphinx_setup()
+    _source_read(app, env.docname, src)
+    assert (
+        src == [
+            """Line 1
 Line 2
 
 .. raw::
@@ -191,46 +184,5 @@ Line 2
 
 
 Line 12"""
-            ],
-        )
-
-
-class Functional_Test_Lp(RunestoneTestCase):
-    def test_1(self):
-        self.driver.get(self.host + "/lp_tester.s.html")
-        wait = WebDriverWait(self.driver, 10)
-        try:
-            wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-        except:
-            text = self.driver.page_source
-            print(text[:300])
-
-        snippets = self.driver.find_elements_by_class_name("code_snippet")
-        self.assertEqual(len(snippets), 2)
-        check_button = self.driver.find_element_by_id("e1")
-        result_area = self.driver.find_element_by_id("lp-result")
-
-        # Set snippets.
-        self.driver.execute_script(
-            'LPList["e1"].textAreas[0].setValue("xxx"); LPList["e1"].textAreas[1].setValue("yyy");'
-        )
-        self.assertFalse(result_area.text)
-
-        # Click the test button.
-        check_button.click()
-        WebDriverWait(self.driver, 10).until(
-            EC.text_to_be_present_in_element_value((By.ID, "lp-result"), "Building...")
-        )
-
-        # Refresh the page. See if saved snippets are restored.
-        self.driver.get(self.host + "/lp_tester.s.html")
-        # Wait for script to run. I don't see a wait condition what would work, unfortunately.
-        sleep(0.5)
-        self.assertEqual(
-            self.driver.execute_script('return LPList["e1"].textAreas[0].getValue();'),
-            "xxx",
-        )
-        self.assertEqual(
-            self.driver.execute_script('return LPList["e1"].textAreas[1].getValue();'),
-            "yyy",
-        )
+        ]
+    )
