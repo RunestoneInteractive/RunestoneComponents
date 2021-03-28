@@ -46,6 +46,7 @@ class Reveal extends RunestoneBase {
                 this.createHideButton(); // Hide button is already implemented in modal dialog
             }
         }
+        this.indicate_component_ready();
     }
     /*====================================
     == Get text for buttons/modal title ==
@@ -79,17 +80,17 @@ class Reveal extends RunestoneBase {
     ============================*/
     createShowButton() {
         var _this = this;
-        this.wrapDiv = document.createElement("div"); // wrapper div
+        this.containerDiv = document.createElement("div"); // wrapper div
+        this.containerDiv.id = this.divid;
         if (!this.dataModal) {
             this.revealDiv = document.createElement("div"); // Div that is hidden that contains content
-            this.revealDiv.id = this.divid;
             // Get original content, put it inside revealDiv and replace original div with revealDiv
             //$(this.revealDiv).html(this.origContent);
             for (var i = 0; i < this.children.length; i++) {
                 this.revealDiv.appendChild(this.children[i]);
             }
             $(this.revealDiv).hide();
-            this.wrapDiv.appendChild(this.revealDiv);
+            this.containerDiv.appendChild(this.revealDiv);
         }
         if (this.instructorOnly) {
             $(this.revealDiv).addClass("iguide");
@@ -116,8 +117,8 @@ class Reveal extends RunestoneBase {
                 "data-target": "#" + this.divid + "_modal",
             });
         }
-        this.wrapDiv.appendChild(this.sbutt);
-        $(this.origElem).replaceWith(this.wrapDiv);
+        this.containerDiv.appendChild(this.sbutt);
+        $(this.origElem).replaceWith(this.containerDiv);
     }
     createHideButton() {
         var _this = this;
@@ -131,7 +132,7 @@ class Reveal extends RunestoneBase {
             _this.hideInline();
             $(this).hide();
         };
-        this.wrapDiv.appendChild(this.hbutt);
+        this.containerDiv.appendChild(this.hbutt);
     }
     createInstructorButtons() {
         this.createShowButton();
