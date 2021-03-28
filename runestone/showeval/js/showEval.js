@@ -14,11 +14,12 @@ import "../css/showEval.css";
 
 var seList = [];
 
-export class ShowEval {
+export class ShowEval extends RunestoneBase {
     constructor(opts) {
+        super(opts);
         this.divid = opts.orig.id;
-        this.container = $(`#${this.divid}`);
-        this.container.addClass("showEval");
+        this.containerDiv = opts.orig;
+        this.containerDiv.classList.add("showEval");
         let steps = [];
         for (let s of opts.raw) {
             steps.push(s.replace(/\\/g, ""));
@@ -29,7 +30,7 @@ export class ShowEval {
         this.rb = new RunestoneBase(opts);
         // create elements
         this.currentStepDiv = $("<div>").addClass("currentStepDiv");
-        this.container.append(this.currentStepDiv);
+        $(this.containerDiv).append(this.currentStepDiv);
         this.currentStepDiv.append($("<span>").addClass("pre"));
         this.currentStepDiv.append($("<span>").addClass("eval"));
         this.currentStepDiv.append($("<span>").addClass("post"));
@@ -66,10 +67,9 @@ export class ShowEval {
             this.steps[i].push(comment); // 'anno'
         }
         this.reset();
-        this.rb.caption = "ShowEval";
-        this.rb.containerDiv = this.container[0].parentElement;
-        this.rb.divid = this.container[0].id;
-        this.rb.addCaption("runestone");
+        this.caption = "ShowEval";
+        this.addCaption("runestone");
+        this.indicate_component_ready();
     }
 
     setNextButton(nextButtonSelector) {
@@ -87,12 +87,12 @@ export class ShowEval {
     }
 
     reset() {
-        this.container.find(".previousStep").remove();
+        $(this.containerDiv).find(".previousStep").remove();
         this.setStep(0);
         this.rb.logBookEvent({
             event: "showeval",
             act: "reset",
-            div_id: this.container[0].id,
+            div_id: this.containerDiv.id,
         });
     }
 
@@ -197,7 +197,7 @@ export class ShowEval {
         this.rb.logBookEvent({
             event: "showeval",
             act: "next",
-            div_id: this.container[0].id,
+            div_id: this.containerDiv.id,
         });
     }
 }
@@ -207,7 +207,7 @@ export class ShowEval {
 ==   execute our code on them    ==
 =================================*/
 $(document).bind("runestone:login-complete", function () {
-    $("[data-childcomponent=showeval]").each(function (index) {
+    $("[data-component=showeval]").each(function (index) {
         // MC
         var opts = {
             orig: this,
