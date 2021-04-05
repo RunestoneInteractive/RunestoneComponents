@@ -2,15 +2,12 @@
 Test Clickable Area question directive
 """
 
+import pytest
+from selenium.webdriver.common.action_chains import ActionChains
+
 __author__ = "yasinovskyy"
 
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.by import By
-from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
-
-setUpModule, tearDownModule = module_fixture_maker(__file__)
-# make two variations on Red Orang Yellow row for sphinx 1.x and 2.x
+# make two variations on Red Orange Yellow row for sphinx 1.x and 2.x
 ANSWERS = [
     "Red\nOrange\nYellow",
     "Red Orange Yellow",
@@ -24,208 +21,209 @@ ANSWERS = [
 ]
 
 
-class ClickableAreaQuestion_Tests(RunestoneTestCase):
-    def test_ca1(self):
-        """Text/Code: Nothing selected"""
-        self.driver.get(self.host + "/index.html")
-        wait = WebDriverWait(self.driver, 10)
-        try:
-            wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-        except:
-            text = self.driver.page_source
-            print(text[:300])
+@pytest.fixture
+def selenium_utils_1(selenium_utils):
+    selenium_utils.get("index.html")
+    selenium_utils.wait_until_ready("test_clickablearea_1")
+    selenium_utils.wait_until_ready("test_clickablearea_2")
+    return selenium_utils
 
-        t1 = self.driver.find_elements_by_class_name("alert-warning")[0]
 
-        btn_check = t1.find_element_by_class_name("btn-success")
-        btn_check.click()
+def test_ca1(selenium_utils_1):
+    """Text/Code: Nothing selected"""
+    t1 = selenium_utils_1.driver.find_element_by_id("test_clickablearea_1")
 
-        fb = t1.find_element_by_class_name("alert")
-        self.assertIsNotNone(fb)
-        cnamestr = fb.get_attribute("class")
-        self.assertIn("alert-danger", cnamestr)
+    btn_check = t1.find_element_by_class_name("btn-success")
+    btn_check.click()
 
-    def test_ca2(self):
-        """Text/Code: Correct answer(s) selected"""
-        self.driver.get(self.host + "/index.html")
-        t1 = self.driver.find_elements_by_class_name("alert-warning")[0]
+    fb = t1.find_element_by_class_name("alert")
+    assert fb is not None
+    cnamestr = fb.get_attribute("class")
+    assert "alert-danger" in cnamestr
 
-        targets = t1.find_elements_by_class_name("clickable")
-        for target in targets:
-            if target.text in ANSWERS:
-                target.click()
 
-        btn_check = t1.find_element_by_class_name("btn-success")
-        btn_check.click()
+def test_ca2(selenium_utils_1):
+    """Text/Code: Correct answer(s) selected"""
+    t1 = selenium_utils_1.driver.find_element_by_id("test_clickablearea_1")
 
-        for target in targets:
-            if target.text in ANSWERS:
-                cnamestr = target.get_attribute("class")
-                self.assertIn("clickable-clicked", cnamestr)
-
-        fb = t1.find_element_by_class_name("alert")
-        self.assertIsNotNone(fb)
-        cnamestr = fb.get_attribute("class")
-        self.assertIn("alert-info", cnamestr)
-
-    def test_ca3(self):
-        """Text/Code: Incorrect answer selected"""
-        self.driver.get(self.host + "/index.html")
-        t1 = self.driver.find_elements_by_class_name("alert-warning")[0]
-
-        targets = t1.find_elements_by_class_name("clickable")
-        for target in targets:
-            if target.text not in ANSWERS:
-                target.click()
-
-        btn_check = t1.find_element_by_class_name("btn-success")
-        btn_check.click()
-
-        for target in targets:
-            if target.text not in ANSWERS:
-                cnamestr = target.get_attribute("class")
-                self.assertIn("clickable-incorrect", cnamestr)
-
-        fb = t1.find_element_by_class_name("alert")
-        self.assertIsNotNone(fb)
-        cnamestr = fb.get_attribute("class")
-        self.assertIn("alert-danger", cnamestr)
-
-    def test_ca4(self):
-        """Text/Code: All options clicked one by one"""
-        self.driver.get(self.host + "/index.html")
-        t1 = self.driver.find_elements_by_class_name("alert-warning")[0]
-
-        targets = t1.find_elements_by_class_name("clickable")
-        for target in targets:
+    targets = t1.find_elements_by_class_name("clickable")
+    for target in targets:
+        if target.text in ANSWERS:
             target.click()
 
-        btn_check = t1.find_element_by_class_name("btn-success")
-        btn_check.click()
+    btn_check = t1.find_element_by_class_name("btn-success")
+    ActionChains(selenium_utils_1.driver).move_to_element(btn_check).perform()
+    btn_check.click()
 
-        for target in targets:
+    for target in targets:
+        if target.text in ANSWERS:
             cnamestr = target.get_attribute("class")
-            if target.text in ANSWERS:
-                self.assertIn("clickable-clicked", cnamestr)
-            else:
-                self.assertIn("clickable-incorrect", cnamestr)
+            assert "clickable-clicked" in cnamestr
 
-        fb = t1.find_element_by_class_name("alert")
-        self.assertIsNotNone(fb)
-        cnamestr = fb.get_attribute("class")
-        self.assertIn("alert-danger", cnamestr)
+    fb = t1.find_element_by_class_name("alert")
+    assert fb is not None
+    ActionChains(selenium_utils_1.driver).move_to_element(fb).perform()
+    cnamestr = fb.get_attribute("class")
+    assert "alert-info" in cnamestr
 
-    def test_ca5(self):
-        """Text/Code: Correct answer selected and unselected"""
-        self.driver.get(self.host + "/index.html")
-        t1 = self.driver.find_elements_by_class_name("alert-warning")[0]
 
-        targets = t1.find_elements_by_class_name("clickable")
-        for target in targets:
-            if target.text in ANSWERS:
-                target.click()
-                target.click()
+def test_ca3(selenium_utils_1):
+    """Text/Code: Incorrect answer selected"""
+    t1 = selenium_utils_1.driver.find_element_by_id("test_clickablearea_1")
 
-        for target in targets:
-            if target.text in ANSWERS:
-                cnamestr = target.get_attribute("class")
-                self.assertNotIn("clickable-clicked", cnamestr)
-
-    def test_ca6(self):
-        """Table: Nothing selected"""
-        self.driver.get(self.host + "/index.html")
-        t1 = self.driver.find_elements_by_class_name("alert-warning")[1]
-
-        btn_check = t1.find_element_by_class_name("btn-success")
-        btn_check.click()
-
-        fb = t1.find_element_by_class_name("alert")
-        self.assertIsNotNone(fb)
-        cnamestr = fb.get_attribute("class")
-        self.assertIn("alert-danger", cnamestr)
-
-    def test_ca7(self):
-        """Table: Correct answer(s) selected"""
-        self.driver.get(self.host + "/index.html")
-        t1 = self.driver.find_elements_by_class_name("alert-warning")[1]
-
-        targets = t1.find_elements_by_class_name("clickable")
-        for target in targets:
-            if target.text in ANSWERS:
-                target.click()
-
-        btn_check = t1.find_element_by_class_name("btn-success")
-        btn_check.click()
-
-        for target in targets:
-            if target.text in ANSWERS:
-                cnamestr = target.get_attribute("class")
-                self.assertIn("clickable-clicked", cnamestr)
-
-        fb = t1.find_element_by_class_name("alert")
-        self.assertIsNotNone(fb)
-        cnamestr = fb.get_attribute("class")
-        self.assertIn("alert-info", cnamestr)
-
-    def test_ca8(self):
-        """Table: Incorrect answer selected"""
-        self.driver.get(self.host + "/index.html")
-        t1 = self.driver.find_elements_by_class_name("alert-warning")[1]
-
-        targets = t1.find_elements_by_class_name("clickable")
-        for target in targets:
-            if target.text not in ANSWERS:
-                target.click()
-
-        btn_check = t1.find_element_by_class_name("btn-success")
-        btn_check.click()
-
-        for target in targets:
-            if target.text not in ANSWERS:
-                cnamestr = target.get_attribute("class")
-                self.assertIn("clickable-incorrect", cnamestr)
-
-        fb = t1.find_element_by_class_name("alert")
-        self.assertIsNotNone(fb)
-        cnamestr = fb.get_attribute("class")
-        self.assertIn("alert-danger", cnamestr)
-
-    def test_ca9(self):
-        """Table: All options clicked one by one"""
-        self.driver.get(self.host + "/index.html")
-        t1 = self.driver.find_elements_by_class_name("alert-warning")[1]
-
-        targets = t1.find_elements_by_class_name("clickable")
-        for target in targets:
+    targets = t1.find_elements_by_class_name("clickable")
+    for target in targets:
+        if target.text not in ANSWERS:
             target.click()
 
-        btn_check = t1.find_element_by_class_name("btn-success")
-        btn_check.click()
+    btn_check = t1.find_element_by_class_name("btn-success")
+    btn_check.click()
 
-        for target in targets:
+    for target in targets:
+        if target.text not in ANSWERS:
             cnamestr = target.get_attribute("class")
-            if target.text in ANSWERS:
-                self.assertIn("clickable-clicked", cnamestr)
-            else:
-                self.assertIn("clickable-incorrect", cnamestr)
+            assert "clickable-incorrect" in cnamestr
 
-        fb = t1.find_element_by_class_name("alert")
-        self.assertIsNotNone(fb)
-        cnamestr = fb.get_attribute("class")
-        self.assertIn("alert-danger", cnamestr)
+    fb = t1.find_element_by_class_name("alert")
+    assert fb is not None
+    cnamestr = fb.get_attribute("class")
+    assert "alert-danger" in cnamestr
 
-    def test_ca10(self):
-        """Table: Correct answer selected and unselected"""
-        self.driver.get(self.host + "/index.html")
-        t1 = self.driver.find_elements_by_class_name("alert-warning")[1]
 
-        targets = t1.find_elements_by_class_name("clickable")
-        for target in targets:
-            if target.text in ANSWERS:
-                target.click()
-                target.click()
+def test_ca4(selenium_utils_1):
+    """Text/Code: All options clicked one by one"""
+    t1 = selenium_utils_1.driver.find_element_by_id("test_clickablearea_1")
 
-        for target in targets:
-            if target.text in ANSWERS:
-                cnamestr = target.get_attribute("class")
-                self.assertNotIn("clickable-clicked", cnamestr)
+    targets = t1.find_elements_by_class_name("clickable")
+    for target in targets:
+        target.click()
+
+    btn_check = t1.find_element_by_class_name("btn-success")
+    btn_check.click()
+
+    for target in targets:
+        cnamestr = target.get_attribute("class")
+        if target.text in ANSWERS:
+            assert "clickable-clicked" in cnamestr
+        else:
+            assert "clickable-incorrect" in cnamestr
+
+    fb = t1.find_element_by_class_name("alert")
+    assert fb is not None
+    cnamestr = fb.get_attribute("class")
+    assert "alert-danger" in cnamestr
+
+
+def test_ca5(selenium_utils_1):
+    """Text/Code: Correct answer selected and unselected"""
+    t1 = selenium_utils_1.driver.find_element_by_id("test_clickablearea_1")
+
+    targets = t1.find_elements_by_class_name("clickable")
+    for target in targets:
+        if target.text in ANSWERS:
+            target.click()
+            target.click()
+
+    for target in targets:
+        if target.text in ANSWERS:
+            cnamestr = target.get_attribute("class")
+            assert "clickable-clicked" not in cnamestr
+
+
+def test_ca6(selenium_utils_1):
+    """Table: Nothing selected"""
+    t1 = selenium_utils_1.driver.find_element_by_id("test_clickablearea_2")
+
+    btn_check = t1.find_element_by_class_name("btn-success")
+    btn_check.click()
+
+    fb = t1.find_element_by_class_name("alert")
+    assert fb is not None
+    cnamestr = fb.get_attribute("class")
+    assert "alert-danger" in cnamestr
+
+
+def test_ca7(selenium_utils_1):
+    """Table: Correct answer(s) selected"""
+    t1 = selenium_utils_1.driver.find_element_by_id("test_clickablearea_2")
+
+    targets = t1.find_elements_by_class_name("clickable")
+    for target in targets:
+        if target.text in ANSWERS:
+            target.click()
+
+    btn_check = t1.find_element_by_class_name("btn-success")
+    btn_check.click()
+
+    for target in targets:
+        if target.text in ANSWERS:
+            cnamestr = target.get_attribute("class")
+            assert "clickable-clicked" in cnamestr
+
+    fb = t1.find_element_by_class_name("alert")
+    assert fb is not None
+    cnamestr = fb.get_attribute("class")
+    assert "alert-info" in cnamestr
+
+
+def test_ca8(selenium_utils_1):
+    """Table: Incorrect answer selected"""
+    t1 = selenium_utils_1.driver.find_element_by_id("test_clickablearea_2")
+
+    targets = t1.find_elements_by_class_name("clickable")
+    for target in targets:
+        if target.text not in ANSWERS:
+            target.click()
+
+    btn_check = t1.find_element_by_class_name("btn-success")
+    btn_check.click()
+
+    for target in targets:
+        if target.text not in ANSWERS:
+            cnamestr = target.get_attribute("class")
+            assert "clickable-incorrect" in cnamestr
+
+    fb = t1.find_element_by_class_name("alert")
+    assert fb is not None
+    cnamestr = fb.get_attribute("class")
+    assert "alert-danger" in cnamestr
+
+
+def test_ca9(selenium_utils_1):
+    """Table: All options clicked one by one"""
+    t1 = selenium_utils_1.driver.find_element_by_id("test_clickablearea_2")
+
+    targets = t1.find_elements_by_class_name("clickable")
+    for target in targets:
+        target.click()
+
+    btn_check = t1.find_element_by_class_name("btn-success")
+    btn_check.click()
+
+    for target in targets:
+        cnamestr = target.get_attribute("class")
+        if target.text in ANSWERS:
+            assert "clickable-clicked" in cnamestr
+        else:
+            assert "clickable-incorrect" in cnamestr
+
+    fb = t1.find_element_by_class_name("alert")
+    assert fb is not None
+    cnamestr = fb.get_attribute("class")
+    assert "alert-danger" in cnamestr
+
+
+def test_ca10(selenium_utils_1):
+    """Table: Correct answer selected and unselected"""
+    t1 = selenium_utils_1.driver.find_element_by_id("test_clickablearea_2")
+
+    targets = t1.find_elements_by_class_name("clickable")
+    for target in targets:
+        if target.text in ANSWERS:
+            target.click()
+            target.click()
+
+    for target in targets:
+        if target.text in ANSWERS:
+            cnamestr = target.get_attribute("class")
+            assert "clickable-clicked" not in cnamestr
