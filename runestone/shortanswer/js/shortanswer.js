@@ -35,9 +35,9 @@ export default class ShortAnswer extends RunestoneBase {
                 this.mathjax = true;
             }
             this.renderHTML();
-            this.checkServer("shortanswer");
             this.caption = "shortanswer";
             this.addCaption("runestone");
+            this.checkServer("shortanswer", true);
         }
     }
 
