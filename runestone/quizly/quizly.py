@@ -154,8 +154,7 @@ def purge_activecodes(app, env, docname):
     pass
 
 
-#class Quizly(RunestoneIdDirective):
-class Quizly(Assessment):
+class Quizly(RunestoneIdDirective):
     """
     .. quizly:: some_unique_id, e.g., q1
 
