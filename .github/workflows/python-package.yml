@@ -31,6 +31,7 @@ jobs:
               id: create-runestone-bundle
               run: |
                   npm install
+                  npm run build
             - name: Set up Python ${{ matrix.python-version }}
               id: install-python
               uses: actions/setup-python@v2
