@@ -5,6 +5,7 @@ from .activecode import ActiveCode
 from .animation import Animation
 from .mchoice import MChoice, QuestionNumber
 from .blockly import Blockly
+from .quizly import Quizly
 from .codelens import Codelens
 from .clickableArea import ClickableArea
 from .datafile import DataFile
@@ -227,6 +228,7 @@ cmap = {
     "dragndrop": DragNDrop,
     "parsonsprob": ParsonsProblem,
     "poll": Poll,
+    "quizly": Quizly,
     "reveal": RevealDirective,
     "selectquestion": SelectQuestion,
     "shortanswer": JournalDirective,

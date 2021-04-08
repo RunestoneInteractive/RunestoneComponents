@@ -1,0 +1,191 @@
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <!-- NOTE:  Don't change this Title -->
+  <title>Quizme App Inventor</title>
+ <link type="text/css" rel="stylesheet" href="../../css/main.css">
+  <style>
+    body {
+      background-color: white;
+      font-family: sans-serif;
+    }
+    h1 {
+      font-weight: normal;
+      font-size: 140%;
+    }
+
+    #dialogoverlay{
+	display: none;
+	opacity: .2;
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	background: #FFF;
+	width: 100%;
+	z-index: 10;
+    }
+    #dialogbox{
+	display: none;
+	position: fixed;
+	background: #000;
+	border-radius:7px; 
+	width:400px;
+	z-index: 10;
+    }
+   #dialogbox > div{ background:#FFF; margin:8px; }
+   #dialogbox > div > #dialogboxhead{ background: #666; font-size:19px; padding:10px; color:#CCC; }
+   #dialogbox > div > #dialogboxbody{ background:#333; padding:20px; color:#FFF; }
+   #dialogbox > div > #dialogboxfoot{ background: #666; padding:10px; text-align:right; }
+  </style>
+
+<script>
+ // Event listener and handler for quiz result
+ window.addEventListener('message', handleMessage, false);
+
+ function handleMessage(event) {  
+//     if (event.origin != "http://localhost:85") { return; }  
+     console.log("handleMessage result: " + event.data)
+     this.window.quizly_result = event.data;
+     console.log("handleMessage window result: " + this.window.quizly_result);
+ }
+
+// Based on: https://www.developphp.com/video/JavaScript/Custom-Alert-Box-Programming-Tutorial
+// The variable doc is set based on where the dialogoverlay, which varies if index.html is embedded.
+function JavaScriptAlert(){
+    this.render = function(dialog){
+        var winW = window.innerWidth;
+        var winH = window.innerHeight;
+        var dialogoverlay = window.parent.document.getElementById('dialogoverlay');
+        var doc;
+        if (dialogoverlay) {
+           doc = window.parent.document;
+        } else {
+           doc = window.document;  // For embedded cases
+        }
+        dialogoverlay = doc.getElementById('dialogoverlay');
+        var dialogbox = doc.getElementById('dialogbox');
+        dialogoverlay.style.display = "block";
+        dialogoverlay.style.height = winH+"px";
+        dialogbox.style.left = winW - 550 +"px";
+        dialogbox.style.top = "100px";
+        dialogbox.style.display = "block";
+        doc.getElementById('dialogboxhead').innerHTML = "Javascript Code";
+        doc.getElementById('dialogboxbody').innerHTML = "<pre>" + dialog + "</pre>";
+        doc.getElementById('dialogboxfoot').innerHTML = '<button onclick="Alert.ok()">OK</button>';
+    }
+    this.ok = function(){
+      var dialogoverlay = window.parent.document.getElementById('dialogoverlay');
+      if (dialogoverlay) {
+         doc = window.parent.document;
+      } else {
+         doc = window.document;  // For embedded cases
+      }
+      doc.getElementById('dialogbox').style.display = "none";
+      doc.getElementById('dialogoverlay').style.display = "none";
+    }
+}
+var Alert = new JavaScriptAlert();
+var DEBUG = false;
+
+function showJavascript() {
+  if (DEBUG) console.log("ShowJavaScript");
+  Blockly.hello('showjavascript');
+}
+
+/**
+   Handler for the Quizly submit button.  It
+   evaluates the user's solution and posts
+   the result (true or false) on window.parent.quizlies
+   where it can be retrieved by the GCB quiz object.
+*/
+function checkAnswer() {
+  console.log("checkAnswer -- RAM");
+  document.getElementById('show_javascript').disabled = true;
+  var result = Blockly.Quizme.evaluateUserAnswer();
+  var quizName = Blockly.Quizme.quizName
+  window.postMessage("Result=" + result, 'http://localhost:85');
+
+//  window.parent.quizlies['quizname']=quizName;
+//  var thisQuiz = window.parent.quizlies[quizName];
+//  thisQuiz.result = result[0];
+//  thisQuiz.workspace = result[1];
+  
+
+  // Comment this out if there is separate GCB button for submitting the result.
+//  window.parent.checkAnswer();  // This parent script is in modules/quizly/quizly.py
+}
+
+function giveHint() {
+  if (DEBUG) console.log("giveHint");
+  Blockly.hello('hint');
+}
+
+function showQuiz(quizname) {
+  if (DEBUG) console.log("showQuiz");
+  Blockly.hello('showquiz', quizname);
+}
+
+function giveNewQuestion(quizname) {
+  if (DEBUG) console.log("giveNewQuestion");
+  Blockly.hello('showquiz', quizname);
+}
+
+</script>
+
+</head>
+<body>
+<div id="dialogoverlay"></div>
+<div id="dialogbox">
+  <div>
+    <div id="dialogboxhead"></div>
+    <div id="dialogboxbody"></div>
+    <div id="dialogboxfoot"></div>
+  </div>
+</div>
+
+  <input type="hidden" id="quizname" value="">
+  <h1 hidden="true" id="heading">Quizly: Live Coding Exercises for App Inventor</h1>
+  <table width="100%" height="100%" cellspacing="0" cellpadding="0" style="border:0px">
+    <tr>
+     <td>
+       <div id="quiz_question">Here is where the quiz question goes.</div>
+       <input hidden="true" id="quiz_answer" width="80" font-size="14px" type="text"></input>
+       <div id="hint_html">Here is where the hint goes. </div>
+        &nbsp;
+        &nbsp;
+        <table style="border:0px" >
+         <tr>
+          <td>
+          <button class="gcb-button gcb-button-primary" id="hint_button" onclick="giveHint()">Hint</button>
+          </td>
+          <td>
+          <button class="gcb-button gcb-button-primary" id="gcb_check_answer" onclick="checkAnswer()">Check Answer</button>
+          </td>
+          <td>
+          <button class="gcb-button gcb-button-primary" id="show_javascript" onclick="showJavascript()" style="visibility:hidden" disabled>Show Javascript</button>
+          </td>
+         </tr>
+        </table>
+     </td>
+    </tr>
+    <tr>
+     <td><div contenteditable="true" width="300px" height="100px" id="quiz_result" readonly="readonly">&nbsp; </div></td>
+    </tr>
+    <tr>
+     <td height="99%">
+       <script>
+         // Called once Blockly is fully loaded. Puts Blockly on the top-level Window
+         function blocklyLoaded(blockly) {
+           window.Blockly = blockly;
+         }
+       </script>
+       <iframe style="width: 100%; height: 100%; border: 0px; padding: 1px; margin: 2px;" src="blockly.html"></iframe>
+     </td>
+    </tr>
+  </table>
+
+</body>
+
+<!-- Mirrored from course.mobilecsp.org/mobilecsp/assets/lib/quizly/gcb-index.html?backpack=hidden&selector=hidden&quizname=quiz_pause_the_player&hints=true&repeatable=false by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 26 Feb 2021 01:25:30 GMT -->
+</html>
