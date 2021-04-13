@@ -68,7 +68,7 @@ def test_history(selenium_utils_get):
     """
     div_id = "test_activecode_2"
     t1 = find_ac(selenium_utils_get, div_id)
-    time.sleep(1)
+    time.sleep(2)
     rb = t1.find_element_by_class_name("run-button")
     rb.click()
     time.sleep(2)
