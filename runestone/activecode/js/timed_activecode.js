@@ -1,6 +1,6 @@
 /*
 The TimedActivecode classes are a great example of where multiple inheritance would be useful
-But since Javascript does not suppport multiple inheritance we use the mixin pattern.
+But since Javascript does not support multiple inheritance we use the mixin pattern.
 
 */
 import LiveCode from "./livecode";
