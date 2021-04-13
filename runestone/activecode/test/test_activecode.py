@@ -152,6 +152,7 @@ def test_activity_count(selenium_utils_progress):
 
 def test_sql_activecode(selenium_utils_get):
     t2 = find_ac(selenium_utils_get, "sql1")
+    time.sleep(1)
     click_run(t2)
     selenium_utils_get.wait.until(EC.text_to_be_present_in_element((By.ID, "sql1_stdout"), "You"))
     res = selenium_utils_get.driver.find_element_by_id("sql1_sql_out")
