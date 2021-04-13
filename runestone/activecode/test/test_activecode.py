@@ -4,9 +4,6 @@ import pytest
 from selenium.webdriver import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import (
-    ElementClickInterceptedException,
-)
 
 
 def find_ac(selenium_utils, div_id):
@@ -14,7 +11,9 @@ def find_ac(selenium_utils, div_id):
     return selenium_utils.driver.find_element_by_id(div_id)
 
 
-def click_run(ac_selenium_element):
+def click_run(selenium_utils, ac_selenium_element):
+    # The run button can sometimes be scrolled to the top of the screen, where it's hidden by the navigation bar. In this case, we can't click it, since Selenium will complain ``Message: element click intercepted: Element <button class="btn btn-success run-button" type="button">...</button> is not clickable at point (460, 17). Other element would receive the click: <div class="navbar-collapse collapse navbar-ex1-collapse">...</div>``. To avoid this, always scroll to the top of the document, guaranteeing that the navbar won't be hiding the run button.
+    selenium_utils.driver.execute_script("window.scrollTo(0, 0);")
     rb = ac_selenium_element.find_element_by_class_name("run-button")
     rb.click()
 
@@ -29,7 +28,7 @@ def test_hello(selenium_utils_get):
     """
     div_id = "test_activecode_2"
     t1 = find_ac(selenium_utils_get, div_id)
-    click_run(t1)
+    click_run(selenium_utils_get, t1)
     selenium_utils_get.wait.until(
         EC.text_to_be_present_in_element((By.ID, f"{div_id}_stdout"), "Hello World"),
         message="Did not find expected text",
@@ -47,7 +46,7 @@ def test_hidden(selenium_utils_get):
     :return:
     """
     t1 = find_ac(selenium_utils_get, "testprefixcode")
-    click_run(t1)
+    click_run(selenium_utils_get, t1)
     selenium_utils_get.wait.until(
         EC.text_to_be_present_in_element(
             (By.ID, "testprefixcode_stdout"), "My Code"
@@ -68,39 +67,25 @@ def test_history(selenium_utils_get):
     """
     div_id = "test_activecode_2"
     t1 = find_ac(selenium_utils_get, div_id)
-    time.sleep(2)
-    rb = t1.find_element_by_class_name("run-button")
-    rb.click()
+    click_run(selenium_utils_get, t1)
     time.sleep(2)
 
     ta = t1.find_element_by_class_name("cm-s-default")
     assert ta
     selenium_utils_get.driver.execute_script(
-        f"""window.edList['{div_id}'].editor.setValue("print('GoodBye')")"""
+        f"""window.edList['{div_id}'].editor.setValue("print('Goodbye')")"""
     )
-    selenium_utils_get.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "run-button")))
-    try:
-        rb.click()
-    except ElementClickInterceptedException:
-        interceptor = selenium_utils_get.driver.find_element_by_class_name("navbar-collapse")
-        selenium_utils_get.driver.executed_script(
-            """
-        var el = arguments[0];
-        el.parentNode.removeChild(el);
-        """,
-            interceptor,
-        )
-        rb.click()
-
+    click_run(selenium_utils_get, t1)
     time.sleep(2)
     output = t1.find_element_by_class_name("ac_output")
-    assert output.text.strip() == "GoodBye"
+    assert output.text.strip() == "Goodbye"
     move = ActionChains(selenium_utils_get.driver)
     slider = t1.find_element_by_class_name("ui-slider")
     width = slider.size["width"]
     slider = t1.find_element_by_class_name("ui-slider-handle")
     move.click_and_hold(slider).move_by_offset(-width, 0).release().perform()
-    rb.click()
+    click_run(selenium_utils_get, t1)
+    time.sleep(2)
     output = t1.find_element_by_class_name("ac_output")
     assert output.text.strip() == "Hello World"
 
@@ -111,7 +96,7 @@ def test_livecode_datafile(selenium_utils_get):
     Code is dependent on supplementary file
     """
     t2 = find_ac(selenium_utils_get, "test_activecode_3")
-    click_run(t2)
+    click_run(selenium_utils_get, t2)
     output = t2.find_element_by_class_name("ac_output")
 
     count = 0
@@ -135,7 +120,7 @@ def selenium_utils_progress(selenium_utils):
 
 def test_activity_count(selenium_utils_progress):
     t2 = find_ac(selenium_utils_progress, "test_activecode_5")
-    click_run(t2)
+    click_run(selenium_utils_progress, t2)
     pb = selenium_utils_progress.driver.find_element_by_id("subchapterprogress")
     assert pb
     # Wait for the JS to run. Increase this delay if the next assertion fails.
@@ -146,7 +131,7 @@ def test_activity_count(selenium_utils_progress):
     # expect only 1 because the page isn't included when not using services
     assert 2 == int(possible)
     # count should not increment after a second click
-    click_run(t2)
+    click_run(selenium_utils_progress, t2)
     total = selenium_utils_progress.driver.find_element_by_id("scprogresstotal").text.strip()
     assert 2 == int(total)
 
@@ -154,7 +139,7 @@ def test_activity_count(selenium_utils_progress):
 def test_sql_activecode(selenium_utils_get):
     div_id = "test_activecode_6"
     t2 = find_ac(selenium_utils_get, div_id)
-    click_run(t2)
+    click_run(selenium_utils_get, t2)
     selenium_utils_get.wait.until(EC.text_to_be_present_in_element((By.ID, f"{div_id}_stdout"), "You"))
     res = selenium_utils_get.driver.find_element_by_id(f"{div_id}_sql_out")
     assert res
@@ -163,7 +148,7 @@ def test_sql_activecode(selenium_utils_get):
 
     div_id = "test_activecode_7"
     t2 = find_ac(selenium_utils_get, div_id)
-    click_run(t2)
+    click_run(selenium_utils_get, t2)
     out = selenium_utils_get.driver.find_element_by_id(f"{div_id}_stdout")
     assert "" == out.text.strip()
 
@@ -176,7 +161,7 @@ def selenium_utils_sf(selenium_utils):
 
 def test_readfiles(selenium_utils_sf):
     t2 = find_ac(selenium_utils_sf, "ac9_13_1")
-    click_run(t2)
+    click_run(selenium_utils_sf, t2)
     selenium_utils_sf.wait.until(
         EC.text_to_be_present_in_element((By.ID, "ac9_13_1_stdout"), "Lind")
     )
@@ -186,7 +171,7 @@ def test_readfiles(selenium_utils_sf):
 
 def test_altair(selenium_utils_sf):
     t2 = find_ac(selenium_utils_sf, "alt_kiva_bar1")
-    click_run(t2)
+    click_run(selenium_utils_sf, t2)
     out = t2.find_element_by_id("alt_kiva_bar1_stdout")
     selenium_utils_sf.wait.until(
         EC.text_to_be_present_in_element(
@@ -200,7 +185,7 @@ def test_altair(selenium_utils_sf):
 
 def test_image(selenium_utils_sf):
     t2 = find_ac(selenium_utils_sf, "ac14_7_2")
-    click_run(t2)
+    click_run(selenium_utils_sf, t2)
     selenium_utils_sf.wait.until(
         EC.text_to_be_present_in_element((By.ID, "ac14_7_2_stdout"), "400")
     )
