@@ -18,7 +18,6 @@ __author__ = "isaiahmayerchak"
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
 from runestone.server.componentdb import (
     addQuestionToDB,
     addHTMLToDB,
@@ -27,7 +26,6 @@ from runestone.server.componentdb import (
 from runestone.common.runestonedirective import (
     RunestoneIdDirective,
     RunestoneIdNode,
-    add_i18n_js,
 )
 
 
@@ -42,13 +40,13 @@ def setup(app):
 TEMPLATE_START = """
 <div class="%(divclass)s">
 <ul data-component="dragndrop" data-question_label="%(question_label)s" id="%(divid)s" %(optional)s style="visibility: hidden;">
-    <span data-component="question">%(qnumber)s: %(question)s</span>
+    <span data-subcomponent="question">%(qnumber)s: %(question)s</span>
 	%(feedback)s
 """
 
 TEMPLATE_OPTION = """
-    <li data-component="draggable" id="%(divid)s_drag%(dnd_label)s">%(dragText)s</li>
-    <li data-component="dropzone" for="%(divid)s_drag%(dnd_label)s">%(dropText)s</li>
+    <li data-subcomponent="draggable" id="%(divid)s_drag%(dnd_label)s">%(dragText)s</li>
+    <li data-subcomponent="dropzone" for="%(divid)s_drag%(dnd_label)s">%(dropText)s</li>
 """
 TEMPLATE_END = """</ul></div>"""
 
@@ -75,7 +73,7 @@ def visit_dnd_node(self, node):
 
     if "feedback" in node.runestone_options:
         node.runestone_options["feedback"] = (
-            "<span data-component=feedback>"
+            "<span data-subcomponent=feedback>"
             + node.runestone_options["feedback"]
             + "</span>"
         )
