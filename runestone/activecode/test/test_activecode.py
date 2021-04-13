@@ -140,6 +140,7 @@ def test_sql_activecode(selenium_utils_get):
     div_id = "test_activecode_6"
     t2 = find_ac(selenium_utils_get, div_id)
     click_run(selenium_utils_get, t2)
+    time.sleep(2)
     selenium_utils_get.wait.until(EC.text_to_be_present_in_element((By.ID, f"{div_id}_stdout"), "You"))
     res = selenium_utils_get.driver.find_element_by_id(f"{div_id}_sql_out")
     assert res
@@ -149,6 +150,7 @@ def test_sql_activecode(selenium_utils_get):
     div_id = "test_activecode_7"
     t2 = find_ac(selenium_utils_get, div_id)
     click_run(selenium_utils_get, t2)
+    time.sleep(2)
     out = selenium_utils_get.driver.find_element_by_id(f"{div_id}_stdout")
     assert "" == out.text.strip()
 
