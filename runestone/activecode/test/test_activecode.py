@@ -27,10 +27,11 @@ def test_hello(selenium_utils_get):
     4. Check the output from the ac_output element
     :return:
     """
-    t1 = find_ac(selenium_utils_get, "test1")
+    div_id = "test_activecode_2"
+    t1 = find_ac(selenium_utils_get, div_id)
     click_run(t1)
     selenium_utils_get.wait.until(
-        EC.text_to_be_present_in_element((By.ID, "test1_stdout"), "Hello World"),
+        EC.text_to_be_present_in_element((By.ID, f"{div_id}_stdout"), "Hello World"),
         message="Did not find expected text",
     )
     output = t1.find_element_by_class_name("ac_output")
@@ -65,9 +66,9 @@ def test_history(selenium_utils_get):
     4. Check the output from the ac_output element
     :return:
     """
-    #import pdb; pdb.set_trace()
-    t1 = find_ac(selenium_utils_get, "test1")
-    selenium_utils_get.driver.execute_script("window.scrollTo(0, 0);")
+    div_id = "test_activecode_2"
+    t1 = find_ac(selenium_utils_get, div_id)
+    time.sleep(1)
     rb = t1.find_element_by_class_name("run-button")
     rb.click()
     time.sleep(2)
@@ -75,7 +76,7 @@ def test_history(selenium_utils_get):
     ta = t1.find_element_by_class_name("cm-s-default")
     assert ta
     selenium_utils_get.driver.execute_script(
-        """window.edList['test1'].editor.setValue("print('GoodBye')")"""
+        f"""window.edList['{div_id}'].editor.setValue("print('GoodBye')")"""
     )
     selenium_utils_get.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "run-button")))
     try:
@@ -109,7 +110,7 @@ def test_livecode_datafile(selenium_utils_get):
     Runs test2 example
     Code is dependent on supplementary file
     """
-    t2 = find_ac(selenium_utils_get, "test2")
+    t2 = find_ac(selenium_utils_get, "test_activecode_3")
     click_run(t2)
     output = t2.find_element_by_class_name("ac_output")
 
@@ -133,7 +134,7 @@ def selenium_utils_progress(selenium_utils):
 
 
 def test_activity_count(selenium_utils_progress):
-    t2 = find_ac(selenium_utils_progress, "test_p1")
+    t2 = find_ac(selenium_utils_progress, "test_activecode_5")
     click_run(t2)
     pb = selenium_utils_progress.driver.find_element_by_id("subchapterprogress")
     assert pb
@@ -151,19 +152,19 @@ def test_activity_count(selenium_utils_progress):
 
 
 def test_sql_activecode(selenium_utils_get):
-    t2 = find_ac(selenium_utils_get, "sql1")
-    time.sleep(1)
+    div_id = "test_activecode_6"
+    t2 = find_ac(selenium_utils_get, div_id)
     click_run(t2)
-    selenium_utils_get.wait.until(EC.text_to_be_present_in_element((By.ID, "sql1_stdout"), "You"))
-    res = selenium_utils_get.driver.find_element_by_id("sql1_sql_out")
+    selenium_utils_get.wait.until(EC.text_to_be_present_in_element((By.ID, f"{div_id}_stdout"), "You"))
+    res = selenium_utils_get.driver.find_element_by_id(f"{div_id}_sql_out")
     assert res
-    out = selenium_utils_get.driver.find_element_by_id("sql1_stdout")
+    out = selenium_utils_get.driver.find_element_by_id(f"{div_id}_stdout")
     assert "You passed 2 out of 3 tests" in out.text
 
-    t2 = selenium_utils_get.driver.find_element_by_id("sql2")
-    time.sleep(1)
+    div_id = "test_activecode_7"
+    t2 = find_ac(selenium_utils_get, div_id)
     click_run(t2)
-    out = selenium_utils_get.driver.find_element_by_id("sql2_stdout")
+    out = selenium_utils_get.driver.find_element_by_id(f"{div_id}_stdout")
     assert "" == out.text.strip()
 
 
