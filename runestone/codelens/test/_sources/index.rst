@@ -13,7 +13,7 @@ CodeLens Tests
 .. Sources can also be included from subfolders of this directory.
    (e.g. "DataStructures/queues.rst").
 
-.. codelens:: test1
+.. codelens:: test_codelens_1
 
    a = [1, 2, 3]
    b = [4, 5, 6]
@@ -22,7 +22,7 @@ CodeLens Tests
 
 You can make a Codelens by providing the raw trace data in the source as an option.
 
-.. codelens:: test2
+.. codelens:: test_codelens_2
     :language: java
     :tracedata: {"code":"public class Test { public static void main(String[] args)\n { int x=42;\n x+=1;\n x+=1; x+=1;} }","stdin":"","trace":[{"stdout":"","event":"call","line":2,"stack_to_render":[{"func_name":"main:2","encoded_locals":{},"ordered_varnames":[],"parent_frame_id_list":[],"is_highlighted":true,"is_zombie":false,"is_parent":false,"unique_hash":"1","frame_id":1}],"globals":{},"ordered_globals":[],"func_name":"main","heap":{}},{"stdout":"","event":"step_line","line":2,"stack_to_render":[{"func_name":"main:2","encoded_locals":{},"ordered_varnames":[],"parent_frame_id_list":[],"is_highlighted":true,"is_zombie":false,"is_parent":false,"unique_hash":"2","frame_id":2}],"globals":{},"ordered_globals":[],"func_name":"main","heap":{}},{"stdout":"","event":"step_line","line":3,"stack_to_render":[{"func_name":"main:3","encoded_locals":{"x":42},"ordered_varnames":["x"],"parent_frame_id_list":[],"is_highlighted":true,"is_zombie":false,"is_parent":false,"unique_hash":"4","frame_id":4}],"globals":{},"ordered_globals":[],"func_name":"main","heap":{}},{"stdout":"","event":"step_line","line":4,"stack_to_render":[{"func_name":"main:4","encoded_locals":{"x":43},"ordered_varnames":["x"],"parent_frame_id_list":[],"is_highlighted":true,"is_zombie":false,"is_parent":false,"unique_hash":"6","frame_id":6}],"globals":{},"ordered_globals":[],"func_name":"main","heap":{}},{"stdout":"","event":"step_line","line":4,"stack_to_render":[{"func_name":"main:4","encoded_locals":{"x":44},"ordered_varnames":["x"],"parent_frame_id_list":[],"is_highlighted":true,"is_zombie":false,"is_parent":false,"unique_hash":"8","frame_id":8}],"globals":{},"ordered_globals":[],"func_name":"main","heap":{}},{"stdout":"","event":"step_line","line":4,"stack_to_render":[{"func_name":"main:4","encoded_locals":{"x":45},"ordered_varnames":["x"],"parent_frame_id_list":[],"is_highlighted":true,"is_zombie":false,"is_parent":false,"unique_hash":"9","frame_id":9}],"globals":{},"ordered_globals":[],"func_name":"main","heap":{}},{"stdout":"","event":"return","line":4,"stack_to_render":[{"func_name":"main:4","encoded_locals":{"x":45,"__return__":["VOID"]},"ordered_varnames":["x","__return__"],"parent_frame_id_list":[],"is_highlighted":true,"is_zombie":false,"is_parent":false,"unique_hash":"10","frame_id":10}],"globals":{},"ordered_globals":[],"func_name":"main","heap":{}}],"userlog":"Debugger VM maxMemory: 444M\n"}
 
@@ -34,7 +34,7 @@ You can make a Codelens by providing the raw trace data in the source as an opti
 
 Lets test Java now by providing the source.
 
-.. codelens:: test3
+.. codelens:: test_codelens_3
     :language: java
 
     public class Test1
@@ -49,7 +49,7 @@ Lets test Java now by providing the source.
        }
     }
 
-.. codelens:: test4
+.. codelens:: test_codelens_4
     :language: c
 
     #include <stdlib.h>
@@ -68,7 +68,7 @@ Lets test Java now by providing the source.
     }
 
 
-.. codelens:: test5
+.. codelens:: test_codelens_5
 
    a = [1, 2, 3]
    b = [4, 5, 6]
@@ -88,7 +88,7 @@ Lets test Java now by providing the source.
        prod = prod * i
 
 
-.. codelens:: test6
+.. codelens:: test_codelens_6
     :language: cpp
 
     // From the test suite of https://github.com/codespecs/daikon
