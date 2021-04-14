@@ -126,6 +126,8 @@ def test_sql_activecode(selenium_utils_get):
     t2 = find_ac(selenium_utils_get, div_id)
     click_run(selenium_utils_get, t2)
     # Some hacky debug code to try and understand why this fails on Github actions.
+    for _ in selenium_utils_get.driver.get_log("browser"):
+        print(_)
     try:
         selenium_utils_get.wait.until(EC.text_to_be_present_in_element((By.ID, f"{div_id}_stdout"), "You"))
     except:
