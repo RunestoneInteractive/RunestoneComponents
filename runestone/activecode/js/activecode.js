@@ -1222,9 +1222,8 @@ Yet another is that there is an internal error.  The internal error message is: 
                 let urDivid = this.divid + "_unit_results";
                 if (
                     $(this.outerDiv).find(`#${urDivid}`).length == 0 &&
-                    $(this.outerDiv).find(
-                        `#${urDivid}_offscreen_unit_results`
-                    ).length == 0
+                    $(this.outerDiv).find(`#${urDivid}_offscreen_unit_results`)
+                        .length == 0
                 ) {
                     let urResults = document.getElementById(urDivid);
                     this.outerDiv.appendChild(urResults);
