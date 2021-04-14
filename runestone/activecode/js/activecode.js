@@ -125,7 +125,8 @@ export class ActiveCode extends RunestoneBase {
             1000
         );
         if (this.autorun) {
-            $(document).ready(this.runProg.bind(this));
+            // Simulate pressing the run button, since this will also prevent the user from clicking it until the initial run is complete, and also help the user understand why they're waiting.
+            $(document).ready(this.runButtonHandler.bind(this));
         }
         this.indicate_component_ready();
     }
@@ -233,7 +234,9 @@ export class ActiveCode extends RunestoneBase {
         }
     }
 
-    async runButtonHander() {
+    async runButtonHandler() {
+        // Disable the run button until the run is finished.
+        this.runButton.disabled = true;
         try {
             await this.runProg();
         } catch (e) {
@@ -243,6 +246,8 @@ export class ActiveCode extends RunestoneBase {
             this.logCurrentAnswer();
         }
         this.renderFeedback();
+        // The run is finished; re-enable the button.
+        this.runButton.disabled = false;
     }
 
     createControls() {
@@ -257,7 +262,7 @@ export class ActiveCode extends RunestoneBase {
         ctrlDiv.appendChild(butt);
         this.runButton = butt;
         console.log("adding click function for run");
-        this.runButton.onclick = this.runButtonHander.bind(this);
+        this.runButton.onclick = this.runButtonHandler.bind(this);
         $(butt).attr("type", "button");
 
         if (this.enabledownload || eBookConfig.downloadsEnabled) {

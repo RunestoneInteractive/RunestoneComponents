@@ -1,5 +1,3 @@
-import time
-
 import pytest
 from selenium.webdriver import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
@@ -16,6 +14,9 @@ def click_run(selenium_utils, ac_selenium_element):
     selenium_utils.driver.execute_script("window.scrollTo(0, 0);")
     rb = ac_selenium_element.find_element_by_class_name("run-button")
     rb.click()
+    # After clicking run, the browser may need some time to load and execute the code. Wait until the run button becomes clickable, indicating the code has finished running.
+    div_id = ac_selenium_element.get_attribute("id")
+    selenium_utils.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, f"#{div_id} .run-button")))
 
 
 def test_hello(selenium_utils_get):
@@ -68,7 +69,6 @@ def test_history(selenium_utils_get):
     div_id = "test_activecode_2"
     t1 = find_ac(selenium_utils_get, div_id)
     click_run(selenium_utils_get, t1)
-    time.sleep(2)
 
     ta = t1.find_element_by_class_name("cm-s-default")
     assert ta
@@ -76,7 +76,6 @@ def test_history(selenium_utils_get):
         f"""window.edList['{div_id}'].editor.setValue("print('Goodbye')")"""
     )
     click_run(selenium_utils_get, t1)
-    time.sleep(2)
     output = t1.find_element_by_class_name("ac_output")
     assert output.text.strip() == "Goodbye"
     move = ActionChains(selenium_utils_get.driver)
@@ -85,7 +84,6 @@ def test_history(selenium_utils_get):
     slider = t1.find_element_by_class_name("ui-slider-handle")
     move.click_and_hold(slider).move_by_offset(-width, 0).release().perform()
     click_run(selenium_utils_get, t1)
-    time.sleep(2)
     output = t1.find_element_by_class_name("ac_output")
     assert output.text.strip() == "Hello World"
 
@@ -98,18 +96,7 @@ def test_livecode_datafile(selenium_utils_get):
     t2 = find_ac(selenium_utils_get, "test_activecode_3")
     click_run(selenium_utils_get, t2)
     output = t2.find_element_by_class_name("ac_output")
-
-    count = 0
-    # Give it some time run
-    print(output.text)
-    while output.text.strip() != "Width: 25.0" and count < 20:
-        count += 1
-        time.sleep(0.5)
-        print("Ouput so far:", output.text)
-    try:
-        assert count < 20
-    except Exception:
-        print("WARNING - No response from JOBE server")
+    assert output.text.strip() == "Width: 25.0"
 
 
 @pytest.fixture
@@ -123,8 +110,6 @@ def test_activity_count(selenium_utils_progress):
     click_run(selenium_utils_progress, t2)
     pb = selenium_utils_progress.driver.find_element_by_id("subchapterprogress")
     assert pb
-    # Wait for the JS to run. Increase this delay if the next assertion fails.
-    time.sleep(3)
     total = selenium_utils_progress.driver.find_element_by_id("scprogresstotal").text.strip()
     assert 2 == int(total)
     possible = selenium_utils_progress.driver.find_element_by_id("scprogressposs").text.strip()
@@ -140,7 +125,6 @@ def test_sql_activecode(selenium_utils_get):
     div_id = "test_activecode_6"
     t2 = find_ac(selenium_utils_get, div_id)
     click_run(selenium_utils_get, t2)
-    time.sleep(2)
     selenium_utils_get.wait.until(EC.text_to_be_present_in_element((By.ID, f"{div_id}_stdout"), "You"))
     res = selenium_utils_get.driver.find_element_by_id(f"{div_id}_sql_out")
     assert res
@@ -150,7 +134,6 @@ def test_sql_activecode(selenium_utils_get):
     div_id = "test_activecode_7"
     t2 = find_ac(selenium_utils_get, div_id)
     click_run(selenium_utils_get, t2)
-    time.sleep(2)
     out = selenium_utils_get.driver.find_element_by_id(f"{div_id}_stdout")
     assert "" == out.text.strip()
 
