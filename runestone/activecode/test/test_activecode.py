@@ -128,10 +128,15 @@ def test_sql_activecode(selenium_utils_get):
     # Some hacky debug code to try and understand why this fails on Github actions.
     for _ in selenium_utils_get.driver.get_log("browser"):
         print(_)
+    from selenium.webdriver.support.ui import WebDriverWait
+    long_wait = WebDriverWait(selenium_utils_get.driver, 30)
+    import time
+    start = time.time()
     try:
-        selenium_utils_get.wait.until(EC.text_to_be_present_in_element((By.ID, f"{div_id}_stdout"), "You"))
+        long_wait.until(EC.text_to_be_present_in_element((By.ID, f"{div_id}_stdout"), "You"))
     except:
         print(selenium_utils_get.driver.find_element_by_id(f"{div_id}_stdout").text)
+        print(time.time() - start)
         raise
     res = selenium_utils_get.driver.find_element_by_id(f"{div_id}_sql_out")
     assert res

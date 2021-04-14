@@ -47,6 +47,7 @@ jobs:
             - name: Test with pytest
               id: pytest
               run: |
+                  cd runestone/activecode/test
                   pytest
 
             - uses: act10ns/slack@v1
