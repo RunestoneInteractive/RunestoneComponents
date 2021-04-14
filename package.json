@@ -5,9 +5,10 @@
     "main": "dist/runestone.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "build": "webpack --mode=development",
-        "buildj": "webpack --mode=development --profile --json > stats.json",
-        "watch": "webpack --mode=development --watch",
+        "check-env": "node -e 'console.log(process.env)' | grep npm",
+        "build": "webpack --env.MODE=development",
+        "watch": "webpack --env.MODE=development --watch",
+        "start": "webpack-dev-server --env.MODE=development --open",
         "serve": "cd dist; python -m http.server 8080; cd ..",
         "dist": "webpack --mode=production",
         "distj": "webpack --mode=production --profile --json > stats.json",

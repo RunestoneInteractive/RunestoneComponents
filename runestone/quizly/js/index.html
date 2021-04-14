@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <!-- NOTE:  Don't change this Title -->
   <title>Quizme App Inventor</title>
- <link type="text/css" rel="stylesheet" href="../../css/main.css">
+ <link type="text/css" rel="stylesheet" href="../../_static/quizly/main.css">
   <style>
     body {
       background-color: white;
@@ -40,16 +40,6 @@
   </style>
 
 <script>
- // Event listener and handler for quiz result
- window.addEventListener('message', handleMessage, false);
-
- function handleMessage(event) {  
-//     if (event.origin != "http://localhost:85") { return; }  
-     console.log("handleMessage result: " + event.data)
-     this.window.quizly_result = event.data;
-     console.log("handleMessage window result: " + this.window.quizly_result);
- }
-
 // Based on: https://www.developphp.com/video/JavaScript/Custom-Alert-Box-Programming-Tutorial
 // The variable doc is set based on where the dialogoverlay, which varies if index.html is embedded.
 function JavaScriptAlert(){
@@ -101,19 +91,15 @@ function showJavascript() {
 */
 function checkAnswer() {
   console.log("checkAnswer -- RAM");
+  console.log("window.parent.component_factory = " + JSON.stringify(window.parent.component_factory));
+
   document.getElementById('show_javascript').disabled = true;
   var result = Blockly.Quizme.evaluateUserAnswer();
   var quizName = Blockly.Quizme.quizName
-  window.postMessage("Result=" + result, 'http://localhost:85');
+  var q_result = {"quizname": quizName, "result": result[0], "xml": result[1]}; 
 
-//  window.parent.quizlies['quizname']=quizName;
-//  var thisQuiz = window.parent.quizlies[quizName];
-//  thisQuiz.result = result[0];
-//  thisQuiz.workspace = result[1];
-  
-
-  // Comment this out if there is separate GCB button for submitting the result.
-//  window.parent.checkAnswer();  // This parent script is in modules/quizly/quizly.py
+  // Post the result to runestone
+  window.parent.component_factory.quizly(q_result);
 }
 
 function giveHint() {
@@ -160,7 +146,7 @@ function giveNewQuestion(quizname) {
           <button class="gcb-button gcb-button-primary" id="hint_button" onclick="giveHint()">Hint</button>
           </td>
           <td>
-          <button class="gcb-button gcb-button-primary" id="gcb_check_answer" onclick="checkAnswer()">Check Answer</button>
+            <button class="gcb-button gcb-button-primary" id="gcb_check_answer" onclick="checkAnswer()">Check Me</button>
           </td>
           <td>
           <button class="gcb-button gcb-button-primary" id="show_javascript" onclick="showJavascript()" style="visibility:hidden" disabled>Show Javascript</button>
