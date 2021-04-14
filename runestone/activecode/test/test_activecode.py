@@ -125,7 +125,12 @@ def test_sql_activecode(selenium_utils_get):
     div_id = "test_activecode_6"
     t2 = find_ac(selenium_utils_get, div_id)
     click_run(selenium_utils_get, t2)
-    selenium_utils_get.wait.until(EC.text_to_be_present_in_element((By.ID, f"{div_id}_stdout"), "You"))
+    # Some hacky debug code to try and understand why this fails on Github actions.
+    try:
+        selenium_utils_get.wait.until(EC.text_to_be_present_in_element((By.ID, f"{div_id}_stdout"), "You"))
+    except:
+        print(selenium_utils_get.driver.find_element_by_id(f"{div_id}_stdout").text)
+        raise
     res = selenium_utils_get.driver.find_element_by_id(f"{div_id}_sql_out")
     assert res
     out = selenium_utils_get.driver.find_element_by_id(f"{div_id}_stdout")
