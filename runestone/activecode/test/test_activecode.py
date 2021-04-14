@@ -126,8 +126,8 @@ def test_activity_count(selenium_utils_progress):
 def test_sql_activecode(selenium_utils_get):
     div_id = "test_activecode_6"
     t2 = find_ac(selenium_utils_get, div_id)
-    # Without this line, tests fail on Github actions. They run on my local Windows machine with no problem without this line. I don't know why.
-    time.sleep(1)
+    # TODO: We don't yet have a way for async operations in ActiveCode constructors to signal when they're complete. So, insert a delay to guesstimate when the async load of the SQL WASM code and other async functions complete.
+    time.sleep(2)
     click_run(selenium_utils_get, t2)
     selenium_utils_get.wait.until(EC.text_to_be_present_in_element((By.ID, f"{div_id}_stdout"), "You"))
     res = selenium_utils_get.driver.find_element_by_id(f"{div_id}_sql_out")

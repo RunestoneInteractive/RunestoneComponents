@@ -2,49 +2,45 @@
 Test Short Answer question directive
 """
 
-import pytest
-
 __author__ = "yasinovskyy"
 
 DIV_ID = "test_short_answer_1"
 
 
-@pytest.fixture
-def selenium_utils_1(selenium_utils):
-    selenium_utils.get("index.html")
+def get_sa(selenium_utils):
     selenium_utils.wait_until_ready(DIV_ID)
-    return selenium_utils
+    # See the notes in ``test_activecode.click_run`` on the need for this call.
+    selenium_utils.driver.execute_script("window.scrollTo(0, 0);")
+    return selenium_utils.driver.find_element_by_id(DIV_ID)
 
 
-def test_sa1(selenium_utils_1):
+def click_button(sa_element):
+    sa_element.find_element_by_tag_name("button").click()
+
+
+def test_sa1(selenium_utils_get):
     """No input. Button not clicked"""
-    self = selenium_utils_1
-    t1 = self.driver.find_element_by_id(DIV_ID)
-
+    t1 = get_sa(selenium_utils_get)
     fb = t1.find_element_by_id(f"{DIV_ID}_feedback")
     assert "alert-danger" in fb.get_attribute("class")
 
 
-def test_sa2(selenium_utils_1):
+def test_sa2(selenium_utils_get):
     """No input. Button clicked"""
-    t1 = selenium_utils_1.driver.find_element_by_id(DIV_ID)
-
-    btn_check = t1.find_element_by_tag_name("button")
-    btn_check.click()
-
+    t1 = get_sa(selenium_utils_get)
+    click_button(t1)
     fb = t1.find_element_by_id(f"{DIV_ID}_feedback")
     assert "alert-success" in fb.get_attribute("class")
 
 
-def test_sa3(selenium_utils_1):
+def test_sa3(selenium_utils_get):
     """Answer entered"""
-    t1 = selenium_utils_1.driver.find_element_by_id(DIV_ID)
+    t1 = get_sa(selenium_utils_get)
     ta = t1.find_element_by_id(f"{DIV_ID}_solution")
     ta.clear()
     ta.send_keys("My answer")
 
-    btn_check = t1.find_element_by_tag_name("button")
-    btn_check.click()
+    click_button(t1)
 
     fb = t1.find_element_by_id(f"{DIV_ID}_feedback")
     assert fb is not None
@@ -52,15 +48,14 @@ def test_sa3(selenium_utils_1):
 
 
 # TODO: this is the same as ``_test_sa3``.
-def test_sa4(selenium_utils_1):
+def test_sa4(selenium_utils_get):
     """Answer entered and cleared"""
-    t1 = selenium_utils_1.driver.find_element_by_id(DIV_ID)
+    t1 = get_sa(selenium_utils_get)
     ta = t1.find_element_by_id(f"{DIV_ID}_solution")
     ta.clear()
     ta.send_keys("My answer")
 
-    btn_check = t1.find_element_by_tag_name("button")
-    btn_check.click()
+    click_button(t1)
 
     fb = t1.find_element_by_id(f"{DIV_ID}_feedback")
     assert fb is not None
