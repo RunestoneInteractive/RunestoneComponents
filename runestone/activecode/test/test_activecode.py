@@ -1,3 +1,5 @@
+import time
+
 import pytest
 from selenium.webdriver import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
@@ -124,21 +126,10 @@ def test_activity_count(selenium_utils_progress):
 def test_sql_activecode(selenium_utils_get):
     div_id = "test_activecode_6"
     t2 = find_ac(selenium_utils_get, div_id)
-    import time
+    # Without this line, tests fail on Github actions. They run on my local Windows machine with no problem without this line. I don't know why.
     time.sleep(1)
     click_run(selenium_utils_get, t2)
-    # Some hacky debug code to try and understand why this fails on Github actions.
-    for _ in selenium_utils_get.driver.get_log("browser"):
-        print(_)
-    from selenium.webdriver.support.ui import WebDriverWait
-    long_wait = WebDriverWait(selenium_utils_get.driver, 30)
-    start = time.time()
-    try:
-        long_wait.until(EC.text_to_be_present_in_element((By.ID, f"{div_id}_stdout"), "You"))
-    except:
-        print(selenium_utils_get.driver.find_element_by_id(f"{div_id}_stdout").text)
-        print(time.time() - start)
-        raise
+    selenium_utils_get.wait.until(EC.text_to_be_present_in_element((By.ID, f"{div_id}_stdout"), "You"))
     res = selenium_utils_get.driver.find_element_by_id(f"{div_id}_sql_out")
     assert res
     out = selenium_utils_get.driver.find_element_by_id(f"{div_id}_stdout")
