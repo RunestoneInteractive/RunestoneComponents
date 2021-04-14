@@ -9,6 +9,7 @@ const path = require("path");
 module.exports = (env) => {
     return {
         entry: [
+            "./runestone/quizly/js/quizly.js",
             "./runestone/shortanswer/js/shortanswer.js",
             "./runestone/activecode/js/acfactory.js",
             "./runestone/mchoice/js/mchoice.js",

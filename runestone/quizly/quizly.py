@@ -14,22 +14,25 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# This files runs during runestone build. It generates the node data
+# that is used to render the component by the  quizly.js script.
+
+# Note: An import entry for quizly must be included in runestone/__init__.py
+
 __author__ = "rmorelli"
 
-# Debug flag
+# Debug flags
 DEBUG = True
+VERBOSE = False
 
 import os, shutil
 from docutils import nodes
 from runestone.common import RunestoneIdDirective, RunestoneIdNode
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 from pathlib import Path
-from ..mchoice.assessbase import Assessment
 
 # Template that will load index.html?quizname=the-quiz-name into an <iframe>
-# The only placeholder in the template is the quizname=###
-#         <div style="border: 1px solid black; margin: 5px; padding: 5px;">
-#       <div class="%(divclass)s">
+# NOTE: Hardcoding the container class.  Temporarily??
 QUIZLY_TEMPLATE = """
        <div class="runestone alert alert-warning">
        <div data-component="quizly" id="%(divid)s" data-question_label="%(question_label)s" style="visibility: visible;">
@@ -39,18 +42,11 @@ QUIZLY_TEMPLATE = """
        </div>
        """
 
-# Resource files are stored in the _static directory, from where they
-# are automatically copied into build/x/_static, where 'x' is the project name
+# Resource files should be stored in the X/_static directory, from where they
+# will be automatically copied into build/x/_static, where 'x' is the project name
 STATIC_DIR = "./_static"
 
-# Define the quizly directive
-def setup(app):
-    app.add_directive("quizly", Quizly)
-    app.add_node(QuizlyNode, html=(visit_quizly_node, depart_quizly_node))
-    app.connect("doctree-resolved", process_activcode_nodes)
-    app.connect("env-purge-doc", purge_activecodes)
-
-# Copy the resource files into the _static folder
+# Copy the resource files into the _static folder, maintaining proper folder hierarchy
 # The resources should be organized as follows:
 # _static
 # |-quizly
@@ -61,9 +57,10 @@ def setup(app):
 #   |- quizzes.js       - quizly quizzes
 #   |- index.html       - container for the iframe
 #   |- blockly.html     - blockly iframe
+#   |- main.css         
 #   |- media            - folder of images, etc.
 # Perhaps there's a runestone routine to copy files?
-# TODO: This may need to be generalized with better relative paths??
+# TODO: Test this with MobileCSP units
 def copyfiles():
     CURR_DIR = os.path.dirname(os.path.realpath(__file__))
     QUIZLY_DIR = STATIC_DIR+'/quizly'
@@ -72,27 +69,37 @@ def copyfiles():
         shutil.rmtree(QUIZLY_DIR)
     os.mkdir(QUIZLY_DIR, mode=0o755)
     os.mkdir(QUIZLY_DIR+'/media', mode=0o755)
-    js_folder = Path(CURR_DIR).rglob('js/*.js')
-    html_folder = Path(CURR_DIR).rglob('js/*.html')
-    media_folder = Path(CURR_DIR).rglob('js/media/*')
+    js_folder = Path(CURR_DIR).glob('js/*.js')
+    html_folder = Path(CURR_DIR).glob('js/*.html')
+    media_folder = Path(CURR_DIR).glob('js/media/*')
+    css_folder = Path(CURR_DIR).glob('js/*.css')
     files = [x for x in js_folder]
-    print('Copying resource files to ' + STATIC_DIR) if DEBUG else None
+    print('Copying resource files to ' + STATIC_DIR) if VERBOSE else None
     for f in files:
-        print(str(f) + ' --> ' + QUIZLY_DIR) if DEBUG else None
+        print(str(f) + ' --> ' + QUIZLY_DIR) if VERBOSE else None
+        shutil.copy(f, QUIZLY_DIR)
+    files = [x for x in css_folder]
+    for f in files:
+        print(str(f) + ' --> ' + QUIZLY_DIR) if VERBOSE else None 
         shutil.copy(f, QUIZLY_DIR)
     files = [x for x in html_folder]
     for f in files:
-        print(str(f) + ' --> ' + QUIZLY_DIR) if DEBUG else None 
+        print(str(f) + ' --> ' + QUIZLY_DIR) if VERBOSE else None 
         shutil.copy(f, QUIZLY_DIR)
     files = [x for x in media_folder]
     for f in files:
-        print(str(f) + ' --> ' + MEDIA_DIR) if DEBUG else None
+        print(str(f) + ' --> ' + MEDIA_DIR) if VERBOSE else None
         shutil.copy(f, MEDIA_DIR)
 
+# Define the quizly directive
+def setup(app):
+    app.add_directive("quizly", Quizly)
+    app.add_node(QuizlyNode, html=(visit_quizly_node, depart_quizly_node))
+
+# The only content needed from quizly.py is the quizname
 class QuizlyNode(nodes.General, nodes.Element, RunestoneIdNode):
     def __init__(self, content, **kwargs):
         """
-
         Arguments:
         - `self`:
         - `content`:
@@ -105,7 +112,6 @@ class QuizlyNode(nodes.General, nodes.Element, RunestoneIdNode):
         self.template = QUIZLY_TEMPLATE.replace('###', self.quizname)
         print('DEBUG: QuizlyNode self.quizname = ' + self.quizname) if DEBUG else None
 
-
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
@@ -117,21 +123,9 @@ def visit_quizly_node(self, node):
     print('DEBUG: visit_quizly_node quizname = ' + node.quizname) if DEBUG else None
     print('DEBUG: visit_quizly_node template = ' + node.template) if DEBUG else None
     print('DEBUG: visit_quizly_node options = ' + str(node.runestone_options)) if DEBUG else None
-#    res = QUIZLY_TEMPLATE.replace("###", node.quizname)
+
     res = node.template % (node.runestone_options)
-#    res = node.template
-#     path = os.path.join(
-#         node.runestone_options["quizlyHomePrefix"],
-#         "_static",
-#         node.runestone_options["divid"] + ".html",
-#     )
-#     print('DEBUG: visit_quizly_node  path = ' + path) if DEBUG else None
-
     copyfiles()  # Copy resource files
-
-#     f = open(path, "w")
-#     f.write(res)           # e.g., writes ./_static/q1.html
-#     f.close()
     print('DEBUG: visit_quizly_node res = ' + res) if DEBUG else None
     self.body.append(res)
 
@@ -154,6 +148,8 @@ def purge_activecodes(app, env, docname):
     pass
 
 
+# The object created when the quizly directive is parsed in an RST.
+# The quizname is the only required argument.
 class Quizly(RunestoneIdDirective):
     """
     .. quizly:: some_unique_id, e.g., q1
@@ -169,13 +165,7 @@ class Quizly(RunestoneIdDirective):
         super(Quizly, self).run()
         print('DEBUG; Quizly.run()') if DEBUG else None
 
-        addQuestionToDB(self)
-# Not sure where these settings are done??
-# So I've hard coded a div_class into template
-#        env = self.state.document.settings.env
-#        print('DEBUG: run() divclass = ' + env.config.quizly_div_class) if DEBUG else None
-#        self.options["divclass"] = env.config.quizly_div_class
-
+        addQuestionToDB(self)   # Not sure whether this works?
         document = self.state.document
         rel_filename, filename = document.settings.env.relfn2path(self.arguments[0])
 
@@ -183,10 +173,6 @@ class Quizly(RunestoneIdDirective):
         self.options["quizlyHomePrefix"] = "./" * pathDepth
 
         plstart = len(self.content)
-#         if "preload::" in self.content:
-#             plstart = self.content.index("preload::")
-#             self.options["preload"] = " ".join(self.content[plstart + 1 :])
-
         if self.content:
             self.options["controls"] = self.content[:plstart]
 
