@@ -92,8 +92,7 @@ def test_history(selenium_utils_get):
 
 def test_livecode_datafile(selenium_utils_get):
     """
-    Runs test2 example
-    Code is dependent on supplementary file
+    Code is dependent on datafile directive.
     """
     t2 = find_ac(selenium_utils_get, "test_activecode_3")
     click_run(selenium_utils_get, t2)
