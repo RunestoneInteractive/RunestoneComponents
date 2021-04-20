@@ -74,6 +74,10 @@ class _SeleniumUtils:
             "{}/{}".format(self.host_address, relative_url)
         )
 
+    # Scroll to the top of the window. A button can sometimes be scrolled to the top of the screen, where it's hidden by the navigation bar. In this case, we can't click it, since Selenium will complain ``Message: element click intercepted: Element <button class="btn btn-success run-button" type="button">...</button> is not clickable at point (460, 17). Other element would receive the click: <div class="navbar-collapse collapse navbar-ex1-collapse">...</div>``. To avoid this, scroll to the top of the document, guaranteeing that the navbar won't be hiding the run button.
+    def scroll_to_top(self):
+        self.driver.execute_script("window.scrollTo(0, 0);")
+
     # Wait until a Runestone component has finished rendering itself, given the ID of the component.
     def wait_until_ready(self, id):
         # The component is ready when it has the class below.
