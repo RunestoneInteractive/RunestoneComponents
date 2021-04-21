@@ -144,7 +144,6 @@ class FillInTheBlank(RunestoneIdDirective):
     option_spec = RunestoneIdDirective.option_spec.copy()
     option_spec.update(
         {
-            "blankid": directives.unchanged,
             "casei": directives.flag,  # case insensitive matching
         }
     )
