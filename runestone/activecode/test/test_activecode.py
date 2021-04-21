@@ -13,7 +13,7 @@ def find_ac(selenium_utils, div_id):
 
 def click_run(selenium_utils, ac_selenium_element):
     # The run button can sometimes be scrolled to the top of the screen, where it's hidden by the navigation bar. In this case, we can't click it, since Selenium will complain ``Message: element click intercepted: Element <button class="btn btn-success run-button" type="button">...</button> is not clickable at point (460, 17). Other element would receive the click: <div class="navbar-collapse collapse navbar-ex1-collapse">...</div>``. To avoid this, always scroll to the top of the document, guaranteeing that the navbar won't be hiding the run button.
-    selenium_utils.driver.execute_script("window.scrollTo(0, 0);")
+    selenium_utils.scroll_to_top()
     rb = ac_selenium_element.find_element_by_class_name("run-button")
     rb.click()
     # After clicking run, the browser may need some time to load and execute the code. Wait until the run button becomes clickable, indicating the code has finished running.
