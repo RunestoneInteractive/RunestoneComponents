@@ -11,6 +11,8 @@
  return the buttons, but I'm having a hard time thinking of any other use for that besides mine.
  */
 
+import RunestoneBase from "../../common/js/runestonebase.js";
+import "./pytutor-embed.bundle.js";
 import "./../css/pytutor.css";
 
 function attachLoggers(codelens, divid) {
