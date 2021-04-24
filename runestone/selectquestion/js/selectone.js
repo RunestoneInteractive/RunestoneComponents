@@ -104,7 +104,7 @@ export default class SelectOne extends RunestoneBase {
         if (opts.timed) {
             // timed components are not rendered immediately, only when the student
             // starts the assessment and visits this particular entry.
-            res = await createTimedComponent(htmlsrc, {
+            res = createTimedComponent(htmlsrc, {
                 timed: true,
                 selector_id: selectorId,
                 assessmentTaken: opts.assessmentTaken,
@@ -193,7 +193,7 @@ export default class SelectOne extends RunestoneBase {
             }
             ///////////////////////////
             // just render this component on the page in its usual place
-            await renderRunestoneComponent(htmlsrc, selectorId, {
+            renderRunestoneComponent(htmlsrc, selectorId, {
                 selector_id: selectorId,
                 useRunestoneServices: true,
             });
