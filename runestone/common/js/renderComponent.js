@@ -1,6 +1,6 @@
-import TimedMC from "../../mchoice/js/timedmc";
+import { runestone_import } from "../../../webpack.index.js";
 
-export function renderRunestoneComponent(componentSrc, whereDiv, moreOpts) {
+export unction renderRunestoneComponent(componentSrc, whereDiv, moreOpts) {
     /**
      *  The easy part is adding the componentSrc to the existing div.
      *  The tedious part is calling the right functions to turn the
