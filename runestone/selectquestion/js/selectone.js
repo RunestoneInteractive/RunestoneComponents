@@ -6,8 +6,8 @@
 import {
     renderRunestoneComponent,
     createTimedComponent,
-} from "../../common/js/renderComponent";
-import RunestoneBase from "../../common/js/runestonebase";
+} from "../../common/js/renderComponent.js";
+import RunestoneBase from "../../common/js/runestonebase.js";
 import "../css/selectquestion.css";
 
 export default class SelectOne extends RunestoneBase {
@@ -193,7 +193,7 @@ export default class SelectOne extends RunestoneBase {
             }
             ///////////////////////////
             // just render this component on the page in its usual place
-            res = renderRunestoneComponent(htmlsrc, selectorId, {
+            renderRunestoneComponent(htmlsrc, selectorId, {
                 selector_id: selectorId,
                 useRunestoneServices: true,
             });
