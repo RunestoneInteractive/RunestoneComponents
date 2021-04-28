@@ -48,7 +48,7 @@ from runestone.common.runestonedirective import (
 
 TEMPLATE = """
 <div class="runestone alert alert-warning sqcontainer">
-<div data-component="selectquestion" id={component_id} {selector} {points} {proficiency} {min_difficulty} {max_difficulty} {autogradable} {not_seen_ever} {primary} {AB} {toggle}>
+<div data-component="selectquestion" id={component_id} {selector} {points} {proficiency} {min_difficulty} {max_difficulty} {autogradable} {not_seen_ever} {primary} {AB} {toggle} {toggle_options}>
     <p>Loading ...</p>
 </div>
 </div>
@@ -94,7 +94,7 @@ class SelectQuestion(RunestoneIdDirective):
             "not_seen_ever": directives.flag,
             "primary": directives.flag,
             "ab": directives.unchanged,
-            "toggle": directives.flag,
+            "toggle": directives.unchanged,
         }
     )
 
@@ -183,8 +183,12 @@ class SelectQuestion(RunestoneIdDirective):
             self.options["AB"] = ""
 
         if "toggle" in self.options:
+            self.options[
+                "toggle_options"
+            ] = f"data-toggleoptions={self.options['toggle']}"
             self.options["toggle"] = "data-toggle=true"
         else:
+            self.options["toggle_options"] = ""
             self.options["toggle"] = ""
 
         maybeAddToAssignment(self)
