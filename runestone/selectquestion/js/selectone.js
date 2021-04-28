@@ -253,6 +253,7 @@ export default class SelectOne extends RunestoneBase {
 
     // on changing the value of toggle select dropdown, render selected question in preview panel, add appropriate buttons, then make preview panel visible
     async togglePreview(parentID, toggleOptions) {
+        $("#toggle-buttons").html("");
         var parentDiv = document.getElementById(parentID);
         var toggleQuestionSelect = parentDiv.getElementsByTagName("select")[0];
         var selectedQuestion =
@@ -269,7 +270,6 @@ export default class SelectOne extends RunestoneBase {
         $(closeButton).text("Close Preview");
         $(closeButton).addClass("btn btn-default");
         $(closeButton).click(function (event) {
-            $("#toggle-buttons").html("");
             $("#toggle-preview").html("");
             toggleQuestionSelect.value = $("#" + parentID).data(
                 "toggle_current"
@@ -338,7 +338,6 @@ export default class SelectOne extends RunestoneBase {
             {}
         );
         let response = await fetch(request);
-        $("#toggle-buttons").html("");
         $("#toggle-preview").html("");
         $("#" + parentID).data("toggle_current", selectedQuestion);
     }
