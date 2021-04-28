@@ -147,27 +147,27 @@ export default class Timed extends RunestoneBase {
         this.renderContainer();
         this.renderTimer();
         await this.renderControlButtons();
-        this.assessDiv.appendChild(this.timedDiv); // This can't be appended in renderContainer because then it renders above the timer and control buttons.
+        this.containerDiv.appendChild(this.timedDiv); // This can't be appended in renderContainer because then it renders above the timer and control buttons.
         if (this.renderedQuestionArray.length > 1) this.renderNavControls();
         this.renderSubmitButton();
         this.renderFeedbackContainer();
         this.useRunestoneServices = eBookConfig.useRunestoneServices;
         // Replace intermediate HTML with rendered HTML
-        $(this.origElem).replaceWith(this.assessDiv);
+        $(this.origElem).replaceWith(this.containerDiv);
         // check if already taken and if so show results
         this.styleExamElements(); // rename to renderPossibleResults
-        this.checkServer("timedExam");
+        this.checkServer("timedExam", true);
     }
 
     renderContainer() {
-        this.assessDiv = document.createElement("div"); // container for the entire Timed Component
+        this.containerDiv = document.createElement("div"); // container for the entire Timed Component
         if (this.fullwidth) {
             // allow the container to fill the width - barb
-            $(this.assessDiv).attr({
+            $(this.containerDiv).attr({
                 style: "max-width:none",
             });
         }
-        this.assessDiv.id = this.divid;
+        this.containerDiv.id = this.divid;
         this.timedDiv = document.createElement("div"); // div that will hold the questions for the timed assessment
         this.navDiv = document.createElement("div"); // For navigation control
         $(this.navDiv).attr({
@@ -244,8 +244,8 @@ export default class Timed extends RunestoneBase {
         if (!this.nopause) {
             this.controlDiv.appendChild(this.pauseBtn);
         }
-        this.assessDiv.appendChild(this.wrapperDiv);
-        this.assessDiv.appendChild(this.controlDiv);
+        this.containerDiv.appendChild(this.wrapperDiv);
+        this.containerDiv.appendChild(this.controlDiv);
     }
 
     renderNavControls() {
@@ -471,7 +471,7 @@ export default class Timed extends RunestoneBase {
         this.scoreDiv = document.createElement("P");
         this.scoreDiv.id = this.divid + "results";
         this.scoreDiv.style.display = "none";
-        this.assessDiv.appendChild(this.scoreDiv);
+        this.containerDiv.appendChild(this.scoreDiv);
     }
 
     createRenderedQuestionArray() {
@@ -906,8 +906,8 @@ export default class Timed extends RunestoneBase {
         }
     }
 
-    // restoreAnswerdQuestions
-    // -----------------------
+    // restoreAnsweredQuestions
+    // ------------------------
     restoreAnsweredQuestions() {
         for (var i = 0; i < this.renderedQuestionArray.length; i++) {
             var currentQuestion = this.renderedQuestionArray[i];

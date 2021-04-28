@@ -1,5 +1,3 @@
-import TimedMC from "../../mchoice/js/timedmc";
-
 export function renderRunestoneComponent(componentSrc, whereDiv, moreOpts) {
     /**
      *  The easy part is adding the componentSrc to the existing div.

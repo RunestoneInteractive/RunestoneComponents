@@ -9,8 +9,7 @@ DIV_ID = "test_short_answer_1"
 
 def get_sa(selenium_utils):
     selenium_utils.wait_until_ready(DIV_ID)
-    # See the notes in ``test_activecode.click_run`` on the need for this call.
-    selenium_utils.driver.execute_script("window.scrollTo(0, 0);")
+    selenium_utils.scroll_to_top()
     return selenium_utils.driver.find_element_by_id(DIV_ID)
 
 
