@@ -128,6 +128,7 @@ export default class SelectOne extends RunestoneBase {
             if (data.toggle) {
                 var toggleQuestions = this.questions.split(", ");
                 var toggleUI = "";
+                // check so that only the first toggle select question on the assignments page has a preview panel created, then all toggle select previews use this same panel
                 if (!document.getElementById("component-preview")) {
                     toggleUI +=
                         '<div id="component-preview" class="col-md-6 toggle-preview" style="z-index: 999;">' +
@@ -135,6 +136,7 @@ export default class SelectOne extends RunestoneBase {
                             '<div id="toggle-preview"></div>' +
                         '</div>';
                 }
+                // dropdown menu containing the question options
                 toggleUI +=
                     '<label for="' +
                     selectorId +
@@ -236,6 +238,7 @@ export default class SelectOne extends RunestoneBase {
         return response;
     }
 
+    // retrieve html source of a question, for use in various toggle functionalities
     async getToggleSrc(toggleQuestionID) {
         let request = new Request(
             "/runestone/admin/htmlsrc?acid=" + toggleQuestionID,
@@ -248,6 +251,7 @@ export default class SelectOne extends RunestoneBase {
         return htmlsrc;
     }
 
+    // on changing the value of toggle select dropdown, render selected question in preview panel, add appropriate buttons, then make preview panel visible
     async togglePreview(parentID, toggleOptions) {
         var parentDiv = document.getElementById(parentID);
         var toggleQuestionSelect = parentDiv.getElementsByTagName("select")[0];
@@ -259,9 +263,8 @@ export default class SelectOne extends RunestoneBase {
             selector_id: "toggle-preview",
             useRunestoneServices: true,
         });
-        // let pd = document.getElementById(preview_div);
-        // pd.appendChild(renderGradingComponents(sid, selectedQuestion));
 
+        // add "Close Preview" button to the preview panel
         let closeButton = document.createElement("button");
         $(closeButton).text("Close Preview");
         $(closeButton).addClass("btn btn-default");
@@ -275,6 +278,7 @@ export default class SelectOne extends RunestoneBase {
         });
         $("#toggle-buttons").append(closeButton);
 
+        // if "lock" is not in toggle options, then allow adding more buttons to the preview panel 
         if (!(toggleOptions.includes("lock"))) {
             let setButton = document.createElement("button");
             $(setButton).text("Select this Problem");
@@ -287,6 +291,7 @@ export default class SelectOne extends RunestoneBase {
             );
             $("#toggle-buttons").append(setButton);
 
+            // if "transfer" in toggle options, and if current question type is Parsons and selected question type is active code, then add "Transfer" button to preview panel
             if (toggleOptions.includes("transfer")) {
                 var optionText;
                 var currentType;
@@ -317,6 +322,7 @@ export default class SelectOne extends RunestoneBase {
         $("#component-preview").show();
     }
 
+    // on clicking "Select this Problem" button, close preview panel, replace current question in assignments page with selected question, and send request to update grading database
     async toggleSet(parentID, selectedQuestion, htmlsrc) {
         var selectorId = parentID + "-toggleSelectedQuestion";
         document.getElementById(selectorId).innerHTML = ""; // need to check whether this is even necessary
@@ -337,7 +343,9 @@ export default class SelectOne extends RunestoneBase {
         $("#" + parentID).data("toggle_current", selectedQuestion);
     }
 
+    // on clicking "Transfer" button, extract the current text and indentation of the Parsons blocks in the answer space, then paste that into the selected active code question
     async toggleTransfer(parentID, selectedQuestion, htmlsrc) {
+        // retrieve all Parsons lines within the answer space and loop through this list
         var currentParsons = document.getElementById(parentID + "-toggleSelectedQuestion").querySelectorAll("div[class^='answer']")[0].getElementsByClassName("prettyprint lang-py");
         var currentParsonsClass;
         var currentBlockIndent;
@@ -349,12 +357,14 @@ export default class SelectOne extends RunestoneBase {
         for (var p = 0; p < currentParsons.length; p++) {
             indentCount = 0;
             indent = "";
+            // for Parsons blocks that have built-in indentation in their lines
             currentParsonsClass = currentParsons[p].classList[2];
             if (currentParsonsClass) {
                 if (currentParsonsClass.includes("indent")) {
                     indentCount = parseInt(indentCount) + parseInt(currentParsonsClass.substring(6,currentParsonsClass.length));
                 }
             }
+            // for Parsons answer spaces with vertical lines that allow student to define their own line indentation
             currentBlockIndent = currentParsons[p].parentElement.parentElement.style.left;
             if (currentBlockIndent) {
                 indentCount = parseInt(indentCount) + parseInt(currentBlockIndent.substring(0,currentBlockIndent.indexOf("px")) / 30);
@@ -362,10 +372,11 @@ export default class SelectOne extends RunestoneBase {
             for (var d = 0; d < indentCount; d++) {
                 indent += "    ";
             }
+            // retrieve each text snippet of each Parsons line and loop through this list
             parsonsLine = currentParsons[p].getElementsByTagName("span");
             count = 0;
             for (var l = 0; l < parsonsLine.length; l++) {
-                if (parsonsLine[l].childNodes[0].nodeName == "#text") { // parsons blocks have differing amounts of hierarchy levels (spans within spans)
+                if (parsonsLine[l].childNodes[0].nodeName == "#text") { // Parsons blocks have differing amounts of hierarchy levels (spans within spans)
                     if ((p == 0) && (count == 0)) { // need different check than l == 0 because the l numbering doesn't align with location within line due to inconsistent span heirarchy
                         parsonsLines += indent + parsonsLine[l].innerHTML;
                         count++;
@@ -383,6 +394,7 @@ export default class SelectOne extends RunestoneBase {
                 }
             }
         }
+        // replace all existing code within selected active code question with extracted Parsons text
         var htmlsrcFormer = htmlsrc.substring(0, htmlsrc.indexOf("<textarea") + htmlsrc.split("<textarea")[1].indexOf(">") + 10);
         var htmlsrcLatter = htmlsrc.substring(htmlsrc.indexOf("</textarea>"), htmlsrc.length);
         htmlsrc = htmlsrcFormer + parsonsLines + htmlsrcLatter;
