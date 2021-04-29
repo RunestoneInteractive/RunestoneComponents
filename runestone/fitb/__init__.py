@@ -1,4 +1,1 @@
-# *********
-# |docname|
-# *********
 from .fitb import *
