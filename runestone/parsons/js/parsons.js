@@ -23,6 +23,7 @@
 
 import RunestoneBase from "../../common/js/runestonebase.js";
 import "./parsons-i18n.en.js";
+import "./parsons-i18n.pt-br.js";
 import "./prettify.js";
 import "../css/parsons.css";
 import "../css/prettify.css";
@@ -54,9 +55,12 @@ export default class Parsons extends RunestoneBase {
     constructor(opts) {
         super(opts);
         var orig = opts.orig; // entire <pre> element that will be replaced by new HTML
-        this.origElem = orig;
+        this.containerDiv = orig;
+        this.origElem = $(orig).find("pre")[0];
+        // Find the question text and store it in .question
+        this.question = $(orig).find(`.parsons_question`)[0];
         this.useRunestoneServices = opts.useRunestoneServices;
-        this.divid = orig.id;
+        this.divid = opts.orig.id;
         // Set the storageId (key for storing data)
         var storageId = super.localStorageKey();
         this.storageId = storageId;
@@ -64,36 +68,27 @@ export default class Parsons extends RunestoneBase {
         this.contentArray = [];
         Parsons.counter++; //    Unique identifier
         this.counterId = "parsons-" + Parsons.counter;
-        // Find the question text and store it in .question
-        this.question = null;
-        for (var i = 0; i < this.children.length; i++) {
-            if ($(this.children[i]).is("[data-question]")) {
-                this.question = this.children[i];
-                break;
-            }
-        }
+
+        // for (var i = 0; i < this.children.length; i++) {
+        //     if ($(this.children[i]).is("[data-question]")) {
+        //         this.question = this.children[i];
+        //         break;
+        //     }
+        // }
         this.initializeOptions();
         this.grader = new LineBasedGrader(this);
         this.grader.showfeedback = this.showfeedback;
         var fulltext = $(this.origElem).html();
-        var delimiter = this.question.outerHTML;
-        var temp = fulltext.split(delimiter);
-        var content = temp[1];
         this.blockIndex = 0;
         this.checkCount = 0;
         this.numDistinct = 0;
         this.hasSolved = false;
-        this.initializeLines(content);
+        this.initializeLines(fulltext.trim());
         this.initializeView();
-        // Check the server for an answer to complete things
-        if (this.useRunestoneServices || this.graderactive) {
-            this.checkServer("parsons");
-        } else {
-            this.checkLocalStorage();
-            this.checkServerComplete = Promise.resolve("no server");
-        }
         this.caption = "Parsons";
         this.addCaption("runestone");
+        // Check the server for an answer to complete things
+        this.checkServer("parsons", true);
     }
     // Based on the data-fields in the original HTML, initialize options
     initializeOptions() {
@@ -160,38 +155,16 @@ export default class Parsons extends RunestoneBase {
     }
     // Based on what is specified in the original HTML, create the HTML view
     initializeView() {
-        this.containerDiv = document.createElement("div");
-        $(this.containerDiv).addClass("parsons alert alert-warning");
-        this.containerDiv.id = this.counterId;
+        this.outerDiv = document.createElement("div");
+        $(this.outerDiv).addClass("parsons alert alert-warning");
+        this.outerDiv.id = this.counterId;
         this.parsTextDiv = document.createElement("div");
         $(this.parsTextDiv).addClass("parsons-text");
-        // Images within Parsons problem description were bumping things and causing display misalignment
-        // This if-else section moves images to beneath the problem description to fix misalignment
-        // Also added '.parsons .parsons-img{}' to parsons.css - Vincent Qiu (September 2020)
-        if (this.question.innerHTML.includes("<img")) {
-            var imgString = this.question.innerHTML.substring(
-                this.question.innerHTML.indexOf("<img"),
-                this.question.innerHTML.indexOf(">") + 1
-            );
-            var textWithoutImg = this.question.innerHTML.replace(imgString, "");
-            if (imgString.includes('align="left"')) {
-                imgString = imgString.replace('align="left"', "");
-            }
-            this.parsTextDiv.innerHTML = textWithoutImg;
-            this.containerDiv.appendChild(this.parsTextDiv);
-            this.parsImgDiv = document.createElement("div");
-            $(this.parsImgDiv).addClass("parsons-img");
-            this.parsImgDiv.innerHTML = imgString;
-            this.containerDiv.appendChild(this.parsImgDiv);
-        } else {
-            this.parsTextDiv.innerHTML = this.question.innerHTML;
-            this.containerDiv.appendChild(this.parsTextDiv);
-        }
         this.keyboardTip = document.createElement("div");
         $(this.keyboardTip).attr("role", "tooltip");
         this.keyboardTip.id = this.counterId + "-tip";
         this.keyboardTip.innerHTML = $.i18n("msg_parson_arrow_navigate");
-        this.containerDiv.appendChild(this.keyboardTip);
+        this.outerDiv.appendChild(this.keyboardTip);
         $(this.keyboardTip).hide();
         this.sortContainerDiv = document.createElement("div");
         $(this.sortContainerDiv).addClass("sortable-code-container");
@@ -199,7 +172,7 @@ export default class Parsons extends RunestoneBase {
             "aria-describedby",
             this.counterId + "-tip"
         );
-        this.containerDiv.appendChild(this.sortContainerDiv);
+        this.outerDiv.appendChild(this.sortContainerDiv);
         this.sourceRegionDiv = document.createElement("div");
         this.sourceRegionDiv.id = this.counterId + "-sourceRegion";
         $(this.sourceRegionDiv).addClass("sortable-code");
@@ -235,7 +208,7 @@ export default class Parsons extends RunestoneBase {
         this.answerRegionDiv.appendChild(this.answerArea);
         this.parsonsControlDiv = document.createElement("div");
         $(this.parsonsControlDiv).addClass("parsons-controls");
-        this.containerDiv.appendChild(this.parsonsControlDiv);
+        this.outerDiv.appendChild(this.parsonsControlDiv);
         var that = this;
         this.checkButton = document.createElement("button");
         $(this.checkButton).attr("class", "btn btn-success");
@@ -258,6 +231,7 @@ export default class Parsons extends RunestoneBase {
         this.resetButton.addEventListener("click", function (event) {
             event.preventDefault();
             that.clearFeedback();
+            $(that.checkButton).prop("disabled", false);
             that.resetView();
             that.logMove("reset");
             that.setLocalStorage();
@@ -278,8 +252,15 @@ export default class Parsons extends RunestoneBase {
         this.messageDiv.id = this.counterId + "-message";
         this.parsonsControlDiv.appendChild(this.messageDiv);
         $(this.messageDiv).hide();
-        $(this.origElem).replaceWith(this.containerDiv);
-        $(this.containerDiv).closest(".sqcontainer").css("max-width", "none");
+        $(this.origElem).replaceWith(this.outerDiv);
+        $(this.outerDiv).closest(".sqcontainer").css("max-width", "none");
+        if (this.outerDiv) {
+            if ($(this.question).html().match(/^\s+$/)) {
+                $(this.question).remove();
+            } else {
+                $(this.outerDiv).prepend(this.question);
+            }
+        }
     }
     // Initialize lines and solution properties
     initializeLines(text) {
@@ -385,12 +366,12 @@ export default class Parsons extends RunestoneBase {
         }
         this.indent = indent;
         // For rendering, place in an onscreen position
-        var isHidden = this.containerDiv.offsetParent == null;
+        var isHidden = this.outerDiv.offsetParent == null;
         var replaceElement;
         if (isHidden) {
             replaceElement = document.createElement("div");
-            $(this.containerDiv).replaceWith(replaceElement);
-            document.body.appendChild(this.containerDiv);
+            $(this.outerDiv).replaceWith(replaceElement);
+            document.body.appendChild(this.outerDiv);
         }
         if (this.options.prettifyLanguage !== "") {
             prettyPrint();
@@ -585,7 +566,7 @@ export default class Parsons extends RunestoneBase {
         this.updateView();
         // Put back into the offscreen position
         if (isHidden) {
-            $(replaceElement).replaceWith(this.containerDiv);
+            $(replaceElement).replaceWith(this.outerDiv);
         }
     }
     // Make blocks interactive (both drag-and-drop and keyboard)
@@ -1286,6 +1267,7 @@ export default class Parsons extends RunestoneBase {
             if (this.grade == "correct") {
                 this.hasSolved = true;
                 this.correct = true;
+                $(this.checkButton).prop("disabled", true);
                 localStorage.setItem(this.adaptiveId + "Solved", true);
                 this.recentAttempts = this.checkCount;
                 this.checkCount = 0;

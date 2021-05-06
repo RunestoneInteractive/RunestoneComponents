@@ -136,7 +136,7 @@ export default class Timed extends RunestoneBase {
     /*===============================
     === Generating new Timed HTML ===
     ===============================*/
-    renderTimedAssess() {
+    async renderTimedAssess() {
         console.log("rendering timed ");
         // create renderedQuestionArray returns a promise
         //
@@ -146,28 +146,28 @@ export default class Timed extends RunestoneBase {
         }
         this.renderContainer();
         this.renderTimer();
-        this.renderControlButtons();
-        this.assessDiv.appendChild(this.timedDiv); // This can't be appended in renderContainer because then it renders above the timer and control buttons.
+        await this.renderControlButtons();
+        this.containerDiv.appendChild(this.timedDiv); // This can't be appended in renderContainer because then it renders above the timer and control buttons.
         if (this.renderedQuestionArray.length > 1) this.renderNavControls();
         this.renderSubmitButton();
         this.renderFeedbackContainer();
         this.useRunestoneServices = eBookConfig.useRunestoneServices;
         // Replace intermediate HTML with rendered HTML
-        $(this.origElem).replaceWith(this.assessDiv);
+        $(this.origElem).replaceWith(this.containerDiv);
         // check if already taken and if so show results
         this.styleExamElements(); // rename to renderPossibleResults
-        this.checkServer("timedExam");
+        this.checkServer("timedExam", true);
     }
 
     renderContainer() {
-        this.assessDiv = document.createElement("div"); // container for the entire Timed Component
+        this.containerDiv = document.createElement("div"); // container for the entire Timed Component
         if (this.fullwidth) {
             // allow the container to fill the width - barb
-            $(this.assessDiv).attr({
+            $(this.containerDiv).attr({
                 style: "max-width:none",
             });
         }
-        this.assessDiv.id = this.divid;
+        this.containerDiv.id = this.divid;
         this.timedDiv = document.createElement("div"); // div that will hold the questions for the timed assessment
         this.navDiv = document.createElement("div"); // For navigation control
         $(this.navDiv).attr({
@@ -176,9 +176,9 @@ export default class Timed extends RunestoneBase {
         this.switchContainer = document.createElement("div");
         this.switchContainer.classList.add("switchcontainer");
         this.switchDiv = document.createElement("div"); // is replaced by the questions
+        this.timedDiv.appendChild(this.navDiv);
         this.timedDiv.appendChild(this.switchContainer);
         this.switchContainer.appendChild(this.switchDiv);
-        this.timedDiv.appendChild(this.navDiv);
         $(this.timedDiv).attr({
             id: "timed_Test",
             style: "display:none",
@@ -211,13 +211,14 @@ export default class Timed extends RunestoneBase {
         this.startBtn.textContent = "Start";
         this.startBtn.addEventListener(
             "click",
-            function () {
+            async function () {
                 $(this.finishButton).hide(); // hide the finish button for now
                 let mess = document.createElement("p");
                 mess.innerHTML =
-                    "<strong>Warning: You will lose all of your work if you close this tab or the browser.</strong>  Make sure you click the Finish Exam button to submit your work!";
+                    "<strong>Warning: You will not be able to continue the exam if you close this tab, close the window, or navigate away from this page!</strong>  Make sure you click the Finish Exam button when you are done to submit your work!";
                 this.controlDiv.appendChild(mess);
-                this.renderTimedQuestion();
+                mess.classList.add("examwarning");
+                await this.renderTimedQuestion();
                 this.startAssessment();
             }.bind(this),
             false
@@ -243,8 +244,8 @@ export default class Timed extends RunestoneBase {
         if (!this.nopause) {
             this.controlDiv.appendChild(this.pauseBtn);
         }
-        this.assessDiv.appendChild(this.wrapperDiv);
-        this.assessDiv.appendChild(this.controlDiv);
+        this.containerDiv.appendChild(this.wrapperDiv);
+        this.containerDiv.appendChild(this.controlDiv);
     }
 
     renderNavControls() {
@@ -296,139 +297,124 @@ export default class Timed extends RunestoneBase {
         this.navBtnListeners();
     }
 
+    // when moving off of a question in an active exam:
+    // 1. show that the question has been seen, or mark it broken if it is in error.
+    // 2. check and log the current answer
+    async navigateAway() {
+        if (
+            this.renderedQuestionArray[this.currentQuestionIndex].state ==
+            "broken_exam"
+        ) {
+            $(
+                "ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"
+            ).addClass("broken");
+        }
+        if (
+            this.renderedQuestionArray[this.currentQuestionIndex].state ==
+            "exam_ended"
+        ) {
+            $(
+                "ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"
+            ).addClass("toolate");
+        }
+        if (
+            this.renderedQuestionArray[this.currentQuestionIndex].question
+                .isAnswered
+        ) {
+            $(
+                "ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"
+            ).addClass("answered");
+            await this.renderedQuestionArray[
+                this.currentQuestionIndex
+            ].question.checkCurrentAnswer();
+            if (!this.done) {
+                this.renderedQuestionArray[
+                    this.currentQuestionIndex
+                ].question.logCurrentAnswer();
+            }
+        }
+    }
+    async handleNextPrev(event) {
+        if (!this.taken) {
+            await this.navigateAway();
+        }
+        var target = $(event.target).text();
+        if (target.match(/Next/)) {
+            if ($(this.rightContainer).hasClass("disabled")) {
+                return;
+            }
+            this.currentQuestionIndex++;
+        } else if (target.match(/Prev/)) {
+            if ($(this.leftContainer).hasClass("disabled")) {
+                return;
+            }
+            this.currentQuestionIndex--;
+        }
+        await this.renderTimedQuestion();
+        this.ensureButtonSafety();
+        for (var i = 0; i < this.qNumList.childNodes.length; i++) {
+            for (
+                var j = 0;
+                j < this.qNumList.childNodes[i].childNodes.length;
+                j++
+            ) {
+                $(this.qNumList.childNodes[i].childNodes[j]).removeClass(
+                    "active"
+                );
+            }
+        }
+        $(
+            "ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"
+        ).addClass("active");
+    }
+
+    async handleNumberedNav(event) {
+        if (!this.taken) {
+            await this.navigateAway();
+        }
+        for (var i = 0; i < this.qNumList.childNodes.length; i++) {
+            for (
+                var j = 0;
+                j < this.qNumList.childNodes[i].childNodes.length;
+                j++
+            ) {
+                $(this.qNumList.childNodes[i].childNodes[j]).removeClass(
+                    "active"
+                );
+            }
+        }
+
+        var target = $(event.target).text();
+        let oldIndex = this.currentQuestionIndex;
+        this.currentQuestionIndex = parseInt(target) - 1;
+        if (this.currentQuestionIndex > this.renderedQuestionArray.length) {
+            console.log(`Error: bad index for ${target}`);
+            this.currentQuestionIndex = oldIndex;
+        }
+        $(
+            "ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"
+        ).addClass("active");
+        await this.renderTimedQuestion();
+        this.ensureButtonSafety();
+    }
+
     // set up events for navigation
     navBtnListeners() {
         // Next and Prev Listener
         this.pagNavList.addEventListener(
             "click",
-            function (event) {
-                if (
-                    this.renderedQuestionArray[this.currentQuestionIndex]
-                        .state == "broken_exam"
-                ) {
-                    $(
-                        "ul#pageNums > ul > li:eq(" +
-                            this.currentQuestionIndex +
-                            ")"
-                    ).addClass("broken");
-                }
-                if (
-                    this.renderedQuestionArray[this.currentQuestionIndex]
-                        .question.isAnswered
-                ) {
-                    $(
-                        "ul#pageNums > ul > li:eq(" +
-                            this.currentQuestionIndex +
-                            ")"
-                    ).addClass("answered");
-                    this.renderedQuestionArray[
-                        this.currentQuestionIndex
-                    ].question.checkCurrentAnswer();
-                    if (!this.done) {
-                        this.renderedQuestionArray[
-                            this.currentQuestionIndex
-                        ].question.logCurrentAnswer();
-                    }
-                }
-                // submit the current question here
-                var target = $(event.target).text();
-                if (target.match(/Next/)) {
-                    if ($(this.rightContainer).hasClass("disabled")) {
-                        return;
-                    }
-                    this.currentQuestionIndex++;
-                } else if (target.match(/Prev/)) {
-                    if ($(this.leftContainer).hasClass("disabled")) {
-                        return;
-                    }
-                    this.currentQuestionIndex--;
-                }
-                this.renderTimedQuestion();
-                this.ensureButtonSafety();
-                for (var i = 0; i < this.qNumList.childNodes.length; i++) {
-                    for (
-                        var j = 0;
-                        j < this.qNumList.childNodes[i].childNodes.length;
-                        j++
-                    ) {
-                        $(
-                            this.qNumList.childNodes[i].childNodes[j]
-                        ).removeClass("active");
-                    }
-                }
-                $(
-                    "ul#pageNums > ul > li:eq(" +
-                        this.currentQuestionIndex +
-                        ")"
-                ).addClass("active");
-            }.bind(this),
+            this.handleNextPrev.bind(this),
             false
         );
+
         // Numbered Listener
         this.qNumList.addEventListener(
             "click",
-            function (event) {
-                if (
-                    this.renderedQuestionArray[this.currentQuestionIndex]
-                        .state == "broken_exam"
-                ) {
-                    $(
-                        "ul#pageNums > ul > li:eq(" +
-                            this.currentQuestionIndex +
-                            ")"
-                    ).addClass("broken");
-                }
-                if (
-                    this.renderedQuestionArray[this.currentQuestionIndex]
-                        .question.isAnswered
-                ) {
-                    $(
-                        "ul#pageNums > ul > li:eq(" +
-                            this.currentQuestionIndex +
-                            ")"
-                    ).addClass("answered");
-                    this.renderedQuestionArray[
-                        this.currentQuestionIndex
-                    ].question.checkCurrentAnswer();
-                    if (!this.done) {
-                        this.renderedQuestionArray[
-                            this.currentQuestionIndex
-                        ].question.logCurrentAnswer();
-                    }
-                }
-                for (var i = 0; i < this.qNumList.childNodes.length; i++) {
-                    for (
-                        var j = 0;
-                        j < this.qNumList.childNodes[i].childNodes.length;
-                        j++
-                    ) {
-                        $(
-                            this.qNumList.childNodes[i].childNodes[j]
-                        ).removeClass("active");
-                    }
-                }
-
-                var target = $(event.target).text();
-                let oldIndex = this.currentQuestionIndex;
-                this.currentQuestionIndex = parseInt(target) - 1;
-                if (
-                    this.currentQuestionIndex >
-                    this.renderedQuestionArray.length
-                ) {
-                    console.log(`Error: bad index for ${target}`);
-                    this.currentQuestionIndex = oldIndex;
-                }
-                $(
-                    "ul#pageNums > ul > li:eq(" +
-                        this.currentQuestionIndex +
-                        ")"
-                ).addClass("active");
-                this.renderTimedQuestion();
-                this.ensureButtonSafety();
-            }.bind(this),
+            this.handleNumberedNav.bind(this),
             false
         );
     }
+
     renderSubmitButton() {
         this.buttonContainer = document.createElement("div");
         $(this.buttonContainer).attr({
@@ -442,13 +428,13 @@ export default class Timed extends RunestoneBase {
         this.finishButton.textContent = "Finish Exam";
         this.finishButton.addEventListener(
             "click",
-            function () {
+            async function () {
                 if (
                     window.confirm(
                         "Clicking OK means you are ready to submit your answers and are finished with this assessment."
                     )
                 ) {
-                    this.finishAssessment();
+                    await this.finishAssessment();
                 }
             }.bind(this),
             false
@@ -485,7 +471,7 @@ export default class Timed extends RunestoneBase {
         this.scoreDiv = document.createElement("P");
         this.scoreDiv.id = this.divid + "results";
         this.scoreDiv.style.display = "none";
-        this.assessDiv.appendChild(this.scoreDiv);
+        this.containerDiv.appendChild(this.scoreDiv);
     }
 
     createRenderedQuestionArray() {
@@ -509,6 +495,8 @@ export default class Timed extends RunestoneBase {
                 useRunestoneServices: eBookConfig.useRunestoneServices,
                 timed: true,
                 assessmentTaken: this.taken,
+                timedWrapper: this.divid,
+                initAttempts: 0,
             };
             if ($(tmpChild).children("[data-component]").length > 0) {
                 tmpChild = $(tmpChild).children("[data-component]")[0];
@@ -548,22 +536,42 @@ export default class Timed extends RunestoneBase {
         // check the renderedQuestionArray to see if it has been rendered.
         let opts = this.renderedQuestionArray[this.currentQuestionIndex];
         let currentQuestion;
-        if (opts.state === "prepared" || opts.state === "forreview") {
+        if (
+            opts.state === "prepared" ||
+            opts.state === "forreview" ||
+            (opts.state === "broken_exam" && opts.initAttempts < 3)
+        ) {
             let tmpChild = opts.orig;
             if ($(tmpChild).is("[data-component=selectquestion]")) {
-                // SelectOne is async and will replace itself in this array with
-                // the actual selected question
-                opts.rqa = this.renderedQuestionArray;
-                let newq = new SelectOne(opts);
-                this.renderedQuestionArray[this.currentQuestionIndex] = {
-                    question: newq,
-                };
-                try {
-                    await newq.initialize();
-                } catch (e) {
+                if (this.done && opts.state == "prepared") {
                     this.renderedQuestionArray[
                         this.currentQuestionIndex
-                    ].state = "broken_exam";
+                    ].state = "exam_ended";
+                } else {
+                    // SelectOne is async and will replace itself in this array with
+                    // the actual selected question
+                    opts.rqa = this.renderedQuestionArray;
+                    let newq = new SelectOne(opts);
+                    this.renderedQuestionArray[this.currentQuestionIndex] = {
+                        question: newq,
+                    };
+                    try {
+                        await newq.initialize();
+                        if (opts.state == "broken_exam") {
+                            // remove the broken class from this question if we get here.
+                            $(
+                                `ul#pageNums > ul > li:eq(${this.currentQuestionIndex})`
+                            ).removeClass("broken");
+                        }
+                    } catch (e) {
+                        opts.state = "broken_exam";
+                        this.renderedQuestionArray[
+                            this.currentQuestionIndex
+                        ] = opts;
+                        console.log(
+                            `Error initializing question: Details ${e}`
+                        );
+                    }
                 }
             } else if ($(tmpChild).is("[data-component]")) {
                 let componentKind = $(tmpChild).data("component");
@@ -578,14 +586,17 @@ export default class Timed extends RunestoneBase {
         currentQuestion = this.renderedQuestionArray[this.currentQuestionIndex]
             .question;
         if (opts.state === "forreview") {
-            currentQuestion.checkCurrentAnswer();
+            await currentQuestion.checkCurrentAnswer();
             currentQuestion.renderFeedback();
             currentQuestion.disableInteraction();
         }
 
         if (!this.visited.includes(this.currentQuestionIndex)) {
             this.visited.push(this.currentQuestionIndex);
-            if (this.visited.length === this.renderedQuestionArray.length) {
+            if (
+                this.visited.length === this.renderedQuestionArray.length &&
+                !this.done
+            ) {
                 $(this.finishButton).show();
             }
         }
@@ -629,6 +640,7 @@ export default class Timed extends RunestoneBase {
             $(this.pauseBtn).attr("disabled", false);
             if (this.running === 0 && this.paused === 0) {
                 this.running = 1;
+                this.lastTime = Date.now();
                 $(this.timedDiv).show();
                 this.increment();
                 this.logBookEvent({
@@ -646,14 +658,28 @@ export default class Timed extends RunestoneBase {
                     JSON.stringify(storageObj)
                 );
             }
-            $(window).on("beforeunload", function (event) {
-                // this actual value gets ignored by newer browsers
-                alert("foo");
-                event.preventDefault();
-                event.returnValue =
-                    "Are you sure you want to leave?  Your work will be lost! And you will need your instructor to reset the exam!";
-                return "Are you sure you want to leave?  Your work will be lost!";
-            });
+            $(window).on(
+                "beforeunload",
+                function (event) {
+                    // this actual value gets ignored by newer browsers
+                    if (this.done) {
+                        return;
+                    }
+                    event.preventDefault();
+                    event.returnValue =
+                        "Are you sure you want to leave?  Your work will be lost! And you will need your instructor to reset the exam!";
+                    return "Are you sure you want to leave?  Your work will be lost!";
+                }.bind(this)
+            );
+            window.addEventListener(
+                "pagehide",
+                async function (event) {
+                    if (!this.done) {
+                        await this.finishAssessment();
+                        console.log("Exam exited by leaving page");
+                    }
+                }.bind(this)
+            );
         } else {
             this.handlePrevAssessment();
         }
@@ -728,12 +754,24 @@ export default class Timed extends RunestoneBase {
         if (this.running === 1 && !this.taken) {
             setTimeout(
                 function () {
+                    // When a browser loses focus, setTimeout may not be called on the
+                    // schedule expected.  Browsers are free to save power by lengthening
+                    // the interval to some longer time.  So we cannot just subtract 1
+                    // from the timeLimit we need to measure the elapsed time from the last
+                    // call to the current call and subtract that number of seconds.
+                    let currentTime = Date.now();
                     if (this.limitedTime) {
                         // If there's a time limit, count down to 0
-                        this.timeLimit--;
+                        this.timeLimit =
+                            this.timeLimit -
+                            Math.floor((currentTime - this.lastTime) / 1000);
                     } else {
-                        this.timeLimit++; // Else count up to keep track of how long it took to complete
+                        // Else count up to keep track of how long it took to complete
+                        this.timeLimit =
+                            this.timeLimit +
+                            Math.floor((currentTime - this.lastTime) / 1000);
                     }
+                    this.lastTime = currentTime;
                     localStorage.setItem(
                         eBookConfig.email + ":" + this.divid + "-time",
                         this.timeLimit
@@ -796,7 +834,7 @@ export default class Timed extends RunestoneBase {
         });
     }
 
-    finishAssessment() {
+    async finishAssessment() {
         $("#relations-next").show(); // show the next page button for now
         $("#relations-prev").show(); // show the previous button for now
         if (!this.showFeedback) {
@@ -809,7 +847,7 @@ export default class Timed extends RunestoneBase {
         this.running = 0;
         this.done = 1;
         this.taken = 1;
-        this.finalizeProblems(true); // log results
+        await this.finalizeProblems();
         this.checkScore();
         this.displayScore();
         this.storeScore();
@@ -817,7 +855,7 @@ export default class Timed extends RunestoneBase {
         $(this.pauseBtn).attr("disabled", true);
         this.finishButton.disabled = true;
         $(window).off("beforeunload");
-        //
+        // turn off the pagehide listener
         let assignment_id = this.divid;
         setTimeout(function () {
             jQuery.ajax({
@@ -839,7 +877,9 @@ export default class Timed extends RunestoneBase {
         }, 2000);
     }
 
-    finalizeProblems(logFlag) {
+    // finalizeProblems
+    // ----------------
+    async finalizeProblems() {
         // Because we have submitted each question as we navigate we only need to
         // send the final version of the question the student is on when they press the
         // finish exam button.
@@ -847,7 +887,7 @@ export default class Timed extends RunestoneBase {
         var currentQuestion = this.renderedQuestionArray[
             this.currentQuestionIndex
         ].question;
-        currentQuestion.checkCurrentAnswer();
+        await currentQuestion.checkCurrentAnswer();
         currentQuestion.logCurrentAnswer();
         currentQuestion.renderFeedback();
         currentQuestion.disableInteraction();
@@ -855,8 +895,10 @@ export default class Timed extends RunestoneBase {
         for (var i = 0; i < this.renderedQuestionArray.length; i++) {
             let currentQuestion = this.renderedQuestionArray[i];
             // set the state to forreview so we know that feedback may be appropriate
-            currentQuestion.state = "forreview";
-            currentQuestion.question.disableInteraction();
+            if (currentQuestion.state !== "broken_exam") {
+                currentQuestion.state = "forreview";
+                currentQuestion.question.disableInteraction();
+            }
         }
 
         if (!this.showFeedback) {
@@ -864,6 +906,8 @@ export default class Timed extends RunestoneBase {
         }
     }
 
+    // restoreAnsweredQuestions
+    // ------------------------
     restoreAnsweredQuestions() {
         for (var i = 0; i < this.renderedQuestionArray.length; i++) {
             var currentQuestion = this.renderedQuestionArray[i];
@@ -873,12 +917,19 @@ export default class Timed extends RunestoneBase {
         }
     }
 
+    // hideTimedFeedback
+    // -----------------
     hideTimedFeedback() {
         for (var i = 0; i < this.renderedQuestionArray.length; i++) {
             var currentQuestion = this.renderedQuestionArray[i].question;
             currentQuestion.hideFeedback();
         }
     }
+
+    // checkScore
+    // ----------
+    // This is a simple all or nothing score of one point per question for
+    // that includes our best guess if a question was skipped.
     checkScore() {
         this.correctStr = "";
         this.skippedStr = "";
@@ -1012,7 +1063,7 @@ export default class Timed extends RunestoneBase {
             this.taken = 0;
         }
     }
-    restoreAnswers(data) {
+    async restoreAnswers(data) {
         this.taken = 1;
         var tmpArr;
         if (data === "") {
@@ -1072,7 +1123,7 @@ export default class Timed extends RunestoneBase {
             }
             this.handlePrevAssessment();
         }
-        this.renderTimedQuestion();
+        await this.renderTimedQuestion();
         this.displayScore();
         this.showTime();
     }

@@ -7,7 +7,7 @@ qnum testing
 
 Fill in the Blank
 -----------------
-.. fillintheblank:: fill1412
+.. fillintheblank:: test_fitb_string
 
     Fill in the blanks to make the following sentence: "The red car drove away."
 
@@ -20,7 +20,7 @@ Fill in the Blank
 
 Test 2 - test a numeric range.
 
-.. fillintheblank:: fill_2pi
+.. fillintheblank:: test_fitb_number
 
     .. If this isn't treated as a comment, then it will cause a **syntax error, thus producing a test failure.
 
@@ -55,7 +55,7 @@ Error testing
 
 Regex testing
 -------------
-.. fillintheblank:: fillregex
+.. fillintheblank:: test_fitb_regex_1
    :casei:
 
    Complete the sentence: |blank| had a |blank| lamb. One plus one is: (note that if there aren't enough blanks for the feedback given, they're added to the end of the problem. So, we don't **need** to specify a blank here.)
@@ -69,7 +69,7 @@ Regex testing
        :2 1: Close.... (The second number is a tolerance, so this matches 1 or 3.)
        :x: Nope. (As earlier, this matches anything.)
 
-.. fillintheblank:: regexescapes1
+.. fillintheblank:: test_fitb_regex_2
    :casei:
 
    Windows system files are stored in: |blank|.
@@ -78,37 +78,10 @@ Regex testing
        :program files: Third party applications are stored here, not system files.
        :x: Try again.
 
-.. fillintheblank:: regexescapes2
+.. fillintheblank:: test_fitb_regex_3
    :casei:
 
    Python lists are declared using: |blank|.
 
    -   :\[\]: Correct.
        :x: Try again.
-
-Timed exam testing
-------------------
-.. timed:: timed-exam-test
-
-    .. fillintheblank:: timed-fitb-1
-
-
-        Fill in the blanks to make the following sentence: "The red car drove away."
-
-        The |blank| car drove |blank|.
-
-        -   :red: Correct.
-            :x: Incorrect. Try 'red'.
-        -   :away: Correct.
-            :x: Incorrect. Try 'away'.
-
-    .. fillintheblank:: timed-fitb-2
-
-        What is the solution to the following:
-
-        :math:`2 * \pi =` |blank|.
-
-        - :6.28 0.005: Good job.
-          :3.27 3: Try higher.
-          :9.29 3: Try lower.
-          :.*: Incorrect. Try again.

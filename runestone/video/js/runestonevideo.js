@@ -18,6 +18,7 @@ class RunestoneVideo extends RunestoneBase {
         }
         this.containerDiv = this.container[0].parentElement;
         this.addCaption("runestone");
+        this.indicate_component_ready();
     }
 }
 

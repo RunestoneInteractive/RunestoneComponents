@@ -8,8 +8,10 @@
 "use strict";
 
 import RunestoneBase from "../../common/js/runestonebase.js";
-import AudioTour from "./audiotour";
-import "./activecode-i18n.en";
+import AudioTour from "./audiotour.js";
+import "./activecode-i18n.en.js";
+import "./activecode-i18n.pt-br.js";
+import "./activecode-i18n.sr-Cyrl.js";
 import CodeMirror from "codemirror";
 import "codemirror/mode/python/python.js";
 import "codemirror/mode/css/css.js";
@@ -19,7 +21,6 @@ import "codemirror/mode/javascript/javascript.js";
 import "codemirror/mode/sql/sql.js";
 import "codemirror/mode/clike/clike.js";
 import "codemirror/mode/octave/octave.js";
-import "./activecode-i18n.en.js";
 import "./../css/activecode.css";
 import "codemirror/lib/codemirror.css";
 
@@ -42,10 +43,12 @@ export class ActiveCode extends RunestoneBase {
         super(opts);
         var suffStart;
         var orig = $(opts.orig).find("textarea")[0];
+        this.containerDiv = opts.orig;
         this.useRunestoneServices = opts.useRunestoneServices;
         this.python3 = opts.python3;
         this.alignVertical = opts.vertical;
         this.origElem = orig;
+        this.origText = this.origElem.textContent;
         this.divid = opts.orig.id;
         this.code = $(orig).text() || "\n\n\n\n\n";
         this.language = $(orig).data("lang");
@@ -64,6 +67,7 @@ export class ActiveCode extends RunestoneBase {
         this.loadButton = null;
         this.outerDiv = null;
         this.partner = "";
+        this.logResults = true;
         if (!eBookConfig.allow_pairs || $(orig).data("nopair")) {
             this.enablePartner = false;
         } else {
@@ -88,10 +92,10 @@ export class ActiveCode extends RunestoneBase {
                 doc = connection.get("chatcodes", "channels");
             }
         }
-        if (this.graderactive) {
+        if (this.graderactive || this.isTimed) {
             this.hidecode = false;
         }
-        if (this.includes !== undefined) {
+        if (this.includes) {
             this.includes = this.includes.split(/\s+/);
         }
         let prefixEnd = this.code.indexOf("^^^^");
@@ -121,28 +125,28 @@ export class ActiveCode extends RunestoneBase {
             1000
         );
         if (this.autorun) {
-            $(document).ready(this.runProg.bind(this));
+            // Simulate pressing the run button, since this will also prevent the user from clicking it until the initial run is complete, and also help the user understand why they're waiting.
+            $(document).ready(this.runButtonHandler.bind(this));
         }
+        this.indicate_component_ready();
     }
 
     createEditor(index) {
-        this.containerDiv = document.createElement("div");
+        this.outerDiv = document.createElement("div");
         var linkdiv = document.createElement("div");
         linkdiv.id = this.divid.replace(/_/g, "-").toLowerCase(); // :ref: changes _ to - so add this as a target
-        $(this.containerDiv).addClass("ac_section alert alert-warning");
+        $(this.outerDiv).addClass("ac_section alert alert-warning");
         var codeDiv = document.createElement("div");
         $(codeDiv).addClass("ac_code_div col-md-12");
         this.codeDiv = codeDiv;
-        this.containerDiv.id = this.divid;
-        this.containerDiv.lang = this.language;
-        this.outerDiv = this.containerDiv;
-        $(this.origElem).replaceWith(this.containerDiv);
+        this.outerDiv.lang = this.language;
+        $(this.origElem).replaceWith(this.outerDiv);
         if (linkdiv.id !== this.divid) {
             // Don't want the 'extra' target if they match.
-            this.containerDiv.appendChild(linkdiv);
+            this.outerDiv.appendChild(linkdiv);
         }
-        this.containerDiv.appendChild(codeDiv);
-        var edmode = this.containerDiv.lang;
+        this.outerDiv.appendChild(codeDiv);
+        var edmode = this.outerDiv.lang;
         if (edmode === "sql") {
             edmode = "text/x-sql";
         } else if (edmode === "java") {
@@ -158,7 +162,7 @@ export class ActiveCode extends RunestoneBase {
         }
         var editor = CodeMirror(codeDiv, {
             value: this.code,
-            lineNumbers: true ? !this.isTimed : false,
+            lineNumbers: true,
             mode: edmode,
             indentUnit: 4,
             matchBrackets: true,
@@ -185,7 +189,7 @@ export class ActiveCode extends RunestoneBase {
                 ) {
                     // change events can come before any real changes for various reasons, some unknown
                     // this avoids unneccsary log events and updates to the activity counter
-                    if (this.origElem.textContent === editor.getValue()) {
+                    if (this.origText === editor.getValue()) {
                         return;
                     }
                     $(editor.getWrapperElement()).css(
@@ -230,6 +234,22 @@ export class ActiveCode extends RunestoneBase {
         }
     }
 
+    async runButtonHandler() {
+        // Disable the run button until the run is finished.
+        this.runButton.disabled = true;
+        try {
+            await this.runProg();
+        } catch (e) {
+            console.log(`there was an error ${e} running the code`);
+        }
+        if (this.logResults) {
+            this.logCurrentAnswer();
+        }
+        this.renderFeedback();
+        // The run is finished; re-enable the button.
+        this.runButton.disabled = false;
+    }
+
     createControls() {
         var ctrlDiv = document.createElement("div");
         var butt;
@@ -242,19 +262,7 @@ export class ActiveCode extends RunestoneBase {
         ctrlDiv.appendChild(butt);
         this.runButton = butt;
         console.log("adding click function for run");
-        $(butt).click(
-            async function () {
-                try {
-                    await this.runProg();
-                } catch (e) {
-                    console.log(`there was an error ${e} running the code`);
-                }
-                if (this.logResults) {
-                    this.logCurrentAnswer();
-                }
-                this.renderFeedback();
-            }.bind(this)
-        );
+        this.runButton.onclick = this.runButtonHandler.bind(this);
         $(butt).attr("type", "button");
 
         if (this.enabledownload || eBookConfig.downloadsEnabled) {
@@ -551,7 +559,7 @@ export class ActiveCode extends RunestoneBase {
     // add an initial load history button
     // if there is no edit then there is no append   to_save (True/False)
     async addHistoryScrubber(pos_last) {
-        let deferred = Promise.resolve();
+        let response;
         var reqData = {
             acid: this.divid,
         };
@@ -572,7 +580,7 @@ export class ActiveCode extends RunestoneBase {
                 body: JSON.stringify(reqData),
             });
             try {
-                let response = await fetch(request);
+                response = await fetch(request);
                 let data = await response.json();
                 if (data.history !== undefined) {
                     this.history = this.history.concat(data.history);
@@ -585,16 +593,9 @@ export class ActiveCode extends RunestoneBase {
             } catch (e) {
                 console.log("unable to fetch history");
             }
-            deferred = new Promise((resolve, reject) => {
-                try {
-                    this.renderScrubber(pos_last);
-                    resolve("done");
-                } catch (e) {
-                    reject(e);
-                }
-            });
+            this.renderScrubber(pos_last);
         }
-        return deferred;
+        return "success";
     }
 
     renderScrubber(pos_last) {
@@ -818,7 +819,7 @@ export class ActiveCode extends RunestoneBase {
         return response;
     }
 
-    showCodelens() {
+    async showCodelens() {
         if (this.codelens.style.display == "none") {
             this.codelens.style.display = "block";
             this.clButton.innerText = $.i18n("msg_activecode_hide_codelens");
@@ -831,7 +832,7 @@ export class ActiveCode extends RunestoneBase {
         if (cl) {
             this.codelens.removeChild(cl);
         }
-        var code = this.buildProg(false);
+        var code = await this.buildProg(false);
         var myVars = {};
         myVars.code = code;
         myVars.origin = "opt-frontend.js";
@@ -931,9 +932,9 @@ export class ActiveCode extends RunestoneBase {
                     "An error occurred in the hidden, included code. Sorry we can't give you a more helpful error message";
                 return;
             } else if (errorLine > this.progLines + this.pretextLines) {
-                errText.innerHTML = `An error occurred after the end of your code. 
-One possible reason is that you have an unclosed parenthesis or string. 
-Another possibility is that there is an error in the hidden test code. 
+                errText.innerHTML = `An error occurred after the end of your code.
+One possible reason is that you have an unclosed parenthesis or string.
+Another possibility is that there is an error in the hidden test code.
 Yet another is that there is an internal error.  The internal error message is: ${err.message}`;
                 return;
             } else {
@@ -1097,7 +1098,7 @@ Yet another is that there is an internal error.  The internal error message is: 
 
     async getIncludedCode(divid) {
         if (window.edList[divid]) {
-            return Promise.resolve(window.edList[divid].editor.getValue());
+            return window.edList[divid].editor.getValue();
         } else {
             let request = new Request(
                 `/runestone/ajax/get_datafile?course_id=${eBookConfig.course}&acid=${divid}`,
@@ -1107,7 +1108,8 @@ Yet another is that there is an internal error.  The internal error message is: 
                 }
             );
             let wresult = await fetch(request);
-            return wresult.json();
+            let obj = await wresult.json();
+            return obj.data;
         }
     }
 
@@ -1121,7 +1123,7 @@ Yet another is that there is an internal error.  The internal error message is: 
         this.pretext = "";
         this.pretextLines = 0;
         this.progLines = prog.match(/\n/g).length + 1;
-        if (this.includes !== undefined) {
+        if (this.includes) {
             // iterate over the includes, in-order prepending to prog
             pretext = "";
             for (var x = 0; x < this.includes.length; x++) {
@@ -1142,10 +1144,7 @@ Yet another is that there is an internal error.  The internal error message is: 
 
     async manage_scrubber(saveCode) {
         if (this.historyScrubber === null && !this.autorun) {
-            let response = await this.addHistoryScrubber();
-            if (!response.ok) {
-                console.log("Failed to load history -- this should not fail.");
-            }
+            await this.addHistoryScrubber();
         }
         if (
             this.historyScrubber &&
@@ -1172,7 +1171,7 @@ Yet another is that there is an internal error.  The internal error message is: 
         if (this.historyScrubber == null) {
             saveCode = "False";
         }
-        return Promise.resolve(saveCode);
+        return saveCode;
     }
 
     async checkCurrentAnswer() {
@@ -1184,46 +1183,52 @@ Yet another is that there is an internal error.  The internal error message is: 
     }
 
     logCurrentAnswer() {
-        let self = this;
-        this.run_promise.then(function () {
-            self.logRunEvent({
-                div_id: self.divid,
-                code: self.editor.getValue(),
-                lang: self.language,
-                errinfo: self.errinfo,
-                to_save: self.saveCode,
-                prefix: self.pretext,
-                suffix: self.suffix,
-                partner: self.partner,
-            }); // Log the run event
-            // If unit tests were run there will be a unit_results
-            if (self.unit_results) {
-                self.logBookEvent({
-                    act: self.unit_results,
-                    div_id: self.divid,
-                    event: "unittest",
-                });
-            }
-        });
+        this.logRunEvent({
+            div_id: this.divid,
+            code: this.editor.getValue(),
+            lang: this.language,
+            errinfo: this.errinfo,
+            to_save: this.saveCode,
+            prefix: this.pretext,
+            suffix: this.suffix,
+            partner: this.partner,
+        }); // Log the run event
+        // If unit tests were run there will be a unit_results
+        if (this.unit_results) {
+            this.logBookEvent({
+                act: this.unit_results,
+                div_id: this.divid,
+                event: "unittest",
+            });
+        }
     }
 
     renderFeedback() {
         // The python unit test code builds the table as it is running the tests
         // In "normal" usage this is displayed immediately.
         // However in exam mode we make a div which is offscreen
-        if (
-            this.unit_results_divid &&
-            this.unit_results_divid.indexOf("_offscreen_") > 0
-        ) {
-            let urDivid = `${this.divid}_offscreen_unit_results`;
-            let unitFeedback = document.getElementById(urDivid);
-            let tmp = document.body.removeChild(unitFeedback);
-            if ($(this.containerDiv).find(`#${urDivid}`).length > 0) {
-                tmp = $(this.containerDiv).find(`#${urDivid}`)[0];
+        if (this.unit_results_divid) {
+            if (this.unit_results_divid.indexOf("_offscreen_") > 0) {
+                let urDivid = `${this.divid}_offscreen_unit_results`;
+                let unitFeedback = document.getElementById(urDivid);
+                let tmp = document.body.removeChild(unitFeedback);
+                if ($(this.outerDiv).find(`#${urDivid}`).length > 0) {
+                    tmp = $(this.outerDiv).find(`#${urDivid}`)[0];
+                } else {
+                    this.outerDiv.appendChild(tmp);
+                }
+                $(tmp).show();
             } else {
-                this.containerDiv.appendChild(tmp);
+                let urDivid = this.divid + "_unit_results";
+                if (
+                    $(this.outerDiv).find(`#${urDivid}`).length == 0 &&
+                    $(this.outerDiv).find(`#${urDivid}_offscreen_unit_results`)
+                        .length == 0
+                ) {
+                    let urResults = document.getElementById(urDivid);
+                    this.outerDiv.appendChild(urResults);
+                }
             }
-            $(tmp).show();
         }
     }
 
@@ -1247,7 +1252,6 @@ Yet another is that there is an internal error.  The internal error message is: 
         if (typeof noUI !== "boolean") {
             noUI = false;
         }
-        this.isAnswered = true;
         var prog = await this.buildProg(true);
         this.saveCode = "True";
         $(this.output).text("");
@@ -1274,16 +1278,16 @@ Yet another is that there is an internal error.  The internal error message is: 
         });
         Sk.divid = this.divid;
         Sk.logResults = logResults;
-        if (this.graderactive && this.containerDiv.closest(".loading")) {
-            Sk.gradeContainer = this.containerDiv.closest(".loading").id;
+        if (this.graderactive && this.outerDiv.closest(".loading")) {
+            Sk.gradeContainer = this.outerDiv.closest(".loading").id;
         } else {
             Sk.gradeContainer = this.divid;
         }
         this.setTimeLimit();
         (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = this.graphics;
         Sk.canvas = this.graphics.id; //todo: get rid of this here and in image
-        let promise_list = [];
         if (!noUI) {
+            this.saveCode = await this.manage_scrubber(this.saveCode);
             $(this.runButton).attr("disabled", "disabled");
             $(this.historyScrubber).off("slidechange");
             $(this.historyScrubber).slider("disable");
@@ -1291,49 +1295,40 @@ Yet another is that there is an internal error.  The internal error message is: 
                 duration: 700,
                 queue: false,
             });
-            this.saveCode = await this.manage_scrubber(this.saveCode);
         }
-        this.run_promise = Sk.misceval.asyncToPromise(function () {
-            return Sk.importMainWithBody("<stdin>", false, prog, true);
-        });
-        promise_list.push(this.run_promise);
-        // Make sure that the history scrubber is fully initialized AND the code has been run
-        // before we start logging stuff.
-        var self = this;
-        Promise.all(promise_list)
-            .then(
-                function () {
-                    $(this.runButton).removeAttr("disabled");
-                    if (!noUI) {
-                        if (this.slideit) {
-                            $(this.historyScrubber).on(
-                                "slidechange",
-                                this.slideit.bind(this)
-                            );
-                        }
-                        $(this.historyScrubber).slider("enable");
-                    }
-                    this.errLastRun = false;
-                    this.errinfo = "success";
-                }.bind(this)
-            )
-            .catch(function (err) {
-                $(self.runButton).removeAttr("disabled");
-                $(self.historyScrubber).on(
+        try {
+            await Sk.misceval.asyncToPromise(function () {
+                return Sk.importMainWithBody("<stdin>", false, prog, true);
+            });
+            if (!noUI) {
+                if (this.slideit) {
+                    $(this.historyScrubber).on(
+                        "slidechange",
+                        this.slideit.bind(this)
+                    );
+                }
+                $(this.historyScrubber).slider("enable");
+            }
+            this.errLastRun = false;
+            this.errinfo = "success";
+        } catch (err) {
+            if (!noUI) {
+                $(this.historyScrubber).on(
                     "slidechange",
-                    self.slideit.bind(self)
+                    this.slideit.bind(this)
                 );
-                $(self.historyScrubber).slider("enable");
-                self.errinfo = err.toString();
-                self.addErrorMessage(err);
-            });
-        if (typeof window.allVisualizers != "undefined") {
-            $.each(window.allVisualizers, function (i, e) {
-                e.redrawConnectors();
-            });
+                $(this.historyScrubber).slider("enable");
+            }
+            this.errinfo = err.toString();
+            this.addErrorMessage(err);
+        } finally {
+            $(this.runButton).removeAttr("disabled");
+            if (typeof window.allVisualizers != "undefined") {
+                $.each(window.allVisualizers, function (i, e) {
+                    e.redrawConnectors();
+                });
+            }
         }
-
-        return this.run_promise;
     }
 
     disableInteraction() {

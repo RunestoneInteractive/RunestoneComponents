@@ -1,7 +1,7 @@
 <h2>ShowEval</h2>
 
 ```html
-<div data-childcomponent="showeval" class="runestone explainer alert alert-warning">
+<div data-component="showeval" class="runestone explainer alert alert-warning">
     <button class="btn btn-success" id="showEval_0_nextStep">Forward</button>
     <button class="btn btn-default" id ="showEval_0_reset">Reset</button>
     <div class="evalCont" style="background-color: #FDFDFD;"> <br /></div>

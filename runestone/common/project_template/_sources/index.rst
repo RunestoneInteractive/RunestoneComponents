@@ -87,6 +87,7 @@ Section 4: Theme
 You can override the style rules in the default theme by adding css rules to a file named **theme-overrides.css** (the filename is important - this will replace an existing file). Make sure the file's directory is part of the ``html_static_path``. You can do so by placing it in a folder **_static**, then modifying ``html_static_path`` in conf.py to include that folder:
 
 .. code:: 
+
     html_static_path =  runestone_static_dirs() + ['_static']
 
 

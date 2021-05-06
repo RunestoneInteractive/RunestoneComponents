@@ -1,0 +1,7 @@
+.toggle-preview {
+    border: 4px solid;
+    border-radius: 10px;
+    background-color: azure;
+    padding-top: 10px;
+    box-shadow: 10px 5px 5px gray;
+}

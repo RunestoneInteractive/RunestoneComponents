@@ -14,11 +14,9 @@ Testing: Clickable Area Questions
    (e.g. "DataStructures/queues.rst").
 
 
-
 Clickable Area
 --------------
-
-.. clickablearea:: question1
+.. clickablearea:: test_clickablearea_1
     :question: Click the rainbow color(s)
     :feedback: This is incorrect
     :iscode:
@@ -29,7 +27,7 @@ Clickable Area
     :click-incorrect:Black:endclick:
 
 
-.. clickablearea:: question2
+.. clickablearea:: test_clickablearea_2
     :question: Click the rainbow color(s)
     :feedback: This is incorrect
     :table:

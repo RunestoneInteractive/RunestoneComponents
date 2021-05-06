@@ -27,7 +27,7 @@ Base Class Provides
 
 All Components
 --------------
-* constructor that takes an object of options
+* constructor that takes an object of options.  The constructor will create a Promise as an attribute of the object called `component_ready_promise` This promise should resolve after all asynchronous operations required for initialization have completed.
 * restoreAnswers
 * setLocalStorage
 * checkLocalStorage

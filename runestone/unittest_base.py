@@ -22,18 +22,19 @@ from urllib.error import URLError
 
 # Third-party imports
 # -------------------
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
 import pytest
 from pyvirtualdisplay import Display
-
-logging.basicConfig(level=logging.WARN)
-mylogger = logging.getLogger()
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
 
 # Local imports
 # -------------
-# None
+from runestone.shared_conftest import element_has_css_class
+
+logging.basicConfig(level=logging.WARN)
+mylogger = logging.getLogger()
 
 # Globals
 # =======
@@ -75,15 +76,6 @@ class ModuleFixture(unittest.TestCase):
         # Change to this directory for running Runestone.
         self.old_cwd = os.getcwd()
         os.chdir(self.base_path)
-        # use `run` so that `npm run build` completes before we move on to `runestone build`
-        # otherwise the runestone build may fail due to lack of a runestone.js file!
-        p = subprocess.run(
-            ["npm.cmd" if IS_WINDOWS else "npm", "run", "build"],
-            capture_output=True,
-            text=True,
-        )
-        print(p.stdout + p.stderr)
-        self.assertFalse(p.returncode)
         # Compile the docs. Save the stdout and stderr for examination.
         p = subprocess.run(
             ["runestone", "build", "--all"], capture_output=True, text=True,
@@ -184,6 +176,7 @@ class ModuleFixture(unittest.TestCase):
 
     def tearDownModule(self):
         # Shut down Selenium.
+        self.driver.close()
         self.driver.quit()
         if self.display:
             self.display.stop()
@@ -211,8 +204,19 @@ def module_fixture_maker(module_path, return_mf=False, exit_status_success=True)
         return mf.setUpModule, mf.tearDownModule
 
 
-# Provide a base test case which sets up the `Selenium <http://selenium-python.readthedocs.io/>`_ driver.
+# Provide a base test case which sets up the `Selenium <http://selenium-python.readthedocs.io/>`_ driver. TODO: Port all test to the pytest framework, then remove this.
 class RunestoneTestCase(unittest.TestCase):
+    # Wait until a Runestone component has finished rendering itself, given the ID of the component.
+    def wait_until_ready(self, id):
+        # The component is ready when it has the class below.
+        self.wait.until(
+            element_has_css_class((By.ID, id), "runestone-component-ready")
+        )
+
+    # Get a page from the local server.
+    def get(self, relative_url):
+        return self.driver.get(f"{self.host}/{relative_url}")
+
     def setUp(self):
         # Use the shared module-wide driver.
         self.driver = mf.driver
@@ -228,29 +232,3 @@ class RunestoneTestCase(unittest.TestCase):
         self.driver.execute_script("window.localStorage.clear();")
         self.driver.execute_script("window.sessionStorage.clear();")
         self.driver.delete_all_cookies()
-
-
-# An expectation for Selenium, used for checking that an element has a particular css class. From the `Selenium docs <https://selenium-python.readthedocs.io/waits.html#explicit-waits>`_, under the "Custom wait conditions" subheading.
-#
-# locator - used to find the element
-#
-# returns the WebElement once it has the particular css class.
-class element_has_css_class:
-    def __init__(
-        self,
-        # The element to find; this is passed directly to `driver.find_element <https://selenium-python.readthedocs.io/api.html#selenium.webdriver.remote.webdriver.WebDriver.find_element>`_. See the `Selenium docs`_.
-        locator,
-        # The CSS class to look for.
-        css_class,
-    ):
-
-        self.locator = locator
-        self.css_class = css_class
-
-    def __call__(self, driver):
-        # Find the referenced element.
-        element = driver.find_element(*self.locator)
-        if self.css_class in element.get_attribute("class"):
-            return element
-        else:
-            return False

@@ -2,12 +2,8 @@
 
 "use strict";
 
-import RunestoneBase from "./runestonebase";
 import "../css/user-highlights.css";
 
-var urlList;
-var extendType;
-var rsb = new RunestoneBase();
 
 function getCompletions() {
     // Get the completion status
