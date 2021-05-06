@@ -99,9 +99,8 @@ function addReadingList() {
                 name: "link",
                 class: "btn btn-lg ' + 'buttonConfirmCompletion'",
                 href: nxt_link,
-                text: `Continue to page ${
-                    position + 2
-                } of ${num_readings} in the reading assignment.`,
+                text: `Continue to page ${position + 2
+                    } of ${num_readings} in the reading assignment.`,
             });
         } else {
             l = $("<div />", {
@@ -196,7 +195,7 @@ class PageProgressBar {
             if (
                 val == 100.0 &&
                 $("#completionButton").text().toLowerCase() ===
-                    "mark as completed"
+                "mark as completed"
             ) {
                 $("#completionButton").click();
             }
@@ -206,12 +205,29 @@ class PageProgressBar {
 
 export var pageProgressTracker = {};
 
-function handlePageSetup() {
+async function handlePageSetup() {
     var mess;
-    if (eBookConfig.useRunestoneServices) {
-        jQuery.get(eBookConfig.ajaxURL + "set_tz_offset", {
-            timezoneoffset: new Date().getTimezoneOffset() / 60,
-        });
+    let headers = new Headers({
+        "Content-type": "application/json; charset=utf-8",
+        Accept: "application/json",
+    });
+    let data = { timezoneoffset: new Date().getTimezoneOffset() / 60 }
+    let request = new Request(
+        "/logger/set_tz_offset",
+        {
+            method: "POST",
+            body: JSON.stringify(data),
+            headers: headers,
+        }
+    );
+    try {
+        let response = await fetch(request);
+        if (response.status != 200) {
+            console.log(`Failed to set timezone! ${response.statusText}`)
+        }
+        data = await response.json();
+    } catch (e) {
+
     }
 
     if (eBookConfig.isLoggedIn) {
