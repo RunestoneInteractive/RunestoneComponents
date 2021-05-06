@@ -15,6 +15,7 @@
 import RunestoneBase from "../../common/js/runestonebase.js";
 import "../css/dragndrop.css";
 import "./dragndrop-i18n.en.js";
+import "./dragndrop-i18n.pt-br.js";
 
 export var ddList = {}; // Dictionary that contains all instances of dragndrop objects
 
@@ -43,7 +44,7 @@ export default class DragNDrop extends RunestoneBase {
     populate() {
         for (var i = 0; i < this.origElem.childNodes.length; i++) {
             if (
-                $(this.origElem.childNodes[i]).data("component") === "dropzone"
+                $(this.origElem.childNodes[i]).data("subcomponent") === "dropzone"
             ) {
                 var tmp = $(this.origElem).find(
                     `#${$(this.origElem.childNodes[i]).attr("for")}`
@@ -64,11 +65,11 @@ export default class DragNDrop extends RunestoneBase {
                 tmpArr.push(otherReplaceSpan);
                 this.dragPairArray.push(tmpArr);
             } else if (
-                $(this.origElem.childNodes[i]).data("component") === "question"
+                $(this.origElem.childNodes[i]).data("subcomponent") === "question"
             ) {
                 this.question = this.origElem.childNodes[i].innerHTML;
             } else if (
-                $(this.origElem.childNodes[i]).data("component") === "feedback"
+                $(this.origElem.childNodes[i]).data("subcomponent") === "feedback"
             ) {
                 this.feedback = this.origElem.childNodes[i].innerHTML;
             }
@@ -80,6 +81,7 @@ export default class DragNDrop extends RunestoneBase {
     ========================================*/
     createNewElements() {
         this.containerDiv = document.createElement("div");
+        this.containerDiv.id = this.divid;
         $(this.containerDiv).addClass(
             "alert alert-warning draggable-container"
         );
@@ -96,7 +98,7 @@ export default class DragNDrop extends RunestoneBase {
         this.dragDropWrapDiv.appendChild(this.draggableDiv);
         this.dragDropWrapDiv.appendChild(this.dropZoneDiv);
         this.createButtons();
-        this.checkServer("dragNdrop");
+        this.checkServer("dragNdrop", true);
     }
     finishSettingUp() {
         this.appendReplacementSpans();

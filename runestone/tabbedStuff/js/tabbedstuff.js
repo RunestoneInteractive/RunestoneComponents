@@ -34,6 +34,7 @@ class TabbedStuff extends RunestoneBase {
         this.activeTab = 0; // default value--activeTab is the index of the tab that starts open
         this.findActiveTab();
         this.createTabContainer();
+        this.indicate_component_ready();
     }
     /*===========================================
     == Update attributes of instance variables ==
@@ -57,10 +58,10 @@ class TabbedStuff extends RunestoneBase {
     == Creating/appending final HTML elements ==
     ==========================================*/
     createTabContainer() {
-        this.replacementDiv = document.createElement("div");
-        this.replacementDiv.id = this.divid;
-        $(this.replacementDiv).addClass(this.origElem.getAttribute("class"));
-        $(this.replacementDiv).attr({ role: "tabpanel" });
+        this.containerDiv = document.createElement("div");
+        this.containerDiv.id = this.divid;
+        $(this.containerDiv).addClass(this.origElem.getAttribute("class"));
+        $(this.containerDiv).attr({ role: "tabpanel" });
         this.tabsUL = document.createElement("ul");
         this.tabsUL.id = this.divid + "_tab";
         $(this.tabsUL).addClass("nav nav-tabs");
@@ -68,10 +69,10 @@ class TabbedStuff extends RunestoneBase {
         this.tabContentDiv = document.createElement("div"); // Create tab content container that holds tab panes w/content
         $(this.tabContentDiv).addClass("tab-content");
         this.createTabs(); // create and append tabs to the <ul>
-        this.replacementDiv.appendChild(this.tabsUL);
-        this.replacementDiv.appendChild(this.tabContentDiv);
+        this.containerDiv.appendChild(this.tabsUL);
+        this.containerDiv.appendChild(this.tabContentDiv);
         this.addCMD(); // Adds fuctionality for Codemirror/Disqus
-        $(this.origElem).replaceWith(this.replacementDiv);
+        $(this.origElem).replaceWith(this.containerDiv);
     }
     createTabs() {
         // Create tabs in format <li><a><span></span></a></li> to be appended to the <ul>

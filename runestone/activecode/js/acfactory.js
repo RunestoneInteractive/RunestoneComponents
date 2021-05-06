@@ -26,6 +26,9 @@ export default class ACFactory {
                 opts[attrname] = addopts[attrname];
             }
         }
+        if (lang === undefined) {
+            lang = $(opts.orig).find("[data-lang]").data("lang");
+        }
         if (opts.timed == true) {
             if (lang === "python") {
                 return new TimedActiveCode(opts);
@@ -157,9 +160,9 @@ export default class ACFactory {
 // Page Initialization
 //
 
-$(document).ready(function () {
+$(document).bind("runestone:login-complete", function () {
     ACFactory.createScratchActivecode();
-    $("[data-component=activecode]").each(function (index) {
+    $("[data-component=activecode]").each(function () {
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
             try {
@@ -168,7 +171,7 @@ $(document).ready(function () {
                     $(this).find("textarea").data("lang")
                 );
             } catch (err) {
-                console.log(`Error rendering ClickableArea Problem ${this.id}
+                console.log(`Error rendering Activecode Problem ${this.id}
                 Details: ${err}`);
             }
         }

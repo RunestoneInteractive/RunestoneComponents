@@ -123,7 +123,9 @@ def setup(app):
     logger.info("Connecting to DB")
     try:
         dburl = get_dburl()
-        engine = create_engine(dburl, client_encoding="utf8", convert_unicode=True)
+        # SQLite doesn't support ``client_encoding``, while PostgreSQL does.
+        encoding = dict(client_encoding="utf8") if dburl.startswith("postgresql") else {}
+        engine = create_engine(dburl, convert_unicode=True, **encoding)
         Session = sessionmaker()
         engine.connect()
         Session.configure(bind=engine)
@@ -383,6 +385,7 @@ def addQuestionToDB(self):
                     question_name=id_,
                 )
                 sess.execute(ins)
+            sess.commit()
 
 
 def addQNumberToDB(app, node, qnumber):

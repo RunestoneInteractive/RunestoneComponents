@@ -50,11 +50,11 @@ def depart_showeval_node(self, node):
 
 
 CODE = """
-<div data-childcomponent="showeval" data-question_label="%(question_label)s" class="%(divclass)s" id="%(divid)s" data-tracemode="%(trace_mode)s" %(optional)s>
+<div data-component="showeval" data-question_label="%(question_label)s" class="%(divclass)s" id="%(divid)s" data-tracemode="%(trace_mode)s" %(optional)s>
     <button class="btn btn-success" id="%(divid)s_nextStep">Next Step</button>
     <button class="btn btn-default" id ="%(divid)s_reset">Reset</button>
     <div class="evalCont" style="background-color: #FDFDFD;">%(preReqLines)s</div>
-    <div class="evalCont" id="%(divid)s"></div>
+    <div class="evalCont"></div>
     <script>
     if (typeof window.raw_steps === "undefined") {
     window.raw_steps = {};

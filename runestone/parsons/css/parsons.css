@@ -341,3 +341,7 @@
 .cd_section {
     max-width: none;
 }
+
+#timed_Test .pagination {
+    margin: 5px 0;
+}

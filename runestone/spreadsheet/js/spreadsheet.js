@@ -33,6 +33,7 @@ class SpreadSheet extends RunestoneBase {
         this.divid = this.div_id;
         this.containerDiv = document.getElementById(this.div_id);
         this.addCaption("runestone");
+        this.indicate_component_ready();
     }
 
     renderSheet() {

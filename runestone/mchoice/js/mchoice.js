@@ -47,8 +47,8 @@ export default class MultipleChoice extends RunestoneBase {
         this.findFeedbacks();
         this.createCorrectList();
         this.createMCForm();
-        this.checkServer("mChoice");
         this.addCaption("runestone");
+        this.checkServer("mChoice", true);
     }
 
     /*====================================
@@ -388,9 +388,8 @@ export default class MultipleChoice extends RunestoneBase {
             if (buttonObjs[i].checked) {
                 given = buttonObjs[i].value;
                 this.givenArray.push(given);
-                this.feedbackString += `<li value="${i + 1}">${
-                    this.feedbackList[i]
-                }</li>`;
+                this.feedbackString += `<li value="${i + 1}">${this.feedbackList[i]
+                    }</li>`;
                 this.givenlog += given + ",";
                 this.singlefeedback = this.feedbackList[i];
             }
@@ -551,7 +550,9 @@ export default class MultipleChoice extends RunestoneBase {
         }
     }
     enableMCComparison() {
-        this.compareButton.disabled = false;
+        if (eBookConfig.enableCompareMe) {
+            this.compareButton.disabled = false;
+        }
     }
     instructorMchoiceModal(data) {
         // data.reslist -- student and their answers

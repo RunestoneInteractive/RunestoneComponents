@@ -19,6 +19,7 @@ export default class SQLActiveCode extends ActiveCode {
         this.config = {
             locateFile: (filename) => `${fnprefix}/${filename}`,
         };
+        this.showLast = $(this.origElem).data("showlastsql");
         var self = this;
         initSqlJs(this.config).then(function (SQL) {
             // set up call to load database asynchronously if given
@@ -79,7 +80,6 @@ export default class SQLActiveCode extends ActiveCode {
         if (typeof noUI !== "boolean") {
             noUI = false;
         }
-        var scrubber_dfd, history_dfd;
         // Clear any old results
         this.saveCode = "True";
         let divid = this.divid + "_sql_out";
@@ -153,13 +153,7 @@ export default class SQLActiveCode extends ActiveCode {
         }
 
         try {
-            var __ret = await this.manage_scrubber(
-                scrubber_dfd,
-                history_dfd,
-                this.saveCode
-            );
-            history_dfd = __ret.history_dfd;
-            this.saveCode = __ret.saveCode;
+            this.saveCode = await this.manage_scrubber(this.saveCode);
             if (this.slideit) {
                 $(this.historyScrubber).on(
                     "slidechange",
@@ -175,7 +169,15 @@ export default class SQLActiveCode extends ActiveCode {
         respDiv.id = divid;
         this.outDiv.appendChild(respDiv);
         $(this.outDiv).show();
-        for (let r of this.results) {
+        // Sometimes we don't want to show a bunch of intermediate results
+        // like when we are including a bunch of previous statements from
+        // other activecodes In that case the showlastsql flag can be set
+        // so we only show the last result
+        let resultArray = this.results;
+        if (this.showLast) {
+            resultArray = this.results.slice(-1);
+        }
+        for (let r of resultArray) {
             let section = document.createElement("div");
             section.setAttribute("class", "ac_sql_result");
             respDiv.appendChild(section);
@@ -184,7 +186,7 @@ export default class SQLActiveCode extends ActiveCode {
                     let tableDiv = document.createElement("div");
                     section.appendChild(tableDiv);
                     let maxHeight = 350;
-                    if (this.results.length > 1) maxHeight = 200; // max height smaller if lots of results
+                    if (resultArray.length > 1) maxHeight = 200; // max height smaller if lots of results
                     createTable(r, tableDiv, maxHeight);
                     let messageBox = document.createElement("pre");
                     let rmsg = r.rowcount !== 1 ? " rows " : " row ";
@@ -292,7 +294,6 @@ export default class SQLActiveCode extends ActiveCode {
             this.passed + this.failed
         } tests for ${pct}%`;
         this.unit_results = `percent:${pct}:passed:${this.passed}:failed:${this.failed}`;
-
         return result;
     }
     testOneAssert(row, col, oper, expected, result_table) {

@@ -18,11 +18,10 @@ Testing: Drag and Drop Questions
 Drag and Drop
 -------------
 
-.. dragndrop:: question3
+.. dragndrop:: test_dnd_1
     :feedback: Review your choice
     :match_1: C++|||cpp
     :match_2: Java|||java
     :match_3: Python|||py
 
     Match the language and the file extension.
-

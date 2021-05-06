@@ -26,6 +26,12 @@
 import RunestoneBase from "../../common/js/runestonebase";
 import CodeMirror from "codemirror";
 import "codemirror/mode/gas/gas.js";
+import "codemirror/mode/python/python.js";
+import "codemirror/mode/javascript/javascript.js";
+import "codemirror/mode/sql/sql.js";
+import "codemirror/mode/clike/clike.js";
+import "codemirror/mode/octave/octave.js";
+import "codemirror/lib/codemirror.css";
 
 // Constructor
 // ===========
@@ -39,6 +45,7 @@ class LP extends RunestoneBase {
         this.useRunestoneServices = opts.useRunestoneServices;
         // Store the DOM element (the input) for the "Test" button.
         this.element = opts.orig;
+        this.containerDiv = this.element;
         this.divid = this.element.id;
         // Store the DOM element (the textarea) where compile results will be displayed.
         this.resultElement = $(this.element).siblings("textarea");
@@ -66,9 +73,9 @@ class LP extends RunestoneBase {
             // Keep track of it.
             that.textAreas.push(editor);
         });
-        this.checkServer("lp_build");
         // Handle clicks to the "Save and run" button.
         $(this.element).click((eventObject) => that.onSaveAndRun(eventObject).then(null));
+        this.checkServer("lp_build", true);
     }
 
     async onSaveAndRun(_eventObject) {

@@ -110,9 +110,9 @@ $.i18n().load({
         msg_activecode_save_run: "Save & Run",
         msg_activecode_render: "Save & Render",
         msg_activecode_assertion_error:
-            "An assertion error happens when python encounters an assertion statement.  Python evaluates the expression to the right of the word assert; if that expression isTrue everything is fine and the program continues.  If the expression is False Python raises an error and stops.",
+            "An assertion error happens when python encounters an assertion statement.  Python evaluates the expression to the right of the word assert; if that expression is True everything is fine and the program continues.  If the expression is False Python raises an error and stops.",
         msg_activecode_assertion_error_fix:
-            "Check the expression to the right of assert.  The expression is False and you will need to determine why that is.  You may want to simply print out the indidividual parts of the expression to understand why it is evaluating to False.",
+            "Check the expression to the right of assert.  The expression is False and you will need to determine why that is.  You may want to simply print out the individual parts of the expression to understand why it is evaluating to False.",
         msg_activecode_load_db: "Loading DB...",
     },
 });

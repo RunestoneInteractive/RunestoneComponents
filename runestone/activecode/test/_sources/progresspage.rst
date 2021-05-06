@@ -1,7 +1,7 @@
 Progress Bar Testing
 ====================
 
-.. activecode:: test_p1
+.. activecode:: test_activecode_5
 
    print("Hello World")
 

@@ -69,8 +69,8 @@
                 <div>
                   <b>Runestone in social media:</b>
                 </div>
-                <a href="https://twitter.com/iRunestone" class="twitter-follow-button" data-show-count="true">Follow @iRunestone</a><script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-                <div class="fb-like" data-href="https://www.facebook.com/RunestoneInteractive" data-send="false" data-layout="button_count" data-width="300" data-show-faces="false" data-font="arial"></div>
+                <a href="https://twitter.com/iRunestone">Follow @iRunestone</a>
+                <a href="https://www.facebook.com/RunestoneInteractive">Our Facebook Page</a>
               </li>
 
               <li class="divider"></li>
@@ -243,8 +243,9 @@
     eBookConfig.username = '{{ user_id}}';
     eBookConfig.readings = {{ readings}};
     eBookConfig.activities = {{ activity_info }}
-    eBookConfig.downloadsEnabled = {{downloads_enabled}};
-    eBookConfig.allow_pairs = {{allow_pairs}}
+    eBookConfig.downloadsEnabled = {{ downloads_enabled}};
+    eBookConfig.allow_pairs = {{ allow_pairs}}
+    eBookConfig.enableCompareMe = {{ enable_compare_me }};
     {% endraw %}
   {% else %}
     eBookConfig.useRunestoneServices = {% if use_services == 'true' -%}true{%- else -%}false{%- endif -%};
@@ -253,6 +254,7 @@
     eBookConfig.course = '{{course_id}}';
     eBookConfig.basecourse = '{{ basecourse }}';
     eBookConfig.isLoggedIn = false;
+    eBookConfig.enableCompareMe = eBookConfig.useRunestoneServices;
   {% endif %}
   eBookConfig.ajaxURL = eBookConfig.app+'/ajax/';
   eBookConfig.logLevel = {{loglevel}};
@@ -276,19 +278,6 @@
          <script data-ad-client="{{settings.adsenseid}}" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
         {% endif %}
     {% endraw %}
-{% endif %}
-
-{% if minimal_outside_links != 'True' %}
-<div id="fb-root"></div>
-<script>
-  (function(d, s, id) {
-    var js, fjs = d.getElementsByTagName(s)[0];
-    if (d.getElementById(id)) return;
-    js = d.createElement(s); js.id = id;
-    js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&status=0";
-    fjs.parentNode.insertBefore(js, fjs);
-  }(document, 'script', 'facebook-jssdk'));
-</script>
 {% endif %}
 
 {% endblock %}

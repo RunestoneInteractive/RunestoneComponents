@@ -259,15 +259,17 @@ function setupNavbarLoggedIn() {
 $(document).bind("runestone:login", setupNavbarLoggedIn);
 
 function setupNavbarLoggedOut() {
-    console.log("setup navbar for logged out");
-    $("#registerlink").show();
-    $("#profilelink").hide();
-    $("#passwordlink").hide();
-    $("#ip_dropdown_link").hide();
-    $("li.loginout").html(
-        '<a href="' + eBookConfig.app + '/default/user/login">Login</a>'
-    );
-    $(".footer").html("user not logged in");
+    if (eBookConfig.useRunestoneServices) {
+        console.log("setup navbar for logged out");
+        $("#registerlink").show();
+        $("#profilelink").hide();
+        $("#passwordlink").hide();
+        $("#ip_dropdown_link").hide();
+        $("li.loginout").html(
+            '<a href="' + eBookConfig.app + '/default/user/login">Login</a>'
+        );
+        $(".footer").html("user not logged in");
+    }
 }
 $(document).bind("runestone:logout", setupNavbarLoggedOut);
 

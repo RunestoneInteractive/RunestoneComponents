@@ -11,6 +11,8 @@
  return the buttons, but I'm having a hard time thinking of any other use for that besides mine.
  */
 
+import RunestoneBase from "../../common/js/runestonebase.js";
+import "./pytutor-embed.bundle.js";
 import "./../css/pytutor.css";
 
 function attachLoggers(codelens, divid) {
@@ -30,6 +32,9 @@ function attachLoggers(codelens, divid) {
     codelens.domRoot.find("#executionSlider").bind("slide", function (evt, ui) {
         rb.logBookEvent({ event: "codelens", act: "slide", div_id: divid });
     });
+    // TODO: The component isn't quite fully initialized, but it also doesn't inherit from RunestoneBase. This is a convenient place to mark it ready for now, but it should be moved forward in time during a rewrite.
+    rb.containerDiv = document.getElementById(divid);
+    rb.indicate_component_ready();
 }
 
 function styleButtons(divid) {

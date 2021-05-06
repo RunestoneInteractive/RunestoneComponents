@@ -1,6 +1,6 @@
 /*
 The TimedActivecode classes are a great example of where multiple inheritance would be useful
-But since Javascript does not suppport multiple inheritance we use the mixin pattern.
+But since Javascript does not support multiple inheritance we use the mixin pattern.
 
 */
 import LiveCode from "./livecode";
@@ -10,13 +10,14 @@ import HTMLActiveCode from "./activecode_html";
 import SQLActiveCode from "./activecode_sql";
 
 var TimedActiveCodeMixin = {
-    timedInit: function (opts) {
+    timedInit: async function (opts) {
         this.isTimed = true;
         this.hideButtons();
-        this.addHistoryScrubber();
+        await this.addHistoryScrubber(true); // position last
         this.needsReinitialization = true; // the run button click listener needs to be reinitialized
         this.containerDiv.classList.add("timedComponent");
         window.edList[this.divid] = this;
+        return true;
     },
 
     hideButtons: function () {
@@ -53,14 +54,12 @@ var TimedActiveCodeMixin = {
     checkCorrectTimed: function () {
         // pct_correct is set by the unittest/gui.py module in skulpt.
         // it relies on finding this object in the edList
-        if (this.pct_correct) {
+        if (this.isAnswered) {
             if (this.pct_correct >= 100.0) {
                 return "T";
             } else {
                 return "F";
             }
-        } else if (this.errLastRun) {
-            return "F";
         } else {
             return "I"; // we ignore this in the grading if no unittests
         }
@@ -71,10 +70,23 @@ var TimedActiveCodeMixin = {
     },
 
     reinitializeListeners: function (taken) {
+        if (!this.runButton.onclick) {
+            console.log("reattaching runbuttonhandler");
+            this.runButton.onclick = this.runButtonHander.bind(this);
+        }
         $(this.codeDiv).show();
         this.runButton.disabled = false;
         $(this.codeDiv).removeClass("ac-disabled");
         this.editor.refresh();
+        $(this.histButton).click(this.addHistoryScrubber.bind(this));
+        if (this.historyScrubber !== null) {
+            $(this.historyScrubber).slider({
+                max: this.history.length - 1,
+                value: this.history.length - 1,
+                slide: this.slideit.bind(this),
+                change: this.slideit.bind(this),
+            });
+        }
         if (taken) {
             $(`#${this.divid}_unit_results`).show();
         }
@@ -93,14 +105,18 @@ Object.assign(TimedLiveCode.prototype, TimedActiveCodeMixin);
 export class TimedActiveCode extends ActiveCode {
     constructor(opts) {
         super(opts);
-        this.timedInit(opts);
+        this.timedInitComplete = this.timedInit(opts);
     }
 
     // for timed exams we need to call runProg and tell it that there is
-    // no GUI for sliders or other things. We also do not want it to log
+    // no GUI for sliders or other things.
     // the answers.
-    checkCurrentAnswer() {
-        this.run_promise = this.runProg(true, false);
+    async checkCurrentAnswer() {
+        let noUI = true;
+        const result = await this.timedInitComplete;
+        if (this.isAnswered) {
+            await this.runProg(noUI, false);
+        }
     }
 }
 
