@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html data-require="math">
+<head>
+	<meta charset="UTF-8" />
+	<title>Converting Hex to Binary</title>
+	<script src="../khan-exercise.js"></script>
+</head>
+<body>
+	<div class="exercise">
+	<div class="vars">
+		<var id="Dec">randRange( 0, 255 )</var>
+	</div>
+
+	<div class="problems">
+		<div "decimal to binary">
+			<div class="question">
+			        <p>Express <b>hexadecimal</b> <var>Dec.toString(16).toUpperCase()</var> in <b>binary (base 2)</b>  notation (drop any leading 0s and no spaces).
+			</div>
+			<div class="solution" data-type="text"><var>Dec.toString(2)</var></div>
+		</div>
+	</div>
+
+	<div class="hints">
+	        <p>Write each hexadecimal digit as a 4-bit binary string.
+		<p>The answer is <var>Dec.toString(2)</var></p>
+	</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html data-require="math morelli">
+<head>
+	<meta charset="UTF-8" />
+	<title>Python boolean</title>
+	<script src="../khan-exercise.js"></script>
+</head>
+<body>
+	<div class="exercise">
+	<div class="vars">
+		<var id="V1">randRange( 0, 20)</var>
+		<var id="V2">randRange( 0, 20)</var>
+		<var id="V3">randRange( 0, 20)</var>
+		<var id="V4">randRange( 0, 20)</var>
+		<var id="R1">randFromArray(["==", "!=", "<", ">", ">=", "<="])</var>
+		<var id="R2">randFromArray(["==", "!=", "<", ">", ">=", "<="])</var>
+	</div>
+
+	<div class="problems">
+		<div "evaluate boolean">
+			<div class="question">
+			        <p>What would be output by the following Python code segment: 
+                                <pre>
+                                   x = <var>V1</var>
+                                   y = <var>V2</var>
+				   print x <var>R1</var> y
+				</pre>
+			</div>
+			<div class="solution" data-type="text"><var>jsBoolToPythonBool(evalPythonRelation(V1, R1, V2))</var></div>
+		</div>
+	</div>
+
+	<div class="hints">
+          <p>Is <var>V1</var> <var>symbolToText(R1)</var> <var>V2</var>?
+          <p>In Python the boolean values are <font color="red">True</font> and <font color="red">False</font>.
+          <p>The answer is <var>jsBoolToPythonBool(evalPythonRelation(V1, R1, V2))</var>.
+	</div>
+	</div>
+</body>
+</html>
