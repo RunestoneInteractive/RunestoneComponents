@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html data-require="math morelli">
+<head>
+	<meta charset="UTF-8" />
+	<title>Python boolean</title>
+	<script src="../khan-exercise.js"></script>
+</head>
+<body>
+	<div class="exercise">
+	<div class="vars">
+		<var id="V1">randRange( 0, 20)</var>
+		<var id="V2">randRange( 0, 20)</var>
+		<var id="V3">randRange( 0, 20)</var>
+		<var id="V4">randRange( 0, 20)</var>
+		<var id="R1">randFromArray(["==", "!=", "<", ">", ">=", "<="])</var>
+		<var id="R2">randFromArray(["==", "!=", "<", ">", ">=", "<="])</var>
+		<var id="L1">randFromArray(["and", "or"])</var>
+	</div>
+
+	<div class="problems">
+		<div "evaluate boolean">
+			<div class="question">
+			        <p>What would be output by the following Python code segment: 
+                                <pre>
+                                   x = <var>V1</var>
+                                   y = <var>V2</var>
+				   print x <var>R1</var> <var>V3</var> <var>L1</var> y <var>R2</var> <var>V4</var> 
+				</pre>
+			</div>
+			<div class="solution" data-type="text"><var>jsBoolToPythonBool(evalPythonLogical( evalPythonRelation(V1, R1, V3), L1, evalPythonRelation(V2, R2, V4)))</var></div>
+		</div>
+	</div>
+
+	<div class="hints">
+          <p>Evaluate the <font color="red">relations</font> (==, !=, <, >, <=, >=) before the <font color="red">logical operators</font> (and, or) ?
+          <p>Remember that for <font color="red">and</font> both sides must be True for the expression to be True.
+          <p>Remember that for <font color="red">or</font> at least one side must be True for the expression to be True.
+          <p>The answer is <var>jsBoolToPythonBool(evalPythonLogical( evalPythonRelation(V1, R1, V3), L1, evalPythonRelation(V2, R2, V4)))</var>.
+	</div>
+	</div>
+</body>
+</html>

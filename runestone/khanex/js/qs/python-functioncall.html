@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html data-require="math morelli">
+<head>
+	<meta charset="UTF-8" />
+	<title>Python: function call</title>
+	<script src="../khan-exercise.js"></script>
+
+        <style type="text/css">
+        <!--
+        .textborder {border: 3px dotted red; padding: 2px;}
+        -->
+        </style>
+
+</head>
+<body>
+	<div class="exercise">
+	<div class="vars">
+		<var id="A">randRange( 0, 20)</var>
+		<var id="B">randRange( 1, 20)</var>
+	</div>
+
+	<div class="problems">
+		<div "decimal to binary">
+			<div class="question">
+			        <p>What would be printed if the following Python script were to be run?
+                                <pre>
+				  a = <var>A</var>
+				  b = <var>B</var>
+				  def goo(x,y):
+				    return hoo(x,y)
+				  def hoo(x,y):
+				    return x / y
+				  c = goo(a,b)
+				  print c
+				</pre>
+			</div>
+			<div class="solution" data-type="text"><var>Math.floor(A/B)</var></div>
+		</div>
+	</div>
+
+	<div class="hints">
+	  <p>Trace the function calls. Start at goo(<var>A</var>, <var>B</var>).
+	  <p>goo(<var>A</var>, <var>B</var>) calls hoo(<var>A</var>, <var>B</var>). What is its value?
+	  <p>hoo(<var>A</var>, <var>B</var>) returns <var>A</var> / <var>B</var>. What is its value?
+          <p><var>A</var> / <var>B</var> = <var>Math.floor(A / B)</var>.  So <var>Math.floor(A/B)</var> would be printed.
+	</div>
+	</div>
+</body>
+</html>

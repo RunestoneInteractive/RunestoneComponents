@@ -10,6 +10,7 @@ module.exports = (env) => {
     return {
         entry: [
             "./runestone/quizly/js/quizly.js",
+            "./runestone/khanex/js/khanex.js",
             "./runestone/shortanswer/js/shortanswer.js",
             "./runestone/activecode/js/acfactory.js",
             "./runestone/mchoice/js/mchoice.js",
