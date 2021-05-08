@@ -10,10 +10,10 @@ SECTION 1: Parsons Problem
 * Test dragging blocks
 * Test help functionality
 
-.. parsonsprob:: Test1
+.. parsonsprob:: test_parsons_1
    :adaptive:
    :order: 0 1 2 3 4
-   
+
    need some text ?
    -----
    def fib(num):
@@ -35,7 +35,7 @@ Section 2: Labeling
 * Numbers left
 * No Numbers
 
-.. parsonsprob:: Test2a
+.. parsonsprob:: test_parsons_2
    :order: 0 1 2 3 4
    :numbered: right
 
@@ -55,7 +55,7 @@ Section 2: Labeling
 
 
 
-.. parsonsprob:: Test2b
+.. parsonsprob:: test_parsons_3
    :order: 0 1 2 3 4
    :numbered: left
 
@@ -75,7 +75,7 @@ Section 2: Labeling
 
 
 
-.. parsonsprob:: Test2c
+.. parsonsprob:: test_parsons_4
    :order: 0 1 2 3 4
 
    need some text ?

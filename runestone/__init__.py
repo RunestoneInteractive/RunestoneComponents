@@ -210,7 +210,6 @@ css_files = [
     "presenter_mode.css",
     "jquery-ui-1.10.3.custom.min.css",
     "bootstrap-sphinx.css",
-    "user-highlights.css",
     "runestone-custom-sphinx-bootstrap.css?v=" + runestone_version,
     "theme-overrides.css",
 ]

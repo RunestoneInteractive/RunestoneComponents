@@ -29,8 +29,6 @@ from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneI
 def setup(app):
     app.add_directive("codelens", Codelens)
 
-    app.add_autoversioned_javascript("pytutor-embed.bundle.js")
-
     app.add_config_value("codelens_div_class", "alert alert-warning cd_section", "html")
     app.add_config_value("trace_url", "http://tracer.runestone.academy:5000", "html")
     app.add_node(CodeLensNode, html=(visit_codelens_node, depart_codelens_node))
@@ -40,7 +38,7 @@ def setup(app):
 
 VIS = """
 <div class="runestone" style="max-width: none;">
-    <div class="%(divclass)s" data-question_label="%(question_label)s">
+    <div class="%(divclass)s" data-component="codelens" data-question_label="%(question_label)s">
         <div class="pytutorVisualizer" id="%(divid)s"
            data-params='{"embeddedMode": true, "lang": "%(language)s", "jumpToEnd": false}'>
         </div>

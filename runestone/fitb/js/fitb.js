@@ -37,9 +37,9 @@ export default class FITB extends RunestoneBase {
             this.scriptSelector(this.origElem).html()
         );
         this.createFITBElement();
-        this.checkServer("fillb");
         this.caption = "Fill in the Blank";
         this.addCaption("runestone");
+        this.checkServer("fillb", true);
     }
     // Find the script tag containing JSON in a given root DOM node.
     scriptSelector(root_node) {
@@ -95,7 +95,8 @@ export default class FITB extends RunestoneBase {
         this.submitButton.addEventListener(
             "click",
             function () {
-                this.startEvaluation(true);
+                this.checkCurrentAnswer();
+                this.logCurrentAnswer();
             }.bind(this),
             false
         );
@@ -162,7 +163,7 @@ export default class FITB extends RunestoneBase {
                 this.renderFeedback();
             }
         } else {
-            this.startEvaluation(false);
+            this.checkCurrentAnswer();
         }
     }
     checkLocalStorage() {
@@ -194,15 +195,21 @@ export default class FITB extends RunestoneBase {
     }
 
     checkCurrentAnswer() {
-        // Start of the evaulation chain
+        // Start of the evaluation chain
         this.isCorrectArray = [];
         this.displayFeed = [];
         this.given_arr = [];
         for (var i = 0; i < this.blankArray.length; i++)
             this.given_arr.push(this.blankArray[i].value);
+        if (this.useRunestoneServices) {
+            if (eBookConfig.enableCompareMe) {
+                this.enableCompareButton();
+            }
+        }
         // Grade locally if we can't ask the server to grade.
         if (this.feedbackArray) {
             this.evaluateAnswers();
+            this.renderFeedback();
         }
     }
 
@@ -213,54 +220,31 @@ export default class FITB extends RunestoneBase {
             answer: answer,
             timestamp: new Date(),
         });
-        var ret = this.logBookEvent({
+        let data = await this.logBookEvent({
             event: "fillb",
             act: answer,
             answer: answer,
             correct: this.correct ? "T" : "F",
             div_id: this.divid,
         });
-        return ret;
-    }
+        if (!this.feedbackArray) {
+            // On success, update the feedback from the server's grade.
+            this.setLocalStorage({
+                answer: answer,
+                timestamp: data.timestamp,
+            });
+            this.correct = data.correct;
+            this.displayFeed = data.displayFeed;
+            this.isCorrectArray = data.isCorrectArray;
+            this.renderFeedback();
+        }
+        return data;
+}
 
     /*==============================
     === Evaluation of answer and ===
     ===     display feedback     ===
     ==============================*/
-    /*
-     * keeping this function for backward compatiblitiy
-     * going forward we should be using
-     * checkCurrentAnswer()
-     * logCurrentAnswer()
-     * renderFeedback()
-     * independently.
-     */
-    async startEvaluation(logFlag) {
-        this.checkCurrentAnswer();
-        if (this.feedbackArray) {
-            this.renderFeedback();
-        }
-        if (logFlag) {
-            // Sometimes we don't want to log the answer--for example, when timed exam questions are re-loaded
-            let data = await this.logCurrentAnswer();
-            if (!this.feedbackArray) {
-                // On success, update the feedback from the server's grade.
-                this.setLocalStorage({
-                    answer: JSON.stringify(this.given_arr),
-                    timestamp: data.timestamp,
-                });
-                this.correct = data.correct;
-                this.displayFeed = data.displayFeed;
-                this.isCorrectArray = data.isCorrectArray;
-                this.renderFeedback();
-            }
-        }
-        if (this.useRunestoneServices) {
-            if (eBookConfig.enableCompareMe) {
-                this.enableCompareButton();
-            }
-        }
-    }
     // Inputs:
     //
     // - Strings entered by the student in ``this.blankArray[i].value``.

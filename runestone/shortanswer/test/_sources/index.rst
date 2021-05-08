@@ -17,12 +17,12 @@ Testing: Short Answer Questions
 Short Answer
 ------------
 
-.. shortanswer:: question1
+.. shortanswer:: test_short_answer_1
 
    What are the colors in the rainbow?
 
 
-.. shortanswer:: question2
+.. shortanswer:: test_short_answer_2
    :optional:
    :mathjax:
 

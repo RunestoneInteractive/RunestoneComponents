@@ -40,26 +40,27 @@ class DataFile extends RunestoneBase {
                 this.createPre();
             }
         }
+        this.indicate_component_ready();
     }
     /*=====================================
     == Create either <pre> or <textarea> ==
     ==  depending on if editing is true  ==
     ==================================*/
     createPre() {
-        this.preContainer = document.createElement("pre");
-        this.preContainer.id = this.divid;
-        $(this.preContainer).attr({ style: "display: " + this.displayClass });
-        this.preContainer.innerHTML = this.origElem.innerHTML;
-        $(this.origElem).replaceWith(this.preContainer);
+        this.containerDiv = document.createElement("pre");
+        this.containerDiv.id = this.divid;
+        $(this.containerDiv).attr({ style: "display: " + this.displayClass });
+        this.containerDiv.innerHTML = this.origElem.innerHTML;
+        $(this.origElem).replaceWith(this.containerDiv);
     }
     createTextArea() {
-        this.textAreaContainer = document.createElement("textarea");
-        this.textAreaContainer.id = this.divid;
-        this.textAreaContainer.rows = this.numberOfRows;
-        this.textAreaContainer.cols = this.numberOfCols;
-        this.textAreaContainer.innerHTML = this.origElem.innerHTML;
-        $(this.textAreaContainer).addClass("datafiletextfield");
-        $(this.origElem).replaceWith(this.textAreaContainer);
+        this.containerDiv = document.createElement("textarea");
+        this.containerDiv.id = this.divid;
+        this.containerDiv.rows = this.numberOfRows;
+        this.containerDiv.cols = this.numberOfCols;
+        this.containerDiv.innerHTML = this.origElem.innerHTML;
+        $(this.containerDiv).addClass("datafiletextfield");
+        $(this.origElem).replaceWith(this.containerDiv);
     }
 }
 

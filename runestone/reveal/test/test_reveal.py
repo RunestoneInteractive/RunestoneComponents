@@ -4,10 +4,10 @@ Test Reveal Answer question directive
 
 __author__ = "yasinovskyy"
 
-def test_r1(selenium_utils):
+
+def test_r1(selenium_utils_get):
     """Initial view. Content is hidden"""
-    su = selenium_utils
-    su.get("index.html")
+    su = selenium_utils_get
     su.wait_until_ready("question1")
 
     q1 = su.driver.find_element_by_css_selector("#question1 div")
@@ -15,10 +15,9 @@ def test_r1(selenium_utils):
     assert "display: none;" == cnamestr
 
 
-def test_r2(selenium_utils):
+def test_r2(selenium_utils_get):
     """Reveal button clicked"""
-    su = selenium_utils
-    su.get("index.html")
+    su = selenium_utils_get
     su.wait_until_ready("question1")
     t1 = su.driver.find_element_by_id("reveal")
 
@@ -31,10 +30,9 @@ def test_r2(selenium_utils):
     assert "display: none;" != cnamestr
 
 
-def test_r3(selenium_utils):
+def test_r3(selenium_utils_get):
     """Content is revealed, then hidden again"""
-    su = selenium_utils
-    su.get("index.html")
+    su = selenium_utils_get
     su.wait_until_ready("question1")
     t1 = su.driver.find_element_by_id("reveal")
 
@@ -48,10 +46,9 @@ def test_r3(selenium_utils):
     assert "display: none;" == cnamestr
 
 
-def test_r4(selenium_utils):
+def test_r4(selenium_utils_get):
     """Check for is_instructor test """
-    su = selenium_utils
-    su.get("index.html")
+    su = selenium_utils_get
     su.wait_until_ready("question1")
     t1 = su.driver.find_element_by_id("reveal")
     assert "{{ if is_instructor: }}" in t1.get_attribute("innerHTML")

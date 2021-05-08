@@ -61,3 +61,10 @@ def selenium_driver_session(selenium_module_fixture):
 @pytest.fixture
 def selenium_utils(selenium_driver):  # noqa: F811
     return _SeleniumUtils(selenium_driver, HOST_URL)
+
+
+# Provide a fixture which loads the ``index.html`` page.
+@pytest.fixture
+def selenium_utils_get(selenium_utils):
+    selenium_utils.get("index.html")
+    return selenium_utils
