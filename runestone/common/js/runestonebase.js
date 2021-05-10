@@ -20,7 +20,9 @@ import { pageProgressTracker } from "./bookfuncs.js";
 
 export default class RunestoneBase {
     constructor(opts) {
-        this.component_ready_promise = new Promise(resolve => this._component_ready_resolve_fn = resolve)
+        this.component_ready_promise = new Promise(
+            (resolve) => (this._component_ready_resolve_fn = resolve)
+        );
         this.optional = false;
         if (opts) {
             this.sid = opts.sid;
@@ -57,7 +59,7 @@ export default class RunestoneBase {
                 // is to look for doAssignment in the URL and then grab
                 // the assignment name from the heading.
                 if (location.href.indexOf("doAssignment") >= 0) {
-                    this.timedWrapper = $("h1#assignment_name").text()
+                    this.timedWrapper = $("h1#assignment_name").text();
                 } else {
                     this.timedWrapper = null;
                 }
@@ -102,7 +104,9 @@ export default class RunestoneBase {
                 post_return = response.json();
             } catch (e) {
                 if (this.isTimed) {
-                    alert(`Error: Your action was not saved! The error was ${e}`);
+                    alert(
+                        `Error: Your action was not saved! The error was ${e}`
+                    );
                 }
                 console.log(`Error: ${e}`);
             }
@@ -192,19 +196,23 @@ export default class RunestoneBase {
                 data.sid = this.sid;
             }
             if (!eBookConfig.practice_mode && this.assessmentTaken) {
-                let request = new Request(
-                    "/assessment/results",
-                    {
-                        method: "POST",
-                        body: JSON.stringify(data),
-                        headers: this.jsonHeaders,
-                    }
-                );
+                let request = new Request("/assessment/results", {
+                    method: "POST",
+                    body: JSON.stringify(data),
+                    headers: this.jsonHeaders,
+                });
                 try {
                     let response = await fetch(request);
-                    data = await response.json();
-                    this.repopulateFromStorage(data);
-                    this.csresolver("server");
+                    if (response.ok) {
+                        data = await response.json();
+                        data = data.detail;
+                        this.repopulateFromStorage(data);
+                        this.csresolver("server");
+                    } else {
+                        alert(
+                            `HTTP Error getting results: ${response.statusText}`
+                        );
+                    }
                 } catch (err) {
                     try {
                         this.checkLocalStorage();
