@@ -168,6 +168,11 @@ def depart_khanex_node(self, node):
         added here.
     """
     print('DEBUG: depart_khanex_node') if DEBUG else None
+    addHTMLToDB(
+        node.runestone_options["divid"],
+        node.runestone_options["basecourse"],
+        "".join(self.body[self.body.index(node.delimiter) + 1 :]),
+    )
     self.body.remove(node.delimiter)
     pass
 

@@ -136,8 +136,12 @@ def depart_quizly_node(self, node):
         added here.
     """
     print('DEBUG: depart_quizly_node') if DEBUG else None
+    addHTMLToDB(
+        node.runestone_options["divid"],
+        node.runestone_options["basecourse"],
+        "".join(self.body[self.body.index(node.delimiter) + 1 :]),
+    )
     self.body.remove(node.delimiter)
-    pass
 
 
 def process_activcode_nodes(app, env, docname):
