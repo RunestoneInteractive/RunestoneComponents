@@ -22,7 +22,7 @@
 __author__ = "rmorelli"
 
 # Debug flags
-DEBUG = True
+DEBUG = False
 VERBOSE = False
 
 import os, shutil
