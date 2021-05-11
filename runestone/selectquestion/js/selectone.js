@@ -126,6 +126,12 @@ export default class SelectOne extends RunestoneBase {
             self.realComponent.selectorId = selectorId;
         } else {
             if (data.toggle) {
+                var toggleOptions = data.toggleOptions;
+                var toggleLabels;
+                if (toggleOptions.includes("labels{")) {
+                    toggleLabels = toggleOptions.slice(toggleOptions.indexOf("labels{") + 7, toggleOptions.indexOf("}")).split(",");
+                    toggleOptions = toggleOptions.slice(0, toggleOptions.indexOf(",labels{"));
+                }
                 var toggleQuestions = this.questions.split(", ");
                 var toggleUI = "";
                 // check so that only the first toggle select question on the assignments page has a preview panel created, then all toggle select previews use this same panel
@@ -147,6 +153,7 @@ export default class SelectOne extends RunestoneBase {
                 var toggleQuestionHTMLSrc;
                 var toggleQuestionSubstring;
                 var toggleQuestionType;
+                var toggleQuestionTypes = [];
                 for (i = 0; i < toggleQuestions.length; i++) {
                     toggleQuestionHTMLSrc = await this.getToggleSrc(
                         toggleQuestions[i]
@@ -155,13 +162,13 @@ export default class SelectOne extends RunestoneBase {
                         'data-component="'
                     )[1];
                     switch (
-                        toggleQuestionSubstring.substring(
+                        toggleQuestionSubstring.slice(
                             0,
                             toggleQuestionSubstring.indexOf('"')
                         )
                     ) {
                         case "activecode":
-                            toggleQuestionType = "Write Code";
+                            toggleQuestionType = "Active Write Code";
                             break;
                         case "clickablearea":
                             toggleQuestionType = "Clickable Area";
@@ -176,20 +183,26 @@ export default class SelectOne extends RunestoneBase {
                             toggleQuestionType = "Multiple Choice";
                             break;
                         case "parsons":
-                            toggleQuestionType = "Mixed-Up Code";
+                            toggleQuestionType = "Parsons Mixed-Up Code";
                             break;
                         case "shortanswer":
                             toggleQuestionType = "Short Answer";
                             break;
                     }
+                    toggleQuestionTypes[i] = toggleQuestionType;
                     toggleUI +=
                         '<option value="' +
                         toggleQuestions[i] +
-                        '">' +
-                        toggleQuestionType +
+                        '">';
+                    if (toggleLabels[i]) {
+                        toggleUI += toggleLabels[i];
+                    }
+                    else {
+                        toggleUI += toggleQuestionType +
                         " - " +
                         toggleQuestions[i];
-                    if ((i == 0) && (data.toggleOptions.includes("lock"))) {
+                    }
+                    if ((i == 0) && (toggleOptions.includes("lock"))) {
                         toggleUI += " (only this question will be graded)";
                     }
                     toggleUI += "</option>";
@@ -221,6 +234,10 @@ export default class SelectOne extends RunestoneBase {
                             "toggle_current",
                             toggleFirstID
                         );
+                        $("#" + selectorId).data(
+                            "toggle_current_type",
+                            toggleQuestionTypes[0]
+                        );
                         break;
                     }
                 }
@@ -229,7 +246,8 @@ export default class SelectOne extends RunestoneBase {
                     async function () {
                         await this.togglePreview(
                             toggleQuestionSelect.parentElement.id,
-                            data.toggleOptions
+                            toggleOptions,
+                            toggleQuestionTypes
                         );
                     }.bind(this)
                 );
@@ -252,7 +270,7 @@ export default class SelectOne extends RunestoneBase {
     }
 
     // on changing the value of toggle select dropdown, render selected question in preview panel, add appropriate buttons, then make preview panel visible
-    async togglePreview(parentID, toggleOptions) {
+    async togglePreview(parentID, toggleOptions, toggleQuestionTypes) {
         $("#toggle-buttons").html("");
         var parentDiv = document.getElementById(parentID);
         var toggleQuestionSelect = parentDiv.getElementsByTagName("select")[0];
@@ -285,7 +303,7 @@ export default class SelectOne extends RunestoneBase {
             $(setButton).addClass("btn btn-primary");
             $(setButton).click(
                 async function () {
-                    await this.toggleSet(parentID, selectedQuestion, htmlsrc);
+                    await this.toggleSet(parentID, selectedQuestion, htmlsrc, toggleQuestionTypes);
                     $("#component-preview").hide();
                 }.bind(this)
             );
@@ -293,25 +311,15 @@ export default class SelectOne extends RunestoneBase {
 
             // if "transfer" in toggle options, and if current question type is Parsons and selected question type is active code, then add "Transfer" button to preview panel
             if (toggleOptions.includes("transfer")) {
-                var optionText;
-                var currentType;
-                var selectedType;
-                for (var n = 0; n < toggleQuestionSelect.options.length; n++) {
-                    optionText = toggleQuestionSelect.options[n].innerHTML;
-                    if (optionText.includes($("#" + parentID).data("toggle_current"))) {
-                        currentType = optionText.substring(0, optionText.indexOf(" - "));
-                    }
-                    if (optionText.includes(selectedQuestion)) {
-                        selectedType = optionText.substring(0, optionText.indexOf(" - "));
-                    }
-                }
-                if ((currentType == "Mixed-Up Code") && (selectedType == "Write Code")) {
+                var currentType = $("#" + parentID).data("toggle_current_type");
+                var selectedType = toggleQuestionTypes[toggleQuestionSelect.selectedIndex];
+                if ((currentType == "Parsons Mixed-Up Code") && (selectedType == "Active Write Code")) {
                     let transferButton = document.createElement("button");
-                    $(transferButton).text("Transfer Mixed-Up Code to Write Code");
+                    $(transferButton).text("Transfer Parsons Mixed-Up Code to Active Write Code");
                     $(transferButton).addClass("btn btn-primary");
                     $(transferButton).click(
                         async function () {
-                            await this.toggleTransfer(parentID, selectedQuestion, htmlsrc);
+                            await this.toggleTransfer(parentID, selectedQuestion, htmlsrc, toggleQuestionTypes);
                         }.bind(this)
                     );
                     $("#toggle-buttons").append(transferButton);
@@ -323,8 +331,9 @@ export default class SelectOne extends RunestoneBase {
     }
 
     // on clicking "Select this Problem" button, close preview panel, replace current question in assignments page with selected question, and send request to update grading database
-    async toggleSet(parentID, selectedQuestion, htmlsrc) {
+    async toggleSet(parentID, selectedQuestion, htmlsrc, toggleQuestionTypes) {
         var selectorId = parentID + "-toggleSelectedQuestion";
+        var toggleQuestionSelect = document.getElementById(parentID).getElementsByTagName("select")[0];
         document.getElementById(selectorId).innerHTML = ""; // need to check whether this is even necessary
         let res = renderRunestoneComponent(htmlsrc, selectorId, {
             selector_id: selectorId,
@@ -340,10 +349,11 @@ export default class SelectOne extends RunestoneBase {
         let response = await fetch(request);
         $("#toggle-preview").html("");
         $("#" + parentID).data("toggle_current", selectedQuestion);
+        $("#" + parentID).data("toggle_current_type", toggleQuestionTypes[toggleQuestionSelect.selectedIndex]);
     }
 
     // on clicking "Transfer" button, extract the current text and indentation of the Parsons blocks in the answer space, then paste that into the selected active code question
-    async toggleTransfer(parentID, selectedQuestion, htmlsrc) {
+    async toggleTransfer(parentID, selectedQuestion, htmlsrc, toggleQuestionTypes) {
         // retrieve all Parsons lines within the answer space and loop through this list
         var currentParsons = document.getElementById(parentID + "-toggleSelectedQuestion").querySelectorAll("div[class^='answer']")[0].getElementsByClassName("prettyprint lang-py");
         var currentParsonsClass;
@@ -360,13 +370,13 @@ export default class SelectOne extends RunestoneBase {
             currentParsonsClass = currentParsons[p].classList[2];
             if (currentParsonsClass) {
                 if (currentParsonsClass.includes("indent")) {
-                    indentCount = parseInt(indentCount) + parseInt(currentParsonsClass.substring(6,currentParsonsClass.length));
+                    indentCount = parseInt(indentCount) + parseInt(currentParsonsClass.slice(6,currentParsonsClass.length));
                 }
             }
             // for Parsons answer spaces with vertical lines that allow student to define their own line indentation
             currentBlockIndent = currentParsons[p].parentElement.parentElement.style.left;
             if (currentBlockIndent) {
-                indentCount = parseInt(indentCount) + parseInt(currentBlockIndent.substring(0,currentBlockIndent.indexOf("px")) / 30);
+                indentCount = parseInt(indentCount) + parseInt(currentBlockIndent.slice(0,currentBlockIndent.indexOf("px")) / 30);
             }
             for (var d = 0; d < indentCount; d++) {
                 indent += "    ";
@@ -394,11 +404,11 @@ export default class SelectOne extends RunestoneBase {
             }
         }
         // replace all existing code within selected active code question with extracted Parsons text
-        var htmlsrcFormer = htmlsrc.substring(0, htmlsrc.indexOf("<textarea") + htmlsrc.split("<textarea")[1].indexOf(">") + 10);
-        var htmlsrcLatter = htmlsrc.substring(htmlsrc.indexOf("</textarea>"), htmlsrc.length);
+        var htmlsrcFormer = htmlsrc.slice(0, htmlsrc.indexOf("<textarea") + htmlsrc.split("<textarea")[1].indexOf(">") + 10);
+        var htmlsrcLatter = htmlsrc.slice(htmlsrc.indexOf("</textarea>"), htmlsrc.length);
         htmlsrc = htmlsrcFormer + parsonsLines + htmlsrcLatter;
 
-        await this.toggleSet(parentID, selectedQuestion, htmlsrc);
+        await this.toggleSet(parentID, selectedQuestion, htmlsrc, toggleQuestionTypes);
         $("#component-preview").hide();
     }
 }
