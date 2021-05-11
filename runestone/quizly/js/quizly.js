@@ -18,7 +18,7 @@ __date__ = 4/9/2021  */
 import RunestoneBase from "../../common/js/runestonebase.js";
 //import "../css/poll.css";
 
-var DEBUG = true;
+var DEBUG = false;
 
 export var quizlyList = {};
 
