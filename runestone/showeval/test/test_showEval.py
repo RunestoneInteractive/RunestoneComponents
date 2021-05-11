@@ -1,4 +1,3 @@
-from runestone.conftest import selenium_utils
 import time
 
 import pytest

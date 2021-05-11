@@ -1,10 +1,10 @@
 A Multi Question Exam
 =====================
 
-.. timed:: timed1
+.. timed:: test_timed_1
    :timelimit: 10
 
-   .. mchoice:: questiontimed1_1
+   .. mchoice:: test_timed_mchoice_1
        :answer_a: The value you are searching for is the first element in the array.
        :answer_b: The value you are searching for is the last element in the array
        :answer_c: The value you are searching for is in the middle of the array.
@@ -19,7 +19,7 @@ A Multi Question Exam
 
        Under which of these conditions will a sequential search be faster than a binary search?
 
-   .. clickablearea:: clicktimed1
+   .. clickablearea:: test_timed_clickablearea_1
        :question: Click on the correct cells.
        :feedback: Remember, the operator '=' is used for assignment.
        :table:
@@ -34,15 +34,15 @@ A Multi Question Exam
        | This row is incorrect  |   ...      |   ...    |   ...    |
        +------------------------+------------+----------+----------+
 
-   .. dragndrop:: dnd2
+   .. dragndrop:: test_timed_dnd_1
        :feedback: This is feedback.
-       :match_1: Drag to Answer A|||Answer A
-       :match_2: Drag me Answer B|||Answer B
-       :match_3: Drag to Answer C|||Answer C
+       :match_1: Drag to A|||Answer A
+       :match_2: Drag to B|||Answer B
+       :match_3: Drag to C|||Answer C
 
        This is a drag n drop question.
 
-   .. fillintheblank:: fill1412
+   .. fillintheblank:: test_timed_fitb_1
 
        Fill in the blanks to make the following sentence: "The red car drove away" The |blank| car drove |blank|.
 
@@ -52,28 +52,28 @@ A Multi Question Exam
           :.*: where did we say the red car was going?
 
 
-   .. activecode:: units2
+   .. activecode:: test_timed_activecode_1
        :nocodelens:
-    
+
        Fix the following code so that it always correctly adds two numbers.
        ~~~~
        def add(a,b):
           return 4
-    
+
        ====
        from unittest.gui import TestCaseGui
-    
+
        class myTests(TestCaseGui):
-    
+
            def testOne(self):
                self.assertEqual(add(2,2),4,"A feedback string when the test fails")
                self.assertAlmostEqual(add(2.0,3.0), 5.0, 5, "Try adding your parameters")
-    
+
        myTests().main()
 
 
-   .. parsonsprob:: morning
-   
+   .. parsonsprob:: test_timed_parsons_1
+
       Put the blocks in order to describe a morning routine.
       -----
       get up
@@ -83,11 +83,9 @@ A Multi Question Exam
       brush your teeth
 
 
-   .. shortanswer:: question2
+   .. shortanswer:: test_timed_shortanswer_1
        :optional:
        :mathjax:
-    
+
        What are the colors in the rainbow?
        What is meaning of :math:`\pi r^2`
-   
-   

@@ -160,9 +160,9 @@ export default class ACFactory {
 // Page Initialization
 //
 
-$(document).ready(function () {
+$(document).bind("runestone:login-complete", function () {
     ACFactory.createScratchActivecode();
-    $("[data-component=activecode]").each(function (index) {
+    $("[data-component=activecode]").each(function () {
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
             try {
