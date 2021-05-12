@@ -99,8 +99,9 @@ function addReadingList() {
                 name: "link",
                 class: "btn btn-lg ' + 'buttonConfirmCompletion'",
                 href: nxt_link,
-                text: `Continue to page ${position + 2
-                    } of ${num_readings} in the reading assignment.`,
+                text: `Continue to page ${
+                    position + 2
+                } of ${num_readings} in the reading assignment.`,
             });
         } else {
             l = $("<div />", {
@@ -194,7 +195,7 @@ class PageProgressBar {
             if (
                 val == 100.0 &&
                 $("#completionButton").text().toLowerCase() ===
-                "mark as completed"
+                    "mark as completed"
             ) {
                 $("#completionButton").click();
             }
