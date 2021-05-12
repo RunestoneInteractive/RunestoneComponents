@@ -131,7 +131,7 @@ export default class SelectOne extends RunestoneBase {
                 if (toggleOptions.includes("labels{")) {
                     toggleLabels = toggleOptions.slice(toggleOptions.indexOf("labels{") + 7, toggleOptions.indexOf("}"));
                     toggleOptions = toggleOptions.replace(toggleLabels, "");
-                    toggleLabels = toggleLabels.split(",")
+                    toggleLabels = toggleLabels.split(",");
                 }
                 var toggleQuestions = this.questions.split(", ");
                 var toggleUI = "";
@@ -195,8 +195,15 @@ export default class SelectOne extends RunestoneBase {
                         '<option value="' +
                         toggleQuestions[i] +
                         '">';
-                    if (toggleLabels[i]) {
-                        toggleUI += toggleLabels[i];
+                    if (toggleLabels) {
+                        if (toggleLabels[i]) {
+                            toggleUI += toggleLabels[i];
+                        }
+                        else {
+                            toggleUI += toggleQuestionType +
+                            " - " +
+                            toggleQuestions[i];
+                        }
                     }
                     else {
                         toggleUI += toggleQuestionType +
