@@ -1,37 +1,22 @@
-// *********
-// |docname|
-// *********
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const CopyPlugin = require("copy-webpack-plugin");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
+// ***************************************************************************************
+// |docname| - Define the `webpack configuration <https://webpack.js.org/configuration/>`_
+// ***************************************************************************************
+// .. toctree::
+//  :caption: Related contents
+//
+//  webpack.index.js
+
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require("path");
 
 module.exports = (env) => {
     return {
-        entry: [
-            "./runestone/shortanswer/js/shortanswer.js",
-            "./runestone/activecode/js/acfactory.js",
-            "./runestone/mchoice/js/mchoice.js",
-            "./runestone/fitb/js/fitb.js",
-            "./runestone/clickableArea/js/clickable.js",
-            "./runestone/dragndrop/js/dragndrop.js",
-            "./runestone/timed/js/timed.js",
-            "./runestone/parsons/js/parsons.js",
-            "./runestone/poll/js/poll.js",
-            "./runestone/common/js/user-highlights.js",
-            "./runestone/spreadsheet/js/spreadsheet.js",
-            "./runestone/tabbedStuff/js/tabbedstuff.js",
-            "./runestone/reveal/js/reveal.js",
-            "./runestone/datafile/js/datafile.js",
-            "./runestone/showeval/js/showEval.js",
-            "./runestone/video/js/runestonevideo.js",
-            "./runestone/lp/js/lp.js",
-            "./runestone/codelens/js/codelens.js",
-            "./runestone/webwork/js/webwork.js",
-            "./runestone/selectquestion/js/selectone.js",
-        ],
+        entry: {
+            // See `webpack.index.js`. Therefore, the file ``webpack.bundle.js`` must be included on every page containing Runestone components.
+            webpack: "./webpack.index.js"
+        },
         mode: env.MODE,
-        devtool: env.MODE === "development" ? "inline-source-map" : "none",
+        devtool: env.MODE === "development" ? "inline-source-map" : "source-map",
         module: {
             rules: [
                 {
@@ -55,21 +40,29 @@ module.exports = (env) => {
         },
         output: {
             path: path.resolve(__dirname, "runestone/dist"),
-            filename: "runestone.js",
-            library: "runestone",
-            libraryTarget: "umd",
+            // See https://webpack.js.org/guides/caching/. This provides a hash for dynamic imports as well, avoiding caching out-of-date JS.
+            filename: '[name].bundle.js?v=[contenthash]',
+            // Delete everything in the output directory on each build.
+            clean: true,
+        },
+        // See https://webpack.js.org/guides/caching/.
+        optimization: {
+            moduleIds: 'deterministic',
+            // Collect all the webpack import runtime into a single file, which is named ``runtime.bundle.js``. This must be statically imported by all pages containing Runestone components.
+            runtimeChunk: 'single',
+            splitChunks: {
+                chunks: 'all',
+            },
         },
         plugins: [
-            new CleanWebpackPlugin(),
-            // new CopyPlugin([
-            //     {
-            //         from: "static",
-            //     },
-            // ]),
-            // new HtmlWebpackPlugin({
-            //     inject: "head",
-            //     template: "public/index.html",
-            // }),
+            // _`webpack_static_imports`: Instead of HTML, produce a list of static imports as JSON. Sphinx will then read this file and inject these imports when creating each page. webpack_static_imports_.
+            new HtmlWebpackPlugin({
+                filename: 'webpack_static_imports.json',
+                // Don't prepend the ``<head>`` tag and data to the output.
+                inject: false,
+                // The template to create JSON.
+                templateContent: ({htmlWebpackPlugin}) => `["${htmlWebpackPlugin.files.js.join('", "')}"]`,
+            }),
         ],
     };
 };

@@ -1,6 +1,8 @@
 # *********************************
 # |docname| - Runestone Module init
 # *********************************
+import json
+
 from .activecode import ActiveCode
 from .animation import Animation
 from .mchoice import MChoice, QuestionNumber
@@ -103,7 +105,11 @@ def setup(app):
     This could be expanded if there is additional initialization or customization
     we wanted to do for all projects.
     """
-    for jsfile in script_files:
+    # Include JS produced by webpack. See `webpack static imports <webpack_static_imports>`_.
+    with open(pkg_resources.resource_filename("runestone", "dist/webpack_static_imports.json"), "r", encoding="utf-8") as f:
+        _script_files = script_files + json.load(f)
+
+    for jsfile in _script_files:
         try:
             app.add_autoversioned_javascript(jsfile)
         except ExtensionError:
@@ -113,6 +119,8 @@ def setup(app):
             app.add_autoversioned_stylesheet(cssfile)
         except ExtensionError:
             app.add_css_file(cssfile)
+
+    app.config.html_static_path.append("dist/")
 
 
 def get_master_url():
@@ -193,7 +201,7 @@ script_files = [
     "https://cdn.jsdelivr.net/npm/vega@4.0.0-rc.2/build/vega.js",
     "https://cdn.jsdelivr.net/npm/vega-lite@2.5.0/build/vega-lite.js",
     "https://cdn.jsdelivr.net/npm/vega-embed@3.14.0/build/vega-embed.js",
-    "runestone.js",
+
     "jquery-ui-1.10.3.custom.min.js",
     "bootstrap-3.4.1/js/bootstrap.min.js",
     "jquery-fix.js",  # required by bootstrap theme
