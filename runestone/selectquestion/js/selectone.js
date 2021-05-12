@@ -129,8 +129,9 @@ export default class SelectOne extends RunestoneBase {
                 var toggleOptions = data.toggleOptions;
                 var toggleLabels;
                 if (toggleOptions.includes("labels{")) {
-                    toggleLabels = toggleOptions.slice(toggleOptions.indexOf("labels{") + 7, toggleOptions.indexOf("}")).split(",");
-                    toggleOptions = toggleOptions.slice(0, toggleOptions.indexOf(",labels{"));
+                    toggleLabels = toggleOptions.slice(toggleOptions.indexOf("labels{") + 7, toggleOptions.indexOf("}"));
+                    toggleOptions = toggleOptions.replace(toggleLabels, "");
+                    toggleLabels = toggleLabels.split(",")
                 }
                 var toggleQuestions = this.questions.split(", ");
                 var toggleUI = "";
@@ -315,7 +316,7 @@ export default class SelectOne extends RunestoneBase {
                 var selectedType = toggleQuestionTypes[toggleQuestionSelect.selectedIndex];
                 if ((currentType == "Parsons Mixed-Up Code") && (selectedType == "Active Write Code")) {
                     let transferButton = document.createElement("button");
-                    $(transferButton).text("Transfer Parsons Mixed-Up Code to Active Write Code");
+                    $(transferButton).text("Transfer Response");
                     $(transferButton).addClass("btn btn-primary");
                     $(transferButton).click(
                         async function () {
