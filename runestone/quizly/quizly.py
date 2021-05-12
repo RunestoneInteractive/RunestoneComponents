@@ -136,10 +136,12 @@ def depart_quizly_node(self, node):
         added here.
     """
     print('DEBUG: depart_quizly_node') if DEBUG else None
+    bc = node.runestone_options["basecourse"]
     addHTMLToDB(
         node.runestone_options["divid"],
-        node.runestone_options["basecourse"],
-        "".join(self.body[self.body.index(node.delimiter) + 1 :]),
+        bc,
+        "".join(self.body[self.body.index(node.delimiter) + 1 :])
+        .replace("../_static",f"/runestone/books/published/{bc}/_static"),
     )
     self.body.remove(node.delimiter)
 
