@@ -99,9 +99,12 @@ export default class RunestoneBase {
             try {
                 let response = await fetch(request);
                 if (!response.ok) {
-                    throw new Error("Failed to save the log entry");
+                    let detail = await response.json();
+                    console.error(detail);
+                    throw new Error(`Failed to save the log entry ${detail}`);
+                } else {
+                    post_return = response.json();
                 }
-                post_return = response.json();
             } catch (e) {
                 if (this.isTimed) {
                     alert(
@@ -260,7 +263,7 @@ export default class RunestoneBase {
      */
     repopulateFromStorage(data) {
         // decide whether to use the server's answer (if there is one) or to load from storage
-        if (data !== null && this.shouldUseServer(data)) {
+        if (data !== null && data !== "no data" && this.shouldUseServer(data)) {
             this.restoreAnswers(data);
             this.setLocalStorage(data);
         } else {
