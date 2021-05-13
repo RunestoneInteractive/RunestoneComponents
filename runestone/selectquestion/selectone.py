@@ -185,7 +185,7 @@ class SelectQuestion(RunestoneIdDirective):
         if "toggle" in self.options:
             self.options[
                 "toggle_options"
-            ] = f"data-toggleoptions={self.options['toggle']}"
+            ] = f"data-toggleoptions=\"{self.options['toggle']}\""
             self.options["toggle"] = "data-toggle=true"
         else:
             self.options["toggle_options"] = ""

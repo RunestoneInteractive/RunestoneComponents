@@ -132,6 +132,9 @@ export default class SelectOne extends RunestoneBase {
                     toggleLabels = toggleOptions.slice(toggleOptions.indexOf("labels{") + 7, toggleOptions.indexOf("}"));
                     toggleOptions = toggleOptions.replace(toggleLabels, "");
                     toggleLabels = toggleLabels.split(",");
+                    for (var t = 0; t < toggleLabels.length; t++) {
+                        toggleLabels[t] = toggleLabels[t].trim();
+                    }
                 }
                 var toggleQuestions = this.questions.split(", ");
                 var toggleUI = "";
