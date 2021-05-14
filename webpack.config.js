@@ -12,7 +12,7 @@ const path = require("path");
 module.exports = (env) => {
     return {
         entry: {
-            // See `webpack.index.js`. Therefore, the file ``webpack.bundle.js`` must be included on every page containing Runestone components.
+            // See `webpack.index.js`.
             webpack: "./webpack.index.js"
         },
         mode: env.MODE,
@@ -55,7 +55,7 @@ module.exports = (env) => {
             },
         },
         plugins: [
-            // _`webpack_static_imports`: Instead of HTML, produce a list of static imports as JSON. Sphinx will then read this file and inject these imports when creating each page. webpack_static_imports_.
+            // _`webpack_static_imports`: Instead of HTML, produce a list of static imports as JSON. Sphinx will then read this file and inject these imports when creating each page.
             new HtmlWebpackPlugin({
                 filename: 'webpack_static_imports.json',
                 // Don't prepend the ``<head>`` tag and data to the output.
