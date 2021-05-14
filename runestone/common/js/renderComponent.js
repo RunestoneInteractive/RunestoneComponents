@@ -1,4 +1,4 @@
-export function renderRunestoneComponent(componentSrc, whereDiv, moreOpts) {
+export async function renderRunestoneComponent(componentSrc, whereDiv, moreOpts) {
     /**
      *  The easy part is adding the componentSrc to the existing div.
      *  The tedious part is calling the right functions to turn the
@@ -19,47 +19,46 @@ export function renderRunestoneComponent(componentSrc, whereDiv, moreOpts) {
         "component"
     );
     // Import the JavaScript for this component before proceeding.
-    runestone_import(componentKind).then(() => {
-        let opt = {};
-        opt.orig = jQuery(`#${whereDiv} [data-component]`)[0];
-        if (opt.orig) {
-            opt.lang = $(opt.orig).data("lang");
-            opt.useRunestoneServices = true;
-            opt.graderactive = false;
-            opt.python3 = true;
-            if (typeof moreOpts !== "undefined") {
-                for (let key in moreOpts) {
-                    opt[key] = moreOpts[key];
-                }
+    await runestone_import(componentKind);
+    let opt = {};
+    opt.orig = jQuery(`#${whereDiv} [data-component]`)[0];
+    if (opt.orig) {
+        opt.lang = $(opt.orig).data("lang");
+        opt.useRunestoneServices = true;
+        opt.graderactive = false;
+        opt.python3 = true;
+        if (typeof moreOpts !== "undefined") {
+            for (let key in moreOpts) {
+                opt[key] = moreOpts[key];
             }
         }
+    }
 
-        if (typeof component_factory === "undefined") {
-            alert(
-                "Error:  Missing the component factory!  Clear you browser cache."
+    if (typeof component_factory === "undefined") {
+        alert(
+            "Error:  Missing the component factory!  Clear you browser cache."
+        );
+    } else {
+        if (
+            !window.component_factory[componentKind] &&
+            !jQuery(`#${whereDiv}`).html()
+        ) {
+            jQuery(`#${whereDiv}`).html(
+                `<p>Preview not available for ${componentKind}</p>`
             );
         } else {
-            if (
-                !window.component_factory[componentKind] &&
-                !jQuery(`#${whereDiv}`).html()
-            ) {
-                jQuery(`#${whereDiv}`).html(
-                    `<p>Preview not available for ${componentKind}</p>`
-                );
-            } else {
-                let res = window.component_factory[componentKind](opt);
-                if (componentKind === "activecode") {
-                    if (moreOpts.multiGrader) {
-                        window.edList[
-                            `${moreOpts.gradingContainer} ${res.divid}`
-                        ] = res;
-                    } else {
-                        window.edList[res.divid] = res;
-                    }
+            let res = window.component_factory[componentKind](opt);
+            if (componentKind === "activecode") {
+                if (moreOpts.multiGrader) {
+                    window.edList[
+                        `${moreOpts.gradingContainer} ${res.divid}`
+                    ] = res;
+                } else {
+                    window.edList[res.divid] = res;
                 }
             }
         }
-    });
+    }
 }
 
 export function createTimedComponent(componentSrc, moreOpts) {
