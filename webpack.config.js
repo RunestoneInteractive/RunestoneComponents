@@ -40,8 +40,8 @@ module.exports = (env) => {
         },
         output: {
             path: path.resolve(__dirname, "runestone/dist"),
-            // See https://webpack.js.org/guides/caching/. This provides a hash for dynamic imports as well, avoiding caching out-of-date JS.
-            filename: '[name].bundle.js?v=[contenthash]',
+            // See https://webpack.js.org/guides/caching/. This provides a hash for dynamic imports as well, avoiding caching out-of-date JS. Use this function to rename the top-level output to ``runestone.bundle.js`` instead of the default ``webpack.bundle.js``. I can't find any other way to do this (renaming this file, or `webpack.index.js`).
+            filename: (pathData) => pathData.chunk.name == "webpack" ? "runestone.bundle.js?v=[contenthash]" : "[name].bundle.js?v=[contenthash]",
             // Delete everything in the output directory on each build.
             clean: true,
         },
