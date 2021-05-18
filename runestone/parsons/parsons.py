@@ -33,14 +33,14 @@ def setup(app):
 
 
 TEMPLATE_START = """
-        <div class="%(divclass)s" style="max-width: none;"> 
+        <div class="%(divclass)s" style="max-width: none;">
         <div data-component="parsons" id="%(divid)s" class="alert alert-warning parsons" >
         <div class="parsons_question parsons-text" >
     """
 
 TEMPLATE_END = """
         </div>
-        <pre  data-question_label="%(question_label)s"  %(adaptive)s %(maxdist)s %(order)s %(noindent)s %(language)s %(numbered)s %(optional)s style="visibility: hidden;">
+        <pre  class="parsonsblocks" data-question_label="%(question_label)s"  %(adaptive)s %(maxdist)s %(order)s %(noindent)s %(language)s %(numbered)s %(optional)s style="visibility: hidden;">
         %(code)s
         </pre>
         </div>

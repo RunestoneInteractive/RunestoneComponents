@@ -56,7 +56,7 @@ export default class Parsons extends RunestoneBase {
         super(opts);
         var orig = opts.orig; // entire <pre> element that will be replaced by new HTML
         this.containerDiv = orig;
-        this.origElem = $(orig).find("pre")[0];
+        this.origElem = $(orig).find("pre.parsonsblocks")[0];
         // Find the question text and store it in .question
         this.question = $(orig).find(`.parsons_question`)[0];
         this.useRunestoneServices = opts.useRunestoneServices;
