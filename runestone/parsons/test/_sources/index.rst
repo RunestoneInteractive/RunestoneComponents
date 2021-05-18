@@ -91,3 +91,25 @@ Section 2: Labeling
       return fib(num - 1) + fib(num - 2)
    =====
       return fib(num - 1) * fib(num - 2) #paired
+
+
+.. parsonsprob:: test_parsons_5
+
+   Make a program that looks like this:
+
+   .. code-block:: python
+
+      sum = 0
+      for i in range(10):
+          sum = sum + i
+
+      print(sum)
+
+   -----
+   sum = 0
+   =====
+   for i in range(10):
+       sum = sum + i
+   =====
+   print(sum)
+
