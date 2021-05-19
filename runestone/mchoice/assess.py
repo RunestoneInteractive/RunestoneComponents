@@ -17,8 +17,7 @@ __author__ = "bmiller"
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from runestone.common.runestonedirective import RunestoneDirective, RunestoneIdDirective, add_i18n_js
-from .assessbase import Assessment
+from runestone.common.runestonedirective import RunestoneDirective, RunestoneIdDirective
 from .multiplechoice import *
 
 

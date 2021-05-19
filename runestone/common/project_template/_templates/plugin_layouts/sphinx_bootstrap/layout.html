@@ -156,7 +156,7 @@
             <li class='loginout'><a href='#'>Login</a></li> <!-- correct link populated by addNavbarLoginLink() -->
 			<!-- dark mode toggle -->
              <li><label class="theme-switch" for="checkbox">
-					  <input type="checkbox" id="checkbox" onchange="switchTheme()" />
+					  <input type="checkbox" id="checkbox" onchange="runestoneComponents.switchTheme()" />
 							<div class="slider round"></div>
 					</label>Dark Mode</li>
 			 </ul>
@@ -386,6 +386,6 @@
   {% endif %}
 {% endif %}
 
-<script> getSwitch(); </script>
+<script> runestoneComponents.getSwitch(); </script>
 
 {% endblock %}

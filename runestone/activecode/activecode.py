@@ -53,15 +53,6 @@ def setup(app):
     app.add_config_value("activecode_hide_load_history", False, "html")
     app.add_config_value("wasm_uri", "/_static", "html")
 
-    app.add_autoversioned_javascript("jquery.highlight.js")
-    app.add_autoversioned_javascript("sql-wasm.js")  # todo: only load if we need it
-    app.add_js_file(
-        "https://cdn.jsdelivr.net/npm/handsontable@7.2.2/dist/handsontable.full.js"
-    )
-    app.add_css_file(
-        "https://cdn.jsdelivr.net/npm/handsontable@7.2.2/dist/handsontable.full.min.css"
-    )
-
     app.add_node(ActivcodeNode, html=(visit_ac_node, depart_ac_node))
 
     app.connect("doctree-resolved", process_activcode_nodes)
@@ -79,7 +70,7 @@ TEMPLATE_END = """
 <textarea data-lang="%(language)s" id="%(divid)s_editor" %(autorun)s
     %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s %(chatcodes)s %(optional)s
     data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(tie)s %(dburl)s %(nopair)s
-    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(hidehistory)s %(wasmuri)s 
+    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(hidehistory)s %(wasmuri)s
     %(showlastsql)s style="visibility: hidden;">
 %(initialcode)s
 </textarea>
