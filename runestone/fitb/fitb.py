@@ -36,8 +36,6 @@ from runestone.common import (
     get_node_line,
 )
 
-from runestone.common.runestonedirective import add_i18n_js
-
 
 def setup(app):
     app.add_directive("fillintheblank", FillInTheBlank)
