@@ -39,8 +39,8 @@ export default class SelectOne extends RunestoneBase {
         this.selector_id = $(opts.orig).first().attr("id");
         this.primaryOnly = $(opts.orig).data("primary");
         this.ABExperiment = $(opts.orig).data("ab");
-        this.toggle = $(opts.orig).data("toggle");
         this.toggleOptions = $(opts.orig).data("toggleoptions");
+        this.toggleLabels = $(opts.orig).data("togglelabels");
         opts.orig.id = this.selector_id;
     }
     /**
@@ -82,11 +82,11 @@ export default class SelectOne extends RunestoneBase {
         if (this.timedWrapper) {
             data.timedWrapper = this.timedWrapper;
         }
-        if (this.toggle) {
-            data.toggle = this.toggle;
-        }
         if (this.toggleOptions) {
             data.toggleOptions = this.toggleOptions;
+        }
+        if (this.toggleLabels) {
+            data.toggleLabels = this.toggleLabels;
         }
         let opts = this.origOpts;
         let selectorId = this.selector_id;
@@ -125,12 +125,9 @@ export default class SelectOne extends RunestoneBase {
             self.containerDiv = res.question.containerDiv;
             self.realComponent.selectorId = selectorId;
         } else {
-            if (data.toggle) {
-                var toggleOptions = data.toggleOptions;
-                var toggleLabels;
-                if (toggleOptions.includes("labels{")) {
-                    toggleLabels = toggleOptions.slice(toggleOptions.indexOf("labels{") + 7, toggleOptions.indexOf("}"));
-                    toggleOptions = toggleOptions.replace(toggleLabels, "");
+            if (data.toggleOptions) {
+                var toggleLabels = data.toggleLabels.replace("togglelabels:", "").trim();
+                if (toggleLabels) {
                     toggleLabels = toggleLabels.split(",");
                     for (var t = 0; t < toggleLabels.length; t++) {
                         toggleLabels[t] = toggleLabels[t].trim();
@@ -213,7 +210,7 @@ export default class SelectOne extends RunestoneBase {
                         " - " +
                         toggleQuestions[i];
                     }
-                    if ((i == 0) && (toggleOptions.includes("lock"))) {
+                    if ((i == 0) && (data.toggleOptions.includes("lock"))) {
                         toggleUI += " (only this question will be graded)";
                     }
                     toggleUI += "</option>";
@@ -231,7 +228,7 @@ export default class SelectOne extends RunestoneBase {
                 selector_id: selectorId,
                 useRunestoneServices: true,
             });
-            if (data.toggle) {
+            if (data.toggleOptions) {
                 $("#component-preview").hide();
                 var toggleQuestionSelect = document.getElementById(
                     selectorId + "-toggleQuestion"
@@ -257,7 +254,7 @@ export default class SelectOne extends RunestoneBase {
                     async function () {
                         await this.togglePreview(
                             toggleQuestionSelect.parentElement.id,
-                            toggleOptions,
+                            data.toggleOptions,
                             toggleQuestionTypes
                         );
                     }.bind(this)
@@ -289,7 +286,7 @@ export default class SelectOne extends RunestoneBase {
             toggleQuestionSelect.options[toggleQuestionSelect.selectedIndex]
                 .value;
         var htmlsrc = await this.getToggleSrc(selectedQuestion);
-        let res = renderRunestoneComponent(htmlsrc, "toggle-preview", {
+        renderRunestoneComponent(htmlsrc, "toggle-preview", {
             selector_id: "toggle-preview",
             useRunestoneServices: true,
         });
@@ -346,7 +343,7 @@ export default class SelectOne extends RunestoneBase {
         var selectorId = parentID + "-toggleSelectedQuestion";
         var toggleQuestionSelect = document.getElementById(parentID).getElementsByTagName("select")[0];
         document.getElementById(selectorId).innerHTML = ""; // need to check whether this is even necessary
-        let res = renderRunestoneComponent(htmlsrc, selectorId, {
+        renderRunestoneComponent(htmlsrc, selectorId, {
             selector_id: selectorId,
             useRunestoneServices: true,
         });
@@ -357,7 +354,7 @@ export default class SelectOne extends RunestoneBase {
                 selectedQuestion,
             {}
         );
-        let response = await fetch(request);
+        await fetch(request);
         $("#toggle-preview").html("");
         $("#" + parentID).data("toggle_current", selectedQuestion);
         $("#" + parentID).data("toggle_current_type", toggleQuestionTypes[toggleQuestionSelect.selectedIndex]);
