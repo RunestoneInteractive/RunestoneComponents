@@ -343,7 +343,7 @@ export default class SelectOne extends RunestoneBase {
         var selectorId = parentID + "-toggleSelectedQuestion";
         var toggleQuestionSelect = document.getElementById(parentID).getElementsByTagName("select")[0];
         document.getElementById(selectorId).innerHTML = ""; // need to check whether this is even necessary
-        renderRunestoneComponent(htmlsrc, selectorId, {
+        await renderRunestoneComponent(htmlsrc, selectorId, {
             selector_id: selectorId,
             useRunestoneServices: true,
         });
