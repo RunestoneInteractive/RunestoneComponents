@@ -23,7 +23,7 @@ from runestone.server.componentdb import (
     addHTMLToDB,
     maybeAddToAssignment,
 )
-from runestone.common.runestonedirective import RunestoneIdNode, add_i18n_js
+from runestone.common.runestonedirective import RunestoneIdNode
 
 
 def setup(app):

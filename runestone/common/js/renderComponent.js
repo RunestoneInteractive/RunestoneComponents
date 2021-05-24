@@ -1,3 +1,5 @@
+import { runestone_import } from "../../../webpack.index.js";
+
 export async function renderRunestoneComponent(componentSrc, whereDiv, moreOpts) {
     /**
      *  The easy part is adding the componentSrc to the existing div.
