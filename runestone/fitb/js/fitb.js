@@ -227,6 +227,7 @@ export default class FITB extends RunestoneBase {
             correct: this.correct ? "T" : "F",
             div_id: this.divid,
         });
+        data = data.detail;
         if (!this.feedbackArray) {
             // On success, update the feedback from the server's grade.
             this.setLocalStorage({
