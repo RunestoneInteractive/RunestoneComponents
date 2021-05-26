@@ -341,6 +341,7 @@ def addQuestionToDB(self):
                     practice=practice,
                     topic=topics,
                     from_source=from_source,
+                    review_flag='F',
                     optional=optional,
                     description=et,
                     **meta_opts,
@@ -588,7 +589,6 @@ def addAssignmentToDB(
         return
 
     course_id = getCourseID(course_name)
-    last_changed = datetime.now()
     sel = select([assignments]).where(
         and_(assignments.c.name == name, assignments.c.course == course_id)
     )
@@ -627,6 +627,7 @@ def addAssignmentToDB(
             visible=visible,
             time_limit=time_limit,
             from_source="T",
+            released="F",
         )
         res = sess.execute(ins)
         a_id = res.inserted_primary_key[0]
