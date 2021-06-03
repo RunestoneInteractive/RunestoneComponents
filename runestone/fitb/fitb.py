@@ -121,13 +121,20 @@ def depart_fitb_node(self, node):
     self.body.remove(node.delimiter)
 
 
-# See the :ref:`docs <fill in the blank docs>` for the syntax of this component.
 class FillInTheBlank(RunestoneIdDirective):
     """
-    config values (conf.py):
+    .. fillintheblank:: some_unique_id_here
 
-    - fitb_div_class - custom CSS class of the component's outermost div
+        Put the text of the question here.
+        See https://runestone.academy/runestone/books/published/overview/Assessments/fitb.html
+        for additional options and documentation.
+        -   :Put the correct answer here: Put feedback displayed for this answer here.
+            :x: Put feedback displayed for an incorrect answer here.
     """
+
+    # config values (conf.py):
+    #
+    # - fitb_div_class - custom CSS class of the component's outermost div
 
     required_arguments = 1
     optional_arguments = 0
