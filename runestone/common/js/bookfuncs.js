@@ -243,23 +243,23 @@ function setupNavbarLoggedIn() {
 $(document).bind("runestone:login", setupNavbarLoggedIn);
 
 function setupNavbarLoggedOut() {
-    console.log("setup navbar for logged out");
-    $("#registerlink").show();
-    $("#profilelink").hide();
-    $("#passwordlink").hide();
-    $("#ip_dropdown_link").hide();
-    $("li.loginout").html(
-        '<a href="' + eBookConfig.app + '/default/user/login">Login</a>'
-    );
-    $(".footer").html("user not logged in");
+    if (eBookConfig.useRunestoneServices) {
+        console.log("setup navbar for logged out");
+        $("#registerlink").show();
+        $("#profilelink").hide();
+        $("#passwordlink").hide();
+        $("#ip_dropdown_link").hide();
+        $("li.loginout").html(
+            '<a href="' + eBookConfig.app + '/default/user/login">Login</a>'
+        );
+        $(".footer").html("user not logged in");
+    }
 }
 $(document).bind("runestone:logout", setupNavbarLoggedOut);
 
 function notifyRunestoneComponents() {
-    // Runestone components wait until login process is over to load components because of storage issues
-    $(document).trigger("runestone:login-complete");
-    if (typeof $pjQ !== "undefined")
-        $pjQ(document).trigger("runestone:login-complete"); // for parsons components which are using a different version of jQuery
+    // Runestone components wait until login process is over to load components because of storage issues. This triggers the `dynamic import machinery`, which then sends the login complete signal when this and all dynamic imports are finished.
+    $(document).trigger("runestone:pre-login-complete");
 }
 
 // initialize stuff

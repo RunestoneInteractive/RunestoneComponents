@@ -193,7 +193,7 @@ export default class SelectOne extends RunestoneBase {
             }
             ///////////////////////////
             // just render this component on the page in its usual place
-            renderRunestoneComponent(htmlsrc, selectorId, {
+            await renderRunestoneComponent(htmlsrc, selectorId, {
                 selector_id: selectorId,
                 useRunestoneServices: true,
             });
@@ -283,7 +283,7 @@ export default class SelectOne extends RunestoneBase {
     async toggleSet(parentID, selectedQuestion, htmlsrc) {
         var selectorId = parentID + "-toggleSelectedQuestion";
         document.getElementById(selectorId).innerHTML = ""; // need to check whether this is even necessary
-        let res = renderRunestoneComponent(htmlsrc, selectorId, {
+        await renderRunestoneComponent(htmlsrc, selectorId, {
             selector_id: selectorId,
             useRunestoneServices: true,
         });
@@ -294,7 +294,7 @@ export default class SelectOne extends RunestoneBase {
                 selectedQuestion,
             {}
         );
-        let response = await fetch(request);
+        await fetch(request);
         $("#component-preview").html("");
         $("#" + parentID).data("toggle_current", selectedQuestion);
     }
