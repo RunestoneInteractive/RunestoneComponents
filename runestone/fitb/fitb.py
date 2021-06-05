@@ -1,17 +1,21 @@
-# Copyright (C) 2013  Bradley N. Miller
+# *********
+# |docname|
+# *********
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# .. Copyright (C) 2013  Bradley N. Miller
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 __author__ = "isaiahmayerchak"
 
@@ -119,21 +123,16 @@ class FillInTheBlank(RunestoneIdDirective):
     """
     .. fillintheblank:: some_unique_id_here
 
-        Complete the sentence: |blank| had a |blank| lamb. One plus one is: (note that if there aren't enough blanks for the feedback given, they're added to the end of the problem. So, we don't **need** to specify a blank here.)
-
-        -   :Mary: Is the correct answer.
-            :Sue: Is wrong.
-            :x: Try again. (Note: the last item of feedback matches anything, regardless of the string it's given.)
-        -   :little: That's right.
-            :.*: Nope.
-        -   :2: Right on! Numbers can be given in decimal, hex (0x10 == 16), octal (0o10 == 8), binary (0b10 == 2), or using scientific notation (1e1 == 10), both here and by the user when answering the question.
-            :2 1: Close.... (The second number is a tolerance, so this matches 1 or 3.)
-            :x: Nope. (As earlier, this matches anything.)
-
-    config values (conf.py):
-
-    - fitb_div_class - custom CSS class of the component's outermost div
+        Put the text of the question here.
+        See https://runestone.academy/runestone/books/published/overview/Assessments/fitb.html
+        for additional options and documentation.
+        -   :Put the correct answer here: Put feedback displayed for this answer here.
+            :x: Put feedback displayed for an incorrect answer here.
     """
+
+    # config values (conf.py):
+    #
+    # - fitb_div_class - custom CSS class of the component's outermost div
 
     required_arguments = 1
     optional_arguments = 0

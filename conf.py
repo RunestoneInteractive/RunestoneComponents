@@ -354,5 +354,12 @@ intersphinx_mapping = {
             # An optional local file location -- useful when updating both Sphinx builds before the updates are pushed to the server.
             ##"C:/Users/bjones/Documents/git/web2py/applications/runestone/_build/objects.inv",
         )
+    ),
+    "Overview": (
+        "https://runestone.academy/runestone/books/published/overview/index.html", (
+            None,
+            # An optional local file location -- useful when updating both Sphinx builds before the updates are pushed to the server.
+            ##"C:/Users/bjones/Documents/git/web2py/applications/runestone/books/overview/build/overview/objects.inv",
+        )
     )
 }
