@@ -193,7 +193,7 @@ export default class RunestoneBase {
             }
             if (!eBookConfig.practice_mode && this.assessmentTaken) {
                 let request = new Request(
-                    eBookConfig.ajaxURL + "getAssessResults",
+                    "/assessment/results",
                     {
                         method: "POST",
                         body: JSON.stringify(data),
