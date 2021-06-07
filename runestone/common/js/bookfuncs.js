@@ -258,10 +258,8 @@ function setupNavbarLoggedOut() {
 $(document).bind("runestone:logout", setupNavbarLoggedOut);
 
 function notifyRunestoneComponents() {
-    // Runestone components wait until login process is over to load components because of storage issues
-    $(document).trigger("runestone:login-complete");
-    if (typeof $pjQ !== "undefined")
-        $pjQ(document).trigger("runestone:login-complete"); // for parsons components which are using a different version of jQuery
+    // Runestone components wait until login process is over to load components because of storage issues. This triggers the `dynamic import machinery`, which then sends the login complete signal when this and all dynamic imports are finished.
+    $(document).trigger("runestone:pre-login-complete");
 }
 
 // initialize stuff

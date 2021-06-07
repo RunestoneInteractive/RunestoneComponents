@@ -1,17 +1,7 @@
-/*==========================================
-========       Master fitb.js      =========
-============================================
-===   This file contains the JS for the  ===
-===  Runestone fillintheblank component. ===
-============================================
-===              Created By              ===
-===           Isaiah Mayerchak           ===
-===                 and                  ===
-===             Kirby Olson              ===
-===                6/4/15                ===
-===             Brad Miller              ===
-===                2/7/20                ===
-==========================================*/
+// *********
+// |docname|
+// *********
+// This file contains the JS for the Runestone fillintheblank component. It was created By Isaiah Mayerchak and Kirby Olson, 6/4/15 then revised by Brad Miller, 2/7/20.
 "use strict";
 
 import RunestoneBase from "../../common/js/runestonebase.js";

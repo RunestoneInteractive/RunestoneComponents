@@ -129,4 +129,4 @@
         });
       }});
   });
-}($jqTheme || window.jQuery));
+}(window.jQuery));

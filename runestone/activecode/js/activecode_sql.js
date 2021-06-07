@@ -1,5 +1,7 @@
 import { ActiveCode } from "./activecode.js";
-//require("sql.js");
+import Handsontable from "handsontable";
+import 'handsontable/dist/handsontable.full.css';
+import initSqlJs from "sql.js/dist/sql-wasm.js";
 
 var allDburls = {};
 

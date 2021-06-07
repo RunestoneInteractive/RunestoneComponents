@@ -17,8 +17,8 @@ Base Class Provides
 -------------------
 *   shouldUseServer
 *   checkServer
-*   `logRunEvent` - send the results of executing an ActiveCode exercise to the `runlog endpoint`.
-*   `logBookEvent` - send the results of answering a question to the `hsblog endpoint`.
+*   `logRunEvent` - send the results of executing an ActiveCode exercise to the :ref:`runlog endpoint`.
+*   `logBookEvent` - send the results of answering a question to the :ref:`hsblog endpoint`.
 *   loadData
 *   repopulateFromStorage
 *   localStorageKey
