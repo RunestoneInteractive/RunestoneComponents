@@ -224,7 +224,7 @@ export default class SelectOne extends RunestoneBase {
                 htmlsrc = toggleUI + htmlsrc + "</div>";
             }
             // just render this component on the page in its usual place
-            renderRunestoneComponent(htmlsrc, selectorId, {
+            await renderRunestoneComponent(htmlsrc, selectorId, {
                 selector_id: selectorId,
                 useRunestoneServices: true,
             });

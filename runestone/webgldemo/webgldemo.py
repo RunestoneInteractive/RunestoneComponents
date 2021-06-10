@@ -51,7 +51,6 @@ def setup(app):
 
     # Javascript for saving files to the client's hard drive
     app.add_autoversioned_javascript("FileSaver.min.js")
-    app.add_autoversioned_javascript("Blob.js")
 
     app.add_node(
         WebglInteractiveNode,

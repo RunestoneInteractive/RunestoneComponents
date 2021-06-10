@@ -52,35 +52,40 @@ def get_dburl(outer={}):
     # outer may contain the locals from the calling function
     # nonlocal env, settings # Python 3 only
 
+    dburl = None
     if "WEB2PY_CONFIG" in environ:
         w2py_config = environ["WEB2PY_CONFIG"]
         if w2py_config == "development":
-            return environ["DEV_DBURL"]
+            dburl = environ["DEV_DBURL"]
 
-        if w2py_config == "production":
-            return environ["DBURL"]
+        elif w2py_config == "production":
+            dburl = environ["DBURL"]
 
-        if w2py_config == "test":
-            return environ["TEST_DBURL"]
+        elif w2py_config == "test":
+            dburl = environ["TEST_DBURL"]
 
-    if "options" in outer:
-        return outer["options"].build.template_args["dburl"]
+    elif "options" in outer:
+        dburl = outer["options"].build.template_args["dburl"]
 
-    if "env" in outer:
-        return outer["env"].config.html_context["dburl"]
+    elif "env" in outer:
+        dburl = outer["env"].config.html_context["dburl"]
 
-    if "env" in globals():
-        return globals()["env"].config.html_context["dburl"]
+    elif "env" in globals():
+        dburl = globals()["env"].config.html_context["dburl"]
 
-    ret = None
-    if "settings" in outer:
-        ret = outer["settings"].database_uri
+    elif "settings" in outer:
+        dburl = outer["settings"].database_uri
 
-    if "settings" in globals():
-        ret = globals()["settings"].database_uri.replace("postgres:", "postgresql:")
+    elif "settings" in globals():
+        dburl = globals()["settings"].database_uri
 
-    if ret:
-        return re.sub(r"postgres:.*/", "postgresql:/", ret)
+    # We allow a dburl of "", hence the check against None.
+    if dburl is not None:
+        # DAL uses "postgres:", while SQLAlchemy (and the PostgreSQL spec) uses "postgresql:". Fix.
+        remove_prefix = "postgres://"
+        if dburl.startswith(remove_prefix):
+            dburl = "postgresql://" + dburl[len(remove_prefix):]
+        return dburl
 
     raise RuntimeError("Cannot configure a Database URL!")
 

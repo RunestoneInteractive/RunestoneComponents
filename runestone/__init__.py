@@ -1,6 +1,8 @@
 # *********************************
 # |docname| - Runestone Module init
 # *********************************
+import json
+
 from .activecode import ActiveCode
 from .animation import Animation
 from .mchoice import MChoice, QuestionNumber
@@ -38,38 +40,19 @@ from sphinx.errors import ExtensionError
 # normally this is just used by the `conf.py` file for building a runestone book
 def runestone_static_dirs():
     basedir = os.path.dirname(__file__)
-    module_paths = [
-        x for x in os.listdir(basedir) if os.path.isdir(os.path.join(basedir, x))
-    ]
     module_static_js = [os.path.join(basedir, "dist")]
-    module_static_js.append(os.path.join(basedir, "common", "js"))
     module_static_js.append(os.path.join(basedir, "animation", "js"))
     module_static_js.append(os.path.join(basedir, "codelens", "js"))
     module_static_js.append(os.path.join(basedir, "webgldemo", "js"))
     module_static_js.append(os.path.join(basedir, "matrixeq", "js"))
-    module_static_css = [os.path.join(basedir, "common", "css")]
-    module_static_css.append(os.path.join(basedir, "codelens", "css"))
+    module_static_css = [os.path.join(basedir, "common", "css", "sphinx")]
     module_static_css.append(os.path.join(basedir, "accessibility", "css"))
     module_static_css.append(os.path.join(basedir, "webgldemo", "css"))
     module_static_css.append(os.path.join(basedir, "matrixeq", "css"))
     module_static_css.append(os.path.join(basedir, "lp", "css"))
-    module_static_image = [
-        "%s/images" % os.path.join(basedir, x)
-        for x in module_paths
-        if os.path.exists("%s/images" % os.path.join(basedir, x))
-    ]
-    module_static_bootstrap = [
-        "%s/bootstrap" % os.path.join(basedir, x)
-        for x in module_paths
-        if os.path.exists("%s/bootstrap" % os.path.join(basedir, x))
-    ]
-
     return (
         module_static_js
         + module_static_css
-        + module_static_image
-        + module_static_bootstrap
-        + [os.path.join(basedir, "common/project_template/_static")]
         + CodeChat.CodeToRest.html_static_path()
     )
 
@@ -103,16 +86,24 @@ def setup(app):
     This could be expanded if there is additional initialization or customization
     we wanted to do for all projects.
     """
+    # Include JS and CSS produced by webpack. See `webpack static imports <webpack_static_imports>`_.
+    with open(pkg_resources.resource_filename("runestone", "dist/webpack_static_imports.json"), "r", encoding="utf-8") as f:
+        wb_imports = json.load(f)
+        script_files = wb_imports["js"]
+        _css_files = css_files + wb_imports["css"]
+
     for jsfile in script_files:
         try:
             app.add_autoversioned_javascript(jsfile)
         except ExtensionError:
             app.add_js_file(jsfile)
-    for cssfile in css_files:
+    for cssfile in _css_files:
         try:
             app.add_autoversioned_stylesheet(cssfile)
         except ExtensionError:
             app.add_css_file(cssfile)
+
+    app.config.html_static_path.append("dist/")
 
 
 def get_master_url():
@@ -182,33 +173,10 @@ def build(options):
 # ----------------
 runestone_version = version = pkg_resources.get_distribution("runestone").version
 
-script_files = [
-    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.emitter.bidi.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.emitter.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.fallbacks.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.messagestore.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.parser.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.language.js",
-    "https://cdn.jsdelivr.net/npm/vega@4.0.0-rc.2/build/vega.js",
-    "https://cdn.jsdelivr.net/npm/vega-lite@2.5.0/build/vega-lite.js",
-    "https://cdn.jsdelivr.net/npm/vega-embed@3.14.0/build/vega-embed.js",
-    "runestone.js",
-    "jquery-ui-1.10.3.custom.min.js",
-    "bootstrap-3.4.1/js/bootstrap.min.js",
-    "jquery-fix.js",  # required by bootstrap theme
-    "bootstrap-sphinx.js",
-    "jquery.idle-timer.js",
-    "presenter_mode.js",
-    "theme.js",
-]
-
 css_files = [
-    "bootstrap-3.4.1/css/bootstrap.min.css",
-    "presenter_mode.css",
-    "jquery-ui-1.10.3.custom.min.css",
+    # Generated from a template, so it can't be directly included in the webpack.
     "bootstrap-sphinx.css",
-    "runestone-custom-sphinx-bootstrap.css?v=" + runestone_version,
+    # Deliberately excluded, so it can be overridden by a user-supplied CSs file.
     "theme-overrides.css",
 ]
 

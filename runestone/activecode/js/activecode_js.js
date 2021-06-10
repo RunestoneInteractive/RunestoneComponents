@@ -1,6 +1,10 @@
 import { ActiveCode } from "./activecode.js";
-require("./skulpt.min.js");
-require("./skulpt-stdlib.js");
+import "./skulpt.min.js";
+import "./skulpt-stdlib.js";
+// Used by Skulpt.
+import embed from 'vega-embed';
+// Adapt for use outside webpack -- see https://github.com/vega/vega-embed.
+window.vegaEmbed = embed;
 
 export default class JSActiveCode extends ActiveCode {
     constructor(opts) {
