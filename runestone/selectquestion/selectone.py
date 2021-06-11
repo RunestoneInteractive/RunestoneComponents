@@ -48,7 +48,7 @@ from runestone.common.runestonedirective import (
 
 TEMPLATE = """
 <div class="runestone alert alert-warning sqcontainer">
-<div data-component="selectquestion" id={component_id} {selector} {points} {proficiency} {min_difficulty} {max_difficulty} {autogradable} {not_seen_ever} {primary} {AB} {toggle}>
+<div data-component="selectquestion" id={component_id} {selector} {points} {proficiency} {min_difficulty} {max_difficulty} {autogradable} {not_seen_ever} {primary} {AB} {toggle_options} {toggle_labels}>
     <p>Loading ...</p>
 </div>
 </div>
@@ -72,6 +72,7 @@ class SelectQuestion(RunestoneIdDirective):
        :max_difficulty: maximum difficulty level
        :ab: experiment_name
        :toggle: allow student to choose which question to answer from the given list, with first question in fromid list being rendered first
+       :togglelabels: relabel each question in the fromid list according to input here; blank will revert to a default label
 
        Difficulty is measured in one of two ways. For things like multiple choice and
        fill in the blank, we can use the % of students that get the answer correct on
@@ -94,7 +95,8 @@ class SelectQuestion(RunestoneIdDirective):
             "not_seen_ever": directives.flag,
             "primary": directives.flag,
             "ab": directives.unchanged,
-            "toggle": directives.flag,
+            "toggle": directives.unchanged,
+            "togglelabels": directives.unchanged,
         }
     )
 
@@ -182,10 +184,24 @@ class SelectQuestion(RunestoneIdDirective):
         else:
             self.options["AB"] = ""
 
-        if "toggle" in self.options:
-            self.options["toggle"] = "data-toggle=true"
+        if ("toggle" in self.options) or ("togglelabels" in self.options):
+            self.options[
+                "toggle_options"
+            ] = "data-toggleoptions=\"toggle\""
+            self.options[
+                "toggle_labels"
+            ] = "data-togglelabels=\"togglelabels:\""
+            if "toggle" in self.options:
+                self.options[
+                    "toggle_options"
+                ] = "data-toggleoptions=\"toggle, " + f"{self.options['toggle']}" + "\""
+            if "togglelabels" in self.options:
+                self.options[
+                    "toggle_labels"
+                ] = "data-togglelabels=\"togglelabels: " + f"{self.options['togglelabels']}" + "\""
         else:
-            self.options["toggle"] = ""
+            self.options["toggle_options"] = ""
+            self.options["toggle_labels"] = ""
 
         maybeAddToAssignment(self)
 
