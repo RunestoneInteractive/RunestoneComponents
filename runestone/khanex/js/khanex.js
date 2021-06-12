@@ -18,7 +18,7 @@ __date__ = 5/4/2021
 
 import RunestoneBase from "../../common/js/runestonebase.js";
 
-var DEBUG = true;
+var DEBUG = false;
 
 export var khanexList = {};
 
