@@ -243,9 +243,9 @@
     eBookConfig.username = '{{ user_id}}';
     eBookConfig.readings = {{ readings}};
     eBookConfig.activities = {{ activity_info }}
-    eBookConfig.downloadsEnabled = {{downloads_enabled}};
-    eBookConfig.allow_pairs = {{allow_pairs}}
-    eBookConfig.enableCompareMe = {{enable_compare_me}};
+    eBookConfig.downloadsEnabled = {{ downloads_enabled}};
+    eBookConfig.allow_pairs = {{ allow_pairs}}
+    eBookConfig.enableCompareMe = {{ enable_compare_me }};
     {% endraw %}
   {% else %}
     eBookConfig.useRunestoneServices = {% if use_services == 'true' -%}true{%- else -%}false{%- endif -%};
