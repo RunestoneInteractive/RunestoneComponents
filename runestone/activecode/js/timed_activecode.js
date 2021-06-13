@@ -8,6 +8,7 @@ import { ActiveCode } from "./activecode";
 import JSActiveCode from "./activecode_js";
 import HTMLActiveCode from "./activecode_html";
 import SQLActiveCode from "./activecode_sql";
+import BrythonActiveCode from "./activecode_brython.js";
 
 var TimedActiveCodeMixin = {
     timedInit: async function (opts) {
@@ -145,3 +146,11 @@ export class TimedSQLActiveCode extends SQLActiveCode {
     }
 }
 Object.assign(TimedSQLActiveCode.prototype, TimedActiveCodeMixin);
+
+export class TimedBrythonActiveCode extends BrythonActiveCode {
+    constructor(opts) {
+        super(opts);
+        this.timedInit(opts);
+    }
+}
+Object.assign(TimedBrythonActiveCode.prototype, TimedActiveCodeMixin);

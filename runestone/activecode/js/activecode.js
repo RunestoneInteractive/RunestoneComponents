@@ -60,6 +60,7 @@ export class ActiveCode extends RunestoneBase {
         this.question = $(opts.orig).find(`#${this.divid}_question`)[0];
         this.tie = $(orig).data("tie");
         this.dburl = $(orig).data("dburl");
+        this.python3_interpreter = $(orig).data("python3_interpreter");
         this.runButton = null;
         this.enabledownload = $(orig).data("enabledownload");
         this.downloadButton = null;
