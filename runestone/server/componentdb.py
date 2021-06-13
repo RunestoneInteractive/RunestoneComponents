@@ -128,7 +128,9 @@ def setup(app):
     logger.info("Connecting to DB")
     try:
         dburl = get_dburl()
-        engine = create_engine(dburl, client_encoding="utf8", convert_unicode=True)
+        # SQLite doesn't support ``client_encoding``, while PostgreSQL does.
+        encoding = dict(client_encoding="utf8") if dburl.startswith("postgresql") else {}
+        engine = create_engine(dburl, convert_unicode=True, **encoding)
         Session = sessionmaker()
         engine.connect()
         Session.configure(bind=engine)
@@ -339,6 +341,7 @@ def addQuestionToDB(self):
                     practice=practice,
                     topic=topics,
                     from_source=from_source,
+                    review_flag='F',
                     optional=optional,
                     description=et,
                     **meta_opts,
@@ -388,6 +391,7 @@ def addQuestionToDB(self):
                     question_name=id_,
                 )
                 sess.execute(ins)
+            sess.commit()
 
 
 def addQNumberToDB(app, node, qnumber):
@@ -585,7 +589,6 @@ def addAssignmentToDB(
         return
 
     course_id = getCourseID(course_name)
-    last_changed = datetime.now()
     sel = select([assignments]).where(
         and_(assignments.c.name == name, assignments.c.course == course_id)
     )
@@ -624,6 +627,7 @@ def addAssignmentToDB(
             visible=visible,
             time_limit=time_limit,
             from_source="T",
+            released="F",
         )
         res = sess.execute(ins)
         a_id = res.inserted_primary_key[0]

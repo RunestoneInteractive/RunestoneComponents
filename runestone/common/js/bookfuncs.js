@@ -105,8 +105,7 @@ function addReadingList() {
             });
         } else {
             l = $("<div />", {
-                text:
-                    "This page is not part of the last reading assignment you visited.",
+                text: "This page is not part of the last reading assignment you visited.",
             });
         }
         $("#main-content").append(l);
@@ -206,12 +205,26 @@ class PageProgressBar {
 
 export var pageProgressTracker = {};
 
-function handlePageSetup() {
+async function handlePageSetup() {
     var mess;
-    if (eBookConfig.useRunestoneServices) {
-        jQuery.get(eBookConfig.ajaxURL + "set_tz_offset", {
-            timezoneoffset: new Date().getTimezoneOffset() / 60,
-        });
+    let headers = new Headers({
+        "Content-type": "application/json; charset=utf-8",
+        Accept: "application/json",
+    });
+    let data = { timezoneoffset: new Date().getTimezoneOffset() / 60 };
+    let request = new Request("/logger/set_tz_offset", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: headers,
+    });
+    try {
+        let response = await fetch(request);
+        if (!response.ok) {
+            console.error(`Failed to set timezone! ${response.statusText}`);
+        }
+        data = await response.json();
+    } catch (e) {
+        console.error(`Error setting timezone ${e}`);
     }
 
     if (eBookConfig.isLoggedIn) {

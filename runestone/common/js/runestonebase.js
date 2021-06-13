@@ -20,7 +20,9 @@ import { pageProgressTracker } from "./bookfuncs.js";
 
 export default class RunestoneBase {
     constructor(opts) {
-        this.component_ready_promise = new Promise(resolve => this._component_ready_resolve_fn = resolve)
+        this.component_ready_promise = new Promise(
+            (resolve) => (this._component_ready_resolve_fn = resolve)
+        );
         this.optional = false;
         if (opts) {
             this.sid = opts.sid;
@@ -57,7 +59,7 @@ export default class RunestoneBase {
                 // is to look for doAssignment in the URL and then grab
                 // the assignment name from the heading.
                 if (location.href.indexOf("doAssignment") >= 0) {
-                    this.timedWrapper = $("h1#assignment_name").text()
+                    this.timedWrapper = $("h1#assignment_name").text();
                 } else {
                     this.timedWrapper = null;
                 }
@@ -72,10 +74,8 @@ export default class RunestoneBase {
         });
     }
 
-    // .. _logBookEvent:
-    //
-    // logBookEvent
-    // ------------
+    // _`logBookEvent`
+    //----------------
     // This function sends the provided ``eventInfo`` to the `hsblog endpoint` of the server. Awaiting this function returns either ``undefined`` (if Runestone services are not available) or the data returned by the server as a JavaScript object (already JSON-decoded).
     async logBookEvent(eventInfo) {
         if (this.graderactive) {
@@ -97,12 +97,17 @@ export default class RunestoneBase {
             try {
                 let response = await fetch(request);
                 if (!response.ok) {
-                    throw new Error("Failed to save the log entry");
+                    let detail = await response.json();
+                    console.error(detail);
+                    throw new Error(`Failed to save the log entry ${detail}`);
+                } else {
+                    post_return = response.json();
                 }
-                post_return = response.json();
             } catch (e) {
                 if (this.isTimed) {
-                    alert(`Error: Your action was not saved! The error was ${e}`);
+                    alert(
+                        `Error: Your action was not saved! The error was ${e}`
+                    );
                 }
                 console.log(`Error: ${e}`);
             }
@@ -120,10 +125,8 @@ export default class RunestoneBase {
         return post_return;
     }
 
-    // .. _logRunEvent:
-    //
-    // logRunEvent
-    // -----------
+    // -`logRunEvent`
+    //---------------
     // This function sends the provided ``eventInfo`` to the `runlog endpoint`. When awaited, this function returns the data (decoded from JSON) the server sent back.
     async logRunEvent(eventInfo) {
         let post_promise = "done";
@@ -192,19 +195,23 @@ export default class RunestoneBase {
                 data.sid = this.sid;
             }
             if (!eBookConfig.practice_mode && this.assessmentTaken) {
-                let request = new Request(
-                    "/assessment/results",
-                    {
-                        method: "POST",
-                        body: JSON.stringify(data),
-                        headers: this.jsonHeaders,
-                    }
-                );
+                let request = new Request("/assessment/results", {
+                    method: "POST",
+                    body: JSON.stringify(data),
+                    headers: this.jsonHeaders,
+                });
                 try {
                     let response = await fetch(request);
-                    data = await response.json();
-                    this.repopulateFromStorage(data);
-                    this.csresolver("server");
+                    if (response.ok) {
+                        data = await response.json();
+                        data = data.detail;
+                        this.repopulateFromStorage(data);
+                        this.csresolver("server");
+                    } else {
+                        alert(
+                            `HTTP Error getting results: ${response.statusText}`
+                        );
+                    }
                 } catch (err) {
                     try {
                         this.checkLocalStorage();
@@ -252,7 +259,7 @@ export default class RunestoneBase {
      */
     repopulateFromStorage(data) {
         // decide whether to use the server's answer (if there is one) or to load from storage
-        if (data !== null && this.shouldUseServer(data)) {
+        if (data !== null && data !== "no data" && this.shouldUseServer(data)) {
             this.restoreAnswers(data);
             this.setLocalStorage(data);
         } else {
