@@ -554,6 +554,8 @@ export class ActiveCode extends RunestoneBase {
         $(this.runButton).text($.i18n("msg_activecode_save_run"));
     }
 
+    // _`addHistoryScrubber`
+    // ---------------------
     // Activecode -- If the code has not changed wrt the scrubber position value then don't save the code or reposition the scrubber
     //  -- still call runlog, but add a parameter to not save the code
     // add an initial load history button
