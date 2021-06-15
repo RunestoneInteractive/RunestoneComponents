@@ -4,13 +4,12 @@ export default class BrythonActiveCode extends ActiveCode {
     constructor(opts) {
         super(opts);
         opts.alignVertical = true;
-        //this.code = $("<textarea />").html(this.origElem.innerHTML).text();
         this.python3_interpreter = $(orig).data("python3_interpreter");
         $(this.runButton).text("Render");
         this.editor.setValue(this.code);
     }
 
-    async runProg() {   
+    async runProg() {
         var prog = await this.buildProg(true);
         let saveCode = "True";
         this.saveCode = await this.manage_scrubber(saveCode);
@@ -22,13 +21,18 @@ export default class BrythonActiveCode extends ActiveCode {
             });
         }
         $(this.outDiv).show({ duration: 700, queue: false });
-        document.body.onload("brython()");
-        prog =
-            "<script type='text/javascript' src='https://cdn.jsdelivr.net/npm/brython@3.9.0/brython.min.js'></script>" +
-            "<script type=text/javascript>window.onerror = function(msg,url,line) {alert(msg+' on line: '+line);};</script>" +
-            "<script type='text/python'>" +
-            prog +
-            "</script>";
+        prog = `
+        <html>
+            <head>
+                <script type='text/javascript' src='https://cdn.jsdelivr.net/npm/brython@3.9.0/brython.min.js'></script>
+            </head>
+            <body onload='brython()'>
+                <script type='text/python'>` + prog + 
+         `
+                </script>
+            </body>
+        </html>
+        `;
         this.output.srcdoc = prog;
     }
 

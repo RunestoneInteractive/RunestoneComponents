@@ -268,6 +268,11 @@ class ActiveCode(RunestoneIdDirective):
         self.options["ctext"] = newcomplete
         self.options["no_of_buttons"] = no_of_buttons
 
+        if ("python3_interpreter" in self.options) and (self.options["language"]=="python3") :
+            self.options["python3_interpreter"] = "data-python3_interpreter='%s'" % self.options["python3_interpreter"]
+        else:
+            self.options["python3_interpreter"] = ""
+
         if "caption" not in self.options:
             self.options["caption"] = ""
         else:
@@ -394,11 +399,6 @@ class ActiveCode(RunestoneIdDirective):
             self.options["wasmuri"] = f"data-wasm={env.config.wasm_uri}"
         else:
             self.options["wasmuri"] = ""
-
-        if ("python3_interpreter" in self.options): #and (self.options["language"]=="python3") :
-            self.options["python3_interpreter"] = "data-python3_interpreter='{}'".format(self.options["python3_interpreter"])
-        else:
-            self.options["python3_interpreter"] = ""
 
         if self.content:
             if "^^^^" in self.content:
