@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html data-require="math morelli">
+<head>
+	<meta charset="UTF-8" />
+	<title>Java boolean operators</title>
+	<script src="../khan-exercise.js"></script>
+</head>
+<body>
+	<div class="exercise">
+	<div class="vars">
+		<var id="V1">randFromArray( ["true", "false"])</var>
+		<var id="V2">randFromArray( ["true", "false"] )</var>
+		<var id="VN1">randFromArray( ["A", "!A"] )</var>
+		<var id="VN2">randFromArray( ["B", "!B"] )</var>
+		<var id="O1">randFromArray(["&&", "||", "^"])</var>
+	</div>
+
+	<div class="problems">
+		<div "evaluate boolean">
+			<div class="question">
+			        <p>Evaluate the expression <font color="red"><var>VN1 + " " + O1 + " " + VN2</var></font>
+                                 given that <i>A</i> is <font color="red"><var>V1</var></font> and <i>B</i> is
+				    <font color="red"><var>V2</var></font>.
+			</div>
+			<div class="solution" data-type="text"><var>evalJavaBoolean(V1,VN1, O1, V2, VN2)</var></div>
+		</div>
+	</div>
+
+	<div class="hints">
+          <p>The expression <font color="red"><var>VN1 + " " + O1 + " " + VN2</var></font> <var>mapBooleanToHint(O1)</var>.
+          <p>The answer is <var>evalJavaBoolean(V1, O1, V2)</var>.
+	</div>
+	</div>
+</body>
+</html>

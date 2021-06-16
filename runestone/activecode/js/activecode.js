@@ -8,9 +8,10 @@
 "use strict";
 
 import RunestoneBase from "../../common/js/runestonebase.js";
-import AudioTour from "./audiotour";
-import "./activecode-i18n.en";
-import "./activecode-i18n.pt-br";
+import AudioTour from "./audiotour.js";
+import "./activecode-i18n.en.js";
+import "./activecode-i18n.pt-br.js";
+import "./activecode-i18n.sr-Cyrl.js";
 import CodeMirror from "codemirror";
 import "codemirror/mode/python/python.js";
 import "codemirror/mode/css/css.js";
@@ -20,7 +21,6 @@ import "codemirror/mode/javascript/javascript.js";
 import "codemirror/mode/sql/sql.js";
 import "codemirror/mode/clike/clike.js";
 import "codemirror/mode/octave/octave.js";
-import "./activecode-i18n.en.js";
 import "./../css/activecode.css";
 import "codemirror/lib/codemirror.css";
 
@@ -43,6 +43,7 @@ export class ActiveCode extends RunestoneBase {
         super(opts);
         var suffStart;
         var orig = $(opts.orig).find("textarea")[0];
+        this.containerDiv = opts.orig;
         this.useRunestoneServices = opts.useRunestoneServices;
         this.python3 = opts.python3;
         this.alignVertical = opts.vertical;
@@ -124,28 +125,28 @@ export class ActiveCode extends RunestoneBase {
             1000
         );
         if (this.autorun) {
-            $(document).ready(this.runProg.bind(this));
+            // Simulate pressing the run button, since this will also prevent the user from clicking it until the initial run is complete, and also help the user understand why they're waiting.
+            $(document).ready(this.runButtonHandler.bind(this));
         }
+        this.indicate_component_ready();
     }
 
     createEditor(index) {
-        this.containerDiv = document.createElement("div");
+        this.outerDiv = document.createElement("div");
         var linkdiv = document.createElement("div");
         linkdiv.id = this.divid.replace(/_/g, "-").toLowerCase(); // :ref: changes _ to - so add this as a target
-        $(this.containerDiv).addClass("ac_section alert alert-warning");
+        $(this.outerDiv).addClass("ac_section alert alert-warning");
         var codeDiv = document.createElement("div");
         $(codeDiv).addClass("ac_code_div col-md-12");
         this.codeDiv = codeDiv;
-        this.containerDiv.id = this.divid;
-        this.containerDiv.lang = this.language;
-        this.outerDiv = this.containerDiv;
-        $(this.origElem).replaceWith(this.containerDiv);
+        this.outerDiv.lang = this.language;
+        $(this.origElem).replaceWith(this.outerDiv);
         if (linkdiv.id !== this.divid) {
             // Don't want the 'extra' target if they match.
-            this.containerDiv.appendChild(linkdiv);
+            this.outerDiv.appendChild(linkdiv);
         }
-        this.containerDiv.appendChild(codeDiv);
-        var edmode = this.containerDiv.lang;
+        this.outerDiv.appendChild(codeDiv);
+        var edmode = this.outerDiv.lang;
         if (edmode === "sql") {
             edmode = "text/x-sql";
         } else if (edmode === "java") {
@@ -233,7 +234,9 @@ export class ActiveCode extends RunestoneBase {
         }
     }
 
-    async runButtonHander() {
+    async runButtonHandler() {
+        // Disable the run button until the run is finished.
+        this.runButton.disabled = true;
         try {
             await this.runProg();
         } catch (e) {
@@ -243,6 +246,8 @@ export class ActiveCode extends RunestoneBase {
             this.logCurrentAnswer();
         }
         this.renderFeedback();
+        // The run is finished; re-enable the button.
+        this.runButton.disabled = false;
     }
 
     createControls() {
@@ -257,7 +262,7 @@ export class ActiveCode extends RunestoneBase {
         ctrlDiv.appendChild(butt);
         this.runButton = butt;
         console.log("adding click function for run");
-        this.runButton.onclick = this.runButtonHander.bind(this);
+        this.runButton.onclick = this.runButtonHandler.bind(this);
         $(butt).attr("type", "button");
 
         if (this.enabledownload || eBookConfig.downloadsEnabled) {
@@ -1207,22 +1212,21 @@ Yet another is that there is an internal error.  The internal error message is: 
                 let urDivid = `${this.divid}_offscreen_unit_results`;
                 let unitFeedback = document.getElementById(urDivid);
                 let tmp = document.body.removeChild(unitFeedback);
-                if ($(this.containerDiv).find(`#${urDivid}`).length > 0) {
-                    tmp = $(this.containerDiv).find(`#${urDivid}`)[0];
+                if ($(this.outerDiv).find(`#${urDivid}`).length > 0) {
+                    tmp = $(this.outerDiv).find(`#${urDivid}`)[0];
                 } else {
-                    this.containerDiv.appendChild(tmp);
+                    this.outerDiv.appendChild(tmp);
                 }
                 $(tmp).show();
             } else {
                 let urDivid = this.divid + "_unit_results";
                 if (
-                    $(this.containerDiv).find(`#${urDivid}`).length == 0 &&
-                    $(this.containerDiv).find(
-                        `#${urDivid}_offscreen_unit_results`
-                    ).length == 0
+                    $(this.outerDiv).find(`#${urDivid}`).length == 0 &&
+                    $(this.outerDiv).find(`#${urDivid}_offscreen_unit_results`)
+                        .length == 0
                 ) {
                     let urResults = document.getElementById(urDivid);
-                    this.containerDiv.appendChild(urResults);
+                    this.outerDiv.appendChild(urResults);
                 }
             }
         }
@@ -1274,8 +1278,8 @@ Yet another is that there is an internal error.  The internal error message is: 
         });
         Sk.divid = this.divid;
         Sk.logResults = logResults;
-        if (this.graderactive && this.containerDiv.closest(".loading")) {
-            Sk.gradeContainer = this.containerDiv.closest(".loading").id;
+        if (this.graderactive && this.outerDiv.closest(".loading")) {
+            Sk.gradeContainer = this.outerDiv.closest(".loading").id;
         } else {
             Sk.gradeContainer = this.divid;
         }

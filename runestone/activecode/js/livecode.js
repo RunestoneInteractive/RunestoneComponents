@@ -1,6 +1,7 @@
 import { ActiveCode } from "./activecode.js";
 import MD5 from "./md5.js";
 import JUnitTestParser from "./extractUnitResults.js";
+import "../../codelens/js/pytutor-embed.bundle.js";
 
 export default class LiveCode extends ActiveCode {
     constructor(opts) {

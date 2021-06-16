@@ -272,8 +272,8 @@ export default class ShortAnswer extends RunestoneBase {
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
 =================================*/
-$(document).ready(function () {
-    $("[data-component=shortanswer]").each(function (index) {
+$(document).bind("runestone:login-complete", function () {
+    $("[data-component=shortanswer]").each(function () {
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
             try {

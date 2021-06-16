@@ -6,7 +6,7 @@ Multiple Answer
 ===============
 Old style
 ---------
-.. mchoice:: question1
+.. mchoice:: test_mchoice_1
     :multiple_answers:
     :correct: a, c
     :answer_a: red
@@ -22,7 +22,7 @@ Old style
 
 New style
 ---------
-.. mchoice:: question1_new
+.. mchoice:: test_mchoice_1_new
 
     Which colors might be found in a rainbow (check all)?
 
@@ -115,7 +115,7 @@ Multiple Choice
 ===============
 Old style
 ---------
-.. mchoice:: question2
+.. mchoice:: test_mchoice_2
     :correct: a
     :answer_a: red
     :answer_b: brown
@@ -130,7 +130,7 @@ Old style
 
 New style
 ---------
-.. mchoice:: question2_new
+.. mchoice:: test_mchoice_2_new
 
     What color is a stop sign?
 
@@ -191,5 +191,3 @@ New style
                 self.assertIn(str(3.14*radius**2)[:4], self.getOutput(), 'Checking answer.')
                 self.assertEqual(radius, 10, 'no feedback')
         myTests().main()
-
-

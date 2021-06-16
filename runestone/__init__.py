@@ -6,6 +6,7 @@ from .animation import Animation
 from .mchoice import MChoice, QuestionNumber
 from .blockly import Blockly
 from .quizly import Quizly
+from .khanex import Khanex
 from .codelens import Codelens
 from .clickableArea import ClickableArea
 from .datafile import DataFile
@@ -209,7 +210,6 @@ css_files = [
     "presenter_mode.css",
     "jquery-ui-1.10.3.custom.min.css",
     "bootstrap-sphinx.css",
-    "user-highlights.css",
     "runestone-custom-sphinx-bootstrap.css?v=" + runestone_version,
     "theme-overrides.css",
 ]
