@@ -90,16 +90,15 @@ function showJavascript() {
    where it can be retrieved by the GCB quiz object.
 */
 function checkAnswer() {
-  console.log("checkAnswer -- RAM");
-  console.log("window.parent.component_factory = " + JSON.stringify(window.parent.component_factory));
-
+  if (DEBUG) console.log("DEBUG index.html/checkAnswer()");
   document.getElementById('show_javascript').disabled = true;
   var result = Blockly.Quizme.evaluateUserAnswer();
   var quizName = Blockly.Quizme.quizName
   var q_result = {"quizname": quizName, "result": result[0], "xml": result[1]}; 
-
+  var fn_name = "quizly_" + quizName;
+  if (DEBUG) console.log("DEBUG checkAnswer fn_name = " + fn_name);
   // Post the result to runestone
-  window.parent.component_factory.quizly(q_result);
+  window.parent.component_factory[fn_name](q_result);
 }
 
 function giveHint() {
