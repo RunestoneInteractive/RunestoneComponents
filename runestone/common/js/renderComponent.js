@@ -1,4 +1,6 @@
-export function renderRunestoneComponent(componentSrc, whereDiv, moreOpts) {
+import { runestone_import } from "../../../webpack.index.js";
+
+export async function renderRunestoneComponent(componentSrc, whereDiv, moreOpts) {
     /**
      *  The easy part is adding the componentSrc to the existing div.
      *  The tedious part is calling the right functions to turn the
@@ -18,6 +20,8 @@ export function renderRunestoneComponent(componentSrc, whereDiv, moreOpts) {
     let componentKind = $($(`#${whereDiv} [data-component]`)[0]).data(
         "component"
     );
+    // Import the JavaScript for this component before proceeding.
+    await runestone_import(componentKind);
     let opt = {};
     opt.orig = jQuery(`#${whereDiv} [data-component]`)[0];
     if (opt.orig) {

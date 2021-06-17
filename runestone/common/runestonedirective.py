@@ -356,30 +356,6 @@ def first_time(app, *keys):
     return False
 
 
-# An internationalized component should call add_i18n_javascript() from its setup() function
-def add_i18n_js(app, supported_langs, *i18n_resources):
-    if first_time(app, "add_i18n_js"):
-        app.add_autoversioned_javascript("jquery_i18n/CLDRPluralRuleParser.js")
-        app.add_autoversioned_javascript("jquery_i18n/jquery.i18n.js")
-        app.add_autoversioned_javascript("jquery_i18n/jquery.i18n.messagestore.js")
-        app.add_autoversioned_javascript("jquery_i18n/jquery.i18n.fallbacks.js")
-        app.add_autoversioned_javascript("jquery_i18n/jquery.i18n.language.js")
-        app.add_autoversioned_javascript("jquery_i18n/jquery.i18n.parser.js")
-        app.add_autoversioned_javascript("jquery_i18n/jquery.i18n.emitter.js")
-        app.add_autoversioned_javascript("jquery_i18n/jquery.i18n.emitter.bidi.js")
-    for res in i18n_resources:
-        if first_time(app, "add_i18n_js", res):
-            app.add_autoversioned_javascript(res + ".en.js")
-            if (
-                app.config.language
-                and app.config.language != "en"
-                and app.config.language in supported_langs
-            ):
-                app.add_autoversioned_javascript(
-                    res + "." + app.config.language + ".js"
-                )
-
-
 # Some nodes have a line number of None. Look through their children to find the node's line number.
 def get_node_line(node):
     # This returns source, line. Pick just the line.

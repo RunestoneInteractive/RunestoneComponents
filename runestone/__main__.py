@@ -150,10 +150,10 @@ def build(all, wd):
     else:
         os.chdir(findProjectRoot())
     sys.path.insert(0, os.getcwd())
-    if not pathlib.Path(resource_filename("runestone", "dist/runestone.js")).exists():
-        click.echo("Error -- You are missing runestone.js please make sure")
-        click.echo("you have runestone installed correctly.")
-        click.echo("In a development environment run npm run build")
+    if not pathlib.Path(resource_filename("runestone", "dist/runestone.bundle.js")).exists():
+        click.echo("Error -- You are missing runestone.bundle.js.  Please make sure")
+        click.echo("you have Runestone installed correctly.")
+        click.echo("In a development environment, execute npm run build.")
         sys.exit(-1)
 
     version = require("runestone")[0].version
