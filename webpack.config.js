@@ -15,32 +15,11 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = (env, argv) => {
     return {
-        entry: [
-            "./runestone/quizly/js/quizly.js",
-            "./runestone/khanex/js/khanex.js",
-            "./runestone/shortanswer/js/shortanswer.js",
-            "./runestone/activecode/js/acfactory.js",
-            "./runestone/mchoice/js/mchoice.js",
-            "./runestone/fitb/js/fitb.js",
-            "./runestone/clickableArea/js/clickable.js",
-            "./runestone/dragndrop/js/dragndrop.js",
-            "./runestone/timed/js/timed.js",
-            "./runestone/parsons/js/parsons.js",
-            "./runestone/poll/js/poll.js",
-            "./runestone/common/js/user-highlights.js",
-            "./runestone/spreadsheet/js/spreadsheet.js",
-            "./runestone/tabbedStuff/js/tabbedstuff.js",
-            "./runestone/reveal/js/reveal.js",
-            "./runestone/datafile/js/datafile.js",
-            "./runestone/showeval/js/showEval.js",
-            "./runestone/video/js/runestonevideo.js",
-            "./runestone/lp/js/lp.js",
-            "./runestone/codelens/js/codelens.js",
-            "./runestone/webwork/js/webwork.js",
-            "./runestone/selectquestion/js/selectone.js",
-        ],
-        mode: env.MODE,
-        devtool: env.MODE === "development" ? "inline-source-map" : "none",
+        entry: {
+            runestone: "./webpack.index.js",
+        },
+        // See `mode <https://webpack.js.org/configuration/mode/>`_ for the conditional statement below.
+        devtool: argv.mode === "development" ? "inline-source-map" : "source-map",
         module: {
             rules: [
                 {
