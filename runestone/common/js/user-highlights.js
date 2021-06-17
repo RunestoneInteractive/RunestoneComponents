@@ -170,7 +170,7 @@ function decorateTableOfContents() {
         ) {
             var subChapterList;
             if (data != "None") {
-                subChapterList = data;
+                subChapterList = data.detail;
 
                 var allSubChapterURLs = $("#main-content div li a");
                 $.each(subChapterList, function (index, item) {
@@ -267,6 +267,8 @@ function enableCompletions() {
 // call enable user highlights after login
 $(document).bind("runestone:login", enableCompletions);
 
+// _ processPageState
+// -------------------------
 function processPageState(completionFlag) {
     /*Log last page visited*/
     var currentPathname = window.location.pathname;
