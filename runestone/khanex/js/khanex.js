@@ -30,7 +30,7 @@ export default class Khanex extends RunestoneBase {
         this.origElem = orig;
         this.divid = orig.id;
         this.resultsViewer = $(orig).data("results");
-        this.getIFrame();
+        this.getIFrameAndQuizname();
         this.renderKhanex(); //generates HTML
         // Checks localStorage to see if this khanex has already been completed by this user.
 	//        this.checkKhanexStorage();
@@ -39,13 +39,17 @@ export default class Khanex extends RunestoneBase {
     }
 
     // The main content of the khanex node is the iframe. 
-    getIFrame() {
+    getIFrameAndQuizname() {
       var html = $(this.origElem).html();
       var p1 = html.search('<iframe');
       var p2 = html.search('</iframe>');
       this.iframe = html.slice(p1,p2+8);
       if (DEBUG) console.log("DEBUG: getQuestionText() html = " + html);
       if (DEBUG) console.log("DEBUG: getQuestionText() iframe = " + this.iframe);
+      p1 = html.search('khanex/qs/');
+      p2 = html.search('.html');
+      this.quizname = html.slice(p1+10,p2);  // Grab the quizname from iframe
+      if (DEBUG) console.log("DEBUG quizname= ", this.quizname);
     }
 
     //generates the HTML that the user interacts with
@@ -90,7 +94,7 @@ export default class Khanex extends RunestoneBase {
          try {
 	     var khanex = new Khanex({ orig: this });
              khanexList[this.id] = khanex;
-	     setupCallback(khanex);
+	     setupCallback(khanex,khanex.quizname);
          } catch (err) {
              console.log(`Error rendering Khanex Exercise ${this.id}
                           Details: ${err}`);
@@ -101,14 +105,11 @@ export default class Khanex extends RunestoneBase {
 
 // Sets up a call back function on the window containing the khanex component
 // We need to pass a reference to this khanex object so that it can be use during callback.
-function setupCallback(khanex) {
+function setupCallback(khanex,quizname) {
   if (typeof window.component_factory === "undefined") {
       window.component_factory = {};
   }
-  window.component_factory.khanex = function(result) {
-  if (DEBUG) console.log("DEBUG: Khanex component factory = " + JSON.stringify(window.component_factory));
-  if (DEBUG) console.log("DEBUG: Khanex component factory khanex " + JSON.stringify(result));
-  khanex.submitKhanex(result);
-  }
+  var fn_name = "khanex_" + quizname;   // Unique function name
+  window.component_factory[fn_name] = function(result) { khanex.submitKhanex(result); }
 }
 

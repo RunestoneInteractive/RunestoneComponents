@@ -1964,11 +1964,12 @@ var Khan = (function() {
 			var curTime = new Date().getTime();
 			var data = buildAttemptData(pass, ++attempts, JSON.stringify(validator.guess), curTime);
 
-			// Save the answer to runestone                                                                                                                             
-                        console.log("RAM DEBUG data = " + JSON.stringify(data));
+			// Save the answer to runestone                                                                                                                                                    // We reconstruct the unique function name
+			//                        console.log("RAM DEBUG data = " + JSON.stringify(data));
 			if (window.parent.component_factory) {
-			  window.parent.component_factory.khanex(data);
-                          console.log("RAM DEBUG saved to runestone");
+			  var fn_name = "khanex_" + data['sha1'];
+			  window.parent.component_factory[fn_name](data);
+                          console.log("RAM DEBUG Khanex exercise saved to runestone");
 			}
 
 			request( "problems/" + problemNum + "/attempt", data, function() {
