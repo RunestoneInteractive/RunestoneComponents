@@ -25,13 +25,13 @@ function getCompletions() {
     var data = { lastPageUrl: currentPathname };
     jQuery
         .ajax({
-            url: eBookConfig.ajaxURL + "getCompletionStatus",
+            url: "/logger/getCompletionStatus",
             data: data,
             async: false,
         })
         .done(function (data) {
             if (data != "None") {
-                var completionData = $.parseJSON(data);
+                var completionData = data.detail;
                 var completionClass, completionMsg;
                 if (completionData[0].completionStatus == 1) {
                     completionClass = "buttonConfirmCompletion";
@@ -165,12 +165,12 @@ function decorateTableOfContents() {
         window.location.href.toLowerCase().indexOf("toc.html") != -1 ||
         window.location.href.toLowerCase().indexOf("index.html") != -1
     ) {
-        jQuery.get(eBookConfig.ajaxURL + "getAllCompletionStatus", function (
+        jQuery.get("/logger/getAllCompletionStatus", function (
             data
         ) {
             var subChapterList;
             if (data != "None") {
-                subChapterList = $.parseJSON(data);
+                subChapterList = data;
 
                 var allSubChapterURLs = $("#main-content div li a");
                 $.each(subChapterList, function (index, item) {
@@ -234,21 +234,21 @@ function decorateTableOfContents() {
         jQuery.get("/logger/getlastpage", data, function (data) {
             var lastPageData;
             if (data != "None") {
-                lastPageData = $.parseJSON(data);
-                if (lastPageData[0].lastPageChapter != null) {
+                lastPageData = data.detail;
+                if (lastPageData.lastPageChapter != null) {
                     $("#continue-reading")
                         .show()
                         .html(
                             '<div id="jump-to-chapter" class="alert alert-info" ><strong>You were Last Reading:</strong> ' +
-                            lastPageData[0].lastPageChapter +
-                            (lastPageData[0].lastPageSubchapter
+                            lastPageData.lastPageChapter +
+                            (lastPageData.lastPageSubchapter
                                 ? " &gt; " +
-                                lastPageData[0].lastPageSubchapter
+                                lastPageData.lastPageSubchapter
                                 : "") +
                             ' <a href="' +
-                            lastPageData[0].lastPageUrl +
+                            lastPageData.lastPageUrl +
                             "?lastPosition=" +
-                            lastPageData[0].lastPageScrollLocation +
+                            lastPageData.lastPageScrollLocation +
                             '">Continue Reading</a></div>'
                         );
                 }
@@ -287,8 +287,11 @@ function processPageState(completionFlag) {
         console.log(e);
     });
     jQuery.ajax({
-        url: eBookConfig.ajaxURL + "updatelastpage",
-        data: data,
+        url: "/logger/updatelastpage",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        data: JSON.stringify(data),
+        method: "POST",
         async: true,
     });
 }
