@@ -27,8 +27,7 @@ export default class BrythonActiveCode extends ActiveCode {
                 <script type='text/javascript' src='https://cdn.jsdelivr.net/npm/brython@3.9.0/brython.min.js'></script>
             </head>
             <body onload='brython()'>
-                <script type='text/python'>
-                    ${prog}
+                <script type='text/python'>${prog}
                 </script>
             </body>
         </html>
