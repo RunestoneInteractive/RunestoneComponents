@@ -279,6 +279,18 @@ export default class Parsons extends RunestoneBase {
             // Remove the options from the code
             // only options are #paired or #distractor
             var options = {};
+            var distractIndex;
+            var distractHelptext = "";
+            if (textBlock.includes("#paired:")) {
+                distractIndex = textBlock.indexOf("#paired:");
+                distractHelptext = textBlock.substring(distractIndex + 8, textBlock.length).trim();
+                textBlock = textBlock.substring(0, distractIndex + 7);
+            }
+            else if (textBlock.includes("#distractor:")) {
+                distractIndex = textBlock.indexOf("#distractor:");
+                distractHelptext = textBlock.substring(distractIndex + 12, textBlock.length).trim();
+                textBlock = textBlock.substring(0, distractIndex + 11);
+            }
             textBlock = textBlock.replace(
                 /#(paired|distractor)/,
                 function (mystring, arg1) {
@@ -298,9 +310,11 @@ export default class Parsons extends RunestoneBase {
                     if (options["paired"]) {
                         line.distractor = true;
                         line.paired = true;
+                        line.distractHelptext = distractHelptext;
                     } else if (options["distractor"]) {
                         line.distractor = true;
                         line.paired = false;
+                        line.distractHelptext = distractHelptext;
                     } else {
                         line.distractor = false;
                         line.paired = false;
@@ -1491,6 +1505,10 @@ export default class Parsons extends RunestoneBase {
         feedbackArea.attr("class", "alert alert-info");
         feedbackArea.html($.i18n("msg_parson_not_solution"));
         // Stop ability to select
+        if (block.lines[0].distractHelptext) {
+            block.view.setAttribute("data-toggle","tooltip");
+            block.view.setAttribute("title", block.lines[0].distractHelptext);
+        }
         block.disable();
         // If in answer area, move to source area
         if (!block.inSourceArea()) {
