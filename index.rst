@@ -44,7 +44,6 @@ Misc
     ACKNOWLEDGEMENTS
     .github/FUNDING.yml
     .gitignore
-    .travis.yml
     .readthedocs.yml
     conf.py
     codechat_config.json
