@@ -122,6 +122,9 @@ function addNavigationAndCompletionButtons() {
     } else {
         completionFlag = 1;
     }
+    // Make sure we mark this page as visited regardless of how flakey
+    // the onunload handlers become.
+    processPageState(completionFlag);
     $("#completionButton").on("click", function () {
         if ($(this).hasClass("buttonAskCompletion")) {
             $(this)
