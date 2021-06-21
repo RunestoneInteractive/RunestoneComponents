@@ -38,6 +38,7 @@ import "./runestone/common/project_template/_templates/plugin_layouts/sphinx_boo
 import "./runestone/common/css/runestone-custom-sphinx-bootstrap.css";
 
 // Misc
+import "./runestone/common/js/bookfuncs.js";
 import "./runestone/common/js/user-highlights.js";
 
 // These belong in dynamic imports for the obvious component; however, these components don't include a ``data-component`` attribute.
@@ -95,7 +96,7 @@ export function runestone_auto_import() {
         $("[data-component]").map(
             // Extract the value of the data-component attribute.
             (index, element) => $(element).attr("data-component")
-        // Switch from a jQuery object back to an array, passing that to the Set constructor.
+            // Switch from a jQuery object back to an array, passing that to the Set constructor.
         ).get()
     );
 
