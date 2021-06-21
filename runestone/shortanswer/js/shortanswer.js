@@ -152,6 +152,7 @@ export default class ShortAnswer extends RunestoneBase {
         this.logBookEvent({
             event: "shortanswer",
             act: value,
+            answer: value,
             div_id: this.divid,
         });
     }
