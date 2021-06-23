@@ -22,7 +22,7 @@
 __author__ = "rmorelli"
 
 # Debug flags
-DEBUG = False
+DEBUG = True
 VERBOSE = False
 
 import os, shutil
@@ -61,35 +61,36 @@ STATIC_DIR = "./_static"
 #   |- media            - folder of images, etc.
 # Perhaps there's a runestone routine to copy files?
 # TODO: Test this with MobileCSP units
-def copyfiles():
-    CURR_DIR = os.path.dirname(os.path.realpath(__file__))
-    QUIZLY_DIR = STATIC_DIR+'/quizly'
-    MEDIA_DIR = QUIZLY_DIR+'/media'
-    if os.path.exists(QUIZLY_DIR):
-        shutil.rmtree(QUIZLY_DIR)
-    os.mkdir(QUIZLY_DIR, mode=0o755)
-    os.mkdir(QUIZLY_DIR+'/media', mode=0o755)
-    js_folder = Path(CURR_DIR).glob('js/*.js')
-    html_folder = Path(CURR_DIR).glob('js/*.html')
-    media_folder = Path(CURR_DIR).glob('js/media/*')
-    css_folder = Path(CURR_DIR).glob('js/*.css')
-    files = [x for x in js_folder]
-    print('Copying resource files to ' + STATIC_DIR) if VERBOSE else None
-    for f in files:
-        print(str(f) + ' --> ' + QUIZLY_DIR) if VERBOSE else None
-        shutil.copy(f, QUIZLY_DIR)
-    files = [x for x in css_folder]
-    for f in files:
-        print(str(f) + ' --> ' + QUIZLY_DIR) if VERBOSE else None 
-        shutil.copy(f, QUIZLY_DIR)
-    files = [x for x in html_folder]
-    for f in files:
-        print(str(f) + ' --> ' + QUIZLY_DIR) if VERBOSE else None 
-        shutil.copy(f, QUIZLY_DIR)
-    files = [x for x in media_folder]
-    for f in files:
-        print(str(f) + ' --> ' + MEDIA_DIR) if VERBOSE else None
-        shutil.copy(f, MEDIA_DIR)
+# def copyfiles():
+#     CURR_DIR = os.path.dirname(os.path.realpath(__file__))
+#     QUIZLY_DIR = STATIC_DIR+'/quizly'
+#     MEDIA_DIR = QUIZLY_DIR+'/media'
+#     if not os.path.exists(QUIZLY_DIR):
+#         print('Missing directory ' + QUIZLY_DIR) if DEBUG else None
+# #        shutil.rmtree(QUIZLY_DIR)
+# #    os.mkdir(QUIZLY_DIR, mode=0o755)
+# #    os.mkdir(QUIZLY_DIR+'/media', mode=0o755)
+#     js_folder = Path(CURR_DIR).glob('js/*.js')
+#     html_folder = Path(CURR_DIR).glob('js/*.html')
+#     media_folder = Path(CURR_DIR).glob('js/media/*')
+#     css_folder = Path(CURR_DIR).glob('js/*.css')
+#     files = [x for x in js_folder]
+#     print('Copying resource files to ' + STATIC_DIR) if VERBOSE else None
+#     for f in files:
+#         print(str(f) + ' --> ' + QUIZLY_DIR) if VERBOSE else None
+#         shutil.copy(f, QUIZLY_DIR)
+#     files = [x for x in css_folder]
+#     for f in files:
+#         print(str(f) + ' --> ' + QUIZLY_DIR) if VERBOSE else None 
+#         shutil.copy(f, QUIZLY_DIR)
+#     files = [x for x in html_folder]
+#     for f in files:
+#         print(str(f) + ' --> ' + QUIZLY_DIR) if VERBOSE else None 
+#         shutil.copy(f, QUIZLY_DIR)
+#     files = [x for x in media_folder]
+#     for f in files:
+#         print(str(f) + ' --> ' + MEDIA_DIR) if VERBOSE else None
+#         shutil.copy(f, MEDIA_DIR)
 
 # Define the quizly directive
 def setup(app):
@@ -125,7 +126,7 @@ def visit_quizly_node(self, node):
     print('DEBUG: visit_quizly_node options = ' + str(node.runestone_options)) if DEBUG else None
 
     res = node.template % (node.runestone_options)
-    copyfiles()  # Copy resource files
+#    copyfiles()  # Copy resource files
     print('DEBUG: visit_quizly_node res = ' + res) if DEBUG else None
     self.body.append(res)
 
