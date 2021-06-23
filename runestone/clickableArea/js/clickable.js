@@ -400,9 +400,11 @@ export default class ClickableArea extends RunestoneBase {
     }
 
     logCurrentAnswer() {
+        const answer = this.givenIndexArray.join(";");
         this.logBookEvent({
             event: "clickableArea",
-            act: this.givenIndexArray.join(";"),
+            answer: answer,
+            act: answer,
             div_id: this.divid,
             correct: this.correct ? "T" : "F",
         });
