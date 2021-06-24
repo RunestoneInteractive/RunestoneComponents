@@ -19,6 +19,10 @@
 
 # Note: An import entry for quizly must be included in runestone/__init__.py
 
+# Note: The content files for the khanex component must be stored in the 
+# course's _static folder. Download the following file and unzip it in _static:
+# https://github.com/ram8647/khanex/blob/16398fd496fad5b93fdf4d72c274064db8d1d1ac/khanex-runestone.zip
+
 __author__ = "rmorelli"
 
 # Debug flags
@@ -40,87 +44,6 @@ KHANEX_TEMPLATE = """
      </div>
     </div>
        """
-
-# Resource files should be stored in the X/_static directory, from where they
-# will be automatically copied into build/x/_static, where 'x' is the project name
-STATIC_DIR = "./_static"
-
-# Copy the resource files into the _static folder, maintaining proper folder hierarchy
-# The resources should be organized as follows:
-# _static
-# |-khanex
-#   |- jquery.js - 
-#   |- jquery-ui.js     
-#   |- khan-exericse.js  - main source code
-#   |- khan.html       - test case
-#   |- khanex.js       - runestone js 
-#   |- qs/             - our exercises directroy
-#   |- css/            - css files and images
-#   |- exercises/       - khan exercises
-#   |- utils/           - js utilities
-# Perhaps there's a runestone routine to copy files?
-# TODO: Test this with MobileCSP units
-def copyfiles():
-    CURR_DIR = os.path.dirname(os.path.realpath(__file__))
-    KHANEX_DIR = STATIC_DIR+'/khanex'
-    CSS_DIR = KHANEX_DIR+'/css'
-    IMG_DIR = KHANEX_DIR+'/css/images'
-    QS_DIR = KHANEX_DIR+'/qs'
-    UTILS_DIR = KHANEX_DIR+'/utils'
-    UTEST_DIR = KHANEX_DIR+'/utils/test'
-    EX_DIR = KHANEX_DIR+'/exercises'
-    if os.path.exists(KHANEX_DIR):
-        shutil.rmtree(KHANEX_DIR)
-    os.mkdir(KHANEX_DIR, mode=0o755)
-    os.mkdir(CSS_DIR, mode=0o755)
-    os.mkdir(IMG_DIR, mode=0o755)
-    os.mkdir(UTILS_DIR, mode=0o755)
-    os.mkdir(UTEST_DIR, mode=0o755)
-    os.mkdir(EX_DIR, mode=0o755)
-    os.mkdir(QS_DIR, mode=0o755)
-    js_folder = Path(CURR_DIR).glob('js/*.js')
-    html_folder = Path(CURR_DIR).glob('js/*.html')
-    css_folder = Path(CURR_DIR).glob('js/css/*.css')
-    img_folder = Path(CURR_DIR).glob('js/css/images/*')
-    utils_folder = Path(CURR_DIR).glob('js/utils/*.js')
-    utest_folder = Path(CURR_DIR).glob('js/utils/test/*.js')
-    qs_folder = Path(CURR_DIR).glob('js/qs/*')
-    ex_folder = Path(CURR_DIR).glob('js/exercises/*')
-    print('Copying resource files to ' + STATIC_DIR) if VERBOSE else None
-    files = [x for x in js_folder]
-    for f in files:
-        print(str(f) + ' --> ' + KHANEX_DIR) if VERBOSE else None
-        shutil.copy(f, KHANEX_DIR)
-    files = [x for x in html_folder]
-    for f in files:
-        print(str(f) + ' --> ' + KHANEX_DIR) if VERBOSE else None 
-        shutil.copy(f, KHANEX_DIR)
-    files = [x for x in css_folder]
-    for f in files:
-        print(str(f) + ' --> ' + CSS_DIR) if VERBOSE else None 
-        shutil.copy(f, CSS_DIR)
-    files = [x for x in img_folder]
-    for f in files:
-        print(str(f) + ' --> ' + IMG_DIR) if VERBOSE else None 
-        shutil.copy(f, IMG_DIR)
-    files = [x for x in utils_folder]
-    for f in files:
-        print(str(f) + ' --> ' + UTILS_DIR) if VERBOSE else None
-        shutil.copy(f, UTILS_DIR)
-    shutil.copytree(CURR_DIR + '/js/utils/MathJax', UTILS_DIR + '/MathJax')  
-
-    files = [x for x in utest_folder]
-    for f in files:
-        print(str(f) + ' --> ' + UTEST_DIR) if VERBOSE else None
-        shutil.copy(f, UTEST_DIR)
-    files = [x for x in qs_folder]
-    for f in files:
-        print(str(f) + ' --> ' + QS_DIR) if VERBOSE else None
-        shutil.copy(f, QS_DIR)
-    files = [x for x in ex_folder]
-    for f in files:
-        print(str(f) + ' --> ' + EX_DIR) if VERBOSE else None
-        shutil.copy(f, EX_DIR)
 
 # Define the khanex directive
 def setup(app):
@@ -157,7 +80,6 @@ def visit_khanex_node(self, node):
     print('DEBUG: visit_khanex_node options = ' + str(node.runestone_options)) if DEBUG else None
 
     res = node.template % (node.runestone_options)
-    copyfiles()  # Copy resource files
     print('DEBUG: visit_khanex_node res = ' + res) if DEBUG else None
     self.body.append(res)
 
