@@ -14,10 +14,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-# This files runs during runestone build. It generates the node data
+# This file runs during runestone build. It generates the node data
 # that is used to render the component by the  quizly.js script.
 
 # Note: An import entry for quizly must be included in runestone/__init__.py
+
+# Note: The content files for the quizly component must stored in the 
+# course's _static folder. Download the following file and unzip it in _static:
+#  https://github.com/ram8647/quizly/blob/35ee7c945e6f240450f46f41ad9c80735215b5e0/quizly-runestone.zip
+#
 
 __author__ = "rmorelli"
 
@@ -41,55 +46,6 @@ QUIZLY_TEMPLATE = """
        </div>
        </div>
        """
-
-# Resource files should be stored in the X/_static directory, from where they
-# will be automatically copied into build/x/_static, where 'x' is the project name
-STATIC_DIR = "./_static"
-
-# Copy the resource files into the _static folder, maintaining proper folder hierarchy
-# The resources should be organized as follows:
-# _static
-# |-quizly
-#   |- all_appinventor.js - compressed js files
-#   |- all_blockly.js     - compressed js files
-#   |- all_quizly.js      - compressed js files
-#   |- quizme-helper.js - main source code
-#   |- quizzes.js       - quizly quizzes
-#   |- index.html       - container for the iframe
-#   |- blockly.html     - blockly iframe
-#   |- main.css         
-#   |- media            - folder of images, etc.
-# Perhaps there's a runestone routine to copy files?
-# TODO: Test this with MobileCSP units
-def copyfiles():
-    CURR_DIR = os.path.dirname(os.path.realpath(__file__))
-    QUIZLY_DIR = STATIC_DIR+'/quizly'
-    MEDIA_DIR = QUIZLY_DIR+'/media'
-    if os.path.exists(QUIZLY_DIR):
-        shutil.rmtree(QUIZLY_DIR)
-    os.mkdir(QUIZLY_DIR, mode=0o755)
-    os.mkdir(QUIZLY_DIR+'/media', mode=0o755)
-    js_folder = Path(CURR_DIR).glob('js/*.js')
-    html_folder = Path(CURR_DIR).glob('js/*.html')
-    media_folder = Path(CURR_DIR).glob('js/media/*')
-    css_folder = Path(CURR_DIR).glob('js/*.css')
-    files = [x for x in js_folder]
-    print('Copying resource files to ' + STATIC_DIR) if VERBOSE else None
-    for f in files:
-        print(str(f) + ' --> ' + QUIZLY_DIR) if VERBOSE else None
-        shutil.copy(f, QUIZLY_DIR)
-    files = [x for x in css_folder]
-    for f in files:
-        print(str(f) + ' --> ' + QUIZLY_DIR) if VERBOSE else None 
-        shutil.copy(f, QUIZLY_DIR)
-    files = [x for x in html_folder]
-    for f in files:
-        print(str(f) + ' --> ' + QUIZLY_DIR) if VERBOSE else None 
-        shutil.copy(f, QUIZLY_DIR)
-    files = [x for x in media_folder]
-    for f in files:
-        print(str(f) + ' --> ' + MEDIA_DIR) if VERBOSE else None
-        shutil.copy(f, MEDIA_DIR)
 
 # Define the quizly directive
 def setup(app):
@@ -125,7 +81,6 @@ def visit_quizly_node(self, node):
     print('DEBUG: visit_quizly_node options = ' + str(node.runestone_options)) if DEBUG else None
 
     res = node.template % (node.runestone_options)
-    copyfiles()  # Copy resource files
     print('DEBUG: visit_quizly_node res = ' + res) if DEBUG else None
     self.body.append(res)
 

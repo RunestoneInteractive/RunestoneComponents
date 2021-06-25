@@ -1,5 +1,9 @@
 README.txt
 
+The content files for the khanex component must be stored in the 
+ course's _static folder. Download the following file and unzip it in _static:
+ https://github.com/ram8647/khanex/blob/16398fd496fad5b93fdf4d72c274064db8d1d1ac/khanex-runestone.zip
+
 The khanex directive, in this first pass looks like this:
 -----------------------------------------------
 
@@ -27,10 +31,6 @@ The files that need to be coded by the developer
 ----------------------------
 Th script that runs during runestone build. Runestone build parses the
 source document and translates the directive and its options into a QuizlyNode.
-
- - Copies resource files from quizly/js to the project/_static folder, from where
-   they are copied to build/quizly/_static during build, where they are used by
-   the _sources web pages.
 
  - QuizlyNode -- defines the node. The  only option needed for this is the quizname, 
    which is parsed from the directive. 
