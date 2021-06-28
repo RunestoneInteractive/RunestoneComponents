@@ -1,10 +1,4 @@
 import { ActiveCode } from "./activecode.js";
-import "./skulpt.min.js";
-import "./skulpt-stdlib.js";
-// Used by Skulpt.
-import embed from 'vega-embed';
-// Adapt for use outside webpack -- see https://github.com/vega/vega-embed.
-window.vegaEmbed = embed;
 
 export default class JSActiveCode extends ActiveCode {
     constructor(opts) {
@@ -55,5 +49,23 @@ export default class JSActiveCode extends ActiveCode {
             this.addErrorMessage(e);
             this.errinfo = e;
         }
+    }
+
+    addErrorMessage(err) {
+        // Add the error message
+        this.errLastRun = true;
+        var errHead = $("<h3>").html("Error");
+        this.eContainer = this.outerDiv.appendChild(
+            document.createElement("div")
+        );
+        this.eContainer.className = "error alert alert-danger";
+        this.eContainer.id = this.divid + "_errinfo";
+        this.eContainer.appendChild(errHead[0]);
+        var errText = this.eContainer.appendChild(
+            document.createElement("pre")
+        );
+        var errString = err.toString();
+        errText.innerHTML = errString;
+        console.log("Runtime Error: " + err.toString());
     }
 }
