@@ -23,6 +23,12 @@ import "codemirror/mode/clike/clike.js";
 import "codemirror/mode/octave/octave.js";
 import "./../css/activecode.css";
 import "codemirror/lib/codemirror.css";
+import "./skulpt.min.js";
+import "./skulpt-stdlib.js";
+// Used by Skulpt.
+import embed from "vega-embed";
+// Adapt for use outside webpack -- see https://github.com/vega/vega-embed.
+window.vegaEmbed = embed;
 
 var isMouseDown = false;
 document.onmousedown = function () {
