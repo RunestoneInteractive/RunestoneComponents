@@ -48,7 +48,7 @@ TEMPLATE_END = """
 def setup(app):
     app.add_directive("sage", ActiveCodeSage)
 #    app.add_javascript('http://localhost:8888/static/embedded_sagecell.js')
-    app.add_javascript('https://sagecell.sagemath.org/static/embedded_sagecell.js')
+#    app.add_javascript('https://sagecell.sagemath.org/static/embedded_sagecell.js')
     app.add_node(SageNode, html=(visit_sage_node, depart_sage_node))
 
 

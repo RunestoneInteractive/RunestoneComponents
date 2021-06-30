@@ -70,6 +70,7 @@ const module_map = {
     parsons: () => import("./runestone/parsons/js/timedparsons.js"),
     poll: () => import("./runestone/poll/js/poll.js"),
     reveal: () => import("./runestone/reveal/js/reveal.js"),
+    sage: () => import("./runestone/sage/js/sage.js"),
     selectquestion: () => import("./runestone/selectquestion/js/selectone.js"),
     shortanswer: () => import("./runestone/shortanswer/js/timed_shortanswer.js"),
     showeval: () => import("./runestone/showeval/js/showEval.js"),
