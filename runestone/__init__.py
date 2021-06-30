@@ -19,6 +19,7 @@ from .meta import Meta
 from .parsons import ParsonsProblem
 from .poll import Poll
 from .reveal import RevealDirective
+from .sage import ActiveCodeSage
 from .shortanswer import JournalDirective
 from .showeval import ShowEval
 from .tabbedStuff import TabbedStuffDirective, TabDirective
@@ -196,7 +197,8 @@ cmap = {
     "poll": Poll,
     "reveal": RevealDirective,
     "selectquestion": SelectQuestion,
-    "shortanswer": JournalDirective,
+    "sage": ActiveCodeSage,
+    "shortanswer": JournalDirective,    
     "showeval": ShowEval,
     "tabbed": TabbedStuffDirective,
     "tab": TabDirective,
