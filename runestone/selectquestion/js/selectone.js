@@ -421,6 +421,15 @@ export default class SelectOne extends RunestoneBase {
     }
 }
 
+
+if (typeof window.component_factory === "undefined") {
+    window.component_factory = {};
+}
+
+window.component_factory.selectquestion = function (opts) {
+        return new SelectOne(opts);
+};
+
 /*
  * When the page is loaded and the login checks are complete find and render
  * each selectquestion component that is not part of a timedAssessment.
