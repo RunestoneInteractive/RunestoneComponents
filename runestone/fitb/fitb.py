@@ -141,6 +141,7 @@ class FillInTheBlank(RunestoneIdDirective):
     option_spec = RunestoneIdDirective.option_spec.copy()
     option_spec.update(
         {
+            "dynamic": directives.unchanged,
             "casei": directives.flag,  # case insensitive matching
         }
     )
@@ -180,8 +181,17 @@ class FillInTheBlank(RunestoneIdDirective):
 
         self.updateContent()
 
-        self.state.nested_parse(self.content, self.content_offset, fitbNode)
+        # Process dynamic problem content.
         env = self.state.document.settings.env
+        dynamic = self.options.get("dynamic")
+        if dynamic:
+            # Make sure we're server-side.
+            if not env.config.runestone_server_side_grading:
+                raise self.error("Dynamic problems require server-side grading.")
+            # Add in a header to set up the RNG.
+            fitbNode.template_start = "{{{{ random = get_random({})\n exec({}) }}}}\n".format(repr(self.options["divid"]), repr(dynamic)) + fitbNode.template_start
+
+        self.state.nested_parse(self.content, self.content_offset, fitbNode)
         self.options["divclass"] = env.config.fitb_div_class
 
         # Expected _`structure`, with assigned variable names and transformations made:
@@ -211,17 +221,21 @@ class FillInTheBlank(RunestoneIdDirective):
         #   self.feedbackArray = [
         #       [   # blankArray
         #           { # blankFeedbackDict: feedback 1
-        #               "regex" : feedback_field_name   # (An answer, as a regex;
-        #               "regexFlags" : "x"              # "i" if ``:casei:`` was specified, otherwise "".) OR
-        #               "number" : [min, max]           # a range of correct numeric answers.
-        #               "feedback": feedback_field_body (after being rendered as HTML)  # Provides feedback for this answer.
+        #               "regex" : feedback_field_name,      # (An answer, as a regex;
+        #               "regexFlags" : "x",                 # "i" if ``:casei:`` was specified, otherwise "".) OR
+        #               "number" : [min, max],              # a range of correct numeric answers OR
+        #               "solution_code" : source_code,      # (For dynamic problems -- the dynamically-computed answer.
+        #               "dynamic_code" : source_code,       # The first blank also contains setup code.)
+        #               "feedback": feedback_field_body, (after being rendered as HTML)  # Provides feedback for this answer.
         #           },
         #           { # Feedback 2
         #               Same as above.
         #           }
         #       ],
         #       [  # Blank 2, same as above.
-        #       ]
+        #       ],
+        #       ...,
+        #       [dynamic_source]  # For dynamic problems only.
         #   ]
         #
         # ...and a transformed node structure:
@@ -263,47 +277,54 @@ class FillInTheBlank(RunestoneIdDirective):
                 feedback_field_name = feedback_field[0]
                 assert isinstance(feedback_field_name, nodes.field_name)
                 feedback_field_name_raw = feedback_field_name.rawsource
-                # See if this is a number, optinonally followed by a tolerance.
-                try:
-                    # Parse the number. In Python 3 syntax, this would be ``str_num, *list_tol = feedback_field_name_raw.split()``.
-                    tmp = feedback_field_name_raw.split()
-                    str_num = tmp[0]
-                    list_tol = tmp[1:]
-                    num = ast.literal_eval(str_num)
-                    assert isinstance(num, Number)
-                    # If no tolerance is given, use a tolarance of 0.
-                    if len(list_tol) == 0:
-                        tol = 0
-                    else:
-                        assert len(list_tol) == 1
-                        tol = ast.literal_eval(list_tol[0])
-                        assert isinstance(tol, Number)
-                    # We have the number and a tolerance. Save that.
-                    blankFeedbackDict = {"number": [num - tol, num + tol]}
-                except (SyntaxError, ValueError, AssertionError):
-                    # We can't parse this as a number, so assume it's a regex.
-                    regex = (
-                        # The given regex must match the entire string, from the beginning (which may be preceded by whitespaces) ...
-                        r"^\s*"
-                        +
-                        # ... to the contents (where a single space in the provided pattern is treated as one or more whitespaces in the student's answer) ...
-                        feedback_field_name.rawsource.replace(" ", r"\s+")
-                        # ... to the end (also with optional spaces).
-                        + r"\s*$"
-                    )
-                    blankFeedbackDict = {
-                        "regex": regex,
-                        "regexFlags": "i" if "casei" in self.options else "",
-                    }
-                    # Test out the regex to make sure it compiles without an error.
+                # Simply store the solution code for a dynamic problem.
+                if dynamic:
+                    blankFeedbackDict = {"solution_code": feedback_field_name_raw}
+                    # For the first blank, also include the dynamic source code.
+                    if not blankArray:
+                        blankFeedbackDict["dynamic_code"] = dynamic
+                else:
+                    # See if this is a number, optionally followed by a tolerance.
                     try:
-                        re.compile(regex)
-                    except Exception as ex:
-                        raise self.error(
-                            'Error when compiling regex "{}": {}.'.format(
-                                regex, str(ex)
-                            )
+                        # Parse the number. In Python 3 syntax, this would be ``str_num, *list_tol = feedback_field_name_raw.split()``.
+                        tmp = feedback_field_name_raw.split()
+                        str_num = tmp[0]
+                        list_tol = tmp[1:]
+                        num = ast.literal_eval(str_num)
+                        assert isinstance(num, Number)
+                        # If no tolerance is given, use a tolerance of 0.
+                        if len(list_tol) == 0:
+                            tol = 0
+                        else:
+                            assert len(list_tol) == 1
+                            tol = ast.literal_eval(list_tol[0])
+                            assert isinstance(tol, Number)
+                        # We have the number and a tolerance. Save that.
+                        blankFeedbackDict = {"number": [num - tol, num + tol]}
+                    except (SyntaxError, ValueError, AssertionError):
+                        # We can't parse this as a number, so assume it's a regex.
+                        regex = (
+                            # The given regex must match the entire string, from the beginning (which may be preceded by whitespaces) ...
+                            r"^\s*"
+                            +
+                            # ... to the contents (where a single space in the provided pattern is treated as one or more whitespaces in the student's answer) ...
+                            feedback_field_name.rawsource.replace(" ", r"\s+")
+                            # ... to the end (also with optional spaces).
+                            + r"\s*$"
                         )
+                        blankFeedbackDict = {
+                            "regex": regex,
+                            "regexFlags": "i" if "casei" in self.options else "",
+                        }
+                        # Test out the regex to make sure it compiles without an error.
+                        try:
+                            re.compile(regex)
+                        except Exception as ex:
+                            raise self.error(
+                                'Error when compiling regex "{}": {}.'.format(
+                                    regex, str(ex)
+                                )
+                            )
                 blankArray.append(blankFeedbackDict)
 
                 feedback_field_body = feedback_field[1]
