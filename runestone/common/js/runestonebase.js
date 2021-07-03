@@ -88,7 +88,7 @@ export default class RunestoneBase {
         if (this.percent) {
             eventInfo.percent = this.percent;
         }
-        if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
+        if (eBookConfig.useRunestoneServices) {
             let request = new Request(eBookConfig.ajaxURL + "hsblog", {
                 method: "POST",
                 headers: this.jsonHeaders,
@@ -136,7 +136,7 @@ export default class RunestoneBase {
         if (this.forceSave || "to_save" in eventInfo === false) {
             eventInfo.save_code = "True";
         }
-        if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
+        if (eBookConfig.useRunestoneServices) {
             let request = new Request(eBookConfig.ajaxURL + "runlog.json", {
                 method: "POST",
                 headers: this.jsonHeaders,
