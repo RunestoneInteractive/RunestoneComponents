@@ -10,7 +10,7 @@ import sys
 with open("requirements.txt", "r", encoding="utf-8") as fh:
     dependencies = [l.strip() for l in fh]
 
-VERSION = "5.7.1"
+VERSION = "5.7.2"
 
 # These pre-install hooks are useful to make sure any pre-requisite
 # programs that are not pip installable are in place.
