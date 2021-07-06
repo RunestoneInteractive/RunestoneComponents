@@ -402,7 +402,7 @@ export default class Parsons extends RunestoneBase {
         if (this.options.numbered != undefined) {
             height_add = 1;
         }
-        if (this.options.language == "natural") {
+        if (this.options.language == "natural" || this.options.language == "math") {
             areaWidth = 300;
             maxFunction = function (item) {
                 item.width(areaWidth - 22);
@@ -589,6 +589,11 @@ export default class Parsons extends RunestoneBase {
             this.blocks[i].initializeInteractivity();
         }
         this.initializeTabIndex();
+        if (this.options.language == "natural" || this.options.language == "math") {
+            if (typeof MathJax !== "undefined") {
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.outerDiv]);    
+            } 
+        }
     }
     // Make one block be keyboard accessible
     initializeTabIndex() {

@@ -26,7 +26,7 @@ export default class ParsonsLine {
         this.indent = trimmed.length - this.text.length;
         // Create the View
         var view;
-        if (problem.options.language == "natural") {
+        if (problem.options.language == "natural" || problem.options.language == "math") {
             view = document.createElement("p");
         } else {
             view = document.createElement("code");
