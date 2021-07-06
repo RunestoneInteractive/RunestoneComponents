@@ -261,6 +261,19 @@ export default class Timed extends RunestoneBase {
         $(this.leftNavButton).css("cursor", "pointer");
         this.leftContainer.appendChild(this.leftNavButton);
         this.pagNavList.appendChild(this.leftContainer);
+        //
+        this.leftContainer = document.createElement("li");
+        this.flagButton = document.createElement("button");
+        $(this.flagButton).addClass("class1");
+        this.flagButton.innerHTML = "Flag";
+        $(this.flagButton).attr("aria-labelledby", "Flag");
+        $(this.flagButton).attr("tabindex", "5");
+        $(this.flagButton).attr("role", "button");
+        $(this.flagButton).attr("id", "flag");
+        $(this.flagButton).css("cursor", "pointer");
+        this.leftContainer.appendChild(this.flagButton);
+        this.pagNavList.appendChild(this.leftContainer);
+        //
         this.rightContainer = document.createElement("li");
         this.rightNavButton = document.createElement("button");
         $(this.rightNavButton).attr("aria-label", "Next");

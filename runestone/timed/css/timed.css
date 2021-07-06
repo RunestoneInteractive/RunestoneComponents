@@ -10,6 +10,21 @@ ul#pageNums li {
     color: #000 !important;
 }
 
+/* adding from here DELETE THIS*/
+.class1 {
+    background-color: #FFFF99 !important;
+    border: none;
+    color: #030201 !important;
+    cursor: pointer;
+    width: 150;
+    height: 115;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 15px;
+}
+/* adding to here DELETE THIS*/
+
 /* The following override styles in Bootstrap distribution file (bootstrap.min.css) */
 
 .pagination > .active > a,
