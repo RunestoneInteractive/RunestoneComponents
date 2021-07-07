@@ -23,7 +23,19 @@ ul#pageNums li {
     display: inline-block;
     font-size: 15px;
 }
-/* adding to here DELETE THIS*/
+/* 
+.flagBtn {
+    background-color: #FFFF99 !important;
+    border: none;
+    color: #030201 !important;
+    cursor: pointer;
+    width: 150;
+    height: 115;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 15px;
+} */
 
 /* The following override styles in Bootstrap distribution file (bootstrap.min.css) */
 
@@ -55,6 +67,12 @@ ul#pageNums li {
 .pagination > .toolate > a,
 .pagination > .toolate > span {
     background-color: rgb(236, 203, 54);
+    color: #000;
+}
+
+.pagination > .flagcolor > a,
+.pagination > .flagcolor > span {
+    background-color: #fac989;
     color: #000;
 }
 

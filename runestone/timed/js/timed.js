@@ -262,7 +262,9 @@ export default class Timed extends RunestoneBase {
         this.leftContainer.appendChild(this.leftNavButton);
         this.pagNavList.appendChild(this.leftContainer);
         //
-        this.leftContainer = document.createElement("li");
+        this.flaggingPlace = document.createElement("ul");
+        $(this.flaggingPlace).addClass("pagination");
+        this.flagContainer = document.createElement("li");
         this.flagButton = document.createElement("button");
         $(this.flagButton).addClass("class1");
         this.flagButton.innerHTML = "Flag";
@@ -271,8 +273,8 @@ export default class Timed extends RunestoneBase {
         $(this.flagButton).attr("role", "button");
         $(this.flagButton).attr("id", "flag");
         $(this.flagButton).css("cursor", "pointer");
-        this.leftContainer.appendChild(this.flagButton);
-        this.pagNavList.appendChild(this.leftContainer);
+        this.flagContainer.appendChild(this.flagButton);
+        this.flaggingPlace.appendChild(this.flagContainer);
         //
         this.rightContainer = document.createElement("li");
         this.rightNavButton = document.createElement("button");
@@ -286,6 +288,7 @@ export default class Timed extends RunestoneBase {
         this.pagNavList.appendChild(this.rightContainer);
         this.ensureButtonSafety();
         this.navDiv.appendChild(this.pagNavList);
+        this.navDiv.appendChild(this.flaggingPlace);
         this.break = document.createElement("br");
         this.navDiv.appendChild(this.break);
         // render the question number jump buttons
@@ -308,6 +311,7 @@ export default class Timed extends RunestoneBase {
         this.qNumList.appendChild(this.qNumWrapperList);
         this.navDiv.appendChild(this.qNumList);
         this.navBtnListeners();
+        this.flagBtnListener();
     }
 
     // when moving off of a question in an active exam:
@@ -381,6 +385,14 @@ export default class Timed extends RunestoneBase {
         ).addClass("active");
     }
 
+    async handleFlag(event) {
+        var target = $(event.target).text()
+        if (target.match(/Flag/)) {
+            $("ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"
+            ).addClass("flagcolor");
+        } 
+    }
+
     async handleNumberedNav(event) {
         if (!this.taken) {
             await this.navigateAway();
@@ -424,6 +436,15 @@ export default class Timed extends RunestoneBase {
         this.qNumList.addEventListener(
             "click",
             this.handleNumberedNav.bind(this),
+            false
+        );
+    }
+
+    // set up events for flag
+    flagBtnListener() {
+        this.flaggingPlace.addEventListener(
+            "click",
+            this.handleFlag.bind(this),
             false
         );
     }
