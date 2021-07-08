@@ -267,7 +267,7 @@ export default class Timed extends RunestoneBase {
         this.flagContainer = document.createElement("li");
         this.flagButton = document.createElement("button");
         $(this.flagButton).addClass("class1");
-        this.flagButton.innerHTML = "Flag";
+        this.flagButton.innerHTML = "Come Back";
         $(this.flagButton).attr("aria-labelledby", "Flag");
         $(this.flagButton).attr("tabindex", "5");
         $(this.flagButton).attr("role", "button");
@@ -387,10 +387,15 @@ export default class Timed extends RunestoneBase {
 
     async handleFlag(event) {
         var target = $(event.target).text()
-        if (target.match(/Flag/)) {
+        if (target.match(/Come Back/)) {
             $("ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"
             ).addClass("flagcolor");
-        } 
+            this.flagButton.innerHTML = "Done";
+        } else {
+            $("ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"
+            ).removeClass("flagcolor");
+            this.flagButton.innerHTML = "Come Back";
+        }
     }
 
     async handleNumberedNav(event) {
