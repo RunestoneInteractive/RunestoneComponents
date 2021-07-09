@@ -10,32 +10,20 @@ ul#pageNums li {
     color: #000 !important;
 }
 
-/* adding from here DELETE THIS*/
-.class1 {
-    background-color: #FFFF99 !important;
+.flagBtn { /* documentation */
+    background-color: #ED9C59 !important;
     border: none;
+    outline-style: solid;
+    outline-color: #CE5718 ;
     color: #030201 !important;
     cursor: pointer;
     width: 150;
     height: 115;
     text-align: center;
     text-decoration: none;
-    display: inline-block;
+    display: ruby;
     font-size: 15px;
 }
-/* 
-.flagBtn {
-    background-color: #FFFF99 !important;
-    border: none;
-    color: #030201 !important;
-    cursor: pointer;
-    width: 150;
-    height: 115;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 15px;
-} */
 
 /* The following override styles in Bootstrap distribution file (bootstrap.min.css) */
 
@@ -72,7 +60,7 @@ ul#pageNums li {
 
 .pagination > .flagcolor > a,
 .pagination > .flagcolor > span {
-    background-color: #fac989;
+    background-color: #ED9C59;
     color: #000;
 }
 
