@@ -383,6 +383,15 @@ export default class Timed extends RunestoneBase {
         $(
             "ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"
         ).addClass("active");
+        if  ($("ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"
+        ).hasClass("flagcolor")){
+            this.flagButton.innerHTML = "Done";
+        
+        }
+        else{
+            this.flagButton.innerHTML = "Come Back";
+        }
+
     }
 
     async handleFlag(event) {
@@ -403,6 +412,7 @@ export default class Timed extends RunestoneBase {
             await this.navigateAway();
         }
         for (var i = 0; i < this.qNumList.childNodes.length; i++) {
+            //this.flagButton.innerHTML = "Come Back";
             for (
                 var j = 0;
                 j < this.qNumList.childNodes[i].childNodes.length;
@@ -424,6 +434,14 @@ export default class Timed extends RunestoneBase {
         $(
             "ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"
         ).addClass("active");
+        if  ($("ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"
+        ).hasClass("flagcolor")){
+            this.flagButton.innerHTML = "Done";
+        
+        }
+        else{
+            this.flagButton.innerHTML = "Come Back";
+        }
         await this.renderTimedQuestion();
         this.ensureButtonSafety();
     }
