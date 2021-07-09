@@ -304,8 +304,8 @@
 
   {% block body %}
   {% endblock %}
-  <div id=scprogresscontainer>
-    You have attempted <span id=scprogresstotal></span> of <span id=scprogressposs></span> activities on this page <div id="subchapterprogress"></div>
+  <div id="scprogresscontainer">
+    You have attempted <span id="scprogresstotal"></span> of <span id="scprogressposs"></span> activities on this page <div id="subchapterprogress" aria-label="Page progress"></div>
   </div>
   {% block nextprevious %}
       {% include "subchapter.html" %}
