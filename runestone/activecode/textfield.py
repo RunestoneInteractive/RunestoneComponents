@@ -32,7 +32,7 @@ def textfield_role(name, rawtext, text, lineno, inliner, options={}, content=[])
     Usage:
     In your document you can write :textfield:`myid:myvalue:width`
     This will translate to:
-        <input type='text' id='myid' class="form-control input-small" style="display:inline; width:width;" value='myvalue'></input>
+        <input type="text" id="myid" class="form-control input-small" style="display:inline; width:width;" value="myvalue"></input>
 
     where width can be specified in pixels or percentage of page width (standard CSS syntax).
     Width can also be specified using relative sizes:
@@ -54,7 +54,7 @@ def textfield_role(name, rawtext, text, lineno, inliner, options={}, content=[])
         width = "530px"
 
     res = (
-        """<input type='text' id='%s' class="form-control" style="display:inline; width: %s;" value="%s"></input>"""
+        """<input type="text" id="%s" class="form-control" style="display:inline; width: %s;" value="%s"></input>"""
         % (iid, width, value)
     )
 

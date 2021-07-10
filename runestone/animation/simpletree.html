@@ -2,12 +2,12 @@
 <html>
 
 <head>
-<script type="text/javascript" src="animationrefactor.js"></script>
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script> 
-<script type="text/javascript" src="jqchart/jquery.gchart.js"></script>
-<script type="text/javascript" src="jqchart/jquery.gchart.graphviz.js"></script>
-<script type="text/javascript" src="animationrefactor.js"></script>
-<script type="text/javascript" src="simpletree.js"></script>
+<script src="animationrefactor.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script> 
+<script src="jqchart/jquery.gchart.js"></script>
+<script src="jqchart/jquery.gchart.graphviz.js"></script>
+<script src="animationrefactor.js"></script>
+<script src="simpletree.js"></script>
 </head>
 
 
@@ -29,7 +29,7 @@
 <button onclick="ancan_anim.backward()">Step Backward</button>
 <button onclick="ancan_anim.end()">End</button>
 </div>
-<script type="text/javascript">
+<script>
 init1 = function(divid)
 {
    var a = new Animator(new SimpleTreeModel(), new TreeViewer(), divid)
