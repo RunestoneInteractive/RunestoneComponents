@@ -40,7 +40,7 @@ VIS = """
 <div class="runestone" style="max-width: none;">
     <div class="%(divclass)s" data-component="codelens" data-question_label="%(question_label)s">
         <div class="pytutorVisualizer" id="%(divid)s"
-           data-params='{"embeddedMode": true, "lang": "%(language)s", "jumpToEnd": false}'>
+           data-params="{'embeddedMode': true, 'lang': '%(language)s', 'jumpToEnd': false}">
         </div>
         <p class="runestone_caption"><span class="runestone_caption_text">Activity: CodeLens %(caption)s (%(divid)s)</span> </p>
     </div>

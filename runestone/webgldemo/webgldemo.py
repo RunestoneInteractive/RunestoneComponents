@@ -274,8 +274,8 @@ def visit_webgldemo_node(self, node):
     # print("In visit_webgldemo_node, node.webgl_components = ", node.webgl_components)
 
     # start of HTML
-    res = "<!-- webgldemo start -->\n"
-    res += "<div id='%(divid)s_webgldemo' class='webgldemo_container'>\n"
+    res = '<!-- webgldemo start -->\n'
+    res += '<div id="%(divid)s_webgldemo" class="webgldemo_container">\n'
 
     # The HTML comes from the body of the HTMLprogram file
     # Read the HTML file
@@ -355,7 +355,7 @@ def visit_webgldemo_node(self, node):
     )
 
     # End of HTML
-    res += "</div>\n"
+    res += '</div>\n'
     res += "<!-- webgldemo end -->"
 
     # Replace all of the placeholders in the HTML with the strings stored
@@ -683,11 +683,11 @@ class WebglInteractive(Directive):
 OUTPUT_OPTIONS = """
 <div>
 Show:
-<input type="checkbox" id="%(divid)s_webgl_displayInfo" name="Display" value="InfoMessages" checked='checked' />
+<input type="checkbox" id="%(divid)s_webgl_displayInfo" name="Display" value="InfoMessages" checked="checked" />
 <span id="webgl_infoMessages" class="webgl_infoMessages">Process information &nbsp&nbsp</span>
-<input type="checkbox" id="%(divid)s_webgl_displayWarnings" name="Display" value="Warnings" checked='checked' />
+<input type="checkbox" id="%(divid)s_webgl_displayWarnings" name="Display" value="Warnings" checked="checked" />
 <span id="webgl_warningMessages" class="webgl_warningMessages">Warnings &nbsp&nbsp</span>
-<input type="checkbox" id="%(divid)s_webgl_displayErrors" name="Display" value="Errors" checked='checked' />
+<input type="checkbox" id="%(divid)s_webgl_displayErrors" name="Display" value="Errors" checked="checked" />
 <span id="webgl_errorMessages" class="webgl_errorMessages">Errors</span>
 </div>
 """
@@ -701,13 +701,13 @@ OUTPUT_WINDOW = """
 # There is a list of tab headings
 # Then a list of the contents for each tab.
 
-TAB_BEGIN = """<div id='%(divid)s_editors' class='webgl_code'>"""
+TAB_BEGIN = """<div id="%(divid)s_editors" class="webgl_code">"""
 TAB_END = """</div>"""
 
 # Run the show/hide function on each element to get it into the correct
 # visibility and width
 SHOW_HIDE_SCRIPT = """
-    <script type='text/javascript'>
+    <script type="text/javascript">
         %(divid)s_directive.show_webgl(\"%(divid)s_show_code\",1);
         %(divid)s_directive.show_webgl(\"%(divid)s_show_canvas\",2);
         %(divid)s_directive.show_webgl(\"%(divid)s_show_info\",3);
@@ -716,17 +716,17 @@ SHOW_HIDE_SCRIPT = """
     </script>
 """
 
-TAB_TITLES_LIST_BEGIN = """<ul class='webgl_nav_tabs' id='%(divid)s_tab'>"""
+TAB_TITLES_LIST_BEGIN = """<ul class="webgl_nav_tabs" id="%(divid)s_tab">"""
 
 TAB_TITLES_LIST_END = """</ul>"""
 
 TAB_LIST_ELEMENT = """
 <li>
-    <a data-toggle='tab' href='#%(divid)s_%(tabname)s'><span>%(tabtitle)s</span></a>
+    <a data-toggle="tab" href="#%(divid)s_%(tabname)s"><span>%(tabtitle)s</span></a>
 </li>
 """
 
-TAB_CONTENTS_BEGIN = """<div style='width:100%%; position:relative;'>
+TAB_CONTENTS_BEGIN = """<div style="width:100%%; position:relative;">
 <div class="webgl_code">"""
 
 TAB_CONTENTS_END = """
@@ -735,7 +735,7 @@ TAB_CONTENTS_END = """
 </div>
 """
 
-TAB_DIV_BEGIN = """<div class='webgl_tab_content' id='%(divid)s_%(tabname)s'>"""
+TAB_DIV_BEGIN = """<div class="webgl_tab_content" id="%(divid)s_%(tabname)s">"""
 
 TAB_DIV_END = """</div>"""
 
@@ -765,29 +765,29 @@ class WebglInteractiveNode(nodes.General, nodes.Element):
 
 def add_commands(options):
     res = ""
-    res += "<button class='btn btn-success' id='%(divid)s_runb' onclick='%(divid)s_directive.restart();'>Re-start</button>\n"
+    res += '<button class="btn btn-success" id="%(divid)s_runb" onclick="%(divid)s_directive.restart();">Re-start</button>\n'
     res += "Show: \n"
 
     if options["hidecode"]:
-        res += "<input type='checkbox' id='%(divid)s_show_code' onclick='%(divid)s_directive.show_webgl(\"%(divid)s_show_code\",1);' />Code &nbsp\n"
+        res += '<input type="checkbox" id="%(divid)s_show_code" onclick="%(divid)s_directive.show_webgl(\"%(divid)s_show_code\",1);" />Code &nbsp\n'
     else:
-        res += "<input type='checkbox' id='%(divid)s_show_code' onclick='%(divid)s_directive.show_webgl(\"%(divid)s_show_code\",1);' checked='checked' />Code &nbsp\n"
+        res += '<input type="checkbox" id="%(divid)s_show_code" onclick="%(divid)s_directive.show_webgl(\"%(divid)s_show_code\",1);" checked="checked" />Code &nbsp\n'
 
     if options["hidecanvas"]:
-        res += "<input type='checkbox' id='%(divid)s_show_canvas' onclick='%(divid)s_directive.show_webgl(\"%(divid)s_show_canvas\",2);' />Canvas &nbsp\n"
+        res += '<input type="checkbox" id="%(divid)s_show_canvas" onclick="%(divid)s_directive.show_webgl(\"%(divid)s_show_canvas\",2);" />Canvas &nbsp\n'
     else:
-        res += "<input type='checkbox' id='%(divid)s_show_canvas' onclick='%(divid)s_directive.show_webgl(\"%(divid)s_show_canvas\",2);' checked='checked' />Canvas &nbsp\n"
+        res += '<input type="checkbox" id="%(divid)s_show_canvas" onclick="%(divid)s_directive.show_webgl(\"%(divid)s_show_canvas\",2);" checked="checked" />Canvas &nbsp\n'
 
     if options["hideoutput"]:
-        res += "<input type='checkbox' id='%(divid)s_show_info' onclick='%(divid)s_directive.show_webgl(\"%(divid)s_show_info\",3);'/>Run Info\n"
+        res += '<input type="checkbox" id="%(divid)s_show_info" onclick="%(divid)s_directive.show_webgl(\"%(divid)s_show_info\",3);"/>Run Info\n'
     else:
-        res += "<input type='checkbox' id='%(divid)s_show_info' onclick='%(divid)s_directive.show_webgl(\"%(divid)s_show_info\",3);' checked='checked' />Run Info\n"
+        res += '<input type="checkbox" id="%(divid)s_show_info" onclick="%(divid)s_directive.show_webgl(\"%(divid)s_show_info\",3);" checked="checked" />Run Info\n'
 
-    res += "<button class='btn webgl-default' id='%(divid)s_saveall' onclick='%(divid)s_directive.downloadAllFiles();'\n"
-    res += "title='Download a copy of all the original\nfiles required for this WebGL program.'>Download Files</button>\n"
+    res += '<button class="btn webgl-default" id="%(divid)s_saveall" onclick="%(divid)s_directive.downloadAllFiles();"\n'
+    res += 'title="Download a copy of all the original\nfiles required for this WebGL program.">Download Files</button>\n'
 
-    res += "<button class='btn webgl-default' id='%(divid)s_save_edited' onclick='%(divid)s_directive.downloadEditedFiles();'\n"
-    res += "title='Download a copy of all the\nfiles in the editor panels.'>Download Edited Files</button>\n"
+    res += '<button class="btn webgl-default" id="%(divid)s_save_edited" onclick="%(divid)s_directive.downloadEditedFiles();"\n'
+    res += 'title="Download a copy of all the\nfiles in the editor panels.">Download Edited Files</button>\n'
 
     return res
 
@@ -991,23 +991,23 @@ def visit_webglinteractive_node(self, node):
   </script>
   """
 
-    res += "<div class='webgl_container' id='%(divid)s_webgl_container'>\n"
+    res += '<div class="webgl_container" id="%(divid)s_webgl_container">\n'
 
     # Commands (top row)
-    res += "<div class='webgl_cmds' id='%(divid)s_webgl_cmds'>\n"
+    res += '<div class="webgl_cmds" id="%(divid)s_webgl_cmds">\n'
     res += add_commands(node.webgl_components)
-    res += "</div>\n"
+    res += '</div>\n'
 
     # Start first row (editors and canvas)
-    res += "<div class='webgl_row2' id='%(divid)s_webgl_row2'>\n"
+    res += '<div class="webgl_row2" id="%(divid)s_webgl_row2">\n'
 
     # Editors for code
-    res += "<div class='webgl_editors' id='%(divid)s_webgl_editors'>\n"
+    res += '<div class="webgl_editors" id="%(divid)s_webgl_editors">\n'
     res += add_code_editors(node.webgl_components)
-    res += "</div>\n"
+    res += '</div>\n'
 
     # Canvas for rendering (with controls below the canvas)
-    res += "<div class='webgl_canvas' id='%(divid)s_webgl_canvas'>"
+    res += '<div class="webgl_canvas" id="%(divid)s_webgl_canvas">'
     # Read the HTML file
     filename = (
         node.webgl_components["htmlprogrampath"]
@@ -1050,17 +1050,17 @@ def visit_webglinteractive_node(self, node):
     # Add the HTML body code to the page in the "canvas" area.
     res += bodyCode
 
-    res += "</div>\n"  # end of webgl_canvas
+    res += '</div>\n'  # end of webgl_canvas
 
-    res += "<div style='clear:both;'></div>"  # turns off the float left
-    res += "</div>\n"
+    res += '<div style="clear:both;"></div>'  # turns off the float left
+    res += '</div>\n'
 
     # Output div for text feedback
-    res += "<div class='webgl_output' id='%(divid)s_webgl_output'>"
+    res += '<div class="webgl_output" id="%(divid)s_webgl_output">'
     res += OUTPUT_OPTIONS
     res += OUTPUT_WINDOW
-    res += "</div>\n"
-    res += "<div style='clear:both;'></div>\n"  # turns off the float left
+    res += '</div>\n'
+    res += '<div style="clear:both;"></div>\n'  # turns off the float left
 
     # Add a link to open the webgl program in a separate browser tab.
     programPath = node.webgl_components["htmlprogrampath"].replace("_static/", "")
@@ -1075,7 +1075,7 @@ def visit_webglinteractive_node(self, node):
         + '" target="_blank">Open this webgl program in a new tab or window</a>'
     )
 
-    res += "</div>\n"
+    res += '</div>\n'
 
     # Add javascript code
     res += SHOW_HIDE_SCRIPT

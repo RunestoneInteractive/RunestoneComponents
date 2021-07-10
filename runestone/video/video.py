@@ -43,9 +43,9 @@ CODE = """\
 """
 
 POPUP = """\
-<a id="%(divid)s_thumb" style='position:relative;'>
+<a id="%(divid)s_thumb" style="position:relative;">
     <img src="%(thumb)s" />
-    <div class='video-play-overlay'></div>
+    <div class="video-play-overlay"></div>
 </a>
 <script>
     jQuery(function ($) {

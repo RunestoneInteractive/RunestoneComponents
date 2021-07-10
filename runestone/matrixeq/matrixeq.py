@@ -358,11 +358,11 @@ def visit_matrixeq_node(self, node):
     # start of HTML
     res = "<!-- matrixeq start -->\n"
     res += (
-        "<div id='"
+        '<div id="'
         + id
-        + "' class='matrixeq_container'"
+        + '" class="matrixeq_container"'
         + node.components["colorscheme"]
-        + ">\n"
+        + '>\n'
     )
 
     for j in range(0, len(parts)):
@@ -385,7 +385,7 @@ def visit_matrixeq_node(self, node):
     if node.components["nolabel"]:
         label = ""
 
-    res += "<span class='matrix_label'> " + label + comment + "</span>"
+    res += '<span class="matrix_label"> ' + label + comment + '</span>'
 
     # End of HTML
     res += "</div>\n"
@@ -487,11 +487,11 @@ def visit_inline_matrixeq_node(self, node):
     # start of HTML
     res = "<!-- inline_matrixeq start -->\n"
     res += (
-        "<span id='"
+        '<span id="'
         + id
-        + "' class='matrixeq_container'"
+        + '" class="matrixeq_container"'
         + node.components["colorscheme"]
-        + ">\n"
+        + '>\n'
     )
 
     for j in range(0, len(parts)):

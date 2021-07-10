@@ -48,7 +48,7 @@ TEMPLATE = u"""
 IMG_TEMPLATE = """
 <div class="runestone datafile">
 <div class="datafile_caption">Data file: <code>%(divid)s</code></div>
-<img data-component="datafile" data-isimage=%(image)s id=%(divid)s %(hidden)s src='data:image/%(imtype)s;base64, %(filecontent)s'/></div>
+<img data-component="datafile" data-isimage=%(image)s id=%(divid)s %(hidden)s src="data:image/%(imtype)s;base64, %(filecontent)s"/></div>
 """
 
 

@@ -56,8 +56,8 @@ DISQUS_BOX = """\
 """
 
 DISQUS_LINK = """
-<a href="#disqus_thread" class='disqus_thread_link' data-disqus-identifier="%(identifier)s" onclick="%(identifier)s_disqus(this);">Show Comments</a>
-<script type='text/javascript'>
+<a href="#disqus_thread" class="disqus_thread_link" data-disqus-identifier="%(identifier)s" onclick="%(identifier)s_disqus(this);">Show Comments</a>
+<script type="text/javascript">
     $("a[data-disqus-identifier='%(identifier)s']").attr('data-disqus-identifier', '%(identifier)s_' + eBookConfig.course);
 </script>
 """

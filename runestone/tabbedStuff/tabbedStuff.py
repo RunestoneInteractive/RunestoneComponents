@@ -34,7 +34,7 @@ def setup(app):
 
 
 # Templates to be formatted by node options
-BEGIN = """<div id='%(divid)s' data-component="tabbedStuff" %(inactive)s class='%(divclass)s'>"""
+BEGIN = """<div id="%(divid)s" data-component="tabbedStuff" %(inactive)s class="%(divclass)s">"""
 
 TABDIV_BEGIN = """<div data-component="tab" data-tabname="%(tabname)s" %(active)s>
 """

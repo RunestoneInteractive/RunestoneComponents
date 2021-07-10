@@ -69,7 +69,7 @@ TEMPLATE_END = """
 </div>
 <textarea data-lang="%(language)s" id="%(divid)s_editor" %(autorun)s
     %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s %(chatcodes)s %(optional)s
-    data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(tie)s %(dburl)s %(nopair)s
+    data-audio="%(ctext)s" %(sourcefile)s %(datafile)s %(stdin)s %(tie)s %(dburl)s %(nopair)s
     %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(hidehistory)s %(wasmuri)s
     %(showlastsql)s style="visibility: hidden;">
 %(initialcode)s
@@ -269,7 +269,7 @@ class ActiveCode(RunestoneIdDirective):
         if "caption" not in self.options:
             self.options["caption"] = ""
         else:
-            self.options["caption"] = "data-caption='%s'" % self.options["caption"]
+            self.options["caption"] = 'data-caption="%s"' % self.options["caption"]
 
         if "include" not in self.options:
             self.options["include"] = ""
@@ -332,24 +332,24 @@ class ActiveCode(RunestoneIdDirective):
 
         # livecode options
         if "stdin" in self.options:
-            self.options["stdin"] = "data-stdin='%s'" % self.options["stdin"]
+            self.options["stdin"] = 'data-stdin="%s"' % self.options["stdin"]
         else:
             self.options["stdin"] = ""
 
         if "datafile" not in self.options:
             self.options["datafile"] = ""
         else:
-            self.options["datafile"] = "data-datafile='%s'" % self.options["datafile"]
+            self.options["datafile"] = 'data-datafile="%s"' % self.options["datafile"]
 
         if "sourcefile" not in self.options:
             self.options["sourcefile"] = ""
         else:
             self.options["sourcefile"] = (
-                "data-sourcefile='%s'" % self.options["sourcefile"]
+                'data-sourcefile="%s"' % self.options["sourcefile"]
             )
 
         if "tie" in self.options:
-            self.options["tie"] = "data-tie='{}'".format(self.options["tie"])
+            self.options["tie"] = 'data-tie="{}"'.format(self.options["tie"])
         else:
             self.options["tie"] = ""
 
@@ -366,7 +366,7 @@ class ActiveCode(RunestoneIdDirective):
 
         # SQL Options
         if "dburl" in self.options:
-            self.options["dburl"] = "data-dburl='{}'".format(self.options["dburl"])
+            self.options["dburl"] = 'data-dburl="{}"'.format(self.options["dburl"])
         else:
             self.options["dburl"] = ""
 
