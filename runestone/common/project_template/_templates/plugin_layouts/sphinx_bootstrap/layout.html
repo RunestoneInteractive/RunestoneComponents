@@ -218,7 +218,7 @@
 {%- block extrahead %}
 <link rel="shortcut icon" href="/{{appname}}/static/favicon.ico" type="image/ico" />
 
-<script type="text/javascript">
+<script>
   eBookConfig = {};
   {% if dynamic_pages == 'True' %}
     {% raw %}
@@ -350,7 +350,7 @@
 {% if dynamic_pages == 'True' %}
   {% raw %}
     {{ if request.application == 'runestone':}}
-      <script type="text/javascript">
+      <script>
         var _gaq = _gaq || [];
         _gaq.push(['_setAccount', '{{ =settings.google_ga }}']);
         _gaq.push(['_trackPageview']);
