@@ -148,24 +148,23 @@ export default class Poll extends RunestoneBase {
             data.div_id = this.divid;
             data.course = eBookConfig.course;
             jQuery.get(
-                eBookConfig.ajaxURL + "getpollresults",
+                "/assessment/getpollresults",
                 data,
                 this.showPollResults
             );
         }
     }
-    showPollResults(data) {
+    showPollResults(results) {
         //displays the results returned by the server
-        var results = eval(data);
-        var total = results[0];
-        var opt_list = results[1];
-        var count_list = results[2];
-        var div_id = results[3];
-        var my_vote = results[4];
+        results = results.detail;
+        var total = results["total"];
+        var optCounts = results["opt_counts"]
+        var div_id = results["div_id"];
+        // var my_vote = results[4];
         // resture current users vote
-        if (my_vote > -1) {
-            this.optsArray[my_vote].checked = "checked";
-        }
+        // if (my_vote > -1) {
+        //     this.optsArray[my_vote].checked = "checked";
+        // }
         // show results summary if appropriate
         if (
             (this.resultsViewer === "all" &&
@@ -177,11 +176,11 @@ export default class Poll extends RunestoneBase {
             );
             var list = $(document.createElement("div"));
             $(list).addClass("results-container");
-            for (var i = 0; i < this.optionList.length; i++) {
+            for (let i in optCounts) {
                 var count;
                 var percent;
-                if (count_list[i]) {
-                    count = count_list[i];
+                if (optCounts[i] > 0) {
+                    count = optCounts[i]
                     percent = (count / total) * 100;
                 } else {
                     count = 0;
@@ -215,7 +214,7 @@ export default class Poll extends RunestoneBase {
         }
         this.indicate_component_ready();
     }
-    disableOptions() {}
+    disableOptions() { }
     checkPollStorage() {
         //checks the localstorage to see if the poll has been completed already
         var _this = this;
@@ -226,7 +225,7 @@ export default class Poll extends RunestoneBase {
             data.div_id = this.divid;
             data.course = eBookConfig.course;
             jQuery.get(
-                eBookConfig.ajaxURL + "getpollresults",
+                "/assessment/getpollresults",
                 data,
                 this.showPollResults.bind(this)
             ).fail(this.indicate_component_ready.bind(this));

@@ -571,7 +571,7 @@ export default class MultipleChoice extends RunestoneBase {
         return res;
     }
     compareModal(data, status, whatever) {
-        var datadict = JSON.parse(data)[0];
+        var datadict = data.detail;
         var answers = datadict.answerDict;
         var misc = datadict.misc;
         var kl = Object.keys(answers).sort();
@@ -625,12 +625,13 @@ export default class MultipleChoice extends RunestoneBase {
         var el = $(html);
         el.modal();
     }
+    // _`compareAnswers`
     compareAnswers() {
         var data = {};
         data.div_id = this.divid;
         data.course = eBookConfig.course;
         jQuery.get(
-            eBookConfig.ajaxURL + "getaggregateresults",
+            "/assessment/getaggregateresults",
             data,
             this.compareModal.bind(this)
         );
