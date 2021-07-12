@@ -12,9 +12,8 @@ ul#pageNums li {
 
 .flagBtn { /* documentation */
     background-color: #ED9C59 !important;
-    border: none;
-    outline-style: solid;
-    outline-color: #CE5718 ;
+    border: 3px solid #CE5718;
+    border-radius: 5px;
     color: #030201 !important;
     cursor: pointer;
     width: 150;
