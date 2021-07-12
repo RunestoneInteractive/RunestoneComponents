@@ -160,11 +160,11 @@ export default class Poll extends RunestoneBase {
         var total = results["total"];
         var optCounts = results["opt_counts"]
         var div_id = results["div_id"];
-        // var my_vote = results[4];
-        // resture current users vote
-        // if (my_vote > -1) {
-        //     this.optsArray[my_vote].checked = "checked";
-        // }
+        var my_vote = results["my_vote"];
+        // restore current users vote
+        if (my_vote > -1) {
+            this.optsArray[my_vote].checked = "checked";
+        }
         // show results summary if appropriate
         if (
             (this.resultsViewer === "all" &&
@@ -176,7 +176,7 @@ export default class Poll extends RunestoneBase {
             );
             var list = $(document.createElement("div"));
             $(list).addClass("results-container");
-            for (let i in optCounts) {
+            for (var i = 0; i < this.optionList.length; i++) {
                 var count;
                 var percent;
                 if (optCounts[i] > 0) {
