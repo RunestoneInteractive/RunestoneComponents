@@ -230,7 +230,7 @@ export default class FITB extends RunestoneBase {
             this.renderFeedback();
         }
         return data;
-}
+    }
 
     /*==============================
     === Evaluation of answer and ===
@@ -342,19 +342,20 @@ export default class FITB extends RunestoneBase {
     enableCompareButton() {
         this.compareButton.disabled = false;
     }
+    // _`compareFITBAnswers`
     compareFITBAnswers() {
         var data = {};
         data.div_id = this.divid;
         data.course = eBookConfig.course;
         jQuery.get(
-            eBookConfig.ajaxURL + "gettop10Answers",
+            "/assessment/gettop10Answers",
             data,
             this.compareFITB
         );
     }
     compareFITB(data, status, whatever) {
-        var answers = eval(data)[0];
-        var misc = eval(data)[1];
+        var answers = data.detail.res;
+        var misc = data.detail.miscdata;
         var body = "<table>";
         body += "<tr><th>Answer</th><th>Count</th></tr>";
         for (var row in answers) {
@@ -366,12 +367,6 @@ export default class FITB extends RunestoneBase {
                 " times</td></tr>";
         }
         body += "</table>";
-        if (misc["yourpct"] !== "unavailable") {
-            body +=
-                "<br /><p>You have " +
-                misc["yourpct"] +
-                "% correct for all questions</p>";
-        }
         var html =
             "<div class='modal fade'>" +
             "    <div class='modal-dialog compare-modal'>" +
