@@ -238,7 +238,7 @@ export default class SQLActiveCode extends ActiveCode {
         this.logRunEvent({
             div_id: this.divid,
             code: this.editor.getValue(),
-            lang: this.language,
+            language: this.language,
             errinfo: this.results[this.results.length - 1].status,
             to_save: this.saveCode,
             prefix: this.pretext,
@@ -292,9 +292,8 @@ export default class SQLActiveCode extends ActiveCode {
         }
         let pct = (100 * this.passed) / (this.passed + this.failed);
         pct = pct.toLocaleString(undefined, { maximumFractionDigits: 2 });
-        result += `You passed ${this.passed} out of ${
-            this.passed + this.failed
-        } tests for ${pct}%`;
+        result += `You passed ${this.passed} out of ${this.passed + this.failed
+            } tests for ${pct}%`;
         this.unit_results = `percent:${pct}:passed:${this.passed}:failed:${this.failed}`;
         return result;
     }

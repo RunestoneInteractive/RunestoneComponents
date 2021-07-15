@@ -629,7 +629,7 @@ export default class MultipleChoice extends RunestoneBase {
     compareAnswers() {
         var data = {};
         data.div_id = this.divid;
-        data.course = eBookConfig.course;
+        data.course_name = eBookConfig.course;
         jQuery.get(
             "/assessment/getaggregateresults",
             data,

@@ -91,13 +91,14 @@ export default class SelectOne extends RunestoneBase {
         let opts = this.origOpts;
         let selectorId = this.selector_id;
         console.log("getting question source");
-        let request = new Request("/runestone/ajax/get_question_source", {
+        let request = new Request("/assessment/get_question_source", {
             method: "POST",
             headers: this.jsonHeaders,
             body: JSON.stringify(data),
         });
         let response = await fetch(request);
         let htmlsrc = await response.json();
+        htmlsrc = htmlsrc.detail;
         if (htmlsrc.indexOf("No preview") >= 0) {
             alert(
                 `Error: Not able to find a question for ${selectorId} based on the criteria`
@@ -139,8 +140,8 @@ export default class SelectOne extends RunestoneBase {
                 if (!document.getElementById("component-preview")) {
                     toggleUI +=
                         '<div id="component-preview" class="col-md-6 toggle-preview" style="z-index: 999;">' +
-                            '<div id="toggle-buttons"></div>' +
-                            '<div id="toggle-preview"></div>' +
+                        '<div id="toggle-buttons"></div>' +
+                        '<div id="toggle-preview"></div>' +
                         '</div>';
                 }
                 // dropdown menu containing the question options
@@ -163,10 +164,10 @@ export default class SelectOne extends RunestoneBase {
                         'data-component="'
                     )[1];
                     switch (
-                        toggleQuestionSubstring.slice(
-                            0,
-                            toggleQuestionSubstring.indexOf('"')
-                        )
+                    toggleQuestionSubstring.slice(
+                        0,
+                        toggleQuestionSubstring.indexOf('"')
+                    )
                     ) {
                         case "activecode":
                             toggleQuestionType = "Active Write Code";
@@ -201,14 +202,14 @@ export default class SelectOne extends RunestoneBase {
                         }
                         else {
                             toggleUI += toggleQuestionType +
-                            " - " +
-                            toggleQuestions[i];
+                                " - " +
+                                toggleQuestions[i];
                         }
                     }
                     else {
                         toggleUI += toggleQuestionType +
-                        " - " +
-                        toggleQuestions[i];
+                            " - " +
+                            toggleQuestions[i];
                     }
                     if ((i == 0) && (data.toggleOptions.includes("lock"))) {
                         toggleUI += " (only this question will be graded)";
@@ -339,6 +340,7 @@ export default class SelectOne extends RunestoneBase {
     }
 
     // on clicking "Select this Problem" button, close preview panel, replace current question in assignments page with selected question, and send request to update grading database
+    // _ `toggleSet`
     async toggleSet(parentID, selectedQuestion, htmlsrc, toggleQuestionTypes) {
         var selectorId = parentID + "-toggleSelectedQuestion";
         var toggleQuestionSelect = document.getElementById(parentID).getElementsByTagName("select")[0];
@@ -348,10 +350,10 @@ export default class SelectOne extends RunestoneBase {
             useRunestoneServices: true,
         });
         let request = new Request(
-            "/runestone/ajax/update_selected_question?metaid=" +
-                parentID +
-                "&selected=" +
-                selectedQuestion,
+            "/assessment/set_selected_question?metaid=" +
+            parentID +
+            "&selected=" +
+            selectedQuestion,
             {}
         );
         await fetch(request);
@@ -378,13 +380,13 @@ export default class SelectOne extends RunestoneBase {
             currentParsonsClass = currentParsons[p].classList[2];
             if (currentParsonsClass) {
                 if (currentParsonsClass.includes("indent")) {
-                    indentCount = parseInt(indentCount) + parseInt(currentParsonsClass.slice(6,currentParsonsClass.length));
+                    indentCount = parseInt(indentCount) + parseInt(currentParsonsClass.slice(6, currentParsonsClass.length));
                 }
             }
             // for Parsons answer spaces with vertical lines that allow student to define their own line indentation
             currentBlockIndent = currentParsons[p].parentElement.parentElement.style.left;
             if (currentBlockIndent) {
-                indentCount = parseInt(indentCount) + parseInt(currentBlockIndent.slice(0,currentBlockIndent.indexOf("px")) / 30);
+                indentCount = parseInt(indentCount) + parseInt(currentBlockIndent.slice(0, currentBlockIndent.indexOf("px")) / 30);
             }
             for (var d = 0; d < indentCount; d++) {
                 indent += "    ";

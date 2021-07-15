@@ -1192,7 +1192,7 @@ Yet another is that there is an internal error.  The internal error message is: 
         this.logRunEvent({
             div_id: this.divid,
             code: this.editor.getValue(),
-            lang: this.language,
+            language: this.language,
             errinfo: this.errinfo,
             to_save: this.saveCode,
             prefix: this.pretext,

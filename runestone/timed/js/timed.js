@@ -110,7 +110,7 @@ export default class Timed extends RunestoneBase {
         console.log(sendInfo);
         if (eBookConfig.useRunestoneServices) {
             let request = new Request(
-                eBookConfig.ajaxURL + "tookTimedAssessment",
+                "/assessment/tookTimedAssessment",
                 {
                     method: "POST",
                     headers: this.jsonHeaders,
@@ -119,6 +119,7 @@ export default class Timed extends RunestoneBase {
             );
             let response = await fetch(request);
             let data = await response.json();
+            data = data.detail;
             this.taken = data.tookAssessment;
             this.assessmentTaken = this.taken;
             if (!this.taken) {
