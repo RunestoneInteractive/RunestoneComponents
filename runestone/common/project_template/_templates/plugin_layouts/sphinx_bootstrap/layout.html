@@ -392,6 +392,10 @@
   {% endif %}
 {% endif %}
 
-<script> runestoneComponents.getSwitch(); </script>
+<script> 
+  document.addEventListener('load', (event) => {
+    runestoneComponents.getSwitch(); 
+  });
+</script>
 
 {% endblock %}
