@@ -30,6 +30,7 @@ from .webgldemo import WebglDemo
 import os, socket, pkg_resources
 import CodeChat.CodeToRest
 from sphinx.errors import ExtensionError
+from sphinx.builders.html import JavaScript
 
 
 # TODO: clean up - many of the folders are not needed as the files are imported by webpack
@@ -75,6 +76,26 @@ def runestone_extensions():
     modules.insert(0, modules.pop(modules.index("runestone.common")))
     return modules
 
+# setup_js_defer(app, pagename, templatexname, context, doctree)
+# -----------------------
+# Used to inspect js right before it is rendered to page so that
+# we can forcibly defer js files or prevent same
+def setup_js_defer(app, pagename, templatexname, context, doctree):
+    def js_defer(script_files):
+        for js in sorted(script_files):
+            if app.config.html_defer_js:
+                # Files added from Runestone should already have defer set - so just add it to sphinx based ones
+                to_defer = ["_static/jquery.js", "_static/underscore.js","_static/doctools.js"]
+                if isinstance(js, JavaScript) and js in to_defer:
+                    js.attributes["defer"] = ""
+            else:
+                #config flag not set, prevent all deferrals
+                if isinstance(js, JavaScript):
+                    js.attributes.pop("defer", None)
+        return ''
+
+    context['js_defer'] = js_defer
+
 
 # setup(app)
 # ----------
@@ -94,9 +115,9 @@ def setup(app):
 
     for jsfile in script_files:
         try:
-            app.add_autoversioned_javascript(jsfile)
+            app.add_autoversioned_javascript(jsfile, defer="")
         except ExtensionError:
-            app.add_js_file(jsfile)
+            app.add_js_file(jsfile, defer="")
     for cssfile in _css_files:
         try:
             app.add_autoversioned_stylesheet(cssfile)
@@ -104,6 +125,8 @@ def setup(app):
             app.add_css_file(cssfile)
 
     app.config.html_static_path.append("dist/")
+    app.add_config_value("html_defer_js", False, 'env')
+    app.connect('html-page-context', setup_js_defer)
 
 
 def get_master_url():

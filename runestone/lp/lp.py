@@ -538,7 +538,7 @@ def setup(
     app.setup_extension("CodeChat.CodeToRestSphinx")
 
     # Supply a fake CSS file to avoid errors, since the CodeChat's CSS will import this.
-    app.add_autoversioned_javascript("html4css1.css")
+    app.add_autoversioned_javascript("html4css1.css", defer="")
 
     # See http://www.sphinx-doc.org/en/stable/extdev/appapi.html#sphinx.application.Sphinx.add_role.
     app.add_role("alink", _alink_role)

@@ -18,7 +18,8 @@
 //	$("#visualization").gchart({type: 'graphviz', series: [$.gchart.series([20, 50, 30])]});
 // label: '<f0> left | <f1> middle | <f2> right'
 
-$('#visualization').gchart($.gchart.graphviz(true, 
+document.addEventListener('load', (event) => {
+$('#visualization').gchart($.gchart.graphviz(true,
  {
  struct1: {label: '<f0> left |<f1> middle |<f2> right'},
  struct2: {label: '<f0> one|<f1> two'},
@@ -32,6 +33,7 @@ $('#visualization').gchart($.gchart.graphviz(true,
                 node: {shape: 'record'}
         }
 ));
+});
 
 
 // $('#visualization').gchart($.gchart.graphviz(true, 

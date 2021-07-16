@@ -25,6 +25,8 @@
           'delay': { show: 100, hide: 50}
          };
 
-  $('#relations-prev').tooltip(opts);
-  $('#relations-next').tooltip(opts);
+  document.addEventListener('load', (event) => {
+    $('#relations-prev').tooltip(opts);
+    $('#relations-next').tooltip(opts);
+  });
 </script>

@@ -47,10 +47,10 @@ def setup(app):
 
     # CodeMirror syntax highlighting for various types of code
 
-    app.add_autoversioned_javascript("webglinteractive.js")
+    app.add_autoversioned_javascript("webglinteractive.js", defer="")
 
     # Javascript for saving files to the client's hard drive
-    app.add_autoversioned_javascript("FileSaver.min.js")
+    app.add_autoversioned_javascript("FileSaver.min.js", defer="")
 
     app.add_node(
         WebglInteractiveNode,

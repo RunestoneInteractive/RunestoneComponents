@@ -25,7 +25,7 @@ from runestone.common.runestonedirective import RunestoneIdDirective
 
 def setup(app):
     app.add_directive("animation", Animation)
-    app.add_autoversioned_javascript("animationbase.js")
+    app.add_autoversioned_javascript("animationbase.js", defer="")
 
 
 SRC = """

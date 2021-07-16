@@ -319,6 +319,12 @@ html_show_sourcelink = False
 # This is the file name suffix for HTML files (e.g. ".xhtml").
 # html_file_suffix = None
 
+# It True, sets js files from Sphinx & Runestone to be loaded with defer attr
+# substantially speeding up page rendering. May cause issues with books that
+# have custom directives or raw html that assume jquery or another library
+# is loaded before body is parsed. 
+html_defer_js = True
+
 # Output file base name for HTML help builder.
 htmlhelp_basename = "PythonCoursewareProjectdoc"
 

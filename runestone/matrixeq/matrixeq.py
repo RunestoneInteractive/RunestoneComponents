@@ -43,7 +43,7 @@ def setup(app):
 
     app.add_autoversioned_stylesheet("matrixeq.css")
 
-    app.add_autoversioned_javascript("matrixeq.js")
+    app.add_autoversioned_javascript("matrixeq.js", defer="")
 
     app.add_node(MatrixEqNode, html=(visit_matrixeq_node, depart_matrixeq_node))
     app.add_node(
