@@ -403,7 +403,7 @@ export default class DragNDrop extends RunestoneBase {
             event: "dragNdrop",
             act: answer,
             answer: answer,
-            minHeight: this.minheight,
+            min_height: this.minheight,
             div_id: this.divid,
             correct: this.correct,
             correctNum: this.correctNum,
@@ -454,7 +454,7 @@ export default class DragNDrop extends RunestoneBase {
     restoreAnswers(data) {
         // Restore answers from storage retrieval done in RunestoneBase
         this.hasStoredDropzones = true;
-        this.minheight = data.minHeight;
+        this.minheight = data.min_height;
         this.pregnantIndexArray = data.answer.split(";");
         this.finishSettingUp();
     }
@@ -471,7 +471,7 @@ export default class DragNDrop extends RunestoneBase {
                 this.hasStoredDropzones = true;
                 try {
                     storedObj = JSON.parse(ex);
-                    this.minheight = storedObj.minHeight;
+                    this.minheight = storedObj.min_height;
                 } catch (err) {
                     // error while parsing; likely due to bad value stored in storage
                     console.log(err.message);
@@ -488,7 +488,7 @@ export default class DragNDrop extends RunestoneBase {
                         event: "dragNdrop",
                         act: answer,
                         answer: answer,
-                        minHeight: this.minheight,
+                        min_height: this.minheight,
                         div_id: this.divid,
                         correct: storedObj.correct,
                     });
@@ -522,7 +522,7 @@ export default class DragNDrop extends RunestoneBase {
         var correct = data.correct;
         var storageObj = {
             answer: this.pregnantIndexArray.join(";"),
-            minHeight: this.minheight,
+            min_height: this.minheight,
             timestamp: timeStamp,
             correct: correct,
         };
