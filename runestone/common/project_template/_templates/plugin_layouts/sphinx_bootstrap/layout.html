@@ -16,6 +16,12 @@
 <!DOCTYPE html>
 {%- endblock %}
 
+{%- block scripts %}
+{# Override the scripts block from sphinx so we can force loading of jquery/underscore/doctools js files #}
+{{ js_defer(script_files) }}
+{{ super() }}
+{%- endblock %}
+
 {# Sidebar: Rework into our Boostrap nav section. #}
 {% macro navBar() %}
 
@@ -386,6 +392,10 @@
   {% endif %}
 {% endif %}
 
-<script> runestoneComponents.getSwitch(); </script>
+<script> 
+  document.addEventListener('load', (event) => {
+    runestoneComponents.getSwitch(); 
+  });
+</script>
 
 {% endblock %}
