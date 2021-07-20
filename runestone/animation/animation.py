@@ -40,7 +40,7 @@ SRC = """
 <button onclick="%(divid)s_anim.backward()">Step Backward</button>
 <button onclick="%(divid)s_anim.end()">End</button>
 
-<script type="text/javascript">
+<script>
 %(divid)s_init = function(divid)
 {
    var a = new Animator(new %(model)s(), new %(viewer)s(), divid)
@@ -52,7 +52,7 @@ SRC = """
 </div>
 """
 
-SCRIPTTAG = """<script type="text/javascript" src="../_static/%s"></script>\n"""
+SCRIPTTAG = """<script src="../_static/%s"></script>\n"""
 
 
 class Animation(RunestoneIdDirective):
