@@ -76,6 +76,7 @@ const module_map = {
     spreadsheet: () => import("./runestone/spreadsheet/js/spreadsheet.js"),
     tabbedStuff: () => import("./runestone/tabbedStuff/js/tabbedstuff.js"),
     timedAssessment: () => import("./runestone/timed/js/timed.js"),
+    wavedrom: () => import("./runestone/wavedrom/js/wavedrom.js"),
     // TODO: since this isn't in a ``data-component``, need to trigger an import of this code manually.
     webwork: () => import("./runestone/webwork/js/webwork.js"),
     youtube: () => import("./runestone/video/js/runestonevideo.js"),
