@@ -10,6 +10,20 @@ ul#pageNums li {
     color: #000 !important;
 }
 
+.flagBtn { /* documentation */
+    background-color: #ED9C59 !important;
+    border: 3px solid #CE5718;
+    border-radius: 5px;
+    color: #030201 !important;
+    cursor: pointer;
+    width: 150;
+    height: 115;
+    text-align: center;
+    text-decoration: none;
+    display: ruby;
+    font-size: 15px;
+}
+
 /* The following override styles in Bootstrap distribution file (bootstrap.min.css) */
 
 .pagination > .active > a,
@@ -40,6 +54,12 @@ ul#pageNums li {
 .pagination > .toolate > a,
 .pagination > .toolate > span {
     background-color: rgb(236, 203, 54);
+    color: #000;
+}
+
+.pagination > .flagcolor > a,
+.pagination > .flagcolor > span {
+    background-color: #ED9C59;
     color: #000;
 }
 
