@@ -218,6 +218,7 @@ export default class Timed extends RunestoneBase {
             "click",
             async function () {
                 $(this.finishButton).hide(); // hide the finish button for now
+                $(this.flagButton).show();
                 let mess = document.createElement("p");
                 mess.innerHTML =
                     "<strong>Warning: You will not be able to continue the exam if you close this tab, close the window, or navigate away from this page!</strong>  Make sure you click the Finish Exam button when you are done to submit your work!";
@@ -318,6 +319,7 @@ export default class Timed extends RunestoneBase {
         this.navDiv.appendChild(this.qNumList);
         this.navBtnListeners();
         this.flagBtnListener();                                 // listens for click on flag button
+        $(this.flagButton).hide();
     }
 
     // when moving off of a question in an active exam:
@@ -495,6 +497,7 @@ export default class Timed extends RunestoneBase {
                     )
                 ) {
                     await this.finishAssessment();
+                    $(this.flagButton).hide();
                 }
             }.bind(this),
             false
