@@ -127,6 +127,7 @@ class SelectQuestion(RunestoneIdDirective):
             self.options[
                 "selector"
             ] = f"data-questionlist='{self.question_bank_choices}'"
+            self.options["message"] += f"\nSelecting from: {self.question_bank_choices}"
         else:
             self.options["selector"] = ""
 
@@ -185,20 +186,18 @@ class SelectQuestion(RunestoneIdDirective):
             self.options["AB"] = ""
 
         if ("toggle" in self.options) or ("togglelabels" in self.options):
-            self.options[
-                "toggle_options"
-            ] = "data-toggleoptions=\"toggle\""
-            self.options[
-                "toggle_labels"
-            ] = "data-togglelabels=\"togglelabels:\""
+            self.options["toggle_options"] = 'data-toggleoptions="toggle"'
+            self.options["toggle_labels"] = 'data-togglelabels="togglelabels:"'
             if "toggle" in self.options:
-                self.options[
-                    "toggle_options"
-                ] = "data-toggleoptions=\"toggle, " + f"{self.options['toggle']}" + "\""
+                self.options["toggle_options"] = (
+                    'data-toggleoptions="toggle, ' + f"{self.options['toggle']}" + '"'
+                )
             if "togglelabels" in self.options:
-                self.options[
-                    "toggle_labels"
-                ] = "data-togglelabels=\"togglelabels: " + f"{self.options['togglelabels']}" + "\""
+                self.options["toggle_labels"] = (
+                    'data-togglelabels="togglelabels: '
+                    + f"{self.options['togglelabels']}"
+                    + '"'
+                )
         else:
             self.options["toggle_options"] = ""
             self.options["toggle_labels"] = ""
