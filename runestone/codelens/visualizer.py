@@ -48,7 +48,7 @@ VIS = """
 
 
 DATA = """
-<script type="text/javascript">
+<script>
 var %(divid)s_vis;
 
 if (allTraceData === undefined) {

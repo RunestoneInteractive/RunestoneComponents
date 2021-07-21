@@ -21,7 +21,7 @@ from runestone.common.runestonedirective import RunestoneDirective, RunestoneNod
 
 
 DISQUS_BOX = """\
-<script type="text/javascript">
+<script>
     function %(identifier)s_disqus(source) {
         if (window.DISQUS) {
 

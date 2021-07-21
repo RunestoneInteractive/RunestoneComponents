@@ -55,14 +55,14 @@ class BlocklyNode(nodes.General, nodes.Element, RunestoneIdNode):
 START = """
 <html>
 <head>
-    <script src='blockly_compressed.js' type="text/javascript"> </script>
-    <script src='blocks_compressed.js' type="text/javascript"> </script>
-    <script src='javascript_compressed.js' type="text/javascript"> </script>
-    <script src='python_compressed.js' type="text/javascript"> </script>
-    <script src='msg/js/en.js' type="text/javascript"> </script>
+    <script src='blockly_compressed.js'> </script>
+    <script src='blocks_compressed.js'> </script>
+    <script src='javascript_compressed.js'> </script>
+    <script src='python_compressed.js'> </script>
+    <script src='msg/js/en.js'> </script>
     <link rel="stylesheet" href="bootstrap-3.4.1/css/bootstrap.min.css" type="text/css" />
     <link rel="stylesheet" href="video.css" type="text/css" />
-    <script type="text/javascript">
+    <script>
     // Get the objects we need to do logging from the parent frame.
     // This seems better than reloading all of jQuery and bookfuncs into the frame. But
     // Makes this a bit more dependent on the Runestone Environment.
