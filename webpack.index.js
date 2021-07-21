@@ -114,8 +114,27 @@ export function runestone_auto_import() {
 $(document).ready(runestone_auto_import);
 
 // Provide a function to import one specific Runestone component.
-export function runestone_import(component_name) {
+// the import function inside module_map is async -- runestone_import
+// should be awaited when necessary to ensure the import completes
+export async function runestone_import(component_name) {
     return module_map[component_name]();
+}
+
+async function popupScratchAC() {
+    // load the activecode bundle
+    await runestone_import("activecode");
+    // scratchDiv will be defined if we have already created a scratch
+    // activecode.  If its not defined then we need to get it ready to toggle
+    if (!eBookConfig.scratchDiv) {
+        window.ACFactory.createScratchActivecode();
+        let divid = eBookConfig.scratchDiv
+        window.edList[divid] = ACFactory.createActiveCode($(`#${divid}`)[0],
+            eBookConfig.acDefaultLanguage);
+        if (eBookConfig.isLoggedIn) {
+            window.edList[divid].enableSaveLoad();
+        }
+    }
+    window.ACFactory.toggleScratchActivecode();
 }
 
 // Set the directory containing this script as the `path <https://webpack.js.org/guides/public-path/#on-the-fly>`_ for all webpacked scripts.
@@ -131,4 +150,5 @@ rc.runestone_import = runestone_import;
 rc.runestone_auto_import = runestone_auto_import;
 rc.getSwitch = getSwitch;
 rc.switchTheme = switchTheme;
+rc.popupScratchAC = popupScratchAC;
 window.runestoneComponents = rc;
