@@ -33,7 +33,7 @@
     <div class="navbar-header">
       <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
       <button type='button' class='navbar-toggle' data-toggle="collapse" data-target=".navbar-ex1-collapse">
-        <span class="icon-bar" aria-label="navbar toggle" class="visuallyhidden">toggle navbar</span>
+        <span class="icon-bar visuallyhidden" aria-label="navbar toggle">toggle navbar</span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
@@ -68,7 +68,7 @@
         {% if minimal_outside_links != 'True' %}
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
-            <i class="glyphicon glyphicon-globe" style="opacity: 0.9"><span aria-label="Social" class="visuallyhidden">Social</span></i>
+            <i class="glyphicon glyphicon-globe visuallyhidden" style="opacity: 0.9"><span aria-label="Social">Social</span></i>
           </a>
           <ul class="dropdown-menu social-menu">
               <li>
@@ -105,7 +105,7 @@
         <!-- search dropdown -->
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
-            <i class="glyphicon glyphicon-search" style='opacity:0.9;'><span aria-label="Search" class="visuallyhidden">Search</span></i>
+            <i class="glyphicon glyphicon-search visuallyhidden" style='opacity:0.9;'><span aria-label="Search">Search</span></i>
           </a>
           <ul class='dropdown-menu'>
             {% if 'overview' in course_id %}
@@ -139,7 +139,7 @@
         <!-- user account dropdown -->
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
-            <i class="glyphicon glyphicon-user" style="opacity:0.9;"><span aria-label="User" class="visuallyhidden">User</span></i>
+            <i class="glyphicon glyphicon-user visuallyhidden" style="opacity:0.9;"><span aria-label="User">User</span></i>
           </a>
           <ul class="dropdown-menu user-menu">
             <li><span class='loggedinuser'></span></li>
@@ -174,7 +174,7 @@
 
         <!-- <li class="dropdown">             -->
           <li id="scratch_ac_link" class="dropdown"><a href="javascript:ACFactory.toggleScratchActivecode()">
-              <i class="glyphicon glyphicon-pencil" style="opacity:0.9;"><span aria-label="Scratch Activecode" class="visuallyhidden">Scratch Activecode</span></i></a></li>
+              <i class="glyphicon glyphicon-pencil visuallyhidden" style="opacity:0.9;"><span aria-label="Scratch Activecode">Scratch Activecode</span></i></a></li>
         <!-- </li> -->
 
         <li class="divider-vertical"></li>
@@ -183,7 +183,7 @@
         <!-- help menu dropdown -->
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
-            <i class="glyphicon glyphicon-question-sign" style="opacity:0.9;"><span aria-label="Help" class="visuallyhidden">Help</span></i>
+            <i class="glyphicon glyphicon-question-sign visuallyhidden" style="opacity:0.9;"><span aria-label="Help">Help</span></i>
           </a>
           <ul class="dropdown-menu user-menu">
             <li><a href='http://runestoneinteractive.org/pages/faq.html'>FAQ</a></li>
@@ -214,27 +214,15 @@
           <li>{% include "sourcelink.html" %}</li>
         {% endif %}
       </ul>
-
-      </div> <!-- navbar -->
-
-
-
-
-
-
-
-    </div> <!-- container -->
-  </div>
-</div>
+      </div> <!-- navbar-collapse -->
+    </div> <!-- navbar -->
+  </div> <!-- container -->
 {% endmacro %}
 
 {%- block extrahead %}
-<meta charset='utf-8'>
-<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
-<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
 <link rel="shortcut icon" href="/{{appname}}/static/favicon.ico" type="image/ico" />
 
-<script type="text/javascript">
+<script>
   eBookConfig = {};
   {% if dynamic_pages == 'True' %}
     {% raw %}
@@ -366,13 +354,13 @@
 {% if dynamic_pages == 'True' %}
   {% raw %}
     {{ if request.application == 'runestone':}}
-      <script type="text/javascript">
+      <script>
         var _gaq = _gaq || [];
         _gaq.push(['_setAccount', '{{ =settings.google_ga }}']);
         _gaq.push(['_trackPageview']);
 
         (function() {
-          var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+          var ga = document.createElement('script'); ga.async = true;
           ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
           var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
         })();

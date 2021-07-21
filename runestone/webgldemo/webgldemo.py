@@ -707,7 +707,7 @@ TAB_END = """</div>"""
 # Run the show/hide function on each element to get it into the correct
 # visibility and width
 SHOW_HIDE_SCRIPT = """
-    <script type='text/javascript'>
+    <script>
         %(divid)s_directive.show_webgl(\"%(divid)s_show_code\",1);
         %(divid)s_directive.show_webgl(\"%(divid)s_show_canvas\",2);
         %(divid)s_directive.show_webgl(\"%(divid)s_show_info\",3);
