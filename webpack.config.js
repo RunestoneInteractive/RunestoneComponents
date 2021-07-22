@@ -74,7 +74,7 @@ module.exports = (env, argv) => {
                 // Don't prepend the ``<head>`` tag and data to the output.
                 inject: false,
                 // The template to create JSON.
-                templateContent: ({htmlWebpackPlugin}) => JSON.stringify({
+                templateContent: ({ htmlWebpackPlugin }) => JSON.stringify({
                     js: htmlWebpackPlugin.files.js,
                     css: htmlWebpackPlugin.files.css,
                 }),
