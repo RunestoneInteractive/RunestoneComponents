@@ -175,8 +175,8 @@ def _add_autoversion(
 
 
 # Convenience method to call ``add_js_file`` using ``add_autoversion``.
-def _add_autoversioned_javascript(self, filename):
-    return self.add_js_file(self.add_autoversion(filename))
+def _add_autoversioned_javascript(self, filename, **kwargs):
+    return self.add_js_file(self.add_autoversion(filename), **kwargs)
 
 
 # Convenience method for calling ``add_css_file`` using ``add_autoversion``.

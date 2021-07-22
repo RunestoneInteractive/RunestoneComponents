@@ -49,7 +49,7 @@ from runestone.common.runestonedirective import (
 TEMPLATE = """
 <div class="runestone alert alert-warning sqcontainer">
 <div data-component="selectquestion" id={component_id} {selector} {points} {proficiency} {min_difficulty} {max_difficulty} {autogradable} {not_seen_ever} {primary} {AB} {toggle_options} {toggle_labels}>
-    <p>Loading ...</p>
+    <p>{message}</p>
 </div>
 </div>
 """
@@ -109,24 +109,28 @@ class SelectQuestion(RunestoneIdDirective):
         addQuestionToDB(self)
         env = self.state.document.settings.env
         is_dynamic = env.config.html_context.get("dynamic_pages", False)
+        is_preview = env.config.html_context.get("course_id", None) == "preview"
 
         if not (bool("fromid" in self.options) ^ bool("proficiency" in self.options)):
             raise self.severe(
                 "You must specify either fromid or proficiency but not both"
             )
 
-        if is_dynamic:
-            self.options["message"] = "Loading ..."
+        if is_dynamic or is_preview:
+            self.options["message"] = "Loading a dynamic question ..."
         else:
             self.options[
                 "message"
-            ] = "The selectquestion directive only works with dynamic pages"
+            ] = "The selectquestion directive only works with Runestone Services"
 
         if "fromid" in self.options:
             self.question_bank_choices = self.options["fromid"]
             self.options[
                 "selector"
             ] = f"data-questionlist='{self.question_bank_choices}'"
+            self.options[
+                "message"
+            ] += f"<br/>Selecting from: {self.question_bank_choices}"
         else:
             self.options["selector"] = ""
 
@@ -185,20 +189,18 @@ class SelectQuestion(RunestoneIdDirective):
             self.options["AB"] = ""
 
         if ("toggle" in self.options) or ("togglelabels" in self.options):
-            self.options[
-                "toggle_options"
-            ] = "data-toggleoptions=\"toggle\""
-            self.options[
-                "toggle_labels"
-            ] = "data-togglelabels=\"togglelabels:\""
+            self.options["toggle_options"] = 'data-toggleoptions="toggle"'
+            self.options["toggle_labels"] = 'data-togglelabels="togglelabels:"'
             if "toggle" in self.options:
-                self.options[
-                    "toggle_options"
-                ] = "data-toggleoptions=\"toggle, " + f"{self.options['toggle']}" + "\""
+                self.options["toggle_options"] = (
+                    'data-toggleoptions="toggle, ' + f"{self.options['toggle']}" + '"'
+                )
             if "togglelabels" in self.options:
-                self.options[
-                    "toggle_labels"
-                ] = "data-togglelabels=\"togglelabels: " + f"{self.options['togglelabels']}" + "\""
+                self.options["toggle_labels"] = (
+                    'data-togglelabels="togglelabels: '
+                    + f"{self.options['togglelabels']}"
+                    + '"'
+                )
         else:
             self.options["toggle_options"] = ""
             self.options["toggle_labels"] = ""

@@ -47,10 +47,10 @@ def setup(app):
 
     # CodeMirror syntax highlighting for various types of code
 
-    app.add_autoversioned_javascript("webglinteractive.js")
+    app.add_autoversioned_javascript("webglinteractive.js", defer="")
 
     # Javascript for saving files to the client's hard drive
-    app.add_autoversioned_javascript("FileSaver.min.js")
+    app.add_autoversioned_javascript("FileSaver.min.js", defer="")
 
     app.add_node(
         WebglInteractiveNode,
@@ -707,7 +707,7 @@ TAB_END = """</div>"""
 # Run the show/hide function on each element to get it into the correct
 # visibility and width
 SHOW_HIDE_SCRIPT = """
-    <script type='text/javascript'>
+    <script>
         %(divid)s_directive.show_webgl(\"%(divid)s_show_code\",1);
         %(divid)s_directive.show_webgl(\"%(divid)s_show_canvas\",2);
         %(divid)s_directive.show_webgl(\"%(divid)s_show_info\",3);
