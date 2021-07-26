@@ -7,6 +7,8 @@ from .activecode import ActiveCode
 from .animation import Animation
 from .mchoice import MChoice, QuestionNumber
 from .blockly import Blockly
+from .quizly import Quizly
+from .khanex import Khanex
 from .codelens import Codelens
 from .clickableArea import ClickableArea
 from .datafile import DataFile
@@ -51,11 +53,7 @@ def runestone_static_dirs():
     module_static_css.append(os.path.join(basedir, "webgldemo", "css"))
     module_static_css.append(os.path.join(basedir, "matrixeq", "css"))
     module_static_css.append(os.path.join(basedir, "lp", "css"))
-    return (
-        module_static_js
-        + module_static_css
-        + CodeChat.CodeToRest.html_static_path()
-    )
+    return module_static_js + module_static_css + CodeChat.CodeToRest.html_static_path()
 
 
 # runestone_extensions()
@@ -76,6 +74,7 @@ def runestone_extensions():
     modules.insert(0, modules.pop(modules.index("runestone.common")))
     return modules
 
+
 # setup_js_defer(app, pagename, templatexname, context, doctree)
 # -----------------------
 # Used to inspect js right before it is rendered to page so that
@@ -85,16 +84,20 @@ def setup_js_defer(app, pagename, templatexname, context, doctree):
         for js in sorted(script_files):
             if app.config.html_defer_js:
                 # Files added from Runestone should already have defer set - so just add it to sphinx based ones
-                to_defer = ["_static/jquery.js", "_static/underscore.js","_static/doctools.js"]
+                to_defer = [
+                    "_static/jquery.js",
+                    "_static/underscore.js",
+                    "_static/doctools.js",
+                ]
                 if isinstance(js, JavaScript) and js in to_defer:
                     js.attributes["defer"] = ""
             else:
-                #config flag not set, prevent all deferrals
+                # config flag not set, prevent all deferrals
                 if isinstance(js, JavaScript):
                     js.attributes.pop("defer", None)
-        return ''
+        return ""
 
-    context['js_defer'] = js_defer
+    context["js_defer"] = js_defer
 
 
 # setup(app)
@@ -108,7 +111,13 @@ def setup(app):
     we wanted to do for all projects.
     """
     # Include JS and CSS produced by webpack. See `webpack static imports <webpack_static_imports>`_.
-    with open(pkg_resources.resource_filename("runestone", "dist/webpack_static_imports.json"), "r", encoding="utf-8") as f:
+    with open(
+        pkg_resources.resource_filename(
+            "runestone", "dist/webpack_static_imports.json"
+        ),
+        "r",
+        encoding="utf-8",
+    ) as f:
         wb_imports = json.load(f)
         script_files = wb_imports["js"]
         _css_files = css_files + wb_imports["css"]
@@ -124,9 +133,26 @@ def setup(app):
         except ExtensionError:
             app.add_css_file(cssfile)
 
+    # projects can define their own custom css or js files to include
+    # But since this is imported into their conf.py authors must
+    # define them as attributes of the setup function
+    # ``setup.custom_xxx_files``
+    try:
+        for c in setup.custom_css_files:
+            app.add_css_file(c)
+        print("Adding custom CSS files")
+    except AttributeError:
+        print("No custom CSS files")
+    try:
+        for c in setup.custom_js_files:
+            app.add_js_file(c)
+        print("Adding custom Javascript")
+    except AttributeError:
+        print("No custom js files")
+
     app.config.html_static_path.append("dist/")
-    app.add_config_value("html_defer_js", False, 'env')
-    app.connect('html-page-context', setup_js_defer)
+    app.add_config_value("html_defer_js", False, "env")
+    app.connect("html-page-context", setup_js_defer)
 
 
 def get_master_url():
@@ -217,6 +243,7 @@ cmap = {
     "dragndrop": DragNDrop,
     "parsonsprob": ParsonsProblem,
     "poll": Poll,
+    "quizly": Quizly,
     "reveal": RevealDirective,
     "selectquestion": SelectQuestion,
     "shortanswer": JournalDirective,

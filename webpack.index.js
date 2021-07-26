@@ -65,10 +65,12 @@ const module_map = {
     datafile: () => import("./runestone/datafile/js/datafile.js"),
     dragndrop: () => import("./runestone/dragndrop/js/timeddnd.js"),
     fillintheblank: () => import("./runestone/fitb/js/timedfitb.js"),
+    khanex: () => import("./runestone/khanex/js/khanex.js"),
     lp_build: () => import("./runestone/lp/js/lp.js"),
     multiplechoice: () => import("./runestone/mchoice/js/timedmc.js"),
     parsons: () => import("./runestone/parsons/js/timedparsons.js"),
     poll: () => import("./runestone/poll/js/poll.js"),
+    quizly: () => import("./runestone/quizly/js/quizly.js"),
     reveal: () => import("./runestone/reveal/js/reveal.js"),
     selectquestion: () => import("./runestone/selectquestion/js/selectone.js"),
     shortanswer: () => import("./runestone/shortanswer/js/timed_shortanswer.js"),
@@ -76,6 +78,7 @@ const module_map = {
     spreadsheet: () => import("./runestone/spreadsheet/js/spreadsheet.js"),
     tabbedStuff: () => import("./runestone/tabbedStuff/js/tabbedstuff.js"),
     timedAssessment: () => import("./runestone/timed/js/timed.js"),
+    wavedrom: () => import("./runestone/wavedrom/js/wavedrom.js"),
     // TODO: since this isn't in a ``data-component``, need to trigger an import of this code manually.
     webwork: () => import("./runestone/webwork/js/webwork.js"),
     youtube: () => import("./runestone/video/js/runestonevideo.js"),
@@ -114,8 +117,27 @@ export function runestone_auto_import() {
 $(document).ready(runestone_auto_import);
 
 // Provide a function to import one specific Runestone component.
-export function runestone_import(component_name) {
+// the import function inside module_map is async -- runestone_import
+// should be awaited when necessary to ensure the import completes
+export async function runestone_import(component_name) {
     return module_map[component_name]();
+}
+
+async function popupScratchAC() {
+    // load the activecode bundle
+    await runestone_import("activecode");
+    // scratchDiv will be defined if we have already created a scratch
+    // activecode.  If its not defined then we need to get it ready to toggle
+    if (!eBookConfig.scratchDiv) {
+        window.ACFactory.createScratchActivecode();
+        let divid = eBookConfig.scratchDiv
+        window.edList[divid] = ACFactory.createActiveCode($(`#${divid}`)[0],
+            eBookConfig.acDefaultLanguage);
+        if (eBookConfig.isLoggedIn) {
+            window.edList[divid].enableSaveLoad();
+        }
+    }
+    window.ACFactory.toggleScratchActivecode();
 }
 
 // Set the directory containing this script as the `path <https://webpack.js.org/guides/public-path/#on-the-fly>`_ for all webpacked scripts.
@@ -131,4 +153,5 @@ rc.runestone_import = runestone_import;
 rc.runestone_auto_import = runestone_auto_import;
 rc.getSwitch = getSwitch;
 rc.switchTheme = switchTheme;
+rc.popupScratchAC = popupScratchAC;
 window.runestoneComponents = rc;

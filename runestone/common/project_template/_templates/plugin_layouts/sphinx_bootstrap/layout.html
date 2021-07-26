@@ -33,7 +33,7 @@
     <div class="navbar-header">
       <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
       <button type='button' class='navbar-toggle' data-toggle="collapse" data-target=".navbar-ex1-collapse">
-        <span class="icon-bar visuallyhidden" aria-label="navbar toggle">toggle navbar</span>
+        <span class="icon-bar" aria-label="navbar toggle">toggle navbar</span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
@@ -68,7 +68,7 @@
         {% if minimal_outside_links != 'True' %}
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
-            <i class="glyphicon glyphicon-globe visuallyhidden" style="opacity: 0.9"><span aria-label="Social">Social</span></i>
+            <i class="glyphicon glyphicon-globe" style="opacity: 0.9"><span class="visuallyhidden" aria-label="Social">Social</span></i>
           </a>
           <ul class="dropdown-menu social-menu">
               <li>
@@ -105,7 +105,7 @@
         <!-- search dropdown -->
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
-            <i class="glyphicon glyphicon-search visuallyhidden" style='opacity:0.9;'><span aria-label="Search">Search</span></i>
+            <i class="glyphicon glyphicon-search" style='opacity:0.9;'><span class="visuallyhidden" aria-label="Search">Search</span></i>
           </a>
           <ul class='dropdown-menu'>
             {% if 'overview' in course_id %}
@@ -139,7 +139,7 @@
         <!-- user account dropdown -->
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
-            <i class="glyphicon glyphicon-user visuallyhidden" style="opacity:0.9;"><span aria-label="User">User</span></i>
+            <i class="glyphicon glyphicon-user" style="opacity:0.9;"><span class="visuallyhidden" aria-label="User">User</span></i>
           </a>
           <ul class="dropdown-menu user-menu">
             <li><span class='loggedinuser'></span></li>
@@ -173,8 +173,8 @@
         <!-- <li id="scratch_ac_link"><a href="javascript:ACFactory.toggleScratchActivecode()">Scratch ActiveCode</a></li> -->
 
         <!-- <li class="dropdown">             -->
-          <li id="scratch_ac_link" class="dropdown"><a href="javascript:ACFactory.toggleScratchActivecode()">
-              <i class="glyphicon glyphicon-pencil visuallyhidden" style="opacity:0.9;"><span aria-label="Scratch Activecode">Scratch Activecode</span></i></a></li>
+          <li id="scratch_ac_link" class="dropdown"><a href="javascript:runestoneComponents.popupScratchAC()">
+              <i class="glyphicon glyphicon-pencil" style="opacity:0.9;"><span class="visuallyhidden" aria-label="Scratch Activecode" >Scratch Activecode</span></i></a></li>
         <!-- </li> -->
 
         <li class="divider-vertical"></li>
@@ -183,7 +183,7 @@
         <!-- help menu dropdown -->
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
-            <i class="glyphicon glyphicon-question-sign visuallyhidden" style="opacity:0.9;"><span aria-label="Help">Help</span></i>
+            <i class="glyphicon glyphicon-question-sign" style="opacity:0.9;"><span class="visuallyhidden" aria-label="Help">Help</span></i>
           </a>
           <ul class="dropdown-menu user-menu">
             <li><a href='http://runestoneinteractive.org/pages/faq.html'>FAQ</a></li>
@@ -261,7 +261,6 @@
   eBookConfig.proxyuri_runs = '{{proxy_uri_runs}}';
   eBookConfig.proxyuri_files = '{{proxy_uri_files}}';
   eBookConfig.enable_chatcodes = {{enable_chatcodes}} ? {{ enable_chatcodes }} : false;
-
 
 </script>
 

@@ -6,6 +6,10 @@ export async function renderRunestoneComponent(componentSrc, whereDiv, moreOpts)
      *  The tedious part is calling the right functions to turn the
      *  source into the actual component.
      */
+    if (!componentSrc) {
+        jQuery(`#${whereDiv}`).html(`<p>Sorry, no source is available for preview.</p>`);
+        return;
+    }
     let patt = /..\/_images/g;
     componentSrc = componentSrc.replace(
         patt,
@@ -38,7 +42,7 @@ export async function renderRunestoneComponent(componentSrc, whereDiv, moreOpts)
 
     if (typeof component_factory === "undefined") {
         alert(
-            "Error:  Missing the component factory!  Clear you browser cache."
+            "Error:  Missing the component factory!"
         );
     } else {
         if (

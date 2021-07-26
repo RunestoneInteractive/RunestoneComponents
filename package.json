@@ -5,6 +5,7 @@
     "main": "dist/runestone.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
+        "check-env": "node -e 'console.log(process.env)' | grep npm",
         "build": "webpack --mode=development",
         "buildj": "webpack --mode=development --profile --json > stats.json",
         "watch": "webpack --mode=development --watch",
@@ -37,6 +38,7 @@
         "jexcel": "^3.9.1",
         "jquery-ui": "1.10.4",
         "sql.js": "1.5.0",
-        "vega-embed": "3.14.0"
+        "vega-embed": "3.14.0",
+        "wavedrom": "^2.0.0"
     }
 }
