@@ -293,6 +293,11 @@
 <div class="container" id="continue-reading"></div>
 
 <div class="container" id="main-content" role="main">
+
+  {% with place='top' %}
+    {% include "subchapter.html" %}
+  {% endwith %}
+
 <!-- Ad Serving for Runestone Campaign -->
 {% if dynamic_pages == 'True' %}
     {% raw %}
@@ -314,9 +319,9 @@
   <div id=scprogresscontainer>
     You have attempted <span id=scprogresstotal></span> of <span id=scprogressposs></span> activities on this page <div id="subchapterprogress"></div>
   </div>
-  {% block nextprevious %}
-      {% include "subchapter.html" %}
-  {% endblock %}
+  {% with place='bottom'%}
+    {% include "subchapter.html" %}
+  {% endwith %}
 </div>
 {%- endblock %}
 

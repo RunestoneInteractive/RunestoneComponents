@@ -660,23 +660,51 @@ div.flash {
     display: inline;
     bottom: 65px;
     position: fixed;
+    opacity: 0.4;
 }
 
-#relations-next {
+.navLink:hover {
+    opacity: 1;
+}
+
+.navLink a {
+    display: inline-block;
+    background-color: white; 
+    border-style:solid; 
+    border-color:lightgrey; 
+    border-width:2px; 
+    width:100px; 
+    height:50px
+}
+
+.relations-next {
     right: 35px;
 }
 
-#relations-prev {
+.relations-prev {
     left: 35px;
+}
+
+.nextprev-list {
+    margin: 10px;
+    padding-left: 0;
+    height: 50px;
+}
+
+.nextprev-list-top {
+    display: none;
 }
 
 @media (max-width: 600px) {
 
-    /* Styling definitions for chevron function in bookfuncs.js */
+    .nextprev-list-top {
+        display: block;
+    }    
+    
     .navLink {
-        z-index: 2;
-        display: inline;
-        position: static;
+        display: inline-block;
+        bottom: auto;
+        position: absolute;
     }
 
     ul#top-relations-console,
