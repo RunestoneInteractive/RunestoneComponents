@@ -39,10 +39,11 @@
       </button>
 
       <div>
+        {% set logo = '_static/' + (logo if logo else 'img/logo_small.png') %}
         {% if minimal_outside_links != 'True' %}
-          <a class="brand-logo" style='background: transparent url("{{pathto('_static/img/logo_small.png', 1)}}") no-repeat 0px 0px;' href="/{{appname}}/default/user/login">&nbsp; </a>
+          <a class="brand-logo" href="/{{appname}}/default/user/login" aria-label="Login"><img src="{{pathto(logo, 1)}}" alt=""></a>
         {% else %}
-          <a class="brand-logo" style='background: transparent url("{{pathto('_static/img/logo_small.png', 1)}}") no-repeat 0px 0px;'>&nbsp;<span aria-label="logo" class="visuallyhidden">Runestone Logo</span> </a>
+          <div class="brand-logo"><img src="{{pathto(logo, 1)}}" alt=""></div>
         {% endif %}
         <a class="navbar-brand" href="{{ pathto(master_doc) }}" aria-label="index-page">
           {% if dynamic_pages == 'True' %}
@@ -220,7 +221,10 @@
 {% endmacro %}
 
 {%- block extrahead %}
+
+{% if not favicon %}
 <link rel="shortcut icon" href="/{{appname}}/static/favicon.ico" type="image/ico" />
+{% endif %}
 
 <script>
   eBookConfig = {};
