@@ -194,7 +194,6 @@ a {
     /* Remove top padding when top navbar goes collapsed in narrow viewports */
     body {
         padding-top: 0;
-        margin: auto auto auto 5px;
     }
 
     .navbar-fixed-top {
@@ -204,11 +203,14 @@ a {
 }
 
 @media (min-width: 768px) {
-
     /* when navbar is collapsed we don't want any vertical dividers taking up space */
     .navbar .divider-vertical {
         margin: 0 3px;
         border-left: 1px solid #f2f2f2;
+    }
+    
+    .navbar-fixed-top .container {
+        padding: 0;
     }
 }
 
@@ -222,8 +224,8 @@ div.section {
 }
 
 .container {
-    padding-left: 0;
-    padding-right: 0;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 .container .section>*:not(.section):not(.ac_section) {
@@ -254,12 +256,21 @@ div.section {
     max-width: none;
 }
 
+.container-fluid>.navbar-collapse, .container-fluid>.navbar-header, .container>.navbar-collapse, .container>.navbar-header {
+    margin-left: 0;
+    margin-right: 0;
+}
+
 .navbar>.container .navbar-brand {
     margin-left: 0;
 }
 
 .navbar>.container {
     background-color: var(--navbar);
+}
+
+.navbar-toggle {
+    margin-right: 0px;
 }
 
 .footer>.container {
@@ -726,10 +737,6 @@ div.flash {
     }
 }
 
-.navLink a {
-    color: #999;
-}
-
 #completionButton {
     margin-top: 25px;
     margin-bottom: 15px;
@@ -949,9 +956,14 @@ textarea#lp-result {
 
 
 #scprogresscontainer {
-    width: 50%;
-    margin-left: auto;
-    margin-right: auto;
+    width: 100%;
+    max-width: 500px;
+    margin: 10px auto;
+}
+
+#subchapterprogress.ui-progressbar .ui-progressbar-value {
+    margin: 0;
+    border-radius: 0px;
 }
 
 #subchapterprogress>div {
@@ -997,11 +1009,11 @@ body {
 .theme-switch-wrapper {
     display: flex;
     align-items: center;
+}
 
-    em {
-        margin-left: 10px;
-        font-size: 1rem;
-    }
+.theme-switch-wrapper em {
+    margin-left: 10px;
+    font-size: 1rem;
 }
 
 .theme-switch {
