@@ -697,8 +697,7 @@ div.flash {
 .nextprev-list {
     margin: 10px;
     padding-left: 0;
-    display: flex;
-    justify-content: space-between;
+    height: 50px;
 }
 
 .nextprev-list-top {
@@ -708,14 +707,13 @@ div.flash {
 @media (max-width: 600px) {
 
     .nextprev-list-top {
-        display: flex;
+        display: block;
     }    
-
-    /* Styling definitions for chevron function in bookfuncs.js */
+    
     .navLink {
         display: inline-block;
-        bottom: 0;
-        position: relative;
+        bottom: auto;
+        position: absolute;
     }
 
     ul#top-relations-console,
