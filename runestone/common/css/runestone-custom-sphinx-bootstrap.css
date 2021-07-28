@@ -194,7 +194,7 @@ a {
     /* Remove top padding when top navbar goes collapsed in narrow viewports */
     body {
         padding-top: 0;
-        margin: auto auto auto 5px;
+        margin: auto 5px;
     }
 
     .navbar-fixed-top {
@@ -254,12 +254,21 @@ div.section {
     max-width: none;
 }
 
+.container-fluid>.navbar-collapse, .container-fluid>.navbar-header, .container>.navbar-collapse, .container>.navbar-header {
+    margin-left: 0;
+    margin-right: 0;
+}
+
 .navbar>.container .navbar-brand {
     margin-left: 0;
 }
 
 .navbar>.container {
     background-color: var(--navbar);
+}
+
+.navbar-toggle {
+    margin-right: 0px;
 }
 
 .footer>.container {
@@ -660,23 +669,53 @@ div.flash {
     display: inline;
     bottom: 65px;
     position: fixed;
+    opacity: 0.4;
 }
 
-#relations-next {
+.navLink:hover{
+    opacity: 1;
+}
+
+.navLink a {
+    display: inline-block;
+    background-color: white; 
+    border-style:solid; 
+    border-color:lightgrey; 
+    border-width:2px; 
+    width:100px; 
+    height:50px
+}
+
+.relations-next {
     right: 35px;
 }
 
-#relations-prev {
+.relations-prev {
     left: 35px;
+}
+
+.nextprev-list {
+    margin: 10px;
+    padding-left: 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+.nextprev-list-top {
+    display: hidden;
 }
 
 @media (max-width: 600px) {
 
+    .nextprev-list-top {
+        display: flex;
+    }    
+
     /* Styling definitions for chevron function in bookfuncs.js */
     .navLink {
-        z-index: 2;
-        display: inline;
-        position: static;
+        display: inline-block;
+        bottom: 0;
+        position: relative;
     }
 
     ul#top-relations-console,
@@ -696,10 +735,6 @@ div.flash {
         padding: 0 20px;
         display: inline;
     }
-}
-
-.navLink a {
-    color: #999;
 }
 
 #completionButton {
@@ -922,8 +957,14 @@ textarea#lp-result {
 
 #scprogresscontainer {
     width: 50%;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 10px auto;
+}
+
+@media (max-width: 600px) {
+    #scprogresscontainer { 
+        margin: 10px;
+        width: calc(100% - 20px);
+    }
 }
 
 #subchapterprogress>div {
