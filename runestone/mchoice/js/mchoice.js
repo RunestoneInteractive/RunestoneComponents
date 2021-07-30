@@ -227,7 +227,7 @@ export default class MultipleChoice extends RunestoneBase {
         } // end else
         this.optsForm.appendChild(this.submitButton);
         // Create compare button
-        if (this.useRunestoneServices) {
+        if (this.useRunestoneServices && !eBookConfig.peer) {
             this.compareButton = document.createElement("button");
             $(this.compareButton).attr({
                 class: "btn btn-default",
@@ -371,9 +371,11 @@ export default class MultipleChoice extends RunestoneBase {
         if (logFlag) {
             this.logMCMAsubmission();
         }
-        this.renderMCMAFeedBack();
-        if (this.useRunestoneServices) {
-            this.enableMCComparison();
+        if (!eBookConfig.peer) {
+            this.renderMCMAFeedBack();
+            if (this.useRunestoneServices) {
+                this.enableMCComparison();
+            }
         }
     }
 
@@ -502,9 +504,11 @@ export default class MultipleChoice extends RunestoneBase {
         if (logFlag) {
             this.logMCMFsubmission();
         }
-        this.renderMCMFFeedback();
-        if (this.useRunestoneServices) {
-            this.enableMCComparison();
+        if (!eBookConfig.peer) {
+            this.renderMCMFFeedback();
+            if (this.useRunestoneServices) {
+                this.enableMCComparison();
+            }
         }
     }
 
