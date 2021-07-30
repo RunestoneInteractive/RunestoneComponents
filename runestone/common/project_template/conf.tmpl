@@ -208,7 +208,16 @@ html_theme_options = {
 # creating your own folder and modifying this path.
 # Add any paths that contain custom themes here, relative to this directory.
 html_theme_path = [pkg_resources.resource_filename('runestone', 'common/project_template/_templates/plugin_layouts')]
+# List of extra stylesheets that should be added to all html pages
+# Files must be on a path contained in html_static_path
+#setup.custom_css_files = ["sample.css", "sample2.css"]
 
+# List of extra js files that should be added to all html pages
+# Items may be a file name or a dict with properties {"file":FILENAME, "key1", "value1", "key2, "value2"...}
+#   in which case file should have the file name and other key/value pairs are used as attrs
+#   on the script tag. The sample below will set sample2.js's script tag to have the defer attr
+# Files must be on a path contained in html_static_path
+#setup.custom_js_files = ["sample.css", {"file": "sample2.js", "defer": ""}]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".

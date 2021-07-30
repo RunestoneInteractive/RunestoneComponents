@@ -145,7 +145,12 @@ def setup(app):
         print("No custom CSS files")
     try:
         for c in setup.custom_js_files:
-            app.add_js_file(c)
+            if isinstance(c, dict):
+                #peel off filename, pass rest of key/values on as kwargs
+                filename = c.pop("file") 
+                app.add_autoversioned_javascript(filename, **c)
+            else:
+                app.add_autoversioned_javascript(c)
         print("Adding custom Javascript")
     except AttributeError:
         print("No custom js files")
