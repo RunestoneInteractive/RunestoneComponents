@@ -48,7 +48,7 @@ def runestone_static_dirs():
     module_static_js.append(os.path.join(basedir, "codelens", "js"))
     module_static_js.append(os.path.join(basedir, "webgldemo", "js"))
     module_static_js.append(os.path.join(basedir, "matrixeq", "js"))
-    module_static_css = [os.path.join(basedir, "common", "css", "sphinx")]
+    module_static_css = []
     module_static_css.append(os.path.join(basedir, "accessibility", "css"))
     module_static_css.append(os.path.join(basedir, "webgldemo", "css"))
     module_static_css.append(os.path.join(basedir, "matrixeq", "css"))
@@ -145,7 +145,12 @@ def setup(app):
         print("No custom CSS files")
     try:
         for c in setup.custom_js_files:
-            app.add_js_file(c)
+            if isinstance(c, dict):
+                #peel off filename, pass rest of key/values on as kwargs
+                filename = c.pop("file") 
+                app.add_autoversioned_javascript(filename, **c)
+            else:
+                app.add_autoversioned_javascript(c)
         print("Adding custom Javascript")
     except AttributeError:
         print("No custom js files")
@@ -225,8 +230,6 @@ runestone_version = version = pkg_resources.get_distribution("runestone").versio
 css_files = [
     # Generated from a template, so it can't be directly included in the webpack.
     "bootstrap-sphinx.css",
-    # Deliberately excluded, so it can be overridden by a user-supplied CSs file.
-    "theme-overrides.css",
 ]
 
 
