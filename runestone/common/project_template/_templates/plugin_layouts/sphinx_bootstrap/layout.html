@@ -32,8 +32,8 @@
 
     <div class="navbar-header">
       <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
-      <button type='button' class='navbar-toggle' data-toggle="collapse" data-target=".navbar-ex1-collapse">
-        <span class="icon-bar" aria-label="navbar toggle">toggle navbar</span>
+      <button type='button' class='navbar-toggle' data-toggle="collapse" data-target=".navbar-ex1-collapse" aria-label="navbar toggle">
+        <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
@@ -316,8 +316,8 @@
 
   {% block body %}
   {% endblock %}
-  <div id=scprogresscontainer>
-    You have attempted <span id=scprogresstotal></span> of <span id=scprogressposs></span> activities on this page <div id="subchapterprogress"></div>
+  <div id="scprogresscontainer">
+    You have attempted <span id="scprogresstotal"></span> of <span id="scprogressposs"></span> activities on this page <div id="subchapterprogress" aria-label="Page progress"></div>
   </div>
   {% with place='bottom'%}
     {% include "subchapter.html" %}
@@ -343,9 +343,9 @@
     <p>
     {%- if show_copyright %}
       {%- if hasdoc('copyright') %}
-        {% trans path=pathto('copyright'), copyright=copyright|e %}&copy; <a href="{{ path }}">Copyright</a> {{ copyright }}.{% endtrans %}
+        {% trans path=pathto('copyright'), copyright=copyright %}&copy; <a href="{{ path }}">Copyright</a> {{ copyright }}.{% endtrans %}
       {%- else %}
-        {% trans copyright=copyright|e %}&copy; Copyright {{ copyright }}.{% endtrans %}
+        {% trans copyright=copyright %}&copy; Copyright {{ copyright }}.{% endtrans %}
       {%- endif %}
     {%- endif %}
     {%- if last_updated %}
