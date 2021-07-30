@@ -222,7 +222,7 @@ function notifyRunestoneComponents() {
 }
 
 // initialize stuff
-$(document).ready(function () {
+$(function () {
     if (eBookConfig) {
         handlePageSetup();
     } else {
@@ -236,7 +236,7 @@ $(document).ready(function () {
 
 // misc stuff
 // todo:  This could be further distributed but making a video.js file just for one function seems dumb.
-$(document).ready(function () {
+window.addEventListener("load", function () {
     // add the video play button overlay image
     $(".video-play-overlay").each(function () {
         $(this).css(

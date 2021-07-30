@@ -49,7 +49,7 @@ window.component_factory.webwork = function (opts) {
     return new WebWork();
 };
 
-$(document).ready(function () {
+$(function () {
     $("body").on("runestone_ww_check", logWebWork);
     $("body").on("runestone_show_correct", logShowCorrect);
 });
