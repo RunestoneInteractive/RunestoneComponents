@@ -24,7 +24,7 @@ module.exports = (env, argv) => {
             rules: [
                 {
                     test: /\.css$/i,
-                    use: [argv.mode === "development" ? "style-loader" : MiniCssExtractPlugin.loader, "css-loader"],
+                    use: [MiniCssExtractPlugin.loader, "css-loader"],
                 },
                 {
                     test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/i,
