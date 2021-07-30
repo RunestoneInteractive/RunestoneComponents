@@ -40,7 +40,7 @@
 
       <div>
         {% if minimal_outside_links != 'True' %}
-          <a class="brand-logo" style='background: transparent url("{{pathto('_static/img/logo_small.png', 1)}}") no-repeat 0px 0px;' href="/{{appname}}/default/user/login">&nbsp; </a>
+          <a class="brand-logo" style='background: transparent url("{{pathto('_static/img/logo_small.png', 1)}}") no-repeat 0px 0px;' href="/{{appname}}/default/frontpage">&nbsp; </a>
         {% else %}
           <a class="brand-logo" style='background: transparent url("{{pathto('_static/img/logo_small.png', 1)}}") no-repeat 0px 0px;'>&nbsp;<span aria-label="logo" class="visuallyhidden">Runestone Logo</span> </a>
         {% endif %}
@@ -157,7 +157,7 @@
             {% if minimal_outside_links != 'True' %}
             <li><a href="/{{appname}}/default/user/profile" id="profilelink">Edit Profile</a></li>
             <li><a href="/{{appname}}/default/user/change_password" id="passwordlink">Change Password</a></li>
-            <li><a href="/{{appname}}/default/user/register" id="registerlink">Register</a></li>
+            <li><a href="/{{appname}}/default/frontpage/register" id="registerlink">Register</a></li>
             {% endif %}
             <li class='loginout'><a href='#'>Login</a></li> <!-- correct link populated by addNavbarLoginLink() -->
 			<!-- dark mode toggle -->
