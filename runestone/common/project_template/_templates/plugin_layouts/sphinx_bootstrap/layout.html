@@ -39,10 +39,11 @@
       </button>
 
       <div>
+        {% set logo = '_static/' + (logo if logo else 'img/logo_small.png') %}
         {% if minimal_outside_links != 'True' %}
-          <a class="brand-logo" style='background: transparent url("{{pathto('_static/img/logo_small.png', 1)}}") no-repeat 0px 0px;' href="/{{appname}}/default/user/login">&nbsp; </a>
+          <a class="brand-logo" href="/{{appname}}/default/user/login" aria-label="Login"><img src="{{pathto(logo, 1)}}" alt=""></a>
         {% else %}
-          <a class="brand-logo" style='background: transparent url("{{pathto('_static/img/logo_small.png', 1)}}") no-repeat 0px 0px;'>&nbsp;<span aria-label="logo" class="visuallyhidden">Runestone Logo</span> </a>
+          <div class="brand-logo"><img src="{{pathto(logo, 1)}}" alt=""></div>
         {% endif %}
         <a class="navbar-brand" href="{{ pathto(master_doc) }}" aria-label="index-page">
           {% if dynamic_pages == 'True' %}
@@ -220,7 +221,10 @@
 {% endmacro %}
 
 {%- block extrahead %}
+
+{% if not favicon %}
 <link rel="shortcut icon" href="/{{appname}}/static/favicon.ico" type="image/ico" />
+{% endif %}
 
 <script>
   eBookConfig = {};
@@ -289,6 +293,11 @@
 <div class="container" id="continue-reading"></div>
 
 <div class="container" id="main-content" role="main">
+
+  {% with place='top' %}
+    {% include "subchapter.html" %}
+  {% endwith %}
+
 <!-- Ad Serving for Runestone Campaign -->
 {% if dynamic_pages == 'True' %}
     {% raw %}
@@ -310,9 +319,9 @@
   <div id="scprogresscontainer">
     You have attempted <span id="scprogresstotal"></span> of <span id="scprogressposs"></span> activities on this page <div id="subchapterprogress" aria-label="Page progress"></div>
   </div>
-  {% block nextprevious %}
-      {% include "subchapter.html" %}
-  {% endblock %}
+  {% with place='bottom'%}
+    {% include "subchapter.html" %}
+  {% endwith %}
 </div>
 {%- endblock %}
 
@@ -375,12 +384,14 @@
     </script>
 
     <script async src="https://hypothes.is/embed.js"></script>
+    <!--provide space to prevent hypothes.is sidebar from obscuring content-->
+    <style>@media screen and (max-width:767px) { body { padding-right: 21px; }}</style>
 
   {% endif %}
 {% endif %}
 
 <script> 
-  document.addEventListener('load', (event) => {
+  window.addEventListener('load', (event) => {
     runestoneComponents.getSwitch(); 
   });
 </script>

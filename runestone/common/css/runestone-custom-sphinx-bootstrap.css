@@ -194,7 +194,6 @@ a {
     /* Remove top padding when top navbar goes collapsed in narrow viewports */
     body {
         padding-top: 0;
-        margin: auto auto auto 5px;
     }
 
     .navbar-fixed-top {
@@ -204,11 +203,14 @@ a {
 }
 
 @media (min-width: 768px) {
-
     /* when navbar is collapsed we don't want any vertical dividers taking up space */
     .navbar .divider-vertical {
         margin: 0 3px;
         border-left: 1px solid #f2f2f2;
+    }
+    
+    .navbar-fixed-top .container {
+        padding: 0;
     }
 }
 
@@ -222,8 +224,8 @@ div.section {
 }
 
 .container {
-    padding-left: 0;
-    padding-right: 0;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 .container .section>*:not(.section):not(.ac_section) {
@@ -254,12 +256,21 @@ div.section {
     max-width: none;
 }
 
+.container-fluid>.navbar-collapse, .container-fluid>.navbar-header, .container>.navbar-collapse, .container>.navbar-header {
+    margin-left: 0;
+    margin-right: 0;
+}
+
 .navbar>.container .navbar-brand {
     margin-left: 0;
 }
 
 .navbar>.container {
     background-color: var(--navbar);
+}
+
+.navbar-toggle {
+    margin-right: 0px;
 }
 
 .footer>.container {
@@ -273,10 +284,11 @@ div.section {
 .brand-logo {
     float: left;
     display: block;
-    background-size: 40px 40px !important;
-    width: 40px;
-    height: 40px;
     margin-top: 4px;
+}
+
+.brand-logo img {
+    height: 40px;
 }
 
 .social-menu {
@@ -659,23 +671,51 @@ div.flash {
     display: inline;
     bottom: 65px;
     position: fixed;
+    opacity: 0.4;
 }
 
-#relations-next {
+.navLink:hover {
+    opacity: 1;
+}
+
+.navLink a {
+    display: inline-block;
+    background-color: white; 
+    border-style:solid; 
+    border-color:lightgrey; 
+    border-width:2px; 
+    width:100px; 
+    height:50px
+}
+
+.relations-next {
     right: 35px;
 }
 
-#relations-prev {
+.relations-prev {
     left: 35px;
+}
+
+.nextprev-list {
+    margin: 10px;
+    padding-left: 0;
+    height: 50px;
+}
+
+.nextprev-list-top {
+    display: none;
 }
 
 @media (max-width: 600px) {
 
-    /* Styling definitions for chevron function in bookfuncs.js */
+    .nextprev-list-top {
+        display: block;
+    }    
+    
     .navLink {
-        z-index: 2;
-        display: inline;
-        position: static;
+        display: inline-block;
+        bottom: auto;
+        position: absolute;
     }
 
     ul#top-relations-console,
@@ -695,10 +735,6 @@ div.flash {
         padding: 0 20px;
         display: inline;
     }
-}
-
-.navLink a {
-    color: #999;
 }
 
 #completionButton {
@@ -920,9 +956,14 @@ textarea#lp-result {
 
 
 #scprogresscontainer {
-    width: 50%;
-    margin-left: auto;
-    margin-right: auto;
+    width: 100%;
+    max-width: 500px;
+    margin: 10px auto;
+}
+
+#subchapterprogress.ui-progressbar .ui-progressbar-value {
+    margin: 0;
+    border-radius: 0px;
 }
 
 #subchapterprogress>div {
@@ -968,11 +1009,11 @@ body {
 .theme-switch-wrapper {
     display: flex;
     align-items: center;
+}
 
-    em {
-        margin-left: 10px;
-        font-size: 1rem;
-    }
+.theme-switch-wrapper em {
+    margin-left: 10px;
+    font-size: 1rem;
 }
 
 .theme-switch {

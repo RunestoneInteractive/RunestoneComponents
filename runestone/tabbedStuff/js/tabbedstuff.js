@@ -135,7 +135,7 @@ class TabbedStuff extends RunestoneBase {
 == Find the custom HTML tags and ==
 ==     execute our code on them        ==
 =================================*/
-$(document).ready(function() {
+$("load", function() {
     $("[data-component=tabbedStuff]").each(function(index) {
         TSList[this.id] = new TabbedStuff({ orig: this });
     });
