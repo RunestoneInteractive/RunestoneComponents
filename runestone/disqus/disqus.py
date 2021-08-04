@@ -21,7 +21,7 @@ from runestone.common.runestonedirective import RunestoneDirective, RunestoneNod
 
 
 DISQUS_BOX = """\
-<script type="text/javascript">
+<script>
     function %(identifier)s_disqus(source) {
         if (window.DISQUS) {
 
@@ -56,9 +56,11 @@ DISQUS_BOX = """\
 """
 
 DISQUS_LINK = """
-<a href="#disqus_thread" class='disqus_thread_link' data-disqus-identifier="%(identifier)s" onclick="%(identifier)s_disqus(this);">Show Comments</a>
-<script type='text/javascript'>
+<a href="#disqus_thread" class="disqus_thread_link" data-disqus-identifier="%(identifier)s" onclick="%(identifier)s_disqus(this);">Show Comments</a>
+<script>
+  window.addEventListener('load', (event) => {
     $("a[data-disqus-identifier='%(identifier)s']").attr('data-disqus-identifier', '%(identifier)s_' + eBookConfig.course);
+  });
 </script>
 """
 

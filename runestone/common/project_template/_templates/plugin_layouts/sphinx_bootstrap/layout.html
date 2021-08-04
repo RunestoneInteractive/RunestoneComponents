@@ -16,6 +16,12 @@
 <!DOCTYPE html>
 {%- endblock %}
 
+{%- block scripts %}
+{# Override the scripts block from sphinx so we can force loading of jquery/underscore/doctools js files #}
+{{ js_defer(script_files) }}
+{{ super() }}
+{%- endblock %}
+
 {# Sidebar: Rework into our Boostrap nav section. #}
 {% macro navBar() %}
 
@@ -26,17 +32,18 @@
 
     <div class="navbar-header">
       <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
-      <button type='button' class='navbar-toggle' data-toggle="collapse" data-target=".navbar-ex1-collapse">
-        <span class="icon-bar" aria-label="navbar toggle" class="visuallyhidden">toggle navbar</span>
+      <button type='button' class='navbar-toggle' data-toggle="collapse" data-target=".navbar-ex1-collapse" aria-label="navbar toggle">
+        <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
 
       <div>
+        {% set logo = '_static/' + (logo if logo else 'img/logo_small.png') %}
         {% if minimal_outside_links != 'True' %}
-          <a class="brand-logo" style='background: transparent url("{{pathto('_static/img/logo_small.png', 1)}}") no-repeat 0px 0px;' href="/{{appname}}/default/user/login">&nbsp; </a>
+          <a class="brand-logo" href="/{{appname}}/default/user/login" aria-label="Login"><img src="{{pathto(logo, 1)}}" alt=""></a>
         {% else %}
-          <a class="brand-logo" style='background: transparent url("{{pathto('_static/img/logo_small.png', 1)}}") no-repeat 0px 0px;'>&nbsp;<span aria-label="logo" class="visuallyhidden">Runestone Logo</span> </a>
+          <div class="brand-logo"><img src="{{pathto(logo, 1)}}" alt=""></div>
         {% endif %}
         <a class="navbar-brand" href="{{ pathto(master_doc) }}" aria-label="index-page">
           {% if dynamic_pages == 'True' %}
@@ -62,7 +69,7 @@
         {% if minimal_outside_links != 'True' %}
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
-            <i class="glyphicon glyphicon-globe" style="opacity: 0.9"><span aria-label="Social" class="visuallyhidden">Social</span></i>
+            <i class="glyphicon glyphicon-globe" style="opacity: 0.9"><span class="visuallyhidden" aria-label="Social">Social</span></i>
           </a>
           <ul class="dropdown-menu social-menu">
               <li>
@@ -99,7 +106,7 @@
         <!-- search dropdown -->
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
-            <i class="glyphicon glyphicon-search" style='opacity:0.9;'><span aria-label="Search" class="visuallyhidden">Search</span></i>
+            <i class="glyphicon glyphicon-search" style='opacity:0.9;'><span class="visuallyhidden" aria-label="Search">Search</span></i>
           </a>
           <ul class='dropdown-menu'>
             {% if 'overview' in course_id %}
@@ -133,7 +140,7 @@
         <!-- user account dropdown -->
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
-            <i class="glyphicon glyphicon-user" style="opacity:0.9;"><span aria-label="User" class="visuallyhidden">User</span></i>
+            <i class="glyphicon glyphicon-user" style="opacity:0.9;"><span class="visuallyhidden" aria-label="User">User</span></i>
           </a>
           <ul class="dropdown-menu user-menu">
             <li><span class='loggedinuser'></span></li>
@@ -167,8 +174,8 @@
         <!-- <li id="scratch_ac_link"><a href="javascript:ACFactory.toggleScratchActivecode()">Scratch ActiveCode</a></li> -->
 
         <!-- <li class="dropdown">             -->
-          <li id="scratch_ac_link" class="dropdown"><a href="javascript:ACFactory.toggleScratchActivecode()">
-              <i class="glyphicon glyphicon-pencil" style="opacity:0.9;"><span aria-label="Scratch Activecode" class="visuallyhidden">Scratch Activecode</span></i></a></li>
+          <li id="scratch_ac_link" class="dropdown"><a href="javascript:runestoneComponents.popupScratchAC()">
+              <i class="glyphicon glyphicon-pencil" style="opacity:0.9;"><span class="visuallyhidden" aria-label="Scratch Activecode" >Scratch Activecode</span></i></a></li>
         <!-- </li> -->
 
         <li class="divider-vertical"></li>
@@ -177,7 +184,7 @@
         <!-- help menu dropdown -->
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
-            <i class="glyphicon glyphicon-question-sign" style="opacity:0.9;"><span aria-label="Help" class="visuallyhidden">Help</span></i>
+            <i class="glyphicon glyphicon-question-sign" style="opacity:0.9;"><span class="visuallyhidden" aria-label="Help">Help</span></i>
           </a>
           <ul class="dropdown-menu user-menu">
             <li><a href='http://runestoneinteractive.org/pages/faq.html'>FAQ</a></li>
@@ -208,27 +215,18 @@
           <li>{% include "sourcelink.html" %}</li>
         {% endif %}
       </ul>
-
-      </div> <!-- navbar -->
-
-
-
-
-
-
-
-    </div> <!-- container -->
-  </div>
-</div>
+      </div> <!-- navbar-collapse -->
+    </div> <!-- navbar -->
+  </div> <!-- container -->
 {% endmacro %}
 
 {%- block extrahead %}
-<meta charset='utf-8'>
-<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
-<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
-<link rel="shortcut icon" href="/{{appname}}/static/favicon.ico" type="image/ico" />
 
-<script type="text/javascript">
+{% if not favicon %}
+<link rel="shortcut icon" href="/{{appname}}/static/favicon.ico" type="image/ico" />
+{% endif %}
+
+<script>
   eBookConfig = {};
   {% if dynamic_pages == 'True' %}
     {% raw %}
@@ -268,7 +266,6 @@
   eBookConfig.proxyuri_files = '{{proxy_uri_files}}';
   eBookConfig.enable_chatcodes = {{enable_chatcodes}} ? {{ enable_chatcodes }} : false;
 
-
 </script>
 
 <!-- Ad Serving Headers Only serve ads to Anonymous Users -->
@@ -296,6 +293,11 @@
 <div class="container" id="continue-reading"></div>
 
 <div class="container" id="main-content" role="main">
+
+  {% with place='top' %}
+    {% include "subchapter.html" %}
+  {% endwith %}
+
 <!-- Ad Serving for Runestone Campaign -->
 {% if dynamic_pages == 'True' %}
     {% raw %}
@@ -314,12 +316,12 @@
 
   {% block body %}
   {% endblock %}
-  <div id=scprogresscontainer>
-    You have attempted <span id=scprogresstotal></span> of <span id=scprogressposs></span> activities on this page <div id="subchapterprogress"></div>
+  <div id="scprogresscontainer">
+    You have attempted <span id="scprogresstotal"></span> of <span id="scprogressposs"></span> activities on this page <div id="subchapterprogress" aria-label="Page progress"></div>
   </div>
-  {% block nextprevious %}
-      {% include "subchapter.html" %}
-  {% endblock %}
+  {% with place='bottom'%}
+    {% include "subchapter.html" %}
+  {% endwith %}
 </div>
 {%- endblock %}
 
@@ -341,9 +343,9 @@
     <p>
     {%- if show_copyright %}
       {%- if hasdoc('copyright') %}
-        {% trans path=pathto('copyright'), copyright=copyright|e %}&copy; <a href="{{ path }}">Copyright</a> {{ copyright }}.{% endtrans %}
+        {% trans path=pathto('copyright'), copyright=copyright %}&copy; <a href="{{ path }}">Copyright</a> {{ copyright }}.{% endtrans %}
       {%- else %}
-        {% trans copyright=copyright|e %}&copy; Copyright {{ copyright }}.{% endtrans %}
+        {% trans copyright=copyright %}&copy; Copyright {{ copyright }}.{% endtrans %}
       {%- endif %}
     {%- endif %}
     {%- if last_updated %}
@@ -360,13 +362,13 @@
 {% if dynamic_pages == 'True' %}
   {% raw %}
     {% if request.application == 'runestone' %}
-      <script type="text/javascript">
+      <script>
         var _gaq = _gaq || [];
         _gaq.push(['_setAccount', '{{ settings.google_ga }}']);
         _gaq.push(['_trackPageview']);
 
         (function() {
-          var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+          var ga = document.createElement('script'); ga.async = true;
           ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
           var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
         })();
@@ -382,10 +384,16 @@
     </script>
 
     <script async src="https://hypothes.is/embed.js"></script>
+    <!--provide space to prevent hypothes.is sidebar from obscuring content-->
+    <style>@media screen and (max-width:767px) { body { padding-right: 21px; }}</style>
 
   {% endif %}
 {% endif %}
 
-<script> runestoneComponents.getSwitch(); </script>
+<script> 
+  window.addEventListener('load', (event) => {
+    runestoneComponents.getSwitch(); 
+  });
+</script>
 
 {% endblock %}

@@ -24,7 +24,7 @@ module.exports = (env, argv) => {
             rules: [
                 {
                     test: /\.css$/i,
-                    use: [argv.mode === "development" ? "style-loader" : MiniCssExtractPlugin.loader, "css-loader"],
+                    use: [MiniCssExtractPlugin.loader, "css-loader"],
                 },
                 {
                     test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/i,
@@ -74,7 +74,7 @@ module.exports = (env, argv) => {
                 // Don't prepend the ``<head>`` tag and data to the output.
                 inject: false,
                 // The template to create JSON.
-                templateContent: ({htmlWebpackPlugin}) => JSON.stringify({
+                templateContent: ({ htmlWebpackPlugin }) => JSON.stringify({
                     js: htmlWebpackPlugin.files.js,
                     css: htmlWebpackPlugin.files.css,
                 }),

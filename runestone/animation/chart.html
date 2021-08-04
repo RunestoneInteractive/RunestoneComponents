@@ -1,12 +1,12 @@
 <html>
 <head>
 	<title>charts</title>
-<!--	<script type="text/javascript" src="https://www.google.com/jsapi"></script> -->
-<!--	<script type="text/javascript" src="chart.js"></script>	 -->
+<!--	<script src="https://www.google.com/jsapi"></script> -->
+<!--	<script src="chart.js"></script>	 -->
 
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script> 
-<script type="text/javascript" src="jqchart/jquery.gchart.js"></script>
-<script type="text/javascript" src="jqchart/jquery.gchart.graphviz.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script> 
+<script src="jqchart/jquery.gchart.js"></script>
+<script src="jqchart/jquery.gchart.graphviz.js"></script>
 <style>
 #visualization { width: 800px; height: 400px; }
 </style>
@@ -14,11 +14,12 @@
 </head>
 <body>
 <div id="visualization"></div>
-<script type="text/javascript">
+<script>
 //	$("#visualization").gchart({type: 'graphviz', series: [$.gchart.series([20, 50, 30])]});
 // label: '<f0> left | <f1> middle | <f2> right'
 
-$('#visualization').gchart($.gchart.graphviz(true, 
+window.addEventListener('load', (event) => {
+$('#visualization').gchart($.gchart.graphviz(true,
  {
  struct1: {label: '<f0> left |<f1> middle |<f2> right'},
  struct2: {label: '<f0> one|<f1> two'},
@@ -32,6 +33,7 @@ $('#visualization').gchart($.gchart.graphviz(true,
                 node: {shape: 'record'}
         }
 ));
+});
 
 
 // $('#visualization').gchart($.gchart.graphviz(true, 

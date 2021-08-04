@@ -23,6 +23,12 @@ import "codemirror/mode/clike/clike.js";
 import "codemirror/mode/octave/octave.js";
 import "./../css/activecode.css";
 import "codemirror/lib/codemirror.css";
+import "./skulpt.min.js";
+import "./skulpt-stdlib.js";
+// Used by Skulpt.
+import embed from "vega-embed";
+// Adapt for use outside webpack -- see https://github.com/vega/vega-embed.
+window.vegaEmbed = embed;
 
 var isMouseDown = false;
 document.onmousedown = function () {
@@ -126,7 +132,7 @@ export class ActiveCode extends RunestoneBase {
         );
         if (this.autorun) {
             // Simulate pressing the run button, since this will also prevent the user from clicking it until the initial run is complete, and also help the user understand why they're waiting.
-            $(document).ready(this.runButtonHandler.bind(this));
+            $(this.runButtonHandler.bind(this));
         }
         this.indicate_component_ready();
     }

@@ -3,11 +3,11 @@ Contributing to the Runestone Components
 
 We welcome contributions large and small to the Runestone Components.  We welcome contributions from newcomers as well as seasoned Runestone hackers.  You don't need to be an expert to make a contribution here.  When I started this project I had barely written a line of Javascript, Runestone is a project that is all about helping people learn, if you learn by helping us improve Runestone that is even better!
 
-Understand the RoadMap
-----------------------
+Understand the Road map
+-----------------------
 
-You should look at the `development road map <https://github.com/bnmnetp/runestone/wiki/DevelopmentRoadmap>`_
-and especially RSE-0001 which gives you a clear idea of the current philosophy behind the components.  Any
+You should look at the `development road map <https://github.com/bnmnetp/runestone/wiki/DevelopmentRoadmap2019>`_
+and especially `RSE-0001 <https://github.com/RunestoneInteractive/RunestoneServer/wiki/RSE-0001>`_ which gives you a clear idea of the current philosophy behind the components.  Any
 Sphinx directives should create very simple html and let Javascript take care of the rest.
 
 Coding Standards
@@ -15,13 +15,14 @@ Coding Standards
 
 *   All components must be Python 3 compatible.   The ``six`` module is already
     in the requirements.txt file, so feel free to use that.
-*   No Tabs for Python files (4 spaces = 1 indention)
-*   Avoid profliferation of jQuery versions.  Make your stuff compatible with the version
+*   No Tabs for Python files (4 spaces = 1 indentation)
+*   Avoid proliferation of jQuery versions.  Make your stuff compatible with the version
     of jQuery in the common folder.
 *   Avoid proliferation of additional third party javascript modules.  We are already out of
     control in this regard and it would be nice to rein it in.
+*   To add JavaScript for a new component, follow the directions in `webpack.index.js` for dynamically-loaded components.
 *   When creating a new directive, assign a unique class name to the outermost HTML division. That will allow you to easily confine your CSS declarations to apply only within your directive. Since there are many directives, chances for CSS namespace conflicts are high without that.
-*   When making a new directive Also put the outer div in the runestone class, this makes it easy for us to select all runestone components on a page.
+*   When making a new directive, also put the outer div in the runestone class. This makes it easy for us to select all runestone components on a page.
 *   When making any changes, make sure the docstring for the class that implements the Sphinx directive is up to date.  These docstrings are used in several places for templates and quick help.
 *   Make sure your new directive class inherits and uses RunestoneBase
 *   Avoid writing a directive that returns a raw node.  Creating appropriate nodes that inherit from Runestone gives us much more flexibility to auto number and cross reference and store source in the database.
@@ -46,17 +47,17 @@ multiple instances of your component on a single web page.
 Internationalization
 --------------------
 
-It is recomended to implement internationalization as described in `I18N` even if you plan to support only English currently. Besides making easy to support other languages in the future, internationalization helps you to better separate natural language text fragments from the rest of your code.
+It is recommended to implement internationalization as described in `I18N` even if you plan to support only English currently. Besides making easy to support other languages in the future, internationalization helps you to better separate natural language text fragments from the rest of your code.
 
 
 Major Feature Contributions
 ===========================
 
-There are many ways that we can continue to improve and make the Runestone platform great, and I am exctied to see the platform evolve.  What I would ask is that if you have a large new feature that you would like to propose / contribute please start by creating an issue.  This will allow us to discuss it together up front, consider the design implications, and make it more likely that the PR will be accepted with a minimum of fuss.
+There are many ways that we can continue to improve and make the Runestone platform great, and I am exited to see the platform evolve.  What I would ask is that if you have a large new feature that you would like to propose / contribute please start by creating an issue.  This will allow us to discuss it together up front, consider the design implications, and make it more likely that the PR will be accepted with a minimum of fuss.
 
-Runestone has grown organically over the years but that has led to duplicated tables in the database duplicated code and lots of inconsistency.  We need to start working to change all of that if we are going to continue to grow runestone efficiently.
+Runestone has grown organically over the years but that has led to duplicated tables in the database duplicated code and lots of inconsistency.  We need to start working to change all of that if we are going to continue to grow Runestone efficiently.
 
 
 JavaScript
 ----------
-All the JavaScript files in the Runestone Components are analzyed by webpack. If you add or remove JavaScript files, update the `webpack.index.js`.
+All the JavaScript files in the Runestone Components are analyzed by webpack. If you add or remove JavaScript files, update the `webpack.index.js`.

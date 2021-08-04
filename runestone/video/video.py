@@ -48,33 +48,37 @@ POPUP = """\
     <div class='video-play-overlay'></div>
 </a>
 <script>
+  window.addEventListener('load', (event) => {
     jQuery(function ($) {
        $('#%(divid)s_thumb').click(function (e) {
                 $('#%(divid)s').modal();
                 return false;
         });
     });
+  });
 </script>
 
 """
 
 INLINE = """\
 <script>
-   jQuery(function($) {
-      var rb = new RunestoneBase();
-      $('#%(divid)s_thumb').click(function(e) {
-         $('#%(divid)s').show();
-         $('#%(divid)s_thumb').hide();
-         rb.logBookEvent({'event':'video','act':'play','div_id': '%(divid)s'});
-         // Log the run event
-      });
-      $('#%(divid)s video').one("click", function(){
-        this.play();
-      });
-      $('#%(divid)s video').one("play", function(){
-        rb.logBookEvent({'event':'video','act':'play','div_id': '%(divid)s'});
-      });
-   });
+  window.addEventListener('load', (event) => {
+    jQuery(function($) {
+        var rb = new RunestoneBase();
+        $('#%(divid)s_thumb').click(function(e) {
+            $('#%(divid)s').show();
+            $('#%(divid)s_thumb').hide();
+            rb.logBookEvent({'event':'video','act':'play','div_id': '%(divid)s'});
+            // Log the run event
+        });
+        $('#%(divid)s video').one("click", function(){
+            this.play();
+        });
+        $('#%(divid)s video').one("play", function(){
+            rb.logBookEvent({'event':'video','act':'play','div_id': '%(divid)s'});
+        });
+    });
+  });
 </script>
 """
 SOURCE = """<source src="%s" type="video/%s"></source>"""
