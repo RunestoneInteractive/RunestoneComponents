@@ -268,13 +268,14 @@ export default class SelectOne extends RunestoneBase {
     // retrieve html source of a question, for use in various toggle functionalities
     async getToggleSrc(toggleQuestionID) {
         let request = new Request(
-            "/runestone/admin/htmlsrc?acid=" + toggleQuestionID,
+            "/assessment/htmlsrc?acid=" + toggleQuestionID,
             {
                 method: "GET",
             }
         );
         let response = await fetch(request);
-        let htmlsrc = await response.json();
+        let data = await response.json();
+        let htmlsrc = data.detail;
         return htmlsrc;
     }
 
@@ -429,7 +430,7 @@ if (typeof window.component_factory === "undefined") {
 }
 
 window.component_factory.selectquestion = function (opts) {
-        return new SelectOne(opts);
+    return new SelectOne(opts);
 };
 
 /*
