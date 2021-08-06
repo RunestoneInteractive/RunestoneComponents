@@ -59,6 +59,7 @@ const module_map = {
     //
     // The keys must match the value of each component's ``data-component`` attribute -- the ``runestone_import`` and ``runestone_auto_import`` functions assume this.
     activecode: () => import("./runestone/activecode/js/acfactory.js"),
+    ble: () => import("./runestone/cellbotics/js/ble.js"),
     // Always import the timed version of a component if available, since the timed components also define the component's factory and include the component as well. Note that ``acfactory`` imports the timed components of ActiveCode, so it follows this pattern.
     clickablearea: () => import("./runestone/clickableArea/js/timedclickable.js"),
     codelens: () => import("./runestone/codelens/js/codelens.js"),
@@ -75,6 +76,7 @@ const module_map = {
     selectquestion: () => import("./runestone/selectquestion/js/selectone.js"),
     shortanswer: () => import("./runestone/shortanswer/js/timed_shortanswer.js"),
     showeval: () => import("./runestone/showeval/js/showEval.js"),
+    simple_sensor: () => import("./runestone/cellbotics/js/simple_sensor.js"),
     spreadsheet: () => import("./runestone/spreadsheet/js/spreadsheet.js"),
     tabbedStuff: () => import("./runestone/tabbedStuff/js/tabbedstuff.js"),
     timedAssessment: () => import("./runestone/timed/js/timed.js"),
