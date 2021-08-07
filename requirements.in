@@ -1,7 +1,7 @@
 # *********
 # |docname|
 # *********
-click
+click<8.0
 Paver>=1.2.4
 six>1.12
 Sphinx<4.0.0
