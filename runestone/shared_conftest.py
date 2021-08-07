@@ -47,6 +47,17 @@ def selenium_driver(selenium_driver_session):
 
     yield driver
 
+    # Print the logs -- see the setup in `selenium_logging <selenium_logging>`.
+    print(
+        "\n"
+        "JavaScript console logs\n"
+        "======================="
+    )
+    logs = driver.get_log('browser')
+    for log in logs:
+            print(f'{log["level"]}: {log["message"]}')
+    print("\n")
+
     # Clear as much as possible, to present an almost-fresh instance of a browser for the next test. (Shutting down then starting up a browser is very slow.)
     driver.execute_script("window.localStorage.clear();")
     driver.execute_script("window.sessionStorage.clear();")
