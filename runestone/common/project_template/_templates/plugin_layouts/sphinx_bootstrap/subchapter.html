@@ -1,6 +1,6 @@
-<ul role="navigation" class="nextprev-list nextprev-list-{{place}}" aria-label="Change page">
+<ul role="navigation" class="nextprev-list nextprev-list" aria-label="Change page">
 {%- if prev %}
-<li id="relations-prev-{{place}}" class="relations-prev navLink" title='Previous Section - {{ prev.title|extractText|extractTextII }}' data-toggle="tooltip">
+<li id="relations-prev" class="navLink" title='Previous Section - {{ prev.title|extractText|extractTextII }}' data-toggle="tooltip">
   <a href="{{ prev.link|e }}" aria-label="Previous - {{ prev.title|extractText|extractTextII }}">
     <i class='prevNav glyphicon glyphicon-chevron-left'  style="top:50%; transform:translateY(-50%)translateX(-50%); left: 50%; color:black;"></i>
   </a>
@@ -8,7 +8,7 @@
 {% endif %}
 
 {%- if next %}
-  <li id="relations-next-{{place}}" class="relations-next navLink" title='Next Section - {{ next.title|extractText|extractTextII }}' data-toggle="tooltip" >
+  <li id="relations-next" class="navLink" title='Next Section - {{ next.title|extractText|extractTextII }}' data-toggle="tooltip" >
     <a href="{{ next.link|e }}" aria-label="Next - {{ next.title|extractText|extractTextII }}">
       <i id="relationsNextIcon" class='nextNav glyphicon glyphicon-chevron-right' style="top:50%; transform:translateY(-50%)translateX(-50%); left: 50%; color:black; "></i>
     </a>
@@ -18,7 +18,7 @@
 
 <script>
 window.addEventListener('load', (event) => {
-  $('#relations-prev-{{place}}').tooltip({'placement': 'right', 'delay': { show: 100, hide: 50}});
-  $('#relations-next-{{place}}').tooltip({'placement': 'left', 'delay': { show: 100, hide: 50}});
+  $('#relations-prev').tooltip({'placement': 'right', 'delay': { show: 100, hide: 50}});
+  $('#relations-next').tooltip({'placement': 'left', 'delay': { show: 100, hide: 50}});
 });
 </script>

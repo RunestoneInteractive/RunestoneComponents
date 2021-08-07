@@ -774,11 +774,11 @@ div.flash {
     height:50px
 }
 
-.relations-next {
+#relations-next {
     right: 35px;
 }
 
-.relations-prev {
+#relations-prev {
     left: 35px;
 }
 
@@ -788,15 +788,7 @@ div.flash {
     height: 50px;
 }
 
-.nextprev-list-top {
-    display: none;
-}
-
 @media (max-width: 600px) {
-
-    .nextprev-list-top {
-        display: block;
-    }    
     
     .navLink {
         display: inline-block;
@@ -804,19 +796,8 @@ div.flash {
         position: absolute;
     }
 
-    ul#top-relations-console,
-    ul#bottom-relations-console {
-        list-style: none;
-        text-align: center;
-        width: 100%;
-        margin: 0 auto;
-        padding: 40px 0 20px 0;
-    }
-
-    #top-relations-next,
-    #top-relations-prev,
-    #bottom-relations-next,
-    #bottom-relations-prev {
+    #relations-next,
+    #relations-prev {
         width: 25%;
         padding: 0 20px;
         display: inline;
