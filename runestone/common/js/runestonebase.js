@@ -191,7 +191,9 @@ export default class RunestoneBase {
             if (this.sid) {
                 data.sid = this.sid;
             }
-            if (!eBookConfig.practice_mode && this.assessmentTaken) {
+            // If we are NOT in practice mode and we are not in a peer exercise
+            // and assessmentTaken is true
+            if (!eBookConfig.practice_mode && !eBookConfig.peer && this.assessmentTaken) {
                 let request = new Request(
                     eBookConfig.ajaxURL + "getAssessResults",
                     {
