@@ -19,8 +19,8 @@
 #
 # Standard library
 # ----------------
-# None.
-#
+import logging
+
 # Third-party imports
 # -------------------
 import pytest
@@ -48,15 +48,21 @@ def selenium_driver(selenium_driver_session):
     yield driver
 
     # Print the logs -- see the setup in `selenium_logging <selenium_logging>`.
-    print(
-        "\n"
-        "JavaScript console logs\n"
-        "======================="
-    )
-    logs = driver.get_log('browser')
-    for log in logs:
-            print(f'{log["level"]}: {log["message"]}')
-    print("\n")
+    #
+    # Transform Chrome log levels to `Python log levels <https://docs.python.org/3/library/logging.html#logging-levels>`_.
+    chrome_to_py_loglevels = {
+        "NOTSET": 0,
+        "DEBUG": 10,
+        "INFO": 20,
+        "WARNING": 30,
+        "ERROR": 40,
+        "SEVERE": 40,
+        "CRITICAL": 50,
+    }
+    py_logger = logging.getLogger("Chrome.JavaScript.console")
+    chrome_logs = driver.get_log("browser")
+    for log in chrome_logs:
+        py_logger.log(chrome_to_py_loglevels[log["level"]], log["message"])
 
     # Clear as much as possible, to present an almost-fresh instance of a browser for the next test. (Shutting down then starting up a browser is very slow.)
     driver.execute_script("window.localStorage.clear();")
@@ -81,9 +87,7 @@ class _SeleniumUtils:
 
     # A helper function to attach to the Selenium driver: get from a URL relative to the Runestone application.
     def get(self, relative_url):
-        return self.driver.get(
-            "{}/{}".format(self.host_address, relative_url)
-        )
+        return self.driver.get("{}/{}".format(self.host_address, relative_url))
 
     # Scroll to the top of the window. A button can sometimes be scrolled to the top of the screen, where it's hidden by the navigation bar. In this case, we can't click it, since Selenium will complain ``Message: element click intercepted: Element <button class="btn btn-success run-button" type="button">...</button> is not clickable at point (460, 17). Other element would receive the click: <div class="navbar-collapse collapse navbar-ex1-collapse">...</div>``. To avoid this, scroll to the top of the document, guaranteeing that the navbar won't be hiding the run button.
     def scroll_to_top(self):
@@ -92,9 +96,7 @@ class _SeleniumUtils:
     # Wait until a Runestone component has finished rendering itself, given the ID of the component.
     def wait_until_ready(self, id):
         # The component is ready when it has the class below.
-        self.wait.until(
-            element_has_css_class((By.ID, id), "runestone-component-ready")
-        )
+        self.wait.until(element_has_css_class((By.ID, id), "runestone-component-ready"))
 
 
 # An expectation for Selenium, used for checking that an element has a particular css class. From the `Selenium docs <https://selenium-python.readthedocs.io/waits.html#explicit-waits>`_, under the "Custom wait conditions" subheading.
