@@ -208,7 +208,7 @@ a {
         margin: 0 3px;
         border-left: 1px solid #f2f2f2;
     }
-    
+
     .navbar-fixed-top .container {
         padding: 0;
     }
@@ -766,11 +766,11 @@ div.flash {
 
 .navLink a {
     display: inline-block;
-    background-color: white; 
-    border-style:solid; 
-    border-color:lightgrey; 
-    border-width:2px; 
-    width:100px; 
+    background-color: white;
+    border-style:solid;
+    border-color:lightgrey;
+    border-width:2px;
+    width:100px;
     height:50px
 }
 
@@ -789,7 +789,7 @@ div.flash {
 }
 
 @media (max-width: 600px) {
-    
+
     .navLink {
         display: inline-block;
         bottom: auto;
@@ -869,9 +869,13 @@ div.flash {
     background-color: #ffffff;
 }
 
-.container .section>div.sidebar {
+.container {
     margin: 0 0 0.5em 1em;
     width: auto;
+}
+
+.section>div.sidebar {
+    margin: 0 0 0.5em 1em;
 }
 
 a.disqus_thread_link {
