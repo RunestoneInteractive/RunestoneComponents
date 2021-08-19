@@ -140,20 +140,24 @@ export default class ShortAnswer extends RunestoneBase {
         }
     }
 
-    checkCurrentAnswer() {}
+    checkCurrentAnswer() { }
 
-    logCurrentAnswer() {
+    async logCurrentAnswer(sid) {
         let value = $(document.getElementById(this.divid + "_solution")).val();
         this.renderMath(value);
         this.setLocalStorage({
             answer: value,
             timestamp: new Date(),
         });
-        this.logBookEvent({
+        let data = {
             event: "shortanswer",
             act: value,
             div_id: this.divid,
-        });
+        };
+        if (typeof sid !== "undefined") {
+            data.sid = sid;
+        }
+        await this.logBookEvent(data);
     }
 
     renderFeedback() {

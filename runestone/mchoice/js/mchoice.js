@@ -406,11 +406,11 @@ export default class MultipleChoice extends RunestoneBase {
         }
     }
 
-    logCurrentAnswer() {
+    async logCurrentAnswer(sid) {
         if (this.multipleanswers) {
-            this.logMCMAsubmission();
+            await this.logMCMAsubmission(sid);
         } else {
-            this.logMCMFsubmission();
+            await this.logMCMFsubmission(sid);
         }
     }
 
@@ -457,18 +457,22 @@ export default class MultipleChoice extends RunestoneBase {
         }
     }
 
-    logMCMAsubmission() {
+    async logMCMAsubmission(sid) {
         var answer = this.answer;
         var correct = this.correct;
         var logAnswer =
             "answer:" + answer + ":" + (correct == "T" ? "correct" : "no");
-        this.logBookEvent({
+        let data = {
             event: "mChoice",
             act: logAnswer,
             answer: answer,
             correct: correct,
             div_id: this.divid,
-        });
+        };
+        if (typeof sid !== "undefined") {
+            data.sid = sid;
+        }
+        await this.logBookEvent(data);
     }
 
     renderMCMAFeedBack() {
@@ -519,19 +523,23 @@ export default class MultipleChoice extends RunestoneBase {
         }
     }
 
-    logMCMFsubmission() {
+    async logMCMFsubmission(sid) {
         var answer = this.givenArray[0];
         var correct =
             this.givenArray[0] == this.correctIndexList[0] ? "T" : "F";
         var logAnswer =
             "answer:" + answer + ":" + (correct == "T" ? "correct" : "no"); // backward compatible
-        this.logBookEvent({
+        let data = {
             event: "mChoice",
             act: logAnswer,
             answer: answer,
             correct: correct,
             div_id: this.divid,
-        });
+        };
+        if (typeof sid !== "undefined") {
+            data.sid = sid;
+        }
+        await this.logBookEvent(data);
     }
 
     renderMCMFFeedback() {

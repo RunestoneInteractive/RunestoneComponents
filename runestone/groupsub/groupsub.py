@@ -49,10 +49,15 @@ from runestone.common.runestonedirective import (
 TEMPLATE = """
 <div class="runestone alert alert-warning sqcontainer">
     <div data-component="groupsub" id={component_id} {size_limit}>
-        <div class="col-sm-3">
+        <div class="col-sm-6">
             <select id="assignment_group" multiple class="assignment_partner_select" style="width: 100%">
             </select>
         </div>
+        <div id="groupsub_button" class="col-sm-6">
+        </div>
+        <p>The Submit Group button will submit the answer for each each question
+        on this page for each member of your group. It also logs you as the official
+        group submitter.</p>
     </div>
 </div>
 """
@@ -92,9 +97,9 @@ class GroupSubmission(RunestoneDirective):
         self.options["component_id"] = self.arguments[0].strip()
 
         if "limit" in self.options:
-            self.options["size_limit"] = f"size_limit={self.options['limit']}"
+            self.options["size_limit"] = f"data-size_limit={self.options['limit']}"
         else:
-            self.options["size_limit"] = f"size_limit=4"
+            self.options["size_limit"] = f"data-size_limit=4"
 
         res = TEMPLATE.format(**self.options)
 

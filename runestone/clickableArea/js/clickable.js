@@ -276,7 +276,7 @@ export default class ClickableArea extends RunestoneBase {
                 if (
                     this.ccIndex < this.ccArray.length &&
                     this.ccCounter ===
-                        Math.floor(this.ccArray[this.ccIndex].split(",")[0]) &&
+                    Math.floor(this.ccArray[this.ccIndex].split(",")[0]) &&
                     Math.floor(this.ccArray[this.ccIndex].split(",")[1]) === 0
                 ) {
                     this.manageNewClickable(tComponentArr[t].children[i]);
@@ -285,7 +285,7 @@ export default class ClickableArea extends RunestoneBase {
                 } else if (
                     this.ciIndex < this.ciArray.length &&
                     this.ccCounter ===
-                        Math.floor(this.ciArray[this.ciIndex].split(",")[0]) &&
+                    Math.floor(this.ciArray[this.ciIndex].split(",")[0]) &&
                     Math.floor(this.ciArray[this.ciIndex].split(",")[1]) === 0
                 ) {
                     this.manageNewClickable(tComponentArr[t].children[i]);
@@ -302,13 +302,13 @@ export default class ClickableArea extends RunestoneBase {
                         if (
                             this.ccIndex < this.ccArray.length &&
                             tmp ===
-                                Math.floor(
-                                    this.ccArray[this.ccIndex].split(",")[1]
-                                ) &&
+                            Math.floor(
+                                this.ccArray[this.ccIndex].split(",")[1]
+                            ) &&
                             this.ccCounter ===
-                                Math.floor(
-                                    this.ccArray[this.ccIndex].split(",")[0]
-                                )
+                            Math.floor(
+                                this.ccArray[this.ccIndex].split(",")[0]
+                            )
                         ) {
                             this.manageNewClickable(
                                 tComponentArr[t].children[i].children[j]
@@ -320,13 +320,13 @@ export default class ClickableArea extends RunestoneBase {
                         } else if (
                             this.ciIndex < this.ciArray.length &&
                             tmp ===
-                                Math.floor(
-                                    this.ciArray[this.ciIndex].split(",")[1]
-                                ) &&
+                            Math.floor(
+                                this.ciArray[this.ciIndex].split(",")[1]
+                            ) &&
                             this.ccCounter ===
-                                Math.floor(
-                                    this.ciArray[this.ciIndex].split(",")[0]
-                                )
+                            Math.floor(
+                                this.ciArray[this.ciIndex].split(",")[0]
+                            )
                         ) {
                             this.manageNewClickable(
                                 tComponentArr[t].children[i].children[j]
@@ -399,13 +399,17 @@ export default class ClickableArea extends RunestoneBase {
         this.setLocalStorage({ correct: this.correct ? "T" : "F" });
     }
 
-    logCurrentAnswer() {
-        this.logBookEvent({
+    async logCurrentAnswer(sid) {
+        let data = {
             event: "clickableArea",
             act: this.givenIndexArray.join(";"),
             div_id: this.divid,
             correct: this.correct ? "T" : "F",
-        });
+        };
+        if (typeof sid !== "undefined") {
+            data.sid = sid;
+        }
+        await this.logBookEvent(data);
     }
 
     renderFeedback() {
@@ -424,15 +428,15 @@ export default class ClickableArea extends RunestoneBase {
             }
             $(this.feedBackDiv).html(
                 "Incorrect. You clicked on " +
-                    this.correctNum +
-                    " of the " +
-                    this.correctArray.length.toString() +
-                    " correct elements and " +
-                    this.incorrectNum +
-                    " of the " +
-                    this.incorrectArray.length.toString() +
-                    " incorrect elements. " +
-                    this.feedback
+                this.correctNum +
+                " of the " +
+                this.correctArray.length.toString() +
+                " correct elements and " +
+                this.incorrectNum +
+                " of the " +
+                this.incorrectArray.length.toString() +
+                " incorrect elements. " +
+                this.feedback
             );
             $(this.feedBackDiv).attr("class", "alert alert-danger");
         }
