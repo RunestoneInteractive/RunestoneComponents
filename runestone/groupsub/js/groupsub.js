@@ -49,6 +49,7 @@ class GroupSub extends RunestoneBase {
                 s2: "User 2",
                 s3: "User 3",
                 s4: "User 4",
+                s5: "User 5",
             }
         }
         let select = document.getElementById("assignment_group");
@@ -61,7 +62,8 @@ class GroupSub extends RunestoneBase {
         // Make the select element searchable with multiple selections
         $('.assignment_partner_select').select2({
             placeholder: "Select up to 4 team members",
-            allowClear: true
+            allowClear: true,
+            maximumSelectionLength: this.limit
         });
 
     }
@@ -73,7 +75,11 @@ class GroupSub extends RunestoneBase {
         for (let student of picker.selectedOptions) {
             group.push(student.value);
         }
-
+        // If the leader forgets to add themselves, add them here.
+        let username = eBookConfig.username;
+        if (username && !(username in group)) {
+            group.push(username)
+        }
         if (group.len > this.limit) {
             alert(`You may not have more than ${this.limit} students in a group`);
             return
@@ -86,7 +92,7 @@ class GroupSub extends RunestoneBase {
         for (let student of group) {
             for (let question of window.allComponents) {
                 console.log(`${student} ${question}`)
-                await question.logCurrentAnswer(student.value)
+                await question.logCurrentAnswer(student)
             }
         }
 
