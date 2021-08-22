@@ -869,12 +869,7 @@ div.flash {
     background-color: #ffffff;
 }
 
-.container {
-    margin: 0 0 0.5em 1em;
-    width: auto;
-}
-
-.section>div.sidebar {
+.container .section>div.sidebar {
     margin: 0 0 0.5em 1em;
 }
 
