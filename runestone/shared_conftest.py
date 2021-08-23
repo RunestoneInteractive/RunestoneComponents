@@ -45,24 +45,27 @@ def selenium_driver(selenium_driver_session):
     # Copied from the Runestone Components test framework.
     driver.implicitly_wait(10)
 
-    yield driver
-
-    # Print the logs -- see the setup in `selenium_logging <selenium_logging>`.
-    #
-    # Transform Chrome log levels to `Python log levels <https://docs.python.org/3/library/logging.html#logging-levels>`_.
-    chrome_to_py_loglevels = {
-        "NOTSET": 0,
-        "DEBUG": 10,
-        "INFO": 20,
-        "WARNING": 30,
-        "ERROR": 40,
-        "SEVERE": 40,
-        "CRITICAL": 50,
-    }
-    py_logger = logging.getLogger("Chrome.JavaScript.console")
-    chrome_logs = driver.get_log("browser")
-    for log in chrome_logs:
-        py_logger.log(chrome_to_py_loglevels[log["level"]], log["message"])
+    try:
+        yield driver
+    finally:
+        # Print the logs -- see the setup in `selenium_logging <selenium_logging>`. Capture them if setup fails, since the logs may help understand the failure. However, pytest ignore any generated logs; see `my bug report <https://github.com/pytest-dev/pytest/issues/9021>`_. As a workaround, uncomment the print statement below to dump unfiltered logs during a test run.
+        #
+        # Transform Chrome log levels to `Python log levels <https://docs.python.org/3/library/logging.html#logging-levels>`_.
+        chrome_to_py_loglevels = {
+            "NOTSET": 0,
+            "DEBUG": 10,
+            "INFO": 20,
+            "WARNING": 30,
+            "ERROR": 40,
+            "SEVERE": 40,
+            "CRITICAL": 50,
+        }
+        py_logger = logging.getLogger("Chrome.JavaScript.console")
+        chrome_logs = driver.get_log("browser")
+        for log in chrome_logs:
+            py_logger.log(chrome_to_py_loglevels[log["level"]], log["message"])
+            # Uncomment this to print raw log-like data as a workaround, as described above.
+            ##print(f"{log['level']} - {log['message']}")
 
     # Clear as much as possible, to present an almost-fresh instance of a browser for the next test. (Shutting down then starting up a browser is very slow.)
     driver.execute_script("window.localStorage.clear();")
