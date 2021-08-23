@@ -43,6 +43,23 @@ class GroupSub extends RunestoneBase {
         // get the classlist to populate
         if (eBookConfig.useRunestoneServices) {
             // get classlist from admin/course_students
+            let request = new Request("/runestone/admin/course_students", {
+                method: "GET",
+                headers: this.jsonHeaders,
+            });
+            try {
+                let response = await fetch(request);
+                if (!response.ok) {
+                    throw new Error("Failed to save the log entry");
+                }
+                this.studentList = await response.json();
+            } catch (e) {
+                if (this.isTimed) {
+                    alert(`Error: Your action was not saved! The error was ${e}`);
+                }
+                console.log(`Error: ${e}`);
+            }
+
         } else {
             this.studentList = {
                 s1: "User 1",
@@ -77,7 +94,7 @@ class GroupSub extends RunestoneBase {
         }
         // If the leader forgets to add themselves, add them here.
         let username = eBookConfig.username;
-        if (username && !(username in group)) {
+        if (username && !group.includes(username)) {
             group.push(username)
         }
         if (group.len > this.limit) {

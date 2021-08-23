@@ -203,7 +203,7 @@ export default class FITB extends RunestoneBase {
         }
     }
 
-    async logCurrentAnswer() {
+    async logCurrentAnswer(sid) {
         let answer = JSON.stringify(this.given_arr);
         // Save the answer locally.
         let feedback = true;
