@@ -233,8 +233,8 @@ export default class SQLActiveCode extends ActiveCode {
         return Promise.resolve("done");
     }
 
-    logCurrentAnswer() {
-        this.logRunEvent({
+    async logCurrentAnswer(sid) {
+        let data = {
             div_id: this.divid,
             code: this.editor.getValue(),
             lang: this.language,
@@ -243,15 +243,23 @@ export default class SQLActiveCode extends ActiveCode {
             prefix: this.pretext,
             suffix: this.suffix,
             partner: this.partner,
-        }); // Log the run event
+        }; // Log the run event
+        if (typeof sid !== "undefined") {
+            data.sid = sid;
+        }
+        await this.logRunEvent(data);
 
         if (this.unit_results) {
-            this.logBookEvent({
+            let unitData = {
                 event: "unittest",
                 div_id: this.divid,
                 course: eBookConfig.course,
                 act: this.unit_results,
-            });
+            };
+            if (typeof sid !== "undefined") {
+                unitData.sid = sid;
+            }
+            await this.logBookEvent(unitData);
         }
     }
 
@@ -291,9 +299,8 @@ export default class SQLActiveCode extends ActiveCode {
         }
         let pct = (100 * this.passed) / (this.passed + this.failed);
         pct = pct.toLocaleString(undefined, { maximumFractionDigits: 2 });
-        result += `You passed ${this.passed} out of ${
-            this.passed + this.failed
-        } tests for ${pct}%`;
+        result += `You passed ${this.passed} out of ${this.passed + this.failed
+            } tests for ${pct}%`;
         this.unit_results = `percent:${pct}:passed:${this.passed}:failed:${this.failed}`;
         return result;
     }

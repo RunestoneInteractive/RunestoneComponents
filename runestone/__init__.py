@@ -5,21 +5,22 @@ import json
 
 from .activecode import ActiveCode
 from .animation import Animation
-from .mchoice import MChoice, QuestionNumber
 from .blockly import Blockly
-from .quizly import Quizly
-from .khanex import Khanex
 from .codelens import Codelens
 from .clickableArea import ClickableArea
 from .datafile import DataFile
 from .disqus import DisqusDirective
 from .dragndrop import DragNDrop
 from .fitb import FillInTheBlank
+from .groupsub import GroupSubmission
+from .khanex import Khanex
 from .selectquestion import SelectQuestion
 from .matrixeq import MatrixEq
+from .mchoice import MChoice, QuestionNumber
 from .meta import Meta
 from .parsons import ParsonsProblem
 from .poll import Poll
+from .quizly import Quizly
 from .reveal import RevealDirective
 from .shortanswer import JournalDirective
 from .showeval import ShowEval
@@ -146,8 +147,8 @@ def setup(app):
     try:
         for c in setup.custom_js_files:
             if isinstance(c, dict):
-                #peel off filename, pass rest of key/values on as kwargs
-                filename = c.pop("file") 
+                # peel off filename, pass rest of key/values on as kwargs
+                filename = c.pop("file")
                 app.add_autoversioned_javascript(filename, **c)
             else:
                 app.add_autoversioned_javascript(c)
@@ -244,6 +245,7 @@ cmap = {
     "datafile": DataFile,
     "disqus": DisqusDirective,
     "dragndrop": DragNDrop,
+    "groupsub": GroupSubmission,
     "parsonsprob": ParsonsProblem,
     "poll": Poll,
     "quizly": Quizly,

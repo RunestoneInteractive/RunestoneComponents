@@ -476,8 +476,8 @@ export class ActiveCode extends RunestoneBase {
                     if (!didAgree) {
                         didAgree = confirm(
                             "Pair Programming should only be used with the consent of your instructor." +
-                                "Your partner must be a registered member of the class and have agreed to pair with you." +
-                                "By clicking OK you certify that both of these conditions have been met."
+                            "Your partner must be a registered member of the class and have agreed to pair with you." +
+                            "By clicking OK you certify that both of these conditions have been met."
                         );
                         if (didAgree) {
                             localStorage.setItem("partnerAgree", "true");
@@ -520,13 +520,13 @@ export class ActiveCode extends RunestoneBase {
         $(butt).attr(
             "href",
             "http://" +
-                chatcodesServer +
-                "/new?" +
-                $.param({
-                    topic: window.location.host + "-" + this.divid,
-                    code: this.editor.getValue(),
-                    lang: "Python",
-                })
+            chatcodesServer +
+            "/new?" +
+            $.param({
+                topic: window.location.host + "-" + this.divid,
+                code: this.editor.getValue(),
+                lang: "Python",
+            })
         );
         this.chatButton = butt;
         chatBar.appendChild(butt);
@@ -913,7 +913,7 @@ export class ActiveCode extends RunestoneBase {
         });
     }
 
-    toggleEditorVisibility() {}
+    toggleEditorVisibility() { }
 
     addErrorMessage(err) {
         // Add the error message
@@ -1051,7 +1051,7 @@ Yet another is that there is an internal error.  The internal error message is: 
                     var xl = eval(x);
                     xl = xl.map(pyStr);
                     x = xl.join(" ");
-                } catch (err) {}
+                } catch (err) { }
             }
         }
         $(this.output).css("visibility", "visible");
@@ -1155,7 +1155,7 @@ Yet another is that there is an internal error.  The internal error message is: 
         if (
             this.historyScrubber &&
             this.history[$(this.historyScrubber).slider("value")] !=
-                this.editor.getValue()
+            this.editor.getValue()
         ) {
             saveCode = "True";
             this.history.push(this.editor.getValue());
@@ -1188,8 +1188,9 @@ Yet another is that there is an internal error.  The internal error message is: 
         }
     }
 
-    logCurrentAnswer() {
-        this.logRunEvent({
+    // the sid parameter is optional and is used for group submissions
+    async logCurrentAnswer(sid) {
+        let data = {
             div_id: this.divid,
             code: this.editor.getValue(),
             lang: this.language,
@@ -1198,14 +1199,22 @@ Yet another is that there is an internal error.  The internal error message is: 
             prefix: this.pretext,
             suffix: this.suffix,
             partner: this.partner,
-        }); // Log the run event
+        }; // Log the run event
+        if (typeof sid !== "undefined") {
+            data.sid = sid;
+        }
+        await this.logRunEvent(data);
         // If unit tests were run there will be a unit_results
         if (this.unit_results) {
-            this.logBookEvent({
+            let unitData = {
                 act: this.unit_results,
                 div_id: this.divid,
                 event: "unittest",
-            });
+            };
+            if (typeof sid !== "undefined") {
+                unitData.sid = sid;
+            }
+            await this.logBookEvent(unitData)
         }
     }
 
