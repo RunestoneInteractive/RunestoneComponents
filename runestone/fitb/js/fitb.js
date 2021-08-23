@@ -203,21 +203,28 @@ export default class FITB extends RunestoneBase {
         }
     }
 
-    async logCurrentAnswer() {
+    async logCurrentAnswer(sid) {
         let answer = JSON.stringify(this.given_arr);
         // Save the answer locally.
+        let feedback = true;
         this.setLocalStorage({
             answer: answer,
             timestamp: new Date(),
         });
-        let data = await this.logBookEvent({
+        let data = {
             event: "fillb",
             act: answer,
             answer: answer,
             correct: this.correct ? "T" : "F",
             div_id: this.divid,
-        });
+        };
+        if (typeof sid !== "undefined") {
+            data.sid = sid;
+            feedback = false;
+        };
+        data = await this.logBookEvent(data);
         data = data.detail;
+        if (!feedback) return;
         if (!this.feedbackArray) {
             // On success, update the feedback from the server's grade.
             this.setLocalStorage({

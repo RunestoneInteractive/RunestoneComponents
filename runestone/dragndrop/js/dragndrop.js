@@ -169,7 +169,7 @@ export default class DragNDrop extends RunestoneBase {
         this.submitButton.onclick = function () {
             this.checkCurrentAnswer();
             this.renderFeedback();
-            this.logCurrentAnswer(true);
+            this.logCurrentAnswer();
         }.bind(this);
         this.resetButton = document.createElement("button"); // Check me button
         this.resetButton.textContent = $.i18n("msg_dragndrop_reset");
@@ -209,7 +209,7 @@ export default class DragNDrop extends RunestoneBase {
                 if (this.pregnantIndexArray[this.indexArray[i]] !== "-1") {
                     this.dragPairArray[this.indexArray[i]][1].appendChild(
                         this.dragPairArray[
-                            this.pregnantIndexArray[this.indexArray[i]]
+                        this.pregnantIndexArray[this.indexArray[i]]
                         ][0]
                     );
                 }
@@ -397,9 +397,9 @@ export default class DragNDrop extends RunestoneBase {
         this.setLocalStorage({ correct: this.correct ? "T" : "F" });
     }
 
-    logCurrentAnswer() {
+    async logCurrentAnswer(sid) {
         let answer = this.pregnantIndexArray.join(";");
-        this.logBookEvent({
+        let data = {
             event: "dragNdrop",
             act: answer,
             answer: answer,
@@ -408,7 +408,11 @@ export default class DragNDrop extends RunestoneBase {
             correct: this.correct,
             correctNum: this.correctNum,
             dragNum: this.dragNum,
-        });
+        };
+        if (typeof sid !== "undefined") {
+            data.sid = sid;
+        }
+        await this.logBookEvent(data);
     }
     renderFeedback() {
         for (var i = 0; i < this.dragPairArray.length; i++) {

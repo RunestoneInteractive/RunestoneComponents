@@ -1194,8 +1194,9 @@ Yet another is that there is an internal error.  The internal error message is: 
         }
     }
 
-    logCurrentAnswer() {
-        this.logRunEvent({
+    // the sid parameter is optional and is used for group submissions
+    async logCurrentAnswer(sid) {
+        let data = {
             div_id: this.divid,
             code: this.editor.getValue(),
             language: this.language,
@@ -1204,14 +1205,22 @@ Yet another is that there is an internal error.  The internal error message is: 
             prefix: this.pretext,
             suffix: this.suffix,
             partner: this.partner,
-        }); // Log the run event
+        }; // Log the run event
+        if (typeof sid !== "undefined") {
+            data.sid = sid;
+        }
+        await this.logRunEvent(data);
         // If unit tests were run there will be a unit_results
         if (this.unit_results) {
-            this.logBookEvent({
+            let unitData = {
                 act: this.unit_results,
                 div_id: this.divid,
                 event: "unittest",
-            });
+            };
+            if (typeof sid !== "undefined") {
+                unitData.sid = sid;
+            }
+            await this.logBookEvent(unitData)
         }
     }
 

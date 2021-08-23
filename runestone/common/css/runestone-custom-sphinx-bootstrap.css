@@ -208,7 +208,7 @@ a {
         margin: 0 3px;
         border-left: 1px solid #f2f2f2;
     }
-    
+
     .navbar-fixed-top .container {
         padding: 0;
     }
@@ -456,6 +456,92 @@ h2 {
     font-weight: normal;
 }
 
+/*
+Missing brackets
+================
+The default styling from Sphinx's ``basic.css`` doesn't style multiple references to the same reference with brackets. Here's the relevant snippet of CSS:
+
+.. code-block:: CSS
+    :number-lines:
+
+    a.brackets:before,
+    span.brackets > a:before{
+        content: "[";
+    }
+
+    a.brackets:after,
+    span.brackets > a:after {
+        content: "]";
+    }
+
+The HTML for a footnote reference is:
+
+.. code-block:: HTML
+    :number-lines:
+
+    <a class="footnote-reference brackets" href="#assembled" id="id1">2</a>
+
+The HTML for a typical footnote is:
+
+.. code-block:: HTML
+    :number-lines:
+
+    <dl class="footnote brackets">
+        <dt class="label" id="xxx">
+            <span class="brackets">
+                <a class="fn-backref" href="#id2">1</a>
+            </span>
+        </dt>
+        <dd>Omitted this...</dd>
+    </dl>
+
+The HTML for a footnote referenced multiple times is:
+
+.. code-block:: HTML
+    :number-lines:
+
+    <dl class="footnote brackets">
+        <dt class="label" id="xxx">
+            <span class="brackets">1</span>
+            <span class="fn-backref">
+                (<a href="#id1">1</a>,<a href="#id2">2</a>,<a href="#id3">3</a>)
+            </span>
+        </dt>
+        <dd>Omitted this...</dd>
+    </dl>
+
+However, there's no (current) CSS selector that will add a ``content`` to the multiply-referenced footnote without adding an additional ``content`` to the typical footnote: we want to select ``dt.label > span.brackets > text-only content`` or ``dt.label > span.brackets > :not(:has a)`` (see the unsupported `:has selector <https://css-tricks.com/did-you-know-about-the-has-css-selector/>`_. So, I see no solution for this (outside JS).
+
+
+Incorrect color
+===============
+Second, the Bootstrap theme (v3.4.1) contains the following CSS, from ``node_modules/bootstrap/dist/css/less/labels.less``:
+
+.. code-block:: CSS
+    :number-lines:
+
+    .label {
+        display: inline;
+        padding: .2em .6em .3em;
+        font-size: 75%;
+        font-weight: 700;
+        line-height: 1;
+        color: @label-color;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: .25em;
+
+        ...more here omitted...
+    }
+
+ALL this therefore gets applied to footnotes, since they have the ``label`` class. Because the ``@label-color`` is white, this CSS makes the reference invisible against the default (light mode) white background. I like the rest of the styling changes (even though they differ from the standard Sphinx settings), so only the color is changed.
+*/
+dt.label > span.brackets:not(span.brackets > a),
+dt.label > span.fn-backref:not(span.fn-backref > a) {
+    color: black;
+}
+
 /* These admonition styles styles are copied from the Bootstrap .alert classes.
  Most of the !important declarations are to override the Sphinx basic.css styles */
 .admonition {
@@ -680,19 +766,19 @@ div.flash {
 
 .navLink a {
     display: inline-block;
-    background-color: white; 
-    border-style:solid; 
-    border-color:lightgrey; 
-    border-width:2px; 
-    width:100px; 
+    background-color: white;
+    border-style:solid;
+    border-color:lightgrey;
+    border-width:2px;
+    width:100px;
     height:50px
 }
 
-.relations-next {
+#relations-next {
     right: 35px;
 }
 
-.relations-prev {
+#relations-prev {
     left: 35px;
 }
 
@@ -702,35 +788,16 @@ div.flash {
     height: 50px;
 }
 
-.nextprev-list-top {
-    display: none;
-}
-
 @media (max-width: 600px) {
 
-    .nextprev-list-top {
-        display: block;
-    }    
-    
     .navLink {
         display: inline-block;
         bottom: auto;
         position: absolute;
     }
 
-    ul#top-relations-console,
-    ul#bottom-relations-console {
-        list-style: none;
-        text-align: center;
-        width: 100%;
-        margin: 0 auto;
-        padding: 40px 0 20px 0;
-    }
-
-    #top-relations-next,
-    #top-relations-prev,
-    #bottom-relations-next,
-    #bottom-relations-prev {
+    #relations-next,
+    #relations-prev {
         width: 25%;
         padding: 0 20px;
         display: inline;
@@ -804,7 +871,6 @@ div.flash {
 
 .container .section>div.sidebar {
     margin: 0 0 0.5em 1em;
-    width: auto;
 }
 
 a.disqus_thread_link {

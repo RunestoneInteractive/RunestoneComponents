@@ -38,6 +38,9 @@ window.onPlayerStateChange = function (event) {
     } else if (event.data == YT.PlayerState.PAUSED) {
         console.log("paused at " + videoTime);
         data.act = "pause:" + videoTime;
+    } else {
+        console.log(`YT Player State: ${YT.PlayerState}`)
+        data.act = "ready"
     }
     rb.logBookEvent(data);
 };

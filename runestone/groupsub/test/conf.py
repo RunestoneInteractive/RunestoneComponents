@@ -1,6 +1,4 @@
-# *********
-# |docname|
-# *********
+# -*- coding: utf-8 -*-
 #
 # Problem Solving with Algorithms and Data Structures documentation build configuration file, created by
 # sphinx-quickstart on Thu Oct 27 08:17:45 2011.
@@ -30,19 +28,15 @@ import pkg_resources
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = [
-    "sphinx.ext.mathjax",
-    "myst_parser",
-    "sphinx.ext.intersphinx",
-] + runestone_extensions()
+extensions = ["sphinx.ext.mathjax"] + runestone_extensions()
 
-# ,'runestone.video','runestone.reveal','runestone.poll','runestone.tabbedStuff','runestone.disqus','runestone.codelens','runestone.activecode', 'runestone.assess', 'runestone.animation','runestone.meta', 'runestone.parsons', 'runestone.blockly', 'runestone.livecode','runestone.accessibility']
+# ,'runestone.video','runestone.reveal','runestone.poll','runestone.tabbedStuff','runestone.disqus','runestone.codelens','runestone.activecode', 'runestone.assess', 'runestone.animation','runestone.meta', 'runestone.parsons', 'runestone.blockly', 'runestone.livecode']
 
-# This sets up your project to use the defaults.  If you want to create a custom  set of templates
-# for your own project you can over ride them by creating your own _templates folder
+# Add any paths that contain templates here, relative to this directory.
 templates_path = [
     pkg_resources.resource_filename("runestone", "common/project_template/_templates")
 ]
+
 
 # The suffix of source filenames.
 source_suffix = ".rst"
@@ -55,7 +49,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "Runestone Interactive Overview"
-copyright = "2017 bjones"
+copyright = "2015 yasiro01"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -78,44 +72,10 @@ release = "0.0"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = [
-    # Misc files.
-    ".pytest_cache",
-    # Ignore Runestone/Sphinx build output.
-    "build",
-    # Ignore copied files from test directories.
-    "**/test/build",
-    "**/_static",
-    "**/test/conf.py",
-    "**/test/pavement.py",
-    "**/test_error/build",
-    "**/test_error/conf.py",
-    "**/test_error/pavement.py",
-    "**/test_working/build",
-    "**/test_working/conf.py",
-    "**/test_working/pavement.py",
-    # Ignore the NPM library and webpack build output.
-    "node_modules",
-    "runestone/dist",
-    ".history/*",
-    # Ignore external JS libraries/CSS sheets.
-    "**/js/*_compressed.js",
-    "**/js/*.bundle.js",
-    "**/js/*.min.js",
-    "**/js/jquery*.js",
-    "**/js/md5.js",
-    "**/js/sharedb.js",
-    "**/js/skulpt*.js",
-    "**/jqchart",
-    "**/js/msg",
-    "**/js/processing.js",
-    "**/js/prettify.js",
-    "**/css/*.min.css",
-    "runestone/common/project_template/_templates/plugin_layouts/sphinx_bootstrap/static/bootstrap-*",
-]
+exclude_patterns = []
 
 # The reST default role (used for this markup: `text`) to use for all documents.
-default_role = "any"
+# default_role = None
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 # add_function_parentheses = True
@@ -134,12 +94,6 @@ pygments_style = "sphinx"
 # A list of ignored prefixes for module index sorting.
 # modindex_common_prefix = []
 
-# `keep_warnings <http://www.sphinx-doc.org/en/stable/config.html#confval-keep_warnings>`_:
-# If true, keep warnings as “system message” paragraphs in the built documents.
-# Regardless of this setting, warnings are always written to the standard error
-# stream when sphinx-build is run.
-keep_warnings = True
-
 # `rst_prolog <http://www.sphinx-doc.org/en/stable/config.html#confval-rst_prolog>`_:
 # A string of reStructuredText that will be included at the beginning of every
 # source file that is read.
@@ -149,55 +103,8 @@ rst_prolog = (
 
 .. |blank| replace:: :blank:`x`
 """
-    # For literate programming files, provide a convenient way to refer to a source file's name. See `runestone.lp.lp._docname_role`.
-    """.. |docname| replace:: :docname:`name`
-"""
 )
 
-# Select whether to use server-side grading where possible. Server-side grading
-# requires **all** the following:
-#
-# - The use of Runestone services (``eBookConfig.useRunestoneServices === true``)
-# - Logging enabled (``eBookConfig.logLevel > 0``)
-#
-# The first two conditions cause the ``RunestoneBase.logBookEvent`` in ``runestonebase.js`` to post a student response to the server. The last conditions ensures that ``hsblog`` in ``ajax.py`` on the server will return a response containing grading information.
-runestone_server_side_grading = False
-
-# Extensions
-# ==========
-# CodeChat
-# --------
-# **CodeChat note:** A dict of {glob_, lexer_alias}, which uses lexer_alias
-# (e.g. a lexer's `short name <http://pygments.org/docs/lexers/>`_) to analyze
-# any file wihch matches the given `glob
-# <https://docs.python.org/2/library/glob.html>`_.
-CodeChat_lexer_for_glob = {
-    # Otherwise, Pygments picks the wrong lexer for CSS and other common files.
-    "*.css": "CSS",
-    "*.js": "JavaScript",
-    "*.html": "HTML",
-    # Perl uses ``#`` for comments, so pretend these files are Perl.
-    "*.in": "Perl",
-    ".gitignore": "Perl",
-    "*.cfg": "INI",
-    # These are actually a Python files.
-    "codechat_config.json": "Python",
-    "conf.tmpl": "Python",
-    "pavement.tmpl": "Python",
-}
-#
-# **CodeChat note::** This is a list of exclude_patterns_ which applies only to
-# source documents; exclude_patterns_ will exclude the given files from all of
-# Sphinx (for example, files here won't be included even if they're mentioned in
-# html_static_path_.
-CodeChat_excludes = []
-#
-# Inline syntax highlight
-# -----------------------
-# `inline_highlight_respect_highlight <https://sphinxcontrib-inlinesyntaxhighlight.readthedocs.io/en/latest/#confval-inline_highlight_respect_highlight>`_:
-# Use the language specified by the ``highlight`` directive to syntax highlight ``code`` role contents.
-inline_highlight_respect_highlight = True
-inline_highlight_literals = False
 
 # -- Options for HTML output ---------------------------------------------------
 
@@ -211,7 +118,7 @@ html_theme = "sphinx_bootstrap"
 # html_theme_options = {'nosidebar': 'true'}
 html_theme_options = {
     # Navigation bar title. (Default: ``project`` value)
-    "navbar_title": "Runestone Components",
+    "navbar_title": "groupsubtest",
     # Tab name for entire site. (Default: "Site")
     "navbar_site_name": "Chapters",
     # Global TOC depth for "site" navbar tab. (Default: 1)
@@ -243,9 +150,8 @@ html_theme_options = {
     #'bootswatch_theme': "slate",
 }
 
+# html_style = "style.css"
 
-# This is set up to use the default runestone themes, you can override them by
-# creating your own folder and modifying this path.
 # Add any paths that contain custom themes here, relative to this directory.
 html_theme_path = [
     pkg_resources.resource_filename(
@@ -319,53 +225,5 @@ html_show_sourcelink = False
 # This is the file name suffix for HTML files (e.g. ".xhtml").
 # html_file_suffix = None
 
-# It True, sets js files from Sphinx & Runestone to be loaded with defer attr
-# substantially speeding up page rendering. May cause issues with books that
-# have custom directives or raw html that assume jquery or another library
-# is loaded before body is parsed.
-html_defer_js = True
-
 # Output file base name for HTML help builder.
 htmlhelp_basename = "PythonCoursewareProjectdoc"
-
-# 'accessibility_style' config value is defined in the 'accessibility' extension.
-# By this config value you can select what accessibility stylesheet
-# you want to add ('normal', 'light', 'darkest' or 'none')
-# accessibility_style = 'normal'
-
-# Config values for specific Runestone components
-#
-# activecode_div_class = 'runestone explainer ac_section alert alert-warning'
-# activecode_hide_load_history = False
-# mchoice_div_class = 'runestone alert alert-warning'
-# clickable_div_class = 'runestone alert alert-warning'
-# codelens_div_class = 'alert alert-warning cd_section'
-# dragndrop_div_class = 'runestone'
-# fitb_div_class = 'runestone'
-# parsons_div_class = 'runestone'
-# poll_div_class = 'alert alert-warning'
-# shortanswer_div_class = 'journal alert alert-warning'
-# shortanswer_optional_div_class = 'journal alert alert-success'
-# showeval_div_class = 'runestone explainer alert alert-warning'
-# tabbed_div_class = 'alert alert-warning'
-
-# Intersphinx
-# ===========
-# `intersphinx_mapping <https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#confval-intersphinx_mapping>`_:
-# This config value contains the locations and names of other projects that should be linked to in this documentation.
-intersphinx_mapping = {
-    "RunestoneServer": (
-        "https://runestoneserver.readthedocs.io/en/latest/", (
-            None,
-            # An optional local file location -- useful when updating both Sphinx builds before the updates are pushed to the server.
-            ##"C:/Users/bjones/Documents/git/web2py/applications/runestone/_build/objects.inv",
-        )
-    ),
-    "Overview": (
-        "https://runestone.academy/runestone/books/published/overview/index.html", (
-            None,
-            # An optional local file location -- useful when updating both Sphinx builds before the updates are pushed to the server.
-            ##"C:/Users/bjones/Documents/git/web2py/applications/runestone/books/overview/build/overview/objects.inv",
-        )
-    )
-}
