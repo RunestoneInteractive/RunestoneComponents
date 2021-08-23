@@ -66,6 +66,7 @@ const module_map = {
     datafile: () => import("./runestone/datafile/js/datafile.js"),
     dragndrop: () => import("./runestone/dragndrop/js/timeddnd.js"),
     fillintheblank: () => import("./runestone/fitb/js/timedfitb.js"),
+    groupsub: () => import("./runestone/groupsub/js/groupsub.js"),
     khanex: () => import("./runestone/khanex/js/khanex.js"),
     lp_build: () => import("./runestone/lp/js/lp.js"),
     multiplechoice: () => import("./runestone/mchoice/js/timedmc.js"),
@@ -92,7 +93,7 @@ const module_map = {
 // ========================
 // Fulfill a promise when the Runestone pre-login complete event occurs.
 let pre_login_complete_promise = new Promise(resolve => $(document).bind("runestone:pre-login-complete", resolve));
-
+let loadedComponents;
 // Provide a simple function to import the JS for all components on the page.
 export function runestone_auto_import() {
     // Create a set of ``data-component`` values, to avoid duplication.

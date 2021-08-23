@@ -22,6 +22,10 @@ export default class RunestoneBase {
     constructor(opts) {
         this.component_ready_promise = new Promise(resolve => this._component_ready_resolve_fn = resolve)
         this.optional = false;
+        if (typeof window.allComponents === "undefined") {
+            window.allComponents = [];
+        }
+        window.allComponents.push(this);
         if (opts) {
             this.sid = opts.sid;
             this.graderactive = opts.graderactive;
@@ -345,6 +349,11 @@ export default class RunestoneBase {
             "Each component should provide an implementation of disableInteraction"
         );
     }
+
+    toString() {
+        return `${this.constructor.name}: ${this.divid}`
+    }
+
 }
 
 window.RunestoneBase = RunestoneBase;

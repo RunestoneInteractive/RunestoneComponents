@@ -50,7 +50,7 @@ import ParsonsBlock from "./parsonsBlock";
 ==== INITIALIZATION ====================================================
 ===================================================================== */
 
-var prsList = {}; // Parsons dictionary
+export var prsList = {}; // Parsons dictionary
 export default class Parsons extends RunestoneBase {
     constructor(opts) {
         super(opts);
@@ -455,9 +455,9 @@ export default class Parsons extends RunestoneBase {
                 areaHeight += Math.ceil(
                     // For future more accurate height display, this calculation should also be conditionally based on fontFamily
                     singleHeight +
-                        (linesItem[linesIndex].children.length - 1) *
-                            additionalHeight +
-                        height_add * addition
+                    (linesItem[linesIndex].children.length - 1) *
+                    additionalHeight +
+                    height_add * addition
                 );
 
                 // Determine the longest text line in the current Parsons block and calculate its width - Vincent Qiu (September 2020)
@@ -475,9 +475,9 @@ export default class Parsons extends RunestoneBase {
                     indent = linesItem[linesIndex].children[i].indent;
                     itemLength = Math.ceil(
                         pixelsPerIndent * indent +
-                            tempCanvasCtx.measureText(
-                                linesItem[linesIndex].children[i].innerText
-                            ).width
+                        tempCanvasCtx.measureText(
+                            linesItem[linesIndex].children[i].innerText
+                        ).width
                     );
                     longCount += Math.floor(itemLength / (widthLimit - 29));
                     if (itemLength > maxInnerLength) {
@@ -591,8 +591,8 @@ export default class Parsons extends RunestoneBase {
         this.initializeTabIndex();
         if (this.options.language == "natural" || this.options.language == "math") {
             if (typeof MathJax !== "undefined") {
-                MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.outerDiv]);    
-            } 
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.outerDiv]);
+            }
         }
     }
     // Make one block be keyboard accessible
@@ -740,7 +740,7 @@ export default class Parsons extends RunestoneBase {
     // Log the answer to the problem
     //   correct: The answer given matches the solution
     //   incorrect*: The answer is wrong for various reasons
-    logCurrentAnswer() {
+    async logCurrentAnswer(sid) {
         var event = {
             event: "parsons",
             div_id: this.divid,
@@ -763,7 +763,12 @@ export default class Parsons extends RunestoneBase {
             event.correct = "F";
         }
         event.act = act;
-        this.logBookEvent(event);
+
+        if (typeof sid !== "undefined") {
+            event.sid = sid;
+        }
+
+        await this.logBookEvent(event);
     }
     /* =====================================================================
     ==== ACCESSING =========================================================
@@ -1511,7 +1516,7 @@ export default class Parsons extends RunestoneBase {
         feedbackArea.html($.i18n("msg_parson_not_solution"));
         // Stop ability to select
         if (block.lines[0].distractHelptext) {
-            block.view.setAttribute("data-toggle","tooltip");
+            block.view.setAttribute("data-toggle", "tooltip");
             block.view.setAttribute("title", block.lines[0].distractHelptext);
         }
         block.disable();
@@ -1545,9 +1550,9 @@ export default class Parsons extends RunestoneBase {
                     duration:
                         Math.sqrt(
                             Math.pow(endY - startY, 2) +
-                                Math.pow(endX - startX, 2)
+                            Math.pow(endX - startX, 2)
                         ) *
-                            4 +
+                        4 +
                         500,
                     start: function () {
                         that.moving = block;
