@@ -591,7 +591,7 @@ export default class Parsons extends RunestoneBase {
         this.initializeTabIndex();
         if (this.options.language == "natural" || this.options.language == "math") {
             if (typeof MathJax !== "undefined") {
-                MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.outerDiv]);
+                this.queueMathJax(this.outerDiv)
             }
         }
     }

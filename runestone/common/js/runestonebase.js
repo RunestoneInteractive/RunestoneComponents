@@ -364,6 +364,14 @@ export default class RunestoneBase {
         return `${this.constructor.name}: ${this.divid}`
     }
 
+    queueMathJax(component) {
+        if (MathJax.version.substring(0, 1) === "2") {
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub, component]);
+        } else {
+            MathJax.typesetPromise([component])
+        }
+    }
+
 }
 
 window.RunestoneBase = RunestoneBase;

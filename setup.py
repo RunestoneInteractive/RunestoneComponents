@@ -10,8 +10,12 @@ import sys
 with open("requirements.txt", "r", encoding="utf-8") as fh:
     dependencies = [l.strip() for l in fh]
 
+<<<<<<< HEAD
 
 VERSION = "6.0.0dev"
+=======
+VERSION = "5.10.0"
+>>>>>>> master
 
 # These pre-install hooks are useful to make sure any pre-requisite
 # programs that are not pip installable are in place.

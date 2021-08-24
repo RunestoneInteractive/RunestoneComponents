@@ -339,7 +339,7 @@ export default class FITB extends RunestoneBase {
         }
         this.feedBackDiv.innerHTML = feedback_html;
         if (typeof MathJax !== "undefined") {
-            MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+            this.queueMathJax(document.body)
         }
     }
 
