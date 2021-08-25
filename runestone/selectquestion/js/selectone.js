@@ -91,7 +91,7 @@ export default class SelectOne extends RunestoneBase {
         let opts = this.origOpts;
         let selectorId = this.selector_id;
         console.log("getting question source");
-        let request = new Request("/assessment/get_question_source", {
+        let request = new Request("/ns/assessment/get_question_source", {
             method: "POST",
             headers: this.jsonHeaders,
             body: JSON.stringify(data),
@@ -268,7 +268,7 @@ export default class SelectOne extends RunestoneBase {
     // retrieve html source of a question, for use in various toggle functionalities
     async getToggleSrc(toggleQuestionID) {
         let request = new Request(
-            "/assessment/htmlsrc?acid=" + toggleQuestionID,
+            "/ns/assessment/htmlsrc?acid=" + toggleQuestionID,
             {
                 method: "GET",
             }
@@ -306,7 +306,7 @@ export default class SelectOne extends RunestoneBase {
         });
         $("#toggle-buttons").append(closeButton);
 
-        // if "lock" is not in toggle options, then allow adding more buttons to the preview panel 
+        // if "lock" is not in toggle options, then allow adding more buttons to the preview panel
         if (!(toggleOptions.includes("lock"))) {
             let setButton = document.createElement("button");
             $(setButton).text("Select this Problem");
@@ -351,7 +351,7 @@ export default class SelectOne extends RunestoneBase {
             useRunestoneServices: true,
         });
         let request = new Request(
-            "/assessment/set_selected_question?metaid=" +
+            "/ns/assessment/set_selected_question?metaid=" +
             parentID +
             "&selected=" +
             selectedQuestion,

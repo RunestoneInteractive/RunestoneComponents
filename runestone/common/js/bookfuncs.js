@@ -171,7 +171,7 @@ async function handlePageSetup() {
         Accept: "application/json",
     });
     let data = { timezoneoffset: new Date().getTimezoneOffset() / 60 };
-    let request = new Request("/logger/set_tz_offset", {
+    let request = new Request("/ns/logger/set_tz_offset", {
         method: "POST",
         body: JSON.stringify(data),
         headers: headers,

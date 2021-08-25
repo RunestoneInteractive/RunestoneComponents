@@ -25,7 +25,7 @@ function getCompletions() {
     var data = { lastPageUrl: currentPathname };
     jQuery
         .ajax({
-            url: "/logger/getCompletionStatus",
+            url: "/ns/logger/getCompletionStatus",
             data: data,
             async: false,
         })
@@ -292,7 +292,7 @@ function processPageState(completionFlag) {
         console.log(e);
     });
     jQuery.ajax({
-        url: "/logger/updatelastpage",
+        url: "/ns/logger/updatelastpage",
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         data: JSON.stringify(data),
