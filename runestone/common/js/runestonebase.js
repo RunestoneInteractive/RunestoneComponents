@@ -93,7 +93,7 @@ export default class RunestoneBase {
             eventInfo.percent = this.percent;
         }
         if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
-            let request = new Request("/ns/logger/bookevent", {
+            let request = new Request(`${eBookConfig.new_server_prefix}/logger/bookevent`, {
                 method: "POST",
                 headers: this.jsonHeaders,
                 body: JSON.stringify(eventInfo),
@@ -144,7 +144,7 @@ export default class RunestoneBase {
             eventInfo.save_code = "True";
         }
         if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
-            let request = new Request("/ns/logger/runlog", {
+            let request = new Request(`${eBookConfig.new_server_prefix}/logger/runlog`, {
                 method: "POST",
                 headers: this.jsonHeaders,
                 body: JSON.stringify(eventInfo),
@@ -202,7 +202,7 @@ export default class RunestoneBase {
             // and assessmentTaken is true
             if (!eBookConfig.practice_mode && !eBookConfig.peer && this.assessmentTaken) {
                 let request = new Request(
-                    "/ns/assessment/results",
+                    `${eBookConfig.new_server_prefix}/assessment/results`,
                     {
                         method: "POST",
                         body: JSON.stringify(data),

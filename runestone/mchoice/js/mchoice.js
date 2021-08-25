@@ -646,7 +646,7 @@ export default class MultipleChoice extends RunestoneBase {
         data.div_id = this.divid;
         data.course_name = eBookConfig.course;
         jQuery.get(
-            "/assessment/getaggregateresults",
+            `${eBookConfig.new_server_prefix}/assessment/getaggregateresults`,
             data,
             this.compareModal.bind(this)
         );

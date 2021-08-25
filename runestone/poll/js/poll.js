@@ -148,7 +148,7 @@ export default class Poll extends RunestoneBase {
             data.div_id = this.divid;
             data.course = eBookConfig.course;
             jQuery.get(
-                "/assessment/getpollresults",
+                `${eBookConfig.new_server_prefix}/assessment/getpollresults`,
                 data,
                 this.showPollResults
             );
@@ -225,7 +225,7 @@ export default class Poll extends RunestoneBase {
             data.div_id = this.divid;
             data.course = eBookConfig.course;
             jQuery.get(
-                "/assessment/getpollresults",
+                `${eBookConfig.new_server_prefix}/assessment/getpollresults`,
                 data,
                 this.showPollResults.bind(this)
             ).fail(this.indicate_component_ready.bind(this));

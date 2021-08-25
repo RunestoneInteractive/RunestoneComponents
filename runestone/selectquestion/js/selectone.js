@@ -91,7 +91,7 @@ export default class SelectOne extends RunestoneBase {
         let opts = this.origOpts;
         let selectorId = this.selector_id;
         console.log("getting question source");
-        let request = new Request("/ns/assessment/get_question_source", {
+        let request = new Request(`${eBookConfig.new_server_prefix}/assessment/get_question_source`, {
             method: "POST",
             headers: this.jsonHeaders,
             body: JSON.stringify(data),
@@ -268,7 +268,7 @@ export default class SelectOne extends RunestoneBase {
     // retrieve html source of a question, for use in various toggle functionalities
     async getToggleSrc(toggleQuestionID) {
         let request = new Request(
-            "/ns/assessment/htmlsrc?acid=" + toggleQuestionID,
+            `${eBookConfig.new_server_prefix}/assessment/htmlsrc?acid=${toggleQuestionID}`,
             {
                 method: "GET",
             }
@@ -351,10 +351,7 @@ export default class SelectOne extends RunestoneBase {
             useRunestoneServices: true,
         });
         let request = new Request(
-            "/ns/assessment/set_selected_question?metaid=" +
-            parentID +
-            "&selected=" +
-            selectedQuestion,
+            `${eBookConfig.new_server_prefix}/assessment/set_selected_question?metaid=${parentID}&selected=${selectedQuestion}`,
             {}
         );
         await fetch(request);
