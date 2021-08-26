@@ -355,7 +355,7 @@ export default class FITB extends RunestoneBase {
         data.div_id = this.divid;
         data.course = eBookConfig.course;
         jQuery.get(
-            "/assessment/gettop10Answers",
+            `${eBookConfig.new_server_prefix}/assessment/gettop10Answers`,
             data,
             this.compareFITB
         );

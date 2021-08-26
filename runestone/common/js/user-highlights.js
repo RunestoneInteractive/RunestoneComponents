@@ -25,7 +25,7 @@ function getCompletions() {
     var data = { lastPageUrl: currentPathname };
     jQuery
         .ajax({
-            url: "/logger/getCompletionStatus",
+            url: `${eBookConfig.new_server_prefix}/logger/getCompletionStatus`,
             data: data,
             async: false,
         })
@@ -168,7 +168,7 @@ function decorateTableOfContents() {
         window.location.href.toLowerCase().indexOf("toc.html") != -1 ||
         window.location.href.toLowerCase().indexOf("index.html") != -1
     ) {
-        jQuery.get("/logger/getAllCompletionStatus", function (
+        jQuery.get(`${eBookConfig.new_server_prefix}/logger/getAllCompletionStatus`, function (
             data
         ) {
             var subChapterList;
@@ -234,7 +234,7 @@ function decorateTableOfContents() {
             }
         });
         var data = { course: eBookConfig.course };
-        jQuery.get("/logger/getlastpage", data, function (data) {
+        jQuery.get(`${eBookConfig.new_server_prefix}/logger/getlastpage`, data, function (data) {
             var lastPageData;
             if (data != "None") {
                 lastPageData = data.detail;
@@ -292,7 +292,7 @@ function processPageState(completionFlag) {
         console.log(e);
     });
     jQuery.ajax({
-        url: "/logger/updatelastpage",
+        url: `${eBookConfig.new_server_prefix}/logger/updatelastpage`,
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         data: JSON.stringify(data),

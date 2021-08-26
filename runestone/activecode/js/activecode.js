@@ -582,7 +582,7 @@ export class ActiveCode extends RunestoneBase {
             // If this is timed and already taken we should restore history info
             this.renderScrubber();
         } else {
-            let request = new Request("/assessment/gethist", {
+            let request = new Request(`${eBookConfig.new_server_prefix}/assessment/gethist`, {
                 method: "POST",
                 headers: this.jsonHeaders,
                 body: JSON.stringify(reqData),

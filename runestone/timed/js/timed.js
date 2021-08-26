@@ -110,7 +110,7 @@ export default class Timed extends RunestoneBase {
         console.log(sendInfo);
         if (eBookConfig.useRunestoneServices) {
             let request = new Request(
-                "/assessment/tookTimedAssessment",
+                `${eBookConfig.new_server_prefix}/assessment/tookTimedAssessment`,
                 {
                     method: "POST",
                     headers: this.jsonHeaders,
@@ -296,7 +296,7 @@ export default class Timed extends RunestoneBase {
         this.pagNavList.appendChild(this.rightContainer);
         this.ensureButtonSafety();
         this.navDiv.appendChild(this.pagNavList);
-        this.flagDiv.appendChild(this.flaggingPlace);           // adds flaggingPlace to the flagDiv 
+        this.flagDiv.appendChild(this.flaggingPlace);           // adds flaggingPlace to the flagDiv
         this.break = document.createElement("br");
         this.navDiv.appendChild(this.break);
         // render the question number jump buttons
@@ -393,7 +393,7 @@ export default class Timed extends RunestoneBase {
             "ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"
         ).addClass("active");
         if ($("ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"
-        ).hasClass("flagcolor")) {                                           // checking for class 
+        ).hasClass("flagcolor")) {                                           // checking for class
             this.flagButton.innerHTML = "Unflag Question";                  // changes text on button
         }
         else {

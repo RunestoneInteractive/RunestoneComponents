@@ -1,3 +1,6 @@
+<!-- ****************************************
+     |docname| - main template for this theme
+     **************************************** -->
 {% extends "basic/layout.html" %}
 
 {% if dynamic_pages == 'True' %}
@@ -232,7 +235,7 @@
     {% raw %}
     eBookConfig.useRunestoneServices = true;
     eBookConfig.host = '';
-    eBookConfig.app = eBookConfig.host + '/' + '{{ request.application }}';
+    eBookConfig.app = eBookConfig.host + '/runestone';
     eBookConfig.course = '{{ course_name }}';
     eBookConfig.basecourse = '{{ base_course }}';
     eBookConfig.isLoggedIn = {{ is_logged_in}};
@@ -244,6 +247,8 @@
     eBookConfig.downloadsEnabled = {{downloads_enabled}};
     eBookConfig.allow_pairs = {{allow_pairs}}
     eBookConfig.enableCompareMe = {{enable_compare_me}};
+    // _`new_server_prefix`: Defined by the server to be the path to the new server.
+    eBookConfig.new_server_prefix = '{{ new_server_prefix }}';
     {% endraw %}
   {% else %}
     eBookConfig.useRunestoneServices = {% if use_services == 'true' -%}true{%- else -%}false{%- endif -%};
@@ -253,6 +258,7 @@
     eBookConfig.basecourse = '{{ basecourse }}';
     eBookConfig.isLoggedIn = false;
     eBookConfig.enableCompareMe = eBookConfig.useRunestoneServices;
+    eBookConfig.new_server_prefix = '';
   {% endif %}
   eBookConfig.ajaxURL = eBookConfig.app+'/ajax/';
   eBookConfig.logLevel = {{loglevel}};
@@ -293,7 +299,7 @@
 <div class="container" id="continue-reading"></div>
 
 <div class="container" id="main-content" role="main">
-  
+
 <!-- Ad Serving for Runestone Campaign -->
 {% if dynamic_pages == 'True' %}
     {% raw %}
@@ -317,7 +323,7 @@
   </div>
 
   {% include "subchapter.html" %}
-  
+
 </div>
 {%- endblock %}
 
@@ -386,9 +392,9 @@
   {% endif %}
 {% endif %}
 
-<script> 
+<script>
   window.addEventListener('load', (event) => {
-    runestoneComponents.getSwitch(); 
+    runestoneComponents.getSwitch();
   });
 </script>
 
