@@ -16,18 +16,22 @@ import json
 import os.path
 
 
-# Given a file, return the inline comment token based on the file extension.
+# Given a file, return the inline comment token based on the file extension. Default to an empty string if we can't find the the provided language.
 def commentForExt(file_name):
     return {
-        ".py": "# ",
         ".c": "// ",
-        ".h": "// ",
-        ".js": "// ",
-        ".s": "; ",
-        ".rst": "",
         ".css": "/* ",  # Will need some hand editing...
+        ".h": "// ",
         ".ini": "; ",
-    }[os.path.splitext(file_name)[1]]
+        ".js": "// ",
+        ".py": "# ",
+        # Rust.
+        ".rs": "// ",
+        ".rst": "",
+        ".s": "; ",
+        # ARM assembly.
+        ".S": "@ ",
+    }.get(os.path.splitext(file_name)[1], "")
 
 
 # Relative to the Sphinx output directory, the path to student source (which has all feedback and code solutions removed).
