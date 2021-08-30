@@ -48,9 +48,9 @@ class LP extends RunestoneBase {
         this.containerDiv = this.element;
         this.divid = this.element.id;
         // Store the DOM element (the textarea) where compile results will be displayed.
-        this.resultElement = $(this.element).siblings("textarea");
-        // Store the DOM element (a span) where feedback will be displayed.
-        this.feedbackElement = $(this.element).siblings("div");
+        this.resultElement = $(this.element).siblings(".lp-result");
+        // Store the DOM element (a div) where feedback will be displayed.
+        this.feedbackElement = $(this.element).siblings(".lp-feedback").children("div");
         // Use a nice editor.
         let that = this;
         this.textAreas = [];
@@ -78,13 +78,62 @@ class LP extends RunestoneBase {
         this.checkServer("lp_build", true);
     }
 
+    // Data structures:
+    //
+    // Format of data stored locally and on the server*::
+    //
+    //  -   answer: JSON-encoded string containing {
+    //          code_snippets: [
+    //              str, snippet 1, ...
+    //          ],
+    //          (optional) resultString: str, output from build.
+    //      }
+    //  -   correct: (optional) float, a percentage from 0 to 100.
+    //  -   timestamp: date/time in UTC.
+    //
+    // Format of data sent to the server*::
+    //
+    //  -   answer: JSON-encoded string containing only the code_snippets
+    //          array, not resultString. There's no point in sending the
+    //          previous resultString, since the server will compute a new
+    //          one.
+    //  -   event: "lp_build"
+    //  -   act: "", since the useinfo table requires it. It's not
+    //          otherwise used.
+    //  -   path: str, giving the relative path to this web page. Used
+    //          to find the source code which produced this page in order
+    //          to do snippet replacement.
+    //  -   div_id: str, the div_id of this component.
+    //
+    // Format of data received from the server::
+    //
+    //  If there was an error:
+    //  -   errors: [
+    //          str, error message 1, ...
+    //      ]
+    //
+    //  Otherwise:
+    //  -   answer: JSON-encoded string containing {
+    //          resultString: str, output from build.
+    //          Note that the code_snippets aren't sent back, to save
+    //              bandwidth.
+    //      }
+    //  -   correct: float, a percentage from 0 to 100.
+    //  -   timestamp: str, the server's timestamp.
+    //
+    // * For simplicity, I omitted the common fields (course, etc.) and discussed only fields unique to this component.
+
     async onSaveAndRun(_eventObject) {
+        // Prevent multiple click while the build is running.
+        $(this.element).attr("disabled", true);
         $(this.resultElement).val("Building...");
         $(this.feedbackElement).text("").attr("");
         // Since the Save and run button was clicked, we assume the code snippets have been changed; therefore, don't store ``correct`` or ``answer.resultString`` because they are out of date.
-        let answer = { code_snippets: this.textareasToData() };
+        //
+        // Store the answer as a string, since this is what goes in to / comes out from the database. We have to translate this back to a data structure when restoring from the db or local storage.
+        let code_snippets = this.textareasToData();
         this.setLocalStorage({
-            answer: answer,
+            answer: JSON.stringify({code_snippets: code_snippets}),
             timestamp: new Date(),
         });
         // Store the answer that the server returns, which includes additional data (correct/incorrect, feedback from the build, etc.).
@@ -92,8 +141,9 @@ class LP extends RunestoneBase {
         try {
             serverAnswer = await this.logBookEvent({
                 event: "lp_build",
-                // All values must be strings, or the resulting values on the server side come out confused.
-                answer: JSON.stringify(answer),
+                answer: JSON.stringify(code_snippets),
+                // This is required by useinfo, but not used.
+                act: "",
                 // Find the relative path to this web page. Slice off the leading ``/``.
                 path: window.location.href
                     .replace(eBookConfig.app, "")
@@ -105,13 +155,19 @@ class LP extends RunestoneBase {
                 .val(`Error contacting server: {err}.`)
                 .attr("class", "alert alert-danger");
             return;
+        } finally {
+            // Always re-enable the button after the server responds.
+            $(this.element).attr("disabled", false);
         }
+        serverAnswer = serverAnswer.detail;
         // The server doesn't return the ``code_snippets``, for efficiency. Include those. If an error was returned, note that there is no ``answer`` yet.
         if (!("answer" in serverAnswer)) {
-            serverAnswer["answer"] = {};
+            serverAnswer.answer = {};
         }
-        serverAnswer["answer"]["code_snippets"] = this.textareasToData();
+        serverAnswer.answer.code_snippets = code_snippets;
         this.displayAnswer(serverAnswer);
+        // JSON-encode the answer for storage.
+        serverAnswer.answer = JSON.stringify(serverAnswer.answer);
         this.setLocalStorage(serverAnswer);
     }
 
@@ -142,6 +198,7 @@ class LP extends RunestoneBase {
             $(this.resultElement).scrollTop(this.resultElement[0].scrollHeight);
         }
     }
+
     // Store the contents of each textarea into an array of strings.
     textareasToData() {
         return $.map(this.textAreas, function (obj, index) {
@@ -149,6 +206,7 @@ class LP extends RunestoneBase {
             return obj.getValue();
         });
     }
+
     // Store an array of strings in ``data.code_snippets`` into each textarea.
     dataToTextareas(data) {
         // Find all code snippet textareas.
@@ -157,11 +215,15 @@ class LP extends RunestoneBase {
             value.setValue((data.answer.code_snippets || "")[index] || "");
         });
     }
+
     // Restore answers from storage retrieval done in RunestoneBase.
     restoreAnswers(data) {
+        // We store the answer as a JSON-encoded string in the db / local storage. Restore the actual data structure from it.
+        data.answer = JSON.parse(data.answer);
         this.dataToTextareas(data);
         this.displayAnswer(data);
     }
+
     checkLocalStorage() {
         // Loads previous answers from local storage if they exist.
         var storedData;
@@ -181,6 +243,7 @@ class LP extends RunestoneBase {
             }
         }
     }
+
     setLocalStorage(data) {
         localStorage.setItem(this.localStorageKey(), JSON.stringify(data));
     }
@@ -192,7 +255,7 @@ class LP extends RunestoneBase {
 $(document).bind("runestone:login-complete", function () {
     $("[data-component=lp_build]").each(function (index) {
         try {
-            LPList[this.id] = new LP({
+            window.LPList[this.id] = new LP({
                 orig: this,
                 useRunestoneServices: eBookConfig.useRunestoneServices,
             });

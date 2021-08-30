@@ -10,6 +10,7 @@ import sys
 with open("requirements.txt", "r", encoding="utf-8") as fh:
     dependencies = [l.strip() for l in fh]
 
+
 VERSION = "6.0.0dev"
 
 # These pre-install hooks are useful to make sure any pre-requisite

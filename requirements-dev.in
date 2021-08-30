@@ -9,3 +9,4 @@ pyvirtualdisplay
 pytest
 pylint
 readme-renderer>24
+myst_parser

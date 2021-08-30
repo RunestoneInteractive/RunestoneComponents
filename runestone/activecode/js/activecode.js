@@ -23,6 +23,12 @@ import "codemirror/mode/clike/clike.js";
 import "codemirror/mode/octave/octave.js";
 import "./../css/activecode.css";
 import "codemirror/lib/codemirror.css";
+import "./skulpt.min.js";
+import "./skulpt-stdlib.js";
+// Used by Skulpt.
+import embed from "vega-embed";
+// Adapt for use outside webpack -- see https://github.com/vega/vega-embed.
+window.vegaEmbed = embed;
 
 var isMouseDown = false;
 document.onmousedown = function () {
@@ -126,7 +132,7 @@ export class ActiveCode extends RunestoneBase {
         );
         if (this.autorun) {
             // Simulate pressing the run button, since this will also prevent the user from clicking it until the initial run is complete, and also help the user understand why they're waiting.
-            $(document).ready(this.runButtonHandler.bind(this));
+            $(this.runButtonHandler.bind(this));
         }
         this.indicate_component_ready();
     }
@@ -576,7 +582,7 @@ export class ActiveCode extends RunestoneBase {
             // If this is timed and already taken we should restore history info
             this.renderScrubber();
         } else {
-            let request = new Request("/assessment/gethist", {
+            let request = new Request(`${eBookConfig.new_server_prefix}/assessment/gethist`, {
                 method: "POST",
                 headers: this.jsonHeaders,
                 body: JSON.stringify(reqData),
@@ -1188,24 +1194,33 @@ Yet another is that there is an internal error.  The internal error message is: 
         }
     }
 
-    logCurrentAnswer() {
-        this.logRunEvent({
+    // the sid parameter is optional and is used for group submissions
+    async logCurrentAnswer(sid) {
+        let data = {
             div_id: this.divid,
             code: this.editor.getValue(),
-            lang: this.language,
+            language: this.language,
             errinfo: this.errinfo,
             to_save: this.saveCode,
             prefix: this.pretext,
             suffix: this.suffix,
             partner: this.partner,
-        }); // Log the run event
+        }; // Log the run event
+        if (typeof sid !== "undefined") {
+            data.sid = sid;
+        }
+        await this.logRunEvent(data);
         // If unit tests were run there will be a unit_results
         if (this.unit_results) {
-            this.logBookEvent({
+            let unitData = {
                 act: this.unit_results,
                 div_id: this.divid,
                 event: "unittest",
-            });
+            };
+            if (typeof sid !== "undefined") {
+                unitData.sid = sid;
+            }
+            await this.logBookEvent(unitData)
         }
     }
 

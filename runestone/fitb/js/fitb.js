@@ -203,20 +203,28 @@ export default class FITB extends RunestoneBase {
         }
     }
 
-    async logCurrentAnswer() {
+    async logCurrentAnswer(sid) {
         let answer = JSON.stringify(this.given_arr);
         // Save the answer locally.
+        let feedback = true;
         this.setLocalStorage({
             answer: answer,
             timestamp: new Date(),
         });
-        let data = await this.logBookEvent({
+        let data = {
             event: "fillb",
             act: answer,
             answer: answer,
             correct: this.correct ? "T" : "F",
             div_id: this.divid,
-        });
+        };
+        if (typeof sid !== "undefined") {
+            data.sid = sid;
+            feedback = false;
+        };
+        data = await this.logBookEvent(data);
+        data = data.detail;
+        if (!feedback) return;
         if (!this.feedbackArray) {
             // On success, update the feedback from the server's grade.
             this.setLocalStorage({
@@ -229,7 +237,7 @@ export default class FITB extends RunestoneBase {
             this.renderFeedback();
         }
         return data;
-}
+    }
 
     /*==============================
     === Evaluation of answer and ===
@@ -331,7 +339,7 @@ export default class FITB extends RunestoneBase {
         }
         this.feedBackDiv.innerHTML = feedback_html;
         if (typeof MathJax !== "undefined") {
-            MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+            this.queueMathJax(document.body)
         }
     }
 
@@ -341,19 +349,20 @@ export default class FITB extends RunestoneBase {
     enableCompareButton() {
         this.compareButton.disabled = false;
     }
+    // _`compareFITBAnswers`
     compareFITBAnswers() {
         var data = {};
         data.div_id = this.divid;
         data.course = eBookConfig.course;
         jQuery.get(
-            eBookConfig.ajaxURL + "gettop10Answers",
+            `${eBookConfig.new_server_prefix}/assessment/gettop10Answers`,
             data,
             this.compareFITB
         );
     }
     compareFITB(data, status, whatever) {
-        var answers = eval(data)[0];
-        var misc = eval(data)[1];
+        var answers = data.detail.res;
+        var misc = data.detail.miscdata;
         var body = "<table>";
         body += "<tr><th>Answer</th><th>Count</th></tr>";
         for (var row in answers) {
@@ -365,12 +374,6 @@ export default class FITB extends RunestoneBase {
                 " times</td></tr>";
         }
         body += "</table>";
-        if (misc["yourpct"] !== "unavailable") {
-            body +=
-                "<br /><p>You have " +
-                misc["yourpct"] +
-                "% correct for all questions</p>";
-        }
         var html =
             "<div class='modal fade'>" +
             "    <div class='modal-dialog compare-modal'>" +

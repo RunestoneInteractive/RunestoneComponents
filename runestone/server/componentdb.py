@@ -579,7 +579,7 @@ def addAssignmentToDB(
     name=None,
     course_name=None,
     deadline=None,
-    points=None,
+    points=0,
     is_timed="F",
     visible="F",
     time_limit=None,

@@ -5,6 +5,7 @@
     "main": "dist/runestone.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
+        "check-env": "node -e 'console.log(process.env)' | grep npm",
         "build": "webpack --mode=development",
         "buildj": "webpack --mode=development --profile --json > stats.json",
         "watch": "webpack --mode=development --watch",
@@ -17,9 +18,9 @@
     "author": "",
     "license": "ISC",
     "devDependencies": {
-        "css-minimizer-webpack-plugin": "^3.0.0",
         "copy-webpack-plugin": "^8.0.0",
         "css-loader": "^5.0.0",
+        "css-minimizer-webpack-plugin": "^3.0.0",
         "eslint": "^7.0.0",
         "html-loader": "^2.0.0",
         "html-webpack-plugin": "^5.0.0",
@@ -36,7 +37,9 @@
         "handsontable": "7.2.2",
         "jexcel": "^3.9.1",
         "jquery-ui": "1.10.4",
+        "select2": "^4.1.0-rc.0",
         "sql.js": "1.5.0",
-        "vega-embed": "3.14.0"
+        "vega-embed": "3.14.0",
+        "wavedrom": "^2.0.0"
     }
 }

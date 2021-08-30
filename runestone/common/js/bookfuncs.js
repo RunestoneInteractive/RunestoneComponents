@@ -30,47 +30,6 @@
  */
 
 //
-// Chevron functions - Must correspond with width in runestone-custom-sphinx-bootstrap.css
-//
-$(function () {
-    var resizeWindow = false;
-    var resizeWidth = 600;
-    $(window)
-        .on("resize", function (event) {
-            if ($(window).width() <= resizeWidth && resizeWindow == false) {
-                resizeWindow = true;
-                var topPrev = $("#relations-prev")
-                    .clone()
-                    .attr("id", "top-relations-prev");
-                var topNext = $("#relations-next")
-                    .clone()
-                    .attr("id", "top-relations-next");
-                $("#relations-prev, #relations-next").hide();
-                var bottomPrev = topPrev
-                    .clone()
-                    .attr("id", "bottom-relations-prev");
-                var bottomNext = topNext
-                    .clone()
-                    .attr("id", "bottom-relations-next");
-                $("div#main-content > div").prepend(topPrev, topNext);
-                $("#top-relations-prev, #top-relations-next").wrapAll(
-                    '<ul id="top-relations-console"></ul>'
-                );
-                $("div#main-content > div").append(bottomPrev, bottomNext);
-                $("#bottom-relations-prev, #bottom-relations-next").wrapAll(
-                    '<ul id="bottom-relations-console"></ul>'
-                );
-            }
-            if ($(window).width() >= resizeWidth + 1 && resizeWindow == true) {
-                resizeWindow = false;
-                $("#top-relations-console, #bottom-relations-console").remove();
-                $("#relations-prev, #relations-next").show();
-            }
-        })
-        .resize();
-});
-
-//
 // Page decoration functions
 //
 
@@ -212,7 +171,7 @@ async function handlePageSetup() {
         Accept: "application/json",
     });
     let data = { timezoneoffset: new Date().getTimezoneOffset() / 60 };
-    let request = new Request("/logger/set_tz_offset", {
+    let request = new Request(`${eBookConfig.new_server_prefix}/logger/set_tz_offset`, {
         method: "POST",
         body: JSON.stringify(data),
         headers: headers,
@@ -276,7 +235,7 @@ function notifyRunestoneComponents() {
 }
 
 // initialize stuff
-$(document).ready(function () {
+$(function () {
     if (eBookConfig) {
         handlePageSetup();
     } else {
@@ -290,7 +249,7 @@ $(document).ready(function () {
 
 // misc stuff
 // todo:  This could be further distributed but making a video.js file just for one function seems dumb.
-$(document).ready(function () {
+window.addEventListener("load", function () {
     // add the video play button overlay image
     $(".video-play-overlay").each(function () {
         $(this).css(

@@ -24,6 +24,10 @@ export default class RunestoneBase {
             (resolve) => (this._component_ready_resolve_fn = resolve)
         );
         this.optional = false;
+        if (typeof window.allComponents === "undefined") {
+            window.allComponents = [];
+        }
+        window.allComponents.push(this);
         if (opts) {
             this.sid = opts.sid;
             this.graderactive = opts.graderactive;
@@ -89,7 +93,7 @@ export default class RunestoneBase {
             eventInfo.percent = this.percent;
         }
         if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
-            let request = new Request("/logger/bookevent", {
+            let request = new Request(`${eBookConfig.new_server_prefix}/logger/bookevent`, {
                 method: "POST",
                 headers: this.jsonHeaders,
                 body: JSON.stringify(eventInfo),
@@ -140,7 +144,7 @@ export default class RunestoneBase {
             eventInfo.save_code = "True";
         }
         if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
-            let request = new Request("/logger/runlog", {
+            let request = new Request(`${eBookConfig.new_server_prefix}/logger/runlog`, {
                 method: "POST",
                 headers: this.jsonHeaders,
                 body: JSON.stringify(eventInfo),
@@ -194,12 +198,17 @@ export default class RunestoneBase {
             if (this.sid) {
                 data.sid = this.sid;
             }
-            if (!eBookConfig.practice_mode && this.assessmentTaken) {
-                let request = new Request("/assessment/results", {
-                    method: "POST",
-                    body: JSON.stringify(data),
-                    headers: this.jsonHeaders,
-                });
+            // If we are NOT in practice mode and we are not in a peer exercise
+            // and assessmentTaken is true
+            if (!eBookConfig.practice_mode && !eBookConfig.peer && this.assessmentTaken) {
+                let request = new Request(
+                    `${eBookConfig.new_server_prefix}/assessment/results`,
+                    {
+                        method: "POST",
+                        body: JSON.stringify(data),
+                        headers: this.jsonHeaders,
+                    }
+                );
                 try {
                     let response = await fetch(request);
                     if (response.ok) {
@@ -350,6 +359,19 @@ export default class RunestoneBase {
             "Each component should provide an implementation of disableInteraction"
         );
     }
+
+    toString() {
+        return `${this.constructor.name}: ${this.divid}`
+    }
+
+    queueMathJax(component) {
+        if (MathJax.version.substring(0, 1) === "2") {
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub, component]);
+        } else {
+            MathJax.typesetPromise([component])
+        }
+    }
+
 }
 
 window.RunestoneBase = RunestoneBase;

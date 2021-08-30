@@ -68,7 +68,7 @@ class DataFile extends RunestoneBase {
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
 =================================*/
-$(document).ready(function () {
+$(function () {
     $("[data-component=datafile]").each(function (index) {
         try {
             dfList[this.id] = new DataFile({ orig: this });

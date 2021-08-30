@@ -140,6 +140,26 @@ def test_sql_activecode(selenium_utils_get):
     out = selenium_utils_get.driver.find_element_by_id(f"{div_id}_stdout")
     assert "" == out.text.strip()
 
+    div_id = "test_activecode_6"
+    t1 = find_ac(selenium_utils_get, div_id)
+    click_run(selenium_utils_get, t1)
+    ta = t1.find_element_by_class_name("cm-s-default")
+    assert ta
+    selenium_utils_get.driver.execute_script(
+        f"""window.edList['{div_id}'].editor.setValue("CREATE TABLE created_table (x TEXT); INSERT INTO created_table VALUES ('itworks');")"""
+    )
+    click_run(selenium_utils_get, t1)
+
+    div_id = "test_activecode_6b"
+    t2 = find_ac(selenium_utils_get, div_id)
+    # TODO: We don't yet have a way for async operations in ActiveCode constructors to signal when they're complete. So, insert a delay to guesstimate when the async load of the SQL WASM code and other async functions complete.
+    time.sleep(2)
+    click_run(selenium_utils_get, t2)
+    selenium_utils_get.wait.until(EC.text_to_be_present_in_element((By.ID, f"{div_id}_stdout"), "You"))
+    res = selenium_utils_get.driver.find_element_by_id(f"{div_id}_sql_out")
+    assert res
+    out = selenium_utils_get.driver.find_element_by_id(f"{div_id}_stdout")
+    assert "You passed 1 out of 1 tests" in out.text
 
 @pytest.fixture
 def selenium_utils_sf(selenium_utils):

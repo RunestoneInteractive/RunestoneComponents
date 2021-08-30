@@ -40,15 +40,13 @@ export default class SQLActiveCode extends ActiveCode {
                 } else {
                     if (allDburls[self.dburl].status == "loading") {
                         allDburls[self.dburl].xWaitFor.done(function () {
-                            self.db = new SQL.Database(
-                                allDburls[self.dburl].db
-                            );
+                            self.db = allDburls[self.dburl].dbObject;
                             $(self.runButton).removeAttr("disabled");
                             $(self.runButton).text(buttonText);
                         });
                         return;
                     }
-                    self.db = new SQL.Database(allDburls[self.dburl].db);
+                    self.db = allDburls[self.dburl].dbObject;
                     $(self.runButton).removeAttr("disabled");
                     $(self.runButton).text(buttonText);
                     return;
@@ -60,6 +58,7 @@ export default class SQLActiveCode extends ActiveCode {
                 xhr.onload = (e) => {
                     var uInt8Array = new Uint8Array(xhr.response);
                     self.db = new SQL.Database(uInt8Array);
+                    allDburls[self.dburl].dbObject = self.db;
                     $(self.runButton).text(buttonText);
                     $(self.runButton).removeAttr("disabled");
                     allDburls[self.dburl].db = uInt8Array;
@@ -234,25 +233,33 @@ export default class SQLActiveCode extends ActiveCode {
         return Promise.resolve("done");
     }
 
-    logCurrentAnswer() {
-        this.logRunEvent({
+    async logCurrentAnswer(sid) {
+        let data = {
             div_id: this.divid,
             code: this.editor.getValue(),
-            lang: this.language,
+            language: this.language,
             errinfo: this.results[this.results.length - 1].status,
             to_save: this.saveCode,
             prefix: this.pretext,
             suffix: this.suffix,
             partner: this.partner,
-        }); // Log the run event
+        }; // Log the run event
+        if (typeof sid !== "undefined") {
+            data.sid = sid;
+        }
+        await this.logRunEvent(data);
 
         if (this.unit_results) {
-            this.logBookEvent({
+            let unitData = {
                 event: "unittest",
                 div_id: this.divid,
                 course: eBookConfig.course,
                 act: this.unit_results,
-            });
+            };
+            if (typeof sid !== "undefined") {
+                unitData.sid = sid;
+            }
+            await this.logBookEvent(unitData);
         }
     }
 
@@ -292,9 +299,8 @@ export default class SQLActiveCode extends ActiveCode {
         }
         let pct = (100 * this.passed) / (this.passed + this.failed);
         pct = pct.toLocaleString(undefined, { maximumFractionDigits: 2 });
-        result += `You passed ${this.passed} out of ${
-            this.passed + this.failed
-        } tests for ${pct}%`;
+        result += `You passed ${this.passed} out of ${this.passed + this.failed
+            } tests for ${pct}%`;
         this.unit_results = `percent:${pct}:passed:${this.passed}:failed:${this.failed}`;
         return result;
     }

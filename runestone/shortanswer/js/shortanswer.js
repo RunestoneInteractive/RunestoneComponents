@@ -127,7 +127,7 @@ export default class ShortAnswer extends RunestoneBase {
         // before MathJax is loaded.  In that case we will need to implement something
         // like `the solution described here <https://stackoverflow.com/questions/3014018/how-to-detect-when-mathjax-is-fully-loaded>`_
         if (typeof MathJax !== "undefined") {
-            MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.containerDiv]);
+            this.queueMathJax(this.containerDiv)
         }
     }
 
@@ -136,24 +136,29 @@ export default class ShortAnswer extends RunestoneBase {
             value = value.replace(/\$\$(.*?)\$\$/g, "\\[ $1 \\]");
             value = value.replace(/\$(.*?)\$/g, "\\( $1 \\)");
             $(this.renderedAnswer).text(value);
-            MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.renderedAnswer]);
+            this.queueMathJax(this.renderedAnswer)
         }
     }
 
-    checkCurrentAnswer() {}
+    checkCurrentAnswer() { }
 
-    logCurrentAnswer() {
+    async logCurrentAnswer(sid) {
         let value = $(document.getElementById(this.divid + "_solution")).val();
         this.renderMath(value);
         this.setLocalStorage({
             answer: value,
             timestamp: new Date(),
         });
-        this.logBookEvent({
+        let data = {
             event: "shortanswer",
             act: value,
+            answer: value,
             div_id: this.divid,
-        });
+        };
+        if (typeof sid !== "undefined") {
+            data.sid = sid;
+        }
+        await this.logBookEvent(data);
     }
 
     renderFeedback() {
@@ -282,7 +287,7 @@ $(document).bind("runestone:login-complete", function () {
                     useRunestoneServices: eBookConfig.useRunestoneServices,
                 });
             } catch (err) {
-                console.log(`Error rendering ClickableArea Problem ${this.id}
+                console.log(`Error rendering ShortAnswer Problem ${this.id}
                 Details: ${err}`);
             }
         }

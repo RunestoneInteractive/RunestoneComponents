@@ -194,7 +194,6 @@ a {
     /* Remove top padding when top navbar goes collapsed in narrow viewports */
     body {
         padding-top: 0;
-        margin: auto auto auto 5px;
     }
 
     .navbar-fixed-top {
@@ -204,11 +203,14 @@ a {
 }
 
 @media (min-width: 768px) {
-
     /* when navbar is collapsed we don't want any vertical dividers taking up space */
     .navbar .divider-vertical {
         margin: 0 3px;
         border-left: 1px solid #f2f2f2;
+    }
+
+    .navbar-fixed-top .container {
+        padding: 0;
     }
 }
 
@@ -222,8 +224,8 @@ div.section {
 }
 
 .container {
-    padding-left: 0;
-    padding-right: 0;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 .container .section>*:not(.section):not(.ac_section) {
@@ -254,12 +256,21 @@ div.section {
     max-width: none;
 }
 
+.container-fluid>.navbar-collapse, .container-fluid>.navbar-header, .container>.navbar-collapse, .container>.navbar-header {
+    margin-left: 0;
+    margin-right: 0;
+}
+
 .navbar>.container .navbar-brand {
     margin-left: 0;
 }
 
 .navbar>.container {
     background-color: var(--navbar);
+}
+
+.navbar-toggle {
+    margin-right: 0px;
 }
 
 .footer>.container {
@@ -273,10 +284,11 @@ div.section {
 .brand-logo {
     float: left;
     display: block;
-    background-size: 40px 40px !important;
-    width: 40px;
-    height: 40px;
     margin-top: 4px;
+}
+
+.brand-logo img {
+    height: 40px;
 }
 
 .social-menu {
@@ -442,6 +454,92 @@ h2 {
 
 .alert label {
     font-weight: normal;
+}
+
+/*
+Missing brackets
+================
+The default styling from Sphinx's ``basic.css`` doesn't style multiple references to the same reference with brackets. Here's the relevant snippet of CSS:
+
+.. code-block:: CSS
+    :number-lines:
+
+    a.brackets:before,
+    span.brackets > a:before{
+        content: "[";
+    }
+
+    a.brackets:after,
+    span.brackets > a:after {
+        content: "]";
+    }
+
+The HTML for a footnote reference is:
+
+.. code-block:: HTML
+    :number-lines:
+
+    <a class="footnote-reference brackets" href="#assembled" id="id1">2</a>
+
+The HTML for a typical footnote is:
+
+.. code-block:: HTML
+    :number-lines:
+
+    <dl class="footnote brackets">
+        <dt class="label" id="xxx">
+            <span class="brackets">
+                <a class="fn-backref" href="#id2">1</a>
+            </span>
+        </dt>
+        <dd>Omitted this...</dd>
+    </dl>
+
+The HTML for a footnote referenced multiple times is:
+
+.. code-block:: HTML
+    :number-lines:
+
+    <dl class="footnote brackets">
+        <dt class="label" id="xxx">
+            <span class="brackets">1</span>
+            <span class="fn-backref">
+                (<a href="#id1">1</a>,<a href="#id2">2</a>,<a href="#id3">3</a>)
+            </span>
+        </dt>
+        <dd>Omitted this...</dd>
+    </dl>
+
+However, there's no (current) CSS selector that will add a ``content`` to the multiply-referenced footnote without adding an additional ``content`` to the typical footnote: we want to select ``dt.label > span.brackets > text-only content`` or ``dt.label > span.brackets > :not(:has a)`` (see the unsupported `:has selector <https://css-tricks.com/did-you-know-about-the-has-css-selector/>`_. So, I see no solution for this (outside JS).
+
+
+Incorrect color
+===============
+Second, the Bootstrap theme (v3.4.1) contains the following CSS, from ``node_modules/bootstrap/dist/css/less/labels.less``:
+
+.. code-block:: CSS
+    :number-lines:
+
+    .label {
+        display: inline;
+        padding: .2em .6em .3em;
+        font-size: 75%;
+        font-weight: 700;
+        line-height: 1;
+        color: @label-color;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: .25em;
+
+        ...more here omitted...
+    }
+
+ALL this therefore gets applied to footnotes, since they have the ``label`` class. Because the ``@label-color`` is white, this CSS makes the reference invisible against the default (light mode) white background. I like the rest of the styling changes (even though they differ from the standard Sphinx settings), so only the color is changed.
+*/
+dt.label > span.brackets:not(span.brackets > a),
+dt.label > span.fn-backref:not(span.fn-backref > a) {
+    color: black;
 }
 
 /* These admonition styles styles are copied from the Bootstrap .alert classes.
@@ -659,6 +757,21 @@ div.flash {
     display: inline;
     bottom: 65px;
     position: fixed;
+    opacity: 0.4;
+}
+
+.navLink:hover {
+    opacity: 1;
+}
+
+.navLink a {
+    display: inline-block;
+    background-color: white;
+    border-style:solid;
+    border-color:lightgrey;
+    border-width:2px;
+    width:100px;
+    height:50px
 }
 
 #relations-next {
@@ -669,36 +782,26 @@ div.flash {
     left: 35px;
 }
 
+.nextprev-list {
+    margin: 10px;
+    padding-left: 0;
+    height: 50px;
+}
+
 @media (max-width: 600px) {
 
-    /* Styling definitions for chevron function in bookfuncs.js */
     .navLink {
-        z-index: 2;
-        display: inline;
-        position: static;
+        display: inline-block;
+        bottom: auto;
+        position: absolute;
     }
 
-    ul#top-relations-console,
-    ul#bottom-relations-console {
-        list-style: none;
-        text-align: center;
-        width: 100%;
-        margin: 0 auto;
-        padding: 40px 0 20px 0;
-    }
-
-    #top-relations-next,
-    #top-relations-prev,
-    #bottom-relations-next,
-    #bottom-relations-prev {
+    #relations-next,
+    #relations-prev {
         width: 25%;
         padding: 0 20px;
         display: inline;
     }
-}
-
-.navLink a {
-    color: #999;
 }
 
 #completionButton {
@@ -768,7 +871,6 @@ div.flash {
 
 .container .section>div.sidebar {
     margin: 0 0 0.5em 1em;
-    width: auto;
 }
 
 a.disqus_thread_link {
@@ -863,7 +965,7 @@ ul.dropdown-menu.globaltoc {
 
 
 /* Style lp textareas. */
-textarea#lp-result {
+textarea.lp-result {
     width: 100%;
     height: 10em;
     font-family: monospace;
@@ -920,9 +1022,14 @@ textarea#lp-result {
 
 
 #scprogresscontainer {
-    width: 50%;
-    margin-left: auto;
-    margin-right: auto;
+    width: 100%;
+    max-width: 500px;
+    margin: 10px auto;
+}
+
+#subchapterprogress.ui-progressbar .ui-progressbar-value {
+    margin: 0;
+    border-radius: 0px;
 }
 
 #subchapterprogress>div {
@@ -968,11 +1075,11 @@ body {
 .theme-switch-wrapper {
     display: flex;
     align-items: center;
+}
 
-    em {
-        margin-left: 10px;
-        font-size: 1rem;
-    }
+.theme-switch-wrapper em {
+    margin-left: 10px;
+    font-size: 1rem;
 }
 
 .theme-switch {

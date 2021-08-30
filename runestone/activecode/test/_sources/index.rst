@@ -233,6 +233,15 @@ Support for SQL in the browser ?  Yes!
 
     select * from test;
 
+.. activecode:: test_activecode_6b
+    :language: sql
+    :autograde: unittest
+    :dburl: /_static/test.db
+
+    select * from created_table;
+
+    =====
+    assert 0,0 == itworks
 
 .. activecode:: sql3
     :language: sql
