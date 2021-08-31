@@ -243,7 +243,7 @@
     eBookConfig.isInstructor = {{ is_instructor }};
     eBookConfig.username = '{{ user_id}}';
     eBookConfig.readings = {{ readings}};
-    eBookConfig.activities = {{ activity_info }}
+    eBookConfig.activities = {{ activity_info|safe }}
     eBookConfig.downloadsEnabled = {{downloads_enabled}};
     eBookConfig.allow_pairs = {{allow_pairs}}
     eBookConfig.enableCompareMe = {{enable_compare_me}};
