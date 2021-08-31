@@ -104,7 +104,7 @@ export default class RunestoneBase {
         // that interaction has taken place.  This is **independent** of how the
         // autograder will ultimately grade the question!
         if (this.selector_id) {
-            eventInfo.div_id = this.selector_id;
+            eventInfo.div_id = this.selector_id.replace("-toggleSelectedQuestion", "");
             eventInfo.event = "selectquestion";
             eventInfo.act = "interaction"
             this.postLogMessage(eventInfo);
@@ -120,6 +120,7 @@ export default class RunestoneBase {
     }
 
     async postLogMessage(eventInfo) {
+        var post_return;
         let request = new Request(`${eBookConfig.new_server_prefix}/logger/bookevent`, {
             method: "POST",
             headers: this.jsonHeaders,
