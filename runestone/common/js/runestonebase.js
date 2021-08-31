@@ -93,31 +93,21 @@ export default class RunestoneBase {
             eventInfo.percent = this.percent;
         }
         if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
-            let request = new Request(`${eBookConfig.new_server_prefix}/logger/bookevent`, {
-                method: "POST",
-                headers: this.jsonHeaders,
-                body: JSON.stringify(eventInfo),
-            });
-            try {
-                let response = await fetch(request);
-                if (!response.ok) {
-                    let detail = await response.json();
-                    console.error(detail);
-                    throw new Error(`Failed to save the log entry ${detail}`);
-                } else {
-                    post_return = response.json();
-                }
-            } catch (e) {
-                if (this.isTimed) {
-                    alert(
-                        `Error: Your action was not saved! The error was ${e}`
-                    );
-                }
-                console.log(`Error: ${e}`);
-            }
+            post_return = this.postLogMessage(eventInfo)
         }
         if (!this.isTimed || eBookConfig.debug) {
             console.log("logging event " + JSON.stringify(eventInfo));
+        }
+        // When selectquestions are part of an assignment especially toggle questions
+        // we need to count using the selector_id of the select question.
+        // We  also need to log an event for that selector so that we will know
+        // that interaction has taken place.  This is **independent** of how the
+        // autograder will ultimately grade the question!
+        if (this.selector_id) {
+            eventInfo.div_id = this.selector_id;
+            eventInfo.event = "selectquestion";
+            eventInfo.act = "interaction"
+            this.postLogMessage(eventInfo);
         }
         if (
             typeof pageProgressTracker.updateProgress === "function" &&
@@ -129,8 +119,31 @@ export default class RunestoneBase {
         return post_return;
     }
 
-    // -`logRunEvent`
-    //---------------
+    async postLogMessage(eventInfo) {
+        let request = new Request(`${eBookConfig.new_server_prefix}/logger/bookevent`, {
+            method: "POST",
+            headers: this.jsonHeaders,
+            body: JSON.stringify(eventInfo),
+        });
+        try {
+            let response = await fetch(request);
+            if (!response.ok) {
+                throw new Error("Failed to save the log entry");
+            }
+            post_return = response.json();
+        } catch (e) {
+            if (this.isTimed) {
+                alert(`Error: Your action was not saved! The error was ${e}`);
+            }
+            console.log(`Error: ${e}`);
+        }
+        return post_return;
+    }
+
+    // .. _logRunEvent:
+    //
+    // logRunEvent
+    // -----------
     // This function sends the provided ``eventInfo`` to the `runlog endpoint`. When awaited, this function returns the data (decoded from JSON) the server sent back.
     async logRunEvent(eventInfo) {
         let post_promise = "done";
