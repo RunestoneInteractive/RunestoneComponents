@@ -140,7 +140,6 @@ export default class RunestoneBase {
         }
         return post_return;
     }
-
     // .. _logRunEvent:
     //
     // logRunEvent
