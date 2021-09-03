@@ -10,6 +10,7 @@ const path = require("path");
 
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
+const CompressionPlugin = require("compression-webpack-plugin");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
@@ -90,6 +91,8 @@ module.exports = (env, argv) => {
                 filename: '[name].css?v=[contenthash]',
                 chunkFilename: '[id].css',
             }),
+            // Copied from the `webpack docs <https://webpack.js.org/plugins/compression-webpack-plugin>`_. This creates ``.gz`` versions of all files. The webserver in use needs to be configured to send this instead of the uncompressed versions.
+            new CompressionPlugin(),
         ],
     };
 };
