@@ -1,3 +1,7 @@
+# ***********************************************
+# |docname| - Define the ``assignment`` directive
+# ***********************************************
+#
 # Copyright (C) 2015  Paul Resnick
 #
 # This program is free software: you can redistribute it and/or modify

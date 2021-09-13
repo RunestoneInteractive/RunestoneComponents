@@ -1,6 +1,6 @@
-# *********
-# |docname|
-# *********
+# ******************************************************************
+# |docname| - Provide Sphinx support for fill-in-the-blank questions
+# ******************************************************************
 #
 # .. Copyright (C) 2013  Bradley N. Miller
 #
