@@ -223,6 +223,7 @@ export default class MultipleChoice extends RunestoneBase {
                     this.processMCMFSubmission(true);
                     if (eBookConfig.peer) {
                         this.submitButton.disabled = true;
+                        this.disableInteraction();
                     }
                 }.bind(this),
                 false
@@ -522,6 +523,7 @@ export default class MultipleChoice extends RunestoneBase {
     scoreMCMFSubmission() {
         if (this.givenArray[0] == this.correctIndexList[0]) {
             this.correct = true;
+            this.answer = this.givenArray[0]
             this.percent = 1.0;
         } else if (this.givenArray[0] != null) {
             // if given is null then the question wasn"t answered and should be counted as skipped
@@ -657,6 +659,13 @@ export default class MultipleChoice extends RunestoneBase {
             this.optionArray[i].input.disabled = true;
         }
     }
+
+    enableInteraction() {
+        for (var i = 0; i < this.optionArray.length; i++) {
+            this.optionArray[i].input.disabled = false;
+        }
+    }
+
 }
 
 /*=================================
