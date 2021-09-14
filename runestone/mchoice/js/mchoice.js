@@ -521,9 +521,9 @@ export default class MultipleChoice extends RunestoneBase {
     }
 
     scoreMCMFSubmission() {
+        this.answer = this.givenArray[0]
         if (this.givenArray[0] == this.correctIndexList[0]) {
             this.correct = true;
-            this.answer = this.givenArray[0]
             this.percent = 1.0;
         } else if (this.givenArray[0] != null) {
             // if given is null then the question wasn"t answered and should be counted as skipped
