@@ -354,7 +354,7 @@ export default class Timed extends RunestoneBase {
                 this.currentQuestionIndex
             ].question.checkCurrentAnswer();
             if (!this.done) {
-                this.renderedQuestionArray[
+                await this.renderedQuestionArray[
                     this.currentQuestionIndex
                 ].question.logCurrentAnswer();
             }
@@ -952,7 +952,7 @@ export default class Timed extends RunestoneBase {
             this.currentQuestionIndex
         ].question;
         await currentQuestion.checkCurrentAnswer();
-        currentQuestion.logCurrentAnswer();
+        await currentQuestion.logCurrentAnswer();
         currentQuestion.renderFeedback();
         currentQuestion.disableInteraction();
 

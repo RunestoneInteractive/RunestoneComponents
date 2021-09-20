@@ -5,16 +5,43 @@
 //  :caption: Related contents
 //
 //  webpack.index.js
-
+//  webpack.server-index.js
+//
+// Includes
+// ========
+//
+// Node
+// ----
 const path = require("path");
 
+// NPM packages
+// ------------
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const { DefinePlugin } = require("webpack");
 
-module.exports = (env, argv) => {
+
+// Globals
+// =======
+function definePluginDict(env) {
     return {
+        // _`RAND_FUNC`: for testing, use a random function supplied by the test framework if it exists. Otherwise, use the seedable RNG.
+        //
+        // Implementation: pass webpack the ``--env test`` option (see the `env docs <https://webpack.js.org/api/cli/#environment-options>`_). Using the `DefinePlugin <https://webpack.js.org/plugins/define-plugin/>`_, select the appropriate random function.
+        RAND_FUNC: env.test ? "(typeof rs_test_rand === 'undefined') ? Math.random : rs_test_rand" : "rand",
+    }
+}
+
+
+// Webpack configuration
+// =====================
+module.exports = (env, argv) => [
+// Client-side
+// -----------
+    // The primary config: client-side build. This config file contains `multiple targets <https://webpack.js.org/concepts/targets/#multiple-targets>`_.
+    {
         entry: {
             runestone: "./webpack.index.js",
         },
@@ -50,7 +77,7 @@ module.exports = (env, argv) => {
             // See https://webpack.js.org/guides/caching/. This provides a hash for dynamic imports as well, avoiding caching out-of-date JS.
             filename: "[name].bundle.js?v=[contenthash]",
             // Delete everything in the output directory on each build.
-            clean: true,
+            //clean: true,
         },
         // See https://webpack.js.org/guides/code-splitting/#splitchunksplugin.
         optimization: {
@@ -86,10 +113,58 @@ module.exports = (env, argv) => {
                     to: '.'
                 }],
             }),
+            new DefinePlugin(definePluginDict(env)),
             new MiniCssExtractPlugin({
                 filename: '[name].css?v=[contenthash]',
                 chunkFilename: '[id].css',
             }),
         ],
-    };
-};
+    },
+
+// Server-side
+// -----------
+    // Config for server-side code.
+    {
+        entry: {
+            server_side: "./webpack.server-index.js",
+        },
+        // See `mode <https://webpack.js.org/configuration/mode/>`_ for the conditional statement below.
+        devtool: argv.mode === "development" ? "inline-source-map" : "source-map",
+        module: {
+            rules: [
+                {
+                    // Use Babel to transpile to ECMAScript 5.1, since the server-side engine supports that.
+                    //
+                    // Only run ``.js`` files through Babel
+                    test: /\.m?js$/,
+                    use: {
+                        loader: 'babel-loader',
+                        options: {
+                            presets: ['@babel/preset-env']
+                        }
+                    },
+                },
+            ],
+        },
+        output: {
+            // Expose the library as a variable.
+            library: {
+                name: "serverSide",
+                type: "var",
+            },
+            path: path.resolve(__dirname, "runestone/dist"),
+        },
+        plugins: [
+            new DefinePlugin(definePluginDict(env)),
+        ],
+        resolve: {
+            // EJS tries to import these.
+            fallback: {
+                "fs": false,
+                "path": false,
+            }
+        },
+        // The server-side JS engine supports ECMAScript 5.1. See `target <https://webpack.js.org/configuration/target/>`_.
+        target: ["es5", "web"],
+    }
+];

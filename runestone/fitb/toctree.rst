@@ -8,4 +8,5 @@ fitb: A Sphinx extension for fill-in-the-blank questions
     *.py
     js/*.js
     css/*.css
+    fitb_html_structure.html
     test/test_*.py

@@ -43,9 +43,7 @@ export default class TimedFITB extends FITB {
     }
 
     reinitializeListeners() {
-        for (let blank of this.blankArray) {
-            $(blank).change(this.recordAnswered.bind(this));
-        }
+        this.setupBlanks();
     }
 }
 

@@ -133,7 +133,12 @@ def _test_1(selenium_utils_mq, timed_divid):
     selenium_utils_mq.driver.find_element_by_id(f"{div_id}_solution").send_keys("ROYGBIV circle area")
 
     finish(selenium_utils_mq)
-    results = selenium_utils_mq.driver.find_element_by_id(f"{timed_divid}results")
-    assert "Num Correct: 6" in results.text
+    div_id = f"{timed_divid}results"
+    # Wait for the initial text to appear.
+    selenium_utils_mq.wait.until(
+        EC.text_to_be_present_in_element((By.ID, div_id), "Num Correct: 6")
+    )
+    # We can check the rest of the text without waiting, since it's all assigned at the same time.
+    results = selenium_utils_mq.driver.find_element_by_id(div_id)
     assert "Num Wrong: 0" in results.text
     assert "Num Skipped: 1" in results.text

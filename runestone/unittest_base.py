@@ -228,7 +228,7 @@ class RunestoneTestCase(unittest.TestCase):
         self.wait = WebDriverWait(self.driver, 10)
 
     def tearDown(self):
-        # Clear as much as possible, to present an almost-fresh instance of a browser for the next test. (Shutting down then starting up a browswer is very slow.)
+        # Clear as much as possible, to present an almost-fresh instance of a browser for the next test. (Shutting down then starting up a browser is very slow.)
         self.driver.execute_script("window.localStorage.clear();")
         self.driver.execute_script("window.sessionStorage.clear();")
         self.driver.delete_all_cookies()
