@@ -83,8 +83,6 @@ module.exports = (env, argv) => [
             path: path.resolve(__dirname, "runestone/dist"),
             // See https://webpack.js.org/guides/caching/. This provides a hash for dynamic imports as well, avoiding caching out-of-date JS.
             filename: "[name].bundle.js?v=[contenthash]",
-            // Delete everything in the output directory on each build.
-            //clean: true,
         },
         plugins: [
             // _`webpack_static_imports`: Instead of HTML, produce a list of static imports as JSON. Sphinx will then read this file and inject these imports when creating each page.
@@ -153,6 +151,8 @@ module.exports = (env, argv) => [
                 type: "var",
             },
             path: path.resolve(__dirname, "runestone/dist"),
+            // Delete everything in the output directory on each build. Putting these here (in the server-side build) works, while putting it in the client-side build causes it to delete the output from the server-side build.
+            clean: true,
         },
         plugins: [
             new DefinePlugin(definePluginDict(env)),
