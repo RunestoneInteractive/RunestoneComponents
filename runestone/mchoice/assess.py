@@ -85,15 +85,25 @@ class AddButton(RunestoneIdDirective):
 
 
 class QuestionNumber(RunestoneDirective):
-    """Set Parameters for Question Numbering
-.. qnum::
-   'prefix': character prefix before the number
-   'suffix': character prefix after the number
-   'start': start numbering with this value
+    """
+    Set Parameters for Question Numbering:
 
-.. qnum::
-   :prefix: turtle-
-   :start: 10
+    .. code-block:: rst
+        :linenos:
+
+        .. qnum::
+            'prefix': character prefix before the number
+            'suffix': character prefix after the number
+            'start': start numbering with this value
+
+    For example:
+
+    .. code-block:: rst
+        :linenos:
+
+        .. qnum::
+            :prefix: turtle-
+            :start: 10
     """
 
     required_arguments = 0
