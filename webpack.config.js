@@ -42,11 +42,15 @@ module.exports = (env, argv) => [
 // -----------
     // The primary config: client-side build. This config file contains `multiple targets <https://webpack.js.org/concepts/targets/#multiple-targets>`_.
     {
+        // See `mode <https://webpack.js.org/configuration/mode/>`_ for the conditional statement below.
+        devtool: argv.mode === "development" ? "inline-source-map" : "source-map",
         entry: {
             runestone: "./webpack.index.js",
         },
-        // See `mode <https://webpack.js.org/configuration/mode/>`_ for the conditional statement below.
-        devtool: argv.mode === "development" ? "inline-source-map" : "source-map",
+        externals: {
+            // Use the jQuery that Sphinx provides for jQuery.ui. See `externals <https://webpack.js.org/configuration/externals/>`_.
+            jquery: "jQuery",
+        },
         module: {
             rules: [
                 {
@@ -59,25 +63,6 @@ module.exports = (env, argv) => [
                     type: "asset",
                 },
             ],
-        },
-        resolve: {
-            fallback: {
-                // ``sql.js`` wants these in case it's running under node.js. They're not needed by JS in the browser.
-                "crypto": false,
-                "fs": false,
-                "path": false
-            }
-        },
-        externals: {
-            // Use the jQuery that Sphinx provides for jQuery.ui. See `externals <https://webpack.js.org/configuration/externals/>`_.
-            jquery: "jQuery",
-        },
-        output: {
-            path: path.resolve(__dirname, "runestone/dist"),
-            // See https://webpack.js.org/guides/caching/. This provides a hash for dynamic imports as well, avoiding caching out-of-date JS.
-            filename: "[name].bundle.js?v=[contenthash]",
-            // Delete everything in the output directory on each build.
-            //clean: true,
         },
         // See https://webpack.js.org/guides/code-splitting/#splitchunksplugin.
         optimization: {
@@ -93,6 +78,13 @@ module.exports = (env, argv) => [
                 `...`,
                 new CssMinimizerPlugin(),
             ],
+        },
+        output: {
+            path: path.resolve(__dirname, "runestone/dist"),
+            // See https://webpack.js.org/guides/caching/. This provides a hash for dynamic imports as well, avoiding caching out-of-date JS.
+            filename: "[name].bundle.js?v=[contenthash]",
+            // Delete everything in the output directory on each build.
+            //clean: true,
         },
         plugins: [
             // _`webpack_static_imports`: Instead of HTML, produce a list of static imports as JSON. Sphinx will then read this file and inject these imports when creating each page.
@@ -119,17 +111,25 @@ module.exports = (env, argv) => [
                 chunkFilename: '[id].css',
             }),
         ],
+        resolve: {
+            fallback: {
+                // ``sql.js`` wants these in case it's running under node.js. They're not needed by JS in the browser.
+                "crypto": false,
+                "fs": false,
+                "path": false
+            }
+        },
     },
 
 // Server-side
 // -----------
     // Config for server-side code.
     {
+        // See `mode <https://webpack.js.org/configuration/mode/>`_ for the conditional statement below.
+        devtool: argv.mode === "development" ? "inline-source-map" : "source-map",
         entry: {
             server_side: "./webpack.server-index.js",
         },
-        // See `mode <https://webpack.js.org/configuration/mode/>`_ for the conditional statement below.
-        devtool: argv.mode === "development" ? "inline-source-map" : "source-map",
         module: {
             rules: [
                 {
