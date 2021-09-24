@@ -194,7 +194,8 @@ async function handlePageSetup() {
         $(document).trigger("runestone:login");
         addReadingList();
         // Avoid the timedRefresh on the grading page.
-        if (window.location.pathname.indexOf("/admin/grading") == -1) {
+        if ((window.location.pathname.indexOf("/admin/grading") == -1)
+            && (window.location.pathname.indexOf("/peer/") == -1)) {
             timedRefresh();
         }
     } else {
