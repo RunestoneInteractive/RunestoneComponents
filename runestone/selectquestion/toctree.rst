@@ -1,7 +1,7 @@
 *************************************************
-Timed Exam Questions
+Dynamic Questions
 *************************************************
-See the `overview book <https://runestone.academy/runestone/books/published/overview/Assessments/timed.html>`_ for user documentation.
+See the `overview book <https://runestone.academy/runestone/books/published/overview/Containers/dynamic.html>`_ for user documentation.
 
 .. toctree::
     :maxdepth: 1
@@ -10,4 +10,3 @@ See the `overview book <https://runestone.academy/runestone/books/published/over
     *.py
     js/*.js
     css/*.css
-    test/test_*.py
