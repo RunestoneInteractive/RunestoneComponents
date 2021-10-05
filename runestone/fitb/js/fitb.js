@@ -199,7 +199,9 @@ export default class FITB extends RunestoneBase {
         // Grade locally if we can't ask the server to grade.
         if (this.feedbackArray) {
             this.evaluateAnswers();
-            this.renderFeedback();
+            if (!this.isTimed) {
+                this.renderFeedback();
+            }
         }
     }
 
@@ -233,7 +235,9 @@ export default class FITB extends RunestoneBase {
             this.correct = data.correct;
             this.displayFeed = data.displayFeed;
             this.isCorrectArray = data.isCorrectArray;
-            this.renderFeedback();
+            if (!this.isTimed) {
+                this.renderFeedback();
+            }
         }
         return data;
     }
