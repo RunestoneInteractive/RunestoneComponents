@@ -197,7 +197,7 @@ export default class FITB extends RunestoneBase {
             }
         }
         // Grade locally if we can't ask the server to grade.
-        if (this.feedbackArray) {
+        if (this.feedbackArray && !this.isTimed) {
             this.evaluateAnswers();
             this.renderFeedback();
         }
