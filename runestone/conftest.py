@@ -190,7 +190,7 @@ class ModuleFixture(unittest.TestCase):
         # Testing time in dominated by browser startup/shutdown. So, simply run all tests in a module in a single browser instance to speed things up. See ``RunestoneTestCase.setUp`` for additional code to (mostly) clear the browser between tests.
         #
         # `PyVirtualDisplay <http://pyvirtualdisplay.readthedocs.io/en/latest/>`_ only runs on X-windows, meaning Linux. Mac seems to have `some support <https://support.apple.com/en-us/HT201341>`_. Windows is out of the question.
-        if IS_LINUX:
+        if IS_LINUX and not os.environ.get("DISPLAY"):
             self.display = Display(visible=0, size=(1280, 1024))
             self.display.start()
         else:
