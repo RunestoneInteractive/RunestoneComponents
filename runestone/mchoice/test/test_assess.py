@@ -4,7 +4,7 @@
 
 __author__ = "yasinovskyy"
 
-from runestone.unittest_base import (
+from runestone.shared_conftest import (
     element_has_css_class,
 )
 from selenium.webdriver.common.by import By
