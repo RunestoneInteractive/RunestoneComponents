@@ -15,12 +15,20 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = (env, argv) => {
+    const is_dev_mode = argv.mode === "development";
+
     return {
+        // Cache build results between builds in development mode, per the `docs <https://webpack.js.org/configuration/cache/>`__.
+        cache: is_dev_mode
+            ? {
+                type: "filesystem",
+            }
+            : false,
         entry: {
             runestone: "./webpack.index.js",
         },
         // See `mode <https://webpack.js.org/configuration/mode/>`_ for the conditional statement below.
-        devtool: argv.mode === "development" ? "inline-source-map" : "source-map",
+        devtool: is_dev_mode ? "inline-source-map" : "source-map",
         module: {
             rules: [
                 {
@@ -37,10 +45,10 @@ module.exports = (env, argv) => {
         resolve: {
             fallback: {
                 // ``sql.js`` wants these in case it's running under node.js. They're not needed by JS in the browser.
-                "crypto": false,
-                "fs": false,
-                "path": false
-            }
+                crypto: false,
+                fs: false,
+                path: false,
+            },
         },
         externals: {
             // Use the jQuery that Sphinx provides for jQuery.ui. See `externals <https://webpack.js.org/configuration/externals/>`_.
@@ -55,11 +63,11 @@ module.exports = (env, argv) => {
         },
         // See https://webpack.js.org/guides/code-splitting/#splitchunksplugin.
         optimization: {
-            moduleIds: 'deterministic',
+            moduleIds: "deterministic",
             // Collect all the webpack import runtime into a single file, which is named ``runtime.bundle.js``. This must be statically imported by all pages containing Runestone components.
-            runtimeChunk: 'single',
+            runtimeChunk: "single",
             splitChunks: {
-                chunks: 'all',
+                chunks: "all",
             },
             // CSS for production was copied from https://webpack.js.org/plugins/mini-css-extract-plugin/#minimizing-for-production.
             minimizer: [
@@ -71,25 +79,28 @@ module.exports = (env, argv) => {
         plugins: [
             // _`webpack_static_imports`: Instead of HTML, produce a list of static imports as JSON. Sphinx will then read this file and inject these imports when creating each page.
             new HtmlWebpackPlugin({
-                filename: 'webpack_static_imports.json',
+                filename: "webpack_static_imports.json",
                 // Don't prepend the ``<head>`` tag and data to the output.
                 inject: false,
                 // The template to create JSON.
-                templateContent: ({ htmlWebpackPlugin }) => JSON.stringify({
-                    js: htmlWebpackPlugin.files.js,
-                    css: htmlWebpackPlugin.files.css,
-                }),
+                templateContent: ({ htmlWebpackPlugin }) =>
+                    JSON.stringify({
+                        js: htmlWebpackPlugin.files.js,
+                        css: htmlWebpackPlugin.files.css,
+                    }),
             }),
             new CopyPlugin({
-                patterns: [{
-                    // sql.js support: this wasm file will be fetched dynamically when we initialize sql.js. It is important that we do not change its name, and that it is in the same folder as the js.
-                    from: 'node_modules/sql.js/dist/sql-wasm.wasm',
-                    to: '.'
-                }],
+                patterns: [
+                    {
+                        // sql.js support: this wasm file will be fetched dynamically when we initialize sql.js. It is important that we do not change its name, and that it is in the same folder as the js.
+                        from: "node_modules/sql.js/dist/sql-wasm.wasm",
+                        to: ".",
+                    },
+                ],
             }),
             new MiniCssExtractPlugin({
-                filename: '[name].css?v=[contenthash]',
-                chunkFilename: '[id].css',
+                filename: "[name].css?v=[contenthash]",
+                chunkFilename: "[id].css",
             }),
             // Copied from the `webpack docs <https://webpack.js.org/plugins/compression-webpack-plugin>`_. This creates ``.gz`` versions of all files. The webserver in use needs to be configured to send this instead of the uncompressed versions.
             new CompressionPlugin(),
