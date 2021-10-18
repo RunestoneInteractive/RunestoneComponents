@@ -26,7 +26,6 @@ Components
     runestone/*/toctree
     runestone/__init__.py
     runestone/__main__.py
-    runestone/unittest_base.py
 
 
 Packaging
@@ -45,6 +44,8 @@ Misc
 
     ACKNOWLEDGEMENTS
     .github/FUNDING.yml
+    runestone/conftest.py
+    runestone/shared_conftest.py
     .gitignore
     .readthedocs.yml
     conf.py
