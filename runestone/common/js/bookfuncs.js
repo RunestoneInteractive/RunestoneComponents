@@ -58,9 +58,8 @@ function addReadingList() {
                 name: "link",
                 class: "btn btn-lg ' + 'buttonConfirmCompletion'",
                 href: nxt_link,
-                text: `Continue to page ${
-                    position + 2
-                } of ${num_readings} in the reading assignment.`,
+                text: `Continue to page ${position + 2
+                    } of ${num_readings} in the reading assignment.`,
             });
         } else {
             l = $("<div />", {
@@ -154,7 +153,7 @@ class PageProgressBar {
             if (
                 val == 100.0 &&
                 $("#completionButton").text().toLowerCase() ===
-                    "mark as completed"
+                "mark as completed"
             ) {
                 $("#completionButton").click();
             }
@@ -190,10 +189,15 @@ async function handlePageSetup() {
         mess = `username: ${eBookConfig.username}`;
         if (!eBookConfig.isInstructor) {
             $("#ip_dropdown_link").remove();
+            $("#inst_peer_link").remove();
         }
         $(document).trigger("runestone:login");
         addReadingList();
-        timedRefresh();
+        // Avoid the timedRefresh on the grading page.
+        if ((window.location.pathname.indexOf("/admin/grading") == -1)
+            && (window.location.pathname.indexOf("/peer/") == -1)) {
+            timedRefresh();
+        }
     } else {
         mess = "Not logged in";
         $(document).trigger("runestone:logout");
@@ -221,6 +225,7 @@ function setupNavbarLoggedOut() {
         $("#profilelink").hide();
         $("#passwordlink").hide();
         $("#ip_dropdown_link").hide();
+        $("#inst_peer_link").hide();
         $("li.loginout").html(
             '<a href="' + eBookConfig.app + '/default/user/login">Login</a>'
         );

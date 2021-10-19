@@ -29,7 +29,7 @@ export default class LiveCode extends ActiveCode {
         }
         this.createErrorOutput();
     }
-    outputfun(a) {}
+    outputfun(a) { }
     createInputElement() {
         var label = document.createElement("label");
         label.for = this.divid + "_stdin";
@@ -43,12 +43,20 @@ export default class LiveCode extends ActiveCode {
         this.outerDiv.appendChild(input);
         this.stdin_el = input;
     }
-    createErrorOutput() {}
+    createErrorOutput() { }
 
     /*  Main runProg method for livecode
      *
      */
-    async runProg() {
+    async runProg(noUI, logResults) {
+        if (typeof logResults === "undefined") {
+            this.logResults = true;
+        } else {
+            this.logResults = logResults;
+        }
+        if (typeof noUI !== "boolean") {
+            noUI = false;
+        }
         await this.runSetup();
         try {
             let res = await this.submitToJobe();
@@ -197,9 +205,9 @@ export default class LiveCode extends ActiveCode {
             public static void main(String[] args) {
                 CodeTestHelper.resetFinalResults();
                 Result result = JUnitCore.runClasses(${testdrivername.replace(
-                    ".java",
-                    ".class"
-                )});
+            ".java",
+            ".class"
+        )});
                 System.out.println(CodeTestHelper.getFinalResults());
 
                 int total = result.getRunCount();
