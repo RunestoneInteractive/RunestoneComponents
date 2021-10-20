@@ -8,11 +8,11 @@
 
 const path = require("path");
 
-const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
-const CopyPlugin = require('copy-webpack-plugin');
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
+const CopyPlugin = require("copy-webpack-plugin");
 const CompressionPlugin = require("compression-webpack-plugin");
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = (env, argv) => {
     const is_dev_mode = argv.mode === "development";
@@ -21,8 +21,8 @@ module.exports = (env, argv) => {
         // Cache build results between builds in development mode, per the `docs <https://webpack.js.org/configuration/cache/>`__.
         cache: is_dev_mode
             ? {
-                type: "filesystem",
-            }
+                  type: "filesystem",
+              }
             : false,
         entry: {
             runestone: "./webpack.index.js",
@@ -48,6 +48,7 @@ module.exports = (env, argv) => {
                 crypto: false,
                 fs: false,
                 path: false,
+                string_decoder: false,
             },
         },
         externals: {
@@ -58,6 +59,8 @@ module.exports = (env, argv) => {
             path: path.resolve(__dirname, "runestone/dist"),
             // See https://webpack.js.org/guides/caching/. This provides a hash for dynamic imports as well, avoiding caching out-of-date JS.
             filename: "[name].bundle.js?v=[contenthash]",
+            // Node 17.0 reports ``Error: error:0308010C:digital envelope routines::unsupported``. Per `SO <https://stackoverflow.com/a/69394785/16038919>`_, this error is produced by using an old, default hash that OpenSSL removed support for. The `webpack docs <https://webpack.js.org/configuration/output/#outputhashfunction>"__ says that ``xxhash64`` is a faster algorithm.
+            hashFunction: "xxhash64",
             // Delete everything in the output directory on each build.
             clean: true,
         },
