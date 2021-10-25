@@ -48,7 +48,6 @@ module.exports = (env, argv) => {
                 crypto: false,
                 fs: false,
                 path: false,
-                string_decoder: false,
             },
         },
         externals: {
