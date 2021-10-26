@@ -46,6 +46,7 @@ module.exports = (env, argv) => {
               type: "filesystem",
           }
         : false;
+    // See `mode <https://webpack.js.org/configuration/mode/>`_ for the conditional statement below.
     const devtool = is_dev_mode ? "inline-source-map" : "source-map";
     const out_path = path.resolve(__dirname, "runestone/dist");
 
@@ -56,7 +57,6 @@ module.exports = (env, argv) => {
         {
             // Cache build results between builds in development mode, per the `docs <https://webpack.js.org/configuration/cache/>`__.
             cache: cache,
-            // See `mode <https://webpack.js.org/configuration/mode/>`_ for the conditional statement below.
             devtool: devtool,
             entry: {
                 runestone: "./webpack.index.js",
@@ -97,6 +97,8 @@ module.exports = (env, argv) => {
                 path: out_path,
                 // See https://webpack.js.org/guides/caching/. This provides a hash for dynamic imports as well, avoiding caching out-of-date JS.
                 filename: "[name].bundle.js?v=[contenthash]",
+                // Node 17.0 reports ``Error: error:0308010C:digital envelope routines::unsupported``. Per `SO <https://stackoverflow.com/a/69394785/16038919>`_, this error is produced by using an old, default hash that OpenSSL removed support for. The `webpack docs <https://webpack.js.org/configuration/output/#outputhashfunction>"__ says that ``xxhash64`` is a faster algorithm.
+                hashFunction: "xxhash64",
             },
             plugins: [
                 // _`webpack_static_imports`: Instead of HTML, produce a list of static imports as JSON. Sphinx will then read this file and inject these imports when creating each page.
