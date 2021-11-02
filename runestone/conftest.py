@@ -3,7 +3,6 @@
 # ***************************************
 # This defines fixtures specific to the client for test. These same fixtures are defined differently on the server to accommodate the different setup these.
 #
-# TODO: rewrite the tests to use pytest-native syntax, then put the contents of ``unittest_base`` here.
 #
 # Imports
 # =======
@@ -62,11 +61,14 @@ def run_webpack():
     print(p.stderr + p.stdout)
     assert not p.returncode
 
-
-# Provide access to the module fixture, for tests with specific needs.
+# .. _selenium_module_fixture:
+#
+# ``selenium_module_fixture``
+# ---------------------------
+# Provide access to the Selenium module fixture, for tests with specific needs.
 @pytest.fixture(scope="module")
 def selenium_module_fixture(request):
-    # Allow tests to specify the ``exit_status_success`` parameter passed to the ModuleFixture constructor by adding the ``@pytest.mark.exit_status_success(False)`` decorator to a test. (Marking it True instead is equivalent to the unmarked, default value.) See the `example <https://docs.pytest.org/en/stable/fixture.html#using-markers-to-pass-data-to-fixtures>`_ and the API docs <https://docs.pytest.org/en/stable/reference.html#pytest.nodes.Node.get_closest_marker>`_.
+    # Allow modules to specify the ``exit_status_success`` parameter passed to the ``ModuleFixture``` constructor by adding the statement ``pytestmark = pytest.mark.exit_status_success(False)``. (Since this is a module-scoped fixture, applying this mark to an individual test has no effect. Marking it True instead is equivalent to the unmarked, default value.) See the `example <https://docs.pytest.org/en/stable/fixture.html#using-markers-to-pass-data-to-fixtures>`_ (which applies only to function-scoped marks, not module-scoped marks), `marking whole classes or modules <https://docs.pytest.org/en/6.2.x/example/markers.html#marking-whole-classes-or-modules>`_, and the `API docs <https://docs.pytest.org/en/stable/reference.html#pytest.nodes.Node.get_closest_marker>`_.
     exit_status_success_mark = request.node.get_closest_marker("exit_status_success")
     exit_status_success = True if exit_status_success_mark is None else exit_status_success_mark.args[0]
 
