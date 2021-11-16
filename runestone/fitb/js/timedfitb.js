@@ -2,7 +2,7 @@ import FITB from "./fitb.js";
 export default class TimedFITB extends FITB {
     constructor(opts) {
         super(opts);
-        this.renderTimedIcon(this.inputDiv);
+        this.renderTimedIcon(this.containerDiv);
         this.hideButtons();
         this.needsReinitialization = true;
     }

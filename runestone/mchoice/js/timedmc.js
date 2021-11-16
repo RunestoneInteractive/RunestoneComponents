@@ -5,7 +5,7 @@ export default class TimedMC extends MultipleChoice {
         super(opts);
         $(this.containerDiv).addClass("alert alert-warning runestone");
         this.needsReinitialization = true;
-        this.renderTimedIcon(this.MCContainer);
+        this.renderTimedIcon(this.containerDiv);
         this.hideButtons(); // Don't show per-question buttons in a timed assessment
     }
 
