@@ -6,7 +6,7 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "check-env": "node -e 'console.log(process.env)' | grep npm",
-        "build": "webpack --mode=development",
+        "build": "export NODE_OPTIONS=--openssl-legacy-provider; webpack --mode=development",
         "buildj": "webpack --mode=development --profile --json > stats.json",
         "watch": "webpack --mode=development --watch",
         "serve": "cd dist; python -m http.server 8080; cd ..",

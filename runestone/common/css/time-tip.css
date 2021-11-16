@@ -1,0 +1,8 @@
+.timeTip {
+    background-image: url(./clock.png);
+    background-size: 15px;
+    width: 15px;
+    height: 15px;
+    position: relative;
+    left: 50%;
+}
