@@ -36,7 +36,6 @@ var TimedActiveCodeMixin = {
         }
     },
 
-    // bje - not needed anymore
     renderTimedIcon: function (component) {
         // renders the clock icon on timed components. The component parameter
         // is the element that the icon should be appended to.
