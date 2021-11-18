@@ -12,10 +12,11 @@ import SQLActiveCode from "./activecode_sql";
 var TimedActiveCodeMixin = {
     timedInit: async function (opts) {
         this.isTimed = true;
+        this.renderTimedIcon(this.containerDiv);
         this.hideButtons();
         await this.addHistoryScrubber(true); // position last
         this.needsReinitialization = true; // the run button click listener needs to be reinitialized
-        this.containerDiv.classList.add("timedComponent");
+        this.containerDiv.classList.add("timedComponent", "alert", "alert-warning");
         window.edList[this.divid] = this;
         return true;
     },
