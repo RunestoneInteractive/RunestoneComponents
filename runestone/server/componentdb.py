@@ -84,7 +84,7 @@ def get_dburl(outer={}):
         # DAL uses "postgres:", while SQLAlchemy (and the PostgreSQL spec) uses "postgresql:". Fix.
         remove_prefix = "postgres://"
         if dburl.startswith(remove_prefix):
-            dburl = "postgresql://" + dburl[len(remove_prefix):]
+            dburl = "postgresql://" + dburl[len(remove_prefix) :]
         return dburl
 
     raise RuntimeError("Cannot configure a Database URL!")
@@ -129,7 +129,9 @@ def setup(app):
     try:
         dburl = get_dburl()
         # SQLite doesn't support ``client_encoding``, while PostgreSQL does.
-        encoding = dict(client_encoding="utf8") if dburl.startswith("postgresql") else {}
+        encoding = (
+            dict(client_encoding="utf8") if dburl.startswith("postgresql") else {}
+        )
         engine = create_engine(dburl, convert_unicode=True, **encoding)
         Session = sessionmaker()
         engine.connect()
@@ -341,7 +343,7 @@ def addQuestionToDB(self):
                     practice=practice,
                     topic=topics,
                     from_source=from_source,
-                    review_flag='F',
+                    review_flag="F",
                     optional=optional,
                     description=et,
                     **meta_opts,
@@ -416,7 +418,9 @@ def addQNumberToDB(app, node, qnumber):
                 questions.c.base_course == basecourse,
             )
         )
-        .values(qnumber=qnumber,)
+        .values(
+            qnumber=qnumber,
+        )
     )
     sess.execute(stmt)
 
