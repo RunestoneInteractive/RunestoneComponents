@@ -2,7 +2,7 @@ import FITB from "./fitb.js";
 export default class TimedFITB extends FITB {
     constructor(opts) {
         super(opts);
-        this.renderTimedIcon(this.inputDiv);
+        this.renderTimedIcon(this.containerDiv);
         this.hideButtons();
         this.needsReinitialization = true;
     }
@@ -14,14 +14,8 @@ export default class TimedFITB extends FITB {
         // renders the clock icon on timed components.    The component parameter
         // is the element that the icon should be appended to.
         var timeIconDiv = document.createElement("div");
-        var timeIcon = document.createElement("img");
-        $(timeIcon).attr({
-            src: "../_static/clock.png",
-            style: "width:15px;height:15px",
-        });
         timeIconDiv.className = "timeTip";
         timeIconDiv.title = "";
-        timeIconDiv.appendChild(timeIcon);
         $(component).prepend(timeIconDiv);
     }
     checkCorrectTimed() {

@@ -12,10 +12,11 @@ import SQLActiveCode from "./activecode_sql";
 var TimedActiveCodeMixin = {
     timedInit: async function (opts) {
         this.isTimed = true;
+        this.renderTimedIcon(this.containerDiv);
         this.hideButtons();
         await this.addHistoryScrubber(true); // position last
         this.needsReinitialization = true; // the run button click listener needs to be reinitialized
-        this.containerDiv.classList.add("timedComponent");
+        this.containerDiv.classList.add("timedComponent", "alert", "alert-warning");
         window.edList[this.divid] = this;
         return true;
     },
@@ -35,19 +36,12 @@ var TimedActiveCodeMixin = {
         }
     },
 
-    // bje - not needed anymore
     renderTimedIcon: function (component) {
-        // renders the clock icon on timed components.    The component parameter
+        // renders the clock icon on timed components. The component parameter
         // is the element that the icon should be appended to.
         var timeIconDiv = document.createElement("div");
-        var timeIcon = document.createElement("img");
-        $(timeIcon).attr({
-            src: "../_static/clock.png",
-            style: "width:15px;height:15px",
-        });
         timeIconDiv.className = "timeTip";
         timeIconDiv.title = "";
-        timeIconDiv.appendChild(timeIcon);
         $(component).prepend(timeIconDiv);
     },
 

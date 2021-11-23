@@ -11,9 +11,18 @@ export default class TimedParsons extends Parsons {
         }
         this.grader.showfeedback = this.showfeedback;
         this.hideFeedback();
+        this.renderTimedIcon(this.containerDiv);
         $(this.checkButton).hide();
         $(this.helpButton).hide();
         $(this.resetButton).hide();
+    }
+    renderTimedIcon(component) {
+        // renders the clock icon on timed components.    The component parameter
+        // is the element that the icon should be appended to.
+        var timeIconDiv = document.createElement("div");
+        timeIconDiv.className = "timeTip";
+        timeIconDiv.title = "";
+        $(component).prepend(timeIconDiv);
     }
     checkCorrectTimed() {
         return this.correct ? "T" : "F";

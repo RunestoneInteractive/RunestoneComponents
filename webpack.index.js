@@ -37,6 +37,9 @@ import "bootstrap/dist/css/bootstrap.css";
 import "./runestone/common/project_template/_templates/plugin_layouts/sphinx_bootstrap/static/bootstrap-sphinx.js";
 import "./runestone/common/css/runestone-custom-sphinx-bootstrap.css";
 
+// Timed questions related style
+import "./runestone/common/css/time-tip.css";
+
 // Misc
 import "./runestone/common/js/bookfuncs.js";
 import "./runestone/common/js/user-highlights.js";
