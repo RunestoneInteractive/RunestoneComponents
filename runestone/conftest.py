@@ -56,8 +56,8 @@ mylogger = logging.getLogger()
 # Run this once, before all tests, to update the webpacked JS.
 @pytest.fixture(scope="session", autouse=True)
 def run_webpack():
-    # Note that Windows requires ``shell=True``, since the command to execute is ``npm.cmd``.
-    p = subprocess.run(["npm", "run", "build"], text=True, shell=IS_WINDOWS, capture_output=True)
+    # Note that Windows requires ``shell=True``, since the command to execute is ``npm.cmd``. Use the ``--`` to pass following args to the script (webpack), per the `npm docs <https://docs.npmjs.com/cli/v7/commands/npm-run-script>`_. Use ``--env test`` to tell webpack to do a test build of the Runestone Components (see `RAND_FUNC <RAND_FUNC>`).
+    p = subprocess.run(["npm", "run", "build", "--", "--env", "test"], text=True, shell=IS_WINDOWS, capture_output=True)
     print(p.stderr + p.stdout)
     assert not p.returncode
 
@@ -84,10 +84,21 @@ def selenium_driver_session(selenium_module_fixture):
     return selenium_module_fixture.driver
 
 
+# Extend the Selenium driver with client-specific methods.
+class _SeleniumClientUtils(_SeleniumUtils):
+    def inject_random_values(self, value_array):
+        self.driver.execute_script("""
+            rs_test_rand = function() {
+                let index = 0;
+                return () => [%s][index++];
+            }();
+        """ % (", ".join([str(i) for i in value_array])))
+
+
 # Present ``_SeleniumUser`` as a fixture.
 @pytest.fixture
 def selenium_utils(selenium_driver):  # noqa: F811
-    return _SeleniumUtils(selenium_driver, HOST_URL)
+    return _SeleniumClientUtils(selenium_driver, HOST_URL)
 
 
 # Provide a fixture which loads the ``index.html`` page.
