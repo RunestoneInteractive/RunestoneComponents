@@ -45,10 +45,24 @@
         {% else %}
           <div class="brand-logo"><img src="{{pathto(logo, 1)}}" alt=""></div>
         {% endif %}
-        <a class="navbar-brand" href="{{ pathto(master_doc) }}" aria-label="index-page">
+        <a class="navbar-brand" href="{{ pathto(master_doc) }}" aria-label="index-page" style="margin-bottom: 15px;" >
           {% if dynamic_pages == 'True' %}
             {% raw %}
-            {{ =course_name }}
+            <div id="myinstitution">{{ =institution}}</div>
+            {{=course_name}}           
+            <!-- <script src="../sphinx_bootstrap/static/layout.js"></script> -->
+            <script>
+               let tagword = document.getElementById("myinstitution").textContent; // get the contenet of the retrieved institution name  
+               let noinstitution; // this variable to store the name will be displayed 
+               if (tagword == "None" ) {
+                   noinstitution ="";    // display an empty string in case of generic textbooks  
+               }
+               else {
+                   noinstitution = tagword; // if not generic textbook display the retrieved name from database 
+               }
+               document.getElementById("myinstitution").innerHTML = noinstitution;  // change the inner text of the tag 
+            </script>
+              
             {% endraw %}
           {% else %}
           {% if course_title -%}{{ course_title|e }}{%- else -%}{{ course_id|e }}{%- endif -%}
@@ -110,9 +124,9 @@
           </a>
           <ul class='dropdown-menu'>
             {% if 'overview' in course_id %}
-                <li><a href='{{ pathto(master_doc) }}/overview.html' aria-label="index-page">Table of Contents</a></li>
+                <li><a href='{{ pathto(master_doc) }}/overview.html' aria-label="index-page">Table of Contents m</a></li>
             {% else: %}
-                <li><a href='{{ pathto(master_doc) }}' aria-label="index-page">Table of Contents</a></li>
+                <li><a href='{{ pathto(master_doc) }}' aria-label="index-page">Table of Contents n</a></li>
             {% endif %}
             <li><a href='{{ pathto("genindex.html",1) }}'>Book Index</a></li>
             <li class="divider"></li>
@@ -295,6 +309,26 @@
 <div class="container" id="main-content" role="main">
   
 <!-- Ad Serving for Runestone Campaign -->
+{% raw %}
+  <br>
+  <p id="intrname" style="font-size: large;">Instructor: {{ =instructor_name}}</p>
+  <script>
+    let intr_name = document.getElementById("intrname").textContent;
+    let no_intr_name;
+    if ( document.URL.includes("index.html") ) {
+      if (intr_name == "Instructor: None" ) {
+        no_intr_name = "";
+        }
+      else {
+        no_intr_name = intr_name;
+        }
+      document.getElementById("intrname").innerHTML = no_intr_name;
+    }
+    else{
+      document.getElementById("intrname").innerHTML = "";
+    }
+  </script>
+{% endraw %}
 {% if dynamic_pages == 'True' %}
     {% raw %}
         {{ if settings.num_banners > 0 and settings.show_rs_banner: }}
