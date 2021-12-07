@@ -316,7 +316,7 @@
     let intr_name = document.getElementById("intrname").textContent;
     let no_intr_name;
     if ( document.URL.includes("index.html") ) {
-      if (intr_name == "Instructor: None" ) {
+      if (intr_name == "Instructor: None" || intr_name == "Instructor: " ) {
         no_intr_name = "";
         }
       else {
