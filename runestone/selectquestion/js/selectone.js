@@ -41,6 +41,7 @@ export default class SelectOne extends RunestoneBase {
         this.ABExperiment = $(opts.orig).data("ab");
         this.toggleOptions = $(opts.orig).data("toggleoptions");
         this.toggleLabels = $(opts.orig).data("togglelabels");
+        this.limitBaseCourse = $(opts.orig).data("limit-basecourse")
         opts.orig.id = this.selector_id;
     }
     /**
@@ -87,6 +88,9 @@ export default class SelectOne extends RunestoneBase {
         }
         if (this.toggleLabels) {
             data.toggleLabels = this.toggleLabels;
+        }
+        if (this.limitBaseCourse) {
+            data.limitBaseCourse = eBookConfig.basecourse;
         }
         let opts = this.origOpts;
         let selectorId = this.selector_id;
