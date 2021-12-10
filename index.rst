@@ -26,6 +26,9 @@ Components
     runestone/*/toctree
     runestone/__init__.py
     runestone/__main__.py
+    runestone/conftest.py
+    runestone/shared_conftest.py
+    runestone/unittest_base.py
 
 
 Packaging
@@ -36,6 +39,7 @@ Packaging
     setup.py
     setup.cfg
     MANIFEST.in
+    webpack.config.js
 
 Misc
 ====
@@ -47,11 +51,11 @@ Misc
     runestone/conftest.py
     runestone/shared_conftest.py
     .gitignore
+    .github/workflows/python-package.yml
     .readthedocs.yml
     conf.py
     codechat_config.yaml
     requirements-dev.in
     requirements.in
-    webpack.config.js
     public/index.html
     makeRelease.sh
