@@ -394,8 +394,9 @@ export default class MultipleChoice extends RunestoneBase {
             if (buttonObjs[i].checked) {
                 given = buttonObjs[i].value;
                 this.givenArray.push(given);
-                this.feedbackString += `<li value="${i + 1}">${this.feedbackList[i]
-                    }</li>`;
+                this.feedbackString += `<li value="${i + 1}">${
+                    this.feedbackList[i]
+                }</li>`;
                 this.givenlog += given + ",";
                 this.singlefeedback = this.feedbackList[i];
             }
@@ -533,7 +534,8 @@ export default class MultipleChoice extends RunestoneBase {
     }
 
     async logMCMFsubmission(sid) {
-        var answer = this.givenArray[0];
+        // If there's no answer provided (the array is empty), use a blank for the answer.
+        var answer = this.givenArray[0] || "";
         var correct =
             this.givenArray[0] == this.correctIndexList[0] ? "T" : "F";
         var logAnswer =
