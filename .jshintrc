@@ -7,7 +7,7 @@
         "allVisualizers",
         "console"
     ],
-    "esversion": 6,
+    "esversion": 8,
     "quotmark": true,
     "strict": "implied",
     "sub": true,

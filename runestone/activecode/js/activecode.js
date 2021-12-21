@@ -560,6 +560,8 @@ export class ActiveCode extends RunestoneBase {
         $(this.runButton).text($.i18n("msg_activecode_save_run"));
     }
 
+    // _`addHistoryScrubber`
+    // ---------------------
     // Activecode -- If the code has not changed wrt the scrubber position value then don't save the code or reposition the scrubber
     //  -- still call runlog, but add a parameter to not save the code
     // add an initial load history button
@@ -580,7 +582,7 @@ export class ActiveCode extends RunestoneBase {
             // If this is timed and already taken we should restore history info
             this.renderScrubber();
         } else {
-            let request = new Request(eBookConfig.ajaxURL + "gethist.json", {
+            let request = new Request(`${eBookConfig.new_server_prefix}/assessment/gethist`, {
                 method: "POST",
                 headers: this.jsonHeaders,
                 body: JSON.stringify(reqData),
@@ -588,6 +590,10 @@ export class ActiveCode extends RunestoneBase {
             try {
                 response = await fetch(request);
                 let data = await response.json();
+                if (!response.ok) {
+                    throw new Error(`Failed to get the history data: ${data.detail}`);
+                }
+                data = data.detail;
                 if (data.history !== undefined) {
                     this.history = this.history.concat(data.history);
                     for (let t in data.timestamps) {
@@ -597,7 +603,7 @@ export class ActiveCode extends RunestoneBase {
                     }
                 }
             } catch (e) {
-                console.log("unable to fetch history");
+                console.log(`unable to fetch history: ${e}`);
             }
             this.renderScrubber(pos_last);
         }
@@ -1193,7 +1199,7 @@ Yet another is that there is an internal error.  The internal error message is: 
         let data = {
             div_id: this.divid,
             code: this.editor.getValue(),
-            lang: this.language,
+            language: this.language,
             errinfo: this.errinfo,
             to_save: this.saveCode,
             prefix: this.pretext,

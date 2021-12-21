@@ -20,7 +20,9 @@ import { pageProgressTracker } from "./bookfuncs.js";
 
 export default class RunestoneBase {
     constructor(opts) {
-        this.component_ready_promise = new Promise(resolve => this._component_ready_resolve_fn = resolve)
+        this.component_ready_promise = new Promise(
+            (resolve) => (this._component_ready_resolve_fn = resolve)
+        );
         this.optional = false;
         if (typeof window.allComponents === "undefined") {
             window.allComponents = [];
@@ -61,7 +63,7 @@ export default class RunestoneBase {
                 // is to look for doAssignment in the URL and then grab
                 // the assignment name from the heading.
                 if (location.href.indexOf("doAssignment") >= 0) {
-                    this.timedWrapper = $("h1#assignment_name").text()
+                    this.timedWrapper = $("h1#assignment_name").text();
                 } else {
                     this.timedWrapper = null;
                 }
@@ -76,17 +78,15 @@ export default class RunestoneBase {
         });
     }
 
-    // .. _logBookEvent:
-    //
-    // logBookEvent
-    // ------------
+    // _`logBookEvent`
+    //----------------
     // This function sends the provided ``eventInfo`` to the `hsblog endpoint` of the server. Awaiting this function returns either ``undefined`` (if Runestone services are not available) or the data returned by the server as a JavaScript object (already JSON-decoded).
     async logBookEvent(eventInfo) {
         if (this.graderactive) {
             return;
         }
         let post_return;
-        eventInfo.course = eBookConfig.course;
+        eventInfo.course_name = eBookConfig.course;
         eventInfo.clientLoginStatus = eBookConfig.isLoggedIn;
         eventInfo.timezoneoffset = new Date().getTimezoneOffset() / 60;
         if (this.percent) {
@@ -121,7 +121,7 @@ export default class RunestoneBase {
 
     async postLogMessage(eventInfo) {
         var post_return;
-        let request = new Request(eBookConfig.ajaxURL + "hsblog", {
+        let request = new Request(`${eBookConfig.new_server_prefix}/logger/bookevent`, {
             method: "POST",
             headers: this.jsonHeaders,
             body: JSON.stringify(eventInfo),
@@ -157,7 +157,7 @@ export default class RunestoneBase {
             eventInfo.save_code = "True";
         }
         if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
-            let request = new Request(eBookConfig.ajaxURL + "runlog.json", {
+            let request = new Request(`${eBookConfig.new_server_prefix}/logger/runlog`, {
                 method: "POST",
                 headers: this.jsonHeaders,
                 body: JSON.stringify(eventInfo),
@@ -211,9 +211,11 @@ export default class RunestoneBase {
             if (this.sid) {
                 data.sid = this.sid;
             }
-            if (!eBookConfig.practice_mode && this.assessmentTaken) {
+            // If we are NOT in practice mode and we are not in a peer exercise
+            // and assessmentTaken is true
+            if (!eBookConfig.practice_mode && !eBookConfig.peer && this.assessmentTaken) {
                 let request = new Request(
-                    eBookConfig.ajaxURL + "getAssessResults",
+                    `${eBookConfig.new_server_prefix}/assessment/results`,
                     {
                         method: "POST",
                         body: JSON.stringify(data),
@@ -222,9 +224,16 @@ export default class RunestoneBase {
                 );
                 try {
                     let response = await fetch(request);
-                    data = await response.json();
-                    this.repopulateFromStorage(data);
-                    this.csresolver("server");
+                    if (response.ok) {
+                        data = await response.json();
+                        data = data.detail;
+                        this.repopulateFromStorage(data);
+                        this.csresolver("server");
+                    } else {
+                        alert(
+                            `HTTP Error getting results: ${response.statusText}`
+                        );
+                    }
                 } catch (err) {
                     try {
                         this.checkLocalStorage();
@@ -272,7 +281,7 @@ export default class RunestoneBase {
      */
     repopulateFromStorage(data) {
         // decide whether to use the server's answer (if there is one) or to load from storage
-        if (data !== null && this.shouldUseServer(data)) {
+        if (data !== null && data !== "no data" && this.shouldUseServer(data)) {
             this.restoreAnswers(data);
             this.setLocalStorage(data);
         } else {

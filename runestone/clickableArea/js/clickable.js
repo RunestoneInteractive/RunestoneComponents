@@ -400,9 +400,11 @@ export default class ClickableArea extends RunestoneBase {
     }
 
     async logCurrentAnswer(sid) {
+        const answer = this.givenIndexArray.join(";");
         let data = {
             event: "clickableArea",
-            act: this.givenIndexArray.join(";"),
+            answer: answer,
+            act: answer,
             div_id: this.divid,
             correct: this.correct ? "T" : "F",
         };

@@ -1,7 +1,10 @@
+<!-- ****************************************
+     |docname| - main template for this theme
+     **************************************** -->
 {% extends "basic/layout.html" %}
 
 {% if dynamic_pages == 'True' %}
-  {% set appname = '{{ =request.application }}' %}
+  {% set appname = 'runestone' %}
 {% endif %}
 
 
@@ -48,7 +51,7 @@
         <a class="navbar-brand" href="{{ pathto(master_doc) }}" aria-label="index-page">
           {% if dynamic_pages == 'True' %}
             {% raw %}
-            {{ =course_name }}
+            {{ course_name }}
             {% endraw %}
           {% else %}
           {% if course_title -%}{{ course_title|e }}{%- else -%}{{ course_id|e }}{%- endif -%}
@@ -147,6 +150,8 @@
             <li class="divider"></li>
             <li><a href='/{{appname}}/assignments/chooseAssignment.html'>Assignments</a></li>
             <li><a href='/{{appname}}/assignments/practice'>Practice</a></li>
+            <li id="inst_peer_link"><a href='/{{appname}}/peer/instructor.html'>Peer Instruction (Instructor)</a></li>            
+            <li><a href='/{{appname}}/peer/student.html'>Peer Instruction (Student)</a></li>            
             <li class="divider"></li>
             {% if minimal_outside_links != 'True' %}
             <li><a href='/{{appname}}/default/courses'>Change Course</a></li>
@@ -232,18 +237,20 @@
     {% raw %}
     eBookConfig.useRunestoneServices = true;
     eBookConfig.host = '';
-    eBookConfig.app = eBookConfig.host + '/' + '{{= request.application }}';
-    eBookConfig.course = '{{= course_name }}';
-    eBookConfig.basecourse = '{{= base_course }}';
-    eBookConfig.isLoggedIn = {{= is_logged_in}};
-    eBookConfig.email = '{{= user_email }}';
-    eBookConfig.isInstructor = {{= is_instructor }};
-    eBookConfig.username = '{{= user_id}}';
-    eBookConfig.readings = {{= readings}};
-    eBookConfig.activities = {{= XML(activity_info) }}
-    eBookConfig.downloadsEnabled = {{=downloads_enabled}};
-    eBookConfig.allow_pairs = {{=allow_pairs}}
-    eBookConfig.enableCompareMe = {{=enable_compare_me }};
+    eBookConfig.app = eBookConfig.host + '/runestone';
+    eBookConfig.course = '{{ course_name }}';
+    eBookConfig.basecourse = '{{ base_course }}';
+    eBookConfig.isLoggedIn = {{ is_logged_in}};
+    eBookConfig.email = '{{ user_email }}';
+    eBookConfig.isInstructor = {{ is_instructor }};
+    eBookConfig.username = '{{ user_id}}';
+    eBookConfig.readings = {{ readings}};
+    eBookConfig.activities = {{ activity_info|safe }}
+    eBookConfig.downloadsEnabled = {{downloads_enabled}};
+    eBookConfig.allow_pairs = {{allow_pairs}}
+    eBookConfig.enableCompareMe = {{enable_compare_me}};
+    // _`new_server_prefix`: Defined by the server to be the path to the new server.
+    eBookConfig.new_server_prefix = '{{ new_server_prefix }}';
     {% endraw %}
   {% else %}
     eBookConfig.useRunestoneServices = {% if use_services == 'true' -%}true{%- else -%}false{%- endif -%};
@@ -253,6 +260,7 @@
     eBookConfig.basecourse = '{{ basecourse }}';
     eBookConfig.isLoggedIn = false;
     eBookConfig.enableCompareMe = eBookConfig.useRunestoneServices;
+    eBookConfig.new_server_prefix = '';
   {% endif %}
   eBookConfig.ajaxURL = eBookConfig.app+'/ajax/';
   eBookConfig.logLevel = {{loglevel}};
@@ -271,9 +279,9 @@
 <!-- Ad Serving Headers Only serve ads to Anonymous Users -->
 {% if dynamic_pages == 'True' %}
     {% raw %}
-        {{ if response.serve_ad and settings.adsenseid: }}
-         <script data-ad-client="{{=settings.adsenseid}}" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-        {{ pass }}
+        {% if settings.serve_ad and settings.adsenseid %}
+         <script data-ad-client="{{settings.adsenseid}}" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        {% endif %}
     {% endraw %}
 {% endif %}
 
@@ -293,20 +301,20 @@
 <div class="container" id="continue-reading"></div>
 
 <div class="container" id="main-content" role="main">
-  
+
 <!-- Ad Serving for Runestone Campaign -->
 {% if dynamic_pages == 'True' %}
     {% raw %}
-        {{ if settings.num_banners > 0 and settings.show_rs_banner: }}
+        {% if settings.num_banners > 0 and settings.show_rs_banner %}
          <div style="width: 100%;">
-            <a href="/runestone/default/donate?banner={{=banner_num}}">
+            <a href="/runestone/default/donate?banner={{banner_num}}">
             <img class="runestone-banner"
-                 src="/runestone/static/images/RunestoneBanner{{=banner_num}}.png"
+                 src="/runestone/static/images/RunestoneBanner{{banner_num}}.png"
                  alt="Please Support Runestone"
                  style="display: block; width: 728px; margin-left: auto; margin-right: auto; margin-top: 10px;">
             </a>
          </div>
-        {{ pass }}
+        {% endif %}
     {% endraw %}
 {% endif %}
 
@@ -317,7 +325,7 @@
   </div>
 
   {% include "subchapter.html" %}
-  
+
 </div>
 {%- endblock %}
 
@@ -357,10 +365,10 @@
 
 {% if dynamic_pages == 'True' %}
   {% raw %}
-    {{ if request.application == 'runestone':}}
+    {% if request.application == 'runestone' %}
       <script>
         var _gaq = _gaq || [];
-        _gaq.push(['_setAccount', '{{ =settings.google_ga }}']);
+        _gaq.push(['_setAccount', '{{ settings.google_ga }}']);
         _gaq.push(['_trackPageview']);
 
         (function() {
@@ -369,7 +377,7 @@
           var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
         })();
       </script>
-    {{ pass }}
+    {% endif %}
   {% endraw %}
 
   {% if minimal_outside_links != 'True' %}
@@ -386,9 +394,9 @@
   {% endif %}
 {% endif %}
 
-<script> 
+<script>
   window.addEventListener('load', (event) => {
-    runestoneComponents.getSwitch(); 
+    runestoneComponents.getSwitch();
   });
 </script>
 

@@ -110,7 +110,7 @@ export default class Timed extends RunestoneBase {
         console.log(sendInfo);
         if (eBookConfig.useRunestoneServices) {
             let request = new Request(
-                eBookConfig.ajaxURL + "tookTimedAssessment",
+                `${eBookConfig.new_server_prefix}/assessment/tookTimedAssessment`,
                 {
                     method: "POST",
                     headers: this.jsonHeaders,
@@ -119,6 +119,7 @@ export default class Timed extends RunestoneBase {
             );
             let response = await fetch(request);
             let data = await response.json();
+            data = data.detail;
             this.taken = data.tookAssessment;
             this.assessmentTaken = this.taken;
             if (!this.taken) {
@@ -295,7 +296,7 @@ export default class Timed extends RunestoneBase {
         this.pagNavList.appendChild(this.rightContainer);
         this.ensureButtonSafety();
         this.navDiv.appendChild(this.pagNavList);
-        this.flagDiv.appendChild(this.flaggingPlace);           // adds flaggingPlace to the flagDiv 
+        this.flagDiv.appendChild(this.flaggingPlace);           // adds flaggingPlace to the flagDiv
         this.break = document.createElement("br");
         this.navDiv.appendChild(this.break);
         // render the question number jump buttons
@@ -391,11 +392,11 @@ export default class Timed extends RunestoneBase {
         $(
             "ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"
         ).addClass("active");
-        if  ($("ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"
-        ).hasClass("flagcolor")){                                           // checking for class 
+        if ($("ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"
+        ).hasClass("flagcolor")) {                                           // checking for class
             this.flagButton.innerHTML = "Unflag Question";                  // changes text on button
         }
-        else{
+        else {
             this.flagButton.innerHTML = "Flag Question";                    // changes text on button
         }
     }
@@ -440,11 +441,11 @@ export default class Timed extends RunestoneBase {
         $(
             "ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"
         ).addClass("active");
-        if  ($("ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"      // checking for flagcolor class
-        ).hasClass("flagcolor")){
+        if ($("ul#pageNums > ul > li:eq(" + this.currentQuestionIndex + ")"      // checking for flagcolor class
+        ).hasClass("flagcolor")) {
             this.flagButton.innerHTML = "Unflag Question";
         }
-        else{
+        else {
             this.flagButton.innerHTML = "Flag Question";
         }
         await this.renderTimedQuestion();
@@ -1060,6 +1061,8 @@ export default class Timed extends RunestoneBase {
         });
         localStorage.setItem(this.localStorageKey(), storageObj);
     }
+    // _`timed exam endpoint parameters`
+    //----------------------------------
     logScore() {
         this.logBookEvent({
             event: "timedExam",
@@ -1068,7 +1071,7 @@ export default class Timed extends RunestoneBase {
             correct: this.score,
             incorrect: this.incorrect,
             skipped: this.skipped,
-            time: this.timeTaken,
+            time_taken: this.timeTaken,
         });
     }
     shouldUseServer(data) {
