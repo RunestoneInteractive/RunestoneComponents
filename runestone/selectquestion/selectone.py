@@ -188,7 +188,7 @@ class SelectQuestion(RunestoneIdDirective):
         else:
             self.options["AB"] = ""
 
-        if "basecourse" in options:
+        if "basecourse" in self.options:
             self.options["limit_basecourse"] = "data-limit-basecourse=true"
         else:
             self.options["limit_basecourse"] = ""
