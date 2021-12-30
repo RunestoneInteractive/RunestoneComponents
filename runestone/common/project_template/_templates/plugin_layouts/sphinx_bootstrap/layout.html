@@ -279,7 +279,7 @@
 <!-- Ad Serving Headers Only serve ads to Anonymous Users -->
 {% if dynamic_pages == 'True' %}
     {% raw %}
-        {% if serve_ad and settings.adsenseid %}
+        {% if serve_ad is defined and serve_ad and settings.adsenseid %}
          <script data-ad-client="{{settings.adsenseid}}" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
         {% endif %}
     {% endraw %}
