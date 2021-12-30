@@ -51,4 +51,4 @@ def test_r4(selenium_utils_get):
     su = selenium_utils_get
     su.wait_until_ready("question1")
     t1 = su.driver.find_element_by_id("reveal")
-    assert "{{ if is_instructor: }}" in t1.get_attribute("innerHTML")
+    assert "{% if is_instructor: %}" in t1.get_attribute("innerHTML")

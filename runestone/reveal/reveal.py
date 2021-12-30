@@ -73,7 +73,7 @@ def depart_reveal_node(self, node):
 
 # Templates to be formatted by node options
 DYNAMIC_PREFIX = """
-{{ if is_instructor: }}
+{% if is_instructor: %}
 """
 TEMPLATE_START = """
     <div data-component="reveal" id="%(divid)s" %(modal)s %(modaltitle)s %(showtitle)s %(hidetitle)s %(instructoronly)s style="visibility: hidden;">
@@ -82,7 +82,7 @@ TEMPLATE_END = """
     </div>
     """
 DYNAMIC_SUFFIX = """
-{{ pass }}
+{% endif %}
 """
 
 
