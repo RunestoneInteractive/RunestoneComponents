@@ -13,13 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+# **************************************************************
+# |docname| - Record chapter info in the database during a build
+# **************************************************************
 
 __author__ = "bmiller"
 
-import os.path
+from typing import Sequence
 from collections import OrderedDict
 import docutils
-import pdb
 from sphinx.util import logging
 
 logger = logging.getLogger(__name__)
@@ -43,7 +45,6 @@ def env_updated(app, doctree, docname):
     """
     This may be the best place to walk the completed document with TOC
     """
-    # pdb.set_trace()
     # ``docname`` is stored with Unix-style forward slashes, even on Windows. Therefore, we can't use ``os.path.basename`` or ``os.sep``.
     splits = docname.split("/")
     # If the docname is ``'index'``, then set ``chap_id`` to an empty string.
@@ -76,7 +77,6 @@ def env_updated(app, doctree, docname):
         secnum_str = ".".join(map(str, secnum_tuple)) + " " if secnum_tuple else ""
         # Prepend it to the title.
         title = secnum_str + section.next_node(docutils.nodes.Titular).astext()
-        # pdb.set_trace()
 
         if hasattr(app.env, "skipreading") and docname in app.env.skipreading:
             app.env.skips[(chap_id, subchap_id)] = True
@@ -106,11 +106,18 @@ def env_updated(app, doctree, docname):
     return []
 
 
-def make_subchap_num(sn_tuple):
-    if not sn_tuple:
+# Given a sequence of section numbers, produce a single (orderable) int from the subchapter number and optionally the subsubchapter. Any finer divisions are ignored.
+def make_subchap_num(
+    # A sequence of section numbers in the format ``(chapter, subchapter, optional_subsubchapter, ignored_stuff...)``.
+    sn_seq: Sequence[int]
+    # Returns subchapter*100 + optional_subsubchapter.
+) -> int:
+    if not sn_seq or len(sn_seq) < 2:
         return 0
 
-    if len(sn_tuple) > 2:
-        return sn_tuple[1] * 100 + sn_tuple[2]
-    elif len(sn_tuple) == 2:
-        return sn_tuple[1] * 100
+    # Ignore the chapter number at ``sn_tuple[0]`` -- we're creating a subchapter number.
+    ret = sn_seq[1] * 100
+    # Include the subsubchapter number if it exists. Ignore everything else.
+    if len(sn_seq) > 2:
+        ret += sn_seq[2]
+    return ret

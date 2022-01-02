@@ -164,9 +164,9 @@ def depart_lp_node(self, node):
     {}
     <input type="button" value="Save and run" class="btn btn-success" data-component="lp_build" data-question_label="%(question_label)s" data-lang="{}" id="{}" />
     <br />
-    <textarea readonly id="lp-result"></textarea>
+    <textarea readonly class="lp-result"></textarea>
     <br />
-    <div></div>
+    <div class="lp-feedback"><div></div></div>
 </div>""".format(
         "".join(self.body), node.runestone_options["language"], id_
     )

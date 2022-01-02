@@ -25,13 +25,13 @@ function getCompletions() {
     var data = { lastPageUrl: currentPathname };
     jQuery
         .ajax({
-            url: eBookConfig.ajaxURL + "getCompletionStatus",
+            url: `${eBookConfig.new_server_prefix}/logger/getCompletionStatus`,
             data: data,
             async: false,
         })
         .done(function (data) {
             if (data != "None") {
-                var completionData = $.parseJSON(data);
+                var completionData = data.detail;
                 var completionClass, completionMsg;
                 if (completionData[0].completionStatus == 1) {
                     completionClass = "buttonConfirmCompletion";
@@ -43,10 +43,10 @@ function getCompletions() {
                 }
                 $("#main-content").append(
                     '<div style="text-align:center"><button class="btn btn-lg ' +
-                        completionClass +
-                        '" id="completionButton">' +
-                        completionMsg +
-                        "</button></div>"
+                    completionClass +
+                    '" id="completionButton">' +
+                    completionMsg +
+                    "</button></div>"
                 );
             }
         });
@@ -57,8 +57,8 @@ function showLastPositionBanner() {
     if (typeof lastPositionVal !== "undefined") {
         $("body").append(
             '<img src="../_static/last-point.png" style="position:absolute; padding-top:55px; left: 10px; top: ' +
-                parseInt(lastPositionVal) +
-                'px;"/>'
+            parseInt(lastPositionVal) +
+            'px;"/>'
         );
         $("html, body").animate({ scrollTop: parseInt(lastPositionVal) }, 1000);
     }
@@ -122,6 +122,9 @@ function addNavigationAndCompletionButtons() {
     } else {
         completionFlag = 1;
     }
+    // Make sure we mark this page as visited regardless of how flakey
+    // the onunload handlers become.
+    processPageState(completionFlag);
     $("#completionButton").on("click", function () {
         if ($(this).hasClass("buttonAskCompletion")) {
             $(this)
@@ -158,17 +161,19 @@ function addNavigationAndCompletionButtons() {
     });
 }
 
+// _ decorateTableOfContents
+// -------------------------
 function decorateTableOfContents() {
     if (
         window.location.href.toLowerCase().indexOf("toc.html") != -1 ||
         window.location.href.toLowerCase().indexOf("index.html") != -1
     ) {
-        jQuery.get(eBookConfig.ajaxURL + "getAllCompletionStatus", function (
+        jQuery.get(`${eBookConfig.new_server_prefix}/logger/getAllCompletionStatus`, function (
             data
         ) {
             var subChapterList;
             if (data != "None") {
-                subChapterList = $.parseJSON(data);
+                subChapterList = data.detail;
 
                 var allSubChapterURLs = $("#main-content div li a");
                 $.each(subChapterList, function (index, item) {
@@ -183,8 +188,8 @@ function decorateTableOfContents() {
                                     .addClass("completed")
                                     .append(
                                         '<span class="infoTextCompleted">- Completed this topic on ' +
-                                            item.endDate +
-                                            "</span>"
+                                        item.endDate +
+                                        "</span>"
                                     )
                                     .children()
                                     .first()
@@ -205,8 +210,8 @@ function decorateTableOfContents() {
                                     .addClass("active")
                                     .append(
                                         '<span class="infoTextActive">Last read this topic on ' +
-                                            item.endDate +
-                                            "</span>"
+                                        item.endDate +
+                                        "</span>"
                                     )
                                     .children()
                                     .first()
@@ -229,25 +234,25 @@ function decorateTableOfContents() {
             }
         });
         var data = { course: eBookConfig.course };
-        jQuery.get(eBookConfig.ajaxURL + "getlastpage", data, function (data) {
+        jQuery.get(`${eBookConfig.new_server_prefix}/logger/getlastpage`, data, function (data) {
             var lastPageData;
             if (data != "None") {
-                lastPageData = $.parseJSON(data);
-                if (lastPageData[0].lastPageChapter != null) {
+                lastPageData = data.detail;
+                if (lastPageData.lastPageChapter != null) {
                     $("#continue-reading")
                         .show()
                         .html(
                             '<div id="jump-to-chapter" class="alert alert-info" ><strong>You were Last Reading:</strong> ' +
-                                lastPageData[0].lastPageChapter +
-                                (lastPageData[0].lastPageSubchapter
-                                    ? " &gt; " +
-                                      lastPageData[0].lastPageSubchapter
-                                    : "") +
-                                ' <a href="' +
-                                lastPageData[0].lastPageUrl +
-                                "?lastPosition=" +
-                                lastPageData[0].lastPageScrollLocation +
-                                '">Continue Reading</a></div>'
+                            lastPageData.lastPageChapter +
+                            (lastPageData.lastPageSubchapter
+                                ? " &gt; " +
+                                lastPageData.lastPageSubchapter
+                                : "") +
+                            ' <a href="' +
+                            lastPageData.lastPageUrl +
+                            "?lastPosition=" +
+                            lastPageData.lastPageScrollLocation +
+                            '">Continue Reading</a></div>'
                         );
                 }
             }
@@ -265,6 +270,8 @@ function enableCompletions() {
 // call enable user highlights after login
 $(document).bind("runestone:login", enableCompletions);
 
+// _ processPageState
+// -------------------------
 function processPageState(completionFlag) {
     /*Log last page visited*/
     var currentPathname = window.location.pathname;
@@ -285,8 +292,11 @@ function processPageState(completionFlag) {
         console.log(e);
     });
     jQuery.ajax({
-        url: eBookConfig.ajaxURL + "updatelastpage",
-        data: data,
+        url: `${eBookConfig.new_server_prefix}/logger/updatelastpage`,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        data: JSON.stringify(data),
+        method: "POST",
         async: true,
     });
 }

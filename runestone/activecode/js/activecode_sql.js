@@ -237,7 +237,7 @@ export default class SQLActiveCode extends ActiveCode {
         let data = {
             div_id: this.divid,
             code: this.editor.getValue(),
-            lang: this.language,
+            language: this.language,
             errinfo: this.results[this.results.length - 1].status,
             to_save: this.saveCode,
             prefix: this.pretext,

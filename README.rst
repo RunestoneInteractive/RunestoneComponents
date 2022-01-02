@@ -13,6 +13,11 @@ RunestoneComponents
 
 Packaging of the Runestone components for publishing educational materials using Sphinx and restructuredText. Check out the `Overview <http://interactivepython.org/runestone/static/overview/overview.html>`_ To see all of the extensions in action.
 
+Runestone Version 6
+-------------------
+
+**Important** December 2021 - merged Runestone 6 to master branch.  In runestone 6.0 we assume that you are using the new `bookserver` for serving books.  This is installed automatically as part of the Docker build in the main RunestoneServer.  But you can also `pip install bookserver` to run a small scale server that uses sqllite.  Eventually `bookserver` will replace the super simple server you get when you run `runestone serve`
+
 Documentation
 -------------
 

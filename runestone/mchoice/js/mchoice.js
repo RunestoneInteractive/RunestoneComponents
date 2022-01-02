@@ -15,7 +15,7 @@ import RunestoneBase from "../../common/js/runestonebase.js";
 //import "./../styles/runestone-custom-sphinx-bootstrap.css";
 import "../css/mchoice.css";
 
-export var mcList = {}; // Multiple Choice dictionary
+window.mcList = {}; // Multiple Choice dictionary
 
 // MC constructor
 export default class MultipleChoice extends RunestoneBase {
@@ -221,13 +221,17 @@ export default class MultipleChoice extends RunestoneBase {
                 function (ev) {
                     ev.preventDefault();
                     this.processMCMFSubmission(true);
+                    if (eBookConfig.peer) {
+                        this.submitButton.disabled = true;
+                        this.disableInteraction();
+                    }
                 }.bind(this),
                 false
             );
         } // end else
         this.optsForm.appendChild(this.submitButton);
         // Create compare button
-        if (this.useRunestoneServices) {
+        if (this.useRunestoneServices && !eBookConfig.peer) {
             this.compareButton = document.createElement("button");
             $(this.compareButton).attr({
                 class: "btn btn-default",
@@ -371,9 +375,11 @@ export default class MultipleChoice extends RunestoneBase {
         if (logFlag) {
             this.logMCMAsubmission();
         }
-        this.renderMCMAFeedBack();
-        if (this.useRunestoneServices) {
-            this.enableMCComparison();
+        if (!eBookConfig.peer) {
+            this.renderMCMAFeedBack();
+            if (this.useRunestoneServices) {
+                this.enableMCComparison();
+            }
         }
     }
 
@@ -388,8 +394,9 @@ export default class MultipleChoice extends RunestoneBase {
             if (buttonObjs[i].checked) {
                 given = buttonObjs[i].value;
                 this.givenArray.push(given);
-                this.feedbackString += `<li value="${i + 1}">${this.feedbackList[i]
-                    }</li>`;
+                this.feedbackString += `<li value="${i + 1}">${
+                    this.feedbackList[i]
+                }</li>`;
                 this.givenlog += given + ",";
                 this.singlefeedback = this.feedbackList[i];
             }
@@ -506,13 +513,16 @@ export default class MultipleChoice extends RunestoneBase {
         if (logFlag) {
             this.logMCMFsubmission();
         }
-        this.renderMCMFFeedback();
-        if (this.useRunestoneServices) {
-            this.enableMCComparison();
+        if (!eBookConfig.peer) {
+            this.renderMCMFFeedback();
+            if (this.useRunestoneServices) {
+                this.enableMCComparison();
+            }
         }
     }
 
     scoreMCMFSubmission() {
+        this.answer = this.givenArray[0]
         if (this.givenArray[0] == this.correctIndexList[0]) {
             this.correct = true;
             this.percent = 1.0;
@@ -524,7 +534,8 @@ export default class MultipleChoice extends RunestoneBase {
     }
 
     async logMCMFsubmission(sid) {
-        var answer = this.givenArray[0];
+        // If there's no answer provided (the array is empty), use a blank for the answer.
+        var answer = this.givenArray[0] || "";
         var correct =
             this.givenArray[0] == this.correctIndexList[0] ? "T" : "F";
         var logAnswer =
@@ -579,7 +590,7 @@ export default class MultipleChoice extends RunestoneBase {
         return res;
     }
     compareModal(data, status, whatever) {
-        var datadict = JSON.parse(data)[0];
+        var datadict = data.detail;
         var answers = datadict.answerDict;
         var misc = datadict.misc;
         var kl = Object.keys(answers).sort();
@@ -633,12 +644,13 @@ export default class MultipleChoice extends RunestoneBase {
         var el = $(html);
         el.modal();
     }
+    // _`compareAnswers`
     compareAnswers() {
         var data = {};
         data.div_id = this.divid;
-        data.course = eBookConfig.course;
+        data.course_name = eBookConfig.course;
         jQuery.get(
-            eBookConfig.ajaxURL + "getaggregateresults",
+            `${eBookConfig.new_server_prefix}/assessment/getaggregateresults`,
             data,
             this.compareModal.bind(this)
         );
@@ -649,6 +661,13 @@ export default class MultipleChoice extends RunestoneBase {
             this.optionArray[i].input.disabled = true;
         }
     }
+
+    enableInteraction() {
+        for (var i = 0; i < this.optionArray.length; i++) {
+            this.optionArray[i].input.disabled = false;
+        }
+    }
+
 }
 
 /*=================================
@@ -664,7 +683,7 @@ $(document).bind("runestone:login-complete", function () {
         };
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
-            mcList[this.id] = new MultipleChoice(opts);
+            window.mcList[this.id] = new MultipleChoice(opts);
         }
     });
 });
