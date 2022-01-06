@@ -8,12 +8,14 @@
         >This Chapter<b class="caret"></b
     ></a>
     <ul class="dropdown-menu globaltoc">
-        {% raw %} {% for row in subchapter_list %}
+        {% raw %} 
+        {% for row in subchapter_list %}
         <li class="toctree-l1">
             <a class="reference internal" href="{{ row['subchap_uri']}}"
                 >{{ row['title']}}</a
             >
         </li>
-        {% endfor %} {% endraw %}
+        {% endfor %} 
+        {% endraw %}
     </ul>
 </li>
