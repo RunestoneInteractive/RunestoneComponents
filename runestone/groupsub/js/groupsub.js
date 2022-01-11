@@ -108,8 +108,12 @@ class GroupSub extends RunestoneBase {
         });
         for (let student of group) {
             for (let question of window.allComponents) {
-                console.log(`${student} ${question}`)
-                await question.logCurrentAnswer(student)
+                try{
+                    console.log(`${student} ${question}`)
+                    await question.logCurrentAnswer(student)
+                } catch(e) {
+                    console.log(`failed to submit ${question} : ${e}`)
+                }
             }
         }
 

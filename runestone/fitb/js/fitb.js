@@ -215,8 +215,8 @@ export default class FITB extends RunestoneBase {
         });
         let data = {
             event: "fillb",
-            act: answer,
-            answer: answer,
+            act: answer || "",
+            answer: answer || "",
             correct: this.correct ? "T" : "F",
             div_id: this.divid,
         };
