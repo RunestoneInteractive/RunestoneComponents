@@ -29,9 +29,7 @@ imagesize==1.3.0
 jinja2==3.0.3
     # via sphinx
 lxml==4.7.1
-    # via
-    #   -r requirements.in
-    #   codechat
+    # via codechat
 markupsafe==2.0.1
     # via jinja2
 packaging==21.3

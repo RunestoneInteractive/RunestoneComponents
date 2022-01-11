@@ -78,9 +78,7 @@ keyring==23.5.0
 lazy-object-proxy==1.7.1
     # via astroid
 lxml==4.7.1
-    # via
-    #   -r requirements.in
-    #   codechat
+    # via codechat
 markdown-it-py==2.0.0
     # via
     #   mdit-py-plugins
