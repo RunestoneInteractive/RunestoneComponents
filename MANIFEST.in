@@ -1,8 +1,17 @@
 # *********
 # |docname|
 # *********
-graft runestone
+graft runestone/dist
 include requirements.txt
 include README.md
-prune runestone/*/test
-
+# Some of the Runestone Components doesn't use webpack; they still need raw JS/CSS available. See `runestone_static_dirs()`.
+graft runestone/animation/js
+graft runestone/codelens/js
+graft runestone/webgldemo/js
+graft runestone/matrixeq/js
+graft runestone/accessibility/css
+graft runestone/webgldemo/css
+graft runestone/matrixeq/css
+graft runestone/lp/css
+# We need to include the templates used by Sphinx.
+graft runestone/common/project_template

@@ -45,7 +45,6 @@ setup(
     include_package_data=True,
     zip_safe=False,
     package_dir={"runestone": "runestone"},
-    package_data={"": ["js/*.js", "css/*.css", "*.txt"]},
     license="GPL",
     url="https://github.com/RunestoneInteractive/RunestoneComponents",
     download_url="https://github.com/RunestoneInteractive/RunestoneComponents/tarball/{}".format(
@@ -71,9 +70,6 @@ setup(
         "Topic :: Education",
         "Topic :: Text Processing :: Markup",
     ],
-    # data_files=[('common',['runestone/common/*']),
-    #             ('project/template', ['newproject_copy_me/*'])
-    # ],
     long_description=open("README.rst").read(),
     long_description_content_type="text/x-rst",
     entry_points={"console_scripts": ["runestone = runestone.__main__:cli"]},
