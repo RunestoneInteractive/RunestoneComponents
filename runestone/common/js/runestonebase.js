@@ -135,6 +135,11 @@ export default class RunestoneBase {
         try {
             let response = await fetch(request);
             if (!response.ok) {
+                if (response.status === 422) {
+                    // Get details about why this is unprocesable.
+                    post_return = await response.json()
+                    console.log(post_return.detail)
+                }
                 throw new Error("Failed to save the log entry");
             }
             post_return = response.json();
