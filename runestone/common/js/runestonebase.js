@@ -212,7 +212,7 @@ export default class RunestoneBase {
         this.checkServerComplete = new Promise(function (resolve, reject) {
             self.csresolver = resolve;
         });
-        if (this.useRunestoneServices || this.graderactive) {
+        if (eBookConfig.isLoggedIn && (this.useRunestoneServices || this.graderactive)) {
             let data = {};
             data.div_id = this.divid;
             data.course = eBookConfig.course;
@@ -224,6 +224,9 @@ export default class RunestoneBase {
             }
             if (this.sid) {
                 data.sid = this.sid;
+            }
+            if (! (data.div_id && data.course && data.event) ) {
+                console.log(`A required field is missing data ${data.div_id}:${data.course}:${data.event}`)
             }
             // If we are NOT in practice mode and we are not in a peer exercise
             // and assessmentTaken is true
