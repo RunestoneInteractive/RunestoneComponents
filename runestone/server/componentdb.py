@@ -272,7 +272,13 @@ def addQuestionToDB(self):
             author = os.environ.get("USER", "Brad Miller")
 
         autograde = self.options.get("autograde", None)
-        practice = self.options.get("practice", None)
+        if "practice" in self.options:
+            value = self.options["practice"].upper()
+            assert value == "T" or value == "F", f":practice: must be T or F not '{value}'"
+            practice = value
+        else:
+            practice = None
+
         if ("topics" in self.options) and (self.options["topics"] != ""):
             topics = self.options["topics"]
         else:
