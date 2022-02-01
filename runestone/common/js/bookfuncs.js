@@ -72,7 +72,7 @@ function addReadingList() {
 
 function timedRefresh() {
     var timeoutPeriod = 900000; // 75 minutes
-    $(document).bind("idle.idleTimer", function () {
+    $(document).on("idle.idleTimer", function () {
         // After timeout period send the user back to the index.  This will force a login
         // if needed when they want to go to a particular page.  This may not be perfect
         // but its an easy way to make sure laptop users are properly logged in when they
@@ -165,26 +165,27 @@ export var pageProgressTracker = {};
 
 async function handlePageSetup() {
     var mess;
-    let headers = new Headers({
-        "Content-type": "application/json; charset=utf-8",
-        Accept: "application/json",
-    });
-    let data = { timezoneoffset: new Date().getTimezoneOffset() / 60 };
-    let request = new Request(`${eBookConfig.new_server_prefix}/logger/set_tz_offset`, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: headers,
-    });
-    try {
-        let response = await fetch(request);
-        if (!response.ok) {
-            console.error(`Failed to set timezone! ${response.statusText}`);
+    if (eBookConfig.useRunestoneServices) {
+        let headers = new Headers({
+            "Content-type": "application/json; charset=utf-8",
+            Accept: "application/json",
+        });
+        let data = { timezoneoffset: new Date().getTimezoneOffset() / 60 };
+        let request = new Request(`${eBookConfig.new_server_prefix}/logger/set_tz_offset`, {
+            method: "POST",
+            body: JSON.stringify(data),
+            headers: headers,
+        });
+        try {
+            let response = await fetch(request);
+            if (!response.ok) {
+                console.error(`Failed to set timezone! ${response.statusText}`);
+            }
+            data = await response.json();
+        } catch (e) {
+            console.error(`Error setting timezone ${e}`);
         }
-        data = await response.json();
-    } catch (e) {
-        console.error(`Error setting timezone ${e}`);
     }
-
     if (eBookConfig.isLoggedIn) {
         mess = `username: ${eBookConfig.username}`;
         if (!eBookConfig.isInstructor) {
