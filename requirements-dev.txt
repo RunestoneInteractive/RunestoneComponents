@@ -28,9 +28,9 @@ certifi==2021.10.8
     #   urllib3
 cffi==1.15.0
     # via cryptography
-charset-normalizer==2.0.10
+charset-normalizer==2.0.11
     # via requests
-click==7.1.2
+click==8.0.3
     # via
     #   -r requirements.in
     #   pip-tools
@@ -50,9 +50,9 @@ docutils==0.16
     #   myst-parser
     #   readme-renderer
     #   sphinx
-easyprocess==0.3
+easyprocess==1.1
     # via pyvirtualdisplay
-h11==0.12.0
+h11==0.13.0
     # via wsproto
 idna==3.3
     # via
@@ -61,7 +61,7 @@ idna==3.3
     #   urllib3
 imagesize==1.3.0
     # via sphinx
-importlib-metadata==4.10.0
+importlib-metadata==4.10.1
     # via
     #   keyring
     #   twine
@@ -79,7 +79,7 @@ lazy-object-proxy==1.7.1
     # via astroid
 lxml==4.7.1
     # via codechat
-markdown-it-py==2.0.0
+markdown-it-py==2.0.1
     # via
     #   mdit-py-plugins
     #   myst-parser
@@ -125,9 +125,9 @@ pygments==2.11.2
     #   sphinx
 pylint==2.12.2
     # via -r requirements-dev.in
-pyopenssl==21.0.0
+pyopenssl==22.0.0
     # via urllib3
-pyparsing==3.0.6
+pyparsing==3.0.7
     # via packaging
 pytest==6.2.5
     # via -r requirements-dev.in
@@ -157,7 +157,6 @@ six==1.16.0
     #   -r requirements.in
     #   bleach
     #   paver
-    #   pyopenssl
 sniffio==1.2.0
     # via trio
 snowballstemmer==2.2.0
@@ -183,7 +182,7 @@ sphinxcontrib-qthelp==1.0.3
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
-sqlalchemy==1.4.29
+sqlalchemy==1.4.31
     # via -r requirements.in
 toml==0.10.2
     # via
