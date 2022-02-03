@@ -137,8 +137,15 @@ export default class RunestoneBase {
             if (!response.ok) {
                 if (response.status === 422) {
                     // Get details about why this is unprocesable.
-                    post_return = await response.json()
-                    console.log(post_return.detail)
+                    post_return = await response.json();
+                    console.log(post_return.detail);
+                    throw new Error("Unprocessable Request");
+                } else if (response.status == 401) {
+                    post_return = await response.json();
+                    console.log(
+                        `Missing authentication token ${post_return.detail}`
+                    );
+                    throw new Error("Missing authentication token");
                 }
                 throw new Error("Failed to save the log entry");
             }
@@ -212,7 +219,10 @@ export default class RunestoneBase {
         this.checkServerComplete = new Promise(function (resolve, reject) {
             self.csresolver = resolve;
         });
-        if (eBookConfig.isLoggedIn && (this.useRunestoneServices || this.graderactive)) {
+        if (
+            eBookConfig.isLoggedIn &&
+            (this.useRunestoneServices || this.graderactive)
+        ) {
             let data = {};
             data.div_id = this.divid;
             data.course = eBookConfig.course;
@@ -225,8 +235,10 @@ export default class RunestoneBase {
             if (this.sid) {
                 data.sid = this.sid;
             }
-            if (! (data.div_id && data.course && data.event) ) {
-                console.log(`A required field is missing data ${data.div_id}:${data.course}:${data.event}`)
+            if (!(data.div_id && data.course && data.event)) {
+                console.log(
+                    `A required field is missing data ${data.div_id}:${data.course}:${data.event}`
+                );
             }
             // If we are NOT in practice mode and we are not in a peer exercise
             // and assessmentTaken is true
