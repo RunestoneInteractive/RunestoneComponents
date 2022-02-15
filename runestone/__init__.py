@@ -13,6 +13,7 @@ from .disqus import DisqusDirective
 from .dragndrop import DragNDrop
 from .fitb import FillInTheBlank
 from .groupsub import GroupSubmission
+from .hparsons import HParsonsNode
 from .khanex import Khanex
 from .selectquestion import SelectQuestion
 from .matrixeq import MatrixEq
@@ -246,6 +247,7 @@ cmap = {
     "disqus": DisqusDirective,
     "dragndrop": DragNDrop,
     "groupsub": GroupSubmission,
+    "hparsons": HParsonsNode,
     "parsonsprob": ParsonsProblem,
     "poll": Poll,
     "quizly": Quizly,

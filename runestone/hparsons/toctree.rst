@@ -8,4 +8,3 @@ Accessibility
     *.py
     js/*.js
     css/*.css
-    test/test_*.py

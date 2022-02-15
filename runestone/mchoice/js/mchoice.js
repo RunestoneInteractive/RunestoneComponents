@@ -21,6 +21,7 @@ window.mcList = {}; // Multiple Choice dictionary
 export default class MultipleChoice extends RunestoneBase {
     constructor(opts) {
         super(opts);
+        console.log('mchoice')
         opts = opts || {};
         var orig = opts.orig; // entire <ul> element
         this.origElem = orig;
@@ -127,6 +128,7 @@ export default class MultipleChoice extends RunestoneBase {
     renderMCContainer() {
         this.containerDiv = document.createElement("div");
         $(this.containerDiv).html(this.question);
+        $(this.containerDiv).addClass('mctesttest');
         $(this.containerDiv).addClass(this.origElem.getAttribute("class"));
         this.containerDiv.id = this.divid;
     }
