@@ -22,34 +22,26 @@ if (hpList === undefined) hpList = {};
 export default class HParsons extends RunestoneBase {
     constructor(opts) {
         super(opts);
-        console.log('hparsons')
         if (opts) {
             // TODO: what is orig?
             var orig = opts.orig; // entire <pre> element that will be replaced by new HTML
             this.containerDiv = orig;
-            this.origElem = $(orig).find("pre.parsonsblocks")[0];
+            this.origElem = $(orig).find(".hparsons")[0];
+            console.log('hparsons')
             console.log(orig)
+            console.log(this.origElem)
             this.useRunestoneServices =
                 opts.useRunestoneServices || eBookConfig.useRunestoneServices;
             this.divid = orig.id;
 
             // The element that is going to be replaced
-            // this.elem = $(orig).find(".hparsons")[0];
             // Find the question text and store it in .question
             this.question = $(orig).find(`.hparsons_question`)[0];
             // TODO: idk what this is with shortanswer
-            // this.question = this.origElem.innerHTML;
-            // this.optional = false;
-            // if ($(this.origElem).is("[data-optional]")) {
-            //     this.optional = true;
-            // }
-            // if ($(this.origElem).is("[data-mathjax]")) {
-            //     this.mathjax = true;
-            // }
             this.renderHTML();
             this.caption = "hparsons";
-            // this.addCaption("runestone");
-            // this.checkServer("hparsons", true);
+            this.addCaption("runestone");
+            this.checkServer("hparsons", true);
 
             // Set the storageId (key for storing data)
             var storageId = super.localStorageKey();
@@ -63,13 +55,15 @@ export default class HParsons extends RunestoneBase {
 
     renderHTML() {
         console.log('renderhtml');
-        const div = document.createElement('regex-element');
-        div.setAttribute('input-type', 'parsons')
-        div.id = 'abcd';
-        $(this.origElem).replaceWith(div);
+        // const div = document.createElement('regex-element');
+        // div.setAttribute('input-type', 'parsons')
+        // div.id = 'abcd';
+        // console.log(this.origElem)
+        $(this.origElem).html('<regex-element id="tool-area"></regex-element>');
+        // console.log(this.origElem)
         // $(this.origElem).replaceWith(document.createElement('regex-element'));
         // $(this.elem).innerHTML = `<regex-element input-type='parsons' id="abcd"></regex-element>`;
-        console.log(div)
+        // console.log(div)
     }
 
     checkCurrentAnswer() { }

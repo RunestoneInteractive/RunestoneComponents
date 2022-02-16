@@ -91,10 +91,10 @@ class HParsonsDirective(Assessment):
 
     """
 
-    required_arguments = 0  # the div id
-    optional_arguments = 0
+    required_arguments = 1  # the div id
+    optional_arguments = 0 
     final_argument_whitespace = True
-    has_content = False
+    has_content = True 
     option_spec = Assessment.option_spec.copy()
     # seem to be defining the type of the options
     # option_spec.update({"mathjax": directives.flag})
