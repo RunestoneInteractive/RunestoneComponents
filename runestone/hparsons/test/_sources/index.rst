@@ -53,6 +53,10 @@ ActiveCode
     content content content
 
 
+.. hparsons:: codeexample2
+
+    content content content
+
 
 Multiple Choice
 ---------------
