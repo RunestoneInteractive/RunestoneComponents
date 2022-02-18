@@ -60,6 +60,7 @@ export default class HParsons extends RunestoneBase {
         console.log($(this.origElem).data("textentry"))
         let settings = JSON.parse($(this.origElem).children()[0].innerText)
         attributes += ' input-type=' + ($(this.origElem).data("textentry") ? 'text' : 'parsons' );
+        attributes += $(this.origElem).data("hidetests") ? ' hidetests="true"': '';
         $(this.origElem).html('<regex-element' + attributes + '></regex-element>');
         let regexElement = $(this.origElem).children()[0];
         if ($(this.origElem).data("nostrictmatch")) {

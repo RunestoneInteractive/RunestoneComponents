@@ -15913,8 +15913,14 @@ class UnitTestTable {
         this.el = document.createElement('div');
         this.el.id = 'regextool-' + this.parentElement.toolNumber + '-unittest-table';
         this.el.classList.add('regex-unittest');
+        if (this.parentElement.getAttribute('hidetests')) {
+            this.el.style.display = 'none';
+        }
+        else {
+            this.el.style.display = 'block';
+        }
         // the element is hidden initially.
-        this.el.classList.add('collapse');
+        // this.el.classList.add('collapse');
         // columns enabled besides the status column
         // TODO: only enabled notes for study 0 and 1
         this.columnsEnabled = ['actualOutput', 'expectedOutput', 'input', 'notes'];
@@ -16015,7 +16021,7 @@ class UnitTestTable {
         // creating the status(the first) column
         const row = document.createElement('tr');
         let status = result.success ? (JSON.stringify(result.match) === JSON.stringify(testCase.expect) ? 'Pass' : 'Fail') : 'Error';
-        console.log(status);
+        // console.log(status)
         // if (status == 'Pass' && JSON.stringify(testCase.expect) != '[]' && this.noGroupsAllowed && window.pyodide.globals.unit_match_group_cnt != 1) {
         //     status = 'Fail'
         //     // fail because no group is allowed
@@ -16813,7 +16819,7 @@ class RegexElement extends HTMLElement {
         };
         this.logEvent(problemFinished);
     };
-    static get observedAttributes() { return ['input-type', 'problem-id']; }
+    static get observedAttributes() { return ['input-type', 'problem-id', 'hidetests']; }
     attributeChangedCallback(name, oldValue, newValue) {
         switch (name) {
             case 'input-type': {
@@ -16823,6 +16829,14 @@ class RegexElement extends HTMLElement {
             case 'problem-id': {
                 this.problemId = newValue;
                 break;
+            }
+            case 'hidetests': {
+                if (newValue) {
+                    this.unitTestTable.el.style.display = 'none';
+                }
+                else {
+                    this.unitTestTable.el.style.display = 'block';
+                }
             }
         }
     }

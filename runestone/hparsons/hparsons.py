@@ -43,13 +43,13 @@ def setup(app):
 TEMPLATE_START = """
         <div>
         <div data-component="hparsons" id="%(divid)s" data-question_label="%(question_label)s" class="alert alert-warning hparsons" >
-        <div>
+        <div class="hparsons_question hparsons-text" >
     """
 
 TEMPLATE_END = """
         </div>
-        <div class="hparsons_question hparsons-text" >%(problem)s</div>
-        <div class="hparsons %(hidetests)s" %(textentry)s %(nostrictmatch)s>
+        <div>%(instructions)s</div>
+        <div class="hparsons" %(textentry)s %(nostrictmatch)s %(hidetests)s>
             <pre>%(settings)s</pre>
         </div>
         </div>
@@ -147,7 +147,7 @@ class HParsonsDirective(Assessment):
         else:
             self.options['textentry'] = ''
         if "hidetests" in self.options:
-            self.options['hidetests'] = 'hidetests'
+            self.options['hidetests'] = ' data-hidetests="true"'
         else:
             self.options['hidetests'] = ''
         if "nostrictmatch" in self.options:
@@ -167,7 +167,7 @@ class HParsonsDirective(Assessment):
                 has_content = True
                 delimitiers_index[i] = self.content.index(delimitiers[i])
         if has_content:
-            sorted_index, sorted_delimiters = [list(t) for t in zip(*[pair for pair in sorted(zip(delimitiers_index, delimitiers)) if pair[0] > 0])]
+            sorted_index, sorted_delimiters = [list(t) for t in zip(*[pair for pair in sorted(zip(delimitiers_index, delimitiers)) if pair[0] >= 0])]
         else:
             sorted_index = []
             sorted_delimiters = []
@@ -178,9 +178,9 @@ class HParsonsDirective(Assessment):
 
         if '--problem--' in sorted_delimiters:
             index = sorted_delimiters.index('--problem--')
-            self.options['problem'] = '\n'.join(content[(sorted_index[index] + 1): (sorted_index[index + 1] if index + 1 < len(sorted_index) else len(content))])
+            self.options['instructions'] = '\n'.join(content[(sorted_index[index] + 1): (sorted_index[index + 1] if index + 1 < len(sorted_index) else len(content))])
         else:
-            self.options['problem'] = 'empty problem'
+            self.options['instructions'] = 'empty problem'
 
         if '--blocks--' in sorted_delimiters:
             index = sorted_delimiters.index('--blocks--')
@@ -224,12 +224,13 @@ class HParsonsDirective(Assessment):
 
         # exist in short answer and mchoice but not parsons
         # For MChoice its better to insert the qnum into the content before further processing.
-        self.updateContent()
+        # self.updateContent()
 
+        # TODO: fix the nested parse
         # same as mchoice, different from parsons. i think it is for generating instructions.
         # parsons:
         # self.state.nested_parse(
-        #     self.options["instructions"], self.content_offset, parsons_node
+        #     self.options['instructions'], self.content_offset, hparsons_node
         # )
 
 
