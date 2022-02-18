@@ -16232,9 +16232,9 @@ class RegexElement extends HTMLElement {
         let match;
         while ((match = regex.exec(str)) != null) {
             // console.log(match)
-            console.log("Matched '" + match[0] + "' at position " + match.index +
-                "; next search at " + regex.lastIndex);
-            console.log("match: " + JSON.stringify(match));
+            // console.log("Matched '" + match[0] + "' at position " + match.index +
+            //      "; next search at " + regex.lastIndex);
+            // console.log("match: " + JSON.stringify(match));
             pos_result.push({ st: match.index, ed: regex.lastIndex });
             if (match.length < 2) {
                 match_result.push(new window.Sk.builtin.str(match[0]));
@@ -16259,7 +16259,7 @@ class RegexElement extends HTMLElement {
     constructor() {
         super();
         RegexElement.toolCount += 1;
-        console.log(RegexElement.toolCount);
+        // console.log(RegexElement.toolCount);
         this.toolNumber = RegexElement.toolCount;
         this.root = this.attachShadow({ mode: 'open' });
         window.Sk.configure({
@@ -16413,7 +16413,7 @@ class RegexElement extends HTMLElement {
                 enabled: false
             };
             this.logEvent(visibilityStatusEvent);
-            console.log("visibility not working");
+            // console.log("visibility not working");
         }
         else {
             const visibilityStatusEvent = {
@@ -16421,7 +16421,7 @@ class RegexElement extends HTMLElement {
                 enabled: true
             };
             this.logEvent(visibilityStatusEvent);
-            console.log("add visibility change");
+            // console.log("add visibility change");
             document.addEventListener("visibilitychange", (event) => {
                 let pageStatusEvent;
                 if (document.hidden) {
@@ -16461,8 +16461,8 @@ class RegexElement extends HTMLElement {
         // stub for student and problem id
         this.studentId = this._getStudentIdFromURL();
         this.problemId = this.getAttribute('problem-id') || '';
-        console.log(this.studentId);
-        console.log(this.problemId);
+        // console.log(this.studentId);
+        // console.log(this.problemId);
         this.temporaryInputEvent = null;
         this.matchFindall = true;
     }
@@ -16522,7 +16522,7 @@ class RegexElement extends HTMLElement {
         // sheet.innerHTML += '.regex-unittest > table, .regex-unittest td {border: 1px solid black; padding: 3px; text-align: center;}\n'
         // sheet.innerHTML += '.regex-unittest.collapse{display:none;}\n'
         // for study 0: hide the table
-        // sheet.innerHTML += '.regex-unittest{display:none;}\n'
+        sheet.innerHTML += '.hidetests .regex-unittest{display:none;}\n';
         document.body.appendChild(sheet);
         this.root.appendChild(sheet);
         const global_sheet = document.createElement('style');

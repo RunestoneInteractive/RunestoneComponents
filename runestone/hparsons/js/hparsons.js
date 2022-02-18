@@ -27,8 +27,6 @@ export default class HParsons extends RunestoneBase {
             var orig = opts.orig; // entire <pre> element that will be replaced by new HTML
             this.containerDiv = orig;
             this.origElem = $(orig).find(".hparsons")[0];
-            console.log('hparsons')
-            console.log(orig)
             console.log(this.origElem)
             this.useRunestoneServices =
                 opts.useRunestoneServices || eBookConfig.useRunestoneServices;
@@ -54,12 +52,50 @@ export default class HParsons extends RunestoneBase {
     }
 
     renderHTML() {
-        console.log('renderhtml');
         // const div = document.createElement('regex-element');
         // div.setAttribute('input-type', 'parsons')
         // div.id = 'abcd';
         // console.log(this.origElem)
-        $(this.origElem).html('<regex-element id="tool-area"></regex-element>');
+        let attributes = '';
+        console.log($(this.origElem).data("textentry"))
+        let settings = JSON.parse($(this.origElem).children()[0].innerText)
+        attributes += ' input-type=' + ($(this.origElem).data("textentry") ? 'text' : 'parsons' );
+        $(this.origElem).html('<regex-element' + attributes + '></regex-element>');
+        let regexElement = $(this.origElem).children()[0];
+        if ($(this.origElem).data("nostrictmatch")) {
+            regexElement.unitTestTable.strictMatch = false;
+        } else {
+            regexElement.unitTestTable.strictMatch = true;
+        }
+        if ($(this.origElem).data("hidetests")) {
+            regexElement.hidetests = false;
+        } else {
+            regexElement.unitTestTable.strictMatch = true;
+        }
+
+        if (settings.blocks) {
+            regexElement.parsonsData = settings.blocks;
+        }
+        if (settings.explanations) {
+            regexElement.parsonsExplanation = settings.explanations;
+        }
+        if (settings.positivetest) {
+            regexElement.setPositiveInitialTestString(settings.positivetest);
+        }
+        if (settings.negativetest) {
+            regexElement.setNegativeInitialTestString(settings.negativetest);
+        }
+        if (settings.testcases) {
+            regexElement.setTestCases(settings.testcases);
+        }
+
+        // tool.parsonsExplanation = toolConfig.parsonsExplanation;
+        // tool.parsonsData = toolConfig.parsonsData;
+        regexElement.resetTool();
+        // tool.setTestCases(toolConfig.testCases);
+        // tool.setPositiveInitialTestString(toolConfig.positiveInitialTestString);
+        // tool.setNegativeInitialTestString(toolConfig.negativeInitialTestString);
+
         // console.log(this.origElem)
         // $(this.origElem).replaceWith(document.createElement('regex-element'));
         // $(this.elem).innerHTML = `<regex-element input-type='parsons' id="abcd"></regex-element>`;
@@ -213,7 +249,6 @@ $(document).bind("runestone:login-complete", function () {
     $("[data-component=hparsons]").each(function () {
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
-            console.log('rendering hparsons')
             // try {
                 hpList[this.id] = new HParsons({
                     orig: this,

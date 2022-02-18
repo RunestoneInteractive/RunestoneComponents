@@ -1,62 +1,83 @@
-=====================
-This Is A New Project
-=====================
+=========================
+Horizontal Parsons Test
+=========================
 
-.. Here is were you specify the content and order of your new book.
+.. Testing horizontal Parsons problems.
 
-.. Each section heading (e.g. "SECTION 1: A Random Section") will be
-   a heading in the table of contents. Source files that should be
-   generated and included in that section should be placed on individual
-   lines, with one line separating the first source filename and the
-   :maxdepth: line.
-
-.. Sources can also be included from subfolders of this directory.
-   (e.g. "DataStructures/queues.rst").
-
-SECTION 1: Introduction
-:::::::::::::::::::::::
-
-Congratulations!   If you can see this file you have probably successfully run the ``runestone init`` command.  If you are looking at this as a source file you should now run ``runestone build``  to generate html files.   Once you have run the build command you can run ``runestone serve`` and then view this in your browser at ``http://localhost:8000``
-
-This is just a sample of what you can do.  The index.rst file is the table of contents for your entire project.  You can put all of your writing in the index, or  you can include additional rst files.  Those files may even be in subdirectories that you can reference using a relative path.
-
-
-::
-
-
-   .. toctree::
-      :maxdepth: 2
-
-      some/path/myfile.rst
-
-
-Section 2: Links
-::::::::::::::::
-
-Runestone uses the ``restructuredText`` (rst) markup language.  We chose this over markdown largely because rst is extensible.  Nearly all of the basic markup tasks are already handled by restructuredText.  You should check out the docs for the basics of restructuredText (link below). Our extensions are all for the interactive elements.  One key hint about restructuredText:  Its like **Python** -- *indentation matters!*
-
-* `restructuredText Docs <http://docutils.sourceforge.net/rst.html>`_
-* `Runestone Docs <https://runestone.academy/runestone/static/authorguide/index.html>`_
-* Join the discussion on our `Google Group <https://groups.google.com/forum/#!forum/runestone_instructors>`_
-* Tell us about problems on `Github <https://github.com/RunestoneInteractive/RunestoneComponents>`_
-
-
-
-SECTION 3: Sample Directives
-::::::::::::::::::::::::::::
-
-ActiveCode
-----------
+Horizontal Parsons + Regex
+---------------------------
 
 .. hparsons:: codeexample1
+    :hidetests:
+    :nostrictmatch:
 
-    content content content
+    --problem--
+    Capture words that start with a vowel letter(aeiou), but ends with a non-vowel letter. There can be 0 or more letters in between. Also, it is not allowed to have other characters besides letter in between. e.g. your regular expression should match unicorn, element, but should not match: banana, apple. All letters are lowercase.
+    --blocks--
+    [a-z]
+    [aeiou]
+    [^aeiou]
+    +
+    *
+    --explanations--
+    letter a to z
+    letter a, e, i, o, u
+    characters other than letter a, e, i, o, u
+    repeat one or more times
+    repeat zero or more times
+    --positive test string--
+    unicorn
+    element
+    --negative test string--
+    apple
+    banana
+    --test cases--
+    unicorn
+    ['unicorn']
+    element
+    ['element']
+    banana
+    []
+    bananu
+    []
+    apple
+    []
+    baby
+    []
+    az
+    ['az']
+    abcdefghizsdz
+    ['abcdefghizsdz']
+    abc9defghizsdz'
+    []
 
 
 .. hparsons:: codeexample2
+    :textentry:
 
     content content content
 
+
+Other Problems for reference
+-----------------------------
+
+.. parsonsprob:: test_parsons_1
+    :adaptive:
+    :order: 0 1 2 3 4
+
+    need some text ?
+    -----
+    def fib(num):
+    =====
+       if num == 0:
+           return 0:
+    =====
+       if num == 1:
+           return 1:
+    =====
+       return fib(num - 1) + fib(num - 2)
+    =====
+       return fib(num - 1) * fib(num - 2) #paired
 
 Multiple Choice
 ---------------

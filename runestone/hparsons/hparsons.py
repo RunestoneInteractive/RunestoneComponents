@@ -15,6 +15,8 @@
 #
 __author__ = "ziwu"
 
+from cgi import test
+import json
 from docutils import nodes
 from docutils.parsers.rst import directives
 from runestone.mchoice import Assessment
@@ -39,14 +41,16 @@ def setup(app):
 
 # TODO: what is the alert and alert-warnings?
 TEMPLATE_START = """
-        <div style="max-width: none;">
+        <div>
         <div data-component="hparsons" id="%(divid)s" data-question_label="%(question_label)s" class="alert alert-warning hparsons" >
-        <div class="hparsons_question hparsons-text" >
+        <div>
     """
 
 TEMPLATE_END = """
         </div>
-        <div class="hparsons">
+        <div class="hparsons_question hparsons-text" >%(problem)s</div>
+        <div class="hparsons %(hidetests)s" %(textentry)s %(nostrictmatch)s>
+            <pre>%(settings)s</pre>
         </div>
         </div>
         </div>
@@ -86,32 +90,131 @@ def depart_hparsons_node(self, node):
 class HParsonsDirective(Assessment):
     """
     .. hparsons:: uniqueid
+        :textentry: if you will use text entry instead of horizontal parsons
+        :hidetests: if the unittests will be hidden from learners
+        :nostrictmatch: if the answer is required to match the whole string. if not selected, the tool will add ^ and $ automatically to the answer to force matching the full string. This does not affect the test string area.
 
-        nothing makes sense at all.
-
+        --problem--
+        Here is the problem description. 
+        Make sure you use the correct delimitier for each section.
+        --blocks--
+        block 1
+        block 2
+        --explanations--
+        explanations for block 1
+        explanations for block 2
+        --positive test string--
+        this is some positive test string.
+        it can be more than one line.
+        just ignore this section if you do not want to put anything in there.
+        --negative test string--
+        this is some negative test string.
+        --test cases--
+        input string 1
+        ['expected match 1', 'expected match 2']
+        input string 2
+        []
+        input string 3
+        []
     """
 
     required_arguments = 1  # the div id
-    optional_arguments = 0 
-    final_argument_whitespace = True
+    optional_arguments = 1
+    final_argument_whitespace = False
     has_content = True 
     option_spec = Assessment.option_spec.copy()
+    option_spec.update(
+        {
+            "textentry": directives.flag,
+            "hidetests": directives.flag,
+            "nostrictmatch": directives.flag,
+        }
+    )
     # seem to be defining the type of the options
     # option_spec.update({"mathjax": directives.flag})
 
     # just fill it with the name
-    node_class = HParsonsNode 
+    # node_class = HParsonsNode 
 
     def run(self):
         # same
         super(HParsonsDirective, self).run()
         addQuestionToDB(self)
         # Raise an error if the directive does not have contents.
+        # env = self.state.document.settings.env
+        if "textentry" in self.options:
+            self.options['textentry'] = ' data-textentry="true"'
+        else:
+            self.options['textentry'] = ''
+        if "hidetests" in self.options:
+            self.options['hidetests'] = 'hidetests'
+        else:
+            self.options['hidetests'] = ''
+        if "nostrictmatch" in self.options:
+            self.options['nostrictmatch'] = ' data-nostrictmatch="true"'
+        else:
+            self.options['nostrictmatch'] = ''
+
         self.assert_has_content()
 
-        # specifying default for option?
-        # TODO: ignoring for now
-        # self.options["mathjax"] = "data-mathjax" if "mathjax" in self.options else ""
+        # sepcifying the start end end for each section
+        delimitiers = ['--problem--', '--blocks--', '--explanations--', '--positive test string--', '--negative test string--', '--test cases--']
+        delimitiers_index = [-1 for x in range(6)]
+
+        has_content = False
+        for i in range(len(delimitiers)):
+            if delimitiers[i] in self.content:
+                has_content = True
+                delimitiers_index[i] = self.content.index(delimitiers[i])
+        if has_content:
+            sorted_index, sorted_delimiters = [list(t) for t in zip(*[pair for pair in sorted(zip(delimitiers_index, delimitiers)) if pair[0] > 0])]
+        else:
+            sorted_index = []
+            sorted_delimiters = []
+        
+        content = self.content
+
+        parsons_settings = {}
+
+        if '--problem--' in sorted_delimiters:
+            index = sorted_delimiters.index('--problem--')
+            self.options['problem'] = '\n'.join(content[(sorted_index[index] + 1): (sorted_index[index + 1] if index + 1 < len(sorted_index) else len(content))])
+        else:
+            self.options['problem'] = 'empty problem'
+
+        if '--blocks--' in sorted_delimiters:
+            index = sorted_delimiters.index('--blocks--')
+            parsons_settings['blocks'] = list(content[sorted_index[index] + 1: (sorted_index[index + 1] if index + 1 < len(sorted_index) else len(content))])
+        else:
+            parsons_settings['blocks'] = []
+
+        if '--explanations--' in sorted_delimiters:
+            index = sorted_delimiters.index('--explanations--')
+            parsons_settings['explanations'] = list(content[sorted_index[index] + 1: (sorted_index[index + 1]  if index + 1 < len(sorted_index) else len(content))])
+
+        if '--positive test string--' in sorted_delimiters:
+            index = sorted_delimiters.index('--positive test string--')
+            parsons_settings['positivetest'] = '\n'.join(content[sorted_index[index] + 1: (sorted_index[index + 1]  if index + 1 < len(sorted_index) else len(content))])
+
+        if '--negative test string--' in sorted_delimiters:
+            index = sorted_delimiters.index('--negative test string--')
+            parsons_settings['negativetest'] = '\n'.join(content[sorted_index[index] + 1: (sorted_index[index + 1]  if index + 1 < len(sorted_index) else len(content))])
+
+        if '--test cases--' in sorted_delimiters:
+            index = sorted_index[sorted_delimiters.index('--test cases--')] + 1
+            end_index = sorted_index[index + 1] if index + 1 < len(sorted_index) else len(content)
+            parsons_settings['testcases'] = []
+            while index < end_index:
+                testcase = {}
+                testcase['input'] = content[index]
+                testcase['expect'] = content[index + 1] if index + 1 < end_index else []
+                parsons_settings['testcases'].append(testcase)
+                index += 2
+
+        self.options['settings'] = json.dumps(parsons_settings)
+
+        # same
+        maybeAddToAssignment(self)
 
         # same
         hparsons_node = HParsonsNode(self.options, rawsource=self.block_text)
@@ -124,21 +227,11 @@ class HParsonsDirective(Assessment):
         self.updateContent()
 
         # same as mchoice, different from parsons. i think it is for generating instructions.
-        self.state.nested_parse(self.content, self.content_offset, hparsons_node)
         # parsons:
         # self.state.nested_parse(
         #     self.options["instructions"], self.content_offset, parsons_node
         # )
 
-        # adding classes outside of the div based on the options
-        env = self.state.document.settings.env
-        if self.options["optional"]:
-            self.options["divclass"] = env.config.shortanswer_optional_div_class
-        else:
-            self.options["divclass"] = env.config.shortanswer_div_class
-
-        # same
-        maybeAddToAssignment(self)
 
         # same
         return [hparsons_node]
