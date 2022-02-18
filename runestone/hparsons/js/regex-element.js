@@ -16078,7 +16078,6 @@ class UnitTestTable {
         row.innerHTML += this._getRevealedRow(this.testCases[index], this.latestResults[index]);
     };
     setTestCases = (testCases) => {
-        console.log('unittest 242');
         this.testCases = testCases;
         // TODO: make this an option. Set all revealed for study 0 and 1.
         this.hintRevealed = Array(testCases.length).fill(true);

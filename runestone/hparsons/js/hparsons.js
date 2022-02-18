@@ -87,6 +87,10 @@ export default class HParsons extends RunestoneBase {
             regexElement.setNegativeInitialTestString(settings.negativetest);
         }
         if (settings.testcases) {
+            for (let index in settings.testcases) {
+                settings.testcases[index].expect = settings.testcases[index].expect.length < 4 ? [] : settings.testcases[index].expect.slice(2, -2).split(', ');
+                console.log(settings.testcases[index])
+            }
             regexElement.setTestCases(settings.testcases);
         }
 
@@ -126,13 +130,13 @@ export default class HParsons extends RunestoneBase {
     }
 
     renderFeedback() {
-        console.log('hparsons, renderfeedback')
+        // console.log('hparsons, renderfeedback')
         // this.feedbackDiv.innerHTML = "Your answer has been saved.";
         // $(this.feedbackDiv).removeClass("alert-danger");
         // $(this.feedbackDiv).addClass("alert alert-success");
     }
     setLocalStorage(data) {
-        console.log('hparsons, setlocalstorage')
+        // console.log('hparsons, setlocalstorage')
         // if (!this.graderactive) {
         //     let key = this.localStorageKey();
         //     localStorage.setItem(key, JSON.stringify(data));
@@ -140,34 +144,21 @@ export default class HParsons extends RunestoneBase {
     }
     checkLocalStorage() {
         console.log('hparsons, checklocalstorage')
-        // Repopulates the short answer text
-        // which was stored into local storage.
-        // var answer = "";
-        // if (this.graderactive) {
-        //     return;
-        // }
-        // var len = localStorage.length;
-        // if (len > 0) {
-        //     var ex = localStorage.getItem(this.localStorageKey());
-        //     if (ex !== null) {
-        //         try {
-        //             var storedData = JSON.parse(ex);
-        //             answer = storedData.answer;
-        //         } catch (err) {
-        //             // error while parsing; likely due to bad value stored in storage
-        //             console.log(err.message);
-        //             localStorage.removeItem(this.localStorageKey());
-        //             return;
-        //         }
-        //         let solution = $("#" + this.divid + "_solution");
-        //         solution.text(answer);
-        //         this.renderMath(answer);
-        //         this.feedbackDiv.innerHTML =
-        //             "Your current saved answer is shown above.";
-        //         $(this.feedbackDiv).removeClass("alert-danger");
-        //         $(this.feedbackDiv).addClass("alert alert-success");
-        //     }
-        // }
+        var toStore;
+        if (data == undefined) {
+            toStore = {
+                source: this.sourceHash(),
+                answer: this.answerHash(),
+                timestamp: new Date(),
+            };
+            var adaptiveHash = this.adaptiveHash();
+            if (adaptiveHash.length > 0) {
+                toStore.adaptive = adaptiveHash;
+            }
+        } else {
+            toStore = data;
+        }
+        localStorage.setItem(this.storageId, JSON.stringify(toStore));
     }
     restoreAnswers(data) {
         console.log('hparsons, restoreanswers')

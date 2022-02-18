@@ -48,8 +48,7 @@ TEMPLATE_START = """
 
 TEMPLATE_END = """
         </div>
-        <div>%(instructions)s</div>
-        <div class="hparsons" %(textentry)s %(nostrictmatch)s %(hidetests)s>
+        <div class="hparsons" %(textentry)s %(nostrictmatch)s %(hidetests)s %(type)s>
             <pre>%(settings)s</pre>
         </div>
         </div>
@@ -178,9 +177,11 @@ class HParsonsDirective(Assessment):
 
         if '--problem--' in sorted_delimiters:
             index = sorted_delimiters.index('--problem--')
-            self.options['instructions'] = '\n'.join(content[(sorted_index[index] + 1): (sorted_index[index + 1] if index + 1 < len(sorted_index) else len(content))])
+            self.options['instructions'] = content[(sorted_index[index] + 1): (sorted_index[index + 1] if index + 1 < len(sorted_index) else len(content))]
+            self.options['problem'] = '\n'.join(content[(sorted_index[index] + 1): (sorted_index[index + 1] if index + 1 < len(sorted_index) else len(content))])
         else:
-            self.options['instructions'] = 'empty problem'
+            self.options['instructions'] = ['empty problem']
+            self.options['problem'] = 'empty problem'
 
         if '--blocks--' in sorted_delimiters:
             index = sorted_delimiters.index('--blocks--')
@@ -212,6 +213,7 @@ class HParsonsDirective(Assessment):
                 index += 2
 
         self.options['settings'] = json.dumps(parsons_settings)
+        self.options['type'] = type(self.options['instructions'])
 
         # same
         maybeAddToAssignment(self)
@@ -229,9 +231,9 @@ class HParsonsDirective(Assessment):
         # TODO: fix the nested parse
         # same as mchoice, different from parsons. i think it is for generating instructions.
         # parsons:
-        # self.state.nested_parse(
-        #     self.options['instructions'], self.content_offset, hparsons_node
-        # )
+        self.state.nested_parse(
+            self.options['instructions'], self.content_offset, hparsons_node
+        )
 
 
         # same
