@@ -22,33 +22,31 @@ if (hpList === undefined) hpList = {};
 export default class HParsons extends RunestoneBase {
     constructor(opts) {
         super(opts);
-        if (opts) {
-            // TODO: what is orig?
-            var orig = opts.orig; // entire <pre> element that will be replaced by new HTML
-            this.containerDiv = orig;
-            this.origElem = $(orig).find(".hparsons")[0];
-            console.log(this.origElem)
-            this.useRunestoneServices =
-                opts.useRunestoneServices || eBookConfig.useRunestoneServices;
-            this.divid = orig.id;
+        var orig = opts.orig;
+        this.containerDiv = orig;
+        // the div element that will contain regex-element
+        this.origElem = $(orig).find(".hparsons")[0];
+        this.useRunestoneServices =
+            opts.useRunestoneServices || eBookConfig.useRunestoneServices;
+        this.divid = orig.id;
 
-            // The element that is going to be replaced
-            // Find the question text and store it in .question
-            this.question = $(orig).find(`.hparsons_question`)[0];
-            // TODO: idk what this is with shortanswer
-            this.renderHTML();
-            this.caption = "hparsons";
-            this.addCaption("runestone");
-            this.checkServer("hparsons", true);
 
-            // Set the storageId (key for storing data)
-            var storageId = super.localStorageKey();
-            this.storageId = storageId;
-            this.children = this.origElem.childNodes; // this contains all of the child elements of the entire tag...
-            this.contentArray = [];
-            HParsons.counter++; //    Unique identifier
-            this.counterId = "hparsons-" + HParsons.counter;
-        }
+        // Set the storageId (key for storing data)
+        var storageId = super.localStorageKey();
+        this.storageId = storageId;
+        // this.setLocalStorage({test: 'test1'})
+        this.children = this.origElem.childNodes; // this contains all of the child elements of the entire tag...
+        this.contentArray = [];
+        HParsons.counter++; //    Unique identifier
+        this.counterId = "hparsons-" + HParsons.counter;
+
+        // The element that is going to be replaced
+        // Find the question text and store it in .question
+        this.renderHTML();
+        this.origElem.addEventListener('regex-element', (e) => {this.handleRegexElementEvent(e)});
+        this.caption = "hparsons";
+        this.addCaption("runestone");
+        this.checkServer("hparsons", true);
     }
 
     renderHTML() {
@@ -57,12 +55,12 @@ export default class HParsons extends RunestoneBase {
         // div.id = 'abcd';
         // console.log(this.origElem)
         let attributes = '';
-        console.log($(this.origElem).data("textentry"))
         let settings = JSON.parse($(this.origElem).children()[0].innerText)
         attributes += ' input-type=' + ($(this.origElem).data("textentry") ? 'text' : 'parsons' );
         attributes += $(this.origElem).data("hidetests") ? ' hidetests="true"': '';
         $(this.origElem).html('<regex-element' + attributes + '></regex-element>');
         let regexElement = $(this.origElem).children()[0];
+        this.regexElement = regexElement;
         if ($(this.origElem).data("nostrictmatch")) {
             regexElement.unitTestTable.strictMatch = false;
         } else {
@@ -89,10 +87,10 @@ export default class HParsons extends RunestoneBase {
         if (settings.testcases) {
             for (let index in settings.testcases) {
                 settings.testcases[index].expect = settings.testcases[index].expect.length < 4 ? [] : settings.testcases[index].expect.slice(2, -2).split(', ');
-                console.log(settings.testcases[index])
             }
             regexElement.setTestCases(settings.testcases);
         }
+
 
         // tool.parsonsExplanation = toolConfig.parsonsExplanation;
         // tool.parsonsData = toolConfig.parsonsData;
@@ -105,6 +103,7 @@ export default class HParsons extends RunestoneBase {
         // $(this.origElem).replaceWith(document.createElement('regex-element'));
         // $(this.elem).innerHTML = `<regex-element input-type='parsons' id="abcd"></regex-element>`;
         // console.log(div)
+        // localStorage.setItem(this.storageId, JSON.stringify({test: 'test'}));
     }
 
     checkCurrentAnswer() { }
@@ -136,31 +135,26 @@ export default class HParsons extends RunestoneBase {
         // $(this.feedbackDiv).addClass("alert alert-success");
     }
     setLocalStorage(data) {
-        // console.log('hparsons, setlocalstorage')
-        // if (!this.graderactive) {
-        //     let key = this.localStorageKey();
-        //     localStorage.setItem(key, JSON.stringify(data));
-        // }
+        localStorage.setItem(this.storageId, JSON.stringify(data));
     }
     checkLocalStorage() {
-        console.log('hparsons, checklocalstorage')
-        var toStore;
-        if (data == undefined) {
-            toStore = {
-                source: this.sourceHash(),
-                answer: this.answerHash(),
-                timestamp: new Date(),
-            };
-            var adaptiveHash = this.adaptiveHash();
-            if (adaptiveHash.length > 0) {
-                toStore.adaptive = adaptiveHash;
+        // Return what is stored in local storage
+        var data = localStorage.getItem(this.storageId);
+        if (data !== null) {
+            if (data.charAt(0) == "{") {
+                data = JSON.parse(data);
+            } else {
+                data = {};
             }
         } else {
-            toStore = data;
+            data = {};
         }
-        localStorage.setItem(this.storageId, JSON.stringify(toStore));
+        if (data.type != undefined && data.answer != undefined) {
+            this.regexElement.restoreAnswer(data.type, data.answer)
+        }
     }
-    restoreAnswers(data) {
+    // called when server has data
+    restoreAnswers(serverData) {
         console.log('hparsons, restoreanswers')
         // Restore answers from storage retrieval done in RunestoneBase
         // sometimes data.answer can be null
@@ -230,6 +224,14 @@ export default class HParsons extends RunestoneBase {
     disableInteraction() {
         console.log('hparsons, disableinteraction')
         // this.jTextArea.disabled = true;
+    }
+
+    handleRegexElementEvent(event) {
+        if (event.detail['event-type'] == 'parsons-input' || event.detail['event-type'] == 'text-input') {
+            this.setLocalStorage({'type': event.detail['event-type'].slice(0, -6), 'answer': event.detail['answer']}) 
+            // this.setLocalStorage({'event-type': event.detail['event-type'], 'answer': event.detail['answer'][0]}) 
+            // this.setLocalStorage({tes: 'tes'}) 
+        }
     }
 }
 HParsons.counter = 0;

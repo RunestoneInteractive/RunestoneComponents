@@ -13,16 +13,7 @@ Horizontal Parsons + Regex
     --problem--
     Capture words that start with a vowel letter(aeiou), but ends with a non-vowel letter. 
     There can be 0 or more letters in between. 
-    Also, it is not allowed to have other characters besides letter in between.
-
-    .. code-block:: python
-
-        sum = 0
-        for i in range(10):
-            sum = sum + i
-    
-        print(sum)
-    
+    Also, it is not allowed to have other characters besides letter in between
     e.g. your regular expression should match unicorn, element, but should not match: banana, apple. All letters are lowercase.
     --blocks--
     [a-z]

@@ -3163,7 +3163,7 @@ class ParsonsInput {
                             newBlock.parentNode?.removeChild(newBlock);
                             if (this.parentElement) {
                                 this.parentElement.temporaryInputEvent = {
-                                    'event-type': 'parsons',
+                                    'event-type': 'parsons-input',
                                     action: RegexEvent.ParsonsInputAction.REMOVE,
                                     position: [endPosition, -1],
                                     answer: this._getTextArray()
@@ -3177,7 +3177,7 @@ class ParsonsInput {
                     }
                     if (this.parentElement && firstBlock) {
                         this.parentElement.temporaryInputEvent = {
-                            'event-type': 'parsons',
+                            'event-type': 'parsons-input',
                             action: RegexEvent.ParsonsInputAction.ADD,
                             position: [-1, this._getBlockPosition(firstBlock)],
                             answer: this._getTextArray(),
@@ -3244,7 +3244,7 @@ class ParsonsInput {
                         newBlockCopy.parentNode?.removeChild(newBlockCopy);
                         if (this.parentElement) {
                             this.parentElement.temporaryInputEvent = {
-                                'event-type': 'parsons',
+                                'event-type': 'parsons-input',
                                 action: RegexEvent.ParsonsInputAction.REMOVE,
                                 position: [endPosition, -1],
                                 answer: this._getTextArray()
@@ -3254,7 +3254,7 @@ class ParsonsInput {
                     };
                     if (this.parentElement) {
                         this.parentElement.temporaryInputEvent = {
-                            'event-type': 'parsons',
+                            'event-type': 'parsons-input',
                             action: RegexEvent.ParsonsInputAction.ADD,
                             position: [-1, this._getBlockPosition(newBlockCopy)],
                             answer: this._getTextArray(),
@@ -3271,7 +3271,7 @@ class ParsonsInput {
                     newBlock.parentNode?.removeChild(newBlock);
                     if (this.parentElement) {
                         this.parentElement.temporaryInputEvent = {
-                            'event-type': 'parsons',
+                            'event-type': 'parsons-input',
                             action: RegexEvent.ParsonsInputAction.REMOVE,
                             position: [endPosition, -1],
                             answer: this._getTextArray(),
@@ -3317,7 +3317,7 @@ class ParsonsInput {
                                     newBlock.parentNode?.removeChild(newBlock);
                                     if (this.parentElement) {
                                         this.parentElement.temporaryInputEvent = {
-                                            'event-type': 'parsons',
+                                            'event-type': 'parsons-input',
                                             action: RegexEvent.ParsonsInputAction.REMOVE,
                                             position: [endPosition, -1],
                                             answer: this._getTextArray(),
@@ -3331,7 +3331,7 @@ class ParsonsInput {
                             }
                             if (this.parentElement && firstBlock) {
                                 this.parentElement.temporaryInputEvent = {
-                                    'event-type': 'parsons',
+                                    'event-type': 'parsons-input',
                                     action: RegexEvent.ParsonsInputAction.ADD,
                                     position: [-1, this._getBlockPosition(firstBlock)],
                                     answer: this._getTextArray(),
@@ -3357,7 +3357,7 @@ class ParsonsInput {
                                 newBlockCopy.parentNode?.removeChild(newBlockCopy);
                                 if (this.parentElement) {
                                     this.parentElement.temporaryInputEvent = {
-                                        'event-type': 'parsons',
+                                        'event-type': 'parsons-input',
                                         action: RegexEvent.ParsonsInputAction.REMOVE,
                                         position: [endPosition, -1],
                                         answer: this._getTextArray(),
@@ -3367,7 +3367,7 @@ class ParsonsInput {
                             };
                             if (this.parentElement) {
                                 this.parentElement.temporaryInputEvent = {
-                                    'event-type': 'parsons',
+                                    'event-type': 'parsons-input',
                                     action: RegexEvent.ParsonsInputAction.ADD,
                                     position: [-1, this._getBlockPosition(newBlockCopy)],
                                     answer: this._getTextArray(),
@@ -3385,7 +3385,7 @@ class ParsonsInput {
                             newBlock.parentNode?.removeChild(newBlock);
                             if (this.parentElement) {
                                 this.parentElement.temporaryInputEvent = {
-                                    'event-type': 'parsons',
+                                    'event-type': 'parsons-input',
                                     action: RegexEvent.ParsonsInputAction.REMOVE,
                                     position: [endPosition, -1],
                                     answer: this._getTextArray(),
@@ -3408,7 +3408,7 @@ class ParsonsInput {
                 // console.log(isExpandable);
                 if (this.parentElement) {
                     this.parentElement.temporaryInputEvent = {
-                        'event-type': 'parsons',
+                        'event-type': 'parsons-input',
                         action: RegexEvent.ParsonsInputAction.ADD,
                         position: [-1, this._getBlockPosition(event.item)],
                         answer: this._getTextArray(),
@@ -3441,7 +3441,7 @@ class ParsonsInput {
                             newBlock.parentNode?.removeChild(newBlock);
                             if (this.parentElement) {
                                 this.parentElement.temporaryInputEvent = {
-                                    'event-type': 'parsons',
+                                    'event-type': 'parsons-input',
                                     action: RegexEvent.ParsonsInputAction.REMOVE,
                                     position: [endPosition, -1],
                                     answer: this._getTextArray(),
@@ -3480,7 +3480,7 @@ class ParsonsInput {
                 }
                 if (this.parentElement) {
                     this.parentElement.temporaryInputEvent = {
-                        'event-type': 'parsons',
+                        'event-type': 'parsons-input',
                         action: action,
                         position: [this._prevPosition, endposition],
                         answer: this._getTextArray(),
@@ -3565,6 +3565,38 @@ class ParsonsInput {
             }
         }
     };
+    restoreAnswer(type, answer) {
+        if (type != 'parsons' || !Array.isArray(answer)) {
+            return;
+        }
+        console.log('parsons restore');
+        console.log(answer);
+        this._dropArea.innerHTML = '';
+        for (let i = 0; i < answer.length; ++i) {
+            if (typeof answer[i] === 'string') {
+                const newBlock = document.createElement('div');
+                this._dropArea.appendChild(newBlock);
+                newBlock.innerText = answer[i];
+                newBlock.style.display = 'inline-block';
+                newBlock.classList.add('parsons-block');
+                newBlock.onclick = () => {
+                    // clicking the new block generated by clicking an extendable block to remove that block
+                    // console.log('expandable new block onclick')
+                    const endPosition = this._getBlockPosition(newBlock);
+                    newBlock.parentNode?.removeChild(newBlock);
+                    if (this.parentElement) {
+                        this.parentElement.temporaryInputEvent = {
+                            'event-type': 'parsons-input',
+                            action: RegexEvent.ParsonsInputAction.REMOVE,
+                            position: [endPosition, -1],
+                            answer: this._getTextArray()
+                        };
+                    }
+                };
+                this.el.dispatchEvent(new Event('regexChanged'));
+            }
+        }
+    }
 }
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
@@ -15527,7 +15559,7 @@ class TextInput {
             shortKey: true,
         }, (range, context) => {
             const freeKeyboardEvent = {
-                'event-type': 'free-input-keyboard',
+                'event-type': 'text-input-keyboard',
                 range: range,
                 keys: ['ctrl', 'c']
             };
@@ -15541,7 +15573,7 @@ class TextInput {
             shortKey: true,
         }, (range, context) => {
             const freeKeyboardEvent = {
-                'event-type': 'free-input-keyboard',
+                'event-type': 'text-input-keyboard',
                 range: range,
                 keys: ['ctrl', 'v']
             };
@@ -15625,6 +15657,16 @@ class TextInput {
             'background': '#ff99b3'
         }, 'silent');
     };
+    restoreAnswer(type, answer) {
+        // TODO (misplaced): consider removing expandable blocks
+        // TODO: add logging to restoring answer
+        if (type != 'text' || typeof answer !== 'string') {
+            return;
+        }
+        console.log('text restore');
+        console.log(answer);
+        this.quill?.setText(answer);
+    }
 }
 
 // import {Quill} from '../types/Quill';
@@ -16775,13 +16817,15 @@ class RegexElement extends HTMLElement {
         this.negativeTestStringInput.setText(this.negativeInitialTestString);
     };
     logEvent = (eventContent) => {
-        ({
+        const basicEvent = {
             'student-id': window.regexStudentId || 'stub-id',
             'course-id': window.regexCourseId || 'stub-course-id',
             'problem-id': this.problemId,
             'input-type': this.inputType,
             'client-timestamp': this._getTimestamp()
-        });
+        };
+        const ev = new CustomEvent('regex-element', { bubbles: true, detail: { ...basicEvent, ...eventContent } });
+        this.dispatchEvent(ev);
         // console.log({...basicEvent, ...eventContent});
     };
     _getTimestamp = () => {
@@ -16921,7 +16965,7 @@ class RegexElement extends HTMLElement {
                 this.regexInput.removeFormat();
                 // logging free input event
                 this.temporaryInputEvent = {
-                    'event-type': 'free-input',
+                    'event-type': 'text-input',
                     dropped: this.regexInput.droppedText,
                     delta: delta,
                     answer: this.regexInput.getText()
@@ -16994,6 +17038,15 @@ class RegexElement extends HTMLElement {
         this.negativeTestStringInput.quill?.removeFormat(0, this.negativeTestStringInput.quill.getLength() - 1, 'silent');
         this._testStatusDiv.innerText = '';
         this.unitTestTable.setError();
+    }
+    // restore student answer from outside storage
+    restoreAnswer(type, answer) {
+        if (type == undefined || answer == undefined) {
+            return;
+        }
+        console.log('regex restore');
+        console.log(answer);
+        this.regexInput.restoreAnswer(type, answer);
     }
 }
 customElements.define('regex-element', RegexElement);

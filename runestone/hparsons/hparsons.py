@@ -228,9 +228,6 @@ class HParsonsDirective(Assessment):
         # For MChoice its better to insert the qnum into the content before further processing.
         # self.updateContent()
 
-        # TODO: fix the nested parse
-        # same as mchoice, different from parsons. i think it is for generating instructions.
-        # parsons:
         self.state.nested_parse(
             self.options['instructions'], self.content_offset, hparsons_node
         )
