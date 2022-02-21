@@ -228,6 +228,8 @@ export default class SelectOne extends RunestoneBase {
             // just render this component on the page in its usual place
             await renderRunestoneComponent(htmlsrc, selectorId, {
                 selector_id: selectorId,
+                is_toggle: this.toggleOptions,
+                is_select: true,
                 useRunestoneServices: true,
             });
             if (data.toggleOptions) {
@@ -296,6 +298,8 @@ export default class SelectOne extends RunestoneBase {
         var htmlsrc = await this.getToggleSrc(selectedQuestion);
         renderRunestoneComponent(htmlsrc, "toggle-preview", {
             selector_id: "toggle-preview",
+            is_toggle: this.toggleOptions,
+            is_select: true,
             useRunestoneServices: true,
         });
 
@@ -375,6 +379,8 @@ export default class SelectOne extends RunestoneBase {
         document.getElementById(selectorId).innerHTML = ""; // need to check whether this is even necessary
         await renderRunestoneComponent(htmlsrc, selectorId, {
             selector_id: selectorId,
+            is_toggle: this.toggleOptions,
+            is_select: true,
             useRunestoneServices: true,
         });
         let request = new Request(

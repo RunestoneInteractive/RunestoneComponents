@@ -71,6 +71,8 @@ export default class RunestoneBase {
             if ($(opts.orig).data("question_label")) {
                 this.question_label = $(opts.orig).data("question_label");
             }
+            this.is_toggle = true ? opts.is_toggle : false;
+            this.is_select = true ? opts.is_select : false;
         }
         this.jsonHeaders = new Headers({
             "Content-type": "application/json; charset=utf-8",
