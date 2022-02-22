@@ -3569,8 +3569,6 @@ class ParsonsInput {
         if (type != 'parsons' || !Array.isArray(answer)) {
             return;
         }
-        console.log('parsons restore');
-        console.log(answer);
         this._dropArea.innerHTML = '';
         for (let i = 0; i < answer.length; ++i) {
             if (typeof answer[i] === 'string') {
@@ -15663,8 +15661,6 @@ class TextInput {
         if (type != 'text' || typeof answer !== 'string') {
             return;
         }
-        console.log('text restore');
-        console.log(answer);
         this.quill?.setText(answer);
     }
 }
@@ -15825,9 +15821,18 @@ class TestStringInput {
     };
     // TODO: (structure) move this function to the main element after adding highlight to input
     generateColor = (colors, cnt) => {
-        const newcolors = randomColor.randomColor({ count: 10, luminosity: 'light' });
-        for (let i = 0; i < cnt; ++i) {
-            colors.push(newcolors[i]);
+        // const newcolors = randomColor({count: 10, luminosity: 'light'});
+        // for(let i = 0; i < cnt; ++ i) {
+        //     colors.push(newcolors[i]);
+        // }
+        let len = colors.length;
+        for (let i = len; i < len + cnt; ++i) {
+            if (i % 2 == 0) {
+                colors.push('#b0d4a9');
+            }
+            else {
+                colors.push('#98d18c');
+            }
         }
     };
     setText(text) {
@@ -15991,6 +15996,10 @@ class UnitTestTable {
     // not used: Return value: 'Pass' if all pass, 'Error' if one error, 'Fail' if no error but at least one fail
     // return number of test cases passed
     check = (regex) => {
+        if (regex == '') {
+            this.table.innerHTML = this.table.rows[0].innerHTML;
+            return 0;
+        }
         let passCount = 0;
         if (this.el.classList.contains('collapse')) {
             this.el.classList.remove('collapse');
@@ -16057,8 +16066,6 @@ class UnitTestTable {
     };
     // returns: 'Pass' if pass, 'Fail' if fail, 'Error' if error
     _createRow = (index, testCase, result) => {
-        // console.log(testCase);
-        // console.log(result);
         this.latestResults.push(result);
         // creating the status(the first) column
         const row = document.createElement('tr');
@@ -16935,10 +16942,12 @@ class RegexElement extends HTMLElement {
                         // }
                         if (this.regexInput.getText() == '') {
                             this.regexStatus.updateStatus('');
+                            this.unitTestTable.check('');
                         }
                         else {
                             this.regexStatus.updateStatus('error');
                             this.regexInput.updateTestStatus('Error');
+                            this.unitTestTable.setError();
                             // this.regexInput.highlightError(this.regexErrorPosition);
                             // console.log('highlight error: ');
                             // console.log(this.regexErrorPosition);
@@ -16946,7 +16955,6 @@ class RegexElement extends HTMLElement {
                         this.positiveTestStringInput.quill?.removeFormat(0, this.positiveTestStringInput.quill.getLength() - 1, 'silent');
                         this.negativeTestStringInput.quill?.removeFormat(0, this.negativeTestStringInput.quill.getLength() - 1, 'silent');
                         this._testStatusDiv.innerText = 'Test cases passed: 0/' + this.unitTestTable.testCaseCount;
-                        this.unitTestTable.setError();
                     }
                 }
             }, false);
@@ -17004,16 +17012,17 @@ class RegexElement extends HTMLElement {
                         if (this.regexInput.getText() == '') {
                             // it means the regex is actually empty
                             this.regexStatus.updateStatus('');
+                            this.unitTestTable.check('');
                         }
                         else {
                             this.regexStatus.updateStatus('error');
                             this.regexInput.updateTestStatus('Error');
+                            this.unitTestTable.setError();
                             // this.regexInput.highlightError(this.regexErrorPosition);
                         }
                         this.positiveTestStringInput.quill?.removeFormat(0, this.positiveTestStringInput.quill.getLength() - 1, 'silent');
                         this.negativeTestStringInput.quill?.removeFormat(0, this.negativeTestStringInput.quill.getLength() - 1, 'silent');
                         this._testStatusDiv.innerText = 'Test cases passed: 0/' + this.unitTestTable.testCaseCount;
-                        this.unitTestTable.setError();
                     }
                     // check and update the background color of the parsons input based on the unit test results
                 }
@@ -17044,8 +17053,6 @@ class RegexElement extends HTMLElement {
         if (type == undefined || answer == undefined) {
             return;
         }
-        console.log('regex restore');
-        console.log(answer);
         this.regexInput.restoreAnswer(type, answer);
     }
 }

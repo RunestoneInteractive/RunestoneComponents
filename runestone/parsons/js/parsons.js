@@ -675,10 +675,6 @@ export default class Parsons extends RunestoneBase {
     // Return what is stored in local storage
     localData() {
         var data = localStorage.getItem(this.storageId);
-        console.log('parsons, load')
-        console.log(data)
-        console.log('parsons, storageid')
-        console.log(this.storageId)
         if (data !== null) {
             if (data.charAt(0) == "{") {
                 data = JSON.parse(data);
