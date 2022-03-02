@@ -92,6 +92,7 @@ class HParsonsDirective(Assessment):
         :textentry: if you will use text entry instead of horizontal parsons
         :hidetests: if the unittests will be hidden from learners
         :nostrictmatch: if the answer is required to match the whole string. if not selected, the tool will add ^ and $ automatically to the answer to force matching the full string. This does not affect the test string area.
+        :language: SQL or regex
 
         --problem--
         Here is the problem description. 
@@ -102,13 +103,13 @@ class HParsonsDirective(Assessment):
         --explanations--
         explanations for block 1
         explanations for block 2
-        --positive test string--
+        --positive test string-- (this is only for regex)
         this is some positive test string.
         it can be more than one line.
         just ignore this section if you do not want to put anything in there.
-        --negative test string--
+        --negative test string-- (this is only for regex)
         this is some negative test string.
-        --test cases--
+        --test cases-- (this is only for regex)
         input string 1
         ['expected match 1', 'expected match 2']
         input string 2
@@ -154,6 +155,17 @@ class HParsonsDirective(Assessment):
         else:
             self.options['nostrictmatch'] = ''
 
+        # SQL Options copied from activecode
+        if "dburl" in self.options:
+            self.options["dburl"] = "data-dburl='{}'".format(self.options["dburl"])
+        else:
+            self.options["dburl"] = ""
+
+        if "showlastsql" in self.options:
+            self.options["showlastsql"] = 'data-showlastsql="true"'
+        else:
+            self.options["showlastsql"] = ""
+        
         self.assert_has_content()
 
         # sepcifying the start end end for each section
