@@ -4,72 +4,65 @@ Horizontal Parsons Test
 
 .. Testing horizontal Parsons problems.
 
-Horizontal Parsons + Regex
----------------------------
+Horizontal Parsons + SQL
+--------------------------------------
+.. hparsons:: test_activecode_6
+    :language: sql
+    :autograde: unittest
+    :dburl: /_static/test.db
 
-.. hparsons:: codeexample1
-    :nostrictmatch:
+    select * from test;
 
-    --problem--
-    Capture words that start with a vowel letter(aeiou), but ends with a non-vowel letter. 
-    There can be 0 or more letters in between. 
-    Also, it is not allowed to have other characters besides letter in between
-    e.g. your regular expression should match unicorn, element, but should not match: banana, apple. All letters are lowercase.
-    --blocks--
-    [a-z]
-    [aeiou]
-    [^aeiou]
-    +
-    *
-    --explanations--
-    letter a to z
-    letter a, e, i, o, u
-    characters other than letter a, e, i, o, u
-    repeat one or more times
-    repeat zero or more times
-    --positive test string--
-    unicorn
-    element
-    --negative test string--
-    apple
-    banana
-    --test cases--
-    unicorn
-    ['unicorn']
-    element
-    ['element']
-    banana
-    []
-    bananu
-    []
-    apple
-    []
-    baby
-    []
-    az
-    ['az']
-    abcdefghizsdz
-    ['abcdefghizsdz']
-    abc9defghizsdz
-    []
+    =====
+    assert 1,1 == world
+    assert 0,1 == hello
+    assert 2,1 == 42
+
+..     :dburl: http://localhost:8000/_static/test.db
+
+.. activecode:: abcde 
+    :language: sql
+    :autograde: unittest
+    :dburl: /_static/test.db
+
+    select * from test;
+
+    =====
+    assert 1,1 == world
+    assert 0,1 == hello
+    assert 2,1 == 42
+
+..     :dburl: http://localhost:8000/_static/test.db
 
 
-.. hparsons:: codeexample2
-    :textentry:
-    :hidetests:
+.. hparsons:: test_activecode_7
+    :language: sql
+    :autograde: unittest
+    :dburl: /_static/test.db
 
-    --problem--
-    Capture words that start with a vowel letter(aeiou), but ends with a non-vowel letter. 
-    There can be 0 or more letters in between. 
-    Also, it is not allowed to have other characters besides letter in between.
-    e.g. your regular expression should match unicorn, element, but should not match: banana, apple. All letters are lowercase.
-    content content content
-    --positive test string--
-    unicorn
-    element
-    --negative test string--
-    apple
-    banana
+    select * from test;
+
+.. hparsons:: test_activecode_6b
+    :language: sql
+    :autograde: unittest
+    :dburl: /_static/test.db
+
+    select * from created_table;
+
+    =====
+    assert 0,0 == itworks
+
+.. hparsons:: sql3
+    :language: sql
+
+    CREATE TABLE contacts (
+      contact_id INTEGER PRIMARY KEY,
+      first_name TEXT NOT NULL,
+      last_name TEXT NOT NULL,
+      email TEXT NOT NULL UNIQUE,
+      phone TEXT NOT NULL UNIQUE
+    );
+
 
 
 Other Problems for reference

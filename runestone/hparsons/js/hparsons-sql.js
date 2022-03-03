@@ -1,13 +1,123 @@
-import { ActiveCode } from "./activecode.js";
 import Handsontable from "handsontable";
 import 'handsontable/dist/handsontable.full.css';
 import initSqlJs from "sql.js/dist/sql-wasm.js";
+import RunestoneBase from "../../common/js/runestonebase.js";
+
+// temporary code mirror stuff copied from activecode
+import CodeMirror from "codemirror";
+import "codemirror/mode/python/python.js";
+import "codemirror/mode/css/css.js";
+import "codemirror/mode/htmlmixed/htmlmixed.js";
+import "codemirror/mode/xml/xml.js";
+import "codemirror/mode/javascript/javascript.js";
+import "codemirror/mode/sql/sql.js";
+import "codemirror/mode/clike/clike.js";
+import "codemirror/mode/octave/octave.js";
+import "./../css/activecode.css";
+import "codemirror/lib/codemirror.css";
+
+// copied from activecode
+// Used by Skulpt.
+import embed from "vega-embed";
+// Adapt for use outside webpack -- see https://github.com/vega/vega-embed.
+window.vegaEmbed = embed;
 
 var allDburls = {};
 
-export default class SQLActiveCode extends ActiveCode {
+export default class SQLHParons extends RunestoneBase {
     constructor(opts) {
         super(opts);
+        // copied from activecode
+        var suffStart;
+        var orig = $(opts.orig).find("textarea")[0];
+        this.containerDiv = opts.orig;
+        this.useRunestoneServices = opts.useRunestoneServices;
+        this.python3 = opts.python3;
+        this.alignVertical = opts.vertical;
+        this.origElem = orig;
+        this.origText = this.origElem.textContent;
+        this.divid = opts.orig.id;
+        this.code = $(orig).text() || "\n\n\n\n\n";
+        this.language = $(orig).data("lang");
+        this.timelimit = $(orig).data("timelimit");
+        this.includes = $(orig).data("include");
+        this.hidecode = $(orig).data("hidecode");
+        this.chatcodes = $(orig).data("chatcodes");
+        this.hidehistory = $(orig).data("hidehistory");
+        this.question = $(opts.orig).find(`#${this.divid}_question`)[0];
+        this.tie = $(orig).data("tie");
+        this.dburl = $(orig).data("dburl");
+        this.runButton = null;
+        this.enabledownload = $(orig).data("enabledownload");
+        this.downloadButton = null;
+        this.saveButton = null;
+        this.loadButton = null;
+        this.outerDiv = null;
+        this.partner = "";
+        this.logResults = true;
+        if (!eBookConfig.allow_pairs || $(orig).data("nopair")) {
+            this.enablePartner = false;
+        } else {
+            this.enablePartner = true;
+        }
+        this.output = null; // create pre for output
+        this.graphics = null; // create div for turtle graphics
+        this.codecoach = null;
+        this.codelens = null;
+        this.controlDiv = null;
+        this.historyScrubber = null;
+        this.timestamps = ["Original"];
+        this.autorun = $(orig).data("autorun");
+        if (this.chatcodes && eBookConfig.enable_chatcodes) {
+            if (!socket) {
+                socket = new WebSocket("wss://" + chatcodesServer);
+            }
+            if (!connection) {
+                connection = new window.sharedb.Connection(socket);
+            }
+            if (!doc) {
+                doc = connection.get("chatcodes", "channels");
+            }
+        }
+        if (this.graderactive || this.isTimed) {
+            this.hidecode = false;
+        }
+        if (this.includes) {
+            this.includes = this.includes.split(/\s+/);
+        }
+        let prefixEnd = this.code.indexOf("^^^^");
+        if (prefixEnd > -1) {
+            this.prefix = this.code.substring(0, prefixEnd);
+            this.code = this.code.substring(prefixEnd + 5);
+        }
+        suffStart = this.code.indexOf("====");
+        if (suffStart > -1) {
+            this.suffix = this.code.substring(suffStart + 5);
+            this.code = this.code.substring(0, suffStart);
+        }
+        this.history = [this.code];
+        this.createEditor();
+        this.createOutput();
+        this.createControls();
+        if ($(orig).data("caption")) {
+            this.caption = $(orig).data("caption");
+        } else {
+            this.caption = "ActiveCode";
+        }
+        this.addCaption("runestone");
+        setTimeout(
+            function () {
+                this.editor.refresh();
+            }.bind(this),
+            1000
+        );
+        if (this.autorun) {
+            // Simulate pressing the run button, since this will also prevent the user from clicking it until the initial run is complete, and also help the user understand why they're waiting.
+            $(this.runButtonHandler.bind(this));
+        }
+        this.indicate_component_ready();
+
+        // copied from activecode-sql
         //  fnprefix sets the path to load the sql-wasm.wasm file
         var bookprefix;
         var fnprefix;
@@ -72,6 +182,190 @@ export default class SQLActiveCode extends ActiveCode {
             }
         });
     }
+    // copied from activecode
+    createEditor(index) {
+        this.outerDiv = document.createElement("div");
+        var linkdiv = document.createElement("div");
+        linkdiv.id = this.divid.replace(/_/g, "-").toLowerCase(); // :ref: changes _ to - so add this as a target
+        $(this.outerDiv).addClass("ac_section alert alert-warning");
+        var codeDiv = document.createElement("div");
+        $(codeDiv).addClass("ac_code_div col-md-12");
+        this.codeDiv = codeDiv;
+        this.outerDiv.lang = this.language;
+        $(this.origElem).replaceWith(this.outerDiv);
+        if (linkdiv.id !== this.divid) {
+            // Don't want the 'extra' target if they match.
+            this.outerDiv.appendChild(linkdiv);
+        }
+        this.outerDiv.appendChild(codeDiv);
+        var edmode = this.outerDiv.lang;
+        if (edmode === "sql") {
+            edmode = "text/x-sql";
+        } else if (edmode === "java") {
+            edmode = "text/x-java";
+        } else if (edmode === "cpp") {
+            edmode = "text/x-c++src";
+        } else if (edmode === "c") {
+            edmode = "text/x-csrc";
+        } else if (edmode === "python3") {
+            edmode = "python";
+        } else if (edmode === "octave" || edmode === "MATLAB") {
+            edmode = "text/x-octave";
+        }
+        var editor = CodeMirror(codeDiv, {
+            value: this.code,
+            lineNumbers: true,
+            mode: edmode,
+            indentUnit: 4,
+            matchBrackets: true,
+            autoMatchParens: true,
+            extraKeys: {
+                Tab: "indentMore",
+                "Shift-Tab": "indentLess",
+            },
+        });
+        // Make the editor resizable
+        $(editor.getWrapperElement()).resizable({
+            resize: function () {
+                editor.setSize($(this).width(), $(this).height());
+                editor.refresh();
+            },
+        });
+        // give the user a visual cue that they have changed but not saved
+        editor.on(
+            "change",
+            function (ev) {
+                if (
+                    editor.acEditEvent == false ||
+                    editor.acEditEvent === undefined
+                ) {
+                    // change events can come before any real changes for various reasons, some unknown
+                    // this avoids unneccsary log events and updates to the activity counter
+                    if (this.origText === editor.getValue()) {
+                        return;
+                    }
+                    $(editor.getWrapperElement()).css(
+                        "border-top",
+                        "2px solid #b43232"
+                    );
+                    $(editor.getWrapperElement()).css(
+                        "border-bottom",
+                        "2px solid #b43232"
+                    );
+                    this.isAnswered = true;
+                    this.logBookEvent({
+                        event: "activecode",
+                        act: "edit",
+                        div_id: this.divid,
+                    });
+                }
+                editor.acEditEvent = true;
+            }.bind(this)
+        ); // use bind to preserve *this* inside the on handler.
+        //Solving Keyboard Trap of ActiveCode: If user use tab for navigation outside of ActiveCode, then change tab behavior in ActiveCode to enable tab user to tab out of the textarea
+        $(window).keydown(function (e) {
+            var code = e.keyCode ? e.keyCode : e.which;
+            if (code == 9 && $("textarea:focus").length === 0) {
+                editor.setOption("extraKeys", {
+                    Tab: function (cm) {
+                        $(document.activeElement)
+                            .closest(".tab-content")
+                            .nextSibling.focus();
+                    },
+                    "Shift-Tab": function (cm) {
+                        $(document.activeElement)
+                            .closest(".tab-content")
+                            .previousSibling.focus();
+                    },
+                });
+            }
+        });
+        this.editor = editor;
+        if (this.hidecode) {
+            $(this.codeDiv).css("display", "none");
+        }
+    }
+
+    // copied from activecode
+    createOutput() {
+        // Create a parent div with two elements:  pre for standard output and a div
+        // to hold turtle graphics output.  We use a div in case the turtle changes from
+        // using a canvas to using some other element like svg in the future.
+        var outDiv = document.createElement("div");
+        $(outDiv).addClass("ac_output col-md-12");
+        this.outDiv = outDiv;
+        this.output = document.createElement("pre");
+        this.output.id = this.divid + "_stdout";
+        $(this.output).css("visibility", "hidden");
+        this.graphics = document.createElement("div");
+        this.graphics.id = this.divid + "_graphics";
+        $(this.graphics).addClass("ac-canvas");
+        // This bit of magic adds an event which waits for a canvas child to be created on our
+        // newly created div.  When a canvas child is added we add a new class so that the visible
+        // canvas can be styled in CSS.  Which a the moment means just adding a border.
+        $(this.graphics).on(
+            "DOMNodeInserted",
+            "canvas",
+            function () {
+                $(this.graphics).addClass("visible-ac-canvas");
+            }.bind(this)
+        );
+        var clearDiv = document.createElement("div");
+        $(clearDiv).css("clear", "both"); // needed to make parent div resize properly
+        this.outerDiv.appendChild(clearDiv);
+        outDiv.appendChild(this.output);
+        outDiv.appendChild(this.graphics);
+        this.outerDiv.appendChild(outDiv);
+        var lensDiv = document.createElement("div");
+        lensDiv.id = `${this.divid}_codelens`;
+        $(lensDiv).addClass("col-md-12");
+        $(lensDiv).css("display", "none");
+        this.codelens = lensDiv;
+        this.outerDiv.appendChild(lensDiv);
+        var coachDiv = document.createElement("div");
+        $(coachDiv).addClass("col-md-12");
+        $(coachDiv).css("display", "none");
+        this.codecoach = coachDiv;
+        this.outerDiv.appendChild(coachDiv);
+        clearDiv = document.createElement("div");
+        $(clearDiv).css("clear", "both"); // needed to make parent div resize properly
+        this.outerDiv.appendChild(clearDiv);
+    }
+
+    // copied from activecode
+    createControls() {
+        var ctrlDiv = document.createElement("div");
+        var butt;
+        $(ctrlDiv).addClass("ac_actions");
+        $(ctrlDiv).addClass("col-md-12");
+        // Run
+        butt = document.createElement("button");
+        $(butt).text($.i18n("msg_activecode_run_code"));
+        $(butt).addClass("btn btn-success run-button");
+        ctrlDiv.appendChild(butt);
+        this.runButton = butt;
+        console.log("adding click function for run");
+        this.runButton.onclick = this.runButtonHandler.bind(this);
+        $(butt).attr("type", "button");
+
+        if (!this.hidecode && !this.hidehistory) {
+            this.addHistoryButton(ctrlDiv);
+        }
+        if ($(this.origElem).data("gradebutton") && !this.graderactive) {
+            this.addFeedbackButton(ctrlDiv);
+        }
+
+        $(this.outerDiv).prepend(ctrlDiv);
+        if (this.question) {
+            if ($(this.question).html().match(/^\s+$/)) {
+                $(this.question).remove();
+            } else {
+                $(this.outerDiv).prepend(this.question);
+            }
+        }
+        this.controlDiv = ctrlDiv;
+    }
+
     async runProg(noUI, logResults) {
         if (typeof logResults === "undefined") {
             this.logResults = true;
@@ -378,3 +672,25 @@ function createTable(tableData, container, maxHeight) {
 
     return hot;
 }
+
+
+/*=================================
+== Find the custom HTML tags and ==
+==   execute our code on them    ==
+=================================*/
+$(document).bind("runestone:login-complete", function () {
+    $("[data-component=sqlhparsons]").each(function () {
+        if ($(this).closest("[data-component=timedAssessment]").length == 0) {
+            // If this element exists within a timed component, don't render it here
+            // try {
+                hpList[this.id] = new SQLHParons({
+                    orig: this,
+                    useRunestoneServices: eBookConfig.useRunestoneServices,
+                });
+            // } catch (err) {
+            //     console.log(`Error rendering ShortAnswer Problem ${this.id}
+            //     Details: ${err}`);
+            // }
+        }
+    });
+});

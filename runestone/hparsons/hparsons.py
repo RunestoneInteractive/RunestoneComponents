@@ -1,3 +1,6 @@
+# *********
+# |docname|
+# *********
 # Copyright (C) 2011  Bradley N. Miller
 #
 # This program is free software: you can redistribute it and/or modify
@@ -13,149 +16,336 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-__author__ = "ziwu"
+from __future__ import print_function
 
-from cgi import test
-import json
+__author__ = "bmiller"
+
 from docutils import nodes
 from docutils.parsers.rst import directives
-from runestone.mchoice import Assessment
+from .textfield import textfield_role
+from sqlalchemy import Table
 from runestone.server.componentdb import (
     addQuestionToDB,
     addHTMLToDB,
+    get_engine_meta,
     maybeAddToAssignment,
 )
-from runestone.common.runestonedirective import RunestoneDirective, RunestoneIdNode
+from runestone.common.runestonedirective import (
+    RunestoneIdDirective,
+    RunestoneIdNode,
+)
+
+try:
+    from html import escape  # py3
+except ImportError:
+    from cgi import escape  # py2
 
 
 def setup(app):
     app.add_directive("hparsons", HParsonsDirective)
-    # adding the html
-    app.add_node(HParsonsNode, html=(visit_hparsons_node, depart_hparsons_node))
-    # TODO: figure out what these means
-    # app.add_config_value("shortanswer_div_class", "journal alert alert-warning", "html")
-    # app.add_config_value(
-    #     "shortanswer_optional_div_class", "journal alert alert-success", "html"
-    # )
+    app.add_node(HParsonsNode, html=(visit_ac_node, depart_ac_node))
 
 
-# TODO: what is the alert and alert-warnings?
 TEMPLATE_START = """
-        <div>
-        <div data-component="hparsons" id="%(divid)s" data-question_label="%(question_label)s" class="alert alert-warning hparsons" >
-        <div class="hparsons_question hparsons-text" >
-    """
+<div class="%(divclass)s">
+<div data-component="activecode" id=%(divid)s data-question_label="%(question_label)s">
+<div id=%(divid)s_question class="ac_question col-md-12">
+"""
 
 TEMPLATE_END = """
-        </div>
-        <div class="hparsons" %(textentry)s %(nostrictmatch)s %(hidetests)s %(type)s>
-            <pre>%(settings)s</pre>
-        </div>
-        </div>
-        </div>
-    """
+</div>
+<textarea data-lang="%(language)s" id="%(divid)s_editor" %(autorun)s
+    %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s %(chatcodes)s %(optional)s
+    data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(tie)s %(dburl)s %(nopair)s
+    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(hidehistory)s %(wasmuri)s
+    %(showlastsql)s style="visibility: hidden;">
+%(initialcode)s
+</textarea>
+</div>
+</div>
+"""
 
 
-# seems to be the same for all
 class HParsonsNode(nodes.General, nodes.Element, RunestoneIdNode):
     def __init__(self, options, **kwargs):
         super(HParsonsNode, self).__init__(**kwargs)
         self.runestone_options = options
 
-# generate the first part of the html
-def visit_hparsons_node(self, node):
-    div_id = node.runestone_options["divid"]
-    components = dict(node.runestone_options)
-    components.update({"divid": div_id})
+
+# self for these functions is an instance of the writer class.  For example
+# in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
+# The node that is passed as a parameter is an instance of our node class.
+def visit_ac_node(self, node):
+    # print self.settings.env.activecodecounter
+
+    # todo:  handle above in node.runestone_options
+    # todo handle  'hidecode' not in node.runestone_options:
+    # todo:  handle if 'gradebutton' in node.runestone_options: res += GRADES
+
     node.delimiter = "_start__{}_".format(node.runestone_options["divid"])
+
     self.body.append(node.delimiter)
-    res = TEMPLATE_START % components
+
+    res = TEMPLATE_START % node.runestone_options
     self.body.append(res)
 
 
-# generate the second part of the html
-def depart_hparsons_node(self, node):
-    components = dict(node.runestone_options)
-    res = TEMPLATE_END % components
+def depart_ac_node(self, node):
+    """This is called at the start of processing an activecode node.  If activecode had recursive nodes
+    etc and did not want to do all of the processing in visit_ac_node any finishing touches could be
+    added here.
+    """
+    res = TEMPLATE_END % node.runestone_options
     self.body.append(res)
+
     addHTMLToDB(
         node.runestone_options["divid"],
-        components["basecourse"],
+        node.runestone_options["basecourse"],
         "".join(self.body[self.body.index(node.delimiter) + 1 :]),
     )
+
     self.body.remove(node.delimiter)
 
 
-class HParsonsDirective(Assessment):
-    """
-    .. hparsons:: uniqueid
-        :textentry: if you will use text entry instead of horizontal parsons
-        :hidetests: if the unittests will be hidden from learners
-        :nostrictmatch: if the answer is required to match the whole string. if not selected, the tool will add ^ and $ automatically to the answer to force matching the full string. This does not affect the test string area.
-        :language: SQL or regex
+def process_activcode_nodes(app, env, docname):
+    pass
 
-        --problem--
-        Here is the problem description. 
-        Make sure you use the correct delimitier for each section.
-        --blocks--
-        block 1
-        block 2
-        --explanations--
-        explanations for block 1
-        explanations for block 2
-        --positive test string-- (this is only for regex)
-        this is some positive test string.
-        it can be more than one line.
-        just ignore this section if you do not want to put anything in there.
-        --negative test string-- (this is only for regex)
-        this is some negative test string.
-        --test cases-- (this is only for regex)
-        input string 1
-        ['expected match 1', 'expected match 2']
-        input string 2
-        []
-        input string 3
-        []
+
+def purge_activecodes(app, env, docname):
+    pass
+
+
+class HParsonsDirective(RunestoneIdDirective):
+    """
+    .. activecode:: uniqueid
+       :nocanvas:  -- do not create a canvas
+       :autograde: unittest
+       :nopre: -- do not create an output component
+       :above: -- put the canvas above the code
+       :autorun: -- run this activecode as soon as the page is loaded
+       :caption: this is the caption
+       :include: div1,div2 -- invisibly include code from another activecode
+       :hidecode: -- Don't show the editor initially
+       :nocodelens: -- Do not show the codelens button
+       :timelimit: -- set the time limit for this program in seconds
+       :language: python, html, javascript, java, python2, python3
+       :chatcodes: -- Enable users to talk about this code snippet with others
+       :tour_1: audio tour track
+       :tour_2: audio tour track
+       :tour_3: audio tour track
+       :tour_4: audio tour track
+       :tour_5: audio tour track
+       :stdin: : A file to simulate stdin (java, python2, python3)
+       :datafile: : A datafile for the program to read (java, python2, python3)
+       :sourcefile: : source files (java, python2, python3)
+       :available_files: : other additional files (java, python2, python3)
+       :enabledownload: -- allow textfield contents to be downloaded as *.py file
+       :nopair: -- disable pair programming features
+       :dburl: url to load database for sql mode
+       :showlastsql: -- Only show the last sql result in output
+
+        If this is a homework problem instead of an example in the text
+        then the assignment text should go here.  The assignment text ends with
+        the line containing four tilde ~
+        ~~~~
+        print("Hidden code before students code - good for scaffolding")
+        ^^^^
+        print("hello world")
+        ====
+        print("Hidden code, such as unit tests come after the four = signs")
+
+    config values (conf.py):
+
+    - activecode_div_class - custom CSS class of the component's outermost div
+    - activecode_hide_load_history - if True, hide the load history button
+    - wasm_uri - Path or Full URL to folder containing WASM files for SQL. /_static is default
     """
 
-    required_arguments = 1  # the div id
+    required_arguments = 1
     optional_arguments = 1
-    final_argument_whitespace = False
-    has_content = True 
-    option_spec = Assessment.option_spec.copy()
+    has_content = True
+    option_spec = RunestoneIdDirective.option_spec.copy()
     option_spec.update(
         {
-            "textentry": directives.flag,
-            "hidetests": directives.flag,
-            "nostrictmatch": directives.flag,
+            "nocanvas": directives.flag,
+            "nopre": directives.flag,
+            "above": directives.flag,  # put the canvas above the code
+            "autorun": directives.flag,
+            "caption": directives.unchanged,
+            "include": directives.unchanged,
+            "hidecode": directives.flag,
+            "language": directives.unchanged,
+            "chatcodes": directives.flag,
+            "tour_1": directives.unchanged,
+            "tour_2": directives.unchanged,
+            "tour_3": directives.unchanged,
+            "tour_4": directives.unchanged,
+            "tour_5": directives.unchanged,
+            "nocodelens": directives.flag,
+            "coach": directives.flag,
+            "gradebutton": directives.flag,
+            "timelimit": directives.unchanged,
+            "stdin": directives.unchanged,
+            "datafile": directives.unchanged,
+            "sourcefile": directives.unchanged,
+            "available_files": directives.unchanged,
+            "enabledownload": directives.flag,
+            "compileargs": directives.unchanged,
+            "linkargs": directives.unchanged,
+            "interpreterargs": directives.unchanged,
+            "runargs": directives.unchanged,
+            "tie": directives.unchanged,
+            "nopair": directives.flag,
+            "dburl": directives.unchanged,
+            "showlastsql": directives.flag,
         }
     )
-    # seem to be defining the type of the options
-    # option_spec.update({"mathjax": directives.flag})
-
-    # just fill it with the name
-    # node_class = HParsonsNode 
 
     def run(self):
-        # same
         super(HParsonsDirective, self).run()
-        addQuestionToDB(self)
-        # Raise an error if the directive does not have contents.
-        # env = self.state.document.settings.env
-        if "textentry" in self.options:
-            self.options['textentry'] = ' data-textentry="true"'
-        else:
-            self.options['textentry'] = ''
-        if "hidetests" in self.options:
-            self.options['hidetests'] = ' data-hidetests="true"'
-        else:
-            self.options['hidetests'] = ''
-        if "nostrictmatch" in self.options:
-            self.options['nostrictmatch'] = ' data-nostrictmatch="true"'
-        else:
-            self.options['nostrictmatch'] = ''
 
-        # SQL Options copied from activecode
+        env = self.state.document.settings.env
+        # keep track of how many activecodes we have....
+        # could be used to automatically make a unique id for them.
+        if not hasattr(env, "activecodecounter"):
+            env.activecodecounter = 0
+        env.activecodecounter += 1
+        self.options["name"] = self.arguments[0].strip()
+
+        explain_text = None
+        if self.content:
+            if "~~~~" in self.content:
+                idx = self.content.index("~~~~")
+                explain_text = self.content[:idx]
+                self.content = self.content[idx + 1 :]
+            source = "\n".join(self.content)
+        else:
+            source = "\n"
+
+        self.explain_text = explain_text or ["Not an Exercise"]
+        addQuestionToDB(self)
+
+        self.options["initialcode"] = source
+        str = source.replace("\n", "*nline*")
+        str0 = str.replace('"', "*doubleq*")
+        str1 = str0.replace("(", "*open*")
+        str2 = str1.replace(")", "*close*")
+        str3 = str2.replace("'", "*singleq*")
+        self.options["argu"] = str3
+
+        # TODO: This is BAD -- using '_' as a key for audio tour stuff is wrong.
+        complete = ""
+        no_of_buttons = 0
+        okeys = list(self.options.keys())
+        for k in okeys:
+            if "tour_" in k:
+                x, label = k.split("_")
+                no_of_buttons = no_of_buttons + 1
+                complete = complete + self.options[k] + "*atype*"
+
+        newcomplete = complete.replace('"', "*doubleq*")
+        self.options["ctext"] = newcomplete
+        self.options["no_of_buttons"] = no_of_buttons
+
+        if "caption" not in self.options:
+            self.options["caption"] = ""
+        else:
+            self.options["caption"] = "data-caption='%s'" % self.options["caption"]
+
+        if "include" not in self.options:
+            self.options["include"] = ""
+        else:
+            lst = self.options["include"].split(",")
+            lst = [x.strip() for x in lst]
+            self.options["include"] = 'data-include="' + " ".join(lst) + '"'
+
+        if "hidecode" in self.options:
+            self.options["hidecode"] = 'data-hidecode="true"'
+        else:
+            self.options["hidecode"] = ""
+
+        if "enabledownload" in self.options:
+            self.options["enabledownload"] = 'data-enabledownload="true"'
+        else:
+            self.options["enabledownload"] = ""
+
+        if "chatcodes" in self.options:
+            self.options["chatcodes"] = 'data-chatcodes="true"'
+        else:
+            self.options["chatcodes"] = ""
+
+        if "language" not in self.options:
+            self.options["language"] = "python"
+
+        if self.options["language"] == "html":
+            self.options["language"] = "htmlmixed"
+            self.options["initialcode"] = escape(self.options["initialcode"])
+
+        if "nocodelens" in self.options or self.options["language"] not in [
+            "python",
+            "java",
+            "c",
+            "cpp",
+        ]:
+            self.options["codelens"] = ""
+        else:
+            self.options["codelens"] = 'data-codelens="true"'
+
+        if "nopair" in self.options:
+            self.options["nopair"] = 'data-nopair="true"'
+        else:
+            self.options["nopair"] = ""
+
+        if "timelimit" not in self.options:
+            self.options["timelimit"] = "data-timelimit=25000"
+        else:
+            self.options["timelimit"] = "data-timelimit=%s" % self.options["timelimit"]
+
+        if "autorun" not in self.options:
+            self.options["autorun"] = ""
+        else:
+            self.options["autorun"] = 'data-autorun="true"'
+
+        if "coach" in self.options:
+            self.options["coach"] = 'data-coach="true"'
+        else:
+            self.options["coach"] = ""
+
+        # livecode options
+        if "stdin" in self.options:
+            self.options["stdin"] = "data-stdin='%s'" % self.options["stdin"]
+        else:
+            self.options["stdin"] = ""
+
+        if "datafile" not in self.options:
+            self.options["datafile"] = ""
+        else:
+            self.options["datafile"] = "data-datafile='%s'" % self.options["datafile"]
+
+        if "sourcefile" not in self.options:
+            self.options["sourcefile"] = ""
+        else:
+            self.options["sourcefile"] = (
+                "data-sourcefile='%s'" % self.options["sourcefile"]
+            )
+
+        if "tie" in self.options:
+            self.options["tie"] = "data-tie='{}'".format(self.options["tie"])
+        else:
+            self.options["tie"] = ""
+
+        for opt, tp in [
+            ("compileargs", "cargs"),
+            ("linkargs", "largs"),
+            ("runargs", "rargs"),
+            ("interpreterargs", "iargs"),
+        ]:
+            if opt in self.options:
+                self.options[tp] = 'data-{}="{}"'.format(opt, escape(self.options[opt]))
+            else:
+                self.options[tp] = ""
+
+        # SQL Options
         if "dburl" in self.options:
             self.options["dburl"] = "data-dburl='{}'".format(self.options["dburl"])
         else:
@@ -165,85 +355,86 @@ class HParsonsDirective(Assessment):
             self.options["showlastsql"] = 'data-showlastsql="true"'
         else:
             self.options["showlastsql"] = ""
-        
-        self.assert_has_content()
 
-        # sepcifying the start end end for each section
-        delimitiers = ['--problem--', '--blocks--', '--explanations--', '--positive test string--', '--negative test string--', '--test cases--']
-        delimitiers_index = [-1 for x in range(6)]
+        # other options
 
-        has_content = False
-        for i in range(len(delimitiers)):
-            if delimitiers[i] in self.content:
-                has_content = True
-                delimitiers_index[i] = self.content.index(delimitiers[i])
-        if has_content:
-            sorted_index, sorted_delimiters = [list(t) for t in zip(*[pair for pair in sorted(zip(delimitiers_index, delimitiers)) if pair[0] >= 0])]
+        if "gradebutton" not in self.options:
+            self.options["gradebutton"] = ""
         else:
-            sorted_index = []
-            sorted_delimiters = []
-        
-        content = self.content
+            self.options["gradebutton"] = "data-gradebutton=true"
 
-        parsons_settings = {}
-
-        if '--problem--' in sorted_delimiters:
-            index = sorted_delimiters.index('--problem--')
-            self.options['instructions'] = content[(sorted_index[index] + 1): (sorted_index[index + 1] if index + 1 < len(sorted_index) else len(content))]
-            self.options['problem'] = '\n'.join(content[(sorted_index[index] + 1): (sorted_index[index + 1] if index + 1 < len(sorted_index) else len(content))])
+        self.options["divclass"] = env.config.activecode_div_class
+        if env.config.activecode_hide_load_history:
+            self.options["hidehistory"] = "data-hidehistory=true"
         else:
-            self.options['instructions'] = ['empty problem']
-            self.options['problem'] = 'empty problem'
+            self.options["hidehistory"] = ""
 
-        if '--blocks--' in sorted_delimiters:
-            index = sorted_delimiters.index('--blocks--')
-            parsons_settings['blocks'] = list(content[sorted_index[index] + 1: (sorted_index[index + 1] if index + 1 < len(sorted_index) else len(content))])
+        if env.config.wasm_uri:
+            self.options["wasmuri"] = f"data-wasm={env.config.wasm_uri}"
         else:
-            parsons_settings['blocks'] = []
+            self.options["wasmuri"] = ""
 
-        if '--explanations--' in sorted_delimiters:
-            index = sorted_delimiters.index('--explanations--')
-            parsons_settings['explanations'] = list(content[sorted_index[index] + 1: (sorted_index[index + 1]  if index + 1 < len(sorted_index) else len(content))])
+        if self.content:
+            if "^^^^" in self.content:
+                idx = self.content.index("^^^^")
+                prefix = "\n".join(self.content[:idx])
+            if "====" in self.content:
+                idx = self.content.index("====")
+                source = "\n".join(self.content[:idx])
+                suffix = "\n".join(self.content[idx + 1 :])
+            else:
+                source = "\n".join(self.content)
+                suffix = "\n"
+        else:
+            source = "\n"
+            suffix = "\n"
 
-        if '--positive test string--' in sorted_delimiters:
-            index = sorted_delimiters.index('--positive test string--')
-            parsons_settings['positivetest'] = '\n'.join(content[sorted_index[index] + 1: (sorted_index[index + 1]  if index + 1 < len(sorted_index) else len(content))])
+        course_name = env.config.html_context["course_id"]
+        divid = self.options["divid"]
 
-        if '--negative test string--' in sorted_delimiters:
-            index = sorted_delimiters.index('--negative test string--')
-            parsons_settings['negativetest'] = '\n'.join(content[sorted_index[index] + 1: (sorted_index[index + 1]  if index + 1 < len(sorted_index) else len(content))])
+        engine, meta, sess = get_engine_meta()
 
-        if '--test cases--' in sorted_delimiters:
-            index = sorted_index[sorted_delimiters.index('--test cases--')] + 1
-            end_index = sorted_index[index + 1] if index + 1 < len(sorted_index) else len(content)
-            parsons_settings['testcases'] = []
-            while index < end_index:
-                testcase = {}
-                testcase['input'] = content[index]
-                testcase['expect'] = content[index + 1] if index + 1 < end_index else []
-                parsons_settings['testcases'].append(testcase)
-                index += 2
+        if engine:
+            Source_code = Table(
+                "source_code", meta, autoload=True, autoload_with=engine
+            )
+            engine.execute(
+                Source_code.delete()
+                .where(Source_code.c.acid == divid)
+                .where(Source_code.c.course_id == course_name)
+            )
+            engine.execute(
+                Source_code.insert().values(
+                    acid=divid,
+                    course_id=course_name,
+                    main_code=source,
+                    suffix_code=suffix,
+                    includes=self.options["include"],
+                    available_files=self.options.get("available_files", ""),
+                )
+            )
+        else:
+            if (
+                not hasattr(env, "dberr_activecode_reported")
+                or not env.dberr_activecode_reported
+            ):
+                env.dberr_activecode_reported = True
+                print(
+                    "Unable to save to source_code table in activecode.py. Possible problems:"
+                )
+                print("  1. dburl or course_id are not set in conf.py for your book")
+                print("  2. unable to connect to the database using dburl")
+                print("")
+                print(
+                    "This should only affect the grading interface. Everything else should be fine."
+                )
 
-        self.options['settings'] = json.dumps(parsons_settings)
-        self.options['type'] = type(self.options['instructions'])
+        acnode = HParsonsNode(self.options, rawsource=self.block_text)
+        acnode.source, acnode.line = self.state_machine.get_source_and_line(self.lineno)
+        self.add_name(acnode)  # make this divid available as a target for :ref:
 
-        # same
         maybeAddToAssignment(self)
+        if explain_text:
+            self.state.nested_parse(explain_text, self.content_offset, acnode)
 
-        # same
-        hparsons_node = HParsonsNode(self.options, rawsource=self.block_text)
-        hparsons_node.source, hparsons_node.line = self.state_machine.get_source_and_line(
-            self.lineno
-        )
-
-        # exist in short answer and mchoice but not parsons
-        # For MChoice its better to insert the qnum into the content before further processing.
-        # self.updateContent()
-
-        self.state.nested_parse(
-            self.options['instructions'], self.content_offset, hparsons_node
-        )
-
-
-        # same
-        return [hparsons_node]
+        return [acnode]
