@@ -18,15 +18,13 @@ codechat==1.9.0
     # via -r requirements.in
 cogapp==3.3.0
     # via -r requirements.in
-docutils==0.17.1
+docutils==0.16
     # via
     #   codechat
     #   sphinx
 idna==3.3
     # via requests
 imagesize==1.3.0
-    # via sphinx
-importlib-metadata==4.11.2
     # via sphinx
 jinja2==3.0.3
     # via sphinx
@@ -56,7 +54,7 @@ six==1.16.0
     #   paver
 snowballstemmer==2.2.0
     # via sphinx
-sphinx==4.4.0
+sphinx==3.5.4
     # via
     #   -r requirements.in
     #   sphinxcontrib-paverutils
@@ -78,5 +76,6 @@ sqlalchemy==1.4.31
     # via -r requirements.in
 urllib3==1.26.8
     # via requests
-zipp==3.7.0
-    # via importlib-metadata
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools

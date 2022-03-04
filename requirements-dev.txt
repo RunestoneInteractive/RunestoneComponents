@@ -44,7 +44,7 @@ cryptography==36.0.1
     # via
     #   pyopenssl
     #   urllib3
-docutils==0.17.1
+docutils==0.16
     # via
     #   codechat
     #   myst-parser
@@ -62,7 +62,6 @@ imagesize==1.3.0
 importlib-metadata==4.11.2
     # via
     #   keyring
-    #   sphinx
     #   twine
 iniconfig==1.1.1
     # via pytest
@@ -164,7 +163,7 @@ snowballstemmer==2.2.0
     # via sphinx
 sortedcontainers==2.4.0
     # via trio
-sphinx==4.4.0
+sphinx==3.5.4
     # via
     #   -r requirements.in
     #   myst-parser
