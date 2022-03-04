@@ -47,17 +47,16 @@ def setup(app):
 
 
 TEMPLATE_START = """
-<div class="%(divclass)s">
+<div>
 <div data-component="activecode" id=%(divid)s data-question_label="%(question_label)s">
 <div id=%(divid)s_question class="ac_question col-md-12">
 """
 
 TEMPLATE_END = """
 </div>
-<textarea data-lang="%(language)s" id="%(divid)s_editor" %(autorun)s
-    %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s %(chatcodes)s %(optional)s
-    data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(tie)s %(dburl)s %(nopair)s
-    %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(hidehistory)s %(wasmuri)s
+<textarea data-lang="%(language)s" id="%(divid)s_editor" 
+    %(optional)s
+    %(dburl)s
     %(showlastsql)s style="visibility: hidden;">
 %(initialcode)s
 </textarea>
@@ -79,8 +78,6 @@ def visit_ac_node(self, node):
     # print self.settings.env.activecodecounter
 
     # todo:  handle above in node.runestone_options
-    # todo handle  'hidecode' not in node.runestone_options:
-    # todo:  handle if 'gradebutton' in node.runestone_options: res += GRADES
 
     node.delimiter = "_start__{}_".format(node.runestone_options["divid"])
 
@@ -116,31 +113,11 @@ def purge_activecodes(app, env, docname):
 
 
 class HParsonsDirective(RunestoneIdDirective):
+    # only keep: language, autograde, dburl
     """
     .. activecode:: uniqueid
-       :nocanvas:  -- do not create a canvas
        :autograde: unittest
-       :nopre: -- do not create an output component
-       :above: -- put the canvas above the code
-       :autorun: -- run this activecode as soon as the page is loaded
-       :caption: this is the caption
-       :include: div1,div2 -- invisibly include code from another activecode
-       :hidecode: -- Don't show the editor initially
-       :nocodelens: -- Do not show the codelens button
-       :timelimit: -- set the time limit for this program in seconds
        :language: python, html, javascript, java, python2, python3
-       :chatcodes: -- Enable users to talk about this code snippet with others
-       :tour_1: audio tour track
-       :tour_2: audio tour track
-       :tour_3: audio tour track
-       :tour_4: audio tour track
-       :tour_5: audio tour track
-       :stdin: : A file to simulate stdin (java, python2, python3)
-       :datafile: : A datafile for the program to read (java, python2, python3)
-       :sourcefile: : source files (java, python2, python3)
-       :available_files: : other additional files (java, python2, python3)
-       :enabledownload: -- allow textfield contents to be downloaded as *.py file
-       :nopair: -- disable pair programming features
        :dburl: url to load database for sql mode
        :showlastsql: -- Only show the last sql result in output
 
@@ -158,7 +135,6 @@ class HParsonsDirective(RunestoneIdDirective):
 
     - activecode_div_class - custom CSS class of the component's outermost div
     - activecode_hide_load_history - if True, hide the load history button
-    - wasm_uri - Path or Full URL to folder containing WASM files for SQL. /_static is default
     """
 
     required_arguments = 1
@@ -167,35 +143,7 @@ class HParsonsDirective(RunestoneIdDirective):
     option_spec = RunestoneIdDirective.option_spec.copy()
     option_spec.update(
         {
-            "nocanvas": directives.flag,
-            "nopre": directives.flag,
-            "above": directives.flag,  # put the canvas above the code
-            "autorun": directives.flag,
-            "caption": directives.unchanged,
-            "include": directives.unchanged,
-            "hidecode": directives.flag,
             "language": directives.unchanged,
-            "chatcodes": directives.flag,
-            "tour_1": directives.unchanged,
-            "tour_2": directives.unchanged,
-            "tour_3": directives.unchanged,
-            "tour_4": directives.unchanged,
-            "tour_5": directives.unchanged,
-            "nocodelens": directives.flag,
-            "coach": directives.flag,
-            "gradebutton": directives.flag,
-            "timelimit": directives.unchanged,
-            "stdin": directives.unchanged,
-            "datafile": directives.unchanged,
-            "sourcefile": directives.unchanged,
-            "available_files": directives.unchanged,
-            "enabledownload": directives.flag,
-            "compileargs": directives.unchanged,
-            "linkargs": directives.unchanged,
-            "interpreterargs": directives.unchanged,
-            "runargs": directives.unchanged,
-            "tie": directives.unchanged,
-            "nopair": directives.flag,
             "dburl": directives.unchanged,
             "showlastsql": directives.flag,
         }
@@ -233,117 +181,8 @@ class HParsonsDirective(RunestoneIdDirective):
         str3 = str2.replace("'", "*singleq*")
         self.options["argu"] = str3
 
-        # TODO: This is BAD -- using '_' as a key for audio tour stuff is wrong.
-        complete = ""
-        no_of_buttons = 0
-        okeys = list(self.options.keys())
-        for k in okeys:
-            if "tour_" in k:
-                x, label = k.split("_")
-                no_of_buttons = no_of_buttons + 1
-                complete = complete + self.options[k] + "*atype*"
-
-        newcomplete = complete.replace('"', "*doubleq*")
-        self.options["ctext"] = newcomplete
-        self.options["no_of_buttons"] = no_of_buttons
-
-        if "caption" not in self.options:
-            self.options["caption"] = ""
-        else:
-            self.options["caption"] = "data-caption='%s'" % self.options["caption"]
-
-        if "include" not in self.options:
-            self.options["include"] = ""
-        else:
-            lst = self.options["include"].split(",")
-            lst = [x.strip() for x in lst]
-            self.options["include"] = 'data-include="' + " ".join(lst) + '"'
-
-        if "hidecode" in self.options:
-            self.options["hidecode"] = 'data-hidecode="true"'
-        else:
-            self.options["hidecode"] = ""
-
-        if "enabledownload" in self.options:
-            self.options["enabledownload"] = 'data-enabledownload="true"'
-        else:
-            self.options["enabledownload"] = ""
-
-        if "chatcodes" in self.options:
-            self.options["chatcodes"] = 'data-chatcodes="true"'
-        else:
-            self.options["chatcodes"] = ""
-
         if "language" not in self.options:
             self.options["language"] = "python"
-
-        if self.options["language"] == "html":
-            self.options["language"] = "htmlmixed"
-            self.options["initialcode"] = escape(self.options["initialcode"])
-
-        if "nocodelens" in self.options or self.options["language"] not in [
-            "python",
-            "java",
-            "c",
-            "cpp",
-        ]:
-            self.options["codelens"] = ""
-        else:
-            self.options["codelens"] = 'data-codelens="true"'
-
-        if "nopair" in self.options:
-            self.options["nopair"] = 'data-nopair="true"'
-        else:
-            self.options["nopair"] = ""
-
-        if "timelimit" not in self.options:
-            self.options["timelimit"] = "data-timelimit=25000"
-        else:
-            self.options["timelimit"] = "data-timelimit=%s" % self.options["timelimit"]
-
-        if "autorun" not in self.options:
-            self.options["autorun"] = ""
-        else:
-            self.options["autorun"] = 'data-autorun="true"'
-
-        if "coach" in self.options:
-            self.options["coach"] = 'data-coach="true"'
-        else:
-            self.options["coach"] = ""
-
-        # livecode options
-        if "stdin" in self.options:
-            self.options["stdin"] = "data-stdin='%s'" % self.options["stdin"]
-        else:
-            self.options["stdin"] = ""
-
-        if "datafile" not in self.options:
-            self.options["datafile"] = ""
-        else:
-            self.options["datafile"] = "data-datafile='%s'" % self.options["datafile"]
-
-        if "sourcefile" not in self.options:
-            self.options["sourcefile"] = ""
-        else:
-            self.options["sourcefile"] = (
-                "data-sourcefile='%s'" % self.options["sourcefile"]
-            )
-
-        if "tie" in self.options:
-            self.options["tie"] = "data-tie='{}'".format(self.options["tie"])
-        else:
-            self.options["tie"] = ""
-
-        for opt, tp in [
-            ("compileargs", "cargs"),
-            ("linkargs", "largs"),
-            ("runargs", "rargs"),
-            ("interpreterargs", "iargs"),
-        ]:
-            if opt in self.options:
-                self.options[tp] = 'data-{}="{}"'.format(opt, escape(self.options[opt]))
-            else:
-                self.options[tp] = ""
 
         # SQL Options
         if "dburl" in self.options:
@@ -355,39 +194,6 @@ class HParsonsDirective(RunestoneIdDirective):
             self.options["showlastsql"] = 'data-showlastsql="true"'
         else:
             self.options["showlastsql"] = ""
-
-        # other options
-
-        if "gradebutton" not in self.options:
-            self.options["gradebutton"] = ""
-        else:
-            self.options["gradebutton"] = "data-gradebutton=true"
-
-        self.options["divclass"] = env.config.activecode_div_class
-        if env.config.activecode_hide_load_history:
-            self.options["hidehistory"] = "data-hidehistory=true"
-        else:
-            self.options["hidehistory"] = ""
-
-        if env.config.wasm_uri:
-            self.options["wasmuri"] = f"data-wasm={env.config.wasm_uri}"
-        else:
-            self.options["wasmuri"] = ""
-
-        if self.content:
-            if "^^^^" in self.content:
-                idx = self.content.index("^^^^")
-                prefix = "\n".join(self.content[:idx])
-            if "====" in self.content:
-                idx = self.content.index("====")
-                source = "\n".join(self.content[:idx])
-                suffix = "\n".join(self.content[idx + 1 :])
-            else:
-                source = "\n".join(self.content)
-                suffix = "\n"
-        else:
-            source = "\n"
-            suffix = "\n"
 
         course_name = env.config.html_context["course_id"]
         divid = self.options["divid"]
@@ -409,8 +215,6 @@ class HParsonsDirective(RunestoneIdDirective):
                     course_id=course_name,
                     main_code=source,
                     suffix_code=suffix,
-                    includes=self.options["include"],
-                    available_files=self.options.get("available_files", ""),
                 )
             )
         else:
