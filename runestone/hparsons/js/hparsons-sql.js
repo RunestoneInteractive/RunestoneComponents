@@ -1,5 +1,5 @@
 import Handsontable from "handsontable";
-import 'handsontable/dist/handsontable.full.css';
+// import 'handsontable/dist/handsontable.full.css';
 import initSqlJs from "sql.js/dist/sql-wasm.js";
 import RunestoneBase from "../../common/js/runestonebase.js";
 
@@ -13,8 +13,8 @@ import "codemirror/mode/javascript/javascript.js";
 import "codemirror/mode/sql/sql.js";
 import "codemirror/mode/clike/clike.js";
 import "codemirror/mode/octave/octave.js";
-import "./../css/activecode.css";
-import "codemirror/lib/codemirror.css";
+// import "./../../activecode/css/activecode.css";
+// import "codemirror/lib/codemirror.css";
 
 // copied from activecode
 // Used by Skulpt.
@@ -24,9 +24,14 @@ window.vegaEmbed = embed;
 
 var allDburls = {};
 
+export var hpList;
+// Dictionary that contains all instances of horizontal Parsons problem objects
+if (hpList === undefined) hpList = {}; 
+
 export default class SQLHParons extends RunestoneBase {
     constructor(opts) {
         super(opts);
+        console.log('hparsons sql constructor')
         // copied from activecode
         var suffStart;
         var orig = $(opts.orig).find("textarea")[0];
@@ -182,6 +187,155 @@ export default class SQLHParons extends RunestoneBase {
             }
         });
     }
+
+    // copied from activecode
+    async runButtonHandler() {
+        // Disable the run button until the run is finished.
+        this.runButton.disabled = true;
+        try {
+            await this.runProg();
+        } catch (e) {
+            console.log(`there was an error ${e} running the code`);
+        }
+        if (this.logResults) {
+            this.logCurrentAnswer();
+        }
+        this.renderFeedback();
+        // The run is finished; re-enable the button.
+        this.runButton.disabled = false;
+    }
+
+    // copied from activecode
+    addHistoryButton(ctrlDiv) {
+        let butt = document.createElement("button");
+        $(butt).text($.i18n("msg_activecode_load_history"));
+        $(butt).addClass("btn btn-default");
+        $(butt).attr("type", "button");
+        ctrlDiv.appendChild(butt);
+        this.histButton = butt;
+        $(butt).click(this.addHistoryScrubber.bind(this));
+        if (this.graderactive) {
+            this.addHistoryScrubber(true);
+        }
+    }
+
+    // copied from activecode
+    // _`addHistoryScrubber`
+    // ---------------------
+    // Activecode -- If the code has not changed wrt the scrubber position value then don't save the code or reposition the scrubber
+    //  -- still call runlog, but add a parameter to not save the code
+    // add an initial load history button
+    // if there is no edit then there is no append   to_save (True/False)
+    async addHistoryScrubber(pos_last) {
+        let response;
+        var reqData = {
+            acid: this.divid,
+        };
+        if (this.sid !== undefined) {
+            reqData["sid"] = this.sid;
+        }
+        console.log("before get hist");
+        if (
+            eBookConfig.practice_mode ||
+            (this.isTimed && !this.assessmentTaken)
+        ) {
+            // If this is timed and already taken we should restore history info
+            this.renderScrubber();
+        } else {
+            let request = new Request(`${eBookConfig.new_server_prefix}/assessment/gethist`, {
+                method: "POST",
+                headers: this.jsonHeaders,
+                body: JSON.stringify(reqData),
+            });
+            try {
+                response = await fetch(request);
+                let data = await response.json();
+                if (!response.ok) {
+                    throw new Error(`Failed to get the history data: ${data.detail}`);
+                }
+                data = data.detail;
+                if (data.history !== undefined) {
+                    this.history = this.history.concat(data.history);
+                    for (let t in data.timestamps) {
+                        this.timestamps.push(
+                            new Date(data.timestamps[t]).toLocaleString()
+                        );
+                    }
+                }
+            } catch (e) {
+                console.log(`unable to fetch history: ${e}`);
+            }
+            this.renderScrubber(pos_last);
+        }
+        return "success";
+    }
+
+    renderScrubber(pos_last) {
+        console.log("making a new scrubber");
+        var scrubberDiv = document.createElement("div");
+        $(scrubberDiv).css("display", "inline-block");
+        $(scrubberDiv).css("margin-left", "10px");
+        $(scrubberDiv).css("margin-right", "10px");
+        $(scrubberDiv).css({
+            "min-width": "200px",
+            "max-width": "300px",
+        });
+        var scrubber = document.createElement("div");
+        this.timestampP = document.createElement("span");
+        this.slideit = function () {
+            this.editor.setValue(this.history[$(scrubber).slider("value")]);
+            var curVal = this.timestamps[$(scrubber).slider("value")];
+            let pos = $(scrubber).slider("value");
+            let outOf = this.history.length;
+            $(this.timestampP).text(`${curVal} - ${pos + 1} of ${outOf}`);
+            this.logBookEvent({
+                event: "activecode",
+                act: "slide:" + curVal,
+                div_id: this.divid,
+            });
+        };
+        $(scrubber).slider({
+            max: this.history.length - 1,
+            value: this.history.length - 1,
+        });
+        $(scrubber).css("margin", "10px");
+        $(scrubber).on("slide", this.slideit.bind(this));
+        $(scrubber).on("slidechange", this.slideit.bind(this));
+        scrubberDiv.appendChild(scrubber);
+        scrubberDiv.appendChild(this.timestampP);
+        // If there is a deadline set then position the scrubber at the last submission
+        // prior to the deadline
+        if (this.deadline) {
+            let i = 0;
+            let done = false;
+            while (i < this.history.length && !done) {
+                if (new Date(this.timestamps[i]) > this.deadline) {
+                    done = true;
+                } else {
+                    i += 1;
+                }
+            }
+            i = i - 1;
+            scrubber.value = Math.max(i, 0);
+            this.editor.setValue(this.history[scrubber.value]);
+            $(scrubber).slider("value", scrubber.value);
+        } else if (pos_last) {
+            scrubber.value = this.history.length - 1;
+            this.editor.setValue(this.history[scrubber.value]);
+        } else {
+            scrubber.value = 0;
+        }
+        let pos = $(scrubber).slider("value");
+        let outOf = this.history.length;
+        let ts = this.timestamps[$(scrubber).slider("value")];
+        $(this.timestampP).text(`${ts} - ${pos + 1} of ${outOf}`);
+        $(this.histButton).remove();
+        this.histButton = null;
+        this.historyScrubber = scrubber;
+        $(scrubberDiv).insertAfter(this.runButton);
+    } // end definition of helper
+
+
     // copied from activecode
     createEditor(index) {
         this.outerDiv = document.createElement("div");
@@ -344,7 +498,8 @@ export default class SQLHParons extends RunestoneBase {
         $(butt).addClass("btn btn-success run-button");
         ctrlDiv.appendChild(butt);
         this.runButton = butt;
-        console.log("adding click function for run");
+        console.log(butt);
+        console.log("adding click function for run in sql");
         this.runButton.onclick = this.runButtonHandler.bind(this);
         $(butt).attr("type", "button");
 
@@ -527,12 +682,41 @@ export default class SQLHParons extends RunestoneBase {
         return Promise.resolve("done");
     }
 
+    // copied from anctivecode
+    async buildProg(useSuffix) {
+        // assemble code from prefix, suffix, and editor for running.
+        var pretext;
+        var prog = this.editor.getValue() + "\n";
+        if (this.prefix) {
+            prog = this.prefix + prog;
+        }
+        this.pretext = "";
+        this.pretextLines = 0;
+        this.progLines = prog.match(/\n/g).length + 1;
+        if (this.includes) {
+            // iterate over the includes, in-order prepending to prog
+            pretext = "";
+            for (var x = 0; x < this.includes.length; x++) {
+                let iCode = await this.getIncludedCode(this.includes[x]);
+                pretext = pretext + iCode + "\n";
+            }
+            this.pretext = pretext;
+            if (this.pretext) {
+                this.pretextLines = (this.pretext.match(/\n/g) || "").length;
+            }
+            prog = pretext + prog;
+        }
+        if (useSuffix && this.suffix) {
+            prog = prog + this.suffix;
+        }
+        return Promise.resolve(prog);
+    }
     async logCurrentAnswer(sid) {
         let data = {
             div_id: this.divid,
             code: this.editor.getValue(),
             language: this.language,
-            errinfo: this.results[this.results.length - 1].status,
+            // errinfo: this.results[this.results.length - 1].status,
             to_save: this.saveCode,
             prefix: this.pretext,
             suffix: this.suffix,
@@ -679,7 +863,7 @@ function createTable(tableData, container, maxHeight) {
 ==   execute our code on them    ==
 =================================*/
 $(document).bind("runestone:login-complete", function () {
-    $("[data-component=sqlhparsons]").each(function () {
+    $("[data-component=hparsons]").each(function () {
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
             // try {

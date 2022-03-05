@@ -48,7 +48,7 @@ def setup(app):
 
 TEMPLATE_START = """
 <div class="%(divclass)s">
-<div data-component="activecode" id=%(divid)s data-question_label="%(question_label)s">
+<div data-component="hparsons" id=%(divid)s data-question_label="%(question_label)s">
 <div id=%(divid)s_question class="ac_question col-md-12">
 """
 
