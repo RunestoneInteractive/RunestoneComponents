@@ -163,7 +163,7 @@ snowballstemmer==2.2.0
     # via sphinx
 sortedcontainers==2.4.0
     # via trio
-sphinx==3.5.4
+sphinx==4.4.0
     # via
     #   -r requirements.in
     #   myst-parser

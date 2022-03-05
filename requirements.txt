@@ -54,7 +54,7 @@ six==1.16.0
     #   paver
 snowballstemmer==2.2.0
     # via sphinx
-sphinx==3.5.4
+sphinx==4.4.0
     # via
     #   -r requirements.in
     #   sphinxcontrib-paverutils
