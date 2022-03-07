@@ -4,7 +4,7 @@ Horizontal Parsons Test
 
 .. Testing horizontal Parsons problems.
 
-Horizontal Parsons + SQL 
+Horizontal Parsons + SQL
 --------------------------------------
 .. hparsons:: test_activecode_6
     :language: sql

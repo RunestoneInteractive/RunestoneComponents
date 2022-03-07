@@ -44,7 +44,6 @@ export default class SQLHParons extends RunestoneBase {
         this.code = $(orig).text() || "\n\n\n\n\n";
         this.language = $(orig).data("lang");
         this.includes = $(orig).data("include");
-        this.hidehistory = $(orig).data("hidehistory");
         this.question = $(opts.orig).find(`#${this.divid}_question`)[0];
         this.tie = $(orig).data("tie");
         this.dburl = $(orig).data("dburl");
@@ -56,7 +55,6 @@ export default class SQLHParons extends RunestoneBase {
         this.logResults = true;
         this.output = null; // create pre for output
         this.controlDiv = null;
-        this.historyScrubber = null;
         this.timestamps = ["Original"];
         this.autorun = $(orig).data("autorun");
         if (this.includes) {
@@ -72,7 +70,6 @@ export default class SQLHParons extends RunestoneBase {
             this.suffix = this.code.substring(suffStart + 5);
             this.code = this.code.substring(0, suffStart);
         }
-        this.history = [this.code];
         this.createEditor();
         this.createOutput();
         this.createControls();
@@ -176,137 +173,6 @@ export default class SQLHParons extends RunestoneBase {
         // The run is finished; re-enable the button.
         this.runButton.disabled = false;
     }
-
-    // copied from activecode
-    addHistoryButton(ctrlDiv) {
-        let butt = document.createElement("button");
-        $(butt).text($.i18n("msg_activecode_load_history"));
-        $(butt).addClass("btn btn-default");
-        $(butt).attr("type", "button");
-        ctrlDiv.appendChild(butt);
-        this.histButton = butt;
-        $(butt).click(this.addHistoryScrubber.bind(this));
-        if (this.graderactive) {
-            this.addHistoryScrubber(true);
-        }
-    }
-
-    // copied from activecode
-    // _`addHistoryScrubber`
-    // ---------------------
-    // Activecode -- If the code has not changed wrt the scrubber position value then don't save the code or reposition the scrubber
-    //  -- still call runlog, but add a parameter to not save the code
-    // add an initial load history button
-    // if there is no edit then there is no append   to_save (True/False)
-    async addHistoryScrubber(pos_last) {
-        let response;
-        var reqData = {
-            acid: this.divid,
-        };
-        if (this.sid !== undefined) {
-            reqData["sid"] = this.sid;
-        }
-        console.log("before get hist");
-        if (
-            eBookConfig.practice_mode ||
-            (this.isTimed && !this.assessmentTaken)
-        ) {
-            // If this is timed and already taken we should restore history info
-            this.renderScrubber();
-        } else {
-            let request = new Request(`${eBookConfig.new_server_prefix}/assessment/gethist`, {
-                method: "POST",
-                headers: this.jsonHeaders,
-                body: JSON.stringify(reqData),
-            });
-            try {
-                response = await fetch(request);
-                let data = await response.json();
-                if (!response.ok) {
-                    throw new Error(`Failed to get the history data: ${data.detail}`);
-                }
-                data = data.detail;
-                if (data.history !== undefined) {
-                    this.history = this.history.concat(data.history);
-                    for (let t in data.timestamps) {
-                        this.timestamps.push(
-                            new Date(data.timestamps[t]).toLocaleString()
-                        );
-                    }
-                }
-            } catch (e) {
-                console.log(`unable to fetch history: ${e}`);
-            }
-            this.renderScrubber(pos_last);
-        }
-        return "success";
-    }
-
-    renderScrubber(pos_last) {
-        console.log("making a new scrubber");
-        var scrubberDiv = document.createElement("div");
-        $(scrubberDiv).css("display", "inline-block");
-        $(scrubberDiv).css("margin-left", "10px");
-        $(scrubberDiv).css("margin-right", "10px");
-        $(scrubberDiv).css({
-            "min-width": "200px",
-            "max-width": "300px",
-        });
-        var scrubber = document.createElement("div");
-        this.timestampP = document.createElement("span");
-        this.slideit = function () {
-            this.editor.setValue(this.history[$(scrubber).slider("value")]);
-            var curVal = this.timestamps[$(scrubber).slider("value")];
-            let pos = $(scrubber).slider("value");
-            let outOf = this.history.length;
-            $(this.timestampP).text(`${curVal} - ${pos + 1} of ${outOf}`);
-            this.logBookEvent({
-                event: "activecode",
-                act: "slide:" + curVal,
-                div_id: this.divid,
-            });
-        };
-        $(scrubber).slider({
-            max: this.history.length - 1,
-            value: this.history.length - 1,
-        });
-        $(scrubber).css("margin", "10px");
-        $(scrubber).on("slide", this.slideit.bind(this));
-        $(scrubber).on("slidechange", this.slideit.bind(this));
-        scrubberDiv.appendChild(scrubber);
-        scrubberDiv.appendChild(this.timestampP);
-        // If there is a deadline set then position the scrubber at the last submission
-        // prior to the deadline
-        if (this.deadline) {
-            let i = 0;
-            let done = false;
-            while (i < this.history.length && !done) {
-                if (new Date(this.timestamps[i]) > this.deadline) {
-                    done = true;
-                } else {
-                    i += 1;
-                }
-            }
-            i = i - 1;
-            scrubber.value = Math.max(i, 0);
-            this.editor.setValue(this.history[scrubber.value]);
-            $(scrubber).slider("value", scrubber.value);
-        } else if (pos_last) {
-            scrubber.value = this.history.length - 1;
-            this.editor.setValue(this.history[scrubber.value]);
-        } else {
-            scrubber.value = 0;
-        }
-        let pos = $(scrubber).slider("value");
-        let outOf = this.history.length;
-        let ts = this.timestamps[$(scrubber).slider("value")];
-        $(this.timestampP).text(`${ts} - ${pos + 1} of ${outOf}`);
-        $(this.histButton).remove();
-        this.histButton = null;
-        this.historyScrubber = scrubber;
-        $(scrubberDiv).insertAfter(this.runButton);
-    } // end definition of helper
-
 
     // copied from activecode
     createEditor(index) {
@@ -444,10 +310,6 @@ export default class SQLHParons extends RunestoneBase {
         this.runButton.onclick = this.runButtonHandler.bind(this);
         $(butt).attr("type", "button");
 
-        if (!this.hidehistory) {
-            this.addHistoryButton(ctrlDiv);
-        }
-
         $(this.outerDiv).prepend(ctrlDiv);
         if (this.question) {
             if ($(this.question).html().match(/^\s+$/)) {
@@ -538,19 +400,6 @@ export default class SQLHParons extends RunestoneBase {
                 status: "failure",
                 message: "No queries submitted.",
             });
-        }
-
-        try {
-            this.saveCode = await this.manage_scrubber(this.saveCode);
-            if (this.slideit) {
-                $(this.historyScrubber).on(
-                    "slidechange",
-                    this.slideit.bind(this)
-                );
-            }
-            $(this.historyScrubber).slider("enable");
-        } catch (e) {
-            console.log(`Failed to update scrubber ${e}`);
         }
 
         respDiv = document.createElement("div");
