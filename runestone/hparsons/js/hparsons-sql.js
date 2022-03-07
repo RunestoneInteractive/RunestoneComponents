@@ -31,7 +31,6 @@ if (hpList === undefined) hpList = {};
 export default class SQLHParons extends RunestoneBase {
     constructor(opts) {
         super(opts);
-        console.log('hparsons sql constructor')
         // copied from activecode
         var suffStart;
         var orig = $(opts.orig).find("textarea")[0];
@@ -44,49 +43,22 @@ export default class SQLHParons extends RunestoneBase {
         this.divid = opts.orig.id;
         this.code = $(orig).text() || "\n\n\n\n\n";
         this.language = $(orig).data("lang");
-        this.timelimit = $(orig).data("timelimit");
         this.includes = $(orig).data("include");
-        this.hidecode = $(orig).data("hidecode");
-        this.chatcodes = $(orig).data("chatcodes");
         this.hidehistory = $(orig).data("hidehistory");
         this.question = $(opts.orig).find(`#${this.divid}_question`)[0];
         this.tie = $(orig).data("tie");
         this.dburl = $(orig).data("dburl");
         this.runButton = null;
-        this.enabledownload = $(orig).data("enabledownload");
-        this.downloadButton = null;
         this.saveButton = null;
         this.loadButton = null;
         this.outerDiv = null;
         this.partner = "";
         this.logResults = true;
-        if (!eBookConfig.allow_pairs || $(orig).data("nopair")) {
-            this.enablePartner = false;
-        } else {
-            this.enablePartner = true;
-        }
         this.output = null; // create pre for output
-        this.graphics = null; // create div for turtle graphics
-        this.codecoach = null;
-        this.codelens = null;
         this.controlDiv = null;
         this.historyScrubber = null;
         this.timestamps = ["Original"];
         this.autorun = $(orig).data("autorun");
-        if (this.chatcodes && eBookConfig.enable_chatcodes) {
-            if (!socket) {
-                socket = new WebSocket("wss://" + chatcodesServer);
-            }
-            if (!connection) {
-                connection = new window.sharedb.Connection(socket);
-            }
-            if (!doc) {
-                doc = connection.get("chatcodes", "channels");
-            }
-        }
-        if (this.graderactive || this.isTimed) {
-            this.hidecode = false;
-        }
         if (this.includes) {
             this.includes = this.includes.split(/\s+/);
         }
@@ -435,52 +407,23 @@ export default class SQLHParons extends RunestoneBase {
             }
         });
         this.editor = editor;
-        if (this.hidecode) {
-            $(this.codeDiv).css("display", "none");
-        }
     }
 
     // copied from activecode
     createOutput() {
         // Create a parent div with two elements:  pre for standard output and a div
         // to hold turtle graphics output.  We use a div in case the turtle changes from
-        // using a canvas to using some other element like svg in the future.
         var outDiv = document.createElement("div");
         $(outDiv).addClass("ac_output col-md-12");
         this.outDiv = outDiv;
         this.output = document.createElement("pre");
         this.output.id = this.divid + "_stdout";
         $(this.output).css("visibility", "hidden");
-        this.graphics = document.createElement("div");
-        this.graphics.id = this.divid + "_graphics";
-        $(this.graphics).addClass("ac-canvas");
-        // This bit of magic adds an event which waits for a canvas child to be created on our
-        // newly created div.  When a canvas child is added we add a new class so that the visible
-        // canvas can be styled in CSS.  Which a the moment means just adding a border.
-        $(this.graphics).on(
-            "DOMNodeInserted",
-            "canvas",
-            function () {
-                $(this.graphics).addClass("visible-ac-canvas");
-            }.bind(this)
-        );
         var clearDiv = document.createElement("div");
         $(clearDiv).css("clear", "both"); // needed to make parent div resize properly
         this.outerDiv.appendChild(clearDiv);
         outDiv.appendChild(this.output);
-        outDiv.appendChild(this.graphics);
         this.outerDiv.appendChild(outDiv);
-        var lensDiv = document.createElement("div");
-        lensDiv.id = `${this.divid}_codelens`;
-        $(lensDiv).addClass("col-md-12");
-        $(lensDiv).css("display", "none");
-        this.codelens = lensDiv;
-        this.outerDiv.appendChild(lensDiv);
-        var coachDiv = document.createElement("div");
-        $(coachDiv).addClass("col-md-12");
-        $(coachDiv).css("display", "none");
-        this.codecoach = coachDiv;
-        this.outerDiv.appendChild(coachDiv);
         clearDiv = document.createElement("div");
         $(clearDiv).css("clear", "both"); // needed to make parent div resize properly
         this.outerDiv.appendChild(clearDiv);
@@ -498,16 +441,11 @@ export default class SQLHParons extends RunestoneBase {
         $(butt).addClass("btn btn-success run-button");
         ctrlDiv.appendChild(butt);
         this.runButton = butt;
-        console.log(butt);
-        console.log("adding click function for run in sql");
         this.runButton.onclick = this.runButtonHandler.bind(this);
         $(butt).attr("type", "button");
 
-        if (!this.hidecode && !this.hidehistory) {
+        if (!this.hidehistory) {
             this.addHistoryButton(ctrlDiv);
-        }
-        if ($(this.origElem).data("gradebutton") && !this.graderactive) {
-            this.addFeedbackButton(ctrlDiv);
         }
 
         $(this.outerDiv).prepend(ctrlDiv);

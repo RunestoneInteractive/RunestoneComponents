@@ -64,8 +64,6 @@ export default class Parsons extends RunestoneBase {
         // Set the storageId (key for storing data)
         var storageId = super.localStorageKey();
         this.storageId = storageId;
-        console.log('parsons, first getting storageid')
-        console.log(this.storageId)
         this.children = this.origElem.childNodes; // this contains all of the child elements of the entire tag...
         this.contentArray = [];
         Parsons.counter++; //    Unique identifier
@@ -699,8 +697,6 @@ export default class Parsons extends RunestoneBase {
     }
     // RunestoneBase: Set the state of the problem in local storage
     setLocalStorage(data) {
-        console.log('parsons, id')
-        console.log(this.storageId)
         var toStore;
         if (data == undefined) {
             toStore = {
@@ -715,8 +711,6 @@ export default class Parsons extends RunestoneBase {
         } else {
             toStore = data;
         }
-        console.log('parsons, save')
-        console.log(toStore)
         localStorage.setItem(this.storageId, JSON.stringify(toStore));
     }
     /* =====================================================================

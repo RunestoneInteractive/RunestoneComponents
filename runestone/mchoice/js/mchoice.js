@@ -23,8 +23,6 @@ export default class MultipleChoice extends RunestoneBase {
         super(opts);
         opts = opts || {};
         var orig = opts.orig; // entire <ul> element
-        console.log('mchoice')
-        console.log(orig)
         this.origElem = orig;
         this.useRunestoneServices = opts.useRunestoneServices;
         this.multipleanswers = false;
