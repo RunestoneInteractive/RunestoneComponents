@@ -28,19 +28,22 @@ export var hpList;
 // Dictionary that contains all instances of horizontal Parsons problem objects
 if (hpList === undefined) hpList = {}; 
 
+
+import "./horizontal-parsons.js";
+
 export default class SQLHParons extends RunestoneBase {
     constructor(opts) {
         super(opts);
         // copied from activecode
         var suffStart;
         var orig = $(opts.orig).find("textarea")[0];
+        this.divid = opts.orig.id;
         this.containerDiv = opts.orig;
         this.useRunestoneServices = opts.useRunestoneServices;
         this.python3 = opts.python3;
         this.alignVertical = opts.vertical;
         this.origElem = orig;
         this.origText = this.origElem.textContent;
-        this.divid = opts.orig.id;
         this.code = $(orig).text() || "\n\n\n\n\n";
         this.language = $(orig).data("lang");
         this.includes = $(orig).data("include");
@@ -79,12 +82,12 @@ export default class SQLHParons extends RunestoneBase {
             this.caption = "ActiveCode";
         }
         this.addCaption("runestone");
-        setTimeout(
-            function () {
-                this.editor.refresh();
-            }.bind(this),
-            1000
-        );
+        // setTimeout(
+        //     function () {
+        //         // this.editor.refresh();
+        //     }.bind(this),
+        //     1000
+        // );
         if (this.autorun) {
             // Simulate pressing the run button, since this will also prevent the user from clicking it until the initial run is complete, and also help the user understand why they're waiting.
             $(this.runButtonHandler.bind(this));
@@ -180,16 +183,12 @@ export default class SQLHParons extends RunestoneBase {
         var linkdiv = document.createElement("div");
         linkdiv.id = this.divid.replace(/_/g, "-").toLowerCase(); // :ref: changes _ to - so add this as a target
         $(this.outerDiv).addClass("ac_section alert alert-warning");
-        var codeDiv = document.createElement("div");
-        $(codeDiv).addClass("ac_code_div col-md-12");
-        this.codeDiv = codeDiv;
         this.outerDiv.lang = this.language;
         $(this.origElem).replaceWith(this.outerDiv);
-        if (linkdiv.id !== this.divid) {
-            // Don't want the 'extra' target if they match.
-            this.outerDiv.appendChild(linkdiv);
-        }
-        this.outerDiv.appendChild(codeDiv);
+        this.outerDiv.innerHTML = `<horizontal-parsons input-type='parsons' id='${this.divid}-hparsons'>`;
+        this.hparsons = $(this.outerDiv).find("horizontal-parsons")[0];
+        this.hparsons.parsonsData = ['select', '*', 'from', 'test', ';'];
+        // this.outerDiv.appendChild(codeDiv);
         var edmode = this.outerDiv.lang;
         if (edmode === "sql") {
             edmode = "text/x-sql";
@@ -204,75 +203,75 @@ export default class SQLHParons extends RunestoneBase {
         } else if (edmode === "octave" || edmode === "MATLAB") {
             edmode = "text/x-octave";
         }
-        var editor = CodeMirror(codeDiv, {
-            value: this.code,
-            lineNumbers: true,
-            mode: edmode,
-            indentUnit: 4,
-            matchBrackets: true,
-            autoMatchParens: true,
-            extraKeys: {
-                Tab: "indentMore",
-                "Shift-Tab": "indentLess",
-            },
-        });
+        // var editor = CodeMirror(codeDiv, {
+        //     value: this.code,
+        //     lineNumbers: true,
+        //     mode: edmode,
+        //     indentUnit: 4,
+        //     matchBrackets: true,
+        //     autoMatchParens: true,
+        //     extraKeys: {
+        //         Tab: "indentMore",
+        //         "Shift-Tab": "indentLess",
+        //     },
+        // });
         // Make the editor resizable
-        $(editor.getWrapperElement()).resizable({
-            resize: function () {
-                editor.setSize($(this).width(), $(this).height());
-                editor.refresh();
-            },
-        });
+        // $(editor.getWrapperElement()).resizable({
+        //     resize: function () {
+        //         editor.setSize($(this).width(), $(this).height());
+        //         editor.refresh();
+        //     },
+        // });
         // give the user a visual cue that they have changed but not saved
-        editor.on(
-            "change",
-            function (ev) {
-                if (
-                    editor.acEditEvent == false ||
-                    editor.acEditEvent === undefined
-                ) {
-                    // change events can come before any real changes for various reasons, some unknown
-                    // this avoids unneccsary log events and updates to the activity counter
-                    if (this.origText === editor.getValue()) {
-                        return;
-                    }
-                    $(editor.getWrapperElement()).css(
-                        "border-top",
-                        "2px solid #b43232"
-                    );
-                    $(editor.getWrapperElement()).css(
-                        "border-bottom",
-                        "2px solid #b43232"
-                    );
-                    this.isAnswered = true;
-                    this.logBookEvent({
-                        event: "activecode",
-                        act: "edit",
-                        div_id: this.divid,
-                    });
-                }
-                editor.acEditEvent = true;
-            }.bind(this)
-        ); // use bind to preserve *this* inside the on handler.
-        //Solving Keyboard Trap of ActiveCode: If user use tab for navigation outside of ActiveCode, then change tab behavior in ActiveCode to enable tab user to tab out of the textarea
-        $(window).keydown(function (e) {
-            var code = e.keyCode ? e.keyCode : e.which;
-            if (code == 9 && $("textarea:focus").length === 0) {
-                editor.setOption("extraKeys", {
-                    Tab: function (cm) {
-                        $(document.activeElement)
-                            .closest(".tab-content")
-                            .nextSibling.focus();
-                    },
-                    "Shift-Tab": function (cm) {
-                        $(document.activeElement)
-                            .closest(".tab-content")
-                            .previousSibling.focus();
-                    },
-                });
-            }
-        });
-        this.editor = editor;
+        // editor.on(
+        //     "change",
+        //     function (ev) {
+        //         if (
+        //             editor.acEditEvent == false ||
+        //             editor.acEditEvent === undefined
+        //         ) {
+        //             // change events can come before any real changes for various reasons, some unknown
+        //             // this avoids unneccsary log events and updates to the activity counter
+        //             if (this.origText === editor.getValue()) {
+        //                 return;
+        //             }
+        //             $(editor.getWrapperElement()).css(
+        //                 "border-top",
+        //                 "2px solid #b43232"
+        //             );
+        //             $(editor.getWrapperElement()).css(
+        //                 "border-bottom",
+        //                 "2px solid #b43232"
+        //             );
+        //             this.isAnswered = true;
+        //             this.logBookEvent({
+        //                 event: "activecode",
+        //                 act: "edit",
+        //                 div_id: this.divid,
+        //             });
+        //         }
+        //         editor.acEditEvent = true;
+        //     }.bind(this)
+        // ); // use bind to preserve *this* inside the on handler.
+        // //Solving Keyboard Trap of ActiveCode: If user use tab for navigation outside of ActiveCode, then change tab behavior in ActiveCode to enable tab user to tab out of the textarea
+        // $(window).keydown(function (e) {
+        //     var code = e.keyCode ? e.keyCode : e.which;
+        //     if (code == 9 && $("textarea:focus").length === 0) {
+        //         editor.setOption("extraKeys", {
+        //             Tab: function (cm) {
+        //                 $(document.activeElement)
+        //                     .closest(".tab-content")
+        //                     .nextSibling.focus();
+        //             },
+        //             "Shift-Tab": function (cm) {
+        //                 $(document.activeElement)
+        //                     .closest(".tab-content")
+        //                     .previousSibling.focus();
+        //             },
+        //         });
+        //     }
+        // });
+        // this.editor = editor;
     }
 
     // copied from activecode
@@ -470,13 +469,11 @@ export default class SQLHParons extends RunestoneBase {
     }
 
     // copied from anctivecode
+    // changed to getting parsons
     async buildProg(useSuffix) {
         // assemble code from prefix, suffix, and editor for running.
         var pretext;
-        var prog = this.editor.getValue() + "\n";
-        if (this.prefix) {
-            prog = this.prefix + prog;
-        }
+        var prog = this.hparsons.getParsonsTextArray().join(' ') + "\n";
         this.pretext = "";
         this.pretextLines = 0;
         this.progLines = prog.match(/\n/g).length + 1;
@@ -501,7 +498,7 @@ export default class SQLHParons extends RunestoneBase {
     async logCurrentAnswer(sid) {
         let data = {
             div_id: this.divid,
-            code: this.editor.getValue(),
+            // code: this.editor.getValue(),
             language: this.language,
             // errinfo: this.results[this.results.length - 1].status,
             to_save: this.saveCode,

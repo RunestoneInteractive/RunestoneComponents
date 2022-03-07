@@ -3047,13 +3047,13 @@ class ParsonsInput {
         this.el = document.createElement('div');
         this.parentElement = parentElement;
         this.el.id = 'regextool-' + this.parentElement.toolNumber + '-parsons-input';
-        this.el.append('Drag or click to select from the symbols below to form your regex');
+        this.el.append('Drag or click to select from the symbols below to form your code');
         this._dragArea = document.createElement('div');
         this.el.appendChild(this._dragArea);
         this._dragArea.classList.add('drag-area');
         this._dragArea.style.height = '20px';
         this._dragArea.style.backgroundColor = '#fffcc4';
-        this.el.append('Regex:');
+        this.el.append('Your Code:');
         this._dropArea = document.createElement('div');
         this.el.appendChild(this._dropArea);
         this._dropArea.classList.add('drop-area');
@@ -15665,672 +15665,32 @@ class TextInput {
     }
 }
 
-// import {Quill} from '../types/Quill';
-// experiments: wrapping classes
-let Inline = Quill.import('blots/inline');
-class GroupBlot extends Inline {
-    static create(value) {
-        let node = super.create();
-        node.setAttribute('class', 'group0');
-        return node;
-    }
-    static formats(domNode) {
-        return true;
-    }
-}
-GroupBlot.blotName = 'grouping';
-GroupBlot.className = 'group1';
-GroupBlot.tagName = 'span';
-Quill.register(GroupBlot);
-class TestStringInput {
-    // The input element
-    el;
-    quill;
-    droppedText;
-    parentElement;
-    slotName;
-    highlightMode;
-    constructor(slotName, parentElement) {
-        this.parentElement = parentElement;
-        this.el = document.createElement('div');
-        this.slotName = slotName;
-        this.el.id = 'regextool-' + this.parentElement.toolNumber + '-test-string-input' + slotName;
-        this.el.classList.add('regex-test-string');
-        this.quill = null;
-        // console.log(Quill);
-        this.droppedText = false;
-        this.highlightMode = 're.finditer';
-    }
-    initQuill = () => {
-        // initializing quill
-        this.quill = new Quill('#regextool-' + this.parentElement.toolNumber + '-test-string-input' + this.slotName, {
-            modules: {
-                toolbar: false
-            },
-            placeholder: 'type the test string',
-        });
-        this.quill.keyboard.addBinding({
-            key: 'C',
-            shortKey: true,
-        }, (range, context) => {
-            const testStringKeyboardEvent = {
-                'event-type': 'test-string-keyboard',
-                'slot': this.slotName,
-                range: range,
-                keys: ['ctrl', 'c']
-            };
-            if (this.parentElement) {
-                this.parentElement.logEvent(testStringKeyboardEvent);
-            }
-            return true;
-        });
-        this.quill.keyboard.addBinding({
-            key: 'V',
-            shortKey: true,
-        }, (range, context) => {
-            const testStringKeyboardEvent = {
-                'event-type': 'test-string-keyboard',
-                'slot': this.slotName,
-                range: range,
-                keys: ['ctrl', 'v']
-            };
-            if (this.parentElement) {
-                this.parentElement.logEvent(testStringKeyboardEvent);
-            }
-            return true;
-        });
-        this.el.ondrop = (event) => {
-            this.droppedText = true;
-            // console.log('ondrop');
-            // console.log(event);
-        };
-    };
-    getText = () => {
-        if (this.quill != null) {
-            return this.quill.getText();
-        }
-        else {
-            return '';
-        }
-    };
-    updateMatchResult = (matches) => {
-        this.quill?.removeFormat(0, this.quill.getLength() - 1, 'silent');
-        let startPos = 0;
-        let matchPos;
-        const testString = this.getText();
-        for (let i = 0; i < matches.length; ++i) {
-            matchPos = testString.indexOf(matches[i], startPos);
-            startPos = matchPos + matches[i].length;
-            this.quill?.formatText(matchPos, matches[i].length, {
-                'background': 'rgb(251, 255, 130)'
-            }, 'silent');
-        }
-    };
-    // TODO: (UI) differentiate between different matches.
-    // update match result with group info. Each group is a different color.
-    updateGroupedMatchResult = (matches, colors) => {
-        this.quill?.removeFormat(0, this.quill.getLength() - 1, 'silent');
-        if (matches.length == 0) {
-            return;
-        }
-        // generate new colors for group if current colors are not enough
-        const groupCount = matches[0].length;
-        if (colors.length < groupCount) {
-            this.generateColor(colors, groupCount - colors.length);
-        }
-        // highlight the matches in a group sequence such that inner groups' color will cover outer groups'.
-        let index = 0;
-        if (this.highlightMode == 're.findall') {
-            if (this.parentElement?.matchFindall && groupCount > 1) {
-                index = 1;
-            }
-        }
-        for (index; index < groupCount; ++index) {
-            for (let j = 0; j < matches.length; ++j) {
-                this.quill?.formatText(matches[j][index].start, matches[j][index].end - matches[j][index].start, {
-                    'background': colors[index]
-                }, 'silent');
-            }
-        }
-    };
-    // update match result that does not has group info. Each match is a different color.
-    updateMatchResultNoGroup = (matches, colors) => {
-        this.quill?.removeFormat(0, this.quill.getLength() - 1, 'silent');
-        if (matches.length == 0) {
-            return;
-        }
-        const groupCount = matches.length;
-        if (colors.length < groupCount) {
-            this.generateColor(colors, groupCount - colors.length);
-        }
-        // highlight the matches in a group sequence such that inner groups' color will cover outer groups'.
-        let index = 0;
-        for (index; index < matches.length; ++index) {
-            this.quill?.formatText(matches[index].st, matches[index].ed - matches[index].st, {
-                'background': colors[index]
-            }, 'silent');
-        }
-    };
-    updateGroupedMatchResult_exp = (matches) => {
-        let i = 0;
-        for (let j = 0; j < matches.length; ++j) {
-            this.quill?.formatText(matches[j][i].start, matches[j][i].end - matches[j][i].start, {
-                'grouping': true
-            }, 'silent');
-        }
-    };
-    // TODO: (structure) move this function to the main element after adding highlight to input
-    generateColor = (colors, cnt) => {
-        // const newcolors = randomColor({count: 10, luminosity: 'light'});
-        // for(let i = 0; i < cnt; ++ i) {
-        //     colors.push(newcolors[i]);
-        // }
-        let len = colors.length;
-        for (let i = len; i < len + cnt; ++i) {
-            if (i % 2 == 0) {
-                colors.push('#b0d4a9');
-            }
-            else {
-                colors.push('#98d18c');
-            }
-        }
-    };
-    setText(text) {
-        this.quill?.setText(text);
-    }
-}
-
-class StatusOutput {
-    // The input element
-    el;
-    text;
-    parentElement;
-    constructor(parentElement) {
-        this.parentElement = parentElement;
-        this.el = document.createElement('div');
-        this.text = document.createElement('textarea');
-        this.el.appendChild(this.text);
-        this.text.id = 'regextool-' + this.parentElement.toolNumber + '-status-output';
-        this.el.classList.add('regex-textbox');
-        // this.text.setAttribute("rows", "10");
-        this.text.value = 'initializing...\n';
-    }
-}
-
-class RegexOptions {
-    el;
-    triggerButton;
-    containerDiv;
-    flags;
-    buttons;
-    selectedFlags;
-    parentElement;
-    constructor(parentElement) {
-        this.parentElement = parentElement;
-        this.el = document.createElement('div');
-        this.el.classList.add('regex-options-dropdown');
-        this.triggerButton = document.createElement('button');
-        this.triggerButton.classList.add('regex-options-dropdown-btn');
-        this.triggerButton.innerText = 'Flags:\n';
-        this.el.appendChild(this.triggerButton);
-        this.containerDiv = document.createElement('div');
-        this.el.appendChild(this.containerDiv);
-        this.containerDiv.classList.add('regex-options-container');
-        this.flags = ['re.MULTILINE', 're.ASCII', 're.IGNORECASE', 're.LOCALE', 're.DOTALL'];
-        const defaultFlags = [0];
-        this.selectedFlags = [];
-        this.buttons = [];
-        for (let flag = 0; flag < this.flags.length; ++flag) {
-            let newButton = document.createElement('button');
-            this.buttons.push(newButton);
-            this.containerDiv.appendChild(newButton);
-            newButton.innerText = this.flags[flag];
-            newButton.onclick = () => {
-                newButton.classList.toggle('selected');
-                this.updateButton();
-            };
-            if (defaultFlags.indexOf(flag) != -1) {
-                newButton.classList.add('selected');
-            }
-        }
-        this.updateButton();
-        this.triggerButton.onclick = this.onTriggerButtonClicked;
-    }
-    getFlags = () => {
-        let flags = '';
-        this.buttons.forEach(button => {
-            if (button.classList.contains('selected')) {
-                flags += button.innerText + ' | ';
-            }
-        });
-        if (flags == '') {
-            return null;
-        }
-        else {
-            return flags.slice(0, -3);
-        }
-    };
-    getFlagList = () => {
-        let flags = [];
-        this.buttons.forEach(button => {
-            if (button.classList.contains('selected')) {
-                flags.push(button.innerText);
-            }
-        });
-        return flags;
-    };
-    onTriggerButtonClicked = () => {
-        this.containerDiv.classList.toggle('show');
-    };
-    updateButton = () => {
-        let flags = '';
-        this.buttons.forEach(button => {
-            if (button.classList.contains('selected')) {
-                flags += button.innerText[3];
-            }
-        });
-        this.triggerButton.innerText = 'Flags: ' + flags;
-    };
-}
-
-class UnitTestTable {
-    // The input element
-    el;
-    table;
-    flags;
-    testCases;
-    testCaseCount;
-    // if the matched groups should also be identical
-    strictGroup;
-    hintRevealed;
-    // when true: match the whole string from the beginning to the end. When disabled: use findall.
-    strictMatch;
-    // used for problem 3 in the thinkaloud.
-    // TODO: refactor this into strictgroup.
-    noGroupsAllowed;
-    latestResults;
-    latestStatus;
-    columnsEnabled;
-    parentElement;
-    // for saving current index
-    testcaseIndex;
-    constructor(parentElement) {
-        this.parentElement = parentElement;
-        // init the element in HTML 
-        this.el = document.createElement('div');
-        this.el.id = 'regextool-' + this.parentElement.toolNumber + '-unittest-table';
-        this.el.classList.add('regex-unittest');
-        if (this.parentElement.getAttribute('hidetests')) {
-            this.el.style.display = 'none';
-        }
-        else {
-            this.el.style.display = 'block';
-        }
-        // the element is hidden initially.
-        // this.el.classList.add('collapse');
-        // columns enabled besides the status column
-        // TODO: only enabled notes for study 0 and 1
-        this.columnsEnabled = ['actualOutput', 'expectedOutput', 'input', 'notes'];
-        // this.columnsEnabled = ['notes'];
-        this.table = document.createElement('table');
-        this.el.appendChild(this.table);
-        const tableHead = document.createElement('tr');
-        tableHead.innerHTML = this._getTableHead();
-        this.table.appendChild(tableHead);
-        // no flags specified by default
-        this.flags = '';
-        // this.testCases = [{input: 'unicorn', expect: ['unicorn'], notes:'testing unicorn'}, {input: 'element', expect:['element']}, {input: 'banana', expect: []}, {input: 'apple', expect: []}];
-        this.testCases = [];
-        this.testCaseCount = 0;
-        this.hintRevealed = [];
-        this.latestResults = [];
-        this.latestStatus = '';
-        // not matching groups strictly by default
-        this.strictGroup = false;
-        // using strict match by default
-        this.strictMatch = true;
-        // allow groups by default
-        this.noGroupsAllowed = false;
-        this.testcaseIndex = 0;
-    }
-    // not used: Return value: 'Pass' if all pass, 'Error' if one error, 'Fail' if no error but at least one fail
-    // return number of test cases passed
-    check = (regex) => {
-        if (regex == '') {
-            this.table.innerHTML = this.table.rows[0].innerHTML;
-            return 0;
-        }
-        let passCount = 0;
-        if (this.el.classList.contains('collapse')) {
-            this.el.classList.remove('collapse');
-        }
-        // clean up previous unit test result 
-        this.table.innerHTML = this.table.rows[0].innerHTML;
-        this.latestResults = [];
-        const statusList = [];
-        for (let index = 0; index < this.testCases.length; ++index) {
-            // const caseStatus = this.match(index, regex, this.testCases[index]);
-            const caseStatus = this._match_SK(index, regex, this.testCases[index]);
-            if (caseStatus == 'Pass') {
-                passCount += 1;
-            }
-            statusList.push(caseStatus);
-        }
-        // logging
-        const unittestRunEvent = {
-            'event-type': 'unittest-run',
-            'status': statusList
-        };
-        if (this.parentElement) {
-            this.parentElement.logEvent(unittestRunEvent);
-        }
-        return passCount;
-    };
-    _match_SK_output = (text, index, testCase) => {
-        // convert the output result to list of string
-        let splitMatches = text.slice(1, text.length - 2).split(', ');
-        let matches = [];
-        for (let i = 0; i < splitMatches.length; ++i) {
-            if (splitMatches[i].length >= 2) {
-                matches.push(splitMatches[i].slice(1, splitMatches[i].length - 1));
-            }
-        }
-        const result = { success: true, match: matches, errorMessage: null };
-        this.latestStatus = this._createRow(index, testCase, result);
-    };
-    builtinRead(x) {
-        if (window.Sk.builtinFiles === undefined || window.Sk.builtinFiles["files"][x] === undefined)
-            throw "File not found: '" + x + "'";
-        return window.Sk.builtinFiles["files"][x];
-    }
-    /**
-     * Runs re.findall() with data from regex and test string input;
-     * Creates the unittest Table
-    */
-    _match_SK = (index, regex, testCase) => {
-        // TODO: default to using global and multiline
-        let pyCode = '';
-        if (this.strictMatch) {
-            pyCode = 'import re\nprint(re.findall(\'^' + regex + '$\', ' + '\'' + testCase.input + '\', re.MULTILINE))';
-        }
-        else {
-            pyCode = 'import re\nprint(re.findall(\'' + regex + '\', ' + '\'' + testCase.input + '\', re.MULTILINE))';
-        }
-        this.testcaseIndex = index;
-        window.Sk.configure({
-            output: (text) => { this._match_SK_output(text, index, testCase); },
-            read: this.builtinRead
-        });
-        window.Sk.importMainWithBody("<stdin>", false, pyCode, true);
-        return this.latestStatus;
-    };
-    // returns: 'Pass' if pass, 'Fail' if fail, 'Error' if error
-    _createRow = (index, testCase, result) => {
-        this.latestResults.push(result);
-        // creating the status(the first) column
-        const row = document.createElement('tr');
-        let status = result.success ? (JSON.stringify(result.match) === JSON.stringify(testCase.expect) ? 'Pass' : 'Fail') : 'Error';
-        // console.log(status)
-        // if (status == 'Pass' && JSON.stringify(testCase.expect) != '[]' && this.noGroupsAllowed && window.pyodide.globals.unit_match_group_cnt != 1) {
-        //     status = 'Fail'
-        //     // fail because no group is allowed
-        // }
-        const rowContent = '<td>' + status + '</td>';
-        row.innerHTML = rowContent;
-        this.table.append(row);
-        if (!result.success) {
-            row.firstChild.style.backgroundColor = 'red';
-        }
-        else if (status == 'Pass') {
-            row.firstChild.style.backgroundColor = 'green';
-        }
-        else {
-            row.firstChild.style.backgroundColor = 'orange';
-        }
-        if (this.hintRevealed[index]) {
-            row.innerHTML += this._getRevealedRow(testCase, result);
-        }
-        else {
-            row.appendChild(this._getUnrevealedRow(index));
-        }
-        return status;
-    };
-    // html for a revealed row
-    _getRevealedRow = (testCase, result) => {
-        let actualOutput = this.columnsEnabled.indexOf('actualOutput') == -1 ? '' : '<td>' + (result.success ? JSON.stringify(result.match) : String(result.errorMessage)) + '</td>';
-        let expectedOutput = this.columnsEnabled.indexOf('expectedOutput') == -1 ? '' : '<td>' + JSON.stringify(testCase.expect) + '</td>';
-        let input = this.columnsEnabled.indexOf('input') == -1 ? '' : '<td>' + testCase.input + '</td>';
-        let notes = this.columnsEnabled.indexOf('notes') == -1 ? '' : '<td>' + (testCase.notes ? String(testCase.notes) : '--') + '</td>';
-        return actualOutput + expectedOutput + input + notes;
-    };
-    _getUnrevealedRow = (index) => {
-        const td = document.createElement('td');
-        td.colSpan = 4;
-        const button = document.createElement('button');
-        td.appendChild(button);
-        button.innerText = 'Reveal Test Case ' + index.toString();
-        button.setAttribute('id', index.toString());
-        button.onclick = () => {
-            this._revealRow(index);
-        };
-        return td;
-    };
-    // TODO
-    _revealRow = (index) => {
-        console.log('reveal row');
-        console.log(index);
-        this.hintRevealed[index] = true;
-        const row = this.table.rows[index + 1];
-        if (row.lastChild) {
-            row.removeChild(row.lastChild);
-        }
-        row.innerHTML += this._getRevealedRow(this.testCases[index], this.latestResults[index]);
-    };
-    setTestCases = (testCases) => {
-        this.testCases = testCases;
-        // TODO: make this an option. Set all revealed for study 0 and 1.
-        this.hintRevealed = Array(testCases.length).fill(true);
-        this.testCaseCount = testCases.length;
-        // logging
-        // const unittestSetEvent: RegexEvent.UnittestSet = {
-        //     'event-type': 'unittest-set',
-        //     'test-cases': testCases
-        // }
-        // if (this.parentElement) {
-        //     this.parentElement.logEvent(unittestSetEvent);
-        // }
-    };
-    _getTableHead = () => {
-        let actualOutput = this.columnsEnabled.indexOf('actualOutput') == -1 ? '' : '<td>Actual Value</td>';
-        let expectedOutput = this.columnsEnabled.indexOf('expectedOutput') == -1 ? '' : '<td>Expected Value</td>';
-        let input = this.columnsEnabled.indexOf('input') == -1 ? '' : '<td>Test Case</td>';
-        let notes = this.columnsEnabled.indexOf('notes') == -1 ? '' : '<td>Notes</td>';
-        return '<td>Result</td>' + actualOutput + expectedOutput + input + notes;
-    };
-    setError = () => {
-        if (this.el.classList.contains('collapse')) {
-            this.el.classList.remove('collapse');
-        }
-        // clean up previous unit test result 
-        this.table.innerHTML = this.table.rows[0].innerHTML;
-        this.latestResults = [];
-        for (let index = 0; index < this.testCases.length; ++index) {
-            this._createRow(index, this.testCases[index], { success: false, match: [], errorMessage: 'Pattern Error' });
-        }
-    };
-}
-
-class RegexStatusTag {
-    // The input element
-    el;
-    status;
-    parentElement;
-    constructor(parentElement) {
-        this.parentElement = parentElement;
-        this.el = document.createElement('span');
-        this.el.classList.add('regex-status');
-        this.status = '';
-    }
-    updateStatus = (status) => {
-        // currently supporting: '', 'error', 'valid'
-        this.el.innerText = 'pattern ' + status;
-        if (status === '') {
-            if (this.el.classList.contains('error')) {
-                this.el.classList.remove('error');
-            }
-            else if (this.el.classList.contains('valid')) {
-                this.el.classList.remove('valid');
-            }
-        }
-        else if (this.el.classList.contains(status)) {
-            return;
-        }
-        else {
-            if (this.el.classList.contains('error')) {
-                this.el.classList.remove('error');
-            }
-            else if (this.el.classList.contains('valid')) {
-                this.el.classList.remove('valid');
-            }
-            this.el.classList.add(status);
-        }
-    };
-}
-
-class RegexElement extends HTMLElement {
+// declare global {
+//     interface Window {
+//         languagePluginUrl: string
+//         Sk: Skulpt
+//         regexStudentId: string
+//         regexCourseId: string
+//     }
+// }
+class HParsonsElement extends HTMLElement {
     root;
     _parsonsData;
     parsonsExplanation;
-    regexInput;
+    hparsonsInput;
     inputType;
-    regexStatus;
-    // private regexErrorMessage: HTMLDivElement;
-    // private regexErrorPosition: number;
-    // The input box for positive test strings (with highlight)
-    positiveTestStringInput;
-    positiveInitialTestString;
-    // Saving previous checked text, used with checkWhileTyping
-    positivePrevText;
-    // The input box for negative test strings (with highlight)
-    negativeTestStringInput;
-    negativeInitialTestString;
-    // Saving previous checked text, used with checkWhileTyping
-    negativePrevText;
-    // Python output
-    statusOutput;
-    // *temporary: The checkbox to enable always check (will be integrated in options later)
-    checkWhileTyping;
-    positiveMatchResult;
-    negativeMatchResult;
-    // random color representations for groups
-    groupColor;
-    regexOptions;
-    // unit tests
-    unitTestTable;
-    // private logger: Logger;
-    patternValidFlag;
-    // data for logging
-    studentId;
-    problemId;
-    temporaryInputEvent;
-    _testStatusDiv;
-    // highlights the result using findall. used for study 1 and 2.
-    matchFindall;
     static toolCount = 0;
     toolNumber;
-    outf(text) {
-        // console.log('sk output')
-        // console.log(text)
-    }
-    builtinRead(x) {
-        if (window.Sk.builtinFiles === undefined || window.Sk.builtinFiles["files"][x] === undefined)
-            throw "File not found: '" + x + "'";
-        return window.Sk.builtinFiles["files"][x];
-    }
-    // copied from Skulpt source code
-    static _Sk_validGroups = ["(?:", "(?=", "(?!"];
-    _Sk_convert = (pattern) => {
-        var newpattern;
-        var match;
-        var i;
-        // Look for disallowed constructs
-        match = pattern.match(/\(\?./g);
-        if (match) {
-            for (i = 0; i < match.length; i++) {
-                if (RegexElement._Sk_validGroups.indexOf(match[i]) == -1) {
-                    throw new window.Sk.builtin.ValueError("Disallowed group in pattern: '"
-                        + match[i] + "'");
-                }
-            }
-        }
-        newpattern = pattern.replace("/\\/g", "\\\\");
-        newpattern = pattern.replace(/([^\\]){,(?![^\[]*\])/g, "$1{0,");
-        return newpattern;
-    };
-    // adapted from Skulpt source code (findall)
-    // problem: can only show the first and last match of the position, no grouping information
-    _Sk_finditer = (pattern, string, flags = 'gm') => {
-        let pat = pattern;
-        let str = string;
-        pat = this._Sk_convert(pat);
-        // flags can only be global, ignorecase, and multiline
-        let regex = new RegExp(pat, flags);
-        if (pat.match(/\$/)) {
-            var newline_at_end = new RegExp(/\n$/);
-            if (str.match(newline_at_end)) {
-                str = str.slice(0, -1);
-            }
-        }
-        let match_result = [];
-        let pos_result = [];
-        let match;
-        while ((match = regex.exec(str)) != null) {
-            // console.log(match)
-            // console.log("Matched '" + match[0] + "' at position " + match.index +
-            //      "; next search at " + regex.lastIndex);
-            // console.log("match: " + JSON.stringify(match));
-            pos_result.push({ st: match.index, ed: regex.lastIndex });
-            if (match.length < 2) {
-                match_result.push(new window.Sk.builtin.str(match[0]));
-            }
-            else if (match.length == 2) {
-                match_result.push(new window.Sk.builtin.str(match[1]));
-            }
-            else {
-                var groups = [];
-                for (var i = 1; i < match.length; i++) {
-                    groups.push(new window.Sk.builtin.str(match[i]));
-                }
-                match_result.push(new window.Sk.builtin.tuple(groups));
-            }
-            if (match.index === regex.lastIndex) {
-                regex.lastIndex += 1;
-            }
-        }
-        return pos_result;
-        // return new window.Sk.builtin.list(match_result);
-    };
+    temporaryInputEvent;
     constructor() {
         super();
-        RegexElement.toolCount += 1;
+        HParsonsElement.toolCount += 1;
         // console.log(RegexElement.toolCount);
-        this.toolNumber = RegexElement.toolCount;
+        this.toolNumber = HParsonsElement.toolCount;
         this.root = this.attachShadow({ mode: 'open' });
-        window.Sk.configure({
-            output: this.outf,
-            read: this.builtinRead
-        });
-        // time limit for running each run
-        window.Sk.execLimit = 1000;
+        this.hparsonsInput = new ParsonsInput(this);
         // add style
         this.addStyle();
-        // init element: button for unittest
-        // const unitTestButton = document.createElement('button');
-        // unitTestButton.innerText = 'Run Unit Test';
-        // this.root.appendChild(unitTestButton);
-        // unitTestButton.onclick = () => this.unitTestTable.check(this.regexInput.getText());
-        // TODO: make this an option; for now always enabled the 'always check' for study 0 and 1.
-        this.checkWhileTyping = true;
         // a div wrapping the input and the test case status
         const inputAndTestStatusDiv = document.createElement('div');
         this.root.append(inputAndTestStatusDiv);
@@ -16339,191 +15699,18 @@ class RegexElement extends HTMLElement {
         const inputDiv = document.createElement('div');
         inputAndTestStatusDiv.appendChild(inputDiv);
         inputDiv.classList.add('regex-input-div');
-        this.regexOptions = new RegexOptions(this);
-        this.patternValidFlag = true;
         this._parsonsData = new Array();
         this.parsonsExplanation = null;
-        this.regexStatus = new RegexStatusTag(this);
-        this.regexInput = new ParsonsInput(this);
         this.inputType = 'parsons';
         // this.regexErrorMessage = document.createElement('div');
         // this.regexErrorPosition = -1;
         this.initRegexInput(inputDiv);
-        this._testStatusDiv = document.createElement('div');
-        inputAndTestStatusDiv.appendChild(this._testStatusDiv);
-        this._testStatusDiv.classList.add('regex-test-status');
-        // init elements: test string input
-        // TODO: (bug) stylesheet isn't working with shadowroot
-        const quillLinkRef = document.createElement('link');
-        quillLinkRef.href = 'https://cdn.quilljs.com/1.3.7/quill.bubble.css';
-        quillLinkRef.rel = 'stylesheet';
-        this.appendChild(quillLinkRef);
-        const testStringDiv = document.createElement('div');
-        testStringDiv.classList.add('regex-test-string-container');
-        this.root.append('Feel free to experiment with your own test cases.');
-        this.root.append(testStringDiv);
-        const positiveTestStringDiv = document.createElement('div');
-        testStringDiv.append(positiveTestStringDiv);
-        positiveTestStringDiv.classList.add('regex-test-string-div');
-        positiveTestStringDiv.append('Match:');
-        this.positiveInitialTestString = '';
-        const positiveSlot = document.createElement('slot');
-        positiveSlot.name = 'positive-test-string-input';
-        positiveTestStringDiv.appendChild(positiveSlot);
-        const resetPositiveTestStringButton = document.createElement('button');
-        positiveTestStringDiv.appendChild(resetPositiveTestStringButton);
-        resetPositiveTestStringButton.innerText = 'Reset';
-        resetPositiveTestStringButton.onclick = this.resetPositiveTestString;
-        this.positiveTestStringInput = new TestStringInput('positive', this);
-        this.positiveTestStringInput.slotName = 'positive';
-        this.appendChild(this.positiveTestStringInput.el);
-        this.positiveTestStringInput.el.slot = 'positive-test-string-input';
-        this.positiveTestStringInput.initQuill();
-        this.positivePrevText = this.positiveTestStringInput.getText();
-        this.positiveTestStringInput.quill?.on('text-change', (delta, _, source) => {
-            if (source == 'user') {
-                const testStringInputEvent = {
-                    'event-type': 'test-string-input',
-                    'slot': 'positive',
-                    dropped: this.positiveTestStringInput.droppedText,
-                    delta: delta,
-                    'test-string': this.positiveTestStringInput.getText()
-                };
-                this.logEvent(testStringInputEvent);
-            }
-            this.positiveTestStringInput.droppedText = false;
-            if (this.positiveTestStringInput.getText() != this.positivePrevText) {
-                this.positivePrevText = this.positiveTestStringInput.getText();
-                // updating test_string in pyodide
-                // window.pyodide.globals.test_string = this.testStringInput.getText().slice(0, -1);
-                if (this.checkWhileTyping && this.patternValidFlag) {
-                    // this.match();
-                    this._match_with_Sk();
-                }
-                else {
-                    this.positiveTestStringInput.quill?.removeFormat(0, this.positiveTestStringInput.quill.getLength() - 1, 'silent');
-                }
-            }
-        });
-        const negativeTestStringDiv = document.createElement('div');
-        testStringDiv.append(negativeTestStringDiv);
-        negativeTestStringDiv.classList.add('regex-test-string-div');
-        negativeTestStringDiv.append('Do not match:');
-        this.negativeInitialTestString = '';
-        const negativeSlot = document.createElement('slot');
-        negativeSlot.name = 'negative-test-string-input';
-        negativeTestStringDiv.appendChild(negativeSlot);
-        const resetNegativeTestStringButton = document.createElement('button');
-        negativeTestStringDiv.appendChild(resetNegativeTestStringButton);
-        resetNegativeTestStringButton.innerText = 'Reset';
-        resetNegativeTestStringButton.onclick = this.resetNegativeTestString;
-        this.negativeTestStringInput = new TestStringInput('negative', this);
-        this.negativeTestStringInput.slotName = 'negative';
-        this.appendChild(this.negativeTestStringInput.el);
-        this.negativeTestStringInput.el.slot = 'negative-test-string-input';
-        this.negativeTestStringInput.initQuill();
-        this.negativePrevText = this.negativeTestStringInput.getText();
-        this.negativeTestStringInput.quill?.on('text-change', (delta, _, source) => {
-            if (source == 'user') {
-                const testStringInputEvent = {
-                    'event-type': 'test-string-input',
-                    'slot': 'negative',
-                    dropped: this.negativeTestStringInput.droppedText,
-                    delta: delta,
-                    'test-string': this.negativeTestStringInput.getText()
-                };
-                this.logEvent(testStringInputEvent);
-            }
-            this.negativeTestStringInput.droppedText = false;
-            if (this.negativeTestStringInput.getText() != this.negativePrevText) {
-                this.negativePrevText = this.negativeTestStringInput.getText();
-                // updating test_string in pyodide
-                // window.pyodide.globals.test_string = this.testStringInput.getText().slice(0, -1);
-                if (this.checkWhileTyping && this.patternValidFlag) {
-                    // this.match();
-                    this._match_with_Sk();
-                }
-                else {
-                    this.negativeTestStringInput.quill?.removeFormat(0, this.negativeTestStringInput.quill.getLength() - 1, 'silent');
-                }
-            }
-        });
-        // init element: unit test table
-        this.unitTestTable = new UnitTestTable(this);
-        this.root.appendChild(this.unitTestTable.el);
-        // init element: python output
-        this.statusOutput = new StatusOutput(this);
-        this.root.appendChild(this.statusOutput.el);
-        // initialize the match result array
-        this.positiveMatchResult = new Array();
-        this.negativeMatchResult = new Array();
-        // initialize the color array
-        // TODO: (UI) only light colors that do not obfuscates the word
-        this.groupColor = new Array();
-        // logging page visibility
-        if (typeof document.addEventListener === "undefined" || document.hidden === undefined) {
-            const visibilityStatusEvent = {
-                'event-type': 'page-visibility-status',
-                enabled: false
-            };
-            this.logEvent(visibilityStatusEvent);
-            // console.log("visibility not working");
-        }
-        else {
-            const visibilityStatusEvent = {
-                'event-type': 'page-visibility-status',
-                enabled: true
-            };
-            this.logEvent(visibilityStatusEvent);
-            // console.log("add visibility change");
-            document.addEventListener("visibilitychange", (event) => {
-                let pageStatusEvent;
-                if (document.hidden) {
-                    pageStatusEvent = {
-                        'event-type': 'page-status',
-                        'status-type': RegexEvent.PageStatus.VISIBILITY,
-                        result: false
-                    };
-                }
-                else {
-                    pageStatusEvent = {
-                        'event-type': 'page-status',
-                        'status-type': RegexEvent.PageStatus.VISIBILITY,
-                        result: true
-                    };
-                }
-                this.logEvent(pageStatusEvent);
-            }, false);
-        }
-        // logging window blur & focus
-        window.addEventListener('blur', () => {
-            const blurEvent = {
-                'event-type': 'page-status',
-                'status-type': RegexEvent.PageStatus.FOCUS,
-                result: false
-            };
-            this.logEvent(blurEvent);
-        });
-        window.addEventListener('focus', () => {
-            const focusEvent = {
-                'event-type': 'page-status',
-                'status-type': RegexEvent.PageStatus.FOCUS,
-                result: true
-            };
-            this.logEvent(focusEvent);
-        });
-        // stub for student and problem id
-        this.studentId = this._getStudentIdFromURL();
-        this.problemId = this.getAttribute('problem-id') || '';
-        // console.log(this.studentId);
-        // console.log(this.problemId);
-        this.temporaryInputEvent = null;
-        this.matchFindall = true;
+        this.temporaryInputEvent = {};
     }
     set parsonsData(data) {
         this._parsonsData = data;
         if (this.inputType == 'parsons') {
-            this.regexInput.setSourceBlocks(data, this.parsonsExplanation);
+            this.hparsonsInput.setSourceBlocks(data, this.parsonsExplanation);
         }
     }
     get parsonsData() {
@@ -16588,376 +15775,56 @@ class RegexElement extends HTMLElement {
         global_sheet.innerHTML += '.Error .ql-editor { box-shadow: 0 0 2px 5px #ff99b3; margin: 5px; }\n';
         this.appendChild(global_sheet);
     };
-    /**
-     * Runs a function similar to re.finditer() with data from regex and test string input.
-     * Highlights the result in the test string input.
-     */
-    // TODO: separate positive and negative test string to prevent additional calculation when test string is changed
-    _match_with_Sk = () => {
-        let positiveTestString = this.positivePrevText;
-        let negativeTestString = this.negativePrevText;
-        let regex = this.regexInput.getText();
-        if (regex == '') {
-            // ignore empty regex
-            return;
-        }
-        // TODO: add flags. defaulted to gm for now
-        // something to do with regexOptions
-        // updates test string highlight
-        this.positiveTestStringInput.updateMatchResultNoGroup(this._Sk_finditer(regex, positiveTestString), this.groupColor);
-        this.negativeTestStringInput.updateMatchResultNoGroup(this._Sk_finditer(regex, negativeTestString), this.groupColor);
-        // TODO: add log
-        // the code below is the one for pyodide
-        // const positiveMatchTestStringEvent: RegexEvent.MatchTestStringEvent = {
-        //     'event-type': 'match',
-        //     'slot': 'positive',
-        //     trigger: RegexEvent.MatchTriggerType.AUTO,
-        //     regex: this.regexInput.getText(),
-        //     'test-string': this.positivePrevText,
-        //     flags: this.regexOptions.getFlagList(),
-        //     "match-result": this.positiveMatchResult
-        // }
-        // this.logEvent(positiveMatchTestStringEvent);
-        // const negativeMatchTestStringEvent: RegexEvent.MatchTestStringEvent = {
-        //     'event-type': 'match',
-        //     'slot': 'negative',
-        //     trigger: RegexEvent.MatchTriggerType.AUTO,
-        //     regex: this.regexInput.getText(),
-        //     'test-string': this.negativePrevText,
-        //     flags: this.regexOptions.getFlagList(),
-        //     "match-result": this.negativeMatchResult
-        // }
-        // this.logEvent(negativeMatchTestStringEvent);
-        // negative test strings
-    };
-    /**
-     * Runs re.findall() with data from regex and test string input;
-     * Highlights the result in the test string input;
-     * Prints python output.
-    */
-    // public match = (): void => {
-    //     this.statusOutput.text.value = ''
-    //     let pydata = 'import re\n';
-    //     window.pyodide.globals.positive_test_string = this.positivePrevText;
-    //     window.pyodide.globals.negative_test_string = this.negativePrevText;
-    //     if (this.regexInput.getText() != '') {
-    //         window.pyodide.globals.regex_input = this.regexInput.getText();
-    //     } else {
-    //         return;
-    //     }
-    //     if (this.regexOptions.getFlags() != null) {
-    //         pydata += 'pattern = re.compile(regex_input, ' + this.regexOptions.getFlags() + ')\n';
-    //     } else {
-    //         pydata += 'pattern = re.compile(regex_input)\n';
-    //     }
-    //     pydata += 'source = positive_test_string\n';
-    //     pydata += 'global positive_match_result\n';
-    //     pydata += 'positive_match_result = []\n';
-    //     // TODO: (performance)try to reduce assigning data here
-    //     pydata += 'for match_obj in re.finditer(pattern, source):\n';
-    //     pydata += '    match_data = []\n';
-    //     pydata += '    positive_match_result.append(match_data)\n';
-    //     pydata += '    for group_id in range(pattern.groups + 1):\n';
-    //     pydata += '        group_data = {}\n';
-    //     pydata += '        match_data.append(group_data)\n';
-    //     pydata += '        group_data[\'group_id\'] = group_id\n';
-    //     pydata += '        group_data[\'start\'] = match_obj.start(group_id)\n';
-    //     pydata += '        group_data[\'end\'] = match_obj.end(group_id)\n';
-    //     pydata += '        group_data[\'data\'] = match_obj.group(group_id)\n';
-    //     pydata += '    for name, index in pattern.groupindex.items():\n';
-    //     pydata += '        match_data[index][\'name\'] = name\n';
-    //     pydata += 'source = negative_test_string\n';
-    //     pydata += 'global negative_match_result\n';
-    //     pydata += 'negative_match_result = []\n';
-    //     // TODO: (performance)try to reduce assigning data here
-    //     pydata += 'for match_obj in re.finditer(pattern, source):\n';
-    //     pydata += '    match_data = []\n';
-    //     pydata += '    negative_match_result.append(match_data)\n';
-    //     pydata += '    for group_id in range(pattern.groups + 1):\n';
-    //     pydata += '        group_data = {}\n';
-    //     pydata += '        match_data.append(group_data)\n';
-    //     pydata += '        group_data[\'group_id\'] = group_id\n';
-    //     pydata += '        group_data[\'start\'] = match_obj.start(group_id)\n';
-    //     pydata += '        group_data[\'end\'] = match_obj.end(group_id)\n';
-    //     pydata += '        group_data[\'data\'] = match_obj.group(group_id)\n';
-    //     pydata += '    for name, index in pattern.groupindex.items():\n';
-    //     pydata += '        match_data[index][\'name\'] = name\n';
-    //     window.pyodide.runPythonAsync(pydata)
-    //         .then(_ => {
-    //             // TODO: (robustness)test edge cases with no match
-    //             this.positiveMatchResult = window.pyodide.globals.positive_match_result as Array<Array<MatchGroup>>;
-    //             this.negativeMatchResult = window.pyodide.globals.negative_match_result as Array<Array<MatchGroup>>;
-    //             this.addMatchResultToOutput();
-    //             // TODO: (feature)fix highlighting with group information
-    //             this.positiveTestStringInput.updateGroupedMatchResult(this.positiveMatchResult, this.groupColor);
-    //             this.negativeTestStringInput.updateGroupedMatchResult(this.negativeMatchResult, this.groupColor);
-    //             // this.testStringInput.updateGroupedMatchResult_exp(this.matchResult);
-    //             // log match result
-    //             // TODO: it is always auto in this study, but could change in other studies
-    //             const positiveMatchTestStringEvent: RegexEvent.MatchTestStringEvent = {
-    //                 'event-type': 'match',
-    //                 'slot': 'positive',
-    //                 trigger: RegexEvent.MatchTriggerType.AUTO,
-    //                 regex: this.regexInput.getText(),
-    //                 'test-string': this.positivePrevText,
-    //                 flags: this.regexOptions.getFlagList(),
-    //                 "match-result": this.positiveMatchResult
-    //             }
-    //             this.logEvent(positiveMatchTestStringEvent);
-    //             const negativeMatchTestStringEvent: RegexEvent.MatchTestStringEvent = {
-    //                 'event-type': 'match',
-    //                 'slot': 'negative',
-    //                 trigger: RegexEvent.MatchTriggerType.AUTO,
-    //                 regex: this.regexInput.getText(),
-    //                 'test-string': this.negativePrevText,
-    //                 flags: this.regexOptions.getFlagList(),
-    //                 "match-result": this.negativeMatchResult
-    //             }
-    //             this.logEvent(negativeMatchTestStringEvent);
-    //         })
-    //         .catch((err) => { this.addTextToOutput(err) });
-    // }
-    _compilePattern_Sk = () => {
-        let regex = this.regexInput.getText();
-        if (regex == '') {
-            // this.regexErrorMessage.classList.add('hidden');
-            return false;
-        }
-        try {
-            new RegExp(regex);
-            return true;
-        }
-        catch (e) {
-            console.log(e);
-            return false;
-        }
-    };
-    // /**
-    //  * Runs re.compile() without flags
-    // */
-    // public pyodide_compilePattern = (): boolean => {
-    //     // console.log('compile')
-    //     if (this.regexInput.getText() == '') {
-    //         this.regexErrorMessage.classList.add('hidden');
-    //         return false;
-    //     }
-    //     this.statusOutput.text.value = ''
-    //     let pydata = 'import re\n';
-    //     window.pyodide.globals.regex_input = this.regexInput.getText();
-    //     pydata += 'compiled_pattern = re.compile(regex_input)\n';
-    //     let successFlag = false;
-    //     try {
-    //         window.pyodide.runPython(pydata);
-    //         successFlag = true;
-    //         this.regexErrorMessage.classList.add('hidden');
-    //         this.regexErrorMessage.innerText = 'No Error';
-    //         this.regexErrorPosition = -1;
-    //     } catch (err) {
-    //         successFlag = false;
-    //         // updates error message
-    //         const regexError = String(err).split('\n');
-    //         const errorMessage = regexError[regexError.length - 2];
-    //         const errorMessageSplit = errorMessage.split(' ');
-    //         this.regexErrorPosition = parseInt(errorMessageSplit[errorMessageSplit.length - 1]);
-    //         this.regexErrorMessage.innerText = errorMessage;
-    //         if (this.regexErrorMessage.classList.contains('hidden')) {
-    //             this.regexErrorMessage.classList.remove('hidden');
-    //         }
-    //     }
-    //     return successFlag;
-    // }
-    // private addToOutput = (originalOutput: Array<string | Array<string>>): void => {
-    //     let output = '';
-    //     originalOutput.forEach(element => {
-    //         output += '(' + element.toString() + '),';
-    //     });
-    //     this.statusOutput.text.value += '>>>' + this.regexInput.getText() + '\n' + output + '\n';
-    // }
-    // private addTextToOutput = (output: string): void => {
-    //     this.statusOutput.text.value += '>>>' + this.regexInput.getText() + '\n' + output + '\n';
-    // }
-    // private addMatchResultToOutput = (): void => {
-    //     let output = '';
-    //     // currently disabling output
-    //     // for (let i = 0; i < this.matchResult.length; ++i) {
-    //     //     output += 'Match ' + i.toString() + ':\n';
-    //     //     for (let j = 0; j < this.matchResult[i].length; ++j) {
-    //     //         output += 'Group ' + j.toString() + ': ';
-    //     //         output += this.matchResult[i][j].data + ' span(' + this.matchResult[i][j].start + ', ' + this.matchResult[i][j].end + ') ';
-    //     //         if (this.matchResult[i][j].name) {
-    //     //             output += this.matchResult[i][j].name;
-    //     //         }
-    //     //         output += '\n';
-    //     //     }
-    //     //     output += '\n';
-    //     // }
-    //     // this.statusOutput.text.value += '>>>\n' + output;
-    // }
-    setPositiveInitialTestString(text) {
-        this.positiveTestStringInput.setText(text);
-        this.positiveInitialTestString = text;
-    }
-    setNegativeInitialTestString(text) {
-        this.negativeTestStringInput.setText(text);
-        this.negativeInitialTestString = text;
-    }
-    setTestCases(testCases) {
-        console.log('set test cases');
-        this.unitTestTable.setTestCases(testCases);
-    }
-    resetPositiveTestString = () => {
-        const testStringResetEvent = {
-            'event-type': 'test-string-reset',
-            'slot': 'positive',
-            'test-string': this.positiveInitialTestString
-        };
-        this.logEvent(testStringResetEvent);
-        this.positiveTestStringInput.setText(this.positiveInitialTestString);
-    };
-    resetNegativeTestString = () => {
-        const testStringResetEvent = {
-            'event-type': 'test-string-reset',
-            'slot': 'negative',
-            'test-string': this.negativeInitialTestString
-        };
-        this.logEvent(testStringResetEvent);
-        this.negativeTestStringInput.setText(this.negativeInitialTestString);
-    };
     logEvent = (eventContent) => {
-        const basicEvent = {
-            'student-id': window.regexStudentId || 'stub-id',
-            'course-id': window.regexCourseId || 'stub-course-id',
-            'problem-id': this.problemId,
-            'input-type': this.inputType,
-            'client-timestamp': this._getTimestamp()
-        };
-        const ev = new CustomEvent('regex-element', { bubbles: true, detail: { ...basicEvent, ...eventContent } });
-        this.dispatchEvent(ev);
-        // console.log({...basicEvent, ...eventContent});
+        console.log('hparsons, logevent');
+        // const basicEvent: RegexEvent.BasicEvent = {
+        //     'student-id': window.regexStudentId || 'stub-id',
+        //     'course-id': window.regexCourseId || 'stub-course-id',
+        //     'problem-id': this.problemId,
+        //     'input-type': this.inputType,
+        //     'client-timestamp': this._getTimestamp()
+        // };
+        // const ev = new CustomEvent('regex-element', {bubbles: true, detail: {...basicEvent, ...eventContent}});
+        // this.dispatchEvent(ev);
+        // // console.log({...basicEvent, ...eventContent});
     };
-    _getTimestamp = () => {
-        const timestamp = new Date();
-        return timestamp.getFullYear() + '/' + (timestamp.getMonth() + 1) + '/' + timestamp.getDate() + '/' + timestamp.getHours() + '/' + timestamp.getMinutes() + '/' + timestamp.getSeconds() + '/' + timestamp.getMilliseconds();
-    };
-    // log regex input event along with compilation result
-    _logRegexInputEvent = () => {
-        // TODO: just using any here. but regexInputEvent is actually RegexEvent.ParsonsInputEvent or FreeInputEvent... so much trouble with typing!!
-        let regexInputEvent = {
-            ...this.temporaryInputEvent,
-            valid: this.patternValidFlag
-        };
-        if (!this.patternValidFlag) ;
-        this.logEvent(regexInputEvent);
-    };
-    _getStudentIdFromURL = () => {
-        const queryString = document.location.search;
-        const urlParams = new URLSearchParams(queryString);
-        const studentId = urlParams.get('student-id') || 'stub-student-id';
-        return studentId;
-    };
-    logCognitiveLoad = (cl) => {
-        const cognitiveLoad = {
-            'event-type': 'cognitive-load',
-            'data': cl
-        };
-        this.logEvent(cognitiveLoad);
-    };
-    logProblemFinished = (completed) => {
-        const problemFinished = {
-            'event-type': 'problem-finished',
-            'completed': completed
-        };
-        this.logEvent(problemFinished);
-    };
-    static get observedAttributes() { return ['input-type', 'problem-id', 'hidetests']; }
+    // private _getTimestamp = (): string => {
+    //     const timestamp = new Date();
+    //     return timestamp.getFullYear() + '/' + (timestamp.getMonth() + 1) + '/' + timestamp.getDate() + '/' + timestamp.getHours() + '/' + timestamp.getMinutes() + '/' + timestamp.getSeconds() + '/' + timestamp.getMilliseconds();
+    // }
+    // // log regex input event along with compilation result
+    // private _logRegexInputEvent = (): void => {
+    //     // TODO: just using any here. but regexInputEvent is actually RegexEvent.ParsonsInputEvent or FreeInputEvent... so much trouble with typing!!
+    //     let regexInputEvent: any = {
+    //         ...this.temporaryInputEvent,
+    //         valid: this.patternValidFlag
+    //     };
+    //     if (!this.patternValidFlag) {
+    //         // regexInputEvent['error-message'] = this.regexErrorMessage.innerText;
+    //     }
+    //     this.logEvent(regexInputEvent);
+    // }
+    static get observedAttributes() { return ['input-type']; }
     attributeChangedCallback(name, oldValue, newValue) {
         switch (name) {
             case 'input-type': {
                 this.initRegexInput(this.root.querySelector('.regex-input-div'));
                 break;
             }
-            case 'problem-id': {
-                this.problemId = newValue;
-                break;
-            }
-            case 'hidetests': {
-                if (newValue) {
-                    this.unitTestTable.el.style.display = 'none';
-                }
-                else {
-                    this.unitTestTable.el.style.display = 'block';
-                }
-            }
         }
     }
     initRegexInput(inputDiv) {
         inputDiv.innerHTML = '';
-        this.patternValidFlag = true;
         let inputType = this.getAttribute('input-type');
         this.inputType = inputType == 'parsons' ? 'parsons' : 'text';
         this._parsonsData = new Array();
         this.parsonsExplanation = null;
-        inputDiv.append('Your regular expression:');
-        this.regexStatus = new RegexStatusTag(this);
-        inputDiv.appendChild(this.regexStatus.el);
         inputDiv.appendChild(document.createElement('br'));
         // todo:(UI) fix the css for the input
         if (this.inputType == 'parsons') {
             // init elements: parsons regex input
-            this.regexInput = new ParsonsInput(this);
-            inputDiv.appendChild(this.regexInput.el);
-            this.regexInput.el.addEventListener('regexChanged', () => {
-                this.regexInput.removeFormat();
-                if (this.checkWhileTyping) {
-                    // this.patternValidFlag = this.pyodide_compilePattern();
-                    this.patternValidFlag = this._compilePattern_Sk();
-                    // log regex input event
-                    this._logRegexInputEvent();
-                    if (this.patternValidFlag) {
-                        this.regexStatus.updateStatus('valid');
-                        // check and update the background color of the parsons input based on the unit test results
-                        const passCount = this.unitTestTable.check(this.regexInput.getText());
-                        this.regexInput.updateTestStatus(passCount == this.unitTestTable.testCaseCount ? 'Pass' : 'Fail');
-                        this._testStatusDiv.className = '';
-                        this._testStatusDiv.classList.add('regex-test-status');
-                        this._testStatusDiv.classList.add(passCount == this.unitTestTable.testCaseCount ? 'Pass' : 'Fail');
-                        this._testStatusDiv.innerText = 'Test cases passed: ' + passCount + '/' + this.unitTestTable.testCaseCount;
-                        // this.match();
-                        this._match_with_Sk();
-                        if (passCount === this.unitTestTable.testCaseCount) {
-                            // console.log('dispatch');
-                            this.dispatchEvent(new CustomEvent('passed-all-testcases'));
-                        }
-                    }
-                    else {
-                        // if (this.regexErrorMessage.classList.contains('hidden')) {
-                        //     // it means the regex is actually empty
-                        //     this.regexStatus.updateStatus('');
-                        // } else {
-                        //     this.regexStatus.updateStatus('error');
-                        //     this.regexInput.updateTestStatus('Error');
-                        //     this.regexInput.highlightError(this.regexErrorPosition);
-                        //     // console.log('highlight error: ');
-                        //     // console.log(this.regexErrorPosition);
-                        // }
-                        if (this.regexInput.getText() == '') {
-                            this.regexStatus.updateStatus('');
-                            this.unitTestTable.check('');
-                        }
-                        else {
-                            this.regexStatus.updateStatus('error');
-                            this.regexInput.updateTestStatus('Error');
-                            this.unitTestTable.setError();
-                            // this.regexInput.highlightError(this.regexErrorPosition);
-                            // console.log('highlight error: ');
-                            // console.log(this.regexErrorPosition);
-                        }
-                        this.positiveTestStringInput.quill?.removeFormat(0, this.positiveTestStringInput.quill.getLength() - 1, 'silent');
-                        this.negativeTestStringInput.quill?.removeFormat(0, this.negativeTestStringInput.quill.getLength() - 1, 'silent');
-                        this._testStatusDiv.innerText = 'Test cases passed: 0/' + this.unitTestTable.testCaseCount;
-                    }
-                }
-            }, false);
+            this.hparsonsInput = new ParsonsInput(this);
+            inputDiv.appendChild(this.hparsonsInput.el);
         }
         else {
             // (this.inputType == 'text')
@@ -16965,98 +15832,45 @@ class RegexElement extends HTMLElement {
             regex_slot.name = 'regex-input';
             inputDiv.appendChild(regex_slot);
             // TODO: (refactor) rename RegexInput
-            this.regexInput = new TextInput(this);
-            this.appendChild(this.regexInput.el);
-            this.regexInput.el.slot = 'regex-input';
-            this.regexInput.initQuill();
-            this.regexInput.quill?.on('text-change', (delta) => {
-                this.regexInput.removeFormat();
+            this.hparsonsInput = new TextInput(this);
+            this.appendChild(this.hparsonsInput.el);
+            this.hparsonsInput.el.slot = 'regex-input';
+            this.hparsonsInput.initQuill();
+            this.hparsonsInput.quill?.on('text-change', (delta) => {
+                this.hparsonsInput.removeFormat();
                 // logging free input event
                 this.temporaryInputEvent = {
                     'event-type': 'text-input',
-                    dropped: this.regexInput.droppedText,
+                    dropped: this.hparsonsInput.droppedText,
                     delta: delta,
-                    answer: this.regexInput.getText()
+                    answer: this.hparsonsInput.getText()
                 };
-                this.regexInput.droppedText = false;
-                // update status indicator
-                // this.patternValidFlag = this.pyodide_compilePattern();
-                this.patternValidFlag = this._compilePattern_Sk();
-                if (this.patternValidFlag) {
-                    this.regexStatus.updateStatus('valid');
-                }
-                else {
-                    this.regexStatus.updateStatus('error');
-                    // this.regexInput.highlightError(this.regexErrorPosition);
-                }
-                // console.log(this.patternValidFlag);
-                this._logRegexInputEvent();
-                if (this.checkWhileTyping) {
-                    if (this.patternValidFlag) {
-                        // only match when the pattern is valid
-                        const passCount = this.unitTestTable.check(this.regexInput.getText());
-                        this.regexInput.updateTestStatus(passCount == this.unitTestTable.testCaseCount ? 'Pass' : 'Fail');
-                        this._testStatusDiv.innerText = 'Test cases passed: ' + passCount + '/' + this.unitTestTable.testCaseCount;
-                        this._testStatusDiv.className = '';
-                        this._testStatusDiv.classList.add('regex-test-status');
-                        this._testStatusDiv.classList.add(passCount == this.unitTestTable.testCaseCount ? 'Pass' : 'Fail');
-                        // this.match();
-                        this._match_with_Sk();
-                        if (passCount === this.unitTestTable.testCaseCount) {
-                            // console.log('dispatch');
-                            this.dispatchEvent(new CustomEvent('passed-all-testcases'));
-                        }
-                    }
-                    else {
-                        // if (this.regexErrorMessage.classList.contains('hidden')) {
-                        if (this.regexInput.getText() == '') {
-                            // it means the regex is actually empty
-                            this.regexStatus.updateStatus('');
-                            this.unitTestTable.check('');
-                        }
-                        else {
-                            this.regexStatus.updateStatus('error');
-                            this.regexInput.updateTestStatus('Error');
-                            this.unitTestTable.setError();
-                            // this.regexInput.highlightError(this.regexErrorPosition);
-                        }
-                        this.positiveTestStringInput.quill?.removeFormat(0, this.positiveTestStringInput.quill.getLength() - 1, 'silent');
-                        this.negativeTestStringInput.quill?.removeFormat(0, this.negativeTestStringInput.quill.getLength() - 1, 'silent');
-                        this._testStatusDiv.innerText = 'Test cases passed: 0/' + this.unitTestTable.testCaseCount;
-                    }
-                    // check and update the background color of the parsons input based on the unit test results
-                }
+                this.hparsonsInput.droppedText = false;
+                // this._logRegexInputEvent();
             });
         }
-        // this.regexErrorMessage = document.createElement('div');
-        // this.regexErrorMessage.classList.add('regex-error-message');
-        // inputDiv.appendChild(this.regexErrorMessage);
-        // this.regexErrorPosition = -1;
-        // init elements: regex options dropdown
-        this.regexOptions = new RegexOptions(this);
-        // inputDiv.appendChild(this.regexOptions.el);
     }
     resetTool() {
         if (this.inputType != 'parsons') {
-            const regexInput = this.regexInput;
+            const regexInput = this.hparsonsInput;
             regexInput.quill?.setText('', 'silent');
         }
-        // this.regexErrorMessage.classList.add('hidden');
-        this.regexStatus.updateStatus('');
-        this.positiveTestStringInput.quill?.removeFormat(0, this.positiveTestStringInput.quill.getLength() - 1, 'silent');
-        this.negativeTestStringInput.quill?.removeFormat(0, this.negativeTestStringInput.quill.getLength() - 1, 'silent');
-        this._testStatusDiv.innerText = '';
-        this.unitTestTable.setError();
     }
     // restore student answer from outside storage
     restoreAnswer(type, answer) {
         if (type == undefined || answer == undefined) {
             return;
         }
-        this.regexInput.restoreAnswer(type, answer);
+        this.hparsonsInput.restoreAnswer(type, answer);
+    }
+    getCurrentInput() {
+        return this.hparsonsInput.getText();
+    }
+    getParsonsTextArray() {
+        return this.hparsonsInput._getTextArray();
     }
 }
-customElements.define('regex-element', RegexElement);
+customElements.define('horizontal-parsons', HParsonsElement);
 
-export { RegexElement };
-//# sourceMappingURL=regex-element.js.map
+export { HParsonsElement };
+//# sourceMappingURL=horizontal-parsons.js.map

@@ -53,6 +53,7 @@ TEMPLATE_START = """
 
 TEMPLATE_END = """
 </div>
+<div class='hparsons'></div>
 <textarea data-lang="%(language)s" id="%(divid)s_editor" 
     %(optional)s
     %(dburl)s
