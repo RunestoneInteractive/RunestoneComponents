@@ -96,7 +96,7 @@ class HParsonsDirective(RunestoneIdDirective):
     .. hparsons:: uniqueid
        :language: sql, regex
        :dburl: only for sql -- url to load database
-
+       TODO: fix textentry
        :textentry: if you will use text entry instead of horizontal parsons
 
         Here is the problem description. It must ends with the tildes.

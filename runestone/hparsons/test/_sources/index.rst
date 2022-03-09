@@ -25,6 +25,27 @@ Horizontal Parsons + SQL
 
 ..     :dburl: http://localhost:8000/_static/test.db
 
+
+.. hparsons:: teasfasfas
+    :language: sql
+    :dburl: /_static/test.db
+
+
+    this is a cute horizontal parsons problem!
+    ~~~~
+    --blocks--
+    select
+    *
+    from
+    test
+    --unittest--
+    assert 1,1 == world
+    assert 0,1 == hello
+    assert 2,1 == 42
+
+..     :dburl: http://localhost:8000/_static/test.db
+
+
 .. activecode:: abcde 
     :language: sql
     :autograde: unittest

@@ -19,6 +19,7 @@ export default class SQLHParons extends RunestoneBase {
         // copied from activecode
         var suffStart;
         var orig = $(opts.orig).find("textarea")[0];
+        this.textentry = $(orig).data('textentry') ? true : false;
         this.divid = opts.orig.id;
         this.containerDiv = opts.orig;
         this.useRunestoneServices = opts.useRunestoneServices;
@@ -140,8 +141,11 @@ export default class SQLHParons extends RunestoneBase {
     createEditor() {
         this.outerDiv = document.createElement("div");
         $(this.origElem).replaceWith(this.outerDiv);
-        this.outerDiv.innerHTML = `<horizontal-parsons input-type='parsons' id='${this.divid}-hparsons'>`;
-        console.log(this.code);
+        if (this.textentry) {
+            this.outerDiv.innerHTML = `<horizontal-parsons input-type='text' id='${this.divid}-hparsons'>`;
+        } else {
+            this.outerDiv.innerHTML = `<horizontal-parsons input-type='parsons' id='${this.divid}-hparsons'>`;
+        }
         let blocks = [];
         let blockIndex = this.code.indexOf('--blocks--');
         if (blockIndex > -1) {
@@ -345,8 +349,12 @@ export default class SQLHParons extends RunestoneBase {
     // changed to getting parsons
     async buildProg(useSuffix) {
         // assemble code from prefix, suffix, and editor for running.
-        var pretext;
-        var prog = this.hparsons.getParsonsTextArray().join(' ') + "\n";
+        var prog;
+        if (this.textentry) {
+            prog = this.hparsons.getCurrentInput();
+        } else {
+            prog = this.hparsons.getParsonsTextArray().join(' ') + "\n";
+        }
         this.pretext = "";
         this.pretextLines = 0;
         this.progLines = prog.match(/\n/g).length + 1;
