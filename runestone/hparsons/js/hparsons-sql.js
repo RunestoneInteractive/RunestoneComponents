@@ -2,6 +2,7 @@ import Handsontable from "handsontable";
 // import 'handsontable/dist/handsontable.full.css';
 import initSqlJs from "sql.js/dist/sql-wasm.js";
 import RunestoneBase from "../../common/js/runestonebase.js";
+import "../css/hparsons.css";
 
 var allDburls = {};
 
@@ -24,7 +25,6 @@ export default class SQLHParons extends RunestoneBase {
         this.origElem = orig;
         this.origText = this.origElem.textContent;
         this.code = $(orig).text() || "\n\n\n\n\n";
-        this.question = $(opts.orig).find(`#${this.divid}_question`)[0];
         this.dburl = $(orig).data("dburl");
         this.runButton = null;
         this.saveButton = null;
@@ -38,7 +38,7 @@ export default class SQLHParons extends RunestoneBase {
             this.prefix = this.code.substring(0, prefixEnd);
             this.code = this.code.substring(prefixEnd + 5);
         }
-        suffStart = this.code.indexOf("====");
+        suffStart = this.code.indexOf("--unittest--");
         if (suffStart > -1) {
             this.suffix = this.code.substring(suffStart + 5);
             this.code = this.code.substring(0, suffStart);
@@ -139,11 +139,19 @@ export default class SQLHParons extends RunestoneBase {
     // copied from activecode, already modified to add parsons
     createEditor() {
         this.outerDiv = document.createElement("div");
-        $(this.outerDiv).addClass("hparsons_section alert alert-warning");
         $(this.origElem).replaceWith(this.outerDiv);
         this.outerDiv.innerHTML = `<horizontal-parsons input-type='parsons' id='${this.divid}-hparsons'>`;
+        console.log(this.code);
+        let blocks = [];
+        let blockIndex = this.code.indexOf('--blocks--');
+        if (blockIndex > -1) {
+            let blocksString = this.code.substring(blockIndex + 10);
+            let endIndex = blocksString.indexOf('\n--');
+            blocksString = endIndex > -1 ? blocksString.substring(0, endIndex) : blocksString;
+            blocks = blocksString.split('\n');
+        }
         this.hparsons = $(this.outerDiv).find("horizontal-parsons")[0];
-        this.hparsons.parsonsData = ['select', '*', 'from', 'test', ';'];
+        this.hparsons.parsonsData = blocks.slice(1, -1);
     }
 
     // copied from activecode
@@ -184,13 +192,6 @@ export default class SQLHParons extends RunestoneBase {
 
         // TODO: maybe remove the question part
         $(this.outerDiv).prepend(ctrlDiv);
-        if (this.question) {
-            if ($(this.question).html().match(/^\s+$/)) {
-                $(this.question).remove();
-            } else {
-                $(this.outerDiv).prepend(this.question);
-            }
-        }
         this.controlDiv = ctrlDiv;
     }
 

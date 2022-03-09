@@ -4,16 +4,21 @@ Horizontal Parsons Test
 
 .. Testing horizontal Parsons problems.
 
-Horizontal Parsons + SQL  aaa
+Horizontal Parsons + SQL
 --------------------------------------
 .. hparsons:: test_activecode_6
     :language: sql
-    :autograde: unittest
     :dburl: /_static/test.db
 
-    select * from test;
 
-    =====
+    this is a cute horizontal parsons problem!
+    ~~~~
+    --blocks--
+    select
+    *
+    from
+    test
+    --unittest--
     assert 1,1 == world
     assert 0,1 == hello
     assert 2,1 == 42

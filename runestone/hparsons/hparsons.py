@@ -16,8 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-from __future__ import print_function
-
 __author__ = "bmiller"
 
 from docutils import nodes
@@ -34,31 +32,26 @@ from runestone.common.runestonedirective import (
     RunestoneIdNode,
 )
 
-try:
-    from html import escape  # py3
-except ImportError:
-    from cgi import escape  # py2
-
-
 def setup(app):
     app.add_directive("hparsons", HParsonsDirective)
-    app.add_node(HParsonsNode, html=(visit_ac_node, depart_ac_node))
+    app.add_node(HParsonsNode, html=(visit_hp_node, depart_hp_node))
 
 
 TEMPLATE_START = """
 <div>
-<div data-component="hparsons" id=%(divid)s data-question_label="%(question_label)s">
-<div id=%(divid)s_question class="ac_question col-md-12">
+<div data-component="hparsons" id=%(divid)s data-question_label="%(question_label)s" class="alert alert-warning hparsons_section">
+<div class="hp_question col-md-12">
 """
 
 TEMPLATE_END = """
 </div>
 <div class='hparsons'></div>
-<textarea data-lang="%(language)s" id="%(divid)s_editor" 
+<textarea data-lang="%(language)s" 
     %(optional)s
     %(dburl)s
+    %(textentry)s
     style="visibility: hidden;">
-%(initialcode)s
+%(initialsetting)s
 </textarea>
 </div>
 </div>
@@ -74,10 +67,7 @@ class HParsonsNode(nodes.General, nodes.Element, RunestoneIdNode):
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
-def visit_ac_node(self, node):
-    # print self.settings.env.activecodecounter
-
-    # todo:  handle above in node.runestone_options
+def visit_hp_node(self, node):
 
     node.delimiter = "_start__{}_".format(node.runestone_options["divid"])
 
@@ -87,11 +77,7 @@ def visit_ac_node(self, node):
     self.body.append(res)
 
 
-def depart_ac_node(self, node):
-    """This is called at the start of processing an activecode node.  If activecode had recursive nodes
-    etc and did not want to do all of the processing in visit_ac_node any finishing touches could be
-    added here.
-    """
+def depart_hp_node(self, node):
     res = TEMPLATE_END % node.runestone_options
     self.body.append(res)
 
@@ -104,37 +90,28 @@ def depart_ac_node(self, node):
     self.body.remove(node.delimiter)
 
 
-def process_activcode_nodes(app, env, docname):
-    pass
-
-
-def purge_activecodes(app, env, docname):
-    pass
-
-
 class HParsonsDirective(RunestoneIdDirective):
     # only keep: language, autograde, dburl
     """
-    .. activecode:: uniqueid
-       :autograde: unittest
-       :language: python, html, javascript, java, python2, python3
-       :dburl: url to load database for sql mode
-       :showlastsql: -- Only show the last sql result in output
+    .. hparsons:: uniqueid
+       :language: sql, regex
+       :dburl: only for sql -- url to load database
 
-        If this is a homework problem instead of an example in the text
-        then the assignment text should go here.  The assignment text ends with
-        the line containing four tilde ~
+       :textentry: if you will use text entry instead of horizontal parsons
+
+        Here is the problem description. It must ends with the tildes.
+        Make sure you use the correct delimitier for each section below.
         ~~~~
-        print("Hidden code before students code - good for scaffolding")
-        ^^^^
-        print("hello world")
-        ====
-        print("Hidden code, such as unit tests come after the four = signs")
-
-    config values (conf.py):
-
-    - activecode_div_class - custom CSS class of the component's outermost div
-    - activecode_hide_load_history - if True, hide the load history button
+        --blocks--
+        block 1
+        block 2
+        --explanations--
+        explanations for block 1
+        explanations for block 2
+        --unittest--
+        assert 1,1 == world
+        assert 0,1 == hello
+        assert 2,1 == 42
     """
 
     required_arguments = 1
@@ -143,9 +120,9 @@ class HParsonsDirective(RunestoneIdDirective):
     option_spec = RunestoneIdDirective.option_spec.copy()
     option_spec.update(
         {
-            "language": directives.unchanged,
             "dburl": directives.unchanged,
-            "showlastsql": directives.flag,
+            "language": directives.unchanged,
+            "textentry": directives.flag,
         }
     )
 
@@ -153,12 +130,11 @@ class HParsonsDirective(RunestoneIdDirective):
         super(HParsonsDirective, self).run()
 
         env = self.state.document.settings.env
-        # keep track of how many activecodes we have....
-        # could be used to automatically make a unique id for them.
-        if not hasattr(env, "activecodecounter"):
-            env.activecodecounter = 0
-        env.activecodecounter += 1
-        self.options["name"] = self.arguments[0].strip()
+
+        if "textentry" in self.options:
+            self.options['textentry'] = ' data-textentry="true"'
+        else:
+            self.options['textentry'] = ''
 
         explain_text = None
         if self.content:
@@ -173,14 +149,9 @@ class HParsonsDirective(RunestoneIdDirective):
         self.explain_text = explain_text or ["Not an Exercise"]
         addQuestionToDB(self)
 
-        self.options["initialcode"] = source
-        str = source.replace("\n", "*nline*")
-        str0 = str.replace('"', "*doubleq*")
-        str1 = str0.replace("(", "*open*")
-        str2 = str1.replace(")", "*close*")
-        str3 = str2.replace("'", "*singleq*")
-        self.options["argu"] = str3
+        self.options["initialsetting"] = source
 
+        # TODO: change this
         if "language" not in self.options:
             self.options["language"] = "python"
 
@@ -234,6 +205,7 @@ class HParsonsDirective(RunestoneIdDirective):
 
         maybeAddToAssignment(self)
         if explain_text:
+            self.updateContent()
             self.state.nested_parse(explain_text, self.content_offset, acnode)
 
         return [acnode]
