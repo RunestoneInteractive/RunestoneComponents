@@ -23,6 +23,11 @@ import "codemirror/mode/clike/clike.js";
 import "codemirror/mode/octave/octave.js";
 import "./../css/activecode.css";
 import "codemirror/lib/codemirror.css";
+import "codemirror/addon/hint/show-hint.js";
+import "codemirror/addon/hint/show-hint.css";
+import "codemirror/addon/hint/sql-hint.js";
+import "codemirror/addon/hint/anyword-hint.js";
+import "codemirror/addon/edit/matchbrackets.js";
 import "./skulpt.min.js";
 import "./skulpt-stdlib.js";
 // Used by Skulpt.
@@ -42,6 +47,10 @@ window.edList = {};
 
 var socket, connection, doc;
 var chatcodesServer = "chat.codes";
+
+CodeMirror.commands.autocomplete = function (cm) {
+    cm.showHint({ hint: CodeMirror.hint.anyword });
+};
 
 // separate into constructor and init
 export class ActiveCode extends RunestoneBase {
@@ -177,6 +186,7 @@ export class ActiveCode extends RunestoneBase {
             extraKeys: {
                 Tab: "indentMore",
                 "Shift-Tab": "indentLess",
+                "Ctrl-Space": "autocomplete",
             },
         });
         // Make the editor resizable
