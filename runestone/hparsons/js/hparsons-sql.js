@@ -3,25 +3,6 @@ import Handsontable from "handsontable";
 import initSqlJs from "sql.js/dist/sql-wasm.js";
 import RunestoneBase from "../../common/js/runestonebase.js";
 
-// temporary code mirror stuff copied from activecode
-import CodeMirror from "codemirror";
-import "codemirror/mode/python/python.js";
-import "codemirror/mode/css/css.js";
-import "codemirror/mode/htmlmixed/htmlmixed.js";
-import "codemirror/mode/xml/xml.js";
-import "codemirror/mode/javascript/javascript.js";
-import "codemirror/mode/sql/sql.js";
-import "codemirror/mode/clike/clike.js";
-import "codemirror/mode/octave/octave.js";
-// import "./../../activecode/css/activecode.css";
-// import "codemirror/lib/codemirror.css";
-
-// copied from activecode
-// Used by Skulpt.
-import embed from "vega-embed";
-// Adapt for use outside webpack -- see https://github.com/vega/vega-embed.
-window.vegaEmbed = embed;
-
 var allDburls = {};
 
 export var hpList;
@@ -40,29 +21,18 @@ export default class SQLHParons extends RunestoneBase {
         this.divid = opts.orig.id;
         this.containerDiv = opts.orig;
         this.useRunestoneServices = opts.useRunestoneServices;
-        this.python3 = opts.python3;
-        this.alignVertical = opts.vertical;
         this.origElem = orig;
         this.origText = this.origElem.textContent;
         this.code = $(orig).text() || "\n\n\n\n\n";
-        this.language = $(orig).data("lang");
-        this.includes = $(orig).data("include");
         this.question = $(opts.orig).find(`#${this.divid}_question`)[0];
-        this.tie = $(orig).data("tie");
         this.dburl = $(orig).data("dburl");
         this.runButton = null;
         this.saveButton = null;
         this.loadButton = null;
         this.outerDiv = null;
-        this.partner = "";
         this.logResults = true;
         this.output = null; // create pre for output
         this.controlDiv = null;
-        this.timestamps = ["Original"];
-        this.autorun = $(orig).data("autorun");
-        if (this.includes) {
-            this.includes = this.includes.split(/\s+/);
-        }
         let prefixEnd = this.code.indexOf("^^^^");
         if (prefixEnd > -1) {
             this.prefix = this.code.substring(0, prefixEnd);
@@ -82,16 +52,6 @@ export default class SQLHParons extends RunestoneBase {
             this.caption = "ActiveCode";
         }
         this.addCaption("runestone");
-        // setTimeout(
-        //     function () {
-        //         // this.editor.refresh();
-        //     }.bind(this),
-        //     1000
-        // );
-        if (this.autorun) {
-            // Simulate pressing the run button, since this will also prevent the user from clicking it until the initial run is complete, and also help the user understand why they're waiting.
-            $(this.runButtonHandler.bind(this));
-        }
         this.indicate_component_ready();
 
         // copied from activecode-sql
@@ -108,7 +68,6 @@ export default class SQLHParons extends RunestoneBase {
         this.config = {
             locateFile: (filename) => `${fnprefix}/${filename}`,
         };
-        this.showLast = $(this.origElem).data("showlastsql");
         var self = this;
         initSqlJs(this.config).then(function (SQL) {
             // set up call to load database asynchronously if given
@@ -177,104 +136,18 @@ export default class SQLHParons extends RunestoneBase {
         this.runButton.disabled = false;
     }
 
-    // copied from activecode
-    createEditor(index) {
+    // copied from activecode, already modified to add parsons
+    createEditor() {
         this.outerDiv = document.createElement("div");
-        var linkdiv = document.createElement("div");
-        linkdiv.id = this.divid.replace(/_/g, "-").toLowerCase(); // :ref: changes _ to - so add this as a target
         $(this.outerDiv).addClass("ac_section alert alert-warning");
-        this.outerDiv.lang = this.language;
         $(this.origElem).replaceWith(this.outerDiv);
         this.outerDiv.innerHTML = `<horizontal-parsons input-type='parsons' id='${this.divid}-hparsons'>`;
         this.hparsons = $(this.outerDiv).find("horizontal-parsons")[0];
         this.hparsons.parsonsData = ['select', '*', 'from', 'test', ';'];
-        // this.outerDiv.appendChild(codeDiv);
-        var edmode = this.outerDiv.lang;
-        if (edmode === "sql") {
-            edmode = "text/x-sql";
-        } else if (edmode === "java") {
-            edmode = "text/x-java";
-        } else if (edmode === "cpp") {
-            edmode = "text/x-c++src";
-        } else if (edmode === "c") {
-            edmode = "text/x-csrc";
-        } else if (edmode === "python3") {
-            edmode = "python";
-        } else if (edmode === "octave" || edmode === "MATLAB") {
-            edmode = "text/x-octave";
-        }
-        // var editor = CodeMirror(codeDiv, {
-        //     value: this.code,
-        //     lineNumbers: true,
-        //     mode: edmode,
-        //     indentUnit: 4,
-        //     matchBrackets: true,
-        //     autoMatchParens: true,
-        //     extraKeys: {
-        //         Tab: "indentMore",
-        //         "Shift-Tab": "indentLess",
-        //     },
-        // });
-        // Make the editor resizable
-        // $(editor.getWrapperElement()).resizable({
-        //     resize: function () {
-        //         editor.setSize($(this).width(), $(this).height());
-        //         editor.refresh();
-        //     },
-        // });
-        // give the user a visual cue that they have changed but not saved
-        // editor.on(
-        //     "change",
-        //     function (ev) {
-        //         if (
-        //             editor.acEditEvent == false ||
-        //             editor.acEditEvent === undefined
-        //         ) {
-        //             // change events can come before any real changes for various reasons, some unknown
-        //             // this avoids unneccsary log events and updates to the activity counter
-        //             if (this.origText === editor.getValue()) {
-        //                 return;
-        //             }
-        //             $(editor.getWrapperElement()).css(
-        //                 "border-top",
-        //                 "2px solid #b43232"
-        //             );
-        //             $(editor.getWrapperElement()).css(
-        //                 "border-bottom",
-        //                 "2px solid #b43232"
-        //             );
-        //             this.isAnswered = true;
-        //             this.logBookEvent({
-        //                 event: "activecode",
-        //                 act: "edit",
-        //                 div_id: this.divid,
-        //             });
-        //         }
-        //         editor.acEditEvent = true;
-        //     }.bind(this)
-        // ); // use bind to preserve *this* inside the on handler.
-        // //Solving Keyboard Trap of ActiveCode: If user use tab for navigation outside of ActiveCode, then change tab behavior in ActiveCode to enable tab user to tab out of the textarea
-        // $(window).keydown(function (e) {
-        //     var code = e.keyCode ? e.keyCode : e.which;
-        //     if (code == 9 && $("textarea:focus").length === 0) {
-        //         editor.setOption("extraKeys", {
-        //             Tab: function (cm) {
-        //                 $(document.activeElement)
-        //                     .closest(".tab-content")
-        //                     .nextSibling.focus();
-        //             },
-        //             "Shift-Tab": function (cm) {
-        //                 $(document.activeElement)
-        //                     .closest(".tab-content")
-        //                     .previousSibling.focus();
-        //             },
-        //         });
-        //     }
-        // });
-        // this.editor = editor;
     }
 
     // copied from activecode
+    // seems pretty clear, and do not need to modify
     createOutput() {
         // Create a parent div with two elements:  pre for standard output and a div
         // to hold turtle graphics output.  We use a div in case the turtle changes from
@@ -309,6 +182,7 @@ export default class SQLHParons extends RunestoneBase {
         this.runButton.onclick = this.runButtonHandler.bind(this);
         $(butt).attr("type", "button");
 
+        // TODO: maybe remove the question part
         $(this.outerDiv).prepend(ctrlDiv);
         if (this.question) {
             if ($(this.question).html().match(/^\s+$/)) {
@@ -320,6 +194,7 @@ export default class SQLHParons extends RunestoneBase {
         this.controlDiv = ctrlDiv;
     }
 
+    // copied from activecode-sql
     async runProg(noUI, logResults) {
         if (typeof logResults === "undefined") {
             this.logResults = true;
@@ -410,9 +285,6 @@ export default class SQLHParons extends RunestoneBase {
         // other activecodes In that case the showlastsql flag can be set
         // so we only show the last result
         let resultArray = this.results;
-        if (this.showLast) {
-            resultArray = this.results.slice(-1);
-        }
         for (let r of resultArray) {
             let section = document.createElement("div");
             section.setAttribute("class", "ac_sql_result");
@@ -477,34 +349,22 @@ export default class SQLHParons extends RunestoneBase {
         this.pretext = "";
         this.pretextLines = 0;
         this.progLines = prog.match(/\n/g).length + 1;
-        if (this.includes) {
-            // iterate over the includes, in-order prepending to prog
-            pretext = "";
-            for (var x = 0; x < this.includes.length; x++) {
-                let iCode = await this.getIncludedCode(this.includes[x]);
-                pretext = pretext + iCode + "\n";
-            }
-            this.pretext = pretext;
-            if (this.pretext) {
-                this.pretextLines = (this.pretext.match(/\n/g) || "").length;
-            }
-            prog = pretext + prog;
-        }
         if (useSuffix && this.suffix) {
             prog = prog + this.suffix;
         }
         return Promise.resolve(prog);
     }
+
+    // copied from activecode-sql
     async logCurrentAnswer(sid) {
         let data = {
             div_id: this.divid,
             // code: this.editor.getValue(),
-            language: this.language,
+            language: "sql",
             // errinfo: this.results[this.results.length - 1].status,
             to_save: this.saveCode,
             prefix: this.pretext,
             suffix: this.suffix,
-            partner: this.partner,
         }; // Log the run event
         if (typeof sid !== "undefined") {
             data.sid = sid;

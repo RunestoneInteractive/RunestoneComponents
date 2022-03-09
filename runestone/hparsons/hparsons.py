@@ -57,7 +57,7 @@ TEMPLATE_END = """
 <textarea data-lang="%(language)s" id="%(divid)s_editor" 
     %(optional)s
     %(dburl)s
-    %(showlastsql)s style="visibility: hidden;">
+    style="visibility: hidden;">
 %(initialcode)s
 </textarea>
 </div>
@@ -189,11 +189,6 @@ class HParsonsDirective(RunestoneIdDirective):
             self.options["dburl"] = "data-dburl='{}'".format(self.options["dburl"])
         else:
             self.options["dburl"] = ""
-
-        if "showlastsql" in self.options:
-            self.options["showlastsql"] = 'data-showlastsql="true"'
-        else:
-            self.options["showlastsql"] = ""
 
         course_name = env.config.html_context["course_id"]
         divid = self.options["divid"]
