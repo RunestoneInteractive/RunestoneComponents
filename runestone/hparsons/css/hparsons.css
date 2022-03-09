@@ -1,6 +1,13 @@
-div.hparsons div.latexoutput {
-    background-color: #eeeeee;
-    padding: 1em;
-    margin-bottom: 10px;
-    border-radius: 5px;
+.hparsons_section {
+    position: relative;
+    margin-right: auto;
+    margin-left: auto;
+    max-width: 800px;
+    clear: both;
+}
+
+.hparsons_section > *:not(.hparsons_section) {
+    max-width: 500pt;
+    margin-left: auto;
+    margin-right: auto;
 }
