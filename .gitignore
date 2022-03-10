@@ -48,6 +48,7 @@ bower_componenets/
 runestone/*/test/build_info
 **/sphinx_settings.json
 build_info
+runestone/dist*.tgz
 dist/
 
 # IDEs
