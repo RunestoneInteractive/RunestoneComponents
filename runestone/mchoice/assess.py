@@ -21,7 +21,6 @@ from runestone.common.runestonedirective import RunestoneDirective, RunestoneIdD
 from .multiplechoice import *
 
 
-
 def setup(app):
     app.add_directive("mchoice", MChoice)
     app.add_directive("mchoicemf", MChoiceMF)
@@ -32,7 +31,9 @@ def setup(app):
 
     app.add_config_value("mchoice_div_class", "runestone alert alert-warning", "html")
 
-    app.add_node(MChoiceNode, html=(visit_mc_node, depart_mc_node))
+    app.add_node(MChoiceNode, html=(visit_mc_node, depart_mc_node),
+                 xml=(visit_mc_xml, depart_mc_xml))
+
     app.add_node(
         AnswersBulletList, html=(visit_answers_bullet_node, depart_answers_bullet_node)
     )

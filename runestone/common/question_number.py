@@ -7,7 +7,7 @@
 # ======
 # Third-party
 from docutils import nodes
-
+import pdb
 # Local
 from .runestonedirective import RunestoneIdNode
 from ..server.componentdb import addQNumberToDB
@@ -18,8 +18,9 @@ from ..server.componentdb import addQNumberToDB
 # After the section numbers are available from the TOC tree, determine the section number for each Runestone component with an ID.
 def _insert_qnum(app, doctree, docname):
     toc = app.env.toc_secnumbers.get(docname, {})
-
+    pdb.set_trace()
     # Return the section number tuple for the given ``section_ref`` if it exists, or None if not.
+
     def get_secnum_tuple(section_ref):
         # The Sphinx TOC structure is::
         #
@@ -48,8 +49,9 @@ def _insert_qnum(app, doctree, docname):
             question_number_str = ".".join(map(str, question_number_tuple))
             # Update the database.
             addQNumberToDB(app, node, question_number_str)
-            div_id = node.runestone_options["divid"]
-            node.runestone_options["question_label"] = question_number_str
+            pdb.set_trace()
+            div_id = node["runestone_options"]["divid"]
+            node["runestone_options"]["question_label"] = question_number_str
             # Prepare to number the next question.
             current_question_number += 1
         else:

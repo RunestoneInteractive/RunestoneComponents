@@ -420,7 +420,7 @@ def addQNumberToDB(app, node, qnumber):
         questions.update()
         .where(
             and_(
-                questions.c.name == node.runestone_options["divid"],
+                questions.c.name == node["runestone_options"]["divid"],
                 questions.c.base_course == basecourse,
             )
         )
