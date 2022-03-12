@@ -33,22 +33,10 @@ from runestone.server.componentdb import (
 
 class MChoiceNode(nodes.General, nodes.Element, RunestoneIdNode):
     pass
-    # def __init__(self, content, **kwargs):
-    #     """
-
-    #     Arguments:
-    #     - `self`:
-    #     - `content`:
-    #     """
-
-    # super(MChoiceNode, self).__init__(**kwargs)
-    # pdb.set_trace()
-    # if type(content) == str:
-    #     self.runestone_options = self.attributes['opts']
-    # else:
-    #     self.runestone_options = content
 
 
+# TODO: refactor the common parts of visit_mc_xml and visit_mc_node -- copy/paste ok for
+#       proof of concept but not long term.
 def visit_mc_xml(self, node):
 
     res = ""

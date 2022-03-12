@@ -53,7 +53,8 @@ def setup(app):
     app.add_config_value("activecode_hide_load_history", False, "html")
     app.add_config_value("wasm_uri", "/_static", "html")
 
-    app.add_node(ActivcodeNode, html=(visit_ac_node, depart_ac_node))
+    app.add_node(ActivecodeNode, html=(visit_ac_node, depart_ac_node),
+                 xml=(visit_ac_xml, depart_ac_xml))
 
     app.connect("doctree-resolved", process_activcode_nodes)
     app.connect("env-purge-doc", purge_activecodes)
@@ -79,16 +80,18 @@ TEMPLATE_END = """
 """
 
 
-class ActivcodeNode(nodes.General, nodes.Element, RunestoneIdNode):
-    def __init__(self, content, **kwargs):
-        """
+class ActivecodeNode(nodes.General, nodes.Element, RunestoneIdNode):
+    pass
 
-        Arguments:
-        - `self`:
-        - `content`:
-        """
-        super(ActivcodeNode, self).__init__(name=content["name"], **kwargs)
-        self.runestone_options = content
+
+def visit_ac_xml(self, node):
+    res = TEMPLATE_START % node["runestone_options"]
+    self.output.append(res)
+
+
+def depart_ac_xml(self, node):
+    res = TEMPLATE_END % node["runestone_options"]
+    self.output.append(res)
 
 
 # self for these functions is an instance of the writer class.  For example
@@ -97,15 +100,15 @@ class ActivcodeNode(nodes.General, nodes.Element, RunestoneIdNode):
 def visit_ac_node(self, node):
     # print self.settings.env.activecodecounter
 
-    # todo:  handle above in node.runestone_options
-    # todo handle  'hidecode' not in node.runestone_options:
-    # todo:  handle if 'gradebutton' in node.runestone_options: res += GRADES
+    # todo:  handle above in node["runestone_options"]
+    # todo handle  'hidecode' not in node["runestone_options"]:
+    # todo:  handle if 'gradebutton' in node["runestone_options"]: res += GRADES
 
-    node.delimiter = "_start__{}_".format(node.runestone_options["divid"])
+    node["delimiter"] = "_start__{}_".format(node["runestone_options"]["divid"])
 
-    self.body.append(node.delimiter)
+    self.body.append(node["delimiter"])
 
-    res = TEMPLATE_START % node.runestone_options
+    res = TEMPLATE_START % node["runestone_options"]
     self.body.append(res)
 
 
@@ -114,16 +117,16 @@ def depart_ac_node(self, node):
     etc and did not want to do all of the processing in visit_ac_node any finishing touches could be
     added here.
     """
-    res = TEMPLATE_END % node.runestone_options
+    res = TEMPLATE_END % node["runestone_options"]
     self.body.append(res)
 
     addHTMLToDB(
-        node.runestone_options["divid"],
-        node.runestone_options["basecourse"],
-        "".join(self.body[self.body.index(node.delimiter) + 1 :]),
+        node["runestone_options"]["divid"],
+        node["runestone_options"]["basecourse"],
+        "".join(self.body[self.body.index(node["delimiter"]) + 1 :]),
     )
 
-    self.body.remove(node.delimiter)
+    self.body.remove(node["delimiter"])
 
 
 def process_activcode_nodes(app, env, docname):
@@ -448,8 +451,10 @@ class ActiveCode(RunestoneIdDirective):
                     "This should only affect the grading interface. Everything else should be fine."
                 )
 
-        acnode = ActivcodeNode(self.options, rawsource=self.block_text)
-        acnode.source, acnode.line = self.state_machine.get_source_and_line(self.lineno)
+        acnode = ActivecodeNode(self.options, rawsource=self.block_text)
+        acnode["runestone_options"] = self.options
+        acnode["source"], acnode["line"] = self.state_machine.get_source_and_line(
+            self.lineno)
         self.add_name(acnode)  # make this divid available as a target for :ref:
 
         maybeAddToAssignment(self)
