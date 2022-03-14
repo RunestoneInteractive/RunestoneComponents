@@ -35,7 +35,7 @@ class MChoiceNode(nodes.General, nodes.Element, RunestoneIdNode):
     pass
 
 
-def visit_mc_common(self, node, node_type):
+def visit_mc_common(self, node):
 
     res = ""
     if "random" in node["runestone_options"]:
@@ -81,7 +81,7 @@ def depart_mc_common(self, node):
 
 def visit_mc_xml(self, node):
 
-    res = visit_mc_common(self, node, "xml")
+    res = visit_mc_common(self, node)
     self.output.append(res)
 
 
