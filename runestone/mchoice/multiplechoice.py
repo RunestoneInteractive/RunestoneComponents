@@ -35,9 +35,7 @@ class MChoiceNode(nodes.General, nodes.Element, RunestoneIdNode):
     pass
 
 
-# TODO: refactor the common parts of visit_mc_xml and visit_mc_node -- copy/paste ok for
-#       proof of concept but not long term.
-def visit_mc_xml(self, node):
+def visit_mc_common(self, node, node_type):
 
     res = ""
     if "random" in node["runestone_options"]:
@@ -53,78 +51,54 @@ def visit_mc_xml(self, node):
         node["runestone_options"]["multipleAnswers"] = "false"
     res = node["template_start"] % node["runestone_options"]
 
+    return res
+
+
+def depart_mc_common(self, node):
+    res = ""
+    currFeedback = ""
+    # Add all of the possible answers
+    okeys = list(node["runestone_options"].keys())
+    okeys.sort()
+    for k in okeys:
+        if "answer_" in k:
+            x, label = k.split("_")
+            node["runestone_options"]["alabel"] = label
+            node["runestone_options"]["atext"] = node["runestone_options"][k]
+            currFeedback = "feedback_" + label
+            node["runestone_options"]["feedtext"] = node["runestone_options"].get(
+                currFeedback, ""
+            )  # node["runestone_options"][currFeedback]
+            if label in node["runestone_options"]["correct"]:
+                node["runestone_options"]["is_correct"] = "data-correct"
+            else:
+                node["runestone_options"]["is_correct"] = ""
+            res += node["template_option"] % node["runestone_options"]
+
+    res += node["template_end"] % node["runestone_options"]
+    return res
+
+
+def visit_mc_xml(self, node):
+
+    res = visit_mc_common(self, node, "xml")
     self.output.append(res)
 
 
 def depart_mc_xml(self, node):
-    res = ""
-    currFeedback = ""
-    # Add all of the possible answers
-    okeys = list(node["runestone_options"].keys())
-    okeys.sort()
-    for k in okeys:
-        if "answer_" in k:
-            x, label = k.split("_")
-            node["runestone_options"]["alabel"] = label
-            node["runestone_options"]["atext"] = node["runestone_options"][k]
-            currFeedback = "feedback_" + label
-            node["runestone_options"]["feedtext"] = node["runestone_options"].get(
-                currFeedback, ""
-            )  # node["runestone_options"][currFeedback]
-            if label in node["runestone_options"]["correct"]:
-                node["runestone_options"]["is_correct"] = "data-correct"
-            else:
-                node["runestone_options"]["is_correct"] = ""
-            res += node["template_option"] % node["runestone_options"]
-
-    res += node["template_end"] % node["runestone_options"]
+    res = depart_mc_common(self, node)
     self.output.append(res)
 
 
-def visit_mc_node(self, node):
-
+def visit_mc_html(self, node):
     node["delimiter"] = "_start__{}_".format(node["runestone_options"]["divid"])
     self.body.append(node["delimiter"])
-
-    res = ""
-    if "random" in node["runestone_options"]:
-        node["runestone_options"]["random"] = "data-random"
-    else:
-        node["runestone_options"]["random"] = ""
-    # Use multiple_answers behavior if explicitly required or if multiple correct answers were provided.
-    if ("multiple_answers" in node["runestone_options"]) or (
-        "," in node["runestone_options"]["correct"]
-    ):
-        node["runestone_options"]["multipleAnswers"] = "true"
-    else:
-        node["runestone_options"]["multipleAnswers"] = "false"
-    res = node["template_start"] % node["runestone_options"]
-
+    res = visit_mc_common(self, node)
     self.body.append(res)
 
 
-def depart_mc_node(self, node):
-    res = ""
-    currFeedback = ""
-    # Add all of the possible answers
-    okeys = list(node["runestone_options"].keys())
-    okeys.sort()
-    for k in okeys:
-        if "answer_" in k:
-            x, label = k.split("_")
-            node["runestone_options"]["alabel"] = label
-            node["runestone_options"]["atext"] = node["runestone_options"][k]
-            currFeedback = "feedback_" + label
-            node["runestone_options"]["feedtext"] = node["runestone_options"].get(
-                currFeedback, ""
-            )  # node["runestone_options"][currFeedback]
-            if label in node["runestone_options"]["correct"]:
-                node["runestone_options"]["is_correct"] = "data-correct"
-            else:
-                node["runestone_options"]["is_correct"] = ""
-            res += node["template_option"] % node["runestone_options"]
-
-    res += node["template_end"] % node["runestone_options"]
+def depart_mc_html(self, node):
+    res = depart_mc_common(self, node)
     self.body.append(res)
 
     addHTMLToDB(
@@ -384,7 +358,7 @@ class FeedbackListItem(nodes.list_item, RunestoneNode):
 
 
 # The ``<ul>`` tag will be generated already -- don't output it.
-def visit_answers_bullet_node(self, node):
+def visit_answers_bullet_html(self, node):
     # Prevent the list items, which are wrapped in ``<paragraph>`` tags, from emitting the ``<p>``. See similar code in ``docutils.writers._html_base.HTMLTranslator.visit_bullet_list`` and its use in ``docutils.writer.html4css1.HTMLTranslator.visit_paragraph``.
     self.context.append((self.compact_simple, self.compact_p))
     self.compact_p = None
@@ -392,8 +366,8 @@ def visit_answers_bullet_node(self, node):
 
 
 # The ``</ul>`` tag will be generated already -- don't output it.
-def depart_answers_bullet_node(self, node):
-    # Restore the state modified in ``visit_answers_bullet_node``.
+def depart_answers_bullet_html(self, node):
+    # Restore the state modified in ``visit_answers_bullet_html``.
     self.compact_simple, self.compact_p = self.context.pop()
 
 
@@ -424,12 +398,12 @@ def depart_answer_list_item(self, node):
 
 
 # Nothing to output, since feedback isn't nested under an answer in the HTML.
-def visit_feedback_bullet_node(self, node):
+def visit_feedback_bullet_html(self, node):
     pass
 
 
 # Nothing to output, since feedback isn't nested under an answer in the HTML.
-def depart_feedback_bullet_node(self, node):
+def depart_feedback_bullet_html(self, node):
     pass
 
 
