@@ -33,7 +33,7 @@ def setup(app):
 
     app.add_autoversioned_stylesheet("webgldemo.css")
 
-    app.add_node(WebglDemoNode, html=(visit_webgldemo_node, depart_webgldemo_node))
+    app.add_node(WebglDemoNode, html=(visit_webgldemo_html, depart_webgldemo_html))
 
     app.connect("doctree-resolved", process_webgldemo_nodes)
     app.connect("env-purge-doc", purge_webgldemos)
@@ -54,7 +54,7 @@ def setup(app):
 
     app.add_node(
         WebglInteractiveNode,
-        html=(visit_webglinteractive_node, depart_webglinteractive_node),
+        html=(visit_webglinteractive_html, depart_webglinteractive_html),
     )
 
     app.connect("doctree-resolved", process_webglinteractive_nodes)
@@ -158,7 +158,7 @@ class WebglDemo(Directive):
             Changes:  "../learn_webgl"  to  "../_static/learn_webgl"
             Changes:  "../shaders"      to  "../_static/shaders"
             Changes:  "../models"       to  "../_static/models"
-            Changes:  "src="./"         to  "src="../' + node.webgl_components['htmlprogrampath'] + "/")
+            Changes:  "src="./"         to  "src="../' + node["webgl_components"]['htmlprogrampath'] + "/")
         * The Javascript code at the bottom of a webgl program needs to be
           in the HTML code so that the runestone build process can modify
           the paths to these webgl program resources. The "Learn Computer Graphics
@@ -270,8 +270,8 @@ class WebglDemoNode(nodes.General, nodes.Element):
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
-def visit_webgldemo_node(self, node):
-    # print("In visit_webgldemo_node, node.webgl_components = ", node.webgl_components)
+def visit_webgldemo_html(self, node):
+    # print("In visit_webgldemo_html, node["webgl_components"] = ", node["webgl_components"])
 
     # start of HTML
     res = "<!-- webgldemo start -->\n"
@@ -280,7 +280,7 @@ def visit_webgldemo_node(self, node):
     # The HTML comes from the body of the HTMLprogram file
     # Read the HTML file
     filename = os.path.join(
-        node.webgl_components["htmlprogrampath"], node.webgl_components["htmlprogram"]
+        node["webgl_components"]["htmlprogrampath"], node["webgl_components"]["htmlprogram"]
     )
     file = open(filename, "r")
     fileContents = file.read()
@@ -293,31 +293,31 @@ def visit_webgldemo_node(self, node):
     bodyCode = fileContents[startPos:endPos]
 
     # Update the paths to library files
-    bodyCode = bodyCode.replace("../", node.webgl_components["lib_folder_prefix"])
+    bodyCode = bodyCode.replace("../", node["webgl_components"]["lib_folder_prefix"])
     bodyCode = bodyCode.replace(
         'src="./',
         'src="'
-        + node.webgl_components["program_folder_prefix"]
-        + node.webgl_components["htmlprogrampath"]
+        + node["webgl_components"]["program_folder_prefix"]
+        + node["webgl_components"]["htmlprogrampath"]
         + os.sep,
     )
 
     # make the canvas a specific size
-    if node.webgl_components["width"] > 0 and node.webgl_components["height"] > 0:
+    if node["webgl_components"]["width"] > 0 and node["webgl_components"]["height"] > 0:
         width_re = re.compile(
             r'<canvas id="my_canvas" class="webgldemo_canvas" width="(\d+)" height="(\d+)">'
         )
         if width_re.search(bodyCode):
             new_text = (
                 r'<canvas id="my_canvas" class="webgldemo_canvas" width="'
-                + str(node.webgl_components["width"])
+                + str(node["webgl_components"]["width"])
                 + '" height="'
-                + str(node.webgl_components["height"])
+                + str(node["webgl_components"]["height"])
                 + r'">'
             )
             bodyCode = width_re.sub(new_text, bodyCode)
 
-    if node.webgl_components["width2"] > 0 and node.webgl_components["height2"] > 0:
+    if node["webgl_components"]["width2"] > 0 and node["webgl_components"]["height2"] > 0:
         # make the secondary canvas a specific size
         width_re = re.compile(
             r'<canvas id="my_canvas_b" class="webgldemo_canvas" width="(\d+)" height="(\d+)">'
@@ -325,28 +325,28 @@ def visit_webgldemo_node(self, node):
         if width_re.search(bodyCode):
             new_text = (
                 r'<canvas id="my_canvas_b" class="webgldemo_canvas" width="'
-                + str(node.webgl_components["width2"])
+                + str(node["webgl_components"]["width2"])
                 + '" height="'
-                + str(node.webgl_components["height2"])
+                + str(node["webgl_components"]["height2"])
                 + r'">'
             )
             bodyCode = width_re.sub(new_text, bodyCode)
 
     # Make all the ids and variables unique for this embedded program.
-    bodyCode = bodyCode.replace("my_", node.webgl_components["divid"] + "_")
+    bodyCode = bodyCode.replace("my_", node["webgl_components"]["divid"] + "_")
 
     # Make the first parameter of the scene function be the ID of this webgldemo
-    bodyCode = bodyCode.replace('"my",', '"' + node.webgl_components["divid"] + '",')
+    bodyCode = bodyCode.replace('"my",', '"' + node["webgl_components"]["divid"] + '",')
 
     # Add the HTML body code to the page in the "canvas" area.
     res += bodyCode
 
     # Add a link to open the webgldemo program in a separate browser tab.
-    programPath = node.webgl_components["htmlprogrampath"].replace("_static/", "")
+    programPath = node["webgl_components"]["htmlprogrampath"].replace("_static/", "")
     myLink = os.path.join(
-        node.webgl_components["lib_folder_prefix"],
+        node["webgl_components"]["lib_folder_prefix"],
         programPath,
-        node.webgl_components["htmlprogram"],
+        node["webgl_components"]["htmlprogram"],
     )
     res += (
         '<a href="'
@@ -359,17 +359,17 @@ def visit_webgldemo_node(self, node):
     res += "<!-- webgldemo end -->"
 
     # Replace all of the placeholders in the HTML with the strings stored
-    # in the node.webgl_components dictionary.
-    res = res % node.webgl_components
+    # in the node["webgl_components"] dictionary.
+    res = res % node["webgl_components"]
 
     self.body.append(res)
 
 
 # --------------------------------------------------------------------------
-def depart_webgldemo_node(self, node):
+def depart_webgldemo_html(self, node):
     """
     This is called at the start of processing an activecode node.  If activecode had recursive nodes
-    etc and did not want to do all of the processing in visit_webgldemo_node any finishing touches could be
+    etc and did not want to do all of the processing in visit_webgldemo_html any finishing touches could be
     added here.
     """
     pass
@@ -563,7 +563,7 @@ class WebglInteractive(Directive):
             Changes:  "../learn_webgl"  to  "../_static/learn_webgl"
             Changes:  "../shaders"      to  "../_static/shaders"
             Changes:  "../models"       to  "../_static/models"
-            Changes:  "src="./"         to  "src="../' + node.webgl_components['htmlprogrampath'] + "/")
+            Changes:  "src="./"         to  "src="../' + node["webgl_components"]['htmlprogrampath'] + "/")
         * The Javascript code at the bottom of a webgl program needs to be
           in the HTML code so that the runestone build process can modify
           the paths to these webgl program resources. The "Learn Computer Graphics
@@ -977,8 +977,8 @@ def add_code_editors(options):
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
-def visit_webglinteractive_node(self, node):
-    # print("In visit_webglinteractive_node, node.webgl_components = ", node.webgl_components)
+def visit_webglinteractive_html(self, node):
+    # print("In visit_webglinteractive_html, node["webgl_components"] = ", node["webgl_components"])
 
     # Overall structure is here. Content is added in the functions
     res = "<!-- webglinteractive start -->"
@@ -995,7 +995,7 @@ def visit_webglinteractive_node(self, node):
 
     # Commands (top row)
     res += "<div class='webgl_cmds' id='%(divid)s_webgl_cmds'>\n"
-    res += add_commands(node.webgl_components)
+    res += add_commands(node["webgl_components"])
     res += "</div>\n"
 
     # Start first row (editors and canvas)
@@ -1003,16 +1003,16 @@ def visit_webglinteractive_node(self, node):
 
     # Editors for code
     res += "<div class='webgl_editors' id='%(divid)s_webgl_editors'>\n"
-    res += add_code_editors(node.webgl_components)
+    res += add_code_editors(node["webgl_components"])
     res += "</div>\n"
 
     # Canvas for rendering (with controls below the canvas)
     res += "<div class='webgl_canvas' id='%(divid)s_webgl_canvas'>"
     # Read the HTML file
     filename = (
-        node.webgl_components["htmlprogrampath"]
+        node["webgl_components"]["htmlprogrampath"]
         + "/"
-        + node.webgl_components["htmlprogram"]
+        + node["webgl_components"]["htmlprogram"]
     )
     filename = os.path.realpath(filename)
 
@@ -1023,9 +1023,9 @@ def visit_webglinteractive_node(self, node):
     # Put the HTML source file name so it can be downloaded by the user
     html_file_name = (
         "../"
-        + node.webgl_components["htmlprogrampath"]
+        + node["webgl_components"]["htmlprogrampath"]
         + "/"
-        + node.webgl_components["htmlprogram"]
+        + node["webgl_components"]["htmlprogram"]
     )
     res += '<span style="display: none;">' + html_file_name + "</span>"
 
@@ -1036,16 +1036,16 @@ def visit_webglinteractive_node(self, node):
     bodyCode = fileContents[startPos:endPos]
 
     # Update the paths to library files
-    bodyCode = bodyCode.replace("../", node.webgl_components["lib_folder_prefix"])
+    bodyCode = bodyCode.replace("../", node["webgl_components"]["lib_folder_prefix"])
     bodyCode = bodyCode.replace(
         'src="./',
         'src="'
-        + node.webgl_components["program_folder_prefix"]
-        + node.webgl_components["htmlprogrampath"]
+        + node["webgl_components"]["program_folder_prefix"]
+        + node["webgl_components"]["htmlprogrampath"]
         + os.sep,
     )
 
-    bodyCode = change_html_code_ids(bodyCode, node.webgl_components)
+    bodyCode = change_html_code_ids(bodyCode, node["webgl_components"])
 
     # Add the HTML body code to the page in the "canvas" area.
     res += bodyCode
@@ -1063,11 +1063,11 @@ def visit_webglinteractive_node(self, node):
     res += "<div style='clear:both;'></div>\n"  # turns off the float left
 
     # Add a link to open the webgl program in a separate browser tab.
-    programPath = node.webgl_components["htmlprogrampath"].replace("_static/", "")
+    programPath = node["webgl_components"]["htmlprogrampath"].replace("_static/", "")
     myLink = os.path.join(
-        node.webgl_components["lib_folder_prefix"],
+        node["webgl_components"]["lib_folder_prefix"],
         programPath,
-        node.webgl_components["htmlprogram"],
+        node["webgl_components"]["htmlprogram"],
     )
     res += (
         '<a href="'
@@ -1086,15 +1086,15 @@ def visit_webglinteractive_node(self, node):
     res += "<p> </p>\n"
 
     # Replace all of the placeholders in the HTML with the strings stored
-    # in the node.webgl_components dictionary.
-    res = res % node.webgl_components
+    # in the node["webgl_components"] dictionary.
+    res = res % node["webgl_components"]
 
     self.body.append(res)
 
 
-def depart_webglinteractive_node(self, node):
+def depart_webglinteractive_html(self, node):
     """ This is called at the start of processing an activecode node.  If activecode had recursive nodes
-        etc and did not want to do all of the processing in depart_webglinteractive_node any finishing touches could be
+        etc and did not want to do all of the processing in depart_webglinteractive_html any finishing touches could be
         added here.
     """
     pass

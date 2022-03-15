@@ -25,9 +25,9 @@ def setup(app):
     app.add_directive("tabbed", TabbedStuffDirective)
     app.add_directive("tab", TabDirective)
 
-    app.add_node(TabNode, html=(visit_tab_node, depart_tab_node))
+    app.add_node(TabNode, html=(visit_tab_html, depart_tab_html))
     app.add_node(
-        TabbedStuffNode, html=(visit_tabbedstuff_node, depart_tabbedstuff_node)
+        TabbedStuffNode, html=(visit_tabbedstuff_html, depart_tabbedstuff_html)
     )
 
     app.add_config_value("tabbed_div_class", "alert alert-warning", "html")
@@ -48,62 +48,55 @@ END = """
 
 
 class TabNode(nodes.General, nodes.Element):
-    def __init__(self, content, **kwargs):
-        super(TabNode, self).__init__(**kwargs)
-        self.tabnode_options = content
-        self.tabname = content["tabname"]
+    pass
 
 
-def visit_tab_node(self, node):
+def visit_tab_html(self, node):
     # Set options and format templates accordingly
-    divid = node.parent.divid
-    tabname = node.tabname
+    divid = node.parent["divid"]
+    tabname = node["tabname"]
 
-    if "active" in node.tabnode_options:
-        node.tabnode_options["active"] = "data-active"
+    if "active" in node["tabnode_options"]:
+        node["tabnode_options"]["active"] = "data-active"
     else:
-        node.tabnode_options["active"] = ""
+        node["tabnode_options"]["active"] = ""
 
     res = TABDIV_BEGIN % {
         "divid": divid,
         "tabname": tabname,
-        "active": node.tabnode_options["active"],
+        "active": node["tabnode_options"]["active"],
     }
     self.body.append(res)
 
 
-def depart_tab_node(self, node):
+def depart_tab_html(self, node):
     # Set options and format templates accordingly
     self.body.append(TABDIV_END)
 
 
 class TabbedStuffNode(nodes.General, nodes.Element, RunestoneNode):
     """A TabbedStuffNode contains one or more TabNodes"""
-
-    def __init__(self, content, **kwargs):
-        super(TabbedStuffNode, self).__init__(**kwargs)
-        self.tabbed_stuff_options = content
-        self.divid = content["divid"]
+    pass
 
 
-def visit_tabbedstuff_node(self, node):
-    divid = node.divid
-    if "inactive" in node.tabbed_stuff_options:
-        node.tabbed_stuff_options["inactive"] = "data-inactive"
+def visit_tabbedstuff_html(self, node):
+    divid = node["divid"]
+    if "inactive" in node["tabbed_stuff_options"]:
+        node["tabbed_stuff_options"]["inactive"] = "data-inactive"
     else:
-        node.tabbed_stuff_options["inactive"] = ""
+        node["tabbed_stuff_options"]["inactive"] = ""
 
     res = BEGIN % {
         "divid": divid,
-        "divclass": node.tabbed_stuff_options["divclass"],
-        "inactive": node.tabbed_stuff_options["inactive"],
+        "divclass": node["tabbed_stuff_options"]["divclass"],
+        "inactive": node["tabbed_stuff_options"]["inactive"],
     }
 
     self.body.append(res)
 
 
-def depart_tabbedstuff_node(self, node):
-    divid = node.divid
+def depart_tabbedstuff_html(self, node):
+    divid = node["divid"]
     res = ""
     # close the tab plugin div and init the Bootstrap tabs
     res += END
@@ -151,7 +144,9 @@ config values (conf.py):
 
         # Create the node, to be populated by "nested_parse".
         self.options["tabname"] = self.arguments[0]
-        tab_node = TabNode(self.options, rawsource=self.block_text)
+        tab_node = TabNode()
+        tab_node["tabnode_options"] = self.options
+        tab_node["tabname"] = self.options["tabname"]
 
         # Parse the child nodes (content of the tab)
         self.state.nested_parse(self.content, self.content_offset, tab_node)
@@ -200,8 +195,11 @@ config values (conf.py):
         self.options["divclass"] = env.config.tabbed_div_class
 
         # Create the node, to be populated by "nested_parse".
-        tabbedstuff_node = TabbedStuffNode(self.options, rawsource=self.block_text)
-        tabbedstuff_node.source, tabbedstuff_node.line = self.state_machine.get_source_and_line(
+        tabbedstuff_node = TabbedStuffNode()
+        tabbedstuff_node["tabbed_stuff_options"] = self.options
+        tabbedstuff_node["divid"] = self.options["divid"]
+
+        tabbedstuff_node["source"], tabbedstuff_node["line"] = self.state_machine.get_source_and_line(
             self.lineno
         )
 

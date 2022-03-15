@@ -31,7 +31,7 @@ class BlePairNode(nodes.General, nodes.Element):
     pass
 
 
-def visit_ble_pair_node(self, node):
+def visit_ble_pair_html(self, node):
     self.body.append(
         '<div data-component="ble">\n'
         '   <script>runestone_import("ble");</script>\n'
@@ -41,7 +41,7 @@ def visit_ble_pair_node(self, node):
     )
 
 
-def depart_ble_pair_node(self, node):
+def depart_ble_pair_html(self, node):
     pass
 
 
@@ -57,5 +57,5 @@ class BlePairDirective(Directive):
 
 def setup(app):
     # Add the Pair button directive.
-    app.add_node(BlePairNode, html=(visit_ble_pair_node, depart_ble_pair_node))
+    app.add_node(BlePairNode, html=(visit_ble_pair_html, depart_ble_pair_html))
     app.add_directive('ble-pair-button', BlePairDirective)

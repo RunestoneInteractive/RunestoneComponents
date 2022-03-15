@@ -53,7 +53,7 @@ def setup(app):
     app.add_config_value("activecode_hide_load_history", False, "html")
     app.add_config_value("wasm_uri", "/_static", "html")
 
-    app.add_node(ActivecodeNode, html=(visit_ac_node, depart_ac_node),
+    app.add_node(ActivecodeNode, html=(visit_ac_html, depart_ac_html),
                  xml=(visit_ac_xml, depart_ac_xml))
 
     app.connect("doctree-resolved", process_activcode_nodes)
@@ -97,12 +97,8 @@ def depart_ac_xml(self, node):
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
-def visit_ac_node(self, node):
+def visit_ac_html(self, node):
     # print self.settings.env.activecodecounter
-
-    # todo:  handle above in node["runestone_options"]
-    # todo handle  'hidecode' not in node["runestone_options"]:
-    # todo:  handle if 'gradebutton' in node["runestone_options"]: res += GRADES
 
     node["delimiter"] = "_start__{}_".format(node["runestone_options"]["divid"])
 
@@ -112,9 +108,9 @@ def visit_ac_node(self, node):
     self.body.append(res)
 
 
-def depart_ac_node(self, node):
+def depart_ac_html(self, node):
     """This is called at the start of processing an activecode node.  If activecode had recursive nodes
-    etc and did not want to do all of the processing in visit_ac_node any finishing touches could be
+    etc and did not want to do all of the processing in visit_ac_html any finishing touches could be
     added here.
     """
     res = TEMPLATE_END % node["runestone_options"]
@@ -451,7 +447,7 @@ class ActiveCode(RunestoneIdDirective):
                     "This should only affect the grading interface. Everything else should be fine."
                 )
 
-        acnode = ActivecodeNode(self.options, rawsource=self.block_text)
+        acnode = ActivecodeNode()
         acnode["runestone_options"] = self.options
         acnode["source"], acnode["line"] = self.state_machine.get_source_and_line(
             self.lineno)

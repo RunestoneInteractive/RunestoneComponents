@@ -45,10 +45,10 @@ def setup(app):
 
     app.add_autoversioned_javascript("matrixeq.js", defer="")
 
-    app.add_node(MatrixEqNode, html=(visit_matrixeq_node, depart_matrixeq_node))
+    app.add_node(MatrixEqNode, html=(visit_matrixeq_html, depart_matrixeq_html))
     app.add_node(
         InlineMatrixEqNode,
-        html=(visit_inline_matrixeq_node, depart_inline_matrixeq_node),
+        html=(visit_inline_matrixeq_html, depart_inline_matrixeq_html),
     )
 
     app.connect("doctree-resolved", process_matrixeq_nodes)
@@ -144,21 +144,14 @@ class MatrixEq(RunestoneDirective):
             self.options["highlightcolor"] = self.options["highlightcolor"].strip()
         else:
             self.options["highlightcolor"] = "red"  # default highlight color
-
-        return [MatrixEqNode(self.options)]
+        meqn = MatrixEqNode()
+        meqn["components"] = self.options
+        return [meqn]
 
 
 # ==========================================================================
 class MatrixEqNode(nodes.General, nodes.Element, RunestoneNode):
-    def __init__(self, content, **kwargs):
-        """
-
-        Arguments:
-        - `self`:
-        - `content`:
-        """
-        super(MatrixEqNode, self).__init__(name=content["name"], **kwargs)
-        self.components = content
+    pass
 
 
 def matrixToHTML(text, nodeID, node):
@@ -293,7 +286,7 @@ def matrixToHTML(text, nodeID, node):
             elif valuesFormat[r][c] == 1:
                 res += (
                     '<span style="color:'
-                    + node.components["highlightcolor"]
+                    + node["components"]["highlightcolor"]
                     + ';">'
                     + valueStr
                     + "<br /></span>"
@@ -305,7 +298,7 @@ def matrixToHTML(text, nodeID, node):
                     '<span><input type="text" value="'
                     + valueStr
                     + '" style="color:'
-                    + node.components["highlightcolor"]
+                    + node["components"]["highlightcolor"]
                     + '";></span>'
                 )
 
@@ -346,14 +339,14 @@ def divide_matrixeq_into_its_parts(text):
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
-def visit_matrixeq_node(self, node):
-    # print("In visit_matrixeq_node, node.components = ", node.components)
+def visit_matrixeq_html(self, node):
+    # print("In visit_matrixeq_html, node["components"] = ", node["components"])
 
     # Parse the matrix equation into its parts
-    parts = divide_matrixeq_into_its_parts(node.components["contents"].strip())
+    parts = divide_matrixeq_into_its_parts(node["components"]["contents"].strip())
 
-    id = "M" + str(node.components["equationcounter"])
-    node.components["equationcounter"] += 1
+    id = "M" + str(node["components"]["equationcounter"])
+    node["components"]["equationcounter"] += 1
 
     # start of HTML
     res = "<!-- matrixeq start -->\n"
@@ -361,7 +354,7 @@ def visit_matrixeq_node(self, node):
         "<div id='"
         + id
         + "' class='matrixeq_container'"
-        + node.components["colorscheme"]
+        + node["components"]["colorscheme"]
         + ">\n"
     )
 
@@ -370,7 +363,7 @@ def visit_matrixeq_node(self, node):
             (text, nRows) = matrixToHTML(parts[j][1:-1], id + "_" + str(j), node)
             res += text
         else:
-            if node.components["executable"]:
+            if node["components"]["executable"]:
                 event = ' onclick="Matrixeq_directive(this);"'
             else:
                 event = ""
@@ -378,11 +371,11 @@ def visit_matrixeq_node(self, node):
 
     # Add a comment to the end of the equation
     comment = ""
-    if len(node.components["comment"]) > 0:
-        comment = " - " + node.components["comment"]
+    if len(node["components"]["comment"]) > 0:
+        comment = " - " + node["components"]["comment"]
 
-    label = node.components["equationnumber"]
-    if node.components["nolabel"]:
+    label = node["components"]["equationnumber"]
+    if node["components"]["nolabel"]:
         label = ""
 
     res += "<span class='matrix_label'> " + label + comment + "</span>"
@@ -395,10 +388,10 @@ def visit_matrixeq_node(self, node):
 
 
 # --------------------------------------------------------------------------
-def depart_matrixeq_node(self, node):
+def depart_matrixeq_html(self, node):
     """
     This is called at the start of processing an activecode node.  If activecode had recursive nodes
-    etc and did not want to do all of the processing in visit_matrixeq_node any finishing touches could be
+    etc and did not want to do all of the processing in visit_matrixeq_html any finishing touches could be
     added here.
     """
     pass
@@ -435,23 +428,7 @@ class InlineMatrixEqNode(nodes.General, nodes.Element, RunestoneNode):
     The background color is hardcoded to a light yellow.
     The highlight color is hardcoded to red.
     """
-
-    def __init__(self, content, **kwargs):
-        """
-
-        Arguments:
-        - `self`:
-        - `content`:
-        """
-
-        super(InlineMatrixEqNode, self).__init__(**kwargs)
-        matrix_text = re.search(":inline_matrixeq:`(.*)`", content).group(1)
-        self.components = {
-            "contents": matrix_text,
-            "colorscheme": ' style="background-color:inherit; color: inherit"',
-            "highlightcolor": "red",
-            "equationcounter": 0,
-        }
+    pass
 
 
 def inline_matrixeq(
@@ -462,27 +439,37 @@ def inline_matrixeq(
     # problem is encountered.
     text,  # The interpreted _`text` content.
     lineno,  # The line number (_`lineno`) where the interpreted text begins.
-    inliner,  # _`inliner` is the docutils.parsers.rst.states.Inliner object that called this function.
+    # _`inliner` is the docutils.parsers.rst.states.Inliner object that called this function.
+    inliner,
     # It contains the several attributes useful for error reporting and document tree access.
-    options={},  # A dictionary of directive _`options` for customization (from the "role" directive),
+    # A dictionary of directive _`options` for customization (from the "role" directive),
+    options={},
     # to be interpreted by this function. Used for additional attributes for the generated elements and other functionality.
     content=[],
 ):  # A list of strings, the directive _`content` for customization (from the "role"
     # directive). To be interpreted by the role function.
     """
     """
-    matrix_node = InlineMatrixEqNode(rawtext)
-    matrix_node.line = lineno
+    matrix_node = InlineMatrixEqNode()
+    matrix_text = re.search(":inline_matrixeq:`(.*)`", rawtext).group(1)
+    matrix_node["components"] = {
+        "contents": matrix_text,
+        "colorscheme": ' style="background-color:inherit; color: inherit"',
+        "highlightcolor": "red",
+        "equationcounter": 0,
+    }
+
+    matrix_node["line"] = lineno
     return [matrix_node], []
 
 
-def visit_inline_matrixeq_node(self, node):
+def visit_inline_matrixeq_html(self, node):
 
     # Parse the matrix equation into its parts
-    parts = divide_matrixeq_into_its_parts(node.components["contents"].strip())
+    parts = divide_matrixeq_into_its_parts(node["components"]["contents"].strip())
 
-    id = "M" + str(node.components["equationcounter"])
-    node.components["equationcounter"] += 1
+    id = "M" + str(node["components"]["equationcounter"])
+    node["components"]["equationcounter"] += 1
 
     # start of HTML
     res = "<!-- inline_matrixeq start -->\n"
@@ -490,7 +477,7 @@ def visit_inline_matrixeq_node(self, node):
         "<span id='"
         + id
         + "' class='matrixeq_container'"
-        + node.components["colorscheme"]
+        + node["components"]["colorscheme"]
         + ">\n"
     )
 
@@ -508,5 +495,5 @@ def visit_inline_matrixeq_node(self, node):
     self.body.append(res)
 
 
-def depart_inline_matrixeq_node(self, node):
+def depart_inline_matrixeq_html(self, node):
     pass

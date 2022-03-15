@@ -231,7 +231,6 @@ class MChoice(Assessment):
         mcNode["template_start"] = TEMPLATE_START
         mcNode["template_option"] = OPTION
         mcNode["template_end"] = TEMPLATE_END
-        pdb.set_trace()
         # For MChoice its better to insert the qnum into the content before further processing.
         self.updateContent()
 
@@ -374,21 +373,21 @@ def depart_answers_bullet_html(self, node):
 # Write out the special attributes needed by the ``<li>`` tag.
 def visit_answer_list_item(self, node):
     # See the structure_.
-    mcNode = node.parent.parent
+    mc_node = node.parent.parent
 
     # _`label`: Turn the index of this item in the answer_bullet_list (see structure_) into a letter.
     label = chr(node.parent.index(node) + ord("a"))
     # Update dict for formatting the HTML.
-    mcnode["runestone_options"]["alabel"] = label
-    if label in mcnode["runestone_options"]["correct"]:
-        mcnode["runestone_options"]["is_correct"] = "data-correct"
+    mc_node["runestone_options"]["alabel"] = label
+    if label in mc_node["runestone_options"]["correct"]:
+        mc_node["runestone_options"]["is_correct"] = "data-correct"
     else:
-        mcnode["runestone_options"]["is_correct"] = ""
+        mc_node["runestone_options"]["is_correct"] = ""
 
     # Format the HTML.
     self.body.append(
         '<li data-component="answer" %(is_correct)s id="%(divid)s_opt_%(alabel)s">'
-        % mcnode["runestone_options"]
+        % mc_node["runestone_options"]
     )
 
 
@@ -410,12 +409,12 @@ def depart_feedback_bullet_html(self, node):
 def visit_feedback_list_item(self, node):
     # See label_ and structure_.
     answer_list_item = node.parent.parent
-    mcNode = answer_list_item.parent.parent
+    mc_node = answer_list_item.parent.parent
     label = chr(answer_list_item.parent.index(answer_list_item) + ord("a"))
-    mcnode["runestone_options"]["alabel"] = label
+    mc_node["runestone_options"]["alabel"] = label
     self.body.append(
         '</li><li data-component="feedback" id="%(divid)s_opt_%(alabel)s">\n'
-        % mcnode["runestone_options"]
+        % mc_node["runestone_options"]
     )
 
 

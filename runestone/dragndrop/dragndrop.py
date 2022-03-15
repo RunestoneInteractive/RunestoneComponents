@@ -32,7 +32,7 @@ from runestone.common.runestonedirective import (
 def setup(app):
     app.add_directive("dragndrop", DragNDrop)
 
-    app.add_node(DragNDropNode, html=(visit_dnd_node, depart_dnd_node))
+    app.add_node(DragNDropNode, html=(visit_dnd_html, depart_dnd_html))
 
     app.add_config_value("dragndrop_div_class", "runestone", "html")
 
@@ -52,62 +52,78 @@ TEMPLATE_END = """</ul></div>"""
 
 
 class DragNDropNode(nodes.General, nodes.Element, RunestoneIdNode):
-    def __init__(self, content, **kwargs):
-        """
-        Arguments:
-        - `self`:
-        - `content`:
-        """
-        super(DragNDropNode, self).__init__(**kwargs)
-        self.runestone_options = content
-
+    pass
 
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
-def visit_dnd_node(self, node):
-    res = TEMPLATE_START
 
-    node.delimiter = "_start__{}_".format(node.runestone_options["divid"])
-    self.body.append(node.delimiter)
 
-    if "feedback" in node.runestone_options:
-        node.runestone_options["feedback"] = (
-            "<span data-subcomponent=feedback>"
-            + node.runestone_options["feedback"]
-            + "</span>"
-        )
-    else:
-        node.runestone_options["feedback"] = ""
+def visit_dnd_xml(self, node):
+    res = visit_dnd_common(self, node)
+    self.output.append(res)
 
-    res = res % node.runestone_options
+
+def depart_dnd_xml(self, node):
+    res = depart_dnd_common(self, node)
+    self.output.append(res)
+
+
+def visit_dnd_html(self, node):
+
+    node["delimiter"] = "_start__{}_".format(node["runestone_options"]["divid"])
+    self.body.append(node["delimiter"])
+
+    res = visit_dnd_common(self, node)
 
     self.body.append(res)
 
 
-def depart_dnd_node(self, node):
+def depart_dnd_html(self, node):
+    res = depart_dnd_common(self, node)
+    self.body.append(res)
+
+    addHTMLToDB(
+        node["runestone_options"]["divid"],
+        node["runestone_options"]["basecourse"],
+        "".join(self.body[self.body.index(node["delimiter"]) + 1 :]),
+    )
+
+    self.body.remove(node["delimiter"])
+
+
+def visit_dnd_common(self, node):
+    res = TEMPLATE_START
+
+    if "feedback" in node["runestone_options"]:
+        node["runestone_options"]["feedback"] = (
+            "<span data-subcomponent=feedback>"
+            + node["runestone_options"]["feedback"]
+            + "</span>"
+        )
+    else:
+        node["runestone_options"]["feedback"] = ""
+
+    res = res % node["runestone_options"]
+    return res
+
+
+def depart_dnd_common(self, node):
     res = ""
     # Add all of the possible answers
-    okeys = list(node.runestone_options.keys())
+    okeys = list(node["runestone_options"].keys())
     okeys.sort()
     for k in okeys:
         if "match" in k:
             x, label = k.split("_")
-            node.runestone_options["dnd_label"] = label
-            dragE, dropE = node.runestone_options[k].split("|||")
-            node.runestone_options["dragText"] = dragE
-            node.runestone_options["dropText"] = dropE
-            res += node.template_option % node.runestone_options
-    res += node.template_end % node.runestone_options
-    self.body.append(res)
+            node["runestone_options"]["dnd_label"] = label
+            dragE, dropE = node["runestone_options"][k].split("|||")
+            node["runestone_options"]["dragText"] = dragE
+            node["runestone_options"]["dropText"] = dropE
+            res += node["template_option"] % node["runestone_options"]
+    res += node["template_end"] % node["runestone_options"]
 
-    addHTMLToDB(
-        node.runestone_options["divid"],
-        node.runestone_options["basecourse"],
-        "".join(self.body[self.body.index(node.delimiter) + 1 :]),
-    )
-
-    self.body.remove(node.delimiter)
+    return res
 
 
 class DragNDrop(RunestoneIdDirective):
@@ -182,13 +198,14 @@ config values (conf.py):
         env = self.state.document.settings.env
         self.options["divclass"] = env.config.dragndrop_div_class
 
-        dndNode = DragNDropNode(self.options, rawsource=self.block_text)
-        dndNode.source, dndNode.line = self.state_machine.get_source_and_line(
+        dndNode = DragNDropNode()
+        dndNode["runestone_options"] = self.options
+        dndNode["source"], dndNode["line"] = self.state_machine.get_source_and_line(
             self.lineno
         )
-        dndNode.template_start = TEMPLATE_START
-        dndNode.template_option = TEMPLATE_OPTION
-        dndNode.template_end = TEMPLATE_END
+        dndNode["template_start"] = TEMPLATE_START
+        dndNode["template_option"] = TEMPLATE_OPTION
+        dndNode["template_end"] = TEMPLATE_END
 
         maybeAddToAssignment(self)
 

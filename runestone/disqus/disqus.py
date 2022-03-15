@@ -68,27 +68,25 @@ DISQUS_LINK = """
 def setup(app):
     app.add_directive("disqus", DisqusDirective)
 
-    app.add_node(DisqusNode, html=(visit_disqus_node, depart_disqus_node))
+    app.add_node(DisqusNode, html=(visit_disqus_html, depart_disqus_html))
     app.connect("doctree-resolved", process_disqus_nodes)
     app.connect("env-purge-doc", purge_disqus_nodes)
 
 
 class DisqusNode(nodes.General, nodes.Element, RunestoneNode):
-    def __init__(self, content, **kwargs):
-        super(DisqusNode, self).__init__(**kwargs)
-        self.disqus_components = content
+    pass
 
 
-def visit_disqus_node(self, node):
+def visit_disqus_html(self, node):
     res = DISQUS_BOX
     res += DISQUS_LINK
 
-    res = res % node.disqus_components
+    res = res % node["runestone_options"]
 
     self.body.append(res)
 
 
-def depart_disqus_node(self, node):
+def depart_disqus_html(self, node):
     pass
 
 
@@ -123,8 +121,9 @@ class DisqusDirective(RunestoneDirective):
         :return:
         """
 
-        disqus_node = DisqusNode(self.options, rawsource=self.block_text)
-        disqus_node.source, disqus_node.line = self.state_machine.get_source_and_line(
+        disqus_node = DisqusNode()
+        disqus_node["runestone_options"] = self.options
+        disqus_node["source"], disqus_node["line"] = self.state_machine.get_source_and_line(
             self.lineno
         )
         return [disqus_node]

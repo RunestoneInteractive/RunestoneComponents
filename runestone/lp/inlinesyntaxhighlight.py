@@ -37,17 +37,17 @@ def html_visit_literal(self, node):
     if (
         # This is a literal...
         (
-            node.rawsource.startswith("``")
-            and
+            node["rawsource"].startswith("``")
+
             # ...that's not inside a ``:file:``
-            "role" not in node.attributes
-            and
+            and "role" not in node["attributes"]
+
             # ...and we should highlight literals, OR
-            env.config.inline_highlight_literals
+            and env.config.inline_highlight_literals
         )
-        or
+
         # this is a code block, highlight.
-        ("code" in node["classes"])
+        or ("code" in node["classes"])
     ):
 
         if env.config.inline_highlight_respect_highlight:
@@ -55,18 +55,18 @@ def html_visit_literal(self, node):
         else:
             lang = None
 
-        highlight_args = node.get("highlight_args", {})
+        highlight_args = node["get"]("highlight_args", {})
 
-        if node.has_key("language"):
+        if node["has_key"]("language"):
             # code-block directives
             lang = node["language"]
             highlight_args["force"] = True
 
         def warner(msg, **kwargs):
-            self.builder.warn(self.builder.current_docname, msg, node.line, **kwargs)
+            self.builder.warn(self.builder.current_docname, msg, node["line"], **kwargs)
 
         highlighted = self.highlighter.highlight_block(
-            node.astext(), lang, warn=warner, **highlight_args
+            node["astext"](), lang, warn=warner, **highlight_args
         )
 
         # highlighted comes as <div class="highlighted"><pre>...</pre></div>

@@ -24,7 +24,7 @@ from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 
 def setup(app):
     app.add_directive("poll", Poll)
-    app.add_node(PollNode, html=(visit_poll_node, depart_poll_node))
+    app.add_node(PollNode, html=(visit_poll_html, depart_poll_html))
 
     app.add_config_value("poll_div_class", "alert alert-warning", "html")
 
@@ -43,52 +43,50 @@ TEMPLATE_END = """</ul></div>"""
 
 
 class PollNode(nodes.General, nodes.Element, RunestoneIdNode):
-    def __init__(self, content, **kwargs):
-        """
-        Arguments:
-        - `self`:
-        - `content`:
-        """
-        super(PollNode, self).__init__(**kwargs)
-        self.runestone_options = content
+    pass
 
 
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
-def visit_poll_node(self, node):
-    res = TEMPLATE_START
-    res = res % node.runestone_options
-
-    if node.runestone_options["scale"] == "":
-        okeys = list(node.runestone_options.keys())
-        okeys.sort()
-        i = 1
-        for k in okeys:
-            if "option_" in k:
-                node.runestone_options["optiontext"] = (
-                    f"{i}. " + node.runestone_options[k]
-                )
-                i += 1
-                res += TEMPLATE_OPTION % node.runestone_options
-    else:
-        for i in range(node.runestone_options["scale"]):
-            node.runestone_options["optiontext"] = i + 1
-            res += TEMPLATE_OPTION % node.runestone_options
-    res += TEMPLATE_END
-
+def visit_poll_html(self, node):
+    res = visit_poll_common(self, node)
     addHTMLToDB(
-        node.runestone_options["divid"], node.runestone_options["basecourse"], res
+        node["runestone_options"]["divid"], node["runestone_options"]["basecourse"], res
     )
     self.body.append(res)
 
 
-def depart_poll_node(self, node):
+def depart_poll_html(self, node):
     """ This is called at the start of processing a poll node.  If poll had recursive nodes
-        etc and did not want to do all of the processing in visit_poll_node any finishing touches could be
+        etc and did not want to do all of the processing in visit_poll_html any finishing touches could be
         added here.
     """
     pass
+
+
+def visit_poll_common(self, node):
+    res = TEMPLATE_START
+    res = res % node["runestone_options"]
+
+    if node["runestone_options"]["scale"] == "":
+        okeys = list(node["runestone_options"].keys())
+        okeys.sort()
+        i = 1
+        for k in okeys:
+            if "option_" in k:
+                node["runestone_options"]["optiontext"] = (
+                    f"{i}. " + node["runestone_options"][k]
+                )
+                i += 1
+                res += TEMPLATE_OPTION % node["runestone_options"]
+    else:
+        for i in range(node["runestone_options"]["scale"]):
+            node["runestone_options"]["optiontext"] = i + 1
+            res += TEMPLATE_OPTION % node["runestone_options"]
+    res += TEMPLATE_END
+
+    return res
 
 
 class Poll(RunestoneIdDirective):
@@ -164,8 +162,9 @@ config values (conf.py):
         env = self.state.document.settings.env
         self.options["divclass"] = env.config.poll_div_class
 
-        poll_node = PollNode(self.options, rawsource=self.block_text)
-        poll_node.source, poll_node.line = self.state_machine.get_source_and_line(
+        poll_node = PollNode()
+        poll_node["runestone_options"] = self.options
+        poll_node["source"], poll_node["line"] = self.state_machine.get_source_and_line(
             self.lineno
         )
         return [poll_node]

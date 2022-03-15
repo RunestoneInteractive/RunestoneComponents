@@ -44,49 +44,39 @@ from runestone.common import (
 def setup(app):
     app.add_directive("fillintheblank", FillInTheBlank)
     app.add_role("blank", BlankRole)
-    app.add_node(FITBNode, html=(visit_fitb_node, depart_fitb_node))
-    app.add_node(BlankNode, html=(visit_blank_node, depart_blank_node))
+    app.add_node(FITBNode, html=(visit_fitb_html, depart_fitb_html))
+    app.add_node(BlankNode, html=(visit_blank_html, depart_blank_html))
     app.add_node(
-        FITBFeedbackNode, html=(visit_fitb_feedback_node, depart_fitb_feedback_node)
+        FITBFeedbackNode, html=(visit_fitb_feedback_html, depart_fitb_feedback_html)
     )
 
     app.add_config_value("fitb_div_class", "runestone", "html")
 
 
 class FITBNode(nodes.General, nodes.Element, RunestoneIdNode):
-    def __init__(self, content, **kwargs):
-        """
-
-        Arguments:
-        - `self`:
-        - `content`:
-        """
-        super(FITBNode, self).__init__(**kwargs)
-        self.runestone_options = content
-        # Create a data structure of feedback.
-        self.feedbackArray = []
+    pass
 
 
-def visit_fitb_node(self, node):
+def visit_fitb_html(self, node):
 
-    node.delimiter = "_start__{}_".format(node.runestone_options["divid"])
-    self.body.append(node.delimiter)
+    node["delimiter"] = "_start__{}_".format(node["runestone_options"]["divid"])
+    self.body.append(node["delimiter"])
 
-    res = node.template_start % node.runestone_options
+    res = node["template_start"] % node["runestone_options"]
     self.body.append(res)
 
 
-def depart_fitb_node(self, node):
+def depart_fitb_html(self, node):
     # If there were fewer blanks than feedback items, add blanks at the end of the question.
     blankCount = 0
     for _ in node.traverse(BlankNode):
         blankCount += 1
-    while blankCount < len(node.feedbackArray):
-        visit_blank_node(self, None)
+    while blankCount < len(node["feedbackArray"]):
+        visit_blank_html(self, None)
         blankCount += 1
 
     # Warn if there are fewer feedback items than blanks.
-    if len(node.feedbackArray) < blankCount:
+    if len(node["feedbackArray"]) < blankCount:
         # Taken from the example in the `logging API <http://www.sphinx-doc.org/en/stable/extdev/logging.html#logging-api>`_.
         logger = logging.getLogger(__name__)
         logger.warning(
@@ -94,29 +84,29 @@ def depart_fitb_node(self, node):
         )
 
     # Generate the HTML.
-    json_feedback = json.dumps(node.feedbackArray)
+    json_feedback = json.dumps(node["feedbackArray"])
     # Some nodes (for example, those in a timed node) have their ``document == None``. Find a valid ``document``.
     node_with_document = node
     while not node_with_document.document:
         node_with_document = node_with_document.parent
     # Supply client-side grading info if we're not grading on the server.
-    node.runestone_options["json"] = (
+    node["runestone_options"]["json"] = (
         "false"
         if node_with_document.document.settings.env.config.runestone_server_side_grading
         else json_feedback
     )
-    res = node.template_end % node.runestone_options
+    res = node["template_end"] % node["runestone_options"]
     self.body.append(res)
 
     # add HTML to the Database and clean up
     addHTMLToDB(
-        node.runestone_options["divid"],
-        node.runestone_options["basecourse"],
-        "".join(self.body[self.body.index(node.delimiter) + 1 :]),
+        node["runestone_options"]["divid"],
+        node["runestone_options"]["basecourse"],
+        "".join(self.body[self.body.index(node["delimiter"]) + 1 :]),
         json_feedback,
     )
 
-    self.body.remove(node.delimiter)
+    self.body.remove(node["delimiter"])
 
 
 class FillInTheBlank(RunestoneIdDirective):
@@ -171,12 +161,14 @@ class FillInTheBlank(RunestoneIdDirective):
 
         addQuestionToDB(self)
 
-        fitbNode = FITBNode(self.options, rawsource=self.block_text)
-        fitbNode.source, fitbNode.line = self.state_machine.get_source_and_line(
+        fitbNode = FITBNode()
+        fitbNode["runestone_options"] = self.options
+        fitbNode["feedbackArray"] = []
+        fitbNode["source"], fitbNode["line"] = self.state_machine.get_source_and_line(
             self.lineno
         )
-        fitbNode.template_start = TEMPLATE_START
-        fitbNode.template_end = TEMPLATE_END
+        fitbNode["template_start"] = TEMPLATE_START
+        fitbNode["template_end"] = TEMPLATE_END
 
         self.updateContent()
 
@@ -285,9 +277,9 @@ class FillInTheBlank(RunestoneIdDirective):
                     regex = (
                         # The given regex must match the entire string, from the beginning (which may be preceded by whitespaces) ...
                         r"^\s*"
-                        +
+
                         # ... to the contents (where a single space in the provided pattern is treated as one or more whitespaces in the student's answer) ...
-                        feedback_field_name.rawsource.replace(" ", r"\s+")
+                        + feedback_field_name.rawsource.replace(" ", r"\s+")
                         # ... to the end (also with optional spaces).
                         + r"\s*$"
                     )
@@ -314,11 +306,11 @@ class FillInTheBlank(RunestoneIdDirective):
                     *feedback_field_body.children,
                     **feedback_field_body.attributes
                 )
-                ffn.blankFeedbackDict = blankFeedbackDict
+                ffn["blankFeedbackDict"] = blankFeedbackDict
                 fitbNode += ffn
 
             # Add all the feedback for this blank to the feedbackArray.
-            fitbNode.feedbackArray.append(blankArray)
+            fitbNode["feedbackArray"].append(blankArray)
 
         maybeAddToAssignment(self)
 
@@ -358,11 +350,11 @@ class BlankNode(nodes.Inline, nodes.TextElement, RunestoneNode):
     pass
 
 
-def visit_blank_node(self, node):
+def visit_blank_html(self, node):
     self.body.append('<input type="text">')
 
 
-def depart_blank_node(self, node):
+def depart_blank_html(self, node):
     pass
 
 
@@ -371,14 +363,14 @@ class FITBFeedbackNode(nodes.General, nodes.Element, RunestoneNode):
     pass
 
 
-def visit_fitb_feedback_node(self, node):
+def visit_fitb_feedback_html(self, node):
     # Save the HTML generated thus far. Anything generated under this node will be placed in JSON.
     self.context.append(self.body)
     self.body = []
 
 
-def depart_fitb_feedback_node(self, node):
+def depart_fitb_feedback_html(self, node):
     # Place all the HTML generated for this node and its children into the feedbackArray.
-    node.blankFeedbackDict["feedback"] = "".join(self.body)
+    node["blankFeedbackDict"]["feedback"] = "".join(self.body)
     # Restore HTML generated thus far.
     self.body = self.context.pop()

@@ -24,47 +24,45 @@ from runestone.common.runestonedirective import RunestoneDirective, RunestoneNod
 def setup(app):
     app.add_directive("reveal", RevealDirective)
 
-    app.add_node(RevealNode, html=(visit_reveal_node, depart_reveal_node))
+    app.add_node(RevealNode, html=(visit_reveal_html, depart_reveal_html))
 
 
 class RevealNode(nodes.General, nodes.Element, RunestoneNode):
-    def __init__(self, content, **kwargs):
-        super(RevealNode, self).__init__(**kwargs)
-        self.runestone_options = content
+    pass
 
 
-def visit_reveal_node(self, node):
+def visit_reveal_html(self, node):
     # Set options and format templates accordingly
 
-    if "modal" in node.runestone_options:
-        node.runestone_options["modal"] = "data-modal"
+    if "modal" in node["runestone_options"]:
+        node["runestone_options"]["modal"] = "data-modal"
     else:
-        node.runestone_options["modal"] = ""
+        node["runestone_options"]["modal"] = ""
 
-    if "modaltitle" in node.runestone_options:
-        temp = node.runestone_options["modaltitle"]
-        node.runestone_options["modaltitle"] = """data-title=""" + '"' + temp + '"'
+    if "modaltitle" in node["runestone_options"]:
+        temp = node["runestone_options"]["modaltitle"]
+        node["runestone_options"]["modaltitle"] = """data-title=""" + '"' + temp + '"'
     else:
-        node.runestone_options["modaltitle"] = ""
+        node["runestone_options"]["modaltitle"] = ""
 
     if (
-        node.runestone_options["instructoronly"]
-        and node.runestone_options["is_dynamic"]
+        node["runestone_options"]["instructoronly"]
+        and node["runestone_options"]["is_dynamic"]
     ):
         res = DYNAMIC_PREFIX
     else:
         res = ""
 
-    res += TEMPLATE_START % node.runestone_options
+    res += TEMPLATE_START % node["runestone_options"]
     self.body.append(res)
 
 
-def depart_reveal_node(self, node):
+def depart_reveal_html(self, node):
     # Set options and format templates accordingly
-    res = TEMPLATE_END % node.runestone_options
+    res = TEMPLATE_END % node["runestone_options"]
     if (
-        node.runestone_options["instructoronly"]
-        and node.runestone_options["is_dynamic"]
+        node["runestone_options"]["instructoronly"]
+        and node["runestone_options"]["is_dynamic"]
     ):
         res += DYNAMIC_SUFFIX
 
@@ -158,8 +156,9 @@ class RevealDirective(RunestoneDirective):
         is_dynamic = env.config.html_context.get("dynamic_pages", False)
         self.options["is_dynamic"] = is_dynamic
 
-        reveal_node = RevealNode(self.options, rawsource=self.block_text)
-        reveal_node.source, reveal_node.line = self.state_machine.get_source_and_line(
+        reveal_node = RevealNode()
+        reveal_node["runestone_options"] = self.options
+        reveal_node["source"], reveal_node["line"] = self.state_machine.get_source_and_line(
             self.lineno
         )
 

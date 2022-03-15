@@ -32,7 +32,7 @@ from runestone.common.runestonedirective import (
 def setup(app):
     app.add_directive("datafile", DataFile)
 
-    app.add_node(DataFileNode, html=(visit_df_node, depart_df_node))
+    app.add_node(DataFileNode, html=(visit_df_html, depart_df_html))
 
     app.connect("doctree-resolved", process_datafile_nodes)
     app.connect("env-purge-doc", purge_datafiles)
@@ -53,25 +53,19 @@ IMG_TEMPLATE = """
 
 
 class DataFileNode(nodes.General, nodes.Element, RunestoneIdNode):
-    def __init__(self, content, **kwargs):
-        """
-        Arguments:
-        - `self`:
-        - `content`:
-        """
-        super(DataFileNode, self).__init__(**kwargs)
-        self.runestone_options = content
-
+    pass
 
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
-def visit_df_node(self, node):
-    if "image" in node.runestone_options:
+
+
+def visit_df_html(self, node):
+    if "image" in node["runestone_options"]:
         res = IMG_TEMPLATE
     else:
         res = TEMPLATE
-    res = res % node.runestone_options
+    res = res % node["runestone_options"]
 
     res = res.replace(
         "u'", "'"
@@ -79,9 +73,9 @@ def visit_df_node(self, node):
     self.body.append(res)
 
 
-def depart_df_node(self, node):
+def depart_df_html(self, node):
     """ This is called at the start of processing an datafile node.  If datafile had recursive nodes
-        etc and did not want to do all of the processing in visit_ac_node any finishing touches could be
+        etc and did not want to do all of the processing in visit_ac_html any finishing touches could be
         added here.
     """
     pass
@@ -210,9 +204,10 @@ class DataFile(RunestoneIdDirective):
                 "This should only affect the grading interface. Everything else should be fine."
             )
 
-        data_file_node = DataFileNode(self.options, rawsource=self.block_text)
+        data_file_node = DataFileNode()
+        data_file_node["runestone_options"] = self.options
         (
-            data_file_node.source,
-            data_file_node.line,
+            data_file_node["source"],
+            data_file_node["line"],
         ) = self.state_machine.get_source_and_line(self.lineno)
         return [data_file_node]

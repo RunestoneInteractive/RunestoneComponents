@@ -36,7 +36,7 @@ from datetime import datetime
 
 def setup(app):
     app.add_directive("assignment", Assignment)
-    app.add_node(AssignmentNode, html=(visit_a_node, depart_a_node))
+    app.add_node(AssignmentNode, html=(visit_a_html, depart_a_html))
 
     app.connect("doctree-resolved", process_nodes)
     app.connect("env-purge-doc", purge)
@@ -54,13 +54,13 @@ class AssignmentNode(nodes.General, nodes.Element, RunestoneNode):
         self.a_components = content
 
 
-def visit_a_node(self, node):
+def visit_a_html(self, node):
     pass
 
 
-def depart_a_node(self, node):
-    question_ids = node.a_components["question_ids"]
-    basecourse = node.a_components["basecourse"]
+def depart_a_html(self, node):
+    question_ids = node["a_components"]["question_ids"]
+    basecourse = node["a_components"]["basecourse"]
     for q_id in question_ids:
         src = get_HTML_from_DB(q_id, basecourse)
         if src:

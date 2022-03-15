@@ -27,25 +27,23 @@ def setup(app):
     app.add_config_value(
         "showeval_div_class", "runestone explainer alert alert-warning", "html"
     )
-    app.add_node(ShowEvalNode, html=(visit_showeval_node, depart_showeval_node))
+    app.add_node(ShowEvalNode, html=(visit_showeval_html, depart_showeval_html))
 
 
 # Create visitors, so we can generate HTML after the doctree is resolve (where the question label is determined).
 class ShowEvalNode(nodes.General, nodes.Element, RunestoneIdNode):
-    def __init__(self, content, **kwargs):
-        super().__init__(**kwargs)
-        self.runestone_options = content
+    pass
 
 
-def visit_showeval_node(self, node):
-    html = CODE % node.runestone_options
+def visit_showeval_html(self, node):
+    html = CODE % node["runestone_options"]
     self.body.append(html)
     addHTMLToDB(
-        node.runestone_options["divid"], node.runestone_options["basecourse"], html
+        node["runestone_options"]["divid"], node["runestone_options"]["basecourse"], html
     )
 
 
-def depart_showeval_node(self, node):
+def depart_showeval_html(self, node):
     pass
 
 
@@ -144,5 +142,6 @@ config values (conf.py):
                 step = True
             else:
                 self.options["preReqLines"] += line + "<br />\n"
-
-        return [ShowEvalNode(self.options, rawsource=self.block_text)]
+        se_node = ShowEvalNode()
+        se_node["runestone_options"] = self.options
+        return [se_node]

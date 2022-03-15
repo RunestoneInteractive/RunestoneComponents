@@ -11,11 +11,13 @@ def test_1(selenium_module_fixture):
         (
             38,
             'Content block expected for the "fillintheblank" directive; none found.',
+            "ERROR"
         ),
-        (50, "Not enough feedback for the number of blanks supplied."),
+        (37, "Not enough feedback for the number of blanks supplied.", "WARNING"),
     )
-    for error_line, error_string in directive_level_errors:
-        assert ":{}: WARNING: {}".format(error_line, error_string) in mf.build_stderr_data
+    for error_line, error_string, mtype in directive_level_errors:
+        assert ":{}: {}: {}".format(
+            error_line, mtype, error_string) in mf.build_stderr_data
 
     # Check for the following error inside the directive.
     inside_directive_errors = (
@@ -31,12 +33,13 @@ def test_1(selenium_module_fixture):
         ),
     )
     for error_line, error_string in inside_directive_errors:
-        assert ": WARNING: On line {}, {}".format(error_line, error_string) in mf.build_stderr_data
+        assert ": ERROR: On line {}, {}".format(
+            error_line, error_string) in mf.build_stderr_data
 
     assert "WARNING: while setting up extension runestone.lp: role 'docname' is already registered, it will be overridden" in mf.build_stderr_data
 
     # Make sure we saw all errors.
-    assert len(directive_level_errors) + len(inside_directive_errors) + 1 == mf.build_stderr_data.count("WARNING")
+    assert len(inside_directive_errors) + 1 == mf.build_stderr_data.count("ERROR")
 
 
 # Check that numbering works correctly.
@@ -85,7 +88,8 @@ def test_fitb1(selenium_utils_get):
     find_blank(fitb, 1)
     click_checkme(fitb)
     # Get desired response from .i18n file loaded based on language attribute in the HTML tag initially set in conf.py
-    msg_no_answer = selenium_utils_get.driver.execute_script("return $.i18n('msg_no_answer')")
+    msg_no_answer = selenium_utils_get.driver.execute_script(
+        "return $.i18n('msg_no_answer')")
     check_feedback(selenium_utils_get, fitb, msg_no_answer)
 
 
@@ -97,7 +101,8 @@ def test_fitb2(selenium_utils_get):
     click_checkme(fitb)
     check_feedback(selenium_utils_get, fitb, "Correct")
     # Get desired response from .i18n file loaded based on language attribute in the HTML tag initially set in conf.py
-    msg_no_answer = selenium_utils_get.driver.execute_script("return $.i18n('msg_no_answer')")
+    msg_no_answer = selenium_utils_get.driver.execute_script(
+        "return $.i18n('msg_no_answer')")
     check_feedback(selenium_utils_get, fitb, msg_no_answer)
 
 

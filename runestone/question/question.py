@@ -24,36 +24,34 @@ __author__ = "bmiller"
 def setup(app):
     app.add_directive("question", QuestionDirective)
 
-    app.add_node(QuestionNode, html=(visit_question_node, depart_question_node))
+    app.add_node(QuestionNode, html=(visit_question_html, depart_question_html))
 
 
 class QuestionNode(nodes.General, nodes.Element, RunestoneIdNode):
-    def __init__(self, content, **kwargs):
-        super(QuestionNode, self).__init__(**kwargs)
-        self.runestone_options = content
+    pass
 
 
-def visit_question_node(self, node):
+def visit_question_html(self, node):
     # Set options and format templates accordingly
     env = node.document.settings.env
     if not hasattr(env, "questioncounter"):
         env.questioncounter = 0
 
-    if "number" in node.runestone_options:
-        env.questioncounter = int(node.runestone_options["number"])
+    if "number" in node["runestone_options"]:
+        env.questioncounter = int(node["runestone_options"]["number"])
     else:
         env.questioncounter += 1
 
-    node.runestone_options["number"] = "start={}".format(env.questioncounter)
+    node["runestone_options"]["number"] = "start={}".format(env.questioncounter)
 
-    res = TEMPLATE_START % node.runestone_options
+    res = TEMPLATE_START % node["runestone_options"]
     self.body.append(res)
 
 
-def depart_question_node(self, node):
+def depart_question_html(self, node):
     # Set options and format templates accordingly
-    res = TEMPLATE_END % node.runestone_options
-    delimiter = "_start__{}_".format(node.runestone_options["divid"])
+    res = TEMPLATE_END % node["runestone_options"]
+    delimiter = "_start__{}_".format(node["runestone_options"]["divid"])
 
     self.body.append(res)
 
@@ -92,8 +90,9 @@ class QuestionDirective(RunestoneIdDirective):
 
         self.options["name"] = self.arguments[0].strip()
 
-        question_node = QuestionNode(self.options, rawsource=self.block_text)
-        question_node.source, question_node.line = self.state_machine.get_source_and_line(
+        question_node = QuestionNode()
+        question_node["runestone_options"] = self.options
+        question_node["source"], question_node["line"] = self.state_machine.get_source_and_line(
             self.lineno
         )
         self.add_name(question_node)

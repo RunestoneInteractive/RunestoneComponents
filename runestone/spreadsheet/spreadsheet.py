@@ -34,10 +34,12 @@ from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 # setup is called when extensions are loaded. This registers the new directive and
 # logs any js or css files that should be loaded for this extension.
 #
+
+
 def setup(app):
     app.add_directive("spreadsheet", SpreadSheet)
 
-    app.add_node(SpreadSheetNode, html=(visit_ss_node, depart_ss_node))
+    app.add_node(SpreadSheetNode, html=(visit_ss_html, depart_ss_html))
 
 
 # When the directive is process we will create nodes in the document tree to account
@@ -45,16 +47,7 @@ def setup(app):
 # textbooks as HTML one could, render the nodes as LaTex or many other languages.
 #
 class SpreadSheetNode(nodes.General, nodes.Element, RunestoneIdNode):
-    def __init__(self, content, **kwargs):
-        """
-
-        Arguments:
-        - `self`:
-        - `content`:
-        """
-        super(SpreadSheetNode, self).__init__(**kwargs)
-        self.runestone_options = content
-
+    pass
 
 #
 # The spreadsheet class implements the directive.
@@ -62,6 +55,8 @@ class SpreadSheetNode(nodes.General, nodes.Element, RunestoneIdNode):
 # This allows us to handle any arguments, and then create a node or nodes to insert into the
 # document tree to be rendered when the tree is written.
 #
+
+
 class SpreadSheet(RunestoneIdDirective):
     """
     .. spreadsheet:: uniqueid
@@ -140,8 +135,10 @@ class SpreadSheet(RunestoneIdDirective):
                 ",".join([x.strip() for x in self.options["colwidths"].split(",")])
             )
 
-        ssnode = SpreadSheetNode(self.options, rawsource=self.block_text)
-        ssnode.source, ssnode.line = self.state_machine.get_source_and_line(self.lineno)
+        ssnode = SpreadSheetNode()
+        ssnode["runestone_options"] = self.options
+        ssnode["source"], ssnode["line"] = self.state_machine.get_source_and_line(
+            self.lineno)
         self.add_name(ssnode)  # make this divid available as a target for :ref:
 
         return [ssnode]
@@ -222,10 +219,10 @@ TEMPLATE = """
 """
 
 
-def visit_ss_node(self, node):
-    res = TEMPLATE.format(**node.runestone_options)
+def visit_ss_html(self, node):
+    res = TEMPLATE.format(**node["runestone_options"])
     self.body.append(res)
 
 
-def depart_ss_node(self, node):
+def depart_ss_html(self, node):
     pass
