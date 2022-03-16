@@ -224,7 +224,7 @@ class IframeVideo(RunestoneIdDirective):
         if not self.options.get("height"):
             self.options["height"] = self.default_height
         if not self.options.get("align"):
-            self.options["align"] = "left"
+            self.options["align"] = "center"
         if not self.options.get("http"):
             self.options["http"] = "https"
         if not self.options.get("divid"):

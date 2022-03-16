@@ -58,23 +58,23 @@ td.linenos pre {
 
 /* custom modification of pygments.css for color-contrast (AA compliant) */
 .highlight .c1 {
-    color: #376A7B;
+    color: #376a7b;
 }
 
 .highlight .nn {
-    color: #0F6C95;
+    color: #0f6c95;
 }
 
 .highlight .gp {
-    color: #A14C08;
+    color: #a14c08;
 }
 
 .highlight .si {
-    color: #3C773D;
+    color: #3c773d;
 }
 
 .highlight .nc {
-    color: #0B719D;
+    color: #0b719d;
 }
 
 /* `Search` functionality's result custom modification for color-contrast (AA compliant) */
@@ -129,7 +129,7 @@ h5 {
     text-decoration: underline;
 }
 
-#table-of-contents.section {
+#table-of-contentssection {
     font-size: 16px;
 }
 
@@ -138,15 +138,15 @@ h5 {
     background-color: var(--navbar);
 }
 
-.navbar-default .navbar-nav>li {
+.navbar-default .navbar-nav > li {
     color: var(--navbarFont);
 }
 
-.navbar-default .navbar-nav>li>a {
+.navbar-default .navbar-nav > li > a {
     color: var(--navbarFont);
 }
 
-.navbar-default .navbar-nav>li>a:hover {
+.navbar-default .navbar-nav > li > a:hover {
     color: var(--navbarFontHover);
 }
 
@@ -169,15 +169,15 @@ h5 {
 }
 
 /* index and search related styles for color-contrast (AA compliant) */
-#index-and-search.section {
+#index-and-searchsection {
     font-size: 16px;
 }
 
-#index-and-search.section a {
+#index-and-searchsection a {
     color: var(--links);
 }
 
-#index-and-search.section a:hover {
+#index-and-searchsection a:hover {
     color: var(--links);
     text-decoration: underline;
 }
@@ -190,7 +190,6 @@ a {
 
 /* navbar and menu related styles */
 @media (max-width: 768px) {
-
     /* Remove top padding when top navbar goes collapsed in narrow viewports */
     body {
         padding-top: 0;
@@ -199,7 +198,6 @@ a {
     .navbar-fixed-top {
         position: static;
     }
-
 }
 
 @media (min-width: 768px) {
@@ -218,7 +216,7 @@ div.container {
     background-color: var(--background);
 }
 
-div.section {
+divsection {
     margin-left: auto;
     margin-right: auto;
 }
@@ -228,44 +226,70 @@ div.section {
     padding-right: 10px;
 }
 
-.container .section>*:not(.section):not(.ac_section) {
-    max-width: 500pt;
+#main-content section > p,
+pre,
+table,
+ul,
+ol,
+dl,
+h1,
+h2,
+h3,
+h4,
+.admonition {
+    width: 500pt !important;
     margin-left: auto;
     margin-right: auto;
 }
 
+.runestone {
+    position: relative;
+    width: 700pt;
+    margin-left: auto;
+    margin-right: auto;
+    clear: both;
+}
+
+div.highlight pre {
+    width: 500pt;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
 /* This rule is meant to override the behavior of the
    previous rule since it is not possible to exclude
    more than one section in the not() part of the rule
 */
-.container .section div.full-width.container {
+.container section div.full-width {
     margin-left: auto;
     margin-right: auto;
-    max-width: 90%;
+    width: 90vw;
 }
 
-.container .section>img {
+.container section > img {
     display: block;
     margin-left: auto;
     margin-right: auto;
 }
 
-.container .section .parsons,
-.container .section .parsons .sortable-code-container,
-.container .section .cd_section {
+.container section .parsons,
+.container section .parsons .sortable-code-container,
+.container section .cd_section {
     max-width: none;
 }
 
-.container-fluid>.navbar-collapse, .container-fluid>.navbar-header, .container>.navbar-collapse, .container>.navbar-header {
+.container-fluid > .navbar-collapse,
+.container-fluid > .navbar-header,
+.container > .navbar-collapse,
+.container > .navbar-header {
     margin-left: 0;
     margin-right: 0;
 }
 
-.navbar>.container .navbar-brand {
+.navbar > .container .navbar-brand {
     margin-left: 0;
 }
 
-.navbar>.container {
+.navbar > .container {
     background-color: var(--navbar);
 }
 
@@ -273,11 +297,11 @@ div.section {
     margin-right: 0px;
 }
 
-.footer>.container {
+.footer > .container {
     background-color: var(--outerBackground);
 }
 
-.footer>.container p>a {
+.footer > .container p > a {
     color: var(--links);
 }
 
@@ -318,7 +342,7 @@ div.section {
     margin-bottom: -6px;
 }
 
-.dropdown-menu>li>span {
+.dropdown-menu > li > span {
     display: block;
     padding: 3px 20px;
     clear: both;
@@ -328,7 +352,7 @@ div.section {
     white-space: nowrap;
 }
 
-.dropdown-menu>li>a {
+.dropdown-menu > li > a {
     color: var(--grayToWhite);
 }
 
@@ -558,7 +582,7 @@ dt.label > span.fn-backref:not(span.fn-backref > a) {
 
 /* .alert-danger */
 .admonition.caution {
-    color: #A33F3E;
+    color: #a33f3e;
     background-color: #f2dede;
     border-color: #eed3d7;
 }
@@ -624,7 +648,7 @@ div.flash {
 #sign_in_text td {
     font-size: 17px;
     color: #333;
-    font-family: 'lucida grande', Verdana, sans-serif;
+    font-family: "lucida grande", Verdana, sans-serif;
     padding-bottom: 13px;
 }
 
@@ -635,13 +659,13 @@ div.flash {
 /* End login, registration, Janrain styles */
 
 /* end-of-chapter exercises styles */
-#exercises>ol>li,
-#programming-exercises>ol>li {
+#exercises > ol > li,
+#programming-exercises > ol > li {
     margin-bottom: 30px;
 }
 
-#exercises>ol>li:nth-child(even),
-#programming-exercises>ol>li:nth-child(even) {
+#exercises > ol > li:nth-child(even),
+#programming-exercises > ol > li:nth-child(even) {
     padding: 1.2em 1.4em;
     background: #faf7df;
     border: 1px solid #fbeed5;
@@ -700,7 +724,6 @@ div.flash {
 }
 
 @media (max-width: 768px) {
-
     /* remove any custom position styles when the screen is small (mobile devices)
     to prevent the modal from being partially off the screen */
     .codelens-modal {
@@ -711,7 +734,7 @@ div.flash {
     }
 }
 
-.codelens-modal>.modal-dialog {
+.codelens-modal > .modal-dialog {
     width: 400px;
 }
 
@@ -767,11 +790,11 @@ div.flash {
 .navLink a {
     display: inline-block;
     background-color: white;
-    border-style:solid;
-    border-color:lightgrey;
-    border-width:2px;
-    width:100px;
-    height:50px
+    border-style: solid;
+    border-color: lightgrey;
+    border-width: 2px;
+    width: 100px;
+    height: 50px;
 }
 
 #relations-next {
@@ -789,7 +812,6 @@ div.flash {
 }
 
 @media (max-width: 600px) {
-
     .navLink {
         display: inline-block;
         bottom: auto;
@@ -827,7 +849,6 @@ div.flash {
 .buttonConfirmCompletion {
     background-color: #50d392;
     border-color: #3dc682;
-
 }
 
 .buttonConfirmCompletion:hover {
@@ -869,7 +890,7 @@ div.flash {
     background-color: #ffffff;
 }
 
-.container .section>div.sidebar {
+.container section > div.sidebar {
     margin: 0 0 0.5em 1em;
 }
 
@@ -887,23 +908,22 @@ iframe[seamless] {
 }
 
 @media (min-width: 768px) {
-    .container .section>div.sidebar {
+    .container section > div.sidebar {
         margin: 0 3em 0.5em 1em;
     }
 }
 
 @media (min-width: 992px) {
-    .container .section>div.sidebar {
+    .container section > div.sidebar {
         margin: 0 11em 0.5em 1em;
     }
 }
 
 @media (min-width: 1200px) {
-    .container .section>div.sidebar {
+    .container section > div.sidebar {
         margin: 0 18em 0.5em 1em;
     }
 }
-
 
 div.ExecutionVisualizer table.visualizer {
     width: auto;
@@ -911,9 +931,6 @@ div.ExecutionVisualizer table.visualizer {
     margin-right: auto;
     background-color: #ffffff;
 }
-
-
-
 
 .sltooltip {
     position: absolute;
@@ -951,11 +968,14 @@ div.ExecutionVisualizer table.visualizer {
     border-radius: 4px;
 }
 
+ul.dropdown-menu {
+    max-width: 300px;
+}
+
 ul.dropdown-menu.globaltoc {
     max-height: 700px;
     overflow: auto;
 }
-
 
 .globaltoc span.caption-text {
     display: inline-block;
@@ -963,14 +983,12 @@ ul.dropdown-menu.globaltoc {
     font-size: large;
 }
 
-
 /* Style lp textareas. */
 textarea.lp-result {
     width: 100%;
     height: 10em;
     font-family: monospace;
 }
-
 
 /*
  * Hide only visually, but have it available for screen readers:
@@ -1011,7 +1029,6 @@ textarea.lp-result {
     white-space: inherit;
 }
 
-
 .blockquote {
     text-align: center;
     font-size: large;
@@ -1019,7 +1036,6 @@ textarea.lp-result {
     padding-left: 2em;
     padding-right: 2em;
 }
-
 
 #scprogresscontainer {
     width: 100%;
@@ -1032,11 +1048,11 @@ textarea.lp-result {
     border-radius: 0px;
 }
 
-#subchapterprogress>div {
+#subchapterprogress > div {
     background: green;
 }
 
-#subchapterprogress>div.loggedout {
+#subchapterprogress > div.loggedout {
     background: lightgray;
 }
 
@@ -1050,14 +1066,14 @@ textarea.lp-result {
 
 #questions .runestone_caption:before {
     counter-increment: rscomponent;
-    content: "Problem: "counter(rscomponent) " -- ";
+    content: "Problem: " counter(rscomponent) " -- ";
 }
 
 body {
     color: var(--bodyFont);
 }
 
-.jupyter_container .output  {
+.jupyter_container .output {
     margin-top: 10px;
 }
 
@@ -1101,7 +1117,7 @@ body {
     position: absolute;
     right: 0;
     top: 0;
-    transition: .4s;
+    transition: 0.4s;
 }
 
 .slider:before {
@@ -1111,15 +1127,15 @@ body {
     height: 26px;
     left: 4px;
     position: absolute;
-    transition: .4s;
+    transition: 0.4s;
     width: 26px;
 }
 
-input:checked+.slider {
+input:checked + .slider {
     background-color: #66bb6a;
 }
 
-input:checked+.slider:before {
+input:checked + .slider:before {
     transform: translateX(26px);
 }
 

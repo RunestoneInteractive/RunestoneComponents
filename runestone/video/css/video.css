@@ -1,11 +1,11 @@
 .exercises {
-    background-color:#f0ffff;
+    background-color: #f0ffff;
 }
 
 figcaption {
-	margin: .75em 0;
-	text-align: center;
-	font: italic 13px/18px Cambria, Georgia, "Times New Roman", Times, serif;
+    margin: 0.75em 0;
+    text-align: center;
+    font: italic 13px/18px Cambria, Georgia, "Times New Roman", Times, serif;
 }
 
 img.bookfig {
@@ -18,3 +18,8 @@ img.bookfig {
     font-weight: bold;
 }
 
+.runestone iframe {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}

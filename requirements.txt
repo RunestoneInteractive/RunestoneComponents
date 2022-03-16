@@ -18,7 +18,7 @@ codechat==1.9.0
     # via -r requirements.in
 cogapp==3.3.0
     # via -r requirements.in
-docutils==0.16
+docutils==0.17.1
     # via
     #   codechat
     #   sphinx
