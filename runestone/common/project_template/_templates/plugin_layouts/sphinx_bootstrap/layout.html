@@ -67,13 +67,6 @@
 
         <li class="divider-vertical"></li>
 
-        <li class="divider-vertical"></li>
-        {% block sidebartoc %}
-          {% if dynamic_pages == 'True': %}
-            {% include "subchaptoc.html" %}
-          {% endif %}
-          <li class="divider-vertical"></li>
-        {% endblock %}
 
         <!-- social media dropdown -->
         {% if minimal_outside_links != 'True' %}
@@ -213,6 +206,13 @@
       </ul>
 
       <ul class="nav navbar-nav">
+        <li class="divider-vertical"></li>
+        {% block sidebartoc %}
+          {% if dynamic_pages == 'True': %}
+            {% include "subchaptoc.html" %}
+          {% endif %}
+          <li class="divider-vertical"></li>
+        {% endblock %}
         <!-- {% block sidebarrel %}
           {% include "relations.html" %}
         {% endblock %}-->
