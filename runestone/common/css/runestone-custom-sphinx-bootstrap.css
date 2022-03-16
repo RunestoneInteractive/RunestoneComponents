@@ -129,7 +129,7 @@ h5 {
     text-decoration: underline;
 }
 
-#table-of-contentssection {
+#table-of-contents.section {
     font-size: 16px;
 }
 
@@ -169,15 +169,15 @@ h5 {
 }
 
 /* index and search related styles for color-contrast (AA compliant) */
-#index-and-searchsection {
+#index-and-search.section {
     font-size: 16px;
 }
 
-#index-and-searchsection a {
+#index-and-search.section a {
     color: var(--links);
 }
 
-#index-and-searchsection a:hover {
+#index-and-search.section a:hover {
     color: var(--links);
     text-decoration: underline;
 }
@@ -216,28 +216,24 @@ div.container {
     background-color: var(--background);
 }
 
-divsection {
-    margin-left: auto;
-    margin-right: auto;
-}
-
 .container {
     padding-left: 10px;
     padding-right: 10px;
 }
 
 #main-content section > p,
-pre,
-table,
-ul,
-ol,
-dl,
-h1,
-h2,
-h3,
-h4,
-.admonition {
-    width: 500pt !important;
+#main-content section > pre,
+#main-content section > table,
+#main-content section > ul,
+#main-content section > ol,
+#main-content section > dl,
+#main-content section > h1,
+#main-content section > h2,
+#main-content section > h3,
+#main-content section > h4,
+#main-content section > .admonition,
+#main-content section > .toctree-wrapper {
+    width: 500pt;
     margin-left: auto;
     margin-right: auto;
 }
@@ -966,10 +962,6 @@ div.ExecutionVisualizer table.visualizer {
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     border-radius: 4px;
-}
-
-ul.dropdown-menu {
-    max-width: 300px;
 }
 
 ul.dropdown-menu.globaltoc {
