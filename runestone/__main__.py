@@ -1,6 +1,8 @@
 # *********
 # |docname|
 # *********
+
+from runestone import cmap
 import sys
 import os
 import shutil
@@ -9,6 +11,7 @@ import six
 import click
 import pathlib
 import re
+import subprocess
 from paver.easy import sh
 from pkg_resources import resource_string, resource_filename, require
 from .pretext.chapter_pop import manifest_data_to_db
@@ -191,10 +194,14 @@ def build(all, wd):
     paver_main(args=myargs)
 
 
-@cli.command()
+@cli.command(short_help="preview the book in a minimal server (NO API support)")
 @click.option("--port", default=8000, help="port for server to listen on")
 @click.option("--listen", default="", help="address for server to listen on")
-def serve(port, listen):
+def preview(port, listen):
+    _preview(port, listen)
+
+
+def _preview(port, listen):
     click.echo("Note: this is a minimal static server without templates or a database.")
     click.echo("For many use cases this is fine.")
     click.echo(
@@ -246,6 +253,15 @@ def serve(port, listen):
     httpd.serve_forever()
 
 
+# configure preview as an alias for serve
+@cli.command(short_help="Deprecated - use preview")
+@click.option("--port", default=8000, help="port for server to listen on")
+@click.option("--listen", default="", help="address for server to listen on")
+def serve(port, listen):
+    click.echo("The serve command is deprecated, use runestone preview")
+    _preview(port, listen)
+
+
 @cli.command()
 @click.option("--dest", default="", help="destination for deploy")
 def deploy(dest):
@@ -286,7 +302,57 @@ def deploy(dest):
         sh("rsync -rav --delete {} {}".format(pavement.serving_dir, dest))
 
 
-from runestone import cmap
+@cli.command(short_help="Run sphinx build to convert RST to PreTeXt")
+@click.option("--course", default=None, help="Unique name of the book")
+@click.option("--sourcedir", default="_sources", help="Where is the source Luke?")
+@click.option("--outdir", default="build", help="Where is the source Luke?")
+def rs2ptx(course, sourcedir, outdir):
+    """
+    Assemble and run a sphinx command similar to the following:
+
+    .. code-block:: bash
+
+        sphinx-build -b xml -d ./build/overview/doctrees -c . -Acourse_id=overview -Alogin_required=false -Aappname=runestone -Aloglevel=10 -Acourse_url=https://runestone.academy -Adynamic_pages=True -Ause_services=true -Abasecourse=overview -Apython3=true -Adownloads_enabled=true -Aallow_pairs=false -Aenable_chatcodes=false -Arunestone_version=5.7.1 -Abuild_info=unknown . ./build/xml
+
+    This command demonstrates a step toward independence from paver and the pavement.py file.
+    This is kind of moot in a future where we rely on pretext to be the authoring language. But it **would**
+    be easy to move the key variables and template_args from pavement.py to conf.py  and update the build
+    command to work like this...
+    """
+    os.chdir(findProjectRoot())
+    sys.path.insert(0, os.getcwd())
+    try:
+        import pavement
+    except:
+        click.echo("Could not read pavement.py file, aborting")
+        sys.exit(1)
+
+    if not course:
+        if pavement.project_name:
+            course = pavement.project_name
+        else:
+            course = click.prompt("Name of Course ", default="rsbook")
+
+    if pavement.template_args:
+        tdict = pavement.template_args
+    else:
+        tdict = {"course_id": course}
+
+    cmd_start = ["sphinx-build", "-E", "-b", "xml",
+                 "-d", f"./build/{course}/doctrees", "-c", "."]
+    tplate_val = [f"-A{key}={val}" for key, val in tdict.items()]
+    cmd_end = [f"{sourcedir}", f"./{outdir}/xml"]
+    cmd = " ".join(cmd_start + tplate_val + cmd_end)
+    click.echo(cmd)
+    try:
+        cp = subprocess.run(
+            cmd , shell=True, check=True
+        )
+    except subprocess.CalledProcessError as e:
+        click.echo(f"{e.stderr or ''}{e.stdout or ''}")
+        raise
+
+    # TODO: Run the xsltproc command after a successful runestone convert
 
 
 @cli.command(short_help="type runestone doc directive to get help on directive")
