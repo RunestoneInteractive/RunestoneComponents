@@ -60,6 +60,18 @@ def setup(app):
     app.connect("env-purge-doc", purge_activecodes)
 
 
+XML_START = """
+<listing xml:id="{divid}">
+    <caption>{caption}</caption>
+    <program xml:id="{divid}_editor" interactive='yes' language="{language}">
+        <input>
+        {initialcode}
+        </input>
+    </program>
+</listing>
+
+"""
+
 TEMPLATE_START = """
 <div class="%(divclass)s">
 <div data-component="activecode" id=%(divid)s data-question_label="%(question_label)s">
@@ -85,18 +97,18 @@ class ActivecodeNode(nodes.General, nodes.Element, RunestoneIdNode):
 
 
 def visit_ac_xml(self, node):
-    res = TEMPLATE_START % node["runestone_options"]
+    res = XML_START.format(**node["runestone_options"])
     self.output.append(res)
 
 
 def depart_ac_xml(self, node):
-    res = TEMPLATE_END % node["runestone_options"]
-    self.output.append(res)
-
+    pass
 
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
+
+
 def visit_ac_html(self, node):
     # print self.settings.env.activecodecounter
 

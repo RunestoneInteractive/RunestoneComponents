@@ -35,6 +35,49 @@ class MChoiceNode(nodes.General, nodes.Element, RunestoneIdNode):
     pass
 
 
+XML_START = """
+    <exercise xml:id="{divid}">
+        <statement>
+
+"""
+
+XML_START_END = """
+        </statement>
+        <choices>
+"""
+
+XML_OPTION = """
+            <choice {is_correct}>
+                <statement>
+                    <p>{atext}</p>
+                </statement>
+                <feedback>
+                    <p>Incorrect: green means "go!".</p>
+                </feedback>
+            </choice>
+"""
+
+XML_END = """
+        </choices>
+    </exercise>
+"""
+
+TEMPLATE_START = """
+    <div class="{divclass}">
+    <ul data-component="multiplechoice" data-question_label="{question_label}" data-multipleanswers="{multipleAnswers}" {random} id="{divid}" {optional} style="visibility: hidden;">
+    """
+
+OPTION = """
+    <li data-component="answer" {is_correct} id="{divid}_opt_{alabel}">{atext}</li><li data-component="feedback">{feedtext}</li>
+    """
+
+TEMPLATE_END = """
+
+    </ul>
+    </div>
+    """
+
+
 def visit_mc_common(self, node):
 
     res = ""
@@ -49,7 +92,7 @@ def visit_mc_common(self, node):
         node["runestone_options"]["multipleAnswers"] = "true"
     else:
         node["runestone_options"]["multipleAnswers"] = "false"
-    res = node["template_start"] % node["runestone_options"]
+    res = node["template_start"].format(**node["runestone_options"])
 
     return res
 
@@ -73,19 +116,23 @@ def depart_mc_common(self, node):
                 node["runestone_options"]["is_correct"] = "data-correct"
             else:
                 node["runestone_options"]["is_correct"] = ""
-            res += node["template_option"] % node["runestone_options"]
+            res += node["template_option"].format(**node["runestone_options"])
 
-    res += node["template_end"] % node["runestone_options"]
+    res += node["template_end"].format(**node["runestone_options"])
     return res
 
 
 def visit_mc_xml(self, node):
-
+    node["template_start"] = XML_START
+    node["template_end"] = XML_END
+    node["template_option"] = XML_OPTION
+    pdb.set_trace()
     res = visit_mc_common(self, node)
     self.output.append(res)
 
 
 def depart_mc_xml(self, node):
+    self.output.append(XML_START_END)
     res = depart_mc_common(self, node)
     self.output.append(res)
 
@@ -207,24 +254,9 @@ class MChoice(Assessment):
 
         super(MChoice, self).run()
 
-        TEMPLATE_START = """
-            <div class="%(divclass)s">
-            <ul data-component="multiplechoice" data-question_label="%(question_label)s" data-multipleanswers="%(multipleAnswers)s" %(random)s id="%(divid)s" %(optional)s style="visibility: hidden;">
-            """
-
-        OPTION = """
-            <li data-component="answer" %(is_correct)s id="%(divid)s_opt_%(alabel)s">%(atext)s</li><li data-component="feedback">%(feedtext)s</li>
-            """
-
-        TEMPLATE_END = """
-
-            </ul>
-            </div>
-            """
         addQuestionToDB(self)
 
         mcNode = MChoiceNode()
-        # This is maybe a hack or maybe the new right way to do this...
         mcNode["runestone_options"] = self.options
         mcNode["source"], mcNode["line"] = self.state_machine.get_source_and_line(
             self.lineno)
@@ -386,8 +418,8 @@ def visit_answer_list_item(self, node):
 
     # Format the HTML.
     self.body.append(
-        '<li data-component="answer" %(is_correct)s id="%(divid)s_opt_%(alabel)s">'
-        % mc_node["runestone_options"]
+        '<li data-component="answer" {is_correct} id="{divid}_opt_{alabel}">'.format(
+            **mc_node["runestone_options"])
     )
 
 
@@ -413,8 +445,8 @@ def visit_feedback_list_item(self, node):
     label = chr(answer_list_item.parent.index(answer_list_item) + ord("a"))
     mc_node["runestone_options"]["alabel"] = label
     self.body.append(
-        '</li><li data-component="feedback" id="%(divid)s_opt_%(alabel)s">\n'
-        % mc_node["runestone_options"]
+        '</li><li data-component="feedback" id="{divid}_opt_{alabel}">\n'.format(
+            **mc_node["runestone_options"])
     )
 
 
