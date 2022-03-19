@@ -71,6 +71,8 @@ export default class RunestoneBase {
             if ($(opts.orig).data("question_label")) {
                 this.question_label = $(opts.orig).data("question_label");
             }
+            this.is_toggle = true ? opts.is_toggle : false;
+            this.is_select = true ? opts.is_select : false;
         }
         this.jsonHeaders = new Headers({
             "Content-type": "application/json; charset=utf-8",
@@ -147,14 +149,23 @@ export default class RunestoneBase {
                     );
                     throw new Error("Missing authentication token");
                 }
-                throw new Error("Failed to save the log entry");
+                throw new Error(`Failed to save the log entry
+                    Status: ${response.status}`);
             }
             post_return = response.json();
         } catch (e) {
-            if (this.isTimed) {
-                alert(`Error: Your action was not saved! The error was ${e}`);
+            let detail = "none";
+            if (post_return.detail) {
+                detail = post_return.detail;
             }
-            console.log(`Error: ${e}`);
+            if (eBookConfig.loginRequired) {
+                alert(`Error: Your action was not saved! 
+                    The error was ${e} 
+                    Detail: ${detail}. 
+                    Please report this error!`);
+            }
+            // send a request to save this error
+            console.log(`Error: ${e} Detail: ${detail}`);
         }
         return post_return;
     }
@@ -185,9 +196,19 @@ export default class RunestoneBase {
             );
             let response = await fetch(request);
             if (!response.ok) {
-                throw new Error("Failed to log the run");
+                post_promise = await response.json();
+                if (eBookConfig.loginRequired) {
+                    alert(`Failed to save your code
+                        Status is ${response.status}
+                        Detail: ${post_promise.detail}`);
+                } else {
+                    console.log(
+                        `Did not save the code. Status: ${response.status}`
+                    );
+                }
+            } else {
+                post_promise = await response.json();
             }
-            post_promise = await response.json();
         }
         if (!this.isTimed || eBookConfig.debug) {
             console.log("running " + JSON.stringify(eventInfo));

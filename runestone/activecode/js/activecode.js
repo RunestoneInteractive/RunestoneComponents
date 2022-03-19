@@ -23,6 +23,11 @@ import "codemirror/mode/clike/clike.js";
 import "codemirror/mode/octave/octave.js";
 import "./../css/activecode.css";
 import "codemirror/lib/codemirror.css";
+import "codemirror/addon/hint/show-hint.js";
+import "codemirror/addon/hint/show-hint.css";
+import "codemirror/addon/hint/sql-hint.js";
+import "codemirror/addon/hint/anyword-hint.js";
+import "codemirror/addon/edit/matchbrackets.js";
 import "./skulpt.min.js";
 import "./skulpt-stdlib.js";
 // Used by Skulpt.
@@ -42,6 +47,10 @@ window.edList = {};
 
 var socket, connection, doc;
 var chatcodesServer = "chat.codes";
+
+CodeMirror.commands.autocomplete = function (cm) {
+    cm.showHint({ hint: CodeMirror.hint.anyword });
+};
 
 // separate into constructor and init
 export class ActiveCode extends RunestoneBase {
@@ -73,6 +82,7 @@ export class ActiveCode extends RunestoneBase {
         this.loadButton = null;
         this.outerDiv = null;
         this.partner = "";
+        this.runCount = 0;
         this.logResults = true;
         if (!eBookConfig.allow_pairs || $(orig).data("nopair")) {
             this.enablePartner = false;
@@ -176,6 +186,7 @@ export class ActiveCode extends RunestoneBase {
             extraKeys: {
                 Tab: "indentMore",
                 "Shift-Tab": "indentLess",
+                "Ctrl-Space": "autocomplete",
             },
         });
         // Make the editor resizable
@@ -254,6 +265,10 @@ export class ActiveCode extends RunestoneBase {
         this.renderFeedback();
         // The run is finished; re-enable the button.
         this.runButton.disabled = false;
+        this.runCount += 1;
+        if (this.is_toggle && this.runCount == 3) {
+            alert("Help is Available Using the Toggle Question Selector");
+        }
     }
 
     createControls() {
@@ -476,8 +491,8 @@ export class ActiveCode extends RunestoneBase {
                     if (!didAgree) {
                         didAgree = confirm(
                             "Pair Programming should only be used with the consent of your instructor." +
-                            "Your partner must be a registered member of the class and have agreed to pair with you." +
-                            "By clicking OK you certify that both of these conditions have been met."
+                                "Your partner must be a registered member of the class and have agreed to pair with you." +
+                                "By clicking OK you certify that both of these conditions have been met."
                         );
                         if (didAgree) {
                             localStorage.setItem("partnerAgree", "true");
@@ -520,13 +535,13 @@ export class ActiveCode extends RunestoneBase {
         $(butt).attr(
             "href",
             "http://" +
-            chatcodesServer +
-            "/new?" +
-            $.param({
-                topic: window.location.host + "-" + this.divid,
-                code: this.editor.getValue(),
-                lang: "Python",
-            })
+                chatcodesServer +
+                "/new?" +
+                $.param({
+                    topic: window.location.host + "-" + this.divid,
+                    code: this.editor.getValue(),
+                    lang: "Python",
+                })
         );
         this.chatButton = butt;
         chatBar.appendChild(butt);
@@ -582,16 +597,21 @@ export class ActiveCode extends RunestoneBase {
             // If this is timed and already taken we should restore history info
             this.renderScrubber();
         } else {
-            let request = new Request(`${eBookConfig.new_server_prefix}/assessment/gethist`, {
-                method: "POST",
-                headers: this.jsonHeaders,
-                body: JSON.stringify(reqData),
-            });
+            let request = new Request(
+                `${eBookConfig.new_server_prefix}/assessment/gethist`,
+                {
+                    method: "POST",
+                    headers: this.jsonHeaders,
+                    body: JSON.stringify(reqData),
+                }
+            );
             try {
                 response = await fetch(request);
                 let data = await response.json();
                 if (!response.ok) {
-                    throw new Error(`Failed to get the history data: ${data.detail}`);
+                    throw new Error(
+                        `Failed to get the history data: ${data.detail}`
+                    );
                 }
                 data = data.detail;
                 if (data.history !== undefined) {
@@ -919,7 +939,7 @@ export class ActiveCode extends RunestoneBase {
         });
     }
 
-    toggleEditorVisibility() { }
+    toggleEditorVisibility() {}
 
     addErrorMessage(err) {
         // Add the error message
@@ -1057,7 +1077,7 @@ Yet another is that there is an internal error.  The internal error message is: 
                     var xl = eval(x);
                     xl = xl.map(pyStr);
                     x = xl.join(" ");
-                } catch (err) { }
+                } catch (err) {}
             }
         }
         $(this.output).css("visibility", "visible");
@@ -1161,7 +1181,7 @@ Yet another is that there is an internal error.  The internal error message is: 
         if (
             this.historyScrubber &&
             this.history[$(this.historyScrubber).slider("value")] !=
-            this.editor.getValue()
+                this.editor.getValue()
         ) {
             saveCode = "True";
             this.history.push(this.editor.getValue());
@@ -1220,7 +1240,7 @@ Yet another is that there is an internal error.  The internal error message is: 
             if (typeof sid !== "undefined") {
                 unitData.sid = sid;
             }
-            await this.logBookEvent(unitData)
+            await this.logBookEvent(unitData);
         }
     }
 

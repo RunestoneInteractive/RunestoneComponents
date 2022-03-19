@@ -12,7 +12,6 @@
 
 "use strict";
 
-
 // Static imports
 // ==============
 // These imports are (we assume) needed by all pages. However, it would be much better to load these in the modules that actually use them.
@@ -40,6 +39,7 @@ import "./runestone/common/css/runestone-custom-sphinx-bootstrap.css";
 // Misc
 import "./runestone/common/js/bookfuncs.js";
 import "./runestone/common/js/user-highlights.js";
+import "./runestone/common/js/pretext.js";
 
 // These belong in dynamic imports for the obvious component; however, these components don't include a ``data-component`` attribute.
 import "./runestone/matrixeq/css/matrixeq.css";
@@ -49,7 +49,6 @@ import "./runestone/webgldemo/css/webglinteractive.css";
 import { getSwitch, switchTheme } from "./runestone/common/js/theme.js";
 import "./runestone/common/js/presenter_mode.js";
 import "./runestone/common/css/presenter_mode.css";
-
 
 // Dynamically loaded components
 // =============================
@@ -61,7 +60,8 @@ const module_map = {
     activecode: () => import("./runestone/activecode/js/acfactory.js"),
     ble: () => import("./runestone/cellbotics/js/ble.js"),
     // Always import the timed version of a component if available, since the timed components also define the component's factory and include the component as well. Note that ``acfactory`` imports the timed components of ActiveCode, so it follows this pattern.
-    clickablearea: () => import("./runestone/clickableArea/js/timedclickable.js"),
+    clickablearea: () =>
+        import("./runestone/clickableArea/js/timedclickable.js"),
     codelens: () => import("./runestone/codelens/js/codelens.js"),
     datafile: () => import("./runestone/datafile/js/datafile.js"),
     dragndrop: () => import("./runestone/dragndrop/js/timeddnd.js"),
@@ -76,7 +76,8 @@ const module_map = {
     quizly: () => import("./runestone/quizly/js/quizly.js"),
     reveal: () => import("./runestone/reveal/js/reveal.js"),
     selectquestion: () => import("./runestone/selectquestion/js/selectone.js"),
-    shortanswer: () => import("./runestone/shortanswer/js/timed_shortanswer.js"),
+    shortanswer: () =>
+        import("./runestone/shortanswer/js/timed_shortanswer.js"),
     showeval: () => import("./runestone/showeval/js/showEval.js"),
     simple_sensor: () => import("./runestone/cellbotics/js/simple_sensor.js"),
     spreadsheet: () => import("./runestone/spreadsheet/js/spreadsheet.js"),
@@ -86,35 +87,41 @@ const module_map = {
     // TODO: since this isn't in a ``data-component``, need to trigger an import of this code manually.
     webwork: () => import("./runestone/webwork/js/webwork.js"),
     youtube: () => import("./runestone/video/js/runestonevideo.js"),
-}
+};
 
 // .. _dynamic import machinery:
 //
 // Dynamic import machinery
 // ========================
 // Fulfill a promise when the Runestone pre-login complete event occurs.
-let pre_login_complete_promise = new Promise(resolve => $(document).bind("runestone:pre-login-complete", resolve));
+let pre_login_complete_promise = new Promise((resolve) =>
+    $(document).bind("runestone:pre-login-complete", resolve)
+);
 let loadedComponents;
 // Provide a simple function to import the JS for all components on the page.
 export function runestone_auto_import() {
     // Create a set of ``data-component`` values, to avoid duplication.
     const s = new Set(
         // All Runestone components have a ``data-component`` attribute.
-        $("[data-component]").map(
-            // Extract the value of the data-component attribute.
-            (index, element) => $(element).attr("data-component")
-            // Switch from a jQuery object back to an array, passing that to the Set constructor.
-        ).get()
+        $("[data-component]")
+            .map(
+                // Extract the value of the data-component attribute.
+                (index, element) => $(element).attr("data-component")
+                // Switch from a jQuery object back to an array, passing that to the Set constructor.
+            )
+            .get()
     );
 
     // Load JS for each of the components found.
-    const a = [...s].map(value =>
+    const a = [...s].map((value) =>
         // If there's no JS for this component, return an empty Promise.
         (module_map[value] || (() => Promise.resolve()))()
     );
 
     // Send the Runestone login complete event when all JS is loaded and the pre-login is also complete.
-    Promise.all([pre_login_complete_promise, ...a]).then(() => $(document).trigger("runestone:login-complete"));
+    Promise.all([pre_login_complete_promise, ...a]).then(() =>
+        $(document).trigger("runestone:login-complete")
+    );
 }
 
 // Load component JS when the document is ready.
@@ -134,9 +141,11 @@ async function popupScratchAC() {
     // activecode.  If its not defined then we need to get it ready to toggle
     if (!eBookConfig.scratchDiv) {
         window.ACFactory.createScratchActivecode();
-        let divid = eBookConfig.scratchDiv
-        window.edList[divid] = ACFactory.createActiveCode($(`#${divid}`)[0],
-            eBookConfig.acDefaultLanguage);
+        let divid = eBookConfig.scratchDiv;
+        window.edList[divid] = ACFactory.createActiveCode(
+            $(`#${divid}`)[0],
+            eBookConfig.acDefaultLanguage
+        );
         if (eBookConfig.isLoggedIn) {
             window.edList[divid].enableSaveLoad();
         }
@@ -146,8 +155,10 @@ async function popupScratchAC() {
 
 // Set the directory containing this script as the `path <https://webpack.js.org/guides/public-path/#on-the-fly>`_ for all webpacked scripts.
 const script_src = document.currentScript.src;
-__webpack_public_path__ = script_src.substring(0, script_src.lastIndexOf('/') + 1);
-
+__webpack_public_path__ = script_src.substring(
+    0,
+    script_src.lastIndexOf("/") + 1
+);
 
 // Manual exports
 // ==============

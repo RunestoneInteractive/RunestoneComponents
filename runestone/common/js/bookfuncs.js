@@ -58,8 +58,9 @@ function addReadingList() {
                 name: "link",
                 class: "btn btn-lg ' + 'buttonConfirmCompletion'",
                 href: nxt_link,
-                text: `Continue to page ${position + 2
-                    } of ${num_readings} in the reading assignment.`,
+                text: `Continue to page ${
+                    position + 2
+                } of ${num_readings} in the reading assignment.`,
             });
         } else {
             l = $("<div />", {
@@ -153,7 +154,7 @@ class PageProgressBar {
             if (
                 val == 100.0 &&
                 $("#completionButton").text().toLowerCase() ===
-                "mark as completed"
+                    "mark as completed"
             ) {
                 $("#completionButton").click();
             }
@@ -171,11 +172,14 @@ async function handlePageSetup() {
             Accept: "application/json",
         });
         let data = { timezoneoffset: new Date().getTimezoneOffset() / 60 };
-        let request = new Request(`${eBookConfig.new_server_prefix}/logger/set_tz_offset`, {
-            method: "POST",
-            body: JSON.stringify(data),
-            headers: headers,
-        });
+        let request = new Request(
+            `${eBookConfig.new_server_prefix}/logger/set_tz_offset`,
+            {
+                method: "POST",
+                body: JSON.stringify(data),
+                headers: headers,
+            }
+        );
         try {
             let response = await fetch(request);
             if (!response.ok) {
@@ -195,8 +199,10 @@ async function handlePageSetup() {
         $(document).trigger("runestone:login");
         addReadingList();
         // Avoid the timedRefresh on the grading page.
-        if ((window.location.pathname.indexOf("/admin/grading") == -1)
-            && (window.location.pathname.indexOf("/peer/") == -1)) {
+        if (
+            window.location.pathname.indexOf("/admin/grading") == -1 &&
+            window.location.pathname.indexOf("/peer/") == -1
+        ) {
             timedRefresh();
         }
     } else {
