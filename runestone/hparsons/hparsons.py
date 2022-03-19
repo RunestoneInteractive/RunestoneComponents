@@ -34,7 +34,7 @@ from runestone.common.runestonedirective import (
 
 def setup(app):
     app.add_directive("hparsons", HParsonsDirective)
-    app.add_node(HParsonsNode, html=(visit_hp_node, depart_hp_node))
+    app.add_node(HParsonsNode, html=(visit_hp_html, depart_hp_html))
 
 
 TEMPLATE_START = """
@@ -60,35 +60,33 @@ TEMPLATE_END = """
 
 
 class HParsonsNode(nodes.General, nodes.Element, RunestoneIdNode):
-    def __init__(self, options, **kwargs):
-        super(HParsonsNode, self).__init__(**kwargs)
-        self.runestone_options = options
+    pass
 
 
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
-def visit_hp_node(self, node):
+def visit_hp_html(self, node):
 
-    node.delimiter = "_start__{}_".format(node.runestone_options["divid"])
+    node["delimiter"] = "_start__{}_".format(node["runestone_options"]["divid"])
 
-    self.body.append(node.delimiter)
+    self.body.append(node["delimiter"])
 
-    res = TEMPLATE_START % node.runestone_options
+    res = TEMPLATE_START % node["runestone_options"]
     self.body.append(res)
 
 
-def depart_hp_node(self, node):
-    res = TEMPLATE_END % node.runestone_options
+def depart_hp_html(self, node):
+    res = TEMPLATE_END % node["runestone_options"]
     self.body.append(res)
 
     addHTMLToDB(
-        node.runestone_options["divid"],
-        node.runestone_options["basecourse"],
-        "".join(self.body[self.body.index(node.delimiter) + 1 :]),
+        node["runestone_options"]["divid"],
+        node["runestone_options"]["basecourse"],
+        "".join(self.body[self.body.index(node["delimiter"]) + 1 :]),
     )
 
-    self.body.remove(node.delimiter)
+    self.body.remove(node["delimiter"])
 
 
 class HParsonsDirective(RunestoneIdDirective):
@@ -207,13 +205,14 @@ class HParsonsDirective(RunestoneIdDirective):
                     "This should only affect the grading interface. Everything else should be fine."
                 )
 
-        acnode = HParsonsNode(self.options, rawsource=self.block_text)
-        acnode.source, acnode.line = self.state_machine.get_source_and_line(self.lineno)
-        self.add_name(acnode)  # make this divid available as a target for :ref:
+        hpnode = HParsonsNode()
+        hpnode["runestone_options"] = self.options
+        hpnode["source"], hpnode["line"] = self.state_machine.get_source_and_line(self.lineno)
+        self.add_name(hpnode)  # make this divid available as a target for :ref:
 
         maybeAddToAssignment(self)
         if explain_text:
             self.updateContent()
-            self.state.nested_parse(explain_text, self.content_offset, acnode)
+            self.state.nested_parse(explain_text, self.content_offset, hpnode)
 
-        return [acnode]
+        return [hpnode]
