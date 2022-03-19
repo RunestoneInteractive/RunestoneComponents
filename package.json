@@ -9,7 +9,6 @@
         "build": "webpack --mode=development",
         "buildj": "webpack --mode=development --profile --json > stats.json",
         "watch": "webpack --mode=development --watch",
-        "start": "webpack-dev-server --mode=development --open",
         "serve": "cd dist; python -m http.server 8080; cd ..",
         "dist": "webpack --mode=production",
         "distj": "webpack --mode=production --profile --json > stats.json",
@@ -19,8 +18,8 @@
     "author": "",
     "license": "ISC",
     "devDependencies": {
-        "compression-webpack-plugin": "^9.0.0",
         "copy-webpack-plugin": "^9.0.0",
+        "compression-webpack-plugin": "^9.0.0",
         "css-loader": "^6.0.0",
         "css-minimizer-webpack-plugin": "^3.0.0",
         "html-loader": "^3.0.0",
@@ -28,8 +27,7 @@
         "mini-css-extract-plugin": "^2.0.0",
         "webpack": "^5.61.0",
         "webpack-bundle-analyzer": "^4.0.0",
-        "webpack-cli": "^4.9.2",
-        "webpack-dev-server": "^4.7.4"
+        "webpack-cli": "^4.0.0"
     },
     "dependencies": {
         "-": "0.0.1",

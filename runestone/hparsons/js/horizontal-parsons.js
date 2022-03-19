@@ -3049,7 +3049,7 @@ class ParsonsInput {
         this.parentElement = parentElement;
         this.el.id = 'regextool-' + this.parentElement.toolNumber + '-parsons-input';
         const dragTip = document.createElement('div');
-        dragTip.innerText = 'Drag or click to select from the symbols below to form your code';
+        dragTip.innerText = 'Drag from the blocks below to form your code';
         dragTip.classList.add('hparsons-tip');
         this.el.append(dragTip);
         this._dragArea = document.createElement('div');
