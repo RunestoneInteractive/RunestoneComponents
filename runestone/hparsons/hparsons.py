@@ -50,6 +50,7 @@ TEMPLATE_END = """
     %(optional)s
     %(dburl)s
     %(textentry)s
+    %(reuse)s
     style="visibility: hidden;">
 %(initialsetting)s
 </textarea>
@@ -97,6 +98,7 @@ class HParsonsDirective(RunestoneIdDirective):
        :language: sql, regex
        :dburl: only for sql -- url to load database
        TODO: fix textentry
+       :reuse: only for parsons -- make the blocks reusable
        :textentry: if you will use text entry instead of horizontal parsons
 
         Here is the problem description. It must ends with the tildes.
@@ -123,6 +125,7 @@ class HParsonsDirective(RunestoneIdDirective):
             "dburl": directives.unchanged,
             "language": directives.unchanged,
             "textentry": directives.flag,
+            "reuse": directives.flag,
         }
     )
 
@@ -135,6 +138,11 @@ class HParsonsDirective(RunestoneIdDirective):
             self.options['textentry'] = ' data-textentry="true"'
         else:
             self.options['textentry'] = ''
+
+        if "reuse" in self.options:
+            self.options['reuse'] = ' data-reuse="true"'
+        else:
+            self.options['reuse'] = ''
 
         explain_text = None
         if self.content:

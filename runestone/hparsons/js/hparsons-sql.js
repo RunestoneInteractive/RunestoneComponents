@@ -20,6 +20,7 @@ export default class SQLHParons extends RunestoneBase {
         var suffStart;
         var orig = $(opts.orig).find("textarea")[0];
         this.textentry = $(orig).data('textentry') ? true : false;
+        this.reuse = $(orig).data('reuse') ? true : false;
         this.divid = opts.orig.id;
         this.containerDiv = opts.orig;
         this.useRunestoneServices = opts.useRunestoneServices;
@@ -141,11 +142,17 @@ export default class SQLHParons extends RunestoneBase {
     createEditor() {
         this.outerDiv = document.createElement("div");
         $(this.origElem).replaceWith(this.outerDiv);
+        let parsonsHTML = `<horizontal-parsons id='${this.divid}-hparsons'`
         if (this.textentry) {
-            this.outerDiv.innerHTML = `<horizontal-parsons input-type='text' id='${this.divid}-hparsons'>`;
+            parsonsHTML += ` input-type='text' `;
         } else {
-            this.outerDiv.innerHTML = `<horizontal-parsons input-type='parsons' id='${this.divid}-hparsons'>`;
+            parsonsHTML += ` input-type='parsons' `;
         }
+        if (this.reuse) {
+            parsonsHTML += ` reuse-blocks`;
+        }
+        parsonsHTML += `>`
+        this.outerDiv.innerHTML = parsonsHTML;
         let blocks = [];
         let blockIndex = this.code.indexOf('--blocks--');
         if (blockIndex > -1) {
@@ -368,7 +375,7 @@ export default class SQLHParons extends RunestoneBase {
     async logCurrentAnswer(sid) {
         let data = {
             div_id: this.divid,
-            // code: this.editor.getValue(),
+            code: this.hparsons.getParsonsTextArray(),
             language: "sql",
             // errinfo: this.results[this.results.length - 1].status,
             to_save: this.saveCode,
