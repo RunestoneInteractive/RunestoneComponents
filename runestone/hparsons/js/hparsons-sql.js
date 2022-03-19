@@ -149,7 +149,7 @@ export default class SQLHParons extends RunestoneBase {
             parsonsHTML += ` input-type='parsons' `;
         }
         if (this.reuse) {
-            parsonsHTML += ` reuse-blocks`;
+            parsonsHTML += ` reuse-blocks="true"`;
         }
         parsonsHTML += `>`
         this.outerDiv.innerHTML = parsonsHTML;

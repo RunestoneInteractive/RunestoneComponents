@@ -3120,46 +3120,103 @@ class ParsonsInput {
     _initSortable = () => {
         this._dragSortable.destroy();
         this._dropSortable.destroy();
-        this._dragSortable = new Sortable(this._dragArea, {
-            group: {
-                name: 'shared',
-                // pull: 'clone',
-                // put: false
-            },
-            // sort: false,
-            direction: 'horizontal',
-            animation: 150,
-            draggable: '.parsons-block',
-        });
-        this._dropSortable = new Sortable(this._dropArea, {
-            group: 'shared',
-            direction: 'horizontal',
-            animation: 150,
-            draggable: '.parsons-block',
-            onAdd: (event) => {
-                const inputEvent = {
-                    'event-type': 'parsons-input',
-                    action: 'add',
-                    position: [-1, this._getBlockPosition(event.item)],
-                    answer: this._getTextArray(),
-                };
-                this.parentElement.logEvent(inputEvent);
-            },
-            onStart: (event) => {
-                this._prevPosition = this._getBlockPosition(event.item);
-            },
-            onEnd: (event) => {
-                let endposition = this._getBlockPosition(event.item);
-                const action = endposition == -1 ? 'remove' : 'move';
-                const inputEvent = {
-                    'event-type': 'parsons-input',
-                    action: action,
-                    position: [this._prevPosition, endposition],
-                    answer: this._getTextArray(),
-                };
-                this.parentElement.logEvent(inputEvent);
-            },
-        });
+        if (this.reusable) {
+            this._dragSortable = new Sortable(this._dragArea, {
+                group: {
+                    name: 'shared',
+                    pull: 'clone',
+                    put: false
+                },
+                sort: false,
+                direction: 'horizontal',
+                animation: 150,
+                draggable: '.parsons-block',
+            });
+            this._dropSortable = new Sortable(this._dropArea, {
+                group: 'shared',
+                direction: 'horizontal',
+                animation: 150,
+                draggable: '.parsons-block',
+                onAdd: (event) => {
+                    const inputEvent = {
+                        'event-type': 'parsons-input',
+                        action: 'add',
+                        position: [-1, this._getBlockPosition(event.item)],
+                        answer: this._getTextArray(),
+                    };
+                    this.parentElement.logEvent(inputEvent);
+                },
+                onStart: (event) => {
+                    this._prevPosition = this._getBlockPosition(event.item);
+                },
+                onEnd: (event) => {
+                    let endposition;
+                    let action = 'move';
+                    const upperbound = this._dropArea.getBoundingClientRect().top;
+                    const lowerbound = this._dropArea.getBoundingClientRect().bottom;
+                    if (event.originalEvent.clientY > lowerbound || event.originalEvent.clientY < upperbound) {
+                        const item = event.item;
+                        if (item.parentNode) {
+                            item.parentNode.removeChild(item);
+                        }
+                        endposition = -1;
+                        action = 'remove';
+                    }
+                    else {
+                        endposition = this._getBlockPosition(event.item);
+                    }
+                    const inputEvent = {
+                        'event-type': 'parsons-input',
+                        action: action,
+                        position: [this._prevPosition, endposition],
+                        answer: this._getTextArray(),
+                    };
+                    this.parentElement.logEvent(inputEvent);
+                },
+            });
+        }
+        else {
+            this._dragSortable = new Sortable(this._dragArea, {
+                group: {
+                    name: 'shared',
+                    // pull: 'clone',
+                    // put: false
+                },
+                // sort: false,
+                direction: 'horizontal',
+                animation: 150,
+                draggable: '.parsons-block',
+            });
+            this._dropSortable = new Sortable(this._dropArea, {
+                group: 'shared',
+                direction: 'horizontal',
+                animation: 150,
+                draggable: '.parsons-block',
+                onAdd: (event) => {
+                    const inputEvent = {
+                        'event-type': 'parsons-input',
+                        action: 'add',
+                        position: [-1, this._getBlockPosition(event.item)],
+                        answer: this._getTextArray(),
+                    };
+                    this.parentElement.logEvent(inputEvent);
+                },
+                onStart: (event) => {
+                    this._prevPosition = this._getBlockPosition(event.item);
+                },
+                onEnd: (event) => {
+                    let endposition = this._getBlockPosition(event.item);
+                    const action = endposition == -1 ? 'remove' : 'move';
+                    const inputEvent = {
+                        'event-type': 'parsons-input',
+                        action: action,
+                        position: [this._prevPosition, endposition],
+                        answer: this._getTextArray(),
+                    };
+                    this.parentElement.logEvent(inputEvent);
+                },
+            });
+        }
     };
     updateTestStatus = (result) => {
         if (this._dropArea.classList.contains(result)) {
@@ -15358,6 +15415,7 @@ class HParsonsElement extends HTMLElement {
         this.root.append(this.inputDiv);
         const reusable = this.getAttribute('reuse-blocks') ? true : false;
         this.hparsonsInput = new ParsonsInput(this, reusable);
+        // console.log(reusable)
         // a div wrapping the input and the test case status
         // init regex input based on the input type
         this._parsonsData = new Array();
