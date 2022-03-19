@@ -153,6 +153,7 @@ export default class SQLHParons extends RunestoneBase {
         }
         parsonsHTML += `>`
         this.outerDiv.innerHTML = parsonsHTML;
+        this.outerDiv.addEventListener('horizontal-parsons', (ev) => {this.logHorizontalParsonsEvent(ev.detail)})
         let blocks = [];
         let blockIndex = this.code.indexOf('--blocks--');
         if (blockIndex > -1) {
@@ -399,6 +400,17 @@ export default class SQLHParons extends RunestoneBase {
             }
             await this.logBookEvent(unitData);
         }
+    }
+
+    logHorizontalParsonsEvent(hparsonsEvent) {
+        // TODO: might need to find another way to change "act". 
+        // The event string is probably too long.
+        let ev = {
+            event: "hparsons",
+            div_id: this.divid,
+            act: JSON.stringify(hparsonsEvent),
+        };
+        this.logBookEvent(ev);
     }
 
     renderFeedback() {
