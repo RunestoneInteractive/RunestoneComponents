@@ -33,7 +33,7 @@ from runestone.common import RunestoneIdDirective, RunestoneIdNode
 def setup(app):
     app.add_directive("blockly", Blockly)
 
-    app.add_node(BlocklyNode, html=(visit_block_node, depart_block_node))
+    app.add_node(BlocklyNode, html=(visit_block_html, depart_block_html))
 
     app.connect("doctree-resolved", process_activcode_nodes)
     app.connect("env-purge-doc", purge_activecodes)
@@ -154,10 +154,12 @@ END = """
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
-def visit_block_node(self, node):
-    res = START % (node.runestone_options)
+
+
+def visit_block_html(self, node):
+    res = START % (node["runestone_options"])
     res += CTRL_START
-    for ctrl in node.runestone_options["controls"]:
+    for ctrl in node["runestone_options"]["controls"]:
         if ctrl == "variables":
             res += '<category name="Variables" custom="VARIABLE"></category>'
         elif ctrl == "":
@@ -169,11 +171,11 @@ def visit_block_node(self, node):
         else:
             res += '<block type="%s"></block>\n' % (ctrl)
     res += CTRL_END
-    res += END % (node.runestone_options)
+    res += END % (node["runestone_options"])
     path = os.path.join(
-        node.runestone_options["blocklyHomePrefix"],
+        node["runestone_options"]["blocklyHomePrefix"],
         "_static",
-        node.runestone_options["divid"] + ".html",
+        node["runestone_options"]["divid"] + ".html",
     )
     final = (
         '<iframe class="blk-iframe" seamless src="%s" width="600" '
@@ -185,9 +187,9 @@ def visit_block_node(self, node):
     self.body.append(final)
 
 
-def depart_block_node(self, node):
+def depart_block_html(self, node):
     """ This is called at the start of processing an activecode node.  If activecode had recursive nodes
-        etc and did not want to do all of the processing in visit_ac_node any finishing touches could be
+        etc and did not want to do all of the processing in visit_ac_html any finishing touches could be
         added here.
     """
     pass

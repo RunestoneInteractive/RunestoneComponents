@@ -30,7 +30,7 @@ def setup(app):
     app.add_directive("video", Video)
     app.add_directive("youtube", Youtube)
     app.add_directive("vimeo", Vimeo)
-    app.add_node(VideoNode, html=(visit_video_node, depart_video_node))
+    app.add_node(VideoNode, html=(visit_video_html, depart_video_html))
 
 
 CODE = """\
@@ -85,21 +85,18 @@ SOURCE = """<source src="%s" type="video/%s"></source>"""
 
 
 class VideoNode(nodes.General, nodes.Element, RunestoneIdNode):
-    def __init__(self, content, **kwargs):
-        super().__init__(**kwargs)
-        self.runestone_options = content
-        self.template = kwargs["template"]
+    pass
 
 
-def visit_video_node(self, node):
-    html = node.template % node.runestone_options
+def visit_video_html(self, node):
+    html = node["template"] % node["runestone_options"]
     self.body.append(html)
     addHTMLToDB(
-        node.runestone_options["divid"], node.runestone_options["basecourse"], html
+        node["runestone_options"]["divid"], node["runestone_options"]["basecourse"], html
     )
 
 
-def depart_video_node(self, node):
+def depart_video_html(self, node):
     pass
 
 
@@ -235,11 +232,11 @@ class IframeVideo(RunestoneIdDirective):
 
         # res = self.html % self.options
         # addHTMLToDB(self.options["divid"], self.options["basecourse"], res)
-        raw_node = VideoNode(
-            self.options, rawsource=self.block_text, template=self.html
-        )
+        raw_node = VideoNode()
+        raw_node["runestone_options"] = self.options
+        raw_node["template"] = self.html
         # nodes.raw(self.block_text, res, format="html")
-        raw_node.source, raw_node.line = self.state_machine.get_source_and_line(
+        raw_node["source"], raw_node["line"] = self.state_machine.get_source_and_line(
             self.lineno
         )
         return [raw_node]

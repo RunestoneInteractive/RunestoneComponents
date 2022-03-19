@@ -29,7 +29,7 @@ from runestone.common.runestonedirective import RunestoneDirective, RunestoneIdN
 
 def setup(app):
     app.add_directive("shortanswer", JournalDirective)
-    app.add_node(JournalNode, html=(visit_journal_node, depart_journal_node))
+    app.add_node(JournalNode, html=(visit_journal_html, depart_journal_html))
     app.add_config_value("shortanswer_div_class", "journal alert alert-warning", "html")
     app.add_config_value(
         "shortanswer_optional_div_class", "journal alert alert-success", "html"
@@ -48,38 +48,36 @@ TEXT_END = """
 
 
 class JournalNode(nodes.General, nodes.Element, RunestoneIdNode):
-    def __init__(self, options, **kwargs):
-        super(JournalNode, self).__init__(**kwargs)
-        self.runestone_options = options
+    pass
 
 
-def visit_journal_node(self, node):
-    div_id = node.runestone_options["divid"]
-    components = dict(node.runestone_options)
+def visit_journal_html(self, node):
+    div_id = node["runestone_options"]["divid"]
+    components = dict(node["runestone_options"])
     components.update({"divid": div_id})
 
-    node.delimiter = "_start__{}_".format(node.runestone_options["divid"])
-    self.body.append(node.delimiter)
+    node["delimiter"] = "_start__{}_".format(node["runestone_options"]["divid"])
+    self.body.append(node["delimiter"])
 
     res = TEXT_START % components
 
     self.body.append(res)
 
 
-def depart_journal_node(self, node):
+def depart_journal_html(self, node):
 
-    components = dict(node.runestone_options)
+    components = dict(node["runestone_options"])
 
     res = TEXT_END % components
     self.body.append(res)
 
     addHTMLToDB(
-        node.runestone_options["divid"],
+        node["runestone_options"]["divid"],
         components["basecourse"],
-        "".join(self.body[self.body.index(node.delimiter) + 1 :]),
+        "".join(self.body[self.body.index(node["delimiter"]) + 1 :]),
     )
 
-    self.body.remove(node.delimiter)
+    self.body.remove(node["delimiter"])
 
 
 class JournalDirective(Assessment):
@@ -112,8 +110,9 @@ config values (conf.py):
 
         self.options["mathjax"] = "data-mathjax" if "mathjax" in self.options else ""
 
-        journal_node = JournalNode(self.options, rawsource=self.block_text)
-        journal_node.source, journal_node.line = self.state_machine.get_source_and_line(
+        journal_node = JournalNode()
+        journal_node["runestone_options"] = self.options
+        journal_node["source"], journal_node["line"] = self.state_machine.get_source_and_line(
             self.lineno
         )
 

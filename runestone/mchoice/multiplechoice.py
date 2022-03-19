@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+import pdb
 __author__ = "bmiller"
 
 from docutils import nodes
@@ -31,70 +32,129 @@ from runestone.server.componentdb import (
 
 
 class MChoiceNode(nodes.General, nodes.Element, RunestoneIdNode):
-    def __init__(self, content, **kwargs):
-        """
-
-        Arguments:
-        - `self`:
-        - `content`:
-        """
-        super(MChoiceNode, self).__init__(**kwargs)
-        self.runestone_options = content
+    pass
 
 
-def visit_mc_node(self, node):
+XML_START = """
+    <exercise xml:id="{divid}">
+        <statement>
 
-    node.delimiter = "_start__{}_".format(node.runestone_options["divid"])
-    self.body.append(node.delimiter)
+"""
+
+XML_START_END = """
+        </statement>
+        <choices>
+"""
+
+XML_OPTION = """
+            <choice {is_correct}>
+                <statement>
+                    <p>{atext}</p>
+                </statement>
+                <feedback>
+                    <p>Incorrect: green means "go!".</p>
+                </feedback>
+            </choice>
+"""
+
+XML_END = """
+        </choices>
+    </exercise>
+"""
+
+TEMPLATE_START = """
+    <div class="{divclass}">
+    <ul data-component="multiplechoice" data-question_label="{question_label}" data-multipleanswers="{multipleAnswers}" {random} id="{divid}" {optional} style="visibility: hidden;">
+    """
+
+OPTION = """
+    <li data-component="answer" {is_correct} id="{divid}_opt_{alabel}">{atext}</li><li data-component="feedback">{feedtext}</li>
+    """
+
+TEMPLATE_END = """
+
+    </ul>
+    </div>
+    """
+
+
+def visit_mc_common(self, node):
 
     res = ""
-    if "random" in node.runestone_options:
-        node.runestone_options["random"] = "data-random"
+    if "random" in node["runestone_options"]:
+        node["runestone_options"]["random"] = "data-random"
     else:
-        node.runestone_options["random"] = ""
+        node["runestone_options"]["random"] = ""
     # Use multiple_answers behavior if explicitly required or if multiple correct answers were provided.
-    if ("multiple_answers" in node.runestone_options) or (
-        "," in node.runestone_options["correct"]
+    if ("multiple_answers" in node["runestone_options"]) or (
+        "," in node["runestone_options"]["correct"]
     ):
-        node.runestone_options["multipleAnswers"] = "true"
+        node["runestone_options"]["multipleAnswers"] = "true"
     else:
-        node.runestone_options["multipleAnswers"] = "false"
-    res = node.template_start % node.runestone_options
+        node["runestone_options"]["multipleAnswers"] = "false"
+    res = node["template_start"].format(**node["runestone_options"])
 
-    self.body.append(res)
+    return res
 
 
-def depart_mc_node(self, node):
+def depart_mc_common(self, node):
     res = ""
     currFeedback = ""
     # Add all of the possible answers
-    okeys = list(node.runestone_options.keys())
+    okeys = list(node["runestone_options"].keys())
     okeys.sort()
     for k in okeys:
         if "answer_" in k:
             x, label = k.split("_")
-            node.runestone_options["alabel"] = label
-            node.runestone_options["atext"] = node.runestone_options[k]
+            node["runestone_options"]["alabel"] = label
+            node["runestone_options"]["atext"] = node["runestone_options"][k]
             currFeedback = "feedback_" + label
-            node.runestone_options["feedtext"] = node.runestone_options.get(
+            node["runestone_options"]["feedtext"] = node["runestone_options"].get(
                 currFeedback, ""
-            )  # node.runestone_options[currFeedback]
-            if label in node.runestone_options["correct"]:
-                node.runestone_options["is_correct"] = "data-correct"
+            )  # node["runestone_options"][currFeedback]
+            if label in node["runestone_options"]["correct"]:
+                node["runestone_options"]["is_correct"] = "data-correct"
             else:
-                node.runestone_options["is_correct"] = ""
-            res += node.template_option % node.runestone_options
+                node["runestone_options"]["is_correct"] = ""
+            res += node["template_option"].format(**node["runestone_options"])
 
-    res += node.template_end % node.runestone_options
+    res += node["template_end"].format(**node["runestone_options"])
+    return res
+
+
+def visit_mc_xml(self, node):
+    node["template_start"] = XML_START
+    node["template_end"] = XML_END
+    node["template_option"] = XML_OPTION
+    pdb.set_trace()
+    res = visit_mc_common(self, node)
+    self.output.append(res)
+
+
+def depart_mc_xml(self, node):
+    self.output.append(XML_START_END)
+    res = depart_mc_common(self, node)
+    self.output.append(res)
+
+
+def visit_mc_html(self, node):
+    node["delimiter"] = "_start__{}_".format(node["runestone_options"]["divid"])
+    self.body.append(node["delimiter"])
+    res = visit_mc_common(self, node)
+    self.body.append(res)
+
+
+def depart_mc_html(self, node):
+    res = depart_mc_common(self, node)
     self.body.append(res)
 
     addHTMLToDB(
-        node.runestone_options["divid"],
-        node.runestone_options["basecourse"],
-        "".join(self.body[self.body.index(node.delimiter) + 1 :]),
+        node["runestone_options"]["divid"],
+        node["runestone_options"]["basecourse"],
+        "".join(self.body[self.body.index(node["delimiter"]) + 1 :]),
     )
 
-    self.body.remove(node.delimiter)
+    self.body.remove(node["delimiter"])
 
 
 #####################
@@ -194,28 +254,15 @@ class MChoice(Assessment):
 
         super(MChoice, self).run()
 
-        TEMPLATE_START = """
-            <div class="%(divclass)s">
-            <ul data-component="multiplechoice" data-question_label="%(question_label)s" data-multipleanswers="%(multipleAnswers)s" %(random)s id="%(divid)s" %(optional)s style="visibility: hidden;">
-            """
-
-        OPTION = """
-            <li data-component="answer" %(is_correct)s id="%(divid)s_opt_%(alabel)s">%(atext)s</li><li data-component="feedback">%(feedtext)s</li>
-            """
-
-        TEMPLATE_END = """
-
-            </ul>
-            </div>
-            """
         addQuestionToDB(self)
 
-        mcNode = MChoiceNode(self.options, rawsource=self.block_text)
-        mcNode.source, mcNode.line = self.state_machine.get_source_and_line(self.lineno)
-        mcNode.template_start = TEMPLATE_START
-        mcNode.template_option = OPTION
-        mcNode.template_end = TEMPLATE_END
-
+        mcNode = MChoiceNode()
+        mcNode["runestone_options"] = self.options
+        mcNode["source"], mcNode["line"] = self.state_machine.get_source_and_line(
+            self.lineno)
+        mcNode["template_start"] = TEMPLATE_START
+        mcNode["template_option"] = OPTION
+        mcNode["template_end"] = TEMPLATE_END
         # For MChoice its better to insert the qnum into the content before further processing.
         self.updateContent()
 
@@ -258,9 +305,9 @@ class MChoice(Assessment):
                 feedback_bullet_list = answer_list_item[-1]
                 if (
                     not isinstance(feedback_bullet_list, nodes.bullet_list)
-                    or
+
                     # It should have just one item (the feedback itself).
-                    (len(feedback_bullet_list) != 1)
+                    or (len(feedback_bullet_list) != 1)
                 ):
                     raise self.error(
                         "On line {}, a single-item list must be nested under each answer.".format(
@@ -342,7 +389,7 @@ class FeedbackListItem(nodes.list_item, RunestoneNode):
 
 
 # The ``<ul>`` tag will be generated already -- don't output it.
-def visit_answers_bullet_node(self, node):
+def visit_answers_bullet_html(self, node):
     # Prevent the list items, which are wrapped in ``<paragraph>`` tags, from emitting the ``<p>``. See similar code in ``docutils.writers._html_base.HTMLTranslator.visit_bullet_list`` and its use in ``docutils.writer.html4css1.HTMLTranslator.visit_paragraph``.
     self.context.append((self.compact_simple, self.compact_p))
     self.compact_p = None
@@ -350,29 +397,29 @@ def visit_answers_bullet_node(self, node):
 
 
 # The ``</ul>`` tag will be generated already -- don't output it.
-def depart_answers_bullet_node(self, node):
-    # Restore the state modified in ``visit_answers_bullet_node``.
+def depart_answers_bullet_html(self, node):
+    # Restore the state modified in ``visit_answers_bullet_html``.
     self.compact_simple, self.compact_p = self.context.pop()
 
 
 # Write out the special attributes needed by the ``<li>`` tag.
 def visit_answer_list_item(self, node):
     # See the structure_.
-    mcNode = node.parent.parent
+    mc_node = node.parent.parent
 
     # _`label`: Turn the index of this item in the answer_bullet_list (see structure_) into a letter.
     label = chr(node.parent.index(node) + ord("a"))
     # Update dict for formatting the HTML.
-    mcNode.runestone_options["alabel"] = label
-    if label in mcNode.runestone_options["correct"]:
-        mcNode.runestone_options["is_correct"] = "data-correct"
+    mc_node["runestone_options"]["alabel"] = label
+    if label in mc_node["runestone_options"]["correct"]:
+        mc_node["runestone_options"]["is_correct"] = "data-correct"
     else:
-        mcNode.runestone_options["is_correct"] = ""
+        mc_node["runestone_options"]["is_correct"] = ""
 
     # Format the HTML.
     self.body.append(
-        '<li data-component="answer" %(is_correct)s id="%(divid)s_opt_%(alabel)s">'
-        % mcNode.runestone_options
+        '<li data-component="answer" {is_correct} id="{divid}_opt_{alabel}">'.format(
+            **mc_node["runestone_options"])
     )
 
 
@@ -382,24 +429,24 @@ def depart_answer_list_item(self, node):
 
 
 # Nothing to output, since feedback isn't nested under an answer in the HTML.
-def visit_feedback_bullet_node(self, node):
+def visit_feedback_bullet_html(self, node):
     pass
 
 
 # Nothing to output, since feedback isn't nested under an answer in the HTML.
-def depart_feedback_bullet_node(self, node):
+def depart_feedback_bullet_html(self, node):
     pass
 
 
 def visit_feedback_list_item(self, node):
     # See label_ and structure_.
     answer_list_item = node.parent.parent
-    mcNode = answer_list_item.parent.parent
+    mc_node = answer_list_item.parent.parent
     label = chr(answer_list_item.parent.index(answer_list_item) + ord("a"))
-    mcNode.runestone_options["alabel"] = label
+    mc_node["runestone_options"]["alabel"] = label
     self.body.append(
-        '</li><li data-component="feedback" id="%(divid)s_opt_%(alabel)s">\n'
-        % mcNode.runestone_options
+        '</li><li data-component="feedback" id="{divid}_opt_{alabel}">\n'.format(
+            **mc_node["runestone_options"])
     )
 
 

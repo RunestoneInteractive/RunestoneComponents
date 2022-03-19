@@ -146,20 +146,18 @@ TEXTAREA_REPLACEMENT_STRING = """
 # _LpBuildButtonDirective
 # ^^^^^^^^^^^^^^^^^^^^^^^
 class LpNode(nodes.General, nodes.Element, RunestoneIdNode):
-    def __init__(self, content, **kwargs):
-        super().__init__(**kwargs)
-        self.runestone_options = content
+    pass
 
 
-def visit_lp_node(self, node):
+def visit_lp_html(self, node):
     # Save the HTML that's been generated so far. We want to know only what's generated inside the LP directive.
     self.context.append(self.body)
     self.body = []
 
 
-def depart_lp_node(self, node):
+def depart_lp_html(self, node):
     env = env_from_node(node)
-    id_ = node.runestone_options["divid"]
+    id_ = node["runestone_options"]["divid"]
     html = """<div class="runestone">
     {}
     <input type="button" value="Save and run" class="btn btn-success" data-component="lp_build" data-question_label="%(question_label)s" data-lang="{}" id="{}" />
@@ -168,22 +166,22 @@ def depart_lp_node(self, node):
     <br />
     <div class="lp-feedback"><div></div></div>
 </div>""".format(
-        "".join(self.body), node.runestone_options["language"], id_
+        "".join(self.body), node["runestone_options"]["language"], id_
     )
     self.body = self.context.pop() + [html]
 
     addHTMLToDB(
         id_,
-        node.runestone_options["basecourse"],
+        node["runestone_options"]["basecourse"],
         html,
         json.dumps(
             dict(
                 # Provide these to the server, indicating how to build.
-                language=node.runestone_options["language"],
-                builder=node.runestone_options["builder"],
-                timelimit=node.runestone_options["timelimit"],
-                include=node.runestone_options["include"],
-                source_path=node.runestone_options["source_path"],
+                language=node["runestone_options"]["language"],
+                builder=node["runestone_options"]["builder"],
+                timelimit=node["runestone_options"]["timelimit"],
+                include=node["runestone_options"]["include"],
+                source_path=node["runestone_options"]["source_path"],
                 sphinx_base_path=env.app.confdir,
             )
         ),
@@ -229,8 +227,9 @@ class _LpBuildButtonDirective(RunestoneIdDirective):
         self.options.setdefault("builder", "JOBE")
         self.options["source_path"] = env.docname
 
-        lp_node = LpNode(self.options, rawsource=self.block_text)
-        lp_node.source, lp_node.line = self.state_machine.get_source_and_line(
+        lp_node = LpNode()
+        lp_node["runestone_options"] = self.options
+        lp_node["source"], lp_node["line"] = self.state_machine.get_source_and_line(
             self.lineno
         )
         # Insert the question number.
@@ -242,6 +241,8 @@ class _LpBuildButtonDirective(RunestoneIdDirective):
 
 
 # Remove code solutions and feedback from source files. Also, produce a Pygments-highlighted version of each source file.
+
+
 def _doctree_resolved(app, doctree, docname):
     env = app.builder.env
 
@@ -265,9 +266,10 @@ def _doctree_resolved(app, doctree, docname):
             else:
                 # None of the node's ancestors are RunestoneIdNodes. Add to our list.
                 # Some nodes don't define enough information to remove them. Skip.
-                if node.line and node.rawsource:
+                if node["line"] and node.rawsource:
                     runestone_directives_to_remove += [
-                        [node.line, node.line + len(node.rawsource.splitlines())]
+                        [node["line"], node["line"]
+                            + len(node.rawsource.splitlines())]
                     ]
         if runestone_directives_to_remove:
             # Look for answers in the source and remove them. Work from the last answer (which is closest to the end of the file), so edits don't change the line numbering for earlier answers.
@@ -401,7 +403,7 @@ def _alink_role(
     #
     # #. ``:alink:`foo <bar#thing>``` is translated to ```foo <bar_>_```, an indirect reference to ``bar``.
     # #. In  (I think) ``docutils.transforms.references.IndirectHyperlinks``, the ``nodes.target`` referring to ``bar`` is replaced with the ``nodes.target`` for ``bar``. So, any info (such as an ``anchor`` field) specific to this target will be lost in the replacement.
-    # #. In the ``ExternalAnchorTargets`` transform, the ``nodes.target`` with the actual ``refuri`` (name of the URL in a Docutils node) will have the ``node.reference anchor`` value appended. However, this will **only** apply to the original ``node.reference`` -- references to this reference won't have the ``anchor`` field. I'm not sure how or where to fix this (to make ``anchor`` propagate).
+    # #. In the ``ExternalAnchorTargets`` transform, the ``nodes.target`` with the actual ``refuri`` (name of the URL in a Docutils node) will have the ``node["reference"] anchor`` value appended. However, this will **only** apply to the original ``node["reference"]`` -- references to this reference won't have the ``anchor`` field. I'm not sure how or where to fix this (to make ``anchor`` propagate).
     #
     # Test cases: source link is
     # :alink:`.space directive <asmguide#page=75>`
@@ -547,7 +549,7 @@ def setup(
     # See http://www.sphinx-doc.org/en/stable/extdev/appapi.html#sphinx.application.Sphinx.add_transform.
     app.add_transform(ExternalAnchorTargets)
 
-    app.add_node(LpNode, html=(visit_lp_node, depart_lp_node))
+    app.add_node(LpNode, html=(visit_lp_html, depart_lp_html))
 
     # See http://www.sphinx-doc.org/en/stable/extdev/appapi.html#sphinx.application.Sphinx.add_directive.
     app.add_directive("lp_build", _LpBuildButtonDirective)

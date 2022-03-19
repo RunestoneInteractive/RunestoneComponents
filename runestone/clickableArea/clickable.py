@@ -29,7 +29,7 @@ from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneI
 def setup(app):
     app.add_directive("clickablearea", ClickableArea)
 
-    app.add_node(ClickableAreaNode, html=(visit_ca_node, depart_ca_node))
+    app.add_node(ClickableAreaNode, html=(visit_ca_html, depart_ca_html))
 
     app.add_config_value("clickable_div_class", "runestone alert alert-warning", "html")
 
@@ -46,60 +46,53 @@ TEMPLATE_END = """
 
 
 class ClickableAreaNode(nodes.General, nodes.Element, RunestoneIdNode):
-    def __init__(self, content, **kwargs):
-        """
-        Arguments:
-        - `self`:
-        - `content`:
-        """
-        super(ClickableAreaNode, self).__init__(**kwargs)
-        self.runestone_options = content
+    pass
 
 
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
-def visit_ca_node(self, node):
+def visit_ca_html(self, node):
     res = TEMPLATE
 
-    node.delimiter = "_start__{}_".format(node.runestone_options["divid"])
-    self.body.append(node.delimiter)
+    node["delimiter"] = "_start__{}_".format(node["runestone_options"]["divid"])
+    self.body.append(node["delimiter"])
 
-    if "feedback" in node.runestone_options:
-        node.runestone_options["feedback"] = (
-            "<span data-feedback>" + node.runestone_options["feedback"] + "</span>"
+    if "feedback" in node["runestone_options"]:
+        node["runestone_options"]["feedback"] = (
+            "<span data-feedback>" + node["runestone_options"]["feedback"] + "</span>"
         )
     else:
-        node.runestone_options["feedback"] = ""
+        node["runestone_options"]["feedback"] = ""
 
-    if "iscode" not in node.runestone_options:
-        node.runestone_options["correct"] = (
-            "data-cc=" + '"' + node.runestone_options["correct"] + '"'
+    if "iscode" not in node["runestone_options"]:
+        node["runestone_options"]["correct"] = (
+            "data-cc=" + '"' + node["runestone_options"]["correct"] + '"'
         )
-        node.runestone_options["incorrect"] = (
-            "data-ci=" + '"' + node.runestone_options["incorrect"] + '"'
+        node["runestone_options"]["incorrect"] = (
+            "data-ci=" + '"' + node["runestone_options"]["incorrect"] + '"'
         )
     else:
-        node.runestone_options["correct"] = ""
-        node.runestone_options["incorrect"] = ""
+        node["runestone_options"]["correct"] = ""
+        node["runestone_options"]["incorrect"] = ""
 
-    res = res % node.runestone_options
+    res = res % node["runestone_options"]
 
     self.body.append(res)
 
 
-def depart_ca_node(self, node):
+def depart_ca_html(self, node):
     res = ""
-    res = TEMPLATE_END % node.runestone_options
+    res = TEMPLATE_END % node["runestone_options"]
     self.body.append(res)
 
     addHTMLToDB(
-        node.runestone_options["divid"],
-        node.runestone_options["basecourse"],
-        "".join(self.body[self.body.index(node.delimiter) + 1 :]),
+        node["runestone_options"]["divid"],
+        node["runestone_options"]["basecourse"],
+        "".join(self.body[self.body.index(node["delimiter"]) + 1 :]),
     )
 
-    self.body.remove(node.delimiter)
+    self.body.remove(node["delimiter"])
 
 
 class ClickableArea(RunestoneIdDirective):
@@ -166,11 +159,12 @@ config values (conf.py):
             self.options["clickcode"] = source
         else:
             self.options["clickcode"] = ""
-        clickNode = ClickableAreaNode(self.options, rawsource=self.block_text)
-        clickNode.source, clickNode.line = self.state_machine.get_source_and_line(
+        clickNode = ClickableAreaNode()
+        clickNode["runestone_options"] = self.options
+        clickNode["source"], clickNode["line"] = self.state_machine.get_source_and_line(
             self.lineno
         )
-        clickNode.template_start = TEMPLATE
+        clickNode["template_start"] = TEMPLATE
 
         if "table" in self.options:
             self.options["table"] = "data-table"

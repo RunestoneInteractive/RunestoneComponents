@@ -19,21 +19,22 @@
 
 # Note: An import entry for quizly must be included in runestone/__init__.py
 
-# Note: The content files for the khanex component must be stored in the 
+# Note: The content files for the khanex component must be stored in the
 # course's _static folder. Download the following file and unzip it in _static:
 # https://github.com/ram8647/khanex/blob/16398fd496fad5b93fdf4d72c274064db8d1d1ac/khanex-runestone.zip
 
+import shutil
+import os
+from pathlib import Path
+from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
+from runestone.common import RunestoneIdDirective, RunestoneIdNode
+from docutils import nodes
 __author__ = "rmorelli"
 
 # Debug flags
 DEBUG = False
 VERBOSE = False
 
-import os, shutil
-from docutils import nodes
-from runestone.common import RunestoneIdDirective, RunestoneIdNode
-from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from pathlib import Path
 
 # Template that will load index.html?quizname=the-quiz-name into an <iframe>
 # NOTE: Hardcoding the container class.  Temporarily??
@@ -46,58 +47,52 @@ KHANEX_TEMPLATE = """
        """
 
 # Define the khanex directive
+
+
 def setup(app):
     app.add_directive("khanex", Khanex)
-    app.add_node(KhanexNode, html=(visit_khanex_node, depart_khanex_node))
+    app.add_node(KhanexNode, html=(visit_khanex_html, depart_khanex_html))
 
 # The only content needed from khanex.py is the exercise name
+
+
 class KhanexNode(nodes.General, nodes.Element, RunestoneIdNode):
-    def __init__(self, content, **kwargs):
-        """
-        Arguments:
-        - `self`:
-        - `content`:
-        """
-        super(KhanexNode, self).__init__(**kwargs)
-        self.runestone_options = content
-        print('DEBUG: KhanexNode content = ' + str(content)) if DEBUG else None
-        self.exername = str(content['controls'][0])
-        self.exername = str.strip(self.exername[10:])
-        self.template = KHANEX_TEMPLATE.replace('###', self.exername)
-        print('DEBUG: KhanexNode self.exername = ' + self.exername) if DEBUG else None
-        print('DEBUG: KhanexNode self.template = ' + self.template) if DEBUG else None
+    pass
 
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
-def visit_khanex_node(self, node):
 
-    node.delimiter = "_start__{}_".format(node.runestone_options["divid"])
-    self.body.append(node.delimiter)
 
-    print('DEBUG: visit_khanex_node exername = ' + node.exername) if DEBUG else None
-    print('DEBUG: visit_khanex_node template = ' + node.template) if DEBUG else None
-    print('DEBUG: visit_khanex_node options = ' + str(node.runestone_options)) if DEBUG else None
+def visit_khanex_html(self, node):
 
-    res = node.template % (node.runestone_options)
-    print('DEBUG: visit_khanex_node res = ' + res) if DEBUG else None
+    node["delimiter"] = "_start__{}_".format(node["runestone_options"]["divid"])
+    self.body.append(node["delimiter"])
+
+    print('DEBUG: visit_khanex_html exername = ' + node["exername"]) if DEBUG else None
+    print('DEBUG: visit_khanex_html template = ' + node["template"]) if DEBUG else None
+    print('DEBUG: visit_khanex_html options = '
+          + str(node["runestone_options"])) if DEBUG else None
+
+    res = node["template"] % (node["runestone_options"])
+    print('DEBUG: visit_khanex_html res = ' + res) if DEBUG else None
     self.body.append(res)
 
 
-def depart_khanex_node(self, node):
+def depart_khanex_html(self, node):
     """ This is called at the start of processing an activecode node.  If activecode had recursive nodes
-        etc and did not want to do all of the processing in visit_ac_node any finishing touches could be
+        etc and did not want to do all of the processing in visit_ac_html any finishing touches could be
         added here.
     """
-    print('DEBUG: depart_khanex_node') if DEBUG else None
-    bc = node.runestone_options["basecourse"]
+    print('DEBUG: depart_khanex_html') if DEBUG else None
+    bc = node["runestone_options"]["basecourse"]
     addHTMLToDB(
-        node.runestone_options["divid"],
+        node["runestone_options"]["divid"],
         bc,
-        "".join(self.body[self.body.index(node.delimiter) + 1 :])
-        .replace("../_static",f"/runestone/books/published/{bc}/_static"),        
+        "".join(self.body[self.body.index(node["delimiter"]) + 1 :])
+        .replace("../_static", f"/runestone/books/published/{bc}/_static"),
     )
-    self.body.remove(node.delimiter)
+    self.body.remove(node["delimiter"])
     pass
 
 
@@ -138,11 +133,14 @@ class Khanex(RunestoneIdDirective):
         if self.content:
             self.options["controls"] = self.content[:plstart]
 
-        khanex_node = KhanexNode(self.options, rawsource=self.block_text)
-        khanex_node.source, khanex_node.line = self.state_machine.get_source_and_line(
+        khanex_node = KhanexNode()
+        khanex_node["runestone_options"] = self.options
+        khanex_node["exername"] = str(self.options['controls'][0])
+        khanex_node["exername"] = str.strip(khanex_node["exername"][10:])
+        khanex_node["template"] = KHANEX_TEMPLATE.replace(
+            '###', khanex_node["exername"])
+
+        khanex_node["source"], khanex_node["line"] = self.state_machine.get_source_and_line(
             self.lineno
         )
-        print('DEBUG: run() self.content = ' + str(self.content)) if DEBUG else None
-        print('DEBUG: run() khanex_node = ' + str(khanex_node)) if DEBUG else None
         return [khanex_node]
-

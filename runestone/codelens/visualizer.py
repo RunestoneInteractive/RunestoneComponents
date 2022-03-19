@@ -31,7 +31,7 @@ def setup(app):
 
     app.add_config_value("codelens_div_class", "alert alert-warning cd_section", "html")
     app.add_config_value("trace_url", "http://tracer.runestone.academy:5000", "html")
-    app.add_node(CodeLensNode, html=(visit_codelens_node, depart_codelens_node))
+    app.add_node(CodeLensNode, html=(visit_codelens_html, depart_codelens_html))
 
 
 #  data-tracefile="pytutor-embed-demo/java.json"
@@ -62,28 +62,26 @@ allTraceData["%(divid)s"] = %(tracedata)s;
 
 
 class CodeLensNode(nodes.General, nodes.Element, RunestoneIdNode):
-    def __init__(self, content, **kwargs):
-        super().__init__(**kwargs)
-        self.runestone_options = content
+    pass
 
 
-def visit_codelens_node(self, node):
+def visit_codelens_html(self, node):
     html = VIS
-    if "caption" not in node.runestone_options:
-        node.runestone_options["caption"] = node.runestone_options["question_label"]
-    if "tracedata" in node.runestone_options:
+    if "caption" not in node["runestone_options"]:
+        node["runestone_options"]["caption"] = node["runestone_options"]["question_label"]
+    if "tracedata" in node["runestone_options"]:
         html += DATA
     else:
         html += "</div>"
-    html = html % node.runestone_options
+    html = html % node["runestone_options"]
 
     self.body.append(html)
     addHTMLToDB(
-        node.runestone_options["divid"], node.runestone_options["basecourse"], html
+        node["runestone_options"]["divid"], node["runestone_options"]["basecourse"], html
     )
 
 
-def depart_codelens_node(self, node):
+def depart_codelens_html(self, node):
     pass
 
 
@@ -227,8 +225,9 @@ config values (conf.py):
                 else:
                     raise ValueError("language not supported")
 
-        cl_node = CodeLensNode(self.options, rawsource=self.block_text)
-        cl_node.source, cl_node.line = self.state_machine.get_source_and_line(
+        cl_node = CodeLensNode()
+        cl_node["runestone_options"] = self.options
+        cl_node["source"], cl_node["line"] = self.state_machine.get_source_and_line(
             self.lineno
         )
         return [cl_node]

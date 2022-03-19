@@ -27,7 +27,7 @@ def test_1(selenium_module_fixture):
         (102, "No correct answer specified."),
     )
     for error_line, error_string in directive_level_errors:
-        assert ":{}: WARNING: {}".format(error_line, error_string) in mf.build_stderr_data
+        assert ":{}: ERROR: {}".format(error_line, error_string) in mf.build_stderr_data
 
     # Check for the following error inside the directive.
     inside_directive_lines = (
@@ -39,14 +39,15 @@ def test_1(selenium_module_fixture):
         95,
     )
     for error_line in inside_directive_lines:
-        assert ": WARNING: On line {}, a single-item list must be nested under each answer.".format(
+        assert ": ERROR: On line {}, a single-item list must be nested under each answer.".format(
             error_line
         ) in mf.build_stderr_data
 
     assert "WARNING: while setting up extension runestone.lp: role 'docname' is already registered, it will be overridden" in mf.build_stderr_data
 
     # Make sure we saw all errors.
-    assert (len(directive_level_errors) + len(inside_directive_lines) + 1) == mf.build_stderr_data.count("WARNING")
+    assert (len(directive_level_errors) + len(inside_directive_lines)
+            ) == mf.build_stderr_data.count("ERROR")
 
 
 # Run-time checks

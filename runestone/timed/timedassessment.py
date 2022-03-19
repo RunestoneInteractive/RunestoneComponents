@@ -42,64 +42,64 @@ from runestone.server.componentdb import addAssignmentToDB
 # Timed Assessment Implementation
 # -------------------------------
 # Everydirective uses setup to add itself to the applications and add any nodes
+
+
 def setup(app):
     app.add_directive("timed", TimedDirective)
-    app.add_node(TimedNode, html=(visit_timed_node, depart_timed_node))
+    app.add_node(TimedNode, html=(visit_timed_html, depart_timed_html))
 
 
 class TimedNode(nodes.General, nodes.Element, RunestoneIdNode):
-    def __init__(self, content, **kwargs):
-        super(TimedNode, self).__init__(**kwargs)
-        self.runestone_options = content
+    pass
 
 
-def visit_timed_node(self, node):
+def visit_timed_html(self, node):
     # Set options and format templates accordingly
 
-    if "timelimit" not in node.runestone_options:
-        node.runestone_options["timelimit"] = ""
+    if "timelimit" not in node["runestone_options"]:
+        node["runestone_options"]["timelimit"] = ""
     else:
-        node.runestone_options["timelimit"] = "data-time=" + str(
-            node.runestone_options["timelimit"]
+        node["runestone_options"]["timelimit"] = "data-time=" + str(
+            node["runestone_options"]["timelimit"]
         )
 
-    if "noresult" in node.runestone_options:
-        node.runestone_options["noresult"] = "data-no-result"
+    if "noresult" in node["runestone_options"]:
+        node["runestone_options"]["noresult"] = "data-no-result"
     else:
-        node.runestone_options["noresult"] = ""
+        node["runestone_options"]["noresult"] = ""
 
-    if "timedfeedback" in node.runestone_options:
-        node.runestone_options["timedfeedback"] = "data-timedfeedback=true"
+    if "timedfeedback" in node["runestone_options"]:
+        node["runestone_options"]["timedfeedback"] = "data-timedfeedback=true"
     else:
-        node.runestone_options["timedfeedback"] = ""
+        node["runestone_options"]["timedfeedback"] = ""
 
-    if "notimer" in node.runestone_options:
-        node.runestone_options["notimer"] = "data-no-timer"
+    if "notimer" in node["runestone_options"]:
+        node["runestone_options"]["notimer"] = "data-no-timer"
     else:
-        node.runestone_options["notimer"] = ""
+        node["runestone_options"]["notimer"] = ""
 
-    if "nofeedback" in node.runestone_options:
-        node.runestone_options["nofeedback"] = "data-no-feedback"
+    if "nofeedback" in node["runestone_options"]:
+        node["runestone_options"]["nofeedback"] = "data-no-feedback"
     else:
-        node.runestone_options["nofeedback"] = ""
+        node["runestone_options"]["nofeedback"] = ""
 
-    if "fullwidth" in node.runestone_options:
-        node.runestone_options["fullwidth"] = "data-fullwidth"
+    if "fullwidth" in node["runestone_options"]:
+        node["runestone_options"]["fullwidth"] = "data-fullwidth"
     else:
-        node.runestone_options["fullwidth"] = ""
+        node["runestone_options"]["fullwidth"] = ""
 
-    if "nopause" in node.runestone_options:
-        node.runestone_options["nopause"] = "data-no-pause"
+    if "nopause" in node["runestone_options"]:
+        node["runestone_options"]["nopause"] = "data-no-pause"
     else:
-        node.runestone_options["nopause"] = ""
+        node["runestone_options"]["nopause"] = ""
 
-    res = TEMPLATE_START % node.runestone_options
+    res = TEMPLATE_START % node["runestone_options"]
     self.body.append(res)
 
 
-def depart_timed_node(self, node):
+def depart_timed_html(self, node):
     # Set options and format templates accordingly
-    res = TEMPLATE_END % node.runestone_options
+    res = TEMPLATE_END % node["runestone_options"]
 
     self.body.append(res)
 
@@ -162,8 +162,9 @@ class TimedDirective(RunestoneIdDirective):
         else:
             timelimit = None
 
-        timed_node = TimedNode(self.options, rawsource=self.block_text)
-        timed_node.source, timed_node.line = self.state_machine.get_source_and_line(
+        timed_node = TimedNode()
+        timed_node["runestone_options"] = self.options
+        timed_node["source"], timed_node["line"] = self.state_machine.get_source_and_line(
             self.lineno
         )
         # Use the environment so that any parsed directives will know they

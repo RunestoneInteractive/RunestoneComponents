@@ -28,7 +28,8 @@ from runestone.common.runestonedirective import RunestoneIdNode
 
 def setup(app):
     app.add_directive("parsonsprob", ParsonsProblem)
-    app.add_node(ParsonsNode, html=(visit_parsons_node, depart_parsons_node))
+    app.add_node(ParsonsNode, html=(visit_parsons_html, depart_parsons_html),
+                 xml=(visit_parsons_xml, depart_parsons_xml))
     app.add_config_value("parsons_div_class", "runestone", "html")
 
 
@@ -49,30 +50,35 @@ TEMPLATE_END = """
 
 
 class ParsonsNode(nodes.General, nodes.Element, RunestoneIdNode):
-    def __init__(self, options, **kwargs):
-        super(ParsonsNode, self).__init__(**kwargs)
-        self.runestone_options = options
+    pass
 
 
-def visit_parsons_node(self, node):
-    div_id = node.runestone_options["divid"]
-    components = dict(node.runestone_options)
-    components.update({"divid": div_id})
-    node.delimiter = "_start__{}_".format(node.runestone_options["divid"])
-    self.body.append(node.delimiter)
-    res = TEMPLATE_START % components
+def visit_parsons_xml(self, node):
+    res = TEMPLATE_START % node["runestone_options"]
+    self.output.append(res)
+
+
+def depart_parsons_xml(self, node):
+    res = TEMPLATE_END % node["runestone_options"]
+    self.output.append(res)
+
+
+def visit_parsons_html(self, node):
+    node["delimiter"] = "_start__{}_".format(node["runestone_options"]["divid"])
+    self.body.append(node["delimiter"])
+    res = TEMPLATE_START % node["runestone_options"]
     self.body.append(res)
 
 
-def depart_parsons_node(self, node):
-    res = TEMPLATE_END % node.runestone_options
+def depart_parsons_html(self, node):
+    res = TEMPLATE_END % node["runestone_options"]
     self.body.append(res)
     addHTMLToDB(
-        node.runestone_options["divid"],
-        node.runestone_options["basecourse"],
-        "".join(self.body[self.body.index(node.delimiter) + 1 :]),
+        node["runestone_options"]["divid"],
+        node["runestone_options"]["basecourse"],
+        "".join(self.body[self.body.index(node["delimiter"]) + 1 :]),
     )
-    self.body.remove(node.delimiter)
+    self.body.remove(node["delimiter"])
 
 
 class ParsonsProblem(Assessment):
@@ -167,7 +173,7 @@ class ParsonsProblem(Assessment):
         if "numbered" in self.options:
             self.options["numbered"] = (
                 ' data-numbered="' + self.options["numbered"] + '"'
-            )  #' data-numbered="true"'
+            )  # ' data-numbered="true"'
         else:
             self.options["numbered"] = ""
 
@@ -211,8 +217,9 @@ class ParsonsProblem(Assessment):
         self.assert_has_content()
 
         maybeAddToAssignment(self)
-        parsons_node = ParsonsNode(self.options, rawsource=self.block_text)
-        parsons_node.source, parsons_node.line = self.state_machine.get_source_and_line(
+        parsons_node = ParsonsNode()
+        parsons_node["runestone_options"] = self.options
+        parsons_node["source"], parsons_node["line"] = self.state_machine.get_source_and_line(
             self.lineno
         )
         self.state.nested_parse(
