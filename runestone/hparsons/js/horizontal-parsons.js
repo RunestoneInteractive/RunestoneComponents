@@ -3044,7 +3044,8 @@ class ParsonsInput {
     parentElement;
     _prevPosition;
     reusable;
-    constructor(parentElement, reusable) {
+    randomize;
+    constructor(parentElement, reusable, randomize) {
         this.el = document.createElement('div');
         this.parentElement = parentElement;
         this.el.id = 'regextool-' + this.parentElement.toolNumber + '-parsons-input';
@@ -3066,6 +3067,7 @@ class ParsonsInput {
         this.expandableBlocks = [];
         this.expandableBlockTooltips = null;
         this.reusable = reusable;
+        this.randomize = randomize;
         this._dragSortable = new Sortable(this._dragArea, {
             group: 'shared',
             direction: 'horizontal',
@@ -3093,6 +3095,15 @@ class ParsonsInput {
             return ret;
         }
     };
+    // Durstenfeld shuffle
+    shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+            let temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+        }
+    }
     setSourceBlocks = (data, tooltips) => {
         // reset
         // this._dragSortable.destroy();
@@ -3101,6 +3112,13 @@ class ParsonsInput {
         this._dragArea.innerHTML = '';
         this._dropArea.innerHTML = '';
         // adding normal blocks
+        if (this.randomize) {
+            let originalData = JSON.stringify(data);
+            this.shuffleArray(data);
+            while (JSON.stringify(data) == originalData) {
+                this.shuffleArray(data);
+            }
+        }
         for (let i = 0; i < data.length; ++i) {
             const newBlock = document.createElement('div');
             this._dragArea.appendChild(newBlock);
@@ -15414,7 +15432,8 @@ class HParsonsElement extends HTMLElement {
         this.inputDiv.classList.add('hparsons-input');
         this.root.append(this.inputDiv);
         const reusable = this.getAttribute('reuse-blocks') ? true : false;
-        this.hparsonsInput = new ParsonsInput(this, reusable);
+        const randomize = this.getAttribute('randomize') ? true : false;
+        this.hparsonsInput = new ParsonsInput(this, reusable, randomize);
         // console.log(reusable)
         // a div wrapping the input and the test case status
         // init regex input based on the input type
@@ -15500,7 +15519,8 @@ class HParsonsElement extends HTMLElement {
         if (this.inputType == 'parsons') {
             // init elements: parsons regex input
             const reusable = this.getAttribute('reuse-blocks') != null ? true : false;
-            this.hparsonsInput = new ParsonsInput(this, reusable);
+            const randomize = this.getAttribute('randomize') != null ? true : false;
+            this.hparsonsInput = new ParsonsInput(this, reusable, randomize);
             this.inputDiv.appendChild(this.hparsonsInput.el);
         }
         else {

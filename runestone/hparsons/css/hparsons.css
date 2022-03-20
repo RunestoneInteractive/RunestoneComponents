@@ -17,3 +17,43 @@
     padding-top: 10px;
     margin: 5px;
 }
+
+.hp_actions {
+    text-align: center;
+}
+
+.hp_output {
+    display: none;
+    max-width: 450px;
+    background-color: inherit;
+}
+.hp_output pre {
+    background-color: lightgray;
+}
+
+.hp_sql_result {
+    background-color: lightgrey;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.hp_sql_result_success {
+    background-color: transparent;
+    color: green;
+    border: 0px;
+    padding: 0px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    min-height: 0px !important;
+}
+
+.hp_sql_result_failure {
+    background-color: transparent;
+    color: red;
+    border: 0px;
+    padding: 0px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    min-height: 0px !important;
+} 

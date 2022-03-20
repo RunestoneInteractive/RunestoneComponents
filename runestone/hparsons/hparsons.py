@@ -51,6 +51,7 @@ TEMPLATE_END = """
     %(dburl)s
     %(textentry)s
     %(reuse)s
+    %(randomize)s
     style="visibility: hidden;">
 %(initialsetting)s
 </textarea>
@@ -95,6 +96,7 @@ class HParsonsDirective(RunestoneIdDirective):
     .. hparsons:: uniqueid
        :language: sql, regex
        :dburl: only for sql -- url to load database
+       :randomize: randomize the order of horizontal parsons
        TODO: fix textentry
        :reuse: only for parsons -- make the blocks reusable
        :textentry: if you will use text entry instead of horizontal parsons
@@ -124,6 +126,7 @@ class HParsonsDirective(RunestoneIdDirective):
             "language": directives.unchanged,
             "textentry": directives.flag,
             "reuse": directives.flag,
+            "randomize": directives.flag,
         }
     )
 
@@ -141,6 +144,11 @@ class HParsonsDirective(RunestoneIdDirective):
             self.options['reuse'] = ' data-reuse="true"'
         else:
             self.options['reuse'] = ''
+
+        if "randomize" in self.options:
+            self.options['randomize'] = ' data-randomize="true"'
+        else:
+            self.options['randomize'] = ''
 
         explain_text = None
         if self.content:

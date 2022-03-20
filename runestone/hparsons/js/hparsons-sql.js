@@ -3,6 +3,7 @@ import Handsontable from "handsontable";
 import initSqlJs from "sql.js/dist/sql-wasm.js";
 import RunestoneBase from "../../common/js/runestonebase.js";
 import "../css/hparsons.css";
+import 'handsontable/dist/handsontable.full.css';
 
 var allDburls = {};
 
@@ -21,6 +22,7 @@ export default class SQLHParons extends RunestoneBase {
         var orig = $(opts.orig).find("textarea")[0];
         this.textentry = $(orig).data('textentry') ? true : false;
         this.reuse = $(orig).data('reuse') ? true : false;
+        this.randomize = $(orig).data('randomize') ? true : false;
         this.divid = opts.orig.id;
         this.containerDiv = opts.orig;
         this.useRunestoneServices = opts.useRunestoneServices;
@@ -51,7 +53,7 @@ export default class SQLHParons extends RunestoneBase {
         if ($(orig).data("caption")) {
             this.caption = $(orig).data("caption");
         } else {
-            this.caption = "ActiveCode";
+            this.caption = "HorizontalParsons";
         }
         this.addCaption("runestone");
         this.indicate_component_ready();
@@ -151,6 +153,9 @@ export default class SQLHParons extends RunestoneBase {
         if (this.reuse) {
             parsonsHTML += ` reuse-blocks="true"`;
         }
+        if (this.randomize) {
+            parsonsHTML += ` randomize="true"`;
+        }
         parsonsHTML += `>`
         this.outerDiv.innerHTML = parsonsHTML;
         this.outerDiv.addEventListener('horizontal-parsons', (ev) => {this.logHorizontalParsonsEvent(ev.detail)})
@@ -172,7 +177,7 @@ export default class SQLHParons extends RunestoneBase {
         // Create a parent div with two elements:  pre for standard output and a div
         // to hold turtle graphics output.  We use a div in case the turtle changes from
         var outDiv = document.createElement("div");
-        $(outDiv).addClass("ac_output col-md-12");
+        $(outDiv).addClass("hp_output col-md-12");
         this.outDiv = outDiv;
         this.output = document.createElement("pre");
         this.output.id = this.divid + "_stdout";
@@ -191,11 +196,11 @@ export default class SQLHParons extends RunestoneBase {
     createControls() {
         var ctrlDiv = document.createElement("div");
         var butt;
-        $(ctrlDiv).addClass("ac_actions");
+        $(ctrlDiv).addClass("hp_actions");
         $(ctrlDiv).addClass("col-md-12");
         // Run
         butt = document.createElement("button");
-        $(butt).text($.i18n("msg_activecode_run_code"));
+        $(butt).text("Run");
         $(butt).addClass("btn btn-success run-button");
         ctrlDiv.appendChild(butt);
         this.runButton = butt;
@@ -300,7 +305,7 @@ export default class SQLHParons extends RunestoneBase {
         let resultArray = this.results;
         for (let r of resultArray) {
             let section = document.createElement("div");
-            section.setAttribute("class", "ac_sql_result");
+            section.setAttribute("class", "hp_sql_result");
             respDiv.appendChild(section);
             if (r.status === "success") {
                 if (r.columns) {
@@ -317,7 +322,7 @@ export default class SQLHParons extends RunestoneBase {
                     }
                     msg = msg + ".";
                     messageBox.textContent = msg;
-                    messageBox.setAttribute("class", "ac_sql_result_success");
+                    messageBox.setAttribute("class", "hp_sql_result_success");
                     section.appendChild(messageBox);
                 } else if (r.rowcount) {
                     let messageBox = document.createElement("pre");
@@ -325,18 +330,18 @@ export default class SQLHParons extends RunestoneBase {
                     op = op + (op.charAt(op.length - 1) === "e" ? "d." : "ed.");
                     let rmsg = r.rowcount !== 1 ? " rows " : " row ";
                     messageBox.textContent = "" + r.rowcount + rmsg + op;
-                    messageBox.setAttribute("class", "ac_sql_result_success");
+                    messageBox.setAttribute("class", "hp_sql_result_success");
                     section.appendChild(messageBox);
                 } else {
                     let messageBox = document.createElement("pre");
                     messageBox.textContent = "Operation succeeded.";
-                    messageBox.setAttribute("class", "ac_sql_result_success");
+                    messageBox.setAttribute("class", "hp_sql_result_success");
                     section.appendChild(messageBox);
                 }
             } else {
                 let messageBox = document.createElement("pre");
                 messageBox.textContent = r.message;
-                messageBox.setAttribute("class", "ac_sql_result_failure");
+                messageBox.setAttribute("class", "hp_sql_result_failure");
                 section.appendChild(messageBox);
             }
         }
