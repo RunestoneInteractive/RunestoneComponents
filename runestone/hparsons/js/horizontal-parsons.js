@@ -3034,9 +3034,6 @@ var RegexEvent;
 class ParsonsInput {
     // The input element
     el;
-    // TODO(refactor): make expandable blocks more easy to use
-    expandableBlocks;
-    expandableBlockTooltips;
     _dropArea;
     _dragArea;
     _dropSortable;
@@ -3045,6 +3042,10 @@ class ParsonsInput {
     _prevPosition;
     reusable;
     randomize;
+    storedSourceBlocks;
+    storedSourceBlockExplanations;
+    // if the input has been initialized once
+    initialized;
     constructor(parentElement, reusable, randomize) {
         this.el = document.createElement('div');
         this.parentElement = parentElement;
@@ -3064,21 +3065,14 @@ class ParsonsInput {
         this.el.appendChild(this._dropArea);
         this._dropArea.classList.add('drop-area');
         this._prevPosition = -1;
-        this.expandableBlocks = [];
-        this.expandableBlockTooltips = null;
+        this.storedSourceBlocks = [];
+        this.storedSourceBlockExplanations = null;
         this.reusable = reusable;
         this.randomize = randomize;
-        this._dragSortable = new Sortable(this._dragArea, {
-            group: 'shared',
-            direction: 'horizontal',
-            animation: 150
-        });
-        this._dropSortable = new Sortable(this._dropArea, {
-            group: 'shared',
-            direction: 'horizontal',
-            animation: 150
-        });
+        this._dragSortable = null;
+        this._dropSortable = null;
         this._initSortable();
+        this.initialized = false;
     }
     getText = () => {
         let ret = '';
@@ -3105,13 +3099,7 @@ class ParsonsInput {
         }
     }
     setSourceBlocks = (data, tooltips) => {
-        // reset
-        // this._dragSortable.destroy();
-        // this._dropSortable.destroy();
-        // clearing previous settings 
-        this._dragArea.innerHTML = '';
-        this._dropArea.innerHTML = '';
-        // adding normal blocks
+        // shuffle source blocks if randomize
         if (this.randomize) {
             let originalData = JSON.stringify(data);
             this.shuffleArray(data);
@@ -3119,16 +3107,30 @@ class ParsonsInput {
                 this.shuffleArray(data);
             }
         }
-        for (let i = 0; i < data.length; ++i) {
+        this.storedSourceBlocks = data;
+        this.storedSourceBlockExplanations = tooltips;
+        this._resetInput();
+    };
+    // TODO: not efficient enough. should not need to create new elements; simply sorting them should be good.
+    _resetInput = () => {
+        // clearing previous blocks
+        while (this._dragArea.firstChild) {
+            this._dragArea.removeChild(this._dragArea.firstChild);
+        }
+        while (this._dropArea.firstChild) {
+            this._dropArea.removeChild(this._dropArea.firstChild);
+        }
+        // add new blocks
+        for (let i = 0; i < this.storedSourceBlocks.length; ++i) {
             const newBlock = document.createElement('div');
             this._dragArea.appendChild(newBlock);
-            if (data[i] === ' ') {
+            if (this.storedSourceBlocks[i] === ' ') {
                 // console.log('here');
                 newBlock.innerHTML = '&nbsp;';
             }
             else {
                 // console.log(data[i]);
-                newBlock.innerText = data[i];
+                newBlock.innerText = this.storedSourceBlocks[i];
             }
             newBlock.style.display = 'inline-block';
             newBlock.classList.add('parsons-block');
@@ -3136,7 +3138,6 @@ class ParsonsInput {
                 this._onBlockClicked(newBlock);
             };
         }
-        this._initSortable();
     };
     _onBlockClicked = (block) => {
         if (block.parentElement == this._dragArea) {
@@ -3177,8 +3178,6 @@ class ParsonsInput {
         }
     };
     _initSortable = () => {
-        this._dragSortable.destroy();
-        this._dropSortable.destroy();
         if (this.reusable) {
             this._dragSortable = new Sortable(this._dragArea, {
                 group: {
@@ -3296,9 +3295,6 @@ class ParsonsInput {
         }
         this._dropArea.classList.add(result);
     };
-    setExpandableBlocks = (expandableBlocks) => {
-        this.expandableBlocks = expandableBlocks;
-    };
     _getBlockPosition = (block) => {
         let position = -1;
         const parent = this._dropArea;
@@ -3354,6 +3350,16 @@ class ParsonsInput {
                 el = el.nextSibling;
                 el.style.removeProperty('background-color');
             }
+        }
+    };
+    resetInput = () => {
+        if (this.reusable) {
+            while (this._dropArea.firstChild) {
+                this._dropArea.removeChild(this._dropArea.firstChild);
+            }
+        }
+        else {
+            this._resetInput();
         }
     };
     // TODO: not used for now, not sure if is working correctly
@@ -15593,11 +15599,18 @@ class HParsonsElement extends HTMLElement {
             });
         }
     }
-    resetTool() {
+    resetInput() {
         if (this.inputType != 'parsons') {
             const regexInput = this.hparsonsInput;
             regexInput.quill?.setText('', 'silent');
         }
+        else if (this.inputType == 'parsons') {
+            this.hparsonsInput.resetInput();
+        }
+        const resetEvent = {
+            'event-type': 'reset',
+        };
+        this.logEvent(resetEvent);
     }
     // restore student answer from outside storage
     restoreAnswer(type, answer) {

@@ -207,6 +207,16 @@ export default class SQLHParons extends RunestoneBase {
         this.runButton.onclick = this.runButtonHandler.bind(this);
         $(butt).attr("type", "button");
 
+        // Reset button
+        var resetBtn;
+        resetBtn = document.createElement("button");
+        $(resetBtn).text("Reset");
+        $(resetBtn).addClass("btn btn-warning run-button");
+        ctrlDiv.appendChild(resetBtn);
+        this.resetButton = resetBtn;
+        this.resetButton.onclick = () => this.hparsons.resetInput();
+        $(resetBtn).attr("type", "button");
+
         // TODO: maybe remove the question part
         $(this.outerDiv).prepend(ctrlDiv);
         this.controlDiv = ctrlDiv;
