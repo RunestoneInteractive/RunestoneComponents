@@ -3050,14 +3050,14 @@ class ParsonsInput {
         this.parentElement = parentElement;
         this.el.id = 'regextool-' + this.parentElement.toolNumber + '-parsons-input';
         const dragTip = document.createElement('div');
-        dragTip.innerText = 'Drag from the blocks below to form your code';
+        dragTip.innerText = 'Drag or click the blocks below to form your code:';
         dragTip.classList.add('hparsons-tip');
         this.el.append(dragTip);
         this._dragArea = document.createElement('div');
         this.el.appendChild(this._dragArea);
         this._dragArea.classList.add('drag-area');
         const dropTip = document.createElement('div');
-        dropTip.innerText = 'Your code:';
+        dropTip.innerText = 'Your code (click on a block to remove it):';
         dropTip.classList.add('hparsons-tip');
         this.el.append(dropTip);
         this._dropArea = document.createElement('div');
@@ -3133,29 +3133,48 @@ class ParsonsInput {
             newBlock.style.display = 'inline-block';
             newBlock.classList.add('parsons-block');
             newBlock.onclick = () => {
-                // adding the block to the input area
-                if (newBlock.parentElement == this._dragArea) {
-                    let endPosition;
-                    if (this.reusable) {
-                        const newBlockCopy = newBlock.cloneNode(true);
-                        this._dropArea.appendChild(newBlockCopy);
-                        endPosition = this._getBlockPosition(newBlockCopy);
-                    }
-                    else {
-                        this._dropArea.appendChild(newBlock);
-                        endPosition = this._getBlockPosition(newBlock);
-                    }
-                    const inputEvent = {
-                        'event-type': 'parsons-input',
-                        action: 'add',
-                        position: [-1, endPosition],
-                        answer: this._getTextArray(),
-                    };
-                    this.parentElement.logEvent(inputEvent);
-                }
+                this._onBlockClicked(newBlock);
             };
         }
         this._initSortable();
+    };
+    _onBlockClicked = (block) => {
+        if (block.parentElement == this._dragArea) {
+            let endPosition;
+            if (this.reusable) {
+                const blockCopy = block.cloneNode(true);
+                blockCopy.onclick = () => this._onBlockClicked(blockCopy);
+                this._dropArea.appendChild(blockCopy);
+                endPosition = this._getBlockPosition(blockCopy);
+            }
+            else {
+                this._dropArea.appendChild(block);
+                endPosition = this._getBlockPosition(block);
+            }
+            const inputEvent = {
+                'event-type': 'parsons-input',
+                action: 'add',
+                position: [-1, endPosition],
+                answer: this._getTextArray(),
+            };
+            this.parentElement.logEvent(inputEvent);
+        }
+        else {
+            const startPosition = this._getBlockPosition(block);
+            if (this.reusable) {
+                this._dropArea.removeChild(block);
+            }
+            else {
+                this._dragArea.appendChild(block);
+            }
+            const inputEvent = {
+                'event-type': 'parsons-input',
+                action: 'remove',
+                position: [startPosition, -1],
+                answer: this._getTextArray(),
+            };
+            this.parentElement.logEvent(inputEvent);
+        }
     };
     _initSortable = () => {
         this._dragSortable.destroy();
@@ -3171,6 +3190,10 @@ class ParsonsInput {
                 direction: 'horizontal',
                 animation: 150,
                 draggable: '.parsons-block',
+                onClone: (event) => {
+                    const newBlock = event.clone;
+                    newBlock.onclick = () => this._onBlockClicked(newBlock);
+                }
             });
             this._dropSortable = new Sortable(this._dropArea, {
                 group: 'shared',
