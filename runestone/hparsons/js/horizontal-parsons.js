@@ -3132,6 +3132,28 @@ class ParsonsInput {
             }
             newBlock.style.display = 'inline-block';
             newBlock.classList.add('parsons-block');
+            newBlock.onclick = () => {
+                // adding the block to the input area
+                if (newBlock.parentElement == this._dragArea) {
+                    let endPosition;
+                    if (this.reusable) {
+                        const newBlockCopy = newBlock.cloneNode(true);
+                        this._dropArea.appendChild(newBlockCopy);
+                        endPosition = this._getBlockPosition(newBlockCopy);
+                    }
+                    else {
+                        this._dropArea.appendChild(newBlock);
+                        endPosition = this._getBlockPosition(newBlock);
+                    }
+                    const inputEvent = {
+                        'event-type': 'parsons-input',
+                        action: 'add',
+                        position: [-1, endPosition],
+                        answer: this._getTextArray(),
+                    };
+                    this.parentElement.logEvent(inputEvent);
+                }
+            };
         }
         this._initSortable();
     };
@@ -3311,6 +3333,7 @@ class ParsonsInput {
             }
         }
     };
+    // TODO: not used for now, not sure if is working correctly
     restoreAnswer(type, answer) {
         if (type != 'parsons' || !Array.isArray(answer)) {
             return;
