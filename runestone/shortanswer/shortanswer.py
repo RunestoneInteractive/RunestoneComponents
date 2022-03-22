@@ -29,7 +29,9 @@ from runestone.common.runestonedirective import RunestoneDirective, RunestoneIdN
 
 def setup(app):
     app.add_directive("shortanswer", JournalDirective)
-    app.add_node(JournalNode, html=(visit_journal_html, depart_journal_html))
+    app.add_node(JournalNode, html=(visit_journal_html, depart_journal_html),
+                 xml=(visit_journal_xml, depart_journal_xml))
+
     app.add_config_value("shortanswer_div_class", "journal alert alert-warning", "html")
     app.add_config_value(
         "shortanswer_optional_div_class", "journal alert alert-success", "html"
@@ -46,22 +48,36 @@ TEXT_END = """
 </div> <!-- end of runestone div -->
 """
 
+XML_START = """
+<exercise xml:id={divid} {optional}>
+    <statement>
+"""
+
+XML_END = """
+    </statement>
+</exercise> 
+"""
+
 
 class JournalNode(nodes.General, nodes.Element, RunestoneIdNode):
     pass
 
 
 def visit_journal_html(self, node):
-    div_id = node["runestone_options"]["divid"]
-    components = dict(node["runestone_options"])
-    components.update({"divid": div_id})
 
     node["delimiter"] = "_start__{}_".format(node["runestone_options"]["divid"])
     self.body.append(node["delimiter"])
 
-    res = TEXT_START % components
+    res = TEXT_START % node["runestone_options"]
 
     self.body.append(res)
+
+
+def visit_journal_xml(self, node):
+
+    res = XML_START.format(**node["runestone_options"])
+
+    self.output.append(res)
 
 
 def depart_journal_html(self, node):
@@ -78,6 +94,10 @@ def depart_journal_html(self, node):
     )
 
     self.body.remove(node["delimiter"])
+
+
+def depart_journal_xml(self, node):
+    self.output.append(XML_END)
 
 
 class JournalDirective(Assessment):
