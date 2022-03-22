@@ -233,6 +233,7 @@ export default class Parsons extends RunestoneBase {
             that.clearFeedback();
             $(that.checkButton).prop("disabled", false);
             that.resetView();
+            that.checkCount = 0;
             that.logMove("reset");
             that.setLocalStorage();
         });
@@ -283,12 +284,15 @@ export default class Parsons extends RunestoneBase {
             var distractHelptext = "";
             if (textBlock.includes("#paired:")) {
                 distractIndex = textBlock.indexOf("#paired:");
-                distractHelptext = textBlock.substring(distractIndex + 8, textBlock.length).trim();
+                distractHelptext = textBlock
+                    .substring(distractIndex + 8, textBlock.length)
+                    .trim();
                 textBlock = textBlock.substring(0, distractIndex + 7);
-            }
-            else if (textBlock.includes("#distractor:")) {
+            } else if (textBlock.includes("#distractor:")) {
                 distractIndex = textBlock.indexOf("#distractor:");
-                distractHelptext = textBlock.substring(distractIndex + 12, textBlock.length).trim();
+                distractHelptext = textBlock
+                    .substring(distractIndex + 12, textBlock.length)
+                    .trim();
                 textBlock = textBlock.substring(0, distractIndex + 11);
             }
             textBlock = textBlock.replace(
@@ -402,7 +406,10 @@ export default class Parsons extends RunestoneBase {
         if (this.options.numbered != undefined) {
             height_add = 1;
         }
-        if (this.options.language == "natural" || this.options.language == "math") {
+        if (
+            this.options.language == "natural" ||
+            this.options.language == "math"
+        ) {
             areaWidth = 300;
             maxFunction = function (item) {
                 item.width(areaWidth - 22);
@@ -455,9 +462,9 @@ export default class Parsons extends RunestoneBase {
                 areaHeight += Math.ceil(
                     // For future more accurate height display, this calculation should also be conditionally based on fontFamily
                     singleHeight +
-                    (linesItem[linesIndex].children.length - 1) *
-                    additionalHeight +
-                    height_add * addition
+                        (linesItem[linesIndex].children.length - 1) *
+                            additionalHeight +
+                        height_add * addition
                 );
 
                 // Determine the longest text line in the current Parsons block and calculate its width - Vincent Qiu (September 2020)
@@ -475,9 +482,9 @@ export default class Parsons extends RunestoneBase {
                     indent = linesItem[linesIndex].children[i].indent;
                     itemLength = Math.ceil(
                         pixelsPerIndent * indent +
-                        tempCanvasCtx.measureText(
-                            linesItem[linesIndex].children[i].innerText
-                        ).width
+                            tempCanvasCtx.measureText(
+                                linesItem[linesIndex].children[i].innerText
+                            ).width
                     );
                     longCount += Math.floor(itemLength / (widthLimit - 29));
                     if (itemLength > maxInnerLength) {
@@ -589,9 +596,12 @@ export default class Parsons extends RunestoneBase {
             this.blocks[i].initializeInteractivity();
         }
         this.initializeTabIndex();
-        if (this.options.language == "natural" || this.options.language == "math") {
+        if (
+            this.options.language == "natural" ||
+            this.options.language == "math"
+        ) {
             if (typeof MathJax !== "undefined") {
-                this.queueMathJax(this.outerDiv)
+                this.queueMathJax(this.outerDiv);
             }
         }
     }
@@ -1294,7 +1304,6 @@ export default class Parsons extends RunestoneBase {
                 $(this.checkButton).prop("disabled", true);
                 localStorage.setItem(this.adaptiveId + "Solved", true);
                 this.recentAttempts = this.checkCount;
-                this.checkCount = 0;
                 localStorage.setItem(
                     this.adaptiveId + "recentAttempts",
                     this.recentAttempts
@@ -1550,9 +1559,9 @@ export default class Parsons extends RunestoneBase {
                     duration:
                         Math.sqrt(
                             Math.pow(endY - startY, 2) +
-                            Math.pow(endX - startX, 2)
+                                Math.pow(endX - startX, 2)
                         ) *
-                        4 +
+                            4 +
                         500,
                     start: function () {
                         that.moving = block;
