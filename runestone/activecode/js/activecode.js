@@ -893,7 +893,7 @@ export class ActiveCode extends RunestoneBase {
         var embedUrlStr = `${srcURL}#${srcVars}`;
         var myIframe = document.createElement("iframe");
         myIframe.setAttribute("id", this.divid + "_codelens");
-        myIframe.setAttribute("width", "800");
+        myIframe.setAttribute("width", "100%");
         myIframe.setAttribute("height", "500");
         myIframe.setAttribute("style", "display:block");
         myIframe.style.background = "#fff";
@@ -924,7 +924,7 @@ export class ActiveCode extends RunestoneBase {
         srcURL = eBookConfig.app + "/admin/diffviewer?divid=" + div_id;
         myIframe = document.createElement("iframe");
         myIframe.setAttribute("id", div_id + "_coach");
-        myIframe.setAttribute("width", "800px");
+        myIframe.setAttribute("width", "100%");
         myIframe.setAttribute("height", "500px");
         myIframe.setAttribute("style", "display:block");
         myIframe.style.background = "#fff";
