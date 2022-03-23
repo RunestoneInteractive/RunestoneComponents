@@ -476,8 +476,14 @@ export default class SQLHParons extends RunestoneBase {
         try {
             actual = result_table.values[row][col];
         } catch (e) {
-            output = `Failed Not enough data to check row ${row} or column ${col}`;
-            return output;
+            if (expected == 'NO_DATA') {
+                this.passed++;
+                output = `Passed: No data in row ${row}, column ${col}`;
+                return output;
+            } else {
+                output = `Failed: Not enough data to check row ${row} or column ${col}`;
+                return output;
+            }
         }
         const operators = {
             "==": function (operand1, operand2) {

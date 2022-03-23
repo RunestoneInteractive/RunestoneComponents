@@ -52,4 +52,7 @@ Horizontal Parsons + SQL
 ..     :dburl: http://localhost:8000/_static/test.db
 
 
-
+.. toctree::
+    :maxdepth: 3
+    
+    database_hparsons.rst
