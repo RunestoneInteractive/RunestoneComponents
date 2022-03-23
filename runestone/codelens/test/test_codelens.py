@@ -12,6 +12,7 @@ def test_Next_Step(selenium_utils_get):
         "test_codelens_5",
         "test_codelens_6",
     ]:
+        print(tdiv)
         selenium_utils_get.wait_until_ready(tdiv)
         clDiv = driver.find_element_by_id(tdiv)
         assert clDiv
