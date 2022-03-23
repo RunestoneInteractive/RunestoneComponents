@@ -18,6 +18,8 @@
     --codeButtonsBorder: #474949;
     --dangerAlerts: #f2dede;
     --successAlerts: #dff0d8;
+    --contentWidthRegular: 660px;
+    --contentWidthWide: 1060px;
 }
 
 [data-theme="dark"] {
@@ -221,56 +223,42 @@ div.container {
     padding-right: 10px;
 }
 
-#main-content section > p,
-#main-content section > pre,
-#main-content section > table,
-#main-content section > ul,
-#main-content section > ol,
-#main-content section > dl,
-#main-content section > h1,
-#main-content section > h2,
-#main-content section > h3,
-#main-content section > h4,
-#main-content section > .admonition,
-#main-content section > .toctree-wrapper {
-    width: 500pt;
-    margin-left: auto;
-    margin-right: auto;
-}
-
 .runestone {
-    position: relative;
-    width: 700pt;
-    margin-left: auto;
-    margin-right: auto;
     clear: both;
 }
 
-div.highlight pre {
-    width: 500pt;
-    margin-left: auto !important;
-    margin-right: auto !important;
-}
-/* This rule is meant to override the behavior of the
-   previous rule since it is not possible to exclude
-   more than one section in the not() part of the rule
-*/
-.container section div.full-width {
+/* Sets width of content "column" */
+#main-content section > *:not(section) {
+    max-width: var(--contentWidthRegular);
     margin-left: auto;
     margin-right: auto;
-    width: 90vw;
+}
+
+/* Handle content in nested sections by allowing them to grow*/
+#main-content section > section,                
+/* And then make sure a few items are wider by default */
+#main-content section > .runestone.ac_section,
+#main-content section > .runestone.codelens,
+#main-content section > .question,
+#main-content section > .runestone.parsons-container,
+#main-content section > .runestone.parsons-problems,
+#main-content section > .codelens,
+#main-content section > .timedAssessment
+{
+    max-width: var(--contentWidthWide);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Allow individual elements to request being larger */
+#main-content section > .full-width {
+    max-width: var(--contentWidthWide);
 }
 
 .container section > img {
     display: block;
     margin-left: auto;
     margin-right: auto;
-}
-
-.container section .parsons,
-.container section .parsons .sortable-code-container,
-.container section .cd_section {
-    max-width: none;
 }
 
 .container-fluid > .navbar-collapse,
@@ -762,7 +750,7 @@ div.flash {
 }
 
 .video_popup video {
-    width: 500pt;
+    width: var(--contentWidthRegular);
     cursor: pointer;
 }
 

@@ -1,8 +1,4 @@
 .parsons-container {
-    position: relative;
-    width: 800pt;
-    margin-left: auto;
-    margin-right: auto;
     clear: both;
 }
 
@@ -280,7 +276,7 @@
     margin: 10px 0;
 }
 .parsons .parsons-text {
-    max-width: 500pt;
+    max-width: var(--contentWidthRegular);
     margin-left: auto;
     margin-right: auto;
 }
@@ -292,13 +288,14 @@
 }
 
 .parsons .parsons-controls {
-    max-width: 500pt;
+    max-width: var(--contentWidthRegular);
     margin-left: auto;
     margin-right: auto;
     text-align: center;
 }
+
 .parsons [role="tooltip"] {
-    max-width: 500pt;
+    max-width: var(--contentWidthRegular);
     margin-left: auto;
     margin-right: auto;
     margin-top: 5px;
