@@ -37,7 +37,7 @@ def setup(app):
 #  data-tracefile="pytutor-embed-demo/java.json"
 
 VIS = """
-<div class="runestone" style="max-width: none;">
+<div class="runestone codelens %(optclass)s">
     <div class="%(divclass)s" data-component="codelens" data-question_label="%(question_label)s">
         <div class="pytutorVisualizer" id="%(divid)s"
            data-params='{"embeddedMode": true, "lang": "%(language)s", "jumpToEnd": false}'>

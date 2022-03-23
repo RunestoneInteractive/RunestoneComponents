@@ -91,15 +91,18 @@ class MatrixEq(RunestoneDirective):
 
     required_arguments = 1
     optional_arguments = 0
-    has_content = True
-    option_spec = {
-        "notexecutable": directives.flag,
-        "comment": directives.unchanged,
-        "nolabel": directives.flag,
-        "backgroundcolor": directives.unchanged,
-        "foregroundcolor": directives.unchanged,
-        "highlightcolor": directives.unchanged,
-    }
+    has_content = True    
+    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec.update(
+        {
+            "notexecutable": directives.flag,
+            "comment": directives.unchanged,
+            "nolabel": directives.flag,
+            "backgroundcolor": directives.unchanged,
+            "foregroundcolor": directives.unchanged,
+            "highlightcolor": directives.unchanged,
+        }
+    )
 
     def run(self):
 

@@ -208,7 +208,7 @@ class MChoice(Assessment):
         super(MChoice, self).run()
 
         TEMPLATE_START = """
-            <div class="%(divclass)s">
+            <div class="%(divclass)s %(optclass)s">
             <ul data-component="multiplechoice" data-question_label="%(question_label)s" data-multipleanswers="%(multipleAnswers)s" %(random)s id="%(divid)s" %(optional)s style="visibility: hidden;">
             """
 

@@ -29,7 +29,7 @@ def setup(app):
 
 
 SRC = """
-<div id="%(divid)s">
+<div id="%(divid)s" class="%(optclass)s">
 <canvas id="%(divid)s_canvas" width="400" height="400" style="border:4px solid blue"></canvas>
 <br />
 <button onclick="%(divid)s_anim = %(divid)s_init('%(divid)s')">Initialize</button>
@@ -60,12 +60,15 @@ class Animation(RunestoneIdDirective):
     optional_arguments = 1
     final_argument_whitespace = True
     has_content = False
-    option_spec = {
-        "modelfile": directives.unchanged,
-        "viewerfile": directives.unchanged,
-        "model": directives.unchanged,
-        "viewer": directives.unchanged,
-    }
+    option_spec = RunestoneIdDirective.option_spec.copy()
+    option_spec.update(
+        {
+            "modelfile": directives.unchanged,
+            "viewerfile": directives.unchanged,
+            "model": directives.unchanged,
+            "viewer": directives.unchanged,
+        }
+    )
 
     def run(self):
         """

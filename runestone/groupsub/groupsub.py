@@ -47,7 +47,7 @@ from runestone.common.runestonedirective import (
 
 
 TEMPLATE = """
-<div class="runestone alert alert-warning sqcontainer">
+<div class="runestone alert alert-warning sqcontainer %(optclass)s">
     <div data-component="groupsub" id={component_id} {size_limit}>
         <div class="col-sm-6">
             <select id="assignment_group" multiple class="assignment_partner_select" style="width: 100%">

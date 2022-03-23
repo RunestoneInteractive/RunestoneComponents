@@ -109,10 +109,13 @@ class DisqusDirective(RunestoneDirective):
     optional_arguments = 0
     final_argument_whitespace = True
     has_content = False
-    option_spec = {
-        "shortname": directives.unchanged_required,
-        "identifier": directives.unchanged_required,
-    }
+    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec.update(
+        {
+            "shortname": directives.unchanged_required,
+            "identifier": directives.unchanged_required,
+        }
+    )
 
     def run(self):
         """
