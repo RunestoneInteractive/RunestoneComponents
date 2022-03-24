@@ -208,6 +208,7 @@ class RunestoneDirective(Directive):
     option_spec = {
         "author": directives.unchanged,
         "tags": directives.unchanged,
+        "class": directives.unchanged,
         "difficulty": directives.unchanged,
         "autograde": directives.unchanged,
         "practice": directives.unchanged,
@@ -259,6 +260,8 @@ class RunestoneDirective(Directive):
             self.int_points = int(self.options["points"])
         else:
             self.int_points = 1
+
+        self.options['optclass'] = self.options.get('class', "")
 
         self.explain_text = []
 

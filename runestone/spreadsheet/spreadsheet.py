@@ -207,7 +207,7 @@ def as_int_or_float(s):
 
 
 TEMPLATE = """
-<div id="{divid}" data-component="spreadsheet" class="runestone" {autograde} {mindimensions} {colwidths} {coltitles} data-question_label="{question_label}">
+<div id="{divid}" data-component="spreadsheet" class="runestone %(optclass)s" {autograde} {mindimensions} {colwidths} {coltitles} data-question_label="{question_label}">
     <div id="{divid}_sheet"></div>
 
     <script>

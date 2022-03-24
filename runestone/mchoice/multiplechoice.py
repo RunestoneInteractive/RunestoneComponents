@@ -63,7 +63,7 @@ XML_END = """
 """
 
 TEMPLATE_START = """
-    <div class="{divclass}">
+    <div class="{divclass} {optclass}">
     <ul data-component="multiplechoice" data-question_label="{question_label}" data-multipleanswers="{multipleAnswers}" {random} id="{divid}" {optional} style="visibility: hidden;">
     """
 

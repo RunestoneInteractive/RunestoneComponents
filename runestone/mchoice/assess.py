@@ -64,7 +64,7 @@ class AddButton(RunestoneIdDirective):
         super(AddButton, self).run()
 
         TEMPLATE_START = """
-            <div id="%(divid)s" class="alert alert-warning">
+            <div id="%(divid)s" class="alert alert-warning %(optclass)s">
             <form name="%(divid)s_form" method="get" action="" onsubmit="return false;">
             """
 
@@ -110,11 +110,14 @@ class QuestionNumber(RunestoneDirective):
     required_arguments = 0
     optional_arguments = 3
     has_content = False
-    option_spec = {
-        "prefix": directives.unchanged,
-        "suffix": directives.unchanged,
-        "start": directives.positive_int,
-    }
+    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec.update(
+        {
+            "prefix": directives.unchanged,
+            "suffix": directives.unchanged,
+            "start": directives.positive_int,
+        }
+    )
 
     def run(self):
         env = self.state.document.settings.env

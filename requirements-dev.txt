@@ -44,7 +44,7 @@ cryptography==36.0.1
     # via
     #   pyopenssl
     #   urllib3
-docutils==0.16
+docutils==0.17.1
     # via
     #   codechat
     #   myst-parser

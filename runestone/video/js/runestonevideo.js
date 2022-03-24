@@ -39,8 +39,8 @@ window.onPlayerStateChange = function (event) {
         console.log("paused at " + videoTime);
         data.act = "pause:" + videoTime;
     } else {
-        console.log(`YT Player State: ${YT.PlayerState}`)
-        data.act = "ready"
+        console.log(`YT Player State: ${YT.PlayerState}`);
+        data.act = "ready";
     }
     rb.logBookEvent(data);
 };
@@ -57,6 +57,7 @@ window.onYouTubeIframeAPIReady = function () {
             height: $(video).data("video-height"),
             width: $(video).data("video-width"),
             videoId: $(video).data("video-videoid"),
+            align: "center",
             playerVars: playerVars,
             events: {
                 onStateChange: window.onPlayerStateChange,

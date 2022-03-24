@@ -39,7 +39,7 @@ def setup(app):
 
 
 TEMPLATE = u"""
-<div class="runestone datafile">
+<div class="runestone datafile %(optclass)s">
 <div class="datafile_caption">Data file: <code>%(divid)s</code></div>
 <pre data-component="datafile" id=%(divid)s %(hidden)s data-edit="%(edit)s" data-rows="%(rows)s" data-cols="%(cols)s">
 %(filecontent)s</pre></div>
