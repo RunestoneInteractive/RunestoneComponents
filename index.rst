@@ -28,7 +28,6 @@ Components
     runestone/__main__.py
     runestone/conftest.py
     runestone/shared_conftest.py
-    runestone/unittest_base.py
 
 
 Packaging
