@@ -1,0 +1,278 @@
+<!--
+*********************************************************
+|docname| - HTML format for a fill-in-the-blank component
+*********************************************************
+This is the HTML format for creating a fill-in-the-blank Runestone Component. For legibility, newlines were added, which aren't allowed in pure JSON. For more information on this problem, see the `Runestone author's manual <https://runestone.academy/runestone/books/published/overview/Assessments/fitb.html>`_.
+
+
+Server-side grading
+===================
+All of the following problem types may be graded either on the client (offering the best user experience due to rapid grading) or on the server (offering better security by not sending solutions to problems across the network, storing them on the server, or assuming the client's grading is correct). Server-side grading requires the use of a server, so it cannot be enabled for books built to function without a server. To request server-side grading, see the documentation below for which elements of the JSON-encoded dictionary to omit. Instead, store the full and complete dictionary in the Runestone database's ``questions.feedback`` field so the server can access this information when it grades a problem.
+
+
+Dynamic problems
+================
+The following gives an example of the HTML generated for the following dynamic problem:
+
+.. fillintheblank:: fitb_dynamic_1
+    :dyn_vars:
+        v.a = Math.floor(rand()*10);
+        v.b = Math.floor(rand()*10);
+        v.types = {c: Number};
+
+    What is [%= a %] + [%= b %]? :blank:`c`
+
+    -   :c === a + b: Correct; [%= a %] + [%= b %] is [%= c %]. Note that
+            [%= ans %] or [%= ans_array[0] %] also works.
+        :c === a - b: That's subtraction.
+        :c === a * b: That's multiplication.
+        :x: I don't know what you're doing.
+
+
+The reStructuredText used to generate this problem is:
+
+.. literalinclude:: fitb_html_structure.html
+    :language: rest
+    :linenos:
+    :start-at: fitb_dynamic_1
+    :end-before: The reStructuredText
+
+
+The (annotated) HTML for the problem is:
+-->
+
+<div class="runestone">
+  <div
+    data-component="fillintheblank"
+    data-question_label="1"
+    id="fitb_dynamic_1"
+    style="visibility: hidden"
+  >
+    <script type="application/json">
+      // To request server-side grading for this problem type, replace this dictionary with the dict ``{ "dyn_vars": true }``.
+      {
+          "problemHtml":
+          // This string contains templated HTML for the problem body.
+          "<p>
+              Before-14-After: What is {%= a %} + {%= b %}?
+              <input type="text" name='c'>
+           </p>",
+
+          "dyn_vars":
+          // This is a string containing JavaScript code to set up variables.
+          "v.a = Math.floor(rand()*10);
+           v.b = Math.floor(rand()*10);
+           v.types = {c: Number};",
+
+          "blankNames":
+          // This is a dict of ``{blank_name: blank_index}``.
+          {
+              // The blank named "c" is the first blank, so its array
+              // index is 0.
+              "c": 0
+          },
+
+          "feedbackArray":
+          // This element is an array of solutions (one per blank) for client-side grading.
+          [
+              // This is the solution for the first (and in this case only) blank.
+              [
+                  // The first feedback possibility, if it matches, means the problem will be graded as correct.
+                  {
+                      // A JavaScript expression; if true, it matches.
+                      "solution_code": "c === a + b",
+                      // The feedback to display for this match, in templated HTML.
+                      "feedback":
+                      "<p>
+                          Correct; {%= a %} + {%= b %} is {%= c %}. Note
+                          that {%= ans %} or {%= ans_array[0] %} also
+                          works.
+                       </p>\n"
+                  },
+                  // The second and following feedback items are all graded as incorrect.
+                  {
+                      "solution_code": "c === a - b",
+                      "feedback":"<p>That's subtraction.</p>\n"
+                  },
+                  {
+                      "solution_code": "c === a * b",
+                      "feedback": "<p>That's multiplication.</p>\n"
+                  },
+                  // The final feedback item always matches.
+                  {
+                      "solution_code": "x",
+                      "feedback":
+                      "<p>
+                          I don't know what you're doing.
+                       </p>\n"
+                  }
+              ]
+          ]
+      }
+    </script>
+  </div>
+</div>
+
+<!--
+Regex problems
+==============
+.. fillintheblank:: test_fitb_string
+
+    Fill in the blanks to make the following sentence: "The red car drove
+    away."
+
+    The |blank| car drove |blank|.
+
+    -   :red: Correct.
+        :x: Incorrect. Try 'red'.
+    -   :away: Correct.
+        :x: Incorrect. Try 'away'.
+
+
+The reStructuredText used to generate this problem is:
+
+.. literalinclude:: fitb_html_structure.html
+    :language: rest
+    :linenos:
+    :start-at: test_fitb_string
+    :end-before: The reStructuredText
+
+
+The (annotated) HTML for the problem is:
+-->
+
+<div class="runestone">
+  <div
+    data-component="fillintheblank"
+    data-question_label="2"
+    id="test_fitb_string"
+    style="visibility: hidden"
+  >
+    <script type="application/json">
+      // To request server-side grading for this problem type, omit all items from this dictionary except for the ``problemHtml`` key and its value.
+      {
+          // Note that templates are not evaluated for this problem, since only dynamic problems define variables for use by the template.
+          "problemHtml":
+          "<p>
+              Fill in the blanks to make the following sentence:
+              \"The red car drove away.\"
+           </p>
+           <p>
+              The <input type=\"text\" /> car drove <input type=\"text\" />.
+           </p>\n",
+
+          // This is not a dynamic problem.
+          "dyn_vars": null,
+
+          // While it's possible to name blanks for other problem types, only dynamic problems can make ues of the names provided. Therefore, it's let blank for other problem types.
+          "blankNames": {},
+
+          // All FITB problems must contain a feedback array.
+          "feedbackArray": [
+              // Blank 0 ("red "in "The red car")
+              [
+                  // Feedback for the correct answer must always come first.
+                  {
+                      // The reStructured text translator creates a "generous" regex, allowing arbitrary whitespace before and after the provided answer. This isn't required, however; any valid `regular expression <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions>`_ is acceptable. Refer to https://regex101.com for a user-friendly method of creating and testing a regex.
+                      "regex": "^\\s*red\\s*$",
+                      // While any `regex flag <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#advanced_searching_with_flags>`_ could be used, the most useful is ``i``, enabling case-insensitive matches. In this example, the match is case-sensitive; the answer "RED" is wrong.
+                      "regexFlags": "",
+                      // The feedback is arbitrary HTML; again, templates aren't supported for this problem type.
+                      "feedback": "<p>Correct.</p>\n"
+                  },
+                  // Since this is the last answer, it always matches and grades the provided answer as incorrect.
+                  {
+                      "regex": "^\\s*x\\s*$",
+                      "regexFlags": "",
+                      "feedback": "<p>Incorrect. Try \"red\".</p>\n"
+                  }
+              ],
+              // Blank 1 (the "away" in "drove away")
+              [
+                  // The format is exactly the same as blank 0.
+                  {
+                      "regex": "^\\s*away\\s*$",
+                      "regexFlags": "",
+                      "feedback": "<p>Correct.</p>\n"
+                  }, {
+                      "regex": "^\\s*x\\s*$",
+                      "regexFlags": "",
+                      "feedback": "<p>Incorrect. Try \"away\".</p>\n"
+                  }
+              ]
+          ]
+      }
+    </script>
+  </div>
+</div>
+
+<!--
+Numeric problem
+===============
+.. fillintheblank:: test_fitb_number
+
+    What is the solution to the following?
+
+    :math:`2 * \pi =` |blank|.
+
+    -   :6.28 0.005: Good job.
+        :.*: Incorrect. Try again.
+
+
+The reStructuredText used to generate this problem is:
+
+.. literalinclude:: fitb_html_structure.html
+    :language: rest
+    :linenos:
+    :start-at: test_fitb_number
+    :end-before: The reStructuredText
+
+
+The (annotated) HTML for the problem is:
+-->
+
+<div class="runestone">
+  <div
+    data-component="fillintheblank"
+    data-question_label="3"
+    id="test_fitb_number"
+    style="visibility: hidden"
+  >
+    <script type="application/json">
+      // To request server-side grading for this problem type, omit all items from this dictionary except for the ``problemHtml`` key and its value.
+      {
+          // The format for this matches the format of the previous example; comments on the details are omitted here for brevity.
+          "problemHtml":
+          "<p>
+              What is the solution to the following?
+           </p>\n
+           <p>
+              <span class=\"math notranslate nohighlight\">
+                  \\(2 * \\pi =\\)
+              </span>
+              <input type=\"text\" />.
+           </p>\n",
+
+          "dyn_vars": null,
+
+          "blankNames": {},
+
+          "feedbackArray": [
+              [
+                  // Any number in the range (6.275, 6.285) matches.
+                  {
+                      "number": [6.275, 6.285],
+                      "feedback": "<p>Good job.</p>\n"
+                  },
+                  // The next answer is regex. You may switch between answer types freely.
+                  {
+                      "regex": "^\\s*.*\\s*$",
+                      "regexFlags": "",
+                      "feedback": "<p>Incorrect. Try again.</p>\n"
+                  }
+              ]
+          ]
+      }
+    </script>
+  </div>
+</div>
