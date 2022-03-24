@@ -129,7 +129,6 @@ config values (conf.py):
         is_dynamic = env.config.html_context.get("dynamic_pages", False)
         is_dynamic = True if is_dynamic == "True" else False
         step = False
-        count = 0
         for line in self.content:
             if step == True:
                 if line != "":
@@ -144,4 +143,7 @@ config values (conf.py):
                 self.options["preReqLines"] += line + "<br />\n"
         se_node = ShowEvalNode()
         se_node["runestone_options"] = self.options
+        se_node["source"], se_node["line"] = self.state_machine.get_source_and_line(
+            self.lineno
+        )
         return [se_node]
