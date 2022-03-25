@@ -1,38 +1,37 @@
-=========================
-Horizontal Parsons Test
-=========================
+==========================================
+Test: Horizontal Parsons Problems with SQL
+==========================================
 
-.. Testing horizontal Parsons problems.
 
-Horizontal Parsons + SQL
+Examples
+========
+Randomized Block
 --------------------------------------
-.. hparsons:: test_activecode_6
+.. hparsons:: test_hparsons_sql_1 
     :language: sql
     :dburl: /_static/test.db
     :randomize:
-
 
     This is a horizontal Parsons problem! Feedback is based on code execution.
     The blocks are randomized, but cannot be reused ;)
     ~~~~
     --blocks--
-    select
+    SELECT 
     *
-    from
+    FROM
     test
     --unittest--
     assert 1,1 == world
     assert 0,1 == hello
     assert 2,1 == 42
 
-..     :dburl: http://localhost:8000/_static/test.db
 
-
-.. hparsons:: teasfasfas
+Reusable Block
+--------------------------------------
+.. hparsons:: test_hparsons_sql_2 
     :language: sql
     :dburl: /_static/test.db
     :reuse:
-
 
     This is a horizontal parsons problem! Feedback is base on code execution.
     The blocks are set as the original order, and can be used multiple times.
@@ -40,19 +39,11 @@ Horizontal Parsons + SQL
     These features might not be so useful in the context of SQL, but might be useful in regex.
     ~~~~
     --blocks--
-    select
+    SELECT 
     *
-    from
+    FROM
     test
     --unittest--
     assert 1,1 == world
     assert 0,1 == hello
     assert 2,1 == 42
-
-..     :dburl: http://localhost:8000/_static/test.db
-
-
-.. toctree::
-    :maxdepth: 3
-    
-    database_hparsons.rst
