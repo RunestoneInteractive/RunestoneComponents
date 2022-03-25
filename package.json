@@ -37,7 +37,7 @@
         "jexcel": "^3.9.1",
         "jquery-ui": "1.10.4",
         "select2": "^4.1.0-rc.0",
-        "sql.js": "1.5.0",
+        "sql.js": "1.6.2",
         "vega-embed": "3.14.0",
         "wavedrom": "^2.0.0"
     }
