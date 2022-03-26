@@ -6,7 +6,7 @@
 #
 alabaster==0.7.12
     # via sphinx
-astroid==2.9.3
+astroid==2.11.2
     # via pylint
 async-generator==1.10
     # via
@@ -44,6 +44,8 @@ cryptography==36.0.2
     # via
     #   pyopenssl
     #   urllib3
+dill==0.3.4
+    # via pylint
 docutils==0.17.1
     # via
     #   codechat
@@ -68,8 +70,9 @@ iniconfig==1.1.1
     # via pytest
 isort==5.10.1
     # via pylint
-jinja2==3.1.0
+jinja2==3.0.3
     # via
+    #   -r requirements.in
     #   myst-parser
     #   sphinx
 keyring==23.5.0
@@ -84,7 +87,7 @@ markdown-it-py==2.0.1
     #   myst-parser
 markupsafe==2.1.1
     # via jinja2
-mccabe==0.6.1
+mccabe==0.7.0
     # via pylint
 mdit-py-plugins==0.3.0
     # via myst-parser
@@ -122,7 +125,7 @@ pygments==2.11.2
     #   codechat
     #   readme-renderer
     #   sphinx
-pylint==2.12.2
+pylint==2.13.1
     # via -r requirements-dev.in
 pyopenssl==22.0.0
     # via urllib3
@@ -185,11 +188,10 @@ sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
 sqlalchemy==1.4.32
     # via -r requirements.in
-toml==0.10.2
-    # via pylint
 tomli==2.0.1
     # via
     #   pep517
+    #   pylint
     #   pytest
 tqdm==4.63.1
     # via twine
@@ -217,7 +219,7 @@ wheel==0.37.1
     # via
     #   -r requirements-dev.in
     #   pip-tools
-wrapt==1.13.3
+wrapt==1.14.0
     # via astroid
 wsproto==1.1.0
     # via trio-websocket

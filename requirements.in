@@ -9,3 +9,4 @@ sphinxcontrib-paverutils>=1.17
 cogapp>=2.5
 SQLAlchemy>=1.4.0
 CodeChat>=1.8.6
+jinja2<3.1.0
