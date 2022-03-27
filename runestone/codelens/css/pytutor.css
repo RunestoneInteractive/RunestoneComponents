@@ -221,7 +221,8 @@ div.ExecutionVisualizer #pyStdout {
   font-size: 12pt;
   padding: 4px;
   font-family: Andale mono, monospace;
-
+  color:#0a1bb688;
+  background: #faebbf;
   overflow: auto; /* to look pretty on IE */
   /* make sure textarea doesn't grow and stretch */
   resize: none;
