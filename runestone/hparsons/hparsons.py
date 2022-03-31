@@ -52,6 +52,7 @@ TEMPLATE_END = """
     %(textentry)s
     %(reuse)s
     %(randomize)s
+    %(blockanswer)s
     style="visibility: hidden;">
 %(initialsetting)s
 </textarea>
@@ -100,6 +101,7 @@ class HParsonsDirective(RunestoneIdDirective):
        TODO: fix textentry
        :reuse: only for parsons -- make the blocks reusable
        :textentry: if you will use text entry instead of horizontal parsons
+       :blockanswer: 0 1 2 3 # Provide answer for block-based feedback. Please note that the number of block start from 0. If not provided, will use execution based feedback.
 
         Here is the problem description. It must ends with the tildes.
         Make sure you use the correct delimitier for each section below.
@@ -107,6 +109,7 @@ class HParsonsDirective(RunestoneIdDirective):
         --blocks--
         block 1
         block 2
+        block 3
         --explanations--
         explanations for block 1
         explanations for block 2
@@ -127,6 +130,7 @@ class HParsonsDirective(RunestoneIdDirective):
             "textentry": directives.flag,
             "reuse": directives.flag,
             "randomize": directives.flag,
+            "blockanswer": directives.unchanged,
         }
     )
 
@@ -149,6 +153,11 @@ class HParsonsDirective(RunestoneIdDirective):
             self.options['randomize'] = ' data-randomize="true"'
         else:
             self.options['randomize'] = ''
+
+        if "blockanswer" in self.options:
+            self.options["blockanswer"] = "data-blockanswer='{}'".format(self.options["blockanswer"])
+        else:
+            self.options['blockanswer'] = ''
 
         explain_text = None
         if self.content:

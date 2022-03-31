@@ -4,6 +4,7 @@ import initSqlJs from "sql.js/dist/sql-wasm.js";
 import RunestoneBase from "../../common/js/runestonebase.js";
 import "../css/hparsons.css";
 import 'handsontable/dist/handsontable.full.css';
+import BlockBasedGrader from "./blockGrader.js";
 
 var allDburls = {};
 
@@ -23,6 +24,10 @@ export default class SQLHParons extends RunestoneBase {
         this.textentry = $(orig).data('textentry') ? true : false;
         this.reuse = $(orig).data('reuse') ? true : false;
         this.randomize = $(orig).data('randomize') ? true : false;
+        this.isBlockGrading = $(orig).data('blockanswer') ? true : false;
+        if (this.isBlockGrading) {
+            this.blockAnswer = $(orig).data('blockanswer').split(' ');
+        }
         this.divid = opts.orig.id;
         this.containerDiv = opts.orig;
         this.useRunestoneServices = opts.useRunestoneServices;
@@ -121,6 +126,22 @@ export default class SQLHParons extends RunestoneBase {
                 self.db = new SQL.Database();
             }
         });
+
+        // Initializing options used for block based feedback
+        if (this.isBlockGrading) {
+            this.blockIndex = 0;
+            this.checkCount = 0;
+            this.numDistinct = 0;
+            this.hasSolved = false;
+            // TODO: not sure what is the best way to do this
+            this.grader = new BlockBasedGrader();
+            let solutionBlocks = [];
+            for (let i = 0; i < this.blockAnswer.length; ++i) {
+                solutionBlocks.push(this.originalBlocks[this.blockAnswer[i]]);
+            }
+            this.solution = solutionBlocks;
+            this.grader.solution = solutionBlocks;
+        }
     }
 
     // copied from activecode
@@ -140,6 +161,96 @@ export default class SQLHParons extends RunestoneBase {
         this.runButton.disabled = false;
     }
 
+    // Called when check button clicked (block-based Feedback)
+    checkButtonHandler() {
+        this.checkCurrentAnswer();
+        this.renderFeedbackBlockBased();
+    }
+
+    // Used for block-based feedback
+    checkCurrentAnswer() {
+        if (!this.hasSolved) {
+            this.checkCount++;
+            this.clearFeedback();
+            this.grader.answer = this.hparsons.getParsonsTextArray();
+            this.grade = this.grader.grade();
+            if (this.grade == "correct") {
+                this.hasSolved = true;
+                this.correct = true;
+                $(this.checkButton).prop("disabled", true);
+            }
+        }
+    }
+
+    // Feedback UI for Block-based Feedback
+    clearFeedback() {
+        $(this.answerArea).removeClass("incorrect correct");
+        var children = this.answerArea.childNodes;
+        for (var i = 0; i < children.length; i++) {
+            $(children[i]).removeClass(
+                "correctPosition incorrectPosition"
+            );
+        }
+        $(this.messageDiv).hide();
+    }
+
+    renderFeedbackBlockBased() {
+        this.grade = this.grader.graderState;
+        var feedbackArea;
+        var answerArea = $(this.answerArea);
+        feedbackArea = $(this.messageDiv);
+
+        if (this.grade === "correct") {
+            answerArea.addClass("correct");
+            feedbackArea.fadeIn(100);
+            feedbackArea.attr("class", "alert alert-info");
+            if (this.checkCount > 1) {
+                feedbackArea.html(
+                    $.i18n("msg_parson_correct", this.checkCount)
+                );
+            } else {
+                feedbackArea.html($.i18n("msg_parson_correct_first_try"));
+            }
+        }
+
+        if (this.grade === "incorrectTooShort") {
+            // too little code
+            answerArea.addClass("incorrect");
+            feedbackArea.fadeIn(500);
+            feedbackArea.attr("class", "alert alert-danger");
+            feedbackArea.html($.i18n("msg_parson_too_short"));
+        }
+
+        if (this.grade === "incorrectMoveBlocks") {
+            var answerBlocks = this.answerArea.children;
+            var inSolution = [];
+            var inSolutionIndexes = [];
+            var notInSolution = [];
+            for (let i = 0; i < answerBlocks.length; i++) {
+                var block = answerBlocks[i];
+                var index = this.solution.indexOf(block.textContent);
+                if (index == -1) {
+                    notInSolution.push(block);
+                } else {
+                    inSolution.push(block);
+                    inSolutionIndexes.push(index);
+                }
+            }
+            var lisIndexes = this.grader.inverseLISIndices(inSolutionIndexes);
+            for (let i = 0; i < lisIndexes.length; i++) {
+                notInSolution.push(inSolution[lisIndexes[i]]);
+            }
+            answerArea.addClass("incorrect");
+            feedbackArea.fadeIn(500);
+            feedbackArea.attr("class", "alert alert-danger");
+            for (let i = 0; i < notInSolution.length; i++) {
+                $(notInSolution[i]).addClass("incorrectPosition");
+            }
+            feedbackArea.html($.i18n("msg_parson_wrong_order"));
+        }
+    }
+
+
     // copied from activecode, already modified to add parsons
     createEditor() {
         this.outerDiv = document.createElement("div");
@@ -158,7 +269,12 @@ export default class SQLHParons extends RunestoneBase {
         }
         parsonsHTML += `>`
         this.outerDiv.innerHTML = parsonsHTML;
-        this.outerDiv.addEventListener('horizontal-parsons', (ev) => {this.logHorizontalParsonsEvent(ev.detail)})
+        this.outerDiv.addEventListener('horizontal-parsons', (ev) => {
+            this.logHorizontalParsonsEvent(ev.detail)
+            if (this.isBlockGrading) {
+                this.clearFeedback();
+            }
+        })
         let blocks = [];
         let blockIndex = this.code.indexOf('--blocks--');
         if (blockIndex > -1) {
@@ -168,28 +284,37 @@ export default class SQLHParons extends RunestoneBase {
             blocks = blocksString.split('\n');
         }
         this.hparsons = $(this.outerDiv).find("horizontal-parsons")[0];
-        this.hparsons.parsonsData = blocks.slice(1, -1);
+        this.originalBlocks = blocks.slice(1,-1);
+        this.hparsons.parsonsData = blocks.slice(1,-1);
+
+        // Saving UI area for block-based feedback
+        this.answerArea = this.hparsons.shadowRoot.querySelector('.drop-area');
     }
 
-    // copied from activecode
-    // seems pretty clear, and do not need to modify
     createOutput() {
-        // Create a parent div with two elements:  pre for standard output and a div
-        // to hold turtle graphics output.  We use a div in case the turtle changes from
-        var outDiv = document.createElement("div");
-        $(outDiv).addClass("hp_output col-md-12");
-        this.outDiv = outDiv;
-        this.output = document.createElement("pre");
-        this.output.id = this.divid + "_stdout";
-        $(this.output).css("visibility", "hidden");
-        var clearDiv = document.createElement("div");
-        $(clearDiv).css("clear", "both"); // needed to make parent div resize properly
-        this.outerDiv.appendChild(clearDiv);
-        outDiv.appendChild(this.output);
-        this.outerDiv.appendChild(outDiv);
-        clearDiv = document.createElement("div");
-        $(clearDiv).css("clear", "both"); // needed to make parent div resize properly
-        this.outerDiv.appendChild(clearDiv);
+        if (this.isBlockGrading) {
+            // Block based grading output
+            this.messageDiv = document.createElement("div");
+            this.outerDiv.appendChild(this.messageDiv);
+        } else {
+            // Execution based grading output
+            // Create a parent div with two elements:  pre for standard output and a div
+            // to hold turtle graphics output.  We use a div in case the turtle changes from
+            var outDiv = document.createElement("div");
+            $(outDiv).addClass("hp_output col-md-12");
+            this.outDiv = outDiv;
+            this.output = document.createElement("pre");
+            this.output.id = this.divid + "_stdout";
+            $(this.output).css("visibility", "hidden");
+            var clearDiv = document.createElement("div");
+            $(clearDiv).css("clear", "both"); // needed to make parent div resize properly
+            this.outerDiv.appendChild(clearDiv);
+            outDiv.appendChild(this.output);
+            this.outerDiv.appendChild(outDiv);
+            clearDiv = document.createElement("div");
+            $(clearDiv).css("clear", "both"); // needed to make parent div resize properly
+            this.outerDiv.appendChild(clearDiv);
+        }
     }
 
     // copied from activecode
@@ -198,14 +323,26 @@ export default class SQLHParons extends RunestoneBase {
         var butt;
         $(ctrlDiv).addClass("hp_actions");
         $(ctrlDiv).addClass("col-md-12");
-        // Run
-        butt = document.createElement("button");
-        $(butt).text("Run");
-        $(butt).addClass("btn btn-success run-button");
-        ctrlDiv.appendChild(butt);
-        this.runButton = butt;
-        this.runButton.onclick = this.runButtonHandler.bind(this);
-        $(butt).attr("type", "button");
+
+        if (this.isBlockGrading) {
+            // Check button: if line based feedback
+            butt = document.createElement("button");
+            $(butt).text("Check");
+            $(butt).addClass("btn btn-success run-button");
+            ctrlDiv.appendChild(butt);
+            this.checkButton = butt;
+            this.checkButton.onclick = this.checkButtonHandler.bind(this);
+            $(butt).attr("type", "button");
+        } else {
+            // Run button: if execution based feedback
+            butt = document.createElement("button");
+            $(butt).text("Run");
+            $(butt).addClass("btn btn-success run-button");
+            ctrlDiv.appendChild(butt);
+            this.runButton = butt;
+            this.runButton.onclick = this.runButtonHandler.bind(this);
+            $(butt).attr("type", "button");
+        }
 
         // Reset button
         var resetBtn;
@@ -214,10 +351,17 @@ export default class SQLHParons extends RunestoneBase {
         $(resetBtn).addClass("btn btn-warning run-button");
         ctrlDiv.appendChild(resetBtn);
         this.resetButton = resetBtn;
-        this.resetButton.onclick = () => this.hparsons.resetInput();
+        this.resetButton.onclick = () => {
+            this.hparsons.resetInput();
+            if (this.isBlockGrading) {
+                this.clearFeedback();
+                $(this.checkButton).prop("disabled", false);
+                this.checkCount = 0;
+                this.hasSolved = false;
+            }
+        }
         $(resetBtn).attr("type", "button");
 
-        // TODO: maybe remove the question part
         $(this.outerDiv).prepend(ctrlDiv);
         this.controlDiv = ctrlDiv;
     }
