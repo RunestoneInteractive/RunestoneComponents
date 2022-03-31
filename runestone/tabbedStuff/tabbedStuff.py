@@ -34,7 +34,7 @@ def setup(app):
 
 
 # Templates to be formatted by node options
-BEGIN = """<div id='%(divid)s' data-component="tabbedStuff" %(inactive)s class='%(divclass)s'>"""
+BEGIN = """<div id='%(divid)s' data-component="tabbedStuff" %(inactive)s class='%(divclass)s %(optclass)s'>"""
 
 TABDIV_BEGIN = """<div data-component="tab" data-tabname="%(tabname)s" %(active)s>
 """
@@ -86,11 +86,15 @@ def visit_tabbedstuff_html(self, node):
     else:
         node["tabbed_stuff_options"]["inactive"] = ""
 
-    res = BEGIN % {
+    format_dict = {
         "divid": divid,
         "divclass": node["tabbed_stuff_options"]["divclass"],
         "inactive": node["tabbed_stuff_options"]["inactive"],
     }
+
+    format_dict.update(node["tabbed_stuff_options"])
+
+    res = BEGIN % format_dict
 
     self.body.append(res)
 
@@ -124,7 +128,10 @@ config values (conf.py):
     optional_arguments = 0
     final_argument_whitespace = True
     has_content = True
-    option_spec = {"active": directives.flag}
+    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec.update(
+        {"active": directives.flag}
+    )
 
     node_class = TabNode
 
@@ -172,7 +179,10 @@ config values (conf.py):
     optional_arguments = 0
     final_argument_whitespace = True
     has_content = True
-    option_spec = {"inactive": directives.flag}
+    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec.update(
+        {"inactive": directives.flag}
+    )
 
     def run(self):
         """

@@ -223,24 +223,25 @@ export default class FITB extends RunestoneBase {
         if (typeof sid !== "undefined") {
             data.sid = sid;
             feedback = false;
-        };
+        }
+        // Per `logBookEvent <logBookEvent>`, the result is undefined if there's no server. Otherwise, the server provides the endpoint-specific results in ``data.details``; see `make_json_response`.
         data = await this.logBookEvent(data);
-        data = data.detail;
+        let detail = data && data.detail;
         if (!feedback) return;
         if (!this.feedbackArray) {
             // On success, update the feedback from the server's grade.
             this.setLocalStorage({
                 answer: answer,
-                timestamp: data.timestamp,
+                timestamp: detail.timestamp,
             });
-            this.correct = data.correct;
-            this.displayFeed = data.displayFeed;
-            this.isCorrectArray = data.isCorrectArray;
+            this.correct = detail.correct;
+            this.displayFeed = detail.displayFeed;
+            this.isCorrectArray = detail.isCorrectArray;
             if (!this.isTimed) {
                 this.renderFeedback();
             }
         }
-        return data;
+        return detail;
     }
 
     /*==============================
@@ -343,7 +344,7 @@ export default class FITB extends RunestoneBase {
         }
         this.feedBackDiv.innerHTML = feedback_html;
         if (typeof MathJax !== "undefined") {
-            this.queueMathJax(document.body)
+            this.queueMathJax(document.body);
         }
     }
 

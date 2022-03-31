@@ -107,7 +107,7 @@ rst_prolog = (
     # For fill-in-the-blank questions, provide a convenient means to indicate a blank.
     """
 
-.. |blank| replace:: :blank:`x`
+.. |blank| replace:: :blank:`-`
 """
     # For literate programming files, provide a convenient way to refer to a source file's name. See `runestone.lp.lp._docname_role`.
     """.. |docname| replace:: :docname:`name`

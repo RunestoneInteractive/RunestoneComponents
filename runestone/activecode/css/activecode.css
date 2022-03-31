@@ -49,19 +49,12 @@
     border: 0;
 }
 
-.ac_section {
+#main-content section .runestone.ac_section .ac_section {
     position: relative;
     margin-right: auto;
     margin-left: auto;
     max-width: 800px;
     clear: both;
-}
-
-.ac_section > *:not(.ac_section) {
-    max-width: 500pt;
-    margin-left: auto;
-    margin-right: auto;
-    position: relative;
 }
 
 .ac_section .clearfix {
@@ -70,7 +63,6 @@
 
 .ac_output {
     display: none;
-    max-width: 450px;
     background-color: inherit;
 }
 .ac_output pre {

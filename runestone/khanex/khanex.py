@@ -39,7 +39,7 @@ VERBOSE = False
 # Template that will load index.html?quizname=the-quiz-name into an <iframe>
 # NOTE: Hardcoding the container class.  Temporarily??
 KHANEX_TEMPLATE = """
-    <div class="runestone alert alert-warning">
+    <div class="runestone alert alert-warning %(optclass)s">
      <div  data-component="khanex" id="%(divid)s" data-question_label="%(question_label)s" style="visibility: visible;">
        <iframe style="transform:scale(0.7,1);transform-origin:0 0;" width="990px" height="490px" src="../_static/khanex/qs/###.html"></iframe>
      </div>
@@ -114,8 +114,9 @@ class Khanex(RunestoneIdDirective):
     """
     required_arguments = 1
     optional_arguments = 0
-    has_content = True
-    option_spec = {}
+    has_content = True    
+    option_spec = RunestoneIdDirective.option_spec.copy()
+    option_spec.update( {} )
 
     # This invokes the rendering code in js/khanex.js
     def run(self):

@@ -207,7 +207,8 @@ class Blockly(RunestoneIdDirective):
     required_arguments = 1
     optional_arguments = 0
     has_content = True
-    option_spec = {}
+    option_spec = RunestoneIdDirective.option_spec.copy()
+    option_spec.update( {} )
 
     def run(self):
         super(Blockly, self).run()

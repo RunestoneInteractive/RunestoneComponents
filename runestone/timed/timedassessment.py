@@ -106,7 +106,7 @@ def depart_timed_html(self, node):
 
 # Templates to be formatted by node options
 TEMPLATE_START = """
-    <div style="max-width: none">
+    <div class="timedAssessment %(optclass)s">
     <ul data-component="timedAssessment" data-question_label="%(question_label)s" %(timelimit)s id="%(divid)s" %(noresult)s %(nofeedback)s %(timedfeedback)s %(notimer)s %(fullwidth)s %(nopause)s>
     """
 
@@ -131,15 +131,18 @@ class TimedDirective(RunestoneIdDirective):
     optional_arguments = 0
     final_argument_whitespace = True
     has_content = True
-    option_spec = {
-        "timelimit": directives.positive_int,
-        "noresult": directives.flag,
-        "timedfeedback": directives.flag,
-        "nofeedback": directives.flag,  # backward compatibility
-        "fullwidth": directives.flag,
-        "notimer": directives.flag,
-        "nopause": directives.flag,
-    }
+    option_spec = RunestoneIdDirective.option_spec.copy()
+    option_spec.update(
+        {
+            "timelimit": directives.positive_int,
+            "noresult": directives.flag,
+            "timedfeedback": directives.flag,
+            "nofeedback": directives.flag,  # backward compatibility
+            "fullwidth": directives.flag,
+            "notimer": directives.flag,
+            "nopause": directives.flag,
+        }
+    )
 
     def run(self):
         """

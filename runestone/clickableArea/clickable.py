@@ -35,7 +35,7 @@ def setup(app):
 
 
 TEMPLATE = """
-<div class="runestone">
+<div class="runestone %(optclass)s">
 <div data-component="clickablearea" class="%(divclass)s" id="%(divid)s" data-question_label="%(question_label)s" %(optional)s %(table)s %(correct)s %(incorrect)s style="visibility: hidden;">
 <span data-question>%(qnumber)s: %(question)s</span>%(feedback)s%(clickcode)s
 """

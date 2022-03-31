@@ -40,7 +40,7 @@ VERBOSE = False
 # Template that will load index.html?quizname=the-quiz-name into an <iframe>
 # NOTE: Hardcoding the container class.  Temporarily??
 QUIZLY_TEMPLATE = """
-       <div class="runestone alert alert-warning">
+       <div class="runestone alert alert-warning %(optclass)s">
        <div data-component="quizly" id="%(divid)s" data-question_label="%(question_label)s" style="visibility: visible;">
          <iframe height="595" src="../_static/quizly/index.html?backpack=hidden&amp;selector=hidden&amp;quizname=###&amp;hints=true&amp;repeatable=false" style="border: 0px; margin: 1px; padding: 1px;" width="100%%">
          </iframe>
@@ -117,7 +117,8 @@ class Quizly(RunestoneIdDirective):
     required_arguments = 1
     optional_arguments = 0
     has_content = True
-    option_spec = {}
+    option_spec = RunestoneIdDirective.option_spec.copy()
+    option_spec.update( {} )
 
     def run(self):
         super(Quizly, self).run()

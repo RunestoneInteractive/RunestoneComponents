@@ -15,7 +15,10 @@ Coding Standards
 
 *   All components must be Python 3 compatible.   The ``six`` module is already
     in the requirements.txt file, so feel free to use that.
-*   No Tabs for Python files (4 spaces = 1 indentation)
+*   No Tabs for Python files (4 spaces = 1 indentation) 
+*   We use black to format all of our Python code.
+*   No Tabs in Javascript files (4 spaces = 1 indentation)
+*   We use Prettier to format our Javascript - please make sure you configure prettier to use 4 spaces as the tab size.
 *   Avoid proliferation of jQuery versions.  Make your stuff compatible with the version
     of jQuery in the common folder.
 *   Avoid proliferation of additional third party javascript modules.  We are already out of

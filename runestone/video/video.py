@@ -34,7 +34,7 @@ def setup(app):
 
 
 CODE = """\
-<div id="%(divid)s" class="video_popup runestone" >
+<div id="%(divid)s" class="video_popup runestone %(optclass)s" >
 <video %(controls)s %(preload)s %(loop)s poster="%(thumb)s">
     %(sources)s
     No supported video types
@@ -224,7 +224,7 @@ class IframeVideo(RunestoneIdDirective):
         if not self.options.get("height"):
             self.options["height"] = self.default_height
         if not self.options.get("align"):
-            self.options["align"] = "left"
+            self.options["align"] = "center"
         if not self.options.get("http"):
             self.options["http"] = "https"
         if not self.options.get("divid"):
@@ -255,7 +255,7 @@ class Youtube(IframeVideo):
    """
 
     html = """
-    <div class="runestone" style="margin-left: auto; margin-right:auto">
+    <div class="runestone %(optclass)s" style="margin-left: auto; margin-right:auto">
         <div id="%(divid)s" data-component="youtube" class="align-%(align)s youtube-video"
             data-video-height="%(height)d" data-question_label="%(question_label)s"
             data-video-width="%(width)d" data-video-videoid="%(video_id)s"

@@ -47,7 +47,7 @@ from runestone.common.runestonedirective import (
 
 
 TEMPLATE = """
-<div class="runestone alert alert-warning sqcontainer">
+<div class="runestone alert alert-warning sqcontainer %(optclass)s">
 <div data-component="selectquestion" id={component_id} {selector} {points} {proficiency} {min_difficulty} {max_difficulty} {autogradable} {not_seen_ever} {primary} {AB} {toggle_options} {toggle_labels} {limit_basecourse}>
     <p>{message}</p>
 </div>

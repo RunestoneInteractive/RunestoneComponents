@@ -58,7 +58,7 @@ def depart_question_html(self, node):
 
 # Templates to be formatted by node options
 TEMPLATE_START = """
-    <div data-component="question" class="full-width container question" data-question_label="%(question_label)s" id="%(divid)s" >
+    <div data-component="question" class="full-width container question %(optclass)s" data-question_label="%(question_label)s" id="%(divid)s" >
     <ol %(number)s class=arabic><li class="alert alert-warning">
 
     """
