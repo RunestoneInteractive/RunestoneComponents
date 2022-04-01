@@ -39,6 +39,7 @@ from runestone.common import (
     RunestoneIdNode,
     get_node_line,
 )
+from runestone.common.xmlcommon import substitute_departure, substitute_visitor
 
 
 def setup(app):
@@ -47,7 +48,8 @@ def setup(app):
     app.add_node(FITBNode, html=(visit_fitb_html, depart_fitb_html))
     app.add_node(BlankNode, html=(visit_blank_html, depart_blank_html))
     app.add_node(
-        FITBFeedbackNode, html=(visit_fitb_feedback_html, depart_fitb_feedback_html)
+        FITBFeedbackNode, html=(visit_fitb_feedback_html, depart_fitb_feedback_html),
+        xml=(substitute_visitor, substitute_departure)
     )
 
     app.add_config_value("fitb_div_class", "runestone", "html")

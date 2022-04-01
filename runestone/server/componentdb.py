@@ -22,6 +22,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 from __future__ import print_function
+import pdb
 
 from datetime import datetime, timedelta
 
@@ -120,6 +121,8 @@ def setup(app):
 
     app.connect("env-before-read-docs", reset_questions)
     app.connect("build-finished", finalize_updates)
+    app.connect("env-before-read-docs", init_subs_file)
+    app.connect("build-finished", finalize_subs_file)
     # the `qbank` option is for the QuestionBank
     # it allows us to populate the database from the question bank
     # but we don't care about populating chapter and subchapter tables and others
@@ -174,6 +177,17 @@ def get_table_meta():
     return table_info
 
 
+def init_subs_file(app, env, docnames):
+    if app.builder.name == "xml":
+        with open("rs-substitutes.xml", "w") as subfile:
+            subfile.write("<substitutes>")
+
+
+def finalize_subs_file(app, excpt):
+    if app.builder.name == "xml":
+        with open("rs-substitutes.xml", "a") as subfile:
+            subfile.write("</substitutes>")
+
 # Reset Questions
 # ---------------
 # We need to be able to tell the difference between questions that are
@@ -181,6 +195,8 @@ def get_table_meta():
 # so wheenver we build the book, we mark all questions for this base course
 # with ``from_source = 'F'`` Then as the book is built and questions are updated
 # those in the book get ``from_source = 'T'`` set.
+
+
 def reset_questions(app, env, docnames):
     if sess:
         logger.info("Resetting questions")

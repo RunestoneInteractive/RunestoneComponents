@@ -31,7 +31,8 @@ def setup(app):
 
     app.add_config_value("codelens_div_class", "alert alert-warning cd_section", "html")
     app.add_config_value("trace_url", "http://tracer.runestone.academy:5000", "html")
-    app.add_node(CodeLensNode, html=(visit_codelens_html, depart_codelens_html))
+    app.add_node(CodeLensNode, html=(visit_codelens_html, depart_codelens_html),
+                 xml=(visit_codelens_xml, depart_codelens_xml))
 
 
 #  data-tracefile="pytutor-embed-demo/java.json"
@@ -65,6 +66,27 @@ class CodeLensNode(nodes.General, nodes.Element, RunestoneIdNode):
     pass
 
 
+def visit_codelens_xml(self, node):
+    html = VIS
+    if "caption" not in node["runestone_options"]:
+        node["runestone_options"]["caption"] = node["runestone_options"]["question_label"]
+    if "tracedata" in node["runestone_options"]:
+        node["runestone_options"]["tracedata"] = node["runestone_options"]["tracedata"].replace(
+            "<", "&lt;").replace(">", "&gt;")
+        html += DATA
+    else:
+        html += "</div>"
+    html = html % node["runestone_options"]
+
+    self.output.append(
+        "<exercise runestone='{divid}' />".format(**node["runestone_options"]))
+    with open("rs-substitutes.xml", "a") as subfile:
+        subfile.write("<substitute xml:id='{divid}'>".format(
+            **node["runestone_options"]))
+        subfile.write(html)
+        subfile.write("</substitute>")
+
+
 def visit_codelens_html(self, node):
     html = VIS
     if "caption" not in node["runestone_options"]:
@@ -82,6 +104,10 @@ def visit_codelens_html(self, node):
 
 
 def depart_codelens_html(self, node):
+    pass
+
+
+def depart_codelens_xml(self, node):
     pass
 
 

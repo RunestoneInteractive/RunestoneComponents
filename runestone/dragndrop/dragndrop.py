@@ -27,6 +27,7 @@ from runestone.common.runestonedirective import (
     RunestoneIdDirective,
     RunestoneIdNode,
 )
+from runestone.common.xmlcommon import write_substitute
 
 
 def setup(app):
@@ -60,13 +61,11 @@ class DragNDropNode(nodes.General, nodes.Element, RunestoneIdNode):
 
 
 def visit_dnd_xml(self, node):
-    res = visit_dnd_common(self, node)
-    self.output.append(res)
+    write_substitute(self, node)
 
 
 def depart_dnd_xml(self, node):
-    res = depart_dnd_common(self, node)
-    self.output.append(res)
+    pass
 
 
 def visit_dnd_html(self, node):

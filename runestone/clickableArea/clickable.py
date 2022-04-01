@@ -24,12 +24,14 @@ from runestone.server.componentdb import (
     maybeAddToAssignment,
 )
 from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneIdNode
+from runestone.common.xmlcommon import write_substitute, substitute_visitor, substitute_departure
 
 
 def setup(app):
     app.add_directive("clickablearea", ClickableArea)
 
-    app.add_node(ClickableAreaNode, html=(visit_ca_html, depart_ca_html))
+    app.add_node(ClickableAreaNode, html=(visit_ca_html, depart_ca_html),
+                 xml=(substitute_visitor, substitute_departure))
 
     app.add_config_value("clickable_div_class", "runestone alert alert-warning", "html")
 
