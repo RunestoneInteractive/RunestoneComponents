@@ -63,13 +63,12 @@ def setup(app):
 XML_START = """
 <listing xml:id="{divid}">
     <caption>{caption}</caption>
-    <program xml:id="{divid}_editor" interactive='yes' language="{language}">
+    <program xml:id="{divid}_editor" interactive='activecode' language="{language}">
         <input>
-        {initialcode}
+{initialcode}
         </input>
     </program>
 </listing>
-
 """
 
 TEMPLATE_START = """
@@ -97,6 +96,8 @@ class ActivecodeNode(nodes.General, nodes.Element, RunestoneIdNode):
 
 
 def visit_ac_xml(self, node):
+    node["runestone_options"]["initialcode"] = node["runestone_options"]["initialcode"].replace(
+        "<", "&lt;").replace(">", "&gt;")
     res = XML_START.format(**node["runestone_options"])
     self.output.append(res)
 

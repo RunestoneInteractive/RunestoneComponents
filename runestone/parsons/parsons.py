@@ -72,7 +72,9 @@ def visit_parsons_xml(self, node):
         node["runestone_options"]["adaptive"] = "adaptive='yes'"
 
     if not node["runestone_options"]["noindent"]:
-        node["runestone_options"]["noindent"] = "indent='yes'"
+        node["runestone_options"]["noindent"] = "indent='show'"
+    else:
+        node["runestone_options"]["noindent"] = "indent='hide'"
 
     if node["runestone_options"]["language"]:
         node["runestone_options"]["language"] = node["runestone_options"]["language"].replace(
