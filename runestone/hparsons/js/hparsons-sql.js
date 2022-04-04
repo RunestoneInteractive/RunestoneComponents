@@ -16,6 +16,7 @@ export default class SQLHParons extends RunestoneBase {
         super(opts);
         // copied from activecode
         var suffStart;
+        // getting settings
         var orig = $(opts.orig).find("textarea")[0];
         this.textentry = $(orig).data('textentry') ? true : false;
         this.reuse = $(orig).data('reuse') ? true : false;
@@ -35,8 +36,6 @@ export default class SQLHParons extends RunestoneBase {
         this.saveButton = null;
         this.loadButton = null;
         this.outerDiv = null;
-        this.logResults = true;
-        this.output = null; // create pre for output
         this.controlDiv = null;
         let prefixEnd = this.code.indexOf("^^^^");
         if (prefixEnd > -1) {
@@ -108,9 +107,6 @@ export default class SQLHParons extends RunestoneBase {
         this.hparsonsInput = $(this.outerDiv).find("horizontal-parsons")[0];
         this.originalBlocks = blocks.slice(1,-1);
         this.hparsonsInput.parsonsData = blocks.slice(1,-1);
-
-        // Saving UI area for block-based feedback
-        this.answerArea = this.hparsonsInput.shadowRoot.querySelector('.drop-area');
     }
 
     createOutput() {
