@@ -13,7 +13,7 @@ Randomized Block with Block Based Feedback
     :randomize:
     :blockanswer: 0 1 2 3
 
-    This is a horizontal Parsons problem! Feedback is based on code execution.
+    This is a horizontal Parsons problem! Feedback is based on block for this problem.
     The blocks are randomized, but cannot be reused ;)
     ~~~~
     --blocks--
@@ -21,29 +21,6 @@ Randomized Block with Block Based Feedback
     *
     FROM
     test
-    --unittest--
-    assert 1,1 == world
-    assert 0,1 == hello
-    assert 2,1 == 42
-
-
-.. parsonsprob:: test_parsons_1
-   :adaptive:
-   :order: 0 1 2 3 4
-
-   need some text ?
-   -----
-   def fib(num):
-   =====
-      if num == 0:
-          return 0:
-   =====
-      if num == 1:
-          return 1:
-   =====
-      return fib(num - 1) + fib(num - 2)
-   =====
-      return fib(num - 1) * fib(num - 2) #paired
 
 
 Randomized Block with Execution Based Feedback

@@ -1,5 +1,7 @@
 import HParsonsFeedback from "./hparsonsFeedback";
 import BlockBasedGrader from "./blockGrader.js";
+import "../../parsons/js/parsons-i18n.en.js";
+import "../../parsons/js/parsons-i18n.pt-br.js";
 
 export default class BlockFeedback extends HParsonsFeedback {
     createOutput() {
