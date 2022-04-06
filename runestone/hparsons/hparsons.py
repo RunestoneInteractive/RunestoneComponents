@@ -91,10 +91,9 @@ def depart_hp_html(self, node):
 
 
 class HParsonsDirective(RunestoneIdDirective):
-    # only keep: language, autograde, dburl
     """
     .. hparsons:: uniqueid
-       :language: sql, regex
+       :language: python, java, javscript, sql, html: only for highlighting purpose.
        :dburl: only for sql -- url to load database
        :randomize: randomize the order of horizontal parsons
        :reuse: only for parsons -- make the blocks reusable
