@@ -46,7 +46,7 @@ Randomized Block with Block Based Feedback - Java highlighting
     :language: java 
     :dburl: /_static/test.db
     :randomize:
-    :blockanswer: 0 1 2 3
+    :blockanswer: 0 1 2 3 4 5
 
     Java highlighting for keywords
     ~~~~
