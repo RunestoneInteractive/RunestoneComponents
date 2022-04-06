@@ -36,6 +36,10 @@ export default class SQLFeedback extends HParsonsFeedback {
         $(this.outDiv).hide();
     }
 
+    reset() {
+        this.clearFeedback();
+    }
+
     init() {
         // adapted from activecode-sql
         // fnprefix sets the path to load the sql-wasm.wasm file

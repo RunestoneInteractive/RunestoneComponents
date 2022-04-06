@@ -41,8 +41,8 @@ export default class BlockFeedback extends HParsonsFeedback {
             this.grader.answer = this.hparsons.hparsonsInput.getParsonsTextArray();
             this.grade = this.grader.grade();
             if (this.grade == "correct") {
-                this.solved = true;
                 $(this.hparsons.runButton).prop("disabled", true);
+                this.solved = true;
             }
         }
     }
@@ -114,11 +114,15 @@ export default class BlockFeedback extends HParsonsFeedback {
             );
         }
         $(this.messageDiv).hide();
+    }
 
-        // TODO: might need to change this
-        $(this.hparsons.runButton).prop("disabled", false);
-        // this.checkCount = 0;
-        this.solved = false;
+    reset() {
+        if (this.solved) {
+            this.checkCount = 0;
+            $(this.hparsons.runButton).prop("disabled", false);
+            this.solved = false;
+        }
+        this.clearFeedback();
     }
 
 }

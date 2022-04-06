@@ -17,7 +17,12 @@ export default class HParsonsFeedback {
     }
 
     clearFeedback() {
-        // called when Reset is clicked or input is changed
+        // called when input is changed
         console.log('clearFeedback method not implemented in feedback!');
+    }
+    
+    reset() {
+        // called when reset is clicked
+        console.log('reset method not implemented in feedback!');
     }
 }

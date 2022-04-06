@@ -18,7 +18,6 @@ export default class SQLHParons extends RunestoneBase {
         var suffStart;
         // getting settings
         var orig = $(opts.orig).find("textarea")[0];
-        this.textentry = $(orig).data('textentry') ? true : false;
         this.reuse = $(orig).data('reuse') ? true : false;
         this.randomize = $(orig).data('randomize') ? true : false;
         this.isBlockGrading = $(orig).data('blockanswer') ? true : false;
@@ -79,11 +78,7 @@ export default class SQLHParons extends RunestoneBase {
         this.outerDiv = document.createElement("div");
         $(this.origElem).replaceWith(this.outerDiv);
         let parsonsHTML = `<horizontal-parsons id='${this.divid}-hparsons'`
-        if (this.textentry) {
-            parsonsHTML += ` input-type='text' `;
-        } else {
-            parsonsHTML += ` input-type='parsons' `;
-        }
+        parsonsHTML += ` input-type='parsons' `;
         if (this.reuse) {
             parsonsHTML += ` reuse-blocks="true"`;
         }
@@ -138,7 +133,7 @@ export default class SQLHParons extends RunestoneBase {
         this.resetButton = resetBtn;
         this.resetButton.onclick = () => {
             this.hparsonsInput.resetInput();
-            this.feedbackController.clearFeedback();
+            this.feedbackController.reset();
         }
         $(resetBtn).attr("type", "button");
 

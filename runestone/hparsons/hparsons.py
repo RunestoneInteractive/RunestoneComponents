@@ -49,7 +49,6 @@ TEMPLATE_END = """
 <textarea data-lang="%(language)s" 
     %(optional)s
     %(dburl)s
-    %(textentry)s
     %(reuse)s
     %(randomize)s
     %(blockanswer)s
@@ -98,9 +97,7 @@ class HParsonsDirective(RunestoneIdDirective):
        :language: sql, regex
        :dburl: only for sql -- url to load database
        :randomize: randomize the order of horizontal parsons
-       TODO: fix textentry
        :reuse: only for parsons -- make the blocks reusable
-       :textentry: if you will use text entry instead of horizontal parsons
        :blockanswer: 0 1 2 3 # Provide answer for block-based feedback. Please note that the number of block start from 0. If not provided, will use execution based feedback.
 
         Here is the problem description. It must ends with the tildes.
@@ -110,9 +107,6 @@ class HParsonsDirective(RunestoneIdDirective):
         block 1
         block 2
         block 3
-        --explanations--
-        explanations for block 1
-        explanations for block 2
         --unittest--
         assert 1,1 == world
         assert 0,1 == hello
@@ -127,7 +121,6 @@ class HParsonsDirective(RunestoneIdDirective):
         {
             "dburl": directives.unchanged,
             "language": directives.unchanged,
-            "textentry": directives.flag,
             "reuse": directives.flag,
             "randomize": directives.flag,
             "blockanswer": directives.unchanged,
@@ -138,11 +131,6 @@ class HParsonsDirective(RunestoneIdDirective):
         super(HParsonsDirective, self).run()
 
         env = self.state.document.settings.env
-
-        if "textentry" in self.options:
-            self.options['textentry'] = ' data-textentry="true"'
-        else:
-            self.options['textentry'] = ''
 
         if "reuse" in self.options:
             self.options['reuse'] = ' data-reuse="true"'
