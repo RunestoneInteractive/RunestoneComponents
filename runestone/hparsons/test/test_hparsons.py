@@ -110,3 +110,74 @@ def test_run_SQL(selenium_utils_get):
     assert res
     out = selenium_utils_get.driver.find_element(By.ID, f"{div_id}_stdout")
     assert "You passed 2 out of 3 tests" in out.text
+
+
+"""
+Test Block Based feedback is correct:
+1-1. Click on three blocks to form a solution that does not have enough blocks
+1-2. Click on run button to check the result is hinting missing blocks
+2-1. Click on more blocks to form an incorrect solution
+2-2. Click on run button to check the result is hinting incorrect, and incorrect blocks are highlight correctly
+3-1. Click to change to the correct answer
+3-2. Click on run button to check the result is hinting that they completed in 3 attempts
+3-3. Check the run button is disabled 
+4-1. Click on reset button
+4-2. Form a correct solution
+4-3. Click on run button to check the result is hinting completed in one attempt
+"""
+def test_run_block(selenium_utils_get):
+    div_id = "test_hparsons_block_1"
+    hp_question = find_hp_question(selenium_utils_get, div_id) 
+    hp = hp_question.find_element(By.CSS_SELECTOR, 'horizontal-parsons')
+    drag_area = hp.shadow_root.find_element(By.CSS_SELECTOR, '.drag-area')
+    drop_area = hp.shadow_root.find_element(By.CSS_SELECTOR, '.drop-area')
+    run_btn = hp_question.find_elements(By.TAG_NAME, 'button')[0]
+    reset_btn = hp_question.find_elements(By.TAG_NAME, 'button')[1]
+
+    # 1-1. Click on three blocks to form a solution that does not have enough blocks
+    for code_piece in ['SELECT', '*', 'test']:
+        blocks = drag_area.find_elements(By.CSS_SELECTOR, '.parsons-block')
+        for block in blocks:
+            if block.text == code_piece:
+                block.click()
+    # 1-2. Click on run button to check the result is hinting missing blocks
+    run_btn.click()
+    feedback_area = hp_question.find_element(By.CLASS_NAME, 'alert')
+    assert 'Your program is too short.' in feedback_area.text
+
+    # 2-1. Click on more blocks to form an incorrect solution
+    block = drag_area.find_element(By.CSS_SELECTOR, '.parsons-block')
+    block.click()
+    # 2-2. Click on run button to check the result is hinting incorrect, and incorrect blocks are highlight correctly
+    run_btn.click()
+    time.sleep(1)
+    feedback_area = hp_question.find_element(By.CLASS_NAME, 'alert')
+    assert 'Highlighted blocks in your program are wrong or are in the wrong order.' in feedback_area.text
+    highlighted_blocks = []
+    for block in drop_area.find_elements(By.CSS_SELECTOR, '.parsons-block.incorrectPosition'):
+        highlighted_blocks.append(block.text)
+    assert set(highlighted_blocks) == set(['FROM'])
+
+    # 3-1. Click to change to the correct answer
+    drop_area.find_elements(By.CSS_SELECTOR, '.parsons-block')[2].click()
+    drag_area.find_element(By.CSS_SELECTOR, '.parsons-block').click()
+    # 3-2. Click on run button to check the result is hinting that they completed in 3 attempts
+    run_btn.click()
+    feedback_area = hp_question.find_element(By.CLASS_NAME, 'alert')
+    assert 'It took you 3 tries to solve this.' in feedback_area.text
+    # 3-3. Check the run button is disabled
+    assert run_btn.get_attribute('disabled') == 'true'
+
+    # 4-1. Click on reset button
+    reset_btn.click()
+    # 4-2. Form a correct solution
+    for code_piece in ['SELECT', '*', 'FROM', 'test']:
+        blocks = drag_area.find_elements(By.CSS_SELECTOR, '.parsons-block')
+        for block in blocks:
+            if block.text == code_piece:
+                block.click()
+    # 4-3. Click on run button to check the result is hinting completed in one attempt
+    run_btn.click()
+    feedback_area = hp_question.find_element(By.CLASS_NAME, 'alert')
+    assert 'It took you only one try to solve this.' in feedback_area.text
+    

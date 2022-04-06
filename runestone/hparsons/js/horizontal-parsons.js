@@ -15513,7 +15513,7 @@ class HParsonsElement extends HTMLElement {
         sheet.innerHTML += '.hparsons-input {padding: 15px;}\n';
         sheet.innerHTML += '.hparsons-tip { font-style: italic; }\n';
         sheet.innerHTML += '.parsons-block {display: inline-block; font-family: monospace; border-color:gray; margin: 0 1px; position: relative; border-radius: 10px; background-color: #efefef; border: 1px solid #d3d3d3; padding: 5px 10px; margin-top: 5px;}\n';
-        sheet.innerHTML += '.parsons-block.incorrectPosition {background-color: #ffbaba; border: 1px solid red;}\n';
+        sheet.innerHTML += '.drop-area .parsons-block.incorrectPosition {background-color: #ffbaba; border: 1px solid red;}\n';
         sheet.innerHTML += '.parsons-block:hover, .parsons-block:focus { border-color: black;}\n';
         sheet.innerHTML += '.drop-area { background-color: #ffa; padding: 0 5px; height: 42px; margin: 2px 0;}\n';
         sheet.innerHTML += '.drop-area.incorrect { background-color: #f2dede; border-color: #f2b6b6}\n';
