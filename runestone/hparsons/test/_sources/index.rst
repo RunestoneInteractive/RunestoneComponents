@@ -23,6 +23,42 @@ Randomized Block with Block Based Feedback
     test
 
 
+Randomized Block with Block Based Feedback - Python highlighting
+----------------------------------------------------------------
+.. hparsons:: test_hparsons_block_2
+    :language: python
+    :dburl: /_static/test.db
+    :randomize:
+    :blockanswer: 0 1 2 3
+
+    Python highlighting for keywords
+    ~~~~
+    --blocks--
+    return
+    test
+    or
+    None
+
+
+Randomized Block with Block Based Feedback - Java highlighting
+----------------------------------------------------------------
+.. hparsons:: test_hparsons_block_3
+    :language: java 
+    :dburl: /_static/test.db
+    :randomize:
+    :blockanswer: 0 1 2 3
+
+    Java highlighting for keywords
+    ~~~~
+    --blocks--
+    public
+    static
+    Short 
+    ERROR
+    =
+    0x0001;
+
+
 Randomized Block with Execution Based Feedback
 ----------------------------------------------
 .. hparsons:: test_hparsons_sql_1 

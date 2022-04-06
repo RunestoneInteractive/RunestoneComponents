@@ -46,7 +46,8 @@ TEMPLATE_START = """
 TEMPLATE_END = """
 </div>
 <div class='hparsons'></div>
-<textarea data-lang="%(language)s" 
+<textarea
+    %(language)s
     %(optional)s
     %(dburl)s
     %(reuse)s
@@ -131,6 +132,11 @@ class HParsonsDirective(RunestoneIdDirective):
 
         env = self.state.document.settings.env
 
+        if "language" in self.options:
+            self.options["language"] = "data-language='{}'".format(self.options["language"])
+        else:
+            self.options["language"] = ""
+
         if "reuse" in self.options:
             self.options['reuse'] = ' data-reuse="true"'
         else:
@@ -160,10 +166,6 @@ class HParsonsDirective(RunestoneIdDirective):
         addQuestionToDB(self)
 
         self.options["initialsetting"] = source
-
-        # TODO: change this
-        if "language" not in self.options:
-            self.options["language"] = "python"
 
         # SQL Options
         if "dburl" in self.options:

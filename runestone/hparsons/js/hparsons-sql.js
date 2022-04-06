@@ -1,8 +1,10 @@
 // import 'handsontable/dist/handsontable.full.css';
 import RunestoneBase from "../../common/js/runestonebase.js";
 import "../css/hparsons.css";
+import "../css/hljs-xcode.css";
 import BlockFeedback from "./BlockFeedback.js";
 import SQLFeedback from "./SQLFeedback.js";
+
 
 export var hpList;
 // Dictionary that contains all instances of horizontal Parsons problem objects
@@ -21,6 +23,9 @@ export default class SQLHParons extends RunestoneBase {
         this.reuse = $(orig).data('reuse') ? true : false;
         this.randomize = $(orig).data('randomize') ? true : false;
         this.isBlockGrading = $(orig).data('blockanswer') ? true : false;
+        console.log(orig)
+        this.language = $(orig).data('language');
+        console.log(this.language)
         if (this.isBlockGrading) {
             this.blockAnswer = $(orig).data('blockanswer').split(' ');
         }
@@ -84,6 +89,9 @@ export default class SQLHParons extends RunestoneBase {
         }
         if (this.randomize) {
             parsonsHTML += ` randomize="true"`;
+        }
+        if (this.language) {
+            parsonsHTML += ` language="` + this.language + `"`;
         }
         parsonsHTML += `>`
         this.outerDiv.innerHTML = parsonsHTML;

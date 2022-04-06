@@ -24,7 +24,7 @@ export default class BlockFeedback extends HParsonsFeedback {
         }
         this.solution = solutionBlocks;
         this.grader.solution = solutionBlocks;
-        this.answerArea = this.hparsons.hparsonsInput.shadowRoot.querySelector('.drop-area');
+        this.answerArea = this.hparsons.hparsonsInput.querySelector('.drop-area');
     }
 
     // Called when check button clicked (block-based Feedback)
