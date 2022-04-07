@@ -28,7 +28,7 @@ def setup(app):
     app.add_directive("showeval", ShowEval)
 
     app.add_config_value(
-        "showeval_div_class", "runestone explainer alert alert-warning", "html"
+        "showeval_div_class", "runestone explainer", "html"
     )
     app.add_node(ShowEvalNode, html=(visit_showeval_html, depart_showeval_html),
                  xml=(visit_showeval_xml, substitute_departure))

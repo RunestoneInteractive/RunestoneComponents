@@ -29,7 +29,7 @@ from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneI
 def setup(app):
     app.add_directive("codelens", Codelens)
 
-    app.add_config_value("codelens_div_class", "alert alert-warning cd_section", "html")
+    app.add_config_value("codelens_div_class", "cd_section", "html")
     app.add_config_value("trace_url", "http://tracer.runestone.academy:5000", "html")
     app.add_node(CodeLensNode, html=(visit_codelens_html, depart_codelens_html),
                  xml=(visit_codelens_xml, depart_codelens_xml))

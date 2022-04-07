@@ -37,7 +37,7 @@ def setup(app):
 
 TEMPLATE_START = """
         <div class="%(divclass)s parsons-container %(optclass)s">
-        <div data-component="parsons" id="%(divid)s" class="alert alert-warning parsons" >
+        <div data-component="parsons" id="%(divid)s" class="parsons" >
         <div class="parsons_question parsons-text" >
     """
 

@@ -32,7 +32,7 @@ def setup(app):
     app.add_node(JournalNode, html=(visit_journal_html, depart_journal_html),
                  xml=(visit_journal_xml, depart_journal_xml))
 
-    app.add_config_value("shortanswer_div_class", "journal alert alert-warning", "html")
+    app.add_config_value("shortanswer_div_class", "journal", "html")
     app.add_config_value(
         "shortanswer_optional_div_class", "journal alert alert-success", "html"
     )

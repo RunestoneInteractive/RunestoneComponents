@@ -47,7 +47,7 @@ def setup(app):
     app.add_role("textfield", textfield_role)
     app.add_config_value(
         "activecode_div_class",
-        "runestone explainer ac_section alert alert-warning",
+        "runestone explainer ac_section",
         "html",
     )
     app.add_config_value("activecode_hide_load_history", False, "html")

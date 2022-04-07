@@ -29,7 +29,7 @@ def setup(app):
     app.add_node(PollNode, html=(visit_poll_html, depart_poll_html),
                  xml=(visit_poll_xml, substitute_departure))
 
-    app.add_config_value("poll_div_class", "alert alert-warning", "html")
+    app.add_config_value("poll_div_class", "", "html")
 
 
 TEMPLATE_START = """

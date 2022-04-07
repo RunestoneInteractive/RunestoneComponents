@@ -29,7 +29,7 @@ def setup(app):
     app.add_directive("addbutton", AddButton)
     app.add_directive("qnum", QuestionNumber)
 
-    app.add_config_value("mchoice_div_class", "runestone alert alert-warning", "html")
+    app.add_config_value("mchoice_div_class", "runestone", "html")
 
     app.add_node(MChoiceNode, html=(visit_mc_html, depart_mc_html),
                  xml=(visit_mc_xml, depart_mc_xml))
