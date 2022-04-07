@@ -128,13 +128,13 @@ def visit_mc_xml(self, node):
     node["template_end"] = XML_END
     node["template_option"] = XML_OPTION
     res = visit_mc_common(self, node)
-    res = res.replace("data-correct", "correct")
     self.output.append(res)
 
 
 def depart_mc_xml(self, node):
     self.output.append(XML_START_END)
     res = depart_mc_common(self, node)
+    res = res.replace("data-correct", "correct")
     self.output.append(res)
 
 
@@ -443,7 +443,7 @@ def visit_answer_list_item_xml(self, node):
     # Update dict for formatting the HTML.
     mc_node["runestone_options"]["alabel"] = label
     if label in mc_node["runestone_options"]["correct"]:
-        mc_node["runestone_options"]["is_correct"] = "data-correct"
+        mc_node["runestone_options"]["is_correct"] = "correct"
         self.output.append("<choice correct='yes'>")
     else:
         mc_node["runestone_options"]["is_correct"] = ""
