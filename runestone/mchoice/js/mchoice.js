@@ -375,7 +375,7 @@ export default class MultipleChoice extends RunestoneBase {
         if (logFlag) {
             this.logMCMAsubmission();
         }
-        if (!eBookConfig.peer) {
+        if (!eBookConfig.peer || eBookConfig.isInstructor) {
             this.renderMCMAFeedBack();
             if (this.useRunestoneServices) {
                 this.enableMCComparison();
@@ -522,7 +522,7 @@ export default class MultipleChoice extends RunestoneBase {
     }
 
     scoreMCMFSubmission() {
-        this.answer = this.givenArray[0]
+        this.answer = this.givenArray[0];
         if (this.givenArray[0] == this.correctIndexList[0]) {
             this.correct = true;
             this.percent = 1.0;
@@ -667,7 +667,6 @@ export default class MultipleChoice extends RunestoneBase {
             this.optionArray[i].input.disabled = false;
         }
     }
-
 }
 
 /*=================================
