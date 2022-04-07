@@ -23,9 +23,7 @@ export default class SQLHParons extends RunestoneBase {
         this.reuse = $(orig).data('reuse') ? true : false;
         this.randomize = $(orig).data('randomize') ? true : false;
         this.isBlockGrading = $(orig).data('blockanswer') ? true : false;
-        console.log(orig)
         this.language = $(orig).data('language');
-        console.log(this.language)
         if (this.isBlockGrading) {
             this.blockAnswer = $(orig).data('blockanswer').split(' ');
         }
