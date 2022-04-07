@@ -44,7 +44,8 @@ export default class DragNDrop extends RunestoneBase {
     populate() {
         for (var i = 0; i < this.origElem.childNodes.length; i++) {
             if (
-                $(this.origElem.childNodes[i]).data("subcomponent") === "dropzone"
+                $(this.origElem.childNodes[i]).data("subcomponent") ===
+                "dropzone"
             ) {
                 var tmp = $(this.origElem).find(
                     `#${$(this.origElem.childNodes[i]).attr("for")}`
@@ -55,9 +56,8 @@ export default class DragNDrop extends RunestoneBase {
                 $(replaceSpan).attr("draggable", "true");
                 $(replaceSpan).addClass("draggable-drag");
                 var otherReplaceSpan = document.createElement("span");
-                otherReplaceSpan.innerHTML = this.origElem.childNodes[
-                    i
-                ].innerHTML;
+                otherReplaceSpan.innerHTML =
+                    this.origElem.childNodes[i].innerHTML;
                 $(otherReplaceSpan).addClass("draggable-drop");
                 this.setEventListeners(replaceSpan, otherReplaceSpan);
                 var tmpArr = [];
@@ -65,11 +65,13 @@ export default class DragNDrop extends RunestoneBase {
                 tmpArr.push(otherReplaceSpan);
                 this.dragPairArray.push(tmpArr);
             } else if (
-                $(this.origElem.childNodes[i]).data("subcomponent") === "question"
+                $(this.origElem.childNodes[i]).data("subcomponent") ===
+                "question"
             ) {
                 this.question = this.origElem.childNodes[i].innerHTML;
             } else if (
-                $(this.origElem.childNodes[i]).data("subcomponent") === "feedback"
+                $(this.origElem.childNodes[i]).data("subcomponent") ===
+                "feedback"
             ) {
                 this.feedback = this.origElem.childNodes[i].innerHTML;
             }
@@ -85,7 +87,7 @@ export default class DragNDrop extends RunestoneBase {
         $(this.containerDiv).addClass(
             "alert alert-warning draggable-container"
         );
-        $(this.containerDiv).text(this.question);
+        $(this.containerDiv).html(this.question);
         this.containerDiv.appendChild(document.createElement("br"));
         this.dragDropWrapDiv = document.createElement("div"); // Holds the draggables/dropzones, prevents feedback from bleeding in
         $(this.dragDropWrapDiv).css("display", "block");
@@ -209,7 +211,7 @@ export default class DragNDrop extends RunestoneBase {
                 if (this.pregnantIndexArray[this.indexArray[i]] !== "-1") {
                     this.dragPairArray[this.indexArray[i]][1].appendChild(
                         this.dragPairArray[
-                        this.pregnantIndexArray[this.indexArray[i]]
+                            this.pregnantIndexArray[this.indexArray[i]]
                         ][0]
                     );
                 }
