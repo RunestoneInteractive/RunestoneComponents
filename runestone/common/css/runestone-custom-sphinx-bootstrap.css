@@ -20,13 +20,16 @@
     --successAlerts: #dff0d8;
     --contentWidthRegular: 660px;
     --contentWidthWide: 1060px;
+    --componentBgColor: #f0f8ff;
+    --componentBorderColor: #000000;
+    --questionBgColor: rgb(217, 233, 235);
 }
 
 [data-theme="dark"] {
-    --background: #000000;
-    --outerBackground: #3d3d3d;
-    --links: #1165f0;
-    --bodyFont: #ffffff;
+    --background: #2c2f33;
+    --outerBackground: #23272a;
+    --links: #7289da;
+    --bodyFont: #99aab5;
     --tooltip: #000000;
     --grayToWhite: #ffffff;
     --navbar: #3d3d3d;
@@ -37,10 +40,13 @@
     --completionButtonHover: #560073;
     --admonition: #3d3d3d;
     --admonitionBorder: #262626;
-    --codeButtons: #2c0aa6;
+    --codeButtons: #7289da;
     --codeButtonsBorder: #ffffff;
     --dangerAlerts: #8c2626;
     --successAlerts: #217300;
+    --componentBgColor: #07467d;
+    --componentBorderColor: #939090;
+    --questionBgColor: rgb(23, 85, 93);    
 }
 
 /* custom modification of basic.css for color-contrast (AA compliant) */
@@ -225,13 +231,21 @@ div.container {
 
 .runestone {
     clear: both;
-}
+    background-color: var(--componentBgColor);
+    padding: 10px;
+    border-style: solid;
+    border-color: var(--componentBorderColor);
+    border-radius: 10px;
+    margin-bottom: 20px;
+    margin-top: 20px;
+    }
 
 /* Sets width of content "column" */
 #main-content section > *:not(section) {
     max-width: var(--contentWidthRegular);
     margin-left: auto;
     margin-right: auto;
+    
 }
 
 /* Handle content in nested sections by allowing them to grow*/
