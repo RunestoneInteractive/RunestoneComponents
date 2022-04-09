@@ -118,7 +118,7 @@ class Quizly(RunestoneIdDirective):
     optional_arguments = 0
     has_content = True
     option_spec = RunestoneIdDirective.option_spec.copy()
-    option_spec.update( {} )
+    option_spec.update({})
 
     def run(self):
         super(Quizly, self).run()
@@ -136,6 +136,7 @@ class Quizly(RunestoneIdDirective):
             self.options["controls"] = self.content[:plstart]
 
         quizly_node = QuizlyNode()
+        quizly_node["runestone_options"] = self.options
         quizly_node["quizname"] = str(self.options['controls'][0])
         quizly_node["quizname"] = str.strip(quizly_node["quizname"][10:])
         quizly_node["template"] = QUIZLY_TEMPLATE.replace(
