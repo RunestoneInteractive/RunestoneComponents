@@ -70,6 +70,7 @@ const module_map = {
     khanex: () => import("./runestone/khanex/js/khanex.js"),
     lp_build: () => import("./runestone/lp/js/lp.js"),
     multiplechoice: () => import("./runestone/mchoice/js/timedmc.js"),
+    hparsons: () => import("./runestone/hparsons/js/hparsons-sql.js"),
     parsons: () => import("./runestone/parsons/js/timedparsons.js"),
     poll: () => import("./runestone/poll/js/poll.js"),
     quizly: () => import("./runestone/quizly/js/quizly.js"),
