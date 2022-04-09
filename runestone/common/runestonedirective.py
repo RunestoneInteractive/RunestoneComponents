@@ -324,6 +324,7 @@ class RunestoneIdDirective(RunestoneDirective):
             id_ = self.options["divid"]
         if re.match(r"^[0-9_]+", id_):
             print(f"BAD DIVID: {id_}")
+            self.options["divid"] = f"rsid_{id_}"
         self.options["qnumber"] = self.getNumber()
         # print(f"{id_} is number {self.options['qnumber']}")
 
