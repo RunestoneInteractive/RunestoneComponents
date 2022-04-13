@@ -264,7 +264,7 @@ class RunestoneDirective(Directive):
         else:
             self.int_points = 1
 
-        self.options['optclass'] = self.options.get('class', "")
+        self.options["optclass"] = self.options.get("class", "")
 
         self.explain_text = []
 
