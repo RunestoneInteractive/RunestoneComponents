@@ -22,7 +22,7 @@
     --contentWidthWide: 1060px;
     --componentBgColor: #f0f8ff;
     --componentBorderColor: #000000;
-    --questionBgColor: rgb(217, 233, 235);
+    --questionBgColor: #e1efff;
 }
 
 [data-theme="dark"] {
