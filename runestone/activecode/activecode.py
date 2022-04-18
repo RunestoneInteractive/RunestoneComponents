@@ -76,14 +76,11 @@ XML_EX_END = """
 """
 
 XML_LISTING_START = """
-<listing xml:id="{divid}">
-    <caption>{caption}</caption>
-    <program xml:id="{divid}_editor" interactive='activecode' language="{language}">
+    <program xml:id="{divid}" interactive='activecode' language="{language}">
         <input>
 {initialcode}
         </input>
     </program>
-</listing>
 """
 
 
