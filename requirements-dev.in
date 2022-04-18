@@ -10,3 +10,4 @@ pytest
 pylint
 readme-renderer>24
 myst_parser
+json2xml
