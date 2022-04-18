@@ -19,6 +19,7 @@ __author__ = "bmiller"
 from collections import defaultdict
 import binascii
 import os
+import re
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -206,6 +207,14 @@ def setup(app):
     app.add_config_value("generate_component_labels", True, "env")
 
 
+# Roughly what an XML ID allows, per the spec for an `XML Name <https://www.w3.org/TR/REC-xml/#NT-Name>`_. However:
+#
+# - This regex does allow identifiers which begin with a number, which isn't allowed by XML. I don't know of easy ways to implement an AND operation in a regex, so code which uses this regex checks this separately.
+# - This disallows characters that need escaping for CSS to avoid problems there, such as ``.`` and ``:``
+# - I'm not certain how closely Python's definition of a "word character (\w)" matches XML's definition.
+xml_id_regex = re.compile(r"\w[\w-]*", re.UNICODE)
+
+
 # A base class for all Runestone directives.
 class RunestoneDirective(Directive):
     option_spec = {
@@ -268,23 +277,12 @@ class RunestoneDirective(Directive):
 
         self.explain_text = []
 
-    # Check for a `valid HTML5 divid <https://html.spec.whatwg.org/multipage/dom.html#the-id-attribute>`_.
+    # Check for a valid XML id. This is more restrictive then checking for a `valid HTML5 divid <https://html.spec.whatwg.org/multipage/dom.html#the-id-attribute>`_, so we don't bother with a separate HTML ID check.
     def validate_divid(self, divid):
         if (
-            # Per the spec, a divid must not contain `whitespace <https://infra.spec.whatwg.org/#ascii-whitespace>`_ (see also `Python string escape sequences <https://docs.python.org/3/reference/lexical_analysis.html#string-and-bytes-literals>`_).
-            "\t" in divid
-            or "\n" in divid
-            or "\f" in divid
-            or "\r" in divid
-            or " " in divid
-            or
-            # Also avoid characters that need escaping for CSS to avoid problems there.
-            "." in divid
-            or "#" in divid
-            or ":" in divid
-            or
-            # It must also be at least one character long. This is probably taken care of by the existence of ``self.arguments[0]``, but here's a bit of paranoia:
-            len(divid) == 0
+            # Look for invalid XML IDs (they must not begin with a number, which the regex doesn't catch). Use ``fullmatch`` since the entire string must match the regex for an valid id.
+            (divid[0] >= "0" and (divid[0] <= "9"))
+            or not re.fullmatch(xml_id_regex, divid)
         ):
             logger.error(
                 f"Invalid divid '{divid}'.",
