@@ -17,6 +17,8 @@ __author__ = "isaiahmayerchak"
 
 from docutils import nodes
 from docutils.parsers.rst import directives
+
+# We don't use a ``RunestoneIdNode``, because these imply a numbered question, not a GUI element. Likewise, only ``tabbed`` requires a divid; in addition, this divid doesn't need to be globally unique, since it won't be connected with a question in the database. Therefore, just use a RunestoneDirectory for these.
 from runestone.common.runestonedirective import RunestoneDirective, RunestoneNode
 
 
@@ -200,6 +202,7 @@ config values (conf.py):
         self.assert_has_content()
 
         self.options["divid"] = self.arguments[0]
+        self.validate_divid(self.options["divid"])
 
         env = self.state.document.settings.env
         self.options["divclass"] = env.config.tabbed_div_class
