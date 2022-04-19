@@ -51,7 +51,7 @@ XML_OPTION = """
                     <p>{atext}</p>
                 </statement>
                 <feedback>
-                    {feedtext}
+                    <p>{feedtext}</p>
                 </feedback>
             </choice>
 """
