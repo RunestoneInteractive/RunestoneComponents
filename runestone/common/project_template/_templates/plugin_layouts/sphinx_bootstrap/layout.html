@@ -235,7 +235,7 @@
   eBookConfig = {};
   {% if dynamic_pages == 'True' %}
     {% raw %}
-    eBookConfig.useRunestoneServices = {{ use_services }};
+    eBookConfig.useRunestoneServices = {{use_services}};
     eBookConfig.host = '';
     eBookConfig.app = eBookConfig.host + '/runestone';
     eBookConfig.course = '{{ course_name }}';

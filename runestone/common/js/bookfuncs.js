@@ -279,4 +279,15 @@ window.addEventListener("load", function () {
             e.stopPropagation();
         });
     });
+
+    if (location.href.includes("mode=browsing")) {
+        let queryString = "?mode=browsing";
+        document.querySelectorAll("a").forEach((link) => {
+            if (link.href.includes("books/published")) {
+                link.href = link.href.includes("?")
+                    ? link.href + queryString.replace("?", "&")
+                    : link.href + queryString;
+            }
+        });
+    }
 });
