@@ -235,7 +235,7 @@
   eBookConfig = {};
   {% if dynamic_pages == 'True' %}
     {% raw %}
-    eBookConfig.useRunestoneServices = true;
+    eBookConfig.useRunestoneServices = {{ use_services }};
     eBookConfig.host = '';
     eBookConfig.app = eBookConfig.host + '/runestone';
     eBookConfig.course = '{{ course_name }}';
@@ -273,6 +273,7 @@
   eBookConfig.proxyuri_runs = '{{proxy_uri_runs}}';
   eBookConfig.proxyuri_files = '{{proxy_uri_files}}';
   eBookConfig.enable_chatcodes = {{enable_chatcodes}} ? {{ enable_chatcodes }} : false;
+  eBookConfig.enableScratchAC = true;
 
 </script>
 

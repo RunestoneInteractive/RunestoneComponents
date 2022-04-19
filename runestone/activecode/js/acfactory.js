@@ -150,6 +150,7 @@ export default class ACFactory {
         });
     }
     static toggleScratchActivecode() {
+        if (!eBookConfig.enableScratchAC) return;
         var divid = "ac_modal_" + eBookConfig.scratchDiv;
         var div = $("#" + divid);
         $(`#${eBookConfig.scratchDiv}`).removeClass("ac_section");
