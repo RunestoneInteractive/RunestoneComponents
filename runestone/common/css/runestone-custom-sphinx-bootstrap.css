@@ -464,6 +464,10 @@ h2 {
     font-weight: normal;
 }
 
+.navbar_message {
+    margin-top: 15px;
+    font-weight: bold;
+}
 /*
 Missing brackets
 ================
