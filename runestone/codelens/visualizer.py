@@ -61,6 +61,14 @@ allTraceData["%(divid)s"] = %(tracedata)s;
 </div>
 """
 
+PTX_TEMPLATE = """
+<program xml:id="{divid} interactive="codelens" language="{language}>
+    <input>
+{source}
+    </input>
+</program>
+"""
+
 
 class CodeLensNode(nodes.General, nodes.Element, RunestoneIdNode):
     pass
@@ -73,18 +81,8 @@ def visit_codelens_xml(self, node):
     if "tracedata" in node["runestone_options"]:
         node["runestone_options"]["tracedata"] = node["runestone_options"]["tracedata"].replace(
             "<", "&lt;").replace(">", "&gt;")
-        html += DATA
-    else:
-        html += "</div>"
-    html = html % node["runestone_options"]
 
-    self.output.append(
-        "<exercise runestone='{divid}' />".format(**node["runestone_options"]))
-    with open("rs-substitutes.xml", "a") as subfile:
-        subfile.write("<substitute xml:id='{divid}'>".format(
-            **node["runestone_options"]))
-        subfile.write(html)
-        subfile.write("</substitute>")
+    res = PTX_TEMPLATE.format(**node["runestone_options"])
 
 
 def visit_codelens_html(self, node):
@@ -209,7 +207,7 @@ config values (conf.py):
             source = "\n".join(self.content)
         else:
             source = "\n"
-
+        self.options["source"] = source.replace("<", "&lt;")
         CUMULATIVE_MODE = False
         self.JS_VARNAME = self.options["divid"] + "_trace"
         env = self.state.document.settings.env
