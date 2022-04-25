@@ -29,6 +29,9 @@
 # of all in-scope data structures after each executed instruction.
 
 
+import json
+import random
+from .pg_encoder import is_class, is_instance, ObjectEncoder, create_lambda_line_number
 import sys
 import bdb  # the KEY import here!
 import re
@@ -45,7 +48,6 @@ if is_python3:
 else:
     import StringIO
 
-from .pg_encoder import is_class, is_instance, ObjectEncoder, create_lambda_line_number
 
 # TODO: not threadsafe:
 
@@ -149,16 +151,16 @@ OTHER_STDLIB_WHITELIST = ("StringIO", "io")
 # especially getting setHTML, setCSS, and setJS to work in the imported
 # modules.)
 CUSTOM_MODULE_IMPORTS = (
-    "runestone.codelens.callback_module",
-    "runestone.codelens.ttt_module",
-    "runestone.codelens.html_module",
-    "runestone.codelens.htmlexample_module",
-    # ignore these troublesome imports for now
-    #                         'watch_module',   # 'import sys' might be troublesome
-    #                         'bintree_module',
-    #                         'GChartWrapper',
-    "runestone.codelens.matrix",
-    "runestone.codelens.htmlFrame",
+    # "runestone.codelens.callback_module",
+    # "runestone.codelens.ttt_module",
+    # "runestone.codelens.html_module",
+    # "runestone.codelens.htmlexample_module",
+    # # ignore these troublesome imports for now
+    # #                         'watch_module',   # 'import sys' might be troublesome
+    # #                         'bintree_module',
+    # #                         'GChartWrapper',
+    # "runestone.codelens.matrix",
+    # "runestone.codelens.htmlFrame",
 )
 
 
@@ -218,7 +220,6 @@ def __restricted_import__(*args):
 # Note that this is mad inefficient, but is simple to implement!
 
 # VERY IMPORTANT -- set random seed to 0 to ensure deterministic execution:
-import random
 
 random.seed(0)
 
@@ -398,6 +399,8 @@ Patch:
 """
 
 # at_global_scope should be true only if 'frame' represents the global scope
+
+
 def get_user_globals(frame, at_global_scope=False):
     d = filter_var_dict(frame.f_globals)
 
@@ -1506,9 +1509,8 @@ class PGLogger(bdb.Bdb):
         return self.finalizer_func(self.executed_script, self.trace)
 
 
-import json
-
 # the MAIN meaty function!!!
+
 def exec_script_str(script_str, raw_input_lst_json, options_json, finalizer_func):
     options = json.loads(options_json)
 

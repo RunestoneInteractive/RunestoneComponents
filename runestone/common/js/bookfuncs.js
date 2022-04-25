@@ -208,6 +208,8 @@ async function handlePageSetup() {
     } else {
         mess = "Not logged in";
         $(document).trigger("runestone:logout");
+        document.getElementById("browsing_warning").innerHTML =
+            "<p class='navbar_message'>Saving and Logging are Disabled</p>";
     }
     $(".loggedinuser").html(mess);
 
@@ -279,4 +281,15 @@ window.addEventListener("load", function () {
             e.stopPropagation();
         });
     });
+
+    if (location.href.includes("mode=browsing")) {
+        let queryString = "?mode=browsing";
+        document.querySelectorAll("a").forEach((link) => {
+            if (link.href.includes("books/published")) {
+                link.href = link.href.includes("?")
+                    ? link.href + queryString.replace("?", "&")
+                    : link.href + queryString;
+            }
+        });
+    }
 });

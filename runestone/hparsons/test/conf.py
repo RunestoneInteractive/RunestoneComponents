@@ -13,7 +13,8 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import sys
+import os
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -100,14 +101,14 @@ keep_warnings = True
 # A string of reStructuredText that will be included at the beginning of every
 # source file that is read.
 rst_prolog = (
-# For fill-in-the-blank questions, provide a convenient means to indicate a blank.
-"""
+    # For fill-in-the-blank questions, provide a convenient means to indicate a blank.
+    """
 
 .. |blank| replace:: :blank:`x`
 """
 
-# For literate programming files, provide a convenient way to refer to a source file's name. See `runestone.lp.lp._docname_role`.
-""".. |docname| replace:: :docname:`name`
+    # For literate programming files, provide a convenient way to refer to a source file's name. See `runestone.lp.lp._docname_role`.
+    """.. |docname| replace:: :docname:`name`
 """
 )
 
@@ -156,7 +157,8 @@ inline_highlight_literals = False
 html_theme = 'sphinx_bootstrap'
 
 # If using a non-sphinx theme, the path to the theme folder must be in this list
-html_theme_path = [pkg_resources.resource_filename('runestone', 'common/project_template/_templates/plugin_layouts')]
+html_theme_path = [pkg_resources.resource_filename(
+    'runestone', 'common/project_template/_templates/plugin_layouts')]
 
 # To override individual templates from the theme, you can make a directory and add its path
 # relative to this file to the templates_path list. In it, place copies of any template files
@@ -216,7 +218,7 @@ html_theme_options = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 # Example: html_static_path =  runestone_static_dirs() + ['_static', 'other']
-html_static_path = runestone_static_dirs()
+html_static_path = ["_sources/_static"] + runestone_static_dirs()
 
 # List of extra stylesheets that should be added to all html pages
 # Files must be on a path contained in html_static_path
@@ -234,7 +236,7 @@ html_static_path = runestone_static_dirs()
 html_title = 'Runestone Interactive Overview'
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
-html_short_title ='Runestone Interactive Overview'
+html_short_title = 'Runestone Interactive Overview'
 
 # Logo is included at the top of the page
 #html_logo = "../source/_static/logo_small.png"
@@ -281,7 +283,7 @@ html_show_sourcelink = False
 # It True, sets js files from Sphinx & Runestone to be loaded with defer attr
 # substantially speeding up page rendering. May cause issues with books that
 # have custom directives or raw html that assume jquery or another library
-# is loaded before body is parsed. 
+# is loaded before body is parsed.
 html_defer_js = True
 
 # Output file base name for HTML help builder.

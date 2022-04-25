@@ -19,15 +19,17 @@ __author__ = "bmiller"
 from collections import defaultdict
 import binascii
 import os
+import re
 
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
 from docutils.utils import get_source_line
 from docutils.statemachine import ViewList
-
 from sphinx import application
 from sphinx.errors import ExtensionError
+from sphinx.util import logging
+
 
 UNNUMBERED_DIRECTIVES = [
     #    "activecode",
@@ -43,6 +45,8 @@ UNNUMBERED_DIRECTIVES = [
     "timed",
     "disqus",
 ]
+
+logger = logging.getLogger(__name__)
 
 
 # Provide a class which all Runestone nodes will inherit from.
@@ -203,6 +207,14 @@ def setup(app):
     app.add_config_value("generate_component_labels", True, "env")
 
 
+# Roughly what an XML ID allows, per the spec for an `XML Name <https://www.w3.org/TR/REC-xml/#NT-Name>`_. However:
+#
+# - This regex does allow identifiers which begin with a number, which isn't allowed by XML. I don't know of easy ways to implement an AND operation in a regex, so code which uses this regex checks this separately.
+# - This disallows characters that need escaping for CSS to avoid problems there, such as ``.`` and ``:``
+# - I'm not certain how closely Python's definition of a "word character (\w)" matches XML's definition.
+xml_id_regex = re.compile(r"\w[\w-]*", re.UNICODE)
+
+
 # A base class for all Runestone directives.
 class RunestoneDirective(Directive):
     option_spec = {
@@ -261,9 +273,21 @@ class RunestoneDirective(Directive):
         else:
             self.int_points = 1
 
-        self.options['optclass'] = self.options.get('class', "")
+        self.options["optclass"] = self.options.get("class", "")
 
         self.explain_text = []
+
+    # Check for a valid XML id. This is more restrictive then checking for a `valid HTML5 divid <https://html.spec.whatwg.org/multipage/dom.html#the-id-attribute>`_, so we don't bother with a separate HTML ID check.
+    def validate_divid(self, divid):
+        if (
+            # Look for invalid XML IDs (they must not begin with a number, which the regex doesn't catch). Use ``fullmatch`` since the entire string must match the regex for an valid id.
+            (divid[0] >= "0" and (divid[0] <= "9"))
+            or not re.fullmatch(xml_id_regex, divid)
+        ):
+            logger.error(
+                f"Invalid divid '{divid}'.",
+                location=self.state_machine.get_source_and_line(self.lineno),
+            )
 
 
 # This is a base class for all Runestone directives which require a divid as their first parameter.
@@ -318,9 +342,10 @@ class RunestoneIdDirective(RunestoneDirective):
         # Make sure the runestone directive at least requires an ID.
         assert self.required_arguments >= 1
         if "divid" not in self.options:
-            id_ = self.options["divid"] = self.arguments[0]
+            divid = self.options["divid"] = self.arguments[0]
         else:
-            id_ = self.options["divid"]
+            divid = self.options["divid"]
+        self.validate_divid(divid)
 
         self.options["qnumber"] = self.getNumber()
         # print(f"{id_} is number {self.options['qnumber']}")
@@ -331,19 +356,19 @@ class RunestoneIdDirective(RunestoneDirective):
         id_to_page = runestone_data.id_to_page
         page_to_id = runestone_data.page_to_id
         # See if this ID already exists.
-        if id_ in id_to_page:
-            page = id_to_page[id_]
+        if divid in id_to_page:
+            page = id_to_page[divid]
             # If it's not simply an update to an existing ID, complain.
             if page.docname != env.docname or page.lineno != self.lineno:
                 raise self.error(
                     "Duplicate ID -- see {}, line {}".format(page.docname, page.lineno)
                 )
             # Make sure our data structure is consistent.
-            assert id_ in page_to_id[page.docname]
+            assert divid in page_to_id[page.docname]
         else:
             # Add a new entry.
-            id_to_page[id_] = Struct(docname=env.docname, lineno=self.lineno)
-            page_to_id[env.docname].add(id_)
+            id_to_page[divid] = Struct(docname=env.docname, lineno=self.lineno)
+            page_to_id[env.docname].add(divid)
 
         self.in_exam = getattr(env, "in_timed", "")
 
