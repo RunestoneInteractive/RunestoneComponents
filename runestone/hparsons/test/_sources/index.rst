@@ -5,8 +5,62 @@ Test: Horizontal Parsons Problems with SQL
 
 Examples
 ========
-Randomized Block
---------------------------------------
+Randomized Block with Block Based Feedback
+------------------------------------------
+.. hparsons:: test_hparsons_block_1
+    :language: sql
+    :dburl: /_static/test.db
+    :randomize:
+    :blockanswer: 0 1 2 3
+
+    This is a horizontal Parsons problem! Feedback is based on block for this problem.
+    The blocks are randomized, but cannot be reused ;)
+    ~~~~
+    --blocks--
+    SELECT 
+    *
+    FROM
+    test
+
+
+Randomized Block with Block Based Feedback - Python highlighting
+----------------------------------------------------------------
+.. hparsons:: test_hparsons_block_2
+    :language: python
+    :dburl: /_static/test.db
+    :randomize:
+    :blockanswer: 0 1 2 3
+
+    Python highlighting for keywords
+    ~~~~
+    --blocks--
+    return
+    test
+    or
+    None
+
+
+Randomized Block with Block Based Feedback - Java highlighting
+----------------------------------------------------------------
+.. hparsons:: test_hparsons_block_3
+    :language: java 
+    :dburl: /_static/test.db
+    :randomize:
+    :blockanswer: 0 1 2 3 4 5
+
+    Java highlighting for keywords
+    ~~~~
+    --blocks--
+    public
+    static
+    Short 
+    ERROR
+    =
+    0x0001;
+
+
+Randomized Block with Execution Based Feedback
+----------------------------------------------
 .. hparsons:: test_hparsons_sql_1 
     :language: sql
     :dburl: /_static/test.db
@@ -26,8 +80,8 @@ Randomized Block
     assert 2,1 == 42
 
 
-Reusable Block
---------------------------------------
+Reusable Block with Execution Based Feedback
+--------------------------------------------
 .. hparsons:: test_hparsons_sql_2 
     :language: sql
     :dburl: /_static/test.db
