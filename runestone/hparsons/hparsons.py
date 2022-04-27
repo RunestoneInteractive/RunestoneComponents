@@ -46,12 +46,13 @@ TEMPLATE_START = """
 TEMPLATE_END = """
 </div>
 <div class='hparsons'></div>
-<textarea data-lang="%(language)s" 
+<textarea
+    %(language)s
     %(optional)s
     %(dburl)s
-    %(textentry)s
     %(reuse)s
     %(randomize)s
+    %(blockanswer)s
     style="visibility: hidden;">
 %(initialsetting)s
 </textarea>
@@ -91,15 +92,13 @@ def depart_hp_html(self, node):
 
 
 class HParsonsDirective(RunestoneIdDirective):
-    # only keep: language, autograde, dburl
     """
     .. hparsons:: uniqueid
-       :language: sql, regex
+       :language: python, java, javscript, sql, html: only for highlighting purpose.
        :dburl: only for sql -- url to load database
        :randomize: randomize the order of horizontal parsons
-       TODO: fix textentry
        :reuse: only for parsons -- make the blocks reusable
-       :textentry: if you will use text entry instead of horizontal parsons
+       :blockanswer: 0 1 2 3 # Provide answer for block-based feedback. Please note that the number of block start from 0. If not provided, will use execution based feedback.
 
         Here is the problem description. It must ends with the tildes.
         Make sure you use the correct delimitier for each section below.
@@ -107,9 +106,7 @@ class HParsonsDirective(RunestoneIdDirective):
         --blocks--
         block 1
         block 2
-        --explanations--
-        explanations for block 1
-        explanations for block 2
+        block 3
         --unittest--
         assert 1,1 == world
         assert 0,1 == hello
@@ -124,9 +121,9 @@ class HParsonsDirective(RunestoneIdDirective):
         {
             "dburl": directives.unchanged,
             "language": directives.unchanged,
-            "textentry": directives.flag,
             "reuse": directives.flag,
             "randomize": directives.flag,
+            "blockanswer": directives.unchanged,
         }
     )
 
@@ -135,10 +132,10 @@ class HParsonsDirective(RunestoneIdDirective):
 
         env = self.state.document.settings.env
 
-        if "textentry" in self.options:
-            self.options['textentry'] = ' data-textentry="true"'
+        if "language" in self.options:
+            self.options["language"] = "data-language='{}'".format(self.options["language"])
         else:
-            self.options['textentry'] = ''
+            self.options["language"] = ""
 
         if "reuse" in self.options:
             self.options['reuse'] = ' data-reuse="true"'
@@ -149,6 +146,11 @@ class HParsonsDirective(RunestoneIdDirective):
             self.options['randomize'] = ' data-randomize="true"'
         else:
             self.options['randomize'] = ''
+
+        if "blockanswer" in self.options:
+            self.options["blockanswer"] = "data-blockanswer='{}'".format(self.options["blockanswer"])
+        else:
+            self.options['blockanswer'] = ''
 
         explain_text = None
         if self.content:
@@ -164,10 +166,6 @@ class HParsonsDirective(RunestoneIdDirective):
         addQuestionToDB(self)
 
         self.options["initialsetting"] = source
-
-        # TODO: change this
-        if "language" not in self.options:
-            self.options["language"] = "python"
 
         # SQL Options
         if "dburl" in self.options:
