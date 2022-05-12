@@ -1,4 +1,4 @@
-export default class LineBasedGrader {
+export default class DAGGrader {
     constructor(problem) {
         this.problem = problem;
     }
@@ -55,6 +55,8 @@ export default class LineBasedGrader {
         this.incorrectIndents = 0;
         var solutionLines = problem.solution;
         var answerLines = problem.answerLines();
+        console.log(solutionLines)
+        console.log(answerLines)
         var i;
         var state;
         this.percentLines =
@@ -72,17 +74,7 @@ export default class LineBasedGrader {
         // Determine whether the code **that is there** is in the correct order
         // If there is too much or too little code this only matters for
         // calculating a percentage score.
-        let isCorrectOrder = true;
-        this.correctLines = 0;
-        this.solutionLength = solutionLines.length;
-        let loopLimit = Math.min(solutionLines.length, answerLines.length);
-        for (i = 0; i < loopLimit; i++) {
-            if (answerLines[i].text !== solutionLines[i].text) {
-                isCorrectOrder = false;
-            } else {
-                this.correctLines += 1;
-            }
-        }
+        let isCorrectOrder = this.checkCorrectOrdering(solutionLines, answerLines)
 
         // Determine whether blocks are indented correctly
         this.indentLeft = [];
@@ -110,7 +102,24 @@ export default class LineBasedGrader {
         }
         this.calculatePercent();
         this.graderState = state;
+
+        console.log(state)
         return state;
+    }
+
+    checkCorrectOrdering(solutionLines, answerLines) {
+        let isCorrectOrder = true;
+        this.correctLines = 0;
+        this.solutionLength = solutionLines.length;
+        let loopLimit = Math.min(solutionLines.length, answerLines.length);
+        for (i = 0; i < loopLimit; i++) {
+            if (answerLines[i].text !== solutionLines[i].text) {
+                isCorrectOrder = false;
+            } else {
+                this.correctLines += 1;
+            }
+        }
+        return isCorrectOrder
     }
 
     calculatePercent() {

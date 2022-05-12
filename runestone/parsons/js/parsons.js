@@ -28,6 +28,7 @@ import "./prettify.js";
 import "../css/parsons.css";
 import "../css/prettify.css";
 import LineBasedGrader from "./lineGrader";
+import DAGGrader from "./dagGrader";
 import ParsonsLine from "./parsonsLine";
 import ParsonsBlock from "./parsonsBlock";
 
@@ -76,7 +77,7 @@ export default class Parsons extends RunestoneBase {
         //     }
         // }
         this.initializeOptions();
-        this.grader = new LineBasedGrader(this);
+        this.grader = this.options.grader === "dag" ? new DAGGrader(this) : new LineBasedGrader(this);
         this.grader.showfeedback = this.showfeedback;
         var fulltext = $(this.origElem).html();
         this.blockIndex = 0;
@@ -101,7 +102,9 @@ export default class Parsons extends RunestoneBase {
         var noindent = $(this.origElem).data("noindent");
         var adaptive = $(this.origElem).data("adaptive");
         var numbered = $(this.origElem).data("numbered");
+        var grader = $(this.origElem).data("grader");
         options["numbered"] = numbered;
+        options["grader"] = grader;
         if (maxdist !== undefined) {
             options["maxdist"] = maxdist;
         }

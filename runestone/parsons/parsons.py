@@ -41,7 +41,7 @@ TEMPLATE_START = """
 
 TEMPLATE_END = """
         </div>
-        <pre  class="parsonsblocks" data-question_label="%(question_label)s"  %(adaptive)s %(maxdist)s %(order)s %(noindent)s %(language)s %(numbered)s %(optional)s style="visibility: hidden;">
+        <pre  class="parsonsblocks" data-question_label="%(question_label)s"  %(adaptive)s %(maxdist)s %(order)s %(noindent)s %(language)s %(grader)s %(numbered)s %(optional)s style="visibility: hidden;">
         %(code)s
         </pre>
         </div>
@@ -125,6 +125,7 @@ class ParsonsProblem(Assessment):
             "noindent": directives.flag,
             "adaptive": directives.flag,
             "numbered": directives.unchanged,
+            "grader": directives.unchanged
         }
     )
     has_content = True
@@ -199,6 +200,12 @@ class ParsonsProblem(Assessment):
             )
         else:
             self.options["language"] = ""
+        if "grader" in self.options:
+            self.options["grader"] = (
+                ' data-grader="' + self.options["grader"] + '"'
+            )
+        else:
+            self.options["grader"] = ""
 
         if "-----" in self.content:
             index = self.content.index("-----")
