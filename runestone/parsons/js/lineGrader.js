@@ -1,4 +1,4 @@
-export default class DAGGrader {
+export default class LineBasedGrader {
     constructor(problem) {
         this.problem = problem;
     }
@@ -55,8 +55,6 @@ export default class DAGGrader {
         this.incorrectIndents = 0;
         var solutionLines = problem.solution;
         var answerLines = problem.answerLines();
-        console.log(solutionLines)
-        console.log(answerLines)
         var i;
         var state;
         this.percentLines =
@@ -79,6 +77,7 @@ export default class DAGGrader {
         // Determine whether blocks are indented correctly
         this.indentLeft = [];
         this.indentRight = [];
+        let loopLimit = Math.min(solutionLines.length, answerLines.length);
         for (i = 0; i < loopLimit; i++) {
             if (answerLines[i].viewIndent() < solutionLines[i].indent) {
                 this.indentRight.push(answerLines[i]);
@@ -103,7 +102,6 @@ export default class DAGGrader {
         this.calculatePercent();
         this.graderState = state;
 
-        console.log(state)
         return state;
     }
 
@@ -112,7 +110,7 @@ export default class DAGGrader {
         this.correctLines = 0;
         this.solutionLength = solutionLines.length;
         let loopLimit = Math.min(solutionLines.length, answerLines.length);
-        for (i = 0; i < loopLimit; i++) {
+        for (let i = 0; i < loopLimit; i++) {
             if (answerLines[i].text !== solutionLines[i].text) {
                 isCorrectOrder = false;
             } else {

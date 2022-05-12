@@ -285,6 +285,10 @@ export default class Parsons extends RunestoneBase {
             var options = {};
             var distractIndex;
             var distractHelptext = "";
+            var tagIndex;
+            var tag;
+            var dependsIndex;
+            var depends = [];
             if (textBlock.includes("#paired:")) {
                 distractIndex = textBlock.indexOf("#paired:");
                 distractHelptext = textBlock
@@ -297,9 +301,17 @@ export default class Parsons extends RunestoneBase {
                     .substring(distractIndex + 12, textBlock.length)
                     .trim();
                 textBlock = textBlock.substring(0, distractIndex + 11);
+
+            // TODO make this parsing more robust after finalizing the syntax
+            } else if (textBlock.includes("#tag:")) {
+                tagIndex = textBlock.indexOf("#tag:");
+                tag = textBlock.substring(tagIndex + 5, tagIndex + 6);
+                dependsIndex = textBlock.indexOf(";depends:");
+                let dependsString = textBlock.substring(dependsIndex + 9, textBlock.indexOf(";", dependsIndex + 9));
+                depends = dependsString.length > 0 ? dependsString.split(",") : [];
             }
             textBlock = textBlock.replace(
-                /#(paired|distractor)/,
+                /#(paired|distractor|tag:[0-9]+;depends:[0-9,]*;)/,
                 function (mystring, arg1) {
                     options[arg1] = true;
                     return "";
@@ -325,6 +337,10 @@ export default class Parsons extends RunestoneBase {
                     } else {
                         line.distractor = false;
                         line.paired = false;
+                        if (this.options.grader === "dag") {
+                            line.tag = tag;
+                            line.depends = depends;
+                        }
                         solution.push(line);
                     }
                     if ($.inArray(line.indent, indents) == -1) {
