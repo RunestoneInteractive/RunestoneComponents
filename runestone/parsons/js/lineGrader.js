@@ -4,22 +4,7 @@ export default class LineBasedGrader {
     }
     // Use a LIS (Longest Increasing Subsequence) algorithm to return the indexes
     // that are not part of that subsequence.
-    inverseLISIndices(answerBlocks, solution) {
-        var inSolution = [];
-        var inSolutionIndexes = [];
-        var notInSolution = [];
-        for (let i = 0; i < answerBlocks.length; i++) {
-            var block = answerBlocks[i];
-            var index = solution.indexOf(block.lines[0]);
-            if (index == -1) {
-                notInSolution.push(block);
-            } else {
-                inSolution.push(block);
-                inSolutionIndexes.push(index);
-            }
-        }
-        let arr = inSolutionIndexes;
-
+    inverseLISIndices(arr) {
         // Get all subsequences
         var allSubsequences = [];
         for (var i = 0; i < arr.length; i++) {

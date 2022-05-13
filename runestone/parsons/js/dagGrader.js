@@ -2,10 +2,9 @@ import LineBasedGrader from "./lineGrader";
 import { DiGraph } from "jsnetworkx/node/classes";
 import { hasPath } from "jsnetworkx/node/algorithms/shortestPaths/generic";
 
-function graphToNX(answerBlocks) {
+function graphToNX(answerLines) {
     var graph = new DiGraph();
-    for (let block of answerBlocks) {
-        let line = block.lines[0]; // FIXME assume each block only has one line, won't work with adaptivity
+    for (let line of answerLines) {
         graph.addNode(line.tag);
         for (let line2 of line.depends) {
             // the depends graph lists the *incoming* edges of a node
@@ -48,9 +47,13 @@ function allSubsets(arr) {
 export default class DAGGrader extends LineBasedGrader {
 
 
-    inverseLISIndices(answerBlocks, solution) {
+    inverseLISIndices(arr) {
         // For more details and a proof of the correctness of the algorithm, see the paper: https://arxiv.org/abs/2204.04196
-        let graph = graphToNX(answerBlocks);
+
+        var solution = this.problem.solution;
+        var answerLines = this.problem.answerLines();
+
+        let graph = graphToNX(answerLines);
         console.log(allSubsets([1,2,3]))
 
         let seen = new Set();
@@ -96,7 +99,7 @@ export default class DAGGrader extends LineBasedGrader {
 
         // TODO implement the algorithm properly for the DAG grader so that it is the shortest edit distance
         // to ANY of the correct solutions instead of just to the model solution
-        return super.inverseLISIndices(answerBlocks, solution)
+        return super.inverseLISIndices(arr)
     }
 
     checkCorrectOrdering(solutionLines, answerLines) {

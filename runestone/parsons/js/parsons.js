@@ -1424,7 +1424,7 @@ export default class Parsons extends RunestoneBase {
                     inSolutionIndexes.push(index);
                 }
             }
-            var lisIndexes = this.grader.inverseLISIndices(this.answerBlocks(), this.solution);
+            var lisIndexes = this.grader.inverseLISIndices(inSolutionIndexes);
             for (let i = 0; i < lisIndexes.length; i++) {
                 notInSolution.push(inSolution[lisIndexes[i]]);
             }
