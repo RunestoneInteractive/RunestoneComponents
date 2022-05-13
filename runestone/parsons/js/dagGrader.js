@@ -1,14 +1,15 @@
 import LineBasedGrader from "./lineGrader";
 import { DiGraph } from "jsnetworkx/node/classes";
 import { hasPath } from "jsnetworkx/node/algorithms/shortestPaths/generic";
+import { isDirectedAcyclicGraph } from "jsnetworkx/node/algorithms/dag";
 
 function graphToNX(answerLines) {
     var graph = new DiGraph();
-    for (let line of answerLines) {
-        graph.addNode(line.tag);
-        for (let line2 of line.depends) {
+    for (let line1 of answerLines) {
+        graph.addNode(line1.tag);
+        for (let line2tag of line1.depends) {
             // the depends graph lists the *incoming* edges of a node
-            graph.addEdge(line2, line);
+            graph.addEdge(line2tag, line1.tag);
         }
     }
     return graph;
@@ -46,63 +47,63 @@ function allSubsets(arr) {
 
 export default class DAGGrader extends LineBasedGrader {
 
-
     inverseLISIndices(arr) {
         // For more details and a proof of the correctness of the algorithm, see the paper: https://arxiv.org/abs/2204.04196
 
         var solution = this.problem.solution;
         var answerLines = this.problem.answerLines();
 
-        let graph = graphToNX(answerLines);
-        console.log(allSubsets([1,2,3]))
+        let graph = graphToNX(solution);
 
         let seen = new Set();
         let problematicSubgraph = new DiGraph();
-        let distractors = [];
-        for (let block of solution) {
+        let tagsToRemove = [];
+        for (let line1 of answerLines) {
 
-            if (block.distractor) {
-                distractors.push(block);
+            if (line1.distractor) {
+                tagsToRemove.push(line1.tag);
                 continue;
             }
 
-            for (let block2 of seen) {
-                let problematic = hasPath(graph, block, block2);
-                if (hasPath(graph, block, block2)) {
-                    problematicSubgraph.addEdge(block, block2);
+            for (let line2 of seen) {
+                let problematic = hasPath(graph, {source: line1.tag, target: line2.tag});
+                if (problematic) {
+                    problematicSubgraph.addEdge(line1.tag, line2.tag);
                 }
             }
 
-            seen.add(block);
+            seen.add(line1);
         }
 
-        console.log(problematicSubgraph);
-
-        if (problematicSubgraph.numberOfNodes() == 0) {
-            // just return the indices of the distractors, I guess???
-        } else {
-            let mvc = null;
-            let subsets = allSubsets(problematicSubgraph.nodes());
-            for (let i = 0; i <= problematicSubgraph.numberOfNodes(); i++) {
-                for (let subset of subsets[i]) {
-                    if (isVertexCover(problematicSubgraph, subset)) {
-                        mvc = subset;
-                        console.log(mvc)
-                        break;
-                    }
-                }
-                if (mvc != null) {
+        let mvc = null;
+        let subsets = allSubsets(problematicSubgraph.nodes());
+        for (let i = 0; i <= problematicSubgraph.numberOfNodes(); i++) {
+            for (let subset of subsets[i]) {
+                if (isVertexCover(problematicSubgraph, subset)) {
+                    mvc = subset;
                     break;
                 }
             }
+            if (mvc != null) {
+                break;
+            }
         }
 
-        // TODO implement the algorithm properly for the DAG grader so that it is the shortest edit distance
-        // to ANY of the correct solutions instead of just to the model solution
-        return super.inverseLISIndices(arr)
+        tagsToRemove = tagsToRemove.concat([...mvc]);
+        let indices = tagsToRemove.map(tag => {
+            for (let i = 0; i < answerLines.length; i++) {
+                if (answerLines[i].tag === tag) return i;
+            }
+        });
+
+        return indices;
     }
 
     checkCorrectOrdering(solutionLines, answerLines) {
+        if (!(isDirectedAcyclicGraph(graphToNX(solutionLines)))) {
+            throw "Dependency between blocks does not form a Directed Acyclic Graph; Problem unsolvable."
+        }
+
         let seen = new Set();
         let isCorrectOrder = true;
         this.correctLines = 0;
