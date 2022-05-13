@@ -47,25 +47,17 @@ function allSubsets(arr) {
 
 export default class DAGGrader extends LineBasedGrader {
 
-    inverseLISIndices(arr) {
+    inverseLISIndices(arr, inSolution) {
         // For more details and a proof of the correctness of the algorithm, see the paper: https://arxiv.org/abs/2204.04196
 
         var solution = this.problem.solution;
-        var answerLines = this.problem.answerLines();
+        var answerLines = inSolution.map(block => block.lines[0]); // assume NOT adaptive for DAG grading (for now)
 
         let graph = graphToNX(solution);
 
         let seen = new Set();
         let problematicSubgraph = new DiGraph();
-        let indices = [];
-        for (let i = 0; i < answerLines.length; i++) {
-            let line1 = answerLines[i];
-
-            if (line1.distractor) {
-                indices.push(i);
-                continue;
-            }
-
+        for (let line1 of answerLines) {
             for (let line2 of seen) {
                 let problematic = hasPath(graph, {source: line1.tag, target: line2.tag});
                 if (problematic) {
@@ -90,12 +82,11 @@ export default class DAGGrader extends LineBasedGrader {
             }
         }
 
-        indices = indices.concat([...mvc].map(tag => {
+        let indices = ([...mvc].map(tag => {
             for (let i = 0; i < answerLines.length; i++) {
                 if (answerLines[i].tag === tag) return i;
             }
         }));
-
         return indices;
     }
 
