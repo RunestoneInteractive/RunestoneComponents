@@ -57,11 +57,12 @@ export default class DAGGrader extends LineBasedGrader {
 
         let seen = new Set();
         let problematicSubgraph = new DiGraph();
-        let tagsToRemove = [];
-        for (let line1 of answerLines) {
+        let indices = [];
+        for (let i = 0; i < answerLines.length; i++) {
+            let line1 = answerLines[i];
 
             if (line1.distractor) {
-                tagsToRemove.push(line1.tag);
+                indices.push(i);
                 continue;
             }
 
@@ -89,12 +90,11 @@ export default class DAGGrader extends LineBasedGrader {
             }
         }
 
-        tagsToRemove = tagsToRemove.concat([...mvc]);
-        let indices = tagsToRemove.map(tag => {
+        indices = indices.concat([...mvc].map(tag => {
             for (let i = 0; i < answerLines.length; i++) {
                 if (answerLines[i].tag === tag) return i;
             }
-        });
+        }));
 
         return indices;
     }
@@ -111,9 +111,13 @@ export default class DAGGrader extends LineBasedGrader {
         let loopLimit = Math.min(solutionLines.length, answerLines.length);
         for (let i = 0; i < loopLimit; i++) {
             let line = answerLines[i];
-            for (let j = 0; j < line.depends.length; j++) {
-                if (!seen.has(line.depends[j])) {
-                    isCorrectOrder = false;
+            if (line.distractor) {
+                isCorrectOrder = false;
+            } else {
+                for (let j = 0; j < line.depends.length; j++) {
+                    if (!seen.has(line.depends[j])) {
+                        isCorrectOrder = false;
+                    }
                 }
             }
             if (isCorrectOrder) {
