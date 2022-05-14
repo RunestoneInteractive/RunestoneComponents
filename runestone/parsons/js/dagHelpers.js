@@ -4,6 +4,19 @@
  * JSNetworkX is distributed with the BSD license
  */
 
+function isObjectLike(value) {
+  return !!value && typeof value == 'object';
+}
+
+function isBoolean(value) {
+  var boolTag = '[object Boolean]';
+  return value === true || value === false || (isObjectLike(value) && Object.prototype.toString.call(value) == boolTag);
+}
+
+function nodesAreEqual(a, b) {
+  return a === b || typeof a === 'object' && a.toString() === b.toString();
+}
+
 export function hasPath(G, {source, target}) {
     try {
       shortestPath(G, {source, target});
@@ -94,11 +107,7 @@ function bidirectionalPredSucc(G, source, target) {
       }
     }
   }
-  throw new JSNetworkXNoPath(sprintf(
-    'No path between `%j` and `%j`.',
-    source,
-    target
-  ));
+  throw new JSNetworkXNoPath('No path between ' + source + ' and ' + target + ".");
 }
 
 function topologicalSort(G, optNbunch) {
@@ -112,7 +121,7 @@ function topologicalSort(G, optNbunch) {
     optNbunch = G.nodesIter();
   }
 
-  optNbunch.forEach(function(v) { // process all vertices in G
+  for (let v of optNbunch) { // process all vertices in G
     if (explored.has(v)) {
       return; // continue
     }
@@ -145,7 +154,7 @@ function topologicalSort(G, optNbunch) {
         orderExplored.unshift(w);
       }
     }
-  });
+  }
 
   return orderExplored;
 }
@@ -220,6 +229,77 @@ export class DiGraph {
     }
     return this.node.keys();
   }
+
+  get(n) {
+    var value = this.adj.get(n);
+    if (typeof value === 'undefined') {
+      throw new KeyError('Graph does not contain node ' + n + '.');
+    }
+    return value;
+  }
+
+  numberOfNodes() {
+    return this.node.size;
+  }
+
+  *nbunchIter(optNbunch) {
+    if (optNbunch == null) { // include all nodes
+      /*jshint expr:true*/
+      yield* this.adj.keys();
+    }
+    else if (this.hasNode(optNbunch)) { // if nbunch is a single node
+      yield optNbunch;
+    }
+    else { // if nbunch is a sequence of nodes
+      var adj = this.adj;
+
+      try {
+        for (var n of toIterator(optNbunch)) {
+          if (adj.has(n)) {
+            yield n;
+          }
+        }
+      }
+      catch(ex) {
+        if (ex instanceof TypeError) {
+          throw new JSNetworkXError(
+            'nbunch is not a node or a sequence of nodes'
+          );
+        }
+      }
+    }
+  }
+
+  *edgesIter(optNbunch, optData=false) {
+    // handle calls with opt_data being the only argument
+    if (isBoolean(optNbunch)) {
+      optData = optNbunch;
+      optNbunch = undefined;
+    }
+
+    var nodesNbrs;
+
+    if (optNbunch === undefined) {
+      nodesNbrs = this.adj;
+    }
+    else {
+      nodesNbrs = mapIterator(
+        this.nbunchIter(optNbunch),
+        n => tuple2(n, this.adj.get(n))
+      );
+    }
+
+    for (var nodeNbrs of nodesNbrs) {
+      for (var nbrData of nodeNbrs[1]) {
+        var result = [nodeNbrs[0], nbrData[0]];
+        if (optData) {
+          result[2] = nbrData[1];
+        }
+        yield result;
+      }
+    }
+  }
+
 
   reverse(optCopy=true) {
     var H;
