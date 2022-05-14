@@ -1,36 +1,24 @@
+"use strict";
 /**
  * This file adapted from JSNetworkX: https://github.com/fkling/JSNetworkX
  * Copyright (C) 2012 Felix Kling <felix.kling@gmx.net>
  * JSNetworkX is distributed with the BSD license
  */
 
-function isObjectLike(value) {
-  return !!value && typeof value == 'object';
-}
-
-function isBoolean(value) {
-  var boolTag = '[object Boolean]';
-  return value === true || value === false || (isObjectLike(value) && Object.prototype.toString.call(value) == boolTag);
+export function hasPath(G, {source, target}) {
+  try {
+    bidirectionalShortestPath(G, source, target)
+  } catch(error) {
+    if (error instanceof JSNetworkXNoPath) {
+      return false;
+    }
+    throw error;
+  }
+  return true;
 }
 
 function nodesAreEqual(a, b) {
   return a === b || typeof a === 'object' && a.toString() === b.toString();
-}
-
-export function hasPath(G, {source, target}) {
-    try {
-      shortestPath(G, {source, target});
-    } catch(error) {
-      if (error instanceof JSNetworkXNoPath) {
-        return false;
-      }
-      throw error;
-    }
-    return true;
-  }
-
-function shortestPath(G, {source, target, weight}={}) {
-  return bidirectionalShortestPath(G, source, target);
 }
 
 function bidirectionalShortestPath(G, source, target) {
@@ -107,7 +95,7 @@ function bidirectionalPredSucc(G, source, target) {
       }
     }
   }
-  throw new JSNetworkXNoPath('No path between ' + source + ' and ' + target + ".");
+  throw new JSNetworkXNoPath('No path between ' + source + ' and ' + target + '.');
 }
 
 function topologicalSort(G, optNbunch) {
@@ -388,4 +376,14 @@ class JSNetworkXNoPath extends JSNetworkXUnfeasible {
     super(message);
     this.name = 'JSNetworkXNoPath';
   }
+}
+
+// functions from LoDash, needed by functions from JSNetworkX
+function isObjectLike(value) {
+  return !!value && typeof value == 'object';
+}
+
+function isBoolean(value) {
+  var boolTag = '[object Boolean]';
+  return value === true || value === false || (isObjectLike(value) && Object.prototype.toString.call(value) == boolTag);
 }
