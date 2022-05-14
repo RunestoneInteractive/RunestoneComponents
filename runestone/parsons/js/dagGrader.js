@@ -1,7 +1,9 @@
 import LineBasedGrader from "./lineGrader";
-import { DiGraph } from "jsnetworkx/node/classes";
-import { hasPath } from "jsnetworkx/node/algorithms/shortestPaths/generic";
-import { isDirectedAcyclicGraph } from "jsnetworkx/node/algorithms/dag";
+// import { DiGraph } from "jsnetworkx/node/classes";
+// import { hasPath } from "jsnetworkx/node/algorithms/shortestPaths/generic";
+// import { isDirectedAcyclicGraph } from "jsnetworkx/node/algorithms/dag";
+
+import { DiGraph, hasPath, isDirectedAcyclicGraph } from "./dagHelpers"
 
 function graphToNX(answerLines) {
     var graph = new DiGraph();
