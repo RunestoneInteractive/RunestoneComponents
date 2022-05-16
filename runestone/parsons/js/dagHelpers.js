@@ -5,10 +5,10 @@
  * JSNetworkX is distributed with the BSD license
  */
 
-export function hasPath(G, {source, target}) {
+export function hasPath(G, { source, target }) {
   try {
-    bidirectionalShortestPath(G, source, target)
-  } catch(error) {
+    bidirectionalShortestPath(G, source, target);
+  } catch (error) {
     if (error instanceof JSNetworkXNoPath) {
       return false;
     }
@@ -18,7 +18,7 @@ export function hasPath(G, {source, target}) {
 }
 
 function nodesAreEqual(a, b) {
-  return a === b || typeof a === 'object' && a.toString() === b.toString();
+  return a === b || (typeof a === "object" && a.toString() === b.toString());
 }
 
 function bidirectionalShortestPath(G, source, target) {
@@ -78,8 +78,7 @@ function bidirectionalPredSucc(G, source, target) {
           }
         }
       }
-    }
-    else {
+    } else {
       thisLevel = reverseFringe;
       reverseFringe = [];
       for (let v of thisLevel) {
@@ -95,7 +94,9 @@ function bidirectionalPredSucc(G, source, target) {
       }
     }
   }
-  throw new JSNetworkXNoPath('No path between ' + source + ' and ' + target + '.');
+  throw new JSNetworkXNoPath(
+    "No path between " + source.toString() + " and " + target.toString() + "."
+  );
 }
 
 function topologicalSort(G, optNbunch) {
@@ -109,7 +110,8 @@ function topologicalSort(G, optNbunch) {
     optNbunch = G.nodesIter();
   }
 
-  for (let v of optNbunch) { // process all vertices in G
+  for (let v of optNbunch) {
+    // process all vertices in G
     if (explored.has(v)) {
       return; // continue
     }
@@ -117,7 +119,8 @@ function topologicalSort(G, optNbunch) {
     var fringe = [v]; // nodes yet to look at
     while (fringe.length > 0) {
       var w = fringe[fringe.length - 1]; // depth first search
-      if (explored.has(w)) { // already looked down this branch
+      if (explored.has(w)) {
+        // already looked down this branch
         fringe.pop();
         continue;
       }
@@ -125,19 +128,20 @@ function topologicalSort(G, optNbunch) {
       // Check successors for cycles for new nodes
       var newNodes = [];
       /*eslint-disable no-loop-func*/
-      G.get(w).forEach(function(_, n) {
+      G.get(w).forEach(function (_, n) {
         if (!explored.has(n)) {
-          if (seen.has(n)) { // CYCLE !!
-            throw new JSNetworkXUnfeasible('Graph contains a cycle.');
+          if (seen.has(n)) {
+            // CYCLE !!
+            throw new JSNetworkXUnfeasible("Graph contains a cycle.");
           }
           newNodes.push(n);
         }
       });
       /*eslint-enable no-loop-func*/
-      if (newNodes.length > 0) { // add new nodes to fringe
+      if (newNodes.length > 0) {
+        // add new nodes to fringe
         fringe.push.apply(fringe, newNodes);
-      }
-      else {
+      } else {
         explored.add(w);
         orderExplored.unshift(w);
       }
@@ -151,8 +155,7 @@ export function isDirectedAcyclicGraph(G) {
   try {
     topologicalSort(G);
     return true;
-  }
-  catch(ex) {
+  } catch (ex) {
     if (ex instanceof JSNetworkXUnfeasible) {
       return false;
     }
@@ -161,7 +164,6 @@ export function isDirectedAcyclicGraph(G) {
 }
 
 export class DiGraph {
-
   constructor() {
     this.graph = {}; // dictionary for graph attributes
     this.node = new Map(); // dictionary for node attributes
@@ -176,7 +178,7 @@ export class DiGraph {
   }
 
   addNode(n) {
-    if(!this.succ.has(n)) {
+    if (!this.succ.has(n)) {
       this.succ.set(n, new Map());
       this.pred.set(n, new Map());
       this.node.set(n);
@@ -203,15 +205,15 @@ export class DiGraph {
     this.pred.get(v).set(u, datadict);
   }
 
-  nodes(optData=false) {
+  nodes(optData = false) {
     return Array.from(optData ? this.node.entries() : this.node.keys());
   }
 
-  edges(optNbunch, optData=false) {
+  edges(optNbunch, optData = false) {
     return Array.from(this.edgesIter(optNbunch, optData));
   }
 
-  nodesIter(optData=false) {
+  nodesIter(optData = false) {
     if (optData) {
       return toIterator(this.node);
     }
@@ -220,8 +222,8 @@ export class DiGraph {
 
   get(n) {
     var value = this.adj.get(n);
-    if (typeof value === 'undefined') {
-      throw new KeyError('Graph does not contain node ' + n + '.');
+    if (typeof value === "undefined") {
+      throw new KeyError("Graph does not contain node " + n + ".");
     }
     return value;
   }
@@ -231,14 +233,15 @@ export class DiGraph {
   }
 
   *nbunchIter(optNbunch) {
-    if (optNbunch == null) { // include all nodes
+    if (optNbunch == null) {
+      // include all nodes
       /*jshint expr:true*/
       yield* this.adj.keys();
-    }
-    else if (this.hasNode(optNbunch)) { // if nbunch is a single node
+    } else if (this.hasNode(optNbunch)) {
+      // if nbunch is a single node
       yield optNbunch;
-    }
-    else { // if nbunch is a sequence of nodes
+    } else {
+      // if nbunch is a sequence of nodes
       var adj = this.adj;
 
       try {
@@ -247,18 +250,17 @@ export class DiGraph {
             yield n;
           }
         }
-      }
-      catch(ex) {
+      } catch (ex) {
         if (ex instanceof TypeError) {
           throw new JSNetworkXError(
-            'nbunch is not a node or a sequence of nodes'
+            "nbunch is not a node or a sequence of nodes"
           );
         }
       }
     }
   }
 
-  *edgesIter(optNbunch, optData=false) {
+  *edgesIter(optNbunch, optData = false) {
     // handle calls with opt_data being the only argument
     if (isBoolean(optNbunch)) {
       optData = optNbunch;
@@ -269,11 +271,9 @@ export class DiGraph {
 
     if (optNbunch === undefined) {
       nodesNbrs = this.adj;
-    }
-    else {
-      nodesNbrs = mapIterator(
-        this.nbunchIter(optNbunch),
-        n => tuple2(n, this.adj.get(n))
+    } else {
+      nodesNbrs = mapIterator(this.nbunchIter(optNbunch), (n) =>
+        tuple2(n, this.adj.get(n))
       );
     }
 
@@ -288,20 +288,21 @@ export class DiGraph {
     }
   }
 
-
-  reverse(optCopy=true) {
+  reverse(optCopy = true) {
     var H;
-    if(optCopy) {
-      H = new this.constructor(null, {name: 'Reverse of (' + this.name + ')'});
+    if (optCopy) {
+      H = new this.constructor(null, {
+        name: "Reverse of (" + this.name + ")",
+      });
       H.addNodesFrom(this);
-      H.addEdgesFrom(mapIterator(
-        this.edgesIter(null, true),
-        edge => tuple3c(edge[1], edge[0], deepcopy(edge[2]), edge)
-      ));
+      H.addEdgesFrom(
+        mapIterator(this.edgesIter(null, true), (edge) =>
+          tuple3c(edge[1], edge[0], deepcopy(edge[2]), edge)
+        )
+      );
       H.graph = deepcopy(this.graph);
       H.node = deepcopy(this.node);
-    }
-    else {
+    } else {
       var thisPred = this.pred;
       var thisSucc = this.succ;
 
@@ -340,12 +341,11 @@ export class DiGraph {
   predecessors(n) {
     return Array.from(this.predecessorsIter(n));
   }
-
 }
 
 class JSNetworkXException {
   constructor(message) {
-    this.name = 'JSNetworkXException';
+    this.name = "JSNetworkXException";
     this.message = message;
   }
 }
@@ -353,37 +353,42 @@ class JSNetworkXException {
 class JSNetworkXAlgorithmError extends JSNetworkXException {
   constructor(message) {
     super(message);
-    this.name = 'JSNetworkXAlgorithmError';
+    this.name = "JSNetworkXAlgorithmError";
   }
 }
 
 class JSNetworkXError extends JSNetworkXException {
   constructor(message) {
     super(message);
-    this.name = 'JSNetworkXError';
+    this.name = "JSNetworkXError";
   }
 }
 
 class JSNetworkXUnfeasible extends JSNetworkXAlgorithmError {
   constructor(message) {
     super(message);
-    this.name = 'JSNetworkXUnfeasible';
+    this.name = "JSNetworkXUnfeasible";
   }
 }
 
 class JSNetworkXNoPath extends JSNetworkXUnfeasible {
   constructor(message) {
     super(message);
-    this.name = 'JSNetworkXNoPath';
+    this.name = "JSNetworkXNoPath";
   }
 }
 
-// functions from LoDash, needed by functions from JSNetworkX
+// function from LoDash, needed by functions from JSNetworkX
 function isObjectLike(value) {
-  return !!value && typeof value == 'object';
+  return !!value && typeof value == "object";
 }
 
+// function from LoDash, needed by functions from JSNetworkX
 function isBoolean(value) {
-  var boolTag = '[object Boolean]';
-  return value === true || value === false || (isObjectLike(value) && Object.prototype.toString.call(value) == boolTag);
+  var boolTag = "[object Boolean]";
+  return (
+    value === true ||
+    value === false ||
+    (isObjectLike(value) && Object.prototype.toString.call(value) == boolTag)
+  );
 }

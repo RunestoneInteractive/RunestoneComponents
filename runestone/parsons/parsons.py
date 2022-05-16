@@ -28,8 +28,11 @@ from runestone.common.runestonedirective import RunestoneIdNode
 
 def setup(app):
     app.add_directive("parsonsprob", ParsonsProblem)
-    app.add_node(ParsonsNode, html=(visit_parsons_html, depart_parsons_html),
-                 xml=(visit_parsons_xml, depart_parsons_xml))
+    app.add_node(
+        ParsonsNode,
+        html=(visit_parsons_html, depart_parsons_html),
+        xml=(visit_parsons_xml, depart_parsons_xml),
+    )
     app.add_config_value("parsons_div_class", "runestone", "html")
 
 
@@ -125,7 +128,7 @@ class ParsonsProblem(Assessment):
             "noindent": directives.flag,
             "adaptive": directives.flag,
             "numbered": directives.unchanged,
-            "grader": directives.unchanged
+            "grader": directives.unchanged,
         }
     )
     has_content = True
@@ -201,9 +204,7 @@ class ParsonsProblem(Assessment):
         else:
             self.options["language"] = ""
         if "grader" in self.options:
-            self.options["grader"] = (
-                ' data-grader="' + self.options["grader"] + '"'
-            )
+            self.options["grader"] = ' data-grader="' + self.options["grader"] + '"'
         else:
             self.options["grader"] = ""
 
@@ -226,9 +227,10 @@ class ParsonsProblem(Assessment):
         maybeAddToAssignment(self)
         parsons_node = ParsonsNode()
         parsons_node["runestone_options"] = self.options
-        parsons_node["source"], parsons_node["line"] = self.state_machine.get_source_and_line(
-            self.lineno
-        )
+        (
+            parsons_node["source"],
+            parsons_node["line"],
+        ) = self.state_machine.get_source_and_line(self.lineno)
         self.state.nested_parse(
             self.options["instructions"], self.content_offset, parsons_node
         )
