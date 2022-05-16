@@ -303,9 +303,8 @@ def test_dag_grader(selenium_utils_get):
     def drag_block(block, before_block):
         ActionChains(selenium_utils_get.driver).drag_and_drop(
             source.find_element_by_id("parsons-6-block-" + str(block)),
-            answer.find_element_by_id("parsons-6-block-" + str(before_block))
+            answer.find_element_by_id("parsons-6-block-" + str(before_block)),
         ).perform()
-
 
     reset.click()
 
