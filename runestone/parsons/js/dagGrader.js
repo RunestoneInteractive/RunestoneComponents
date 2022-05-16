@@ -22,6 +22,8 @@ function isVertexCover(graph, vertexCover) {
   return true;
 }
 
+// Find all subsets of the set using the correspondence of subsets of
+// a set to binary string whose length are the size of the set
 function allSubsets(arr) {
   let subsets = {};
   for (let i = 0; i <= arr.length; i++) {
