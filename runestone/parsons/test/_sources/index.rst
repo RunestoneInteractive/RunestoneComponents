@@ -118,34 +118,32 @@ Section 2: Labeling
 Proof Blocks
 ============
 
-.. parsonsprob:: test_parsons_4
-   :language: math
-   :grader: dag
+.. parsonsprob:: test_proof_blocks_1
+  :language: math
+  :grader: dag
 
-   .. raw:: html
+  .. raw:: html
 
-    <embed>   Drag and drop <strong style="color:red;">all</strong> of the blocks below to create a proof by induction of the following statement.
-      Claim: for all natural numbers \(n\),
-      $$
-      \sum_{j=0}^n 2(-7)^j = \frac{1-(-7)^{n+1}}{4}
-      $$
+    <embed>
+          <p>Drag and drop <font color="red"><strong>ALL</strong></font> of the blocks below to create a proof of the following statement.</p>
+        <center><font color="red">If graphs $G$ and $H$ are isomorphic and $G$ is 2-colorable, then $H$ is 2-colorable.</font></center>
     </embed>
 
-   -----
-   Proof by induction on \(n\). #tag:0;depends:;
-   =====
-   Inductive Predicate:  \(P(n): \sum_{j=0}^n 2(-7)^j = \frac{1-(-7)^{n+1}}{4}\) #tag:1;depends:0;
-   =====
-   Base case: At \(n=0\), \(\sum_{j=0}^n 2(-7)^j = 2\) and \(\frac{1-(-7)^{n+1}}{4} = \frac{1-(-7)}{4} = 2\), so the base case, \(P(0)\), holds #tag:2;depends:0,1;
-   =====
-   Inductive Hypothesis: Suppose that \(P(n):\) \(\sum_{j=0}^n 2(-7)^j = \frac{1-(-7)^{n+1}}{4}\) holds for \(n=0,1,...,k\). #tag:3;depends:1;
-   =====
-   Inductive Step: We need to show that \(P(k+1):\) \(\sum_{j=0}^{k+1} 2(-7)^j = \frac{1-(-7)^{k+2}}{4}\)  holds #tag:4;depends:3;
-   =====
-   The left hand side is \(\sum_{j=0}^{k+1} 2(-7)^j = \sum_{j=0}^k 2(-7)^j + 2(-7)^{k+1}\) #tag:5;depends:4;
-   =====
-   By the inductive hypothesis we have \(\sum_{j=0}^k 2(-7)^j = \frac{1-(-7)^{k+1}}{4}\). So then substituting we get \(= \frac{1-(-7)^{k+1}}{4} + 2(-7)^{k+1}\) \(= \frac{1-(-7)^{k+1} + 8(-7)^{k+1}}{4}\) \(= \frac{1+7(-7)^{k+1}}{4}\) which simplifies to \(= \frac{1-(-7)^{k+2}}{4}\) #tag:6;depends:5;
-   =====
-   So \(\sum_{j=0}^{k+1} 2(-7)^j = \frac{1-(-7)^{k+2}}{4}\), which was what we needed to show. #tag:7;depends:6;
-
-
+  -----
+  Assume $G$ and $H$ are isomorphic graphs and $G$ is 2-colorable. #tag:0; depends:;
+  =====
+  Let $c:V(G) \to \{red, blue\}$ be a 2-coloring of $G$. #tag: 1; depends:0;
+  =====
+  Let $f$ be an isomorphism $V(H) \to V(G)$ #tag: 2; depends: 0;
+  =====
+  Define $c':V(H) \to \{red, blue\}$ as $c'(v)=c(f(v))$ #tag:3;depends:1,2;
+  =====
+  Let $\langle u - v \rangle$ be an edge in $H$. (If instead there are no edges in $H$, then $H$ is trivially 2-colorable and we are done.) #tag:4;depends:0;
+  =====
+  $\langle f(u) - f(v) \rangle$ is an edge in $G$ #tag:5;depends:4,2;
+  =====
+  $c(f(u)) \ne c(f(v))$ #tag:6;depends:5,1;
+  =====
+  $c'(u) \ne c'(v)$ #tag:7;depends:6,3;
+  =====
+  $c'$ is a 2-coloring of $H$, so $H$ is 2-colorable. (end of proof) #tag:8;depends:7;

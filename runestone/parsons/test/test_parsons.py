@@ -292,6 +292,71 @@ def test_indentation(selenium_utils_get):
     assert b3.get_attribute("class") == "block indentRight"
 
 
+def test_dag_grader(selenium_utils_get):
+    selenium_utils_get.wait_until_ready("test_proof_blocks_1")
+
+    source = selenium_utils_get.driver.find_element_by_id("parsons-6-source")
+    answer = selenium_utils_get.driver.find_element_by_id("parsons-6-answer")
+    checkme = selenium_utils_get.driver.find_element_by_id("parsons-6-check")
+    reset = selenium_utils_get.driver.find_element_by_id("parsons-6-reset")
+
+    def drag_block(block, before_block):
+        ActionChains(selenium_utils_get.driver).drag_and_drop(
+            source.find_element_by_id("parsons-6-block-" + str(block)),
+            answer.find_element_by_id("parsons-6-block-" + str(before_block))
+        ).perform()
+
+
+    reset.click()
+
+    ActionChains(selenium_utils_get.driver).drag_and_drop(
+        source.find_element_by_id("parsons-6-block-8"), answer
+    ).perform()
+
+    for i in range(8, 0, -1):
+        drag_block(i - 1, i)
+    wait_for_animation(selenium_utils_get, "#parsons-6-block-0")
+    checkme.click()
+    message = selenium_utils_get.driver.find_element_by_id("parsons-6-message")
+    assert message.get_attribute("class") == "alert alert-info"
+
+    reset.click()
+
+    ActionChains(selenium_utils_get.driver).drag_and_drop(
+        source.find_element_by_id("parsons-6-block-3"), answer
+    ).perform()
+    drag_block(7, 3)
+    drag_block(6, 7)
+    drag_block(8, 6)
+    drag_block(4, 8)
+    drag_block(1, 4)
+    drag_block(2, 1)
+    drag_block(0, 2)
+    drag_block(5, 1)
+    wait_for_animation(selenium_utils_get, "#parsons-6-block-5")
+    checkme.click()
+    message = selenium_utils_get.driver.find_element_by_id("parsons-6-message")
+    assert message.get_attribute("class") == "alert alert-danger"
+
+    reset.click()
+
+    ActionChains(selenium_utils_get.driver).drag_and_drop(
+        source.find_element_by_id("parsons-6-block-8"), answer
+    ).perform()
+    drag_block(7, 8)
+    drag_block(6, 7)
+    drag_block(3, 6)
+    drag_block(4, 3)
+    drag_block(1, 4)
+    drag_block(2, 1)
+    drag_block(0, 2)
+    drag_block(5, 3)
+    wait_for_animation(selenium_utils_get, "#parsons-6-block-5")
+    checkme.click()
+    message = selenium_utils_get.driver.find_element_by_id("parsons-6-message")
+    assert message.get_attribute("class") == "alert alert-info"
+
+
 def wait_for_animation(selenium_utils, selector):
     while is_element_animated(selenium_utils, selector):
         time.sleep(0.5)
