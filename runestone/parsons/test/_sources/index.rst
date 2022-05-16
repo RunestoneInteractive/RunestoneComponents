@@ -118,14 +118,6 @@ Section 2: Labeling
 Proof Blocks
 ============
 
-.. raw:: html
-
-    <embed>
-      <!-- TODO load dependencies properly through NPM -->
-      <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-      <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    </embed>
-
 .. parsonsprob:: test_parsons_4
    :language: math
    :grader: dag

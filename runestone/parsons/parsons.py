@@ -194,6 +194,8 @@ class ParsonsProblem(Assessment):
         else:
             self.options["noindent"] = ""
         if "adaptive" in self.options:
+            if self.options.get("grader") == "dag" and "adaptive" in self.options:
+                raise Exception("Adaptivity not yet supported with DAG grader")
             self.options["adaptive"] = ' data-adaptive="true"'
         else:
             self.options["adaptive"] = ""
