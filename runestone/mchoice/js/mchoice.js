@@ -513,7 +513,7 @@ export default class MultipleChoice extends RunestoneBase {
         if (logFlag) {
             this.logMCMFsubmission();
         }
-        if (!eBookConfig.peer) {
+        if (!eBookConfig.peer || eBookConfig.isInstructor) {
             this.renderMCMFFeedback();
             if (this.useRunestoneServices) {
                 this.enableMCComparison();
