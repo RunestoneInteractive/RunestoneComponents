@@ -151,12 +151,23 @@ def visit_fitb_xml(self, node):
             <statement>
     """
     self.output.append(TEMPLATE_START)
+    node.private_children = node.children[1:]
+    stmt = str(node.children[0])
+    stmt = re.sub(r"<problematic.*?</problematic>", "<var />", stmt)
+    neededBlanks = len(node["runestone_options"]["pattlist"])
+    numBlanks = stmt.count("<var />")
+    diff = neededBlanks - numBlanks
+    if diff > 0:
+        stmt = stmt[0:stmt.rfind("</paragraph>")]
+        for i in range(diff):
+            stmt += " <var /> "
+        stmt += " </paragraph>"
+    node.children = []
+    self.output.append(stmt)
+    self.output.append("</statement>")
 
 
 def depart_fitb_xml(self, node):
-    blankCount = 0
-    for xx in node.traverse(BlankNode):
-        blankCount += 1
 
     # pattlist = node["runestone_options"]["pattlist"]  # answer patterns
     # flist = node["runestone_options"]["flist"]  # feedback
@@ -166,7 +177,6 @@ def depart_fitb_xml(self, node):
     #     visit_blank_xml(self, None)
     #     blankCount += 1
 
-    self.output.append("</statement>")
     self.output.append("<setup>")
     # Walk the children of node
     # child 0 is the statement
@@ -174,19 +184,23 @@ def depart_fitb_xml(self, node):
     #    each of these children will have an atribute called blankfeedbackdict which is the match for this
     #    each child will have a child/children that is the actual feedback we want to supply
     #
-    self.output.append("<var>")
-    for child in node.children[1:]:
-        rx = child["blankfeedbackdict"]
-        if "number" in rx:
-            self.output.append(f"""<condition number="{rx['number']}">""")
-        else:
-            self.output.append(f"""<condition string="{rx['regex']}">""")
-        fb = ""
-        for p in child.children:
-            fb += str(p)
-        self.output.append(f"<feedback>{fb}</feedback>")
-        self.output.append("</condition>")
-    self.output.append("</var>")
+
+    for var in range(len(node["runestone_options"]["pattlist"])):
+        self.output.append("<var>")
+
+        for ans in range(len(node["runestone_options"]["pattlist"][var])):
+            child = node.private_children.pop(0)
+            rx = child["blankfeedbackdict"]
+            if "number" in rx:
+                self.output.append(f"""<condition number="{rx['number']}">""")
+            else:
+                self.output.append(f"""<condition string="{rx['regex']}">""")
+            fb = ""
+            for p in child.children:
+                fb += str(p)
+            self.output.append(f"<feedback>{fb}</feedback>")
+            self.output.append("</condition>")
+        self.output.append("</var>")
     self.output.append("</setup>")
     self.output.append("</exercise>")
 
