@@ -190,16 +190,19 @@ def depart_fitb_xml(self, node):
 
         for ans in range(len(node["runestone_options"]["pattlist"][var])):
             child = node.private_children.pop(0)
-            rx = child["blankfeedbackdict"]
-            if "number" in rx:
-                self.output.append(f"""<condition number="{rx['number']}">""")
+            if "blankfeedbackdict" in child:
+                rx = child["blankfeedbackdict"]
+                if "number" in rx:
+                    self.output.append(f"""<condition number="{rx['number']}">""")
+                else:
+                    self.output.append(f"""<condition string="{rx['regex']}">""")
+                fb = ""
+                for p in child.children:
+                    fb += str(p)
+                self.output.append(f"<feedback>{fb}</feedback>")
+                self.output.append("</condition>")
             else:
-                self.output.append(f"""<condition string="{rx['regex']}">""")
-            fb = ""
-            for p in child.children:
-                fb += str(p)
-            self.output.append(f"<feedback>{fb}</feedback>")
-            self.output.append("</condition>")
+                self.output.append(str(child))
         self.output.append("</var>")
     self.output.append("</setup>")
     self.output.append("</exercise>")

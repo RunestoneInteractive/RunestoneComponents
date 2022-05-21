@@ -104,7 +104,7 @@ def depart_ca_html(self, node):
 
 def visit_ca_xml(self, node):
     res = XML_START.format(**node["runestone_options"])
-    if node["runestone_options"]["feedback"]:
+    if node["runestone_options"].get("feedback", None):
         res += "<feedback><p>{feedback}</p></feedback>\n".format(
             **node["runestone_options"])
     res += "<areas>\n"
