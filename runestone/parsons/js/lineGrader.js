@@ -72,21 +72,12 @@ export default class LineBasedGrader {
         // Determine whether the code **that is there** is in the correct order
         // If there is too much or too little code this only matters for
         // calculating a percentage score.
-        let isCorrectOrder = true;
-        this.correctLines = 0;
-        this.solutionLength = solutionLines.length;
-        let loopLimit = Math.min(solutionLines.length, answerLines.length);
-        for (i = 0; i < loopLimit; i++) {
-            if (answerLines[i].text !== solutionLines[i].text) {
-                isCorrectOrder = false;
-            } else {
-                this.correctLines += 1;
-            }
-        }
+        let isCorrectOrder = this.checkCorrectOrdering(solutionLines, answerLines)
 
         // Determine whether blocks are indented correctly
         this.indentLeft = [];
         this.indentRight = [];
+        let loopLimit = Math.min(solutionLines.length, answerLines.length);
         for (i = 0; i < loopLimit; i++) {
             if (answerLines[i].viewIndent() < solutionLines[i].indent) {
                 this.indentRight.push(answerLines[i]);
@@ -110,7 +101,23 @@ export default class LineBasedGrader {
         }
         this.calculatePercent();
         this.graderState = state;
+
         return state;
+    }
+
+    checkCorrectOrdering(solutionLines, answerLines) {
+        let isCorrectOrder = true;
+        this.correctLines = 0;
+        this.solutionLength = solutionLines.length;
+        let loopLimit = Math.min(solutionLines.length, answerLines.length);
+        for (let i = 0; i < loopLimit; i++) {
+            if (answerLines[i].text !== solutionLines[i].text) {
+                isCorrectOrder = false;
+            } else {
+                this.correctLines += 1;
+            }
+        }
+        return isCorrectOrder
     }
 
     calculatePercent() {
