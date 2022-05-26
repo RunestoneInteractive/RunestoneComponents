@@ -28,8 +28,11 @@ from runestone.common.runestonedirective import RunestoneIdNode
 
 def setup(app):
     app.add_directive("parsonsprob", ParsonsProblem)
-    app.add_node(ParsonsNode, html=(visit_parsons_html, depart_parsons_html),
-                 xml=(visit_parsons_xml, depart_parsons_xml))
+    app.add_node(
+        ParsonsNode,
+        html=(visit_parsons_html, depart_parsons_html),
+        xml=(visit_parsons_xml, depart_parsons_xml),
+    )
     app.add_config_value("parsons_div_class", "runestone", "html")
 
 
@@ -41,7 +44,7 @@ TEMPLATE_START = """
 
 TEMPLATE_END = """
         </div>
-        <pre  class="parsonsblocks" data-question_label="%(question_label)s"  %(adaptive)s %(maxdist)s %(order)s %(noindent)s %(language)s %(numbered)s %(optional)s style="visibility: hidden;">
+        <pre  class="parsonsblocks" data-question_label="%(question_label)s"  %(adaptive)s %(maxdist)s %(order)s %(noindent)s %(language)s %(grader)s %(numbered)s %(optional)s style="visibility: hidden;">
         %(code)s
         </pre>
         </div>
@@ -125,6 +128,7 @@ class ParsonsProblem(Assessment):
             "noindent": directives.flag,
             "adaptive": directives.flag,
             "numbered": directives.unchanged,
+            "grader": directives.unchanged,
         }
     )
     has_content = True
@@ -190,6 +194,8 @@ class ParsonsProblem(Assessment):
         else:
             self.options["noindent"] = ""
         if "adaptive" in self.options:
+            if self.options.get("grader") == "dag" and "adaptive" in self.options:
+                raise Exception("Adaptivity not yet supported with DAG grader")
             self.options["adaptive"] = ' data-adaptive="true"'
         else:
             self.options["adaptive"] = ""
@@ -199,6 +205,10 @@ class ParsonsProblem(Assessment):
             )
         else:
             self.options["language"] = ""
+        if "grader" in self.options:
+            self.options["grader"] = ' data-grader="' + self.options["grader"] + '"'
+        else:
+            self.options["grader"] = ""
 
         if "-----" in self.content:
             index = self.content.index("-----")
@@ -219,9 +229,10 @@ class ParsonsProblem(Assessment):
         maybeAddToAssignment(self)
         parsons_node = ParsonsNode()
         parsons_node["runestone_options"] = self.options
-        parsons_node["source"], parsons_node["line"] = self.state_machine.get_source_and_line(
-            self.lineno
-        )
+        (
+            parsons_node["source"],
+            parsons_node["line"],
+        ) = self.state_machine.get_source_and_line(self.lineno)
         self.state.nested_parse(
             self.options["instructions"], self.content_offset, parsons_node
         )
