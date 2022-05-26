@@ -476,6 +476,9 @@ export default class MultipleChoice extends RunestoneBase {
             correct: correct,
             div_id: this.divid,
         };
+        if (eBookConfig.peer && typeof studentVoteCount !== "undefined") {
+            data.act = data.act + `:vote${studentVoteCount}`;
+        }
         if (typeof sid !== "undefined") {
             data.sid = sid;
         }
@@ -551,6 +554,9 @@ export default class MultipleChoice extends RunestoneBase {
             correct: correct,
             div_id: this.divid,
         };
+        if (eBookConfig.peer && typeof studentVoteCount !== "undefined") {
+            data.act = data.act + `:vote${studentVoteCount}`;
+        }
         if (typeof sid !== "undefined") {
             data.sid = sid;
         }
