@@ -64,7 +64,7 @@ Or, if you prefer to live on the development edge, you can check out the very la
 
 ::
 
-    pip install git+git://github.com/RunestoneInteractive/RunestoneComponents.git
+    pip install git+https://github.com/RunestoneInteractive/RunestoneComponents
 
 
 To start a project, create a new folder and then run the following command (installed by pip)  in that new folder ``runestone init``  For example:
