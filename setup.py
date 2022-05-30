@@ -11,7 +11,7 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
     dependencies = [l.strip() for l in fh]
 
 
-VERSION = "6.1.2"
+VERSION = "6.2.0"
 
 # These pre-install hooks are useful to make sure any pre-requisite
 # programs that are not pip installable are in place.
