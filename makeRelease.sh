@@ -40,7 +40,7 @@ if [ -d ~/.virtualenvs/json2xml ]
 
     echo "Creating dist for PreTeXt"
     source ~/.virtualenvs/json2xml/bin/activate
-    python scripts/dist2xml.py $1 > runestone/dist/webpack_static_imports.xml
+    python scripts/dist2xml.py $1 
     cd runestone
     tar zcf dist-$1.tgz dist
   else
