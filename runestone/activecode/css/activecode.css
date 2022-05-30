@@ -61,7 +61,12 @@
     position: initial;
 }
 
+.unittest-results {
+    margin-left: 20px;
+}
+
 .ac_output {
+    margin-top: 10px;
     display: none;
     background-color: inherit;
 }
@@ -79,7 +84,7 @@
 }
 
 .ac_question {
-    background-color: rgb(224, 236, 217);
+    background-color: var(--questionBgColor);
     padding-left: 10px;
     padding-top: 10px;
     margin: 5px;
@@ -112,6 +117,11 @@
 .ac-feedback {
     border: 1px solid black;
     padding: 3px;
+}
+
+.CodeMirror {
+    border: solid 2px;
+    margin-bottom: 10px;
 }
 
 .ac_sql_result {

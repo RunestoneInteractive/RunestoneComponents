@@ -29,21 +29,26 @@ def setup(app):
     app.add_directive("addbutton", AddButton)
     app.add_directive("qnum", QuestionNumber)
 
-    app.add_config_value("mchoice_div_class", "runestone alert alert-warning", "html")
+    app.add_config_value("mchoice_div_class", "runestone", "html")
 
     app.add_node(MChoiceNode, html=(visit_mc_html, depart_mc_html),
                  xml=(visit_mc_xml, depart_mc_xml))
 
     app.add_node(
-        AnswersBulletList, html=(visit_answers_bullet_html, depart_answers_bullet_html)
+        AnswersBulletList, html=(visit_answers_bullet_html, depart_answers_bullet_html),
+        xml=(visit_answers_bullet_xml, depart_answers_bullet_xml)
     )
-    app.add_node(AnswerListItem, html=(visit_answer_list_item, depart_answer_list_item))
+    app.add_node(AnswerListItem, html=(visit_answer_list_item, depart_answer_list_item),
+                 xml=(visit_answer_list_item_xml, depart_answer_list_item_xml)
+                 )
     app.add_node(
         FeedbackBulletList,
         html=(visit_feedback_bullet_html, depart_feedback_bullet_html),
+        xml=(visit_feedback_bullet_html, depart_feedback_bullet_html)
     )
     app.add_node(
-        FeedbackListItem, html=(visit_feedback_list_item, depart_feedback_list_item)
+        FeedbackListItem, html=(visit_feedback_list_item, depart_feedback_list_item),
+        xml=(visit_feedback_list_item_xml, depart_feedback_list_item_xml)
     )
 
 

@@ -29,9 +29,10 @@ from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneI
 def setup(app):
     app.add_directive("codelens", Codelens)
 
-    app.add_config_value("codelens_div_class", "alert alert-warning cd_section", "html")
+    app.add_config_value("codelens_div_class", "cd_section", "html")
     app.add_config_value("trace_url", "http://tracer.runestone.academy:5000", "html")
-    app.add_node(CodeLensNode, html=(visit_codelens_html, depart_codelens_html))
+    app.add_node(CodeLensNode, html=(visit_codelens_html, depart_codelens_html),
+                 xml=(visit_codelens_xml, depart_codelens_xml))
 
 
 #  data-tracefile="pytutor-embed-demo/java.json"
@@ -60,9 +61,28 @@ allTraceData["%(divid)s"] = %(tracedata)s;
 </div>
 """
 
+PTX_TEMPLATE = """
+<program xml:id="{divid} interactive="codelens" language="{language}>
+    <input>
+{source}
+    </input>
+</program>
+"""
+
 
 class CodeLensNode(nodes.General, nodes.Element, RunestoneIdNode):
     pass
+
+
+def visit_codelens_xml(self, node):
+    html = VIS
+    if "caption" not in node["runestone_options"]:
+        node["runestone_options"]["caption"] = node["runestone_options"]["question_label"]
+    if "tracedata" in node["runestone_options"]:
+        node["runestone_options"]["tracedata"] = node["runestone_options"]["tracedata"].replace(
+            "<", "&lt;").replace(">", "&gt;")
+
+    res = PTX_TEMPLATE.format(**node["runestone_options"])
 
 
 def visit_codelens_html(self, node):
@@ -82,6 +102,10 @@ def visit_codelens_html(self, node):
 
 
 def depart_codelens_html(self, node):
+    pass
+
+
+def depart_codelens_xml(self, node):
     pass
 
 
@@ -183,7 +207,7 @@ config values (conf.py):
             source = "\n".join(self.content)
         else:
             source = "\n"
-
+        self.options["source"] = source.replace("<", "&lt;")
         CUMULATIVE_MODE = False
         self.JS_VARNAME = self.options["divid"] + "_trace"
         env = self.state.document.settings.env

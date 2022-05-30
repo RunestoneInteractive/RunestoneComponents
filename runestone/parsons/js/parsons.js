@@ -159,7 +159,7 @@ export default class Parsons extends RunestoneBase {
     // Based on what is specified in the original HTML, create the HTML view
     initializeView() {
         this.outerDiv = document.createElement("div");
-        $(this.outerDiv).addClass("parsons alert alert-warning");
+        $(this.outerDiv).addClass("parsons");
         this.outerDiv.id = this.counterId;
         this.parsTextDiv = document.createElement("div");
         $(this.parsTextDiv).addClass("parsons-text");

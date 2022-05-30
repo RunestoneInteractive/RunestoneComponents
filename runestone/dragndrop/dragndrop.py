@@ -27,12 +27,14 @@ from runestone.common.runestonedirective import (
     RunestoneIdDirective,
     RunestoneIdNode,
 )
+from runestone.common.xmlcommon import write_substitute
 
 
 def setup(app):
     app.add_directive("dragndrop", DragNDrop)
 
-    app.add_node(DragNDropNode, html=(visit_dnd_html, depart_dnd_html))
+    app.add_node(DragNDropNode, html=(visit_dnd_html, depart_dnd_html),
+                 xml=(visit_dnd_xml, depart_dnd_xml))
 
     app.add_config_value("dragndrop_div_class", "runestone", "html")
 
@@ -50,6 +52,12 @@ TEMPLATE_OPTION = """
 """
 TEMPLATE_END = """</ul></div>"""
 
+XML_START = """
+<exercise xml:id="{divid}">
+    <statement><p>{question}</p></statement>
+    {feedback}
+"""
+
 
 class DragNDropNode(nodes.General, nodes.Element, RunestoneIdNode):
     pass
@@ -60,13 +68,34 @@ class DragNDropNode(nodes.General, nodes.Element, RunestoneIdNode):
 
 
 def visit_dnd_xml(self, node):
-    res = visit_dnd_common(self, node)
+    res = XML_START
+
+    if "feedback" in node["runestone_options"]:
+        node["runestone_options"]["feedback"] = (
+            "<feedback><p>"
+            + node["runestone_options"]["feedback"]
+            + "</p></feedback>"
+        )
+    else:
+        node["runestone_options"]["feedback"] = ""
+
+    res = res.format(**node["runestone_options"])
     self.output.append(res)
 
 
 def depart_dnd_xml(self, node):
-    res = depart_dnd_common(self, node)
-    self.output.append(res)
+    self.output.append("<matches>")
+    okeys = list(node["runestone_options"].keys())
+    okeys.sort()
+    for k in okeys:
+        if "match" in k:
+            x, ix = k.split("_")
+            dragE, dropE = node["runestone_options"][k].split("|||")
+            self.output.append(f'<match order="{ix}">')
+            self.output.append(f"<premise>{dragE}</premise>")
+            self.output.append(f"<response>{dropE}</response>")
+            self.output.append("</match>")
+    self.output.append("</matches></exercise>")
 
 
 def visit_dnd_html(self, node):

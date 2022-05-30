@@ -24,14 +24,16 @@ from runestone.server.componentdb import (
     maybeAddToAssignment,
 )
 from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneIdNode
+from runestone.common.xmlcommon import write_substitute, substitute_visitor, substitute_departure
 
 
 def setup(app):
     app.add_directive("clickablearea", ClickableArea)
 
-    app.add_node(ClickableAreaNode, html=(visit_ca_html, depart_ca_html))
+    app.add_node(ClickableAreaNode, html=(visit_ca_html, depart_ca_html),
+                 xml=(visit_ca_xml, depart_ca_xml))
 
-    app.add_config_value("clickable_div_class", "runestone alert alert-warning", "html")
+    app.add_config_value("clickable_div_class", "", "html")
 
 
 TEMPLATE = """
@@ -42,6 +44,11 @@ TEMPLATE = """
 TEMPLATE_END = """
 </div>
 </div>
+"""
+
+XML_START = """
+<exercise xml:id="{divid}">
+    <statement><p>{question}</p></statement>
 """
 
 
@@ -93,6 +100,29 @@ def depart_ca_html(self, node):
     )
 
     self.body.remove(node["delimiter"])
+
+
+def visit_ca_xml(self, node):
+    res = XML_START.format(**node["runestone_options"])
+    if node["runestone_options"].get("feedback", None):
+        res += "<feedback><p>{feedback}</p></feedback>\n".format(
+            **node["runestone_options"])
+    res += "<areas>\n"
+    if "iscode" in node["runestone_options"]:
+        # The case where iscode is not in options makes no sense and probably does not exist in
+        # any runestone books
+        for row in node["runestone_options"]["raw_source"]:
+            row = row.replace("\n", "")
+            row = row.replace(":click-correct:", "<area correct='yes'>")
+            row = row.replace(":click-incorrect:", "<area>")
+            row = row.replace(":endclick", "</area>")
+            row = "<cline>" + row + "</cline>\n"
+            res += row
+    self.output.append(res)
+
+
+def depart_ca_xml(self, node):
+    self.output.append("</areas></exercise>")
 
 
 class ClickableArea(RunestoneIdDirective):
@@ -157,6 +187,7 @@ config values (conf.py):
             source = source.replace(":endclick:", "</span>")
             source = "<pre>" + source + "</pre>"
             self.options["clickcode"] = source
+            self.options["raw_source"] = self.content
         else:
             self.options["clickcode"] = ""
         clickNode = ClickableAreaNode()

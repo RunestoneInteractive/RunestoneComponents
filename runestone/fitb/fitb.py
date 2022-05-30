@@ -23,6 +23,7 @@ import json
 import ast
 from numbers import Number
 import re
+import pdb
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -39,15 +40,22 @@ from runestone.common import (
     RunestoneIdNode,
     get_node_line,
 )
+from runestone.common.xmlcommon import substitute_departure, substitute_visitor
+
+
+def noop(self, node):
+    pass
 
 
 def setup(app):
     app.add_directive("fillintheblank", FillInTheBlank)
     app.add_role("blank", BlankRole)
-    app.add_node(FITBNode, html=(visit_fitb_html, depart_fitb_html))
+    app.add_node(FITBNode, html=(visit_fitb_html, depart_fitb_html),
+                 xml=(visit_fitb_xml, depart_fitb_xml))
     app.add_node(BlankNode, html=(visit_blank_html, depart_blank_html))
     app.add_node(
-        FITBFeedbackNode, html=(visit_fitb_feedback_html, depart_fitb_feedback_html)
+        FITBFeedbackNode, html=(visit_fitb_feedback_html, depart_fitb_feedback_html),
+        xml=(noop, noop)
     )
 
     app.add_config_value("fitb_div_class", "runestone", "html")
@@ -107,6 +115,97 @@ def depart_fitb_html(self, node):
     )
 
     self.body.remove(node["delimiter"])
+
+# <exercise>
+#     <title>Fill-In, Integer Answer</title>
+
+#     <statement>
+#         <p>The game of bowling uses <var/> pins that you try to knock down.</p>
+#     </statement>
+#     <setup>
+#         <var>
+#             <condition number="10">
+#                 <feedback>
+#                     <p>Arranged in a triangle, there are <m>1+2+3+4 = 10</m> pins, a so-called <term>triangular</term> number.</p>
+#                 </feedback>
+#             </condition>
+#             <condition number="16">
+#                 <feedback>
+#                     <p><em>Close</em>! You may have used hexadecimal notation, when you did not really mean to.</p>
+#                 </feedback>
+#             </condition>
+#             <condition string=".*">
+#                 <feedback>
+#                     <p>Incorrect.</p>
+#                 </feedback>
+#             </condition>
+#         </var>
+#     </setup>
+# </exercise>
+
+
+def visit_fitb_xml(self, node):
+
+    TEMPLATE_START = """
+        <exercise>
+            <statement>
+    """
+    self.output.append(TEMPLATE_START)
+    node.private_children = node.children[1:]
+    stmt = str(node.children[0])
+    stmt = re.sub(r"<problematic.*?</problematic>", "<var />", stmt)
+    neededBlanks = len(node["runestone_options"]["pattlist"])
+    numBlanks = stmt.count("<var />")
+    diff = neededBlanks - numBlanks
+    if diff > 0:
+        stmt = stmt[0:stmt.rfind("</paragraph>")]
+        for i in range(diff):
+            stmt += " <var /> "
+        stmt += " </paragraph>"
+    node.children = []
+    self.output.append(stmt)
+    self.output.append("</statement>")
+
+
+def depart_fitb_xml(self, node):
+
+    # pattlist = node["runestone_options"]["pattlist"]  # answer patterns
+    # flist = node["runestone_options"]["flist"]  # feedback
+    # for _ in pattlist:
+    #     blankCount += 1
+    # while blankCount < len(flist):
+    #     visit_blank_xml(self, None)
+    #     blankCount += 1
+
+    self.output.append("<setup>")
+    # Walk the children of node
+    # child 0 is the statement
+    # children 1..N are the feedbacks
+    #    each of these children will have an atribute called blankfeedbackdict which is the match for this
+    #    each child will have a child/children that is the actual feedback we want to supply
+    #
+
+    for var in range(len(node["runestone_options"]["pattlist"])):
+        self.output.append("<var>")
+
+        for ans in range(len(node["runestone_options"]["pattlist"][var])):
+            child = node.private_children.pop(0)
+            if "blankfeedbackdict" in child:
+                rx = child["blankfeedbackdict"]
+                if "number" in rx:
+                    self.output.append(f"""<condition number="{rx['number']}">""")
+                else:
+                    self.output.append(f"""<condition string="{rx['regex']}">""")
+                fb = ""
+                for p in child.children:
+                    fb += str(p)
+                self.output.append(f"<feedback>{fb}</feedback>")
+                self.output.append("</condition>")
+            else:
+                self.output.append(str(child))
+        self.output.append("</var>")
+    self.output.append("</setup>")
+    self.output.append("</exercise>")
 
 
 class FillInTheBlank(RunestoneIdDirective):
@@ -175,7 +274,6 @@ class FillInTheBlank(RunestoneIdDirective):
         self.state.nested_parse(self.content, self.content_offset, fitbNode)
         env = self.state.document.settings.env
         self.options["divclass"] = env.config.fitb_div_class
-
         # Expected _`structure`, with assigned variable names and transformations made:
         #
         # .. code-block::
@@ -237,6 +335,8 @@ class FillInTheBlank(RunestoneIdDirective):
                     get_node_line(feedback_bullet_list)
                 )
             )
+        # Thelength of feedbback_list_item gives us the number of blanks.
+        # the number of feedback is len(feedback_bullet_list.children[x].children[0].children)
         for feedback_list_item in feedback_bullet_list.children:
             assert isinstance(feedback_list_item, nodes.list_item)
             feedback_field_list = feedback_list_item[0]
@@ -297,7 +397,6 @@ class FillInTheBlank(RunestoneIdDirective):
                             )
                         )
                 blankArray.append(blankFeedbackDict)
-
                 feedback_field_body = feedback_field[1]
                 assert isinstance(feedback_field_body, nodes.field_body)
                 # Append feedback for this answer to the end of the fitbNode.
@@ -313,6 +412,8 @@ class FillInTheBlank(RunestoneIdDirective):
             fitbNode["feedbackArray"].append(blankArray)
 
         maybeAddToAssignment(self)
+        fitbNode["runestone_options"]["pattlist"] = fitbNode["feedbackArray"][:]
+        fitbNode["runestone_options"]["flist"] = feedback_field_list[:]
 
         return [fitbNode]
 
@@ -352,6 +453,10 @@ class BlankNode(nodes.Inline, nodes.TextElement, RunestoneNode):
 
 def visit_blank_html(self, node):
     self.body.append('<input type="text">')
+
+
+def visit_blank_xml(self, node):
+    self.output.append('<p><var /></p>')
 
 
 def depart_blank_html(self, node):

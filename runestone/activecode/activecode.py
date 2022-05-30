@@ -47,7 +47,7 @@ def setup(app):
     app.add_role("textfield", textfield_role)
     app.add_config_value(
         "activecode_div_class",
-        "runestone explainer ac_section alert alert-warning",
+        "runestone explainer ac_section",
         "html",
     )
     app.add_config_value("activecode_hide_load_history", False, "html")
@@ -60,17 +60,29 @@ def setup(app):
     app.connect("env-purge-doc", purge_activecodes)
 
 
-XML_START = """
-<listing xml:id="{divid}">
-    <caption>{caption}</caption>
-    <program xml:id="{divid}_editor" interactive='yes' language="{language}">
+XML_EX_START = """
+<exercise xml:id="{divid}">
+    <statement>
+"""
+
+XML_EX_END = """
+    </statement>
+    <program xml:id="{divid}_editor" interactive='activecode' language="{language}">
         <input>
-        {initialcode}
+{initialcode}
         </input>
     </program>
-</listing>
-
+</exercise>
 """
+
+XML_LISTING_START = """
+    <program xml:id="{divid}" interactive='activecode' language="{language}">
+        <input>
+{initialcode}
+        </input>
+    </program>
+"""
+
 
 TEMPLATE_START = """
 <div class="%(divclass)s %(optclass)s">
@@ -97,12 +109,21 @@ class ActivecodeNode(nodes.General, nodes.Element, RunestoneIdNode):
 
 
 def visit_ac_xml(self, node):
-    res = XML_START.format(**node["runestone_options"])
-    self.output.append(res)
+    if node["runestone_options"]["has_problem_statement"]:
+        res = XML_EX_START.format(**node["runestone_options"])
+        self.output.append(res)
+    else:
+        node["runestone_options"]["initialcode"] = node["runestone_options"]["initialcode"].replace(
+            "<", "&lt;").replace(">", "&gt;")
 
 
 def depart_ac_xml(self, node):
-    pass
+    if node["runestone_options"]["has_problem_statement"]:
+        res = XML_EX_END.format(**node["runestone_options"])
+        self.output.append(res)
+    else:
+        res = XML_LISTING_START.format(**node["runestone_options"])
+        self.output.append(res)
 
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
@@ -252,7 +273,13 @@ class ActiveCode(RunestoneIdDirective):
         else:
             source = "\n"
 
-        self.explain_text = explain_text or ["Not an Exercise"]
+        if explain_text:
+            self.options["has_problem_statement"] = True
+            self.explain_text = explain_text
+        else:
+            self.options["has_problem_statement"] = False
+            self.explain_text = ["Not an Exercise"]
+
         addQuestionToDB(self)
 
         self.options["initialcode"] = source

@@ -48,7 +48,6 @@ export default class FITB extends RunestoneBase {
     renderFITBInput() {
         // The text [input] elements are created by the template.
         this.containerDiv = document.createElement("div");
-        $(this.containerDiv).addClass("alert alert-warning");
         this.containerDiv.id = this.divid;
         // Copy the original elements to the container holding what the user will see.
         $(this.origElem).children().clone().appendTo(this.containerDiv);

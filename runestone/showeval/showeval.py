@@ -15,19 +15,23 @@
 #
 __author__ = "tconzett"
 
+from asyncore import write
 from docutils import nodes
 from docutils.parsers.rst import directives
+from runestone.common.xmlcommon import substitute_departure
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneIdNode
+from runestone.common.xmlcommon import substitute_departure, write_substitute
 
 
 def setup(app):
     app.add_directive("showeval", ShowEval)
 
     app.add_config_value(
-        "showeval_div_class", "runestone explainer alert alert-warning", "html"
+        "showeval_div_class", "runestone explainer", "html"
     )
-    app.add_node(ShowEvalNode, html=(visit_showeval_html, depart_showeval_html))
+    app.add_node(ShowEvalNode, html=(visit_showeval_html, depart_showeval_html),
+                 xml=(visit_showeval_xml, substitute_departure))
 
 
 # Create visitors, so we can generate HTML after the doctree is resolve (where the question label is determined).
@@ -41,6 +45,11 @@ def visit_showeval_html(self, node):
     addHTMLToDB(
         node["runestone_options"]["divid"], node["runestone_options"]["basecourse"], html
     )
+
+
+def visit_showeval_xml(self, node):
+    html = CODE % node["runestone_options"]
+    write_substitute(self, node, html)
 
 
 def depart_showeval_html(self, node):
@@ -72,7 +81,8 @@ class ShowEval(RunestoneIdDirective):
    more code
    ~~~~
    more {{code}}{{what code becomes in step 1}}
-   more {{what code becomes in step 1}}{{what code becomes in step2}}  ##Optional comment for step 2
+   ##Optional comment for step 2
+   more {{what code becomes in step 1}}{{what code becomes in step2}}
    as many steps as you want {{the first double braces}}{{animate into the second}} wherever.
 
 
@@ -108,7 +118,8 @@ config values (conf.py):
        ~~~~
 
        ''.join({{eggs}}{{['dogs', 'cats', 'moose']}}).upper().join(eggs)
-       {{''.join(['dogs', 'cats', 'moose'])}}{{'dogscatsmoose'}}.upper().join(eggs)  ##I want to put a comment here!
+       ##I want to put a comment here!
+       {{''.join(['dogs', 'cats', 'moose'])}}{{'dogscatsmoose'}}.upper().join(eggs)
        {{'dogscatsmoose'.upper()}}{{'DOGSCATSMOOSE'}}.join(eggs)
        'DOGSCATSMOOSE'.join({{eggs}}{{['dogs', 'cats', 'moose']}})
        {{'DOGSCATSMOOSE'.join(['dogs', 'cats', 'moose'])}}{{'dogsDOGSCATSMOOSEcatsDOGSCATSMOOSEmoose'}}

@@ -40,10 +40,9 @@ XML_START = """
         <statement>
 
 """
-
+# TODO: detect old versus new style to include the choices or not
 XML_START_END = """
         </statement>
-        <choices>
 """
 
 XML_OPTION = """
@@ -52,13 +51,12 @@ XML_OPTION = """
                     <p>{atext}</p>
                 </statement>
                 <feedback>
-                    <p>Incorrect: green means "go!".</p>
+                    <p>{feedtext}</p>
                 </feedback>
             </choice>
 """
 
 XML_END = """
-        </choices>
     </exercise>
 """
 
@@ -101,6 +99,8 @@ def depart_mc_common(self, node):
     res = ""
     currFeedback = ""
     # Add all of the possible answers
+    if node["runestone_options"]["is_new_style"] == False and hasattr(self, "output"):
+        res += "<choices>\n"
     okeys = list(node["runestone_options"].keys())
     okeys.sort()
     for k in okeys:
@@ -113,11 +113,12 @@ def depart_mc_common(self, node):
                 currFeedback, ""
             )  # node["runestone_options"][currFeedback]
             if label in node["runestone_options"]["correct"]:
-                node["runestone_options"]["is_correct"] = "data-correct"
+                node["runestone_options"]["is_correct"] = "data-correct='yes'"
             else:
                 node["runestone_options"]["is_correct"] = ""
             res += node["template_option"].format(**node["runestone_options"])
-
+    if node["runestone_options"]["is_new_style"] == False and hasattr(self, "output"):
+        res += "</choices>\n"
     res += node["template_end"].format(**node["runestone_options"])
     return res
 
@@ -126,7 +127,6 @@ def visit_mc_xml(self, node):
     node["template_start"] = XML_START
     node["template_end"] = XML_END
     node["template_option"] = XML_OPTION
-    pdb.set_trace()
     res = visit_mc_common(self, node)
     self.output.append(res)
 
@@ -134,6 +134,7 @@ def visit_mc_xml(self, node):
 def depart_mc_xml(self, node):
     self.output.append(XML_START_END)
     res = depart_mc_common(self, node)
+    res = res.replace("data-correct", "correct")
     self.output.append(res)
 
 
@@ -290,13 +291,14 @@ class MChoice(Assessment):
         #               ...and so on...
         #
         # See if the last item is a list. If so, and questions/answers weren't specified as options, assume it contains questions and answers.
+        self.options["is_new_style"] = False
         answers_bullet_list = mcNode[-1] if len(mcNode) else None
         if isinstance(answers_bullet_list, nodes.bullet_list) and (
             "answer_a" not in self.options and ("correct" not in self.options)
         ):
             # Accumulate the correct answers.
             correct_answers = []
-
+            self.options["is_new_style"] = True
             # Walk it, processing each answer and its associated feedback.
             for answer_list_item in answers_bullet_list:
                 assert isinstance(answer_list_item, nodes.list_item)
@@ -402,6 +404,15 @@ def depart_answers_bullet_html(self, node):
     self.compact_simple, self.compact_p = self.context.pop()
 
 
+def visit_answers_bullet_xml(self, node):
+    self.output.append("</statement>")
+    self.output.append("<choices>")
+
+
+def depart_answers_bullet_xml(self, node):
+    self.output.append("</choice>")
+
+
 # Write out the special attributes needed by the ``<li>`` tag.
 def visit_answer_list_item(self, node):
     # See the structure_.
@@ -423,9 +434,34 @@ def visit_answer_list_item(self, node):
     )
 
 
+def visit_answer_list_item_xml(self, node):
+    # See the structure_.
+    mc_node = node.parent.parent
+
+    # _`label`: Turn the index of this item in the answer_bullet_list (see structure_) into a letter.
+    label = chr(node.parent.index(node) + ord("a"))
+    # Update dict for formatting the HTML.
+    mc_node["runestone_options"]["alabel"] = label
+    if label in mc_node["runestone_options"]["correct"]:
+        mc_node["runestone_options"]["is_correct"] = "correct"
+        self.output.append("<choice correct='yes'>")
+    else:
+        mc_node["runestone_options"]["is_correct"] = ""
+        self.output.append("<choice>")
+    # Format the HTML.
+    self.output.append(
+        '<statement id="{divid}_opt_{alabel}">'.format(
+            **mc_node["runestone_options"])
+    )
+
+
 # Although the feedback for an answer is given as a sublist, the HTML is just a list. So, let the feedback list item close this list.
 def depart_answer_list_item(self, node):
     pass
+
+
+def depart_answer_list_item_xml(self, node):
+    self.output.append("</choice>")
 
 
 # Nothing to output, since feedback isn't nested under an answer in the HTML.
@@ -450,11 +486,29 @@ def visit_feedback_list_item(self, node):
     )
 
 
+def visit_feedback_list_item_xml(self, node):
+    # See label_ and structure_.
+    answer_list_item = node.parent.parent
+    mc_node = answer_list_item.parent.parent
+    label = chr(answer_list_item.parent.index(answer_list_item) + ord("a"))
+    mc_node["runestone_options"]["alabel"] = label
+    self.output.append("</statement>")
+    self.output.append(
+        '<feedback id="{divid}_opt_{alabel}">\n'.format(
+            **mc_node["runestone_options"])
+    )
+
+
 def depart_feedback_list_item(self, node):
     self.body.append("</li>")
 
 
+def depart_feedback_list_item_xml(self, node):
+    self.output.append("</feedback>")
+
 # backwards compatibility
+
+
 class MChoiceMF(MChoice):
     def run(self):
         raise self.error(

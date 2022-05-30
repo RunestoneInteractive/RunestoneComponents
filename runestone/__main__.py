@@ -324,8 +324,9 @@ def rs2ptx(course, sourcedir, outdir):
     del os.environ["DBURL"]
     try:
         import pavement
-    except:
+    except Exception as e:
         click.echo("Could not read pavement.py file, aborting")
+        click.echo(f"Details: {e}")
         sys.exit(1)
 
     if not course:

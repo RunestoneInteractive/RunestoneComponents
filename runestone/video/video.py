@@ -30,7 +30,8 @@ def setup(app):
     app.add_directive("video", Video)
     app.add_directive("youtube", Youtube)
     app.add_directive("vimeo", Vimeo)
-    app.add_node(VideoNode, html=(visit_video_html, depart_video_html))
+    app.add_node(VideoNode, html=(visit_video_html, depart_video_html),
+                 xml=(visit_video_xml, depart_video_xml))
 
 
 CODE = """\
@@ -84,6 +85,11 @@ INLINE = """\
 SOURCE = """<source src="%s" type="video/%s"></source>"""
 
 
+XML_OUTPUT = """
+    <video xml:id="{divid}" youtube="{video_id}" width="{width}" />
+    """
+
+
 class VideoNode(nodes.General, nodes.Element, RunestoneIdNode):
     pass
 
@@ -94,6 +100,15 @@ def visit_video_html(self, node):
     addHTMLToDB(
         node["runestone_options"]["divid"], node["runestone_options"]["basecourse"], html
     )
+
+
+def visit_video_xml(self, node):
+    xml = XML_OUTPUT.format(**node["runestone_options"])
+    self.output.append(xml)
+
+
+def depart_video_xml(self, node):
+    pass
 
 
 def depart_video_html(self, node):

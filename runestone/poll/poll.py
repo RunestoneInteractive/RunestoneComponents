@@ -16,17 +16,20 @@
 
 __author__ = "isaiahmayerchak"
 
+from asyncore import write
 from docutils import nodes
 from docutils.parsers.rst import directives
 from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneIdNode
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
+from runestone.common.xmlcommon import write_substitute, substitute_departure
 
 
 def setup(app):
     app.add_directive("poll", Poll)
-    app.add_node(PollNode, html=(visit_poll_html, depart_poll_html))
+    app.add_node(PollNode, html=(visit_poll_html, depart_poll_html),
+                 xml=(visit_poll_xml, substitute_departure))
 
-    app.add_config_value("poll_div_class", "alert alert-warning", "html")
+    app.add_config_value("poll_div_class", "", "html")
 
 
 TEMPLATE_START = """
@@ -55,6 +58,11 @@ def visit_poll_html(self, node):
         node["runestone_options"]["divid"], node["runestone_options"]["basecourse"], res
     )
     self.body.append(res)
+
+
+def visit_poll_xml(self, node):
+    html = visit_poll_common(self, node)
+    write_substitute(self, node, html)
 
 
 def depart_poll_html(self, node):
