@@ -208,8 +208,11 @@ async function handlePageSetup() {
     } else {
         mess = "Not logged in";
         $(document).trigger("runestone:logout");
-        document.getElementById("browsing_warning").innerHTML =
-            "<p class='navbar_message'>Saving and Logging are Disabled</p>";
+        let bw = document.getElementById("browsing_warning");
+        if (bw) {
+            bw.innerHTML =
+                "<p class='navbar_message'>Saving and Logging are Disabled</p>";
+        }
     }
     $(".loggedinuser").html(mess);
 
