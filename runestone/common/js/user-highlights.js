@@ -4,7 +4,6 @@
 
 import "../css/user-highlights.css";
 
-
 function getCompletions() {
     // Get the completion status
     if (
@@ -43,10 +42,10 @@ function getCompletions() {
                 }
                 $("#main-content").append(
                     '<div style="text-align:center"><button class="btn btn-lg ' +
-                    completionClass +
-                    '" id="completionButton">' +
-                    completionMsg +
-                    "</button></div>"
+                        completionClass +
+                        '" id="completionButton">' +
+                        completionMsg +
+                        "</button></div>"
                 );
             }
         });
@@ -57,8 +56,8 @@ function showLastPositionBanner() {
     if (typeof lastPositionVal !== "undefined") {
         $("body").append(
             '<img src="../_static/last-point.png" style="position:absolute; padding-top:55px; left: 10px; top: ' +
-            parseInt(lastPositionVal) +
-            'px;"/>'
+                parseInt(lastPositionVal) +
+                'px;"/>'
         );
         $("html, body").animate({ scrollTop: parseInt(lastPositionVal) }, 1000);
     }
@@ -168,95 +167,100 @@ function decorateTableOfContents() {
         window.location.href.toLowerCase().indexOf("toc.html") != -1 ||
         window.location.href.toLowerCase().indexOf("index.html") != -1
     ) {
-        jQuery.get(`${eBookConfig.new_server_prefix}/logger/getAllCompletionStatus`, function (
-            data
-        ) {
-            var subChapterList;
-            if (data != "None") {
-                subChapterList = data.detail;
+        jQuery.get(
+            `${eBookConfig.new_server_prefix}/logger/getAllCompletionStatus`,
+            function (data) {
+                var subChapterList;
+                if (data != "None") {
+                    subChapterList = data.detail;
 
-                var allSubChapterURLs = $("#main-content div li a");
-                $.each(subChapterList, function (index, item) {
-                    for (var s = 0; s < allSubChapterURLs.length; s++) {
-                        if (
-                            allSubChapterURLs[s].href.indexOf(
-                                item.chapterName + "/" + item.subChapterName
-                            ) != -1
-                        ) {
-                            if (item.completionStatus == 1) {
-                                $(allSubChapterURLs[s].parentElement)
-                                    .addClass("completed")
-                                    .append(
-                                        '<span class="infoTextCompleted">- Completed this topic on ' +
-                                        item.endDate +
-                                        "</span>"
-                                    )
-                                    .children()
-                                    .first()
-                                    .hover(
-                                        function () {
-                                            $(this)
-                                                .next(".infoTextCompleted")
-                                                .show();
-                                        },
-                                        function () {
-                                            $(this)
-                                                .next(".infoTextCompleted")
-                                                .hide();
-                                        }
-                                    );
-                            } else if (item.completionStatus == 0) {
-                                $(allSubChapterURLs[s].parentElement)
-                                    .addClass("active")
-                                    .append(
-                                        '<span class="infoTextActive">Last read this topic on ' +
-                                        item.endDate +
-                                        "</span>"
-                                    )
-                                    .children()
-                                    .first()
-                                    .hover(
-                                        function () {
-                                            $(this)
-                                                .next(".infoTextActive")
-                                                .show();
-                                        },
-                                        function () {
-                                            $(this)
-                                                .next(".infoTextActive")
-                                                .hide();
-                                        }
-                                    );
+                    var allSubChapterURLs = $("#main-content div li a");
+                    $.each(subChapterList, function (index, item) {
+                        for (var s = 0; s < allSubChapterURLs.length; s++) {
+                            if (
+                                allSubChapterURLs[s].href.indexOf(
+                                    item.chapterName + "/" + item.subChapterName
+                                ) != -1
+                            ) {
+                                if (item.completionStatus == 1) {
+                                    $(allSubChapterURLs[s].parentElement)
+                                        .addClass("completed")
+                                        .append(
+                                            '<span class="infoTextCompleted">- Completed this topic on ' +
+                                                item.endDate +
+                                                "</span>"
+                                        )
+                                        .children()
+                                        .first()
+                                        .hover(
+                                            function () {
+                                                $(this)
+                                                    .next(".infoTextCompleted")
+                                                    .show();
+                                            },
+                                            function () {
+                                                $(this)
+                                                    .next(".infoTextCompleted")
+                                                    .hide();
+                                            }
+                                        );
+                                } else if (item.completionStatus == 0) {
+                                    $(allSubChapterURLs[s].parentElement)
+                                        .addClass("active")
+                                        .append(
+                                            '<span class="infoTextActive">Last read this topic on ' +
+                                                item.endDate +
+                                                "</span>"
+                                        )
+                                        .children()
+                                        .first()
+                                        .hover(
+                                            function () {
+                                                $(this)
+                                                    .next(".infoTextActive")
+                                                    .show();
+                                            },
+                                            function () {
+                                                $(this)
+                                                    .next(".infoTextActive")
+                                                    .hide();
+                                            }
+                                        );
+                                }
                             }
                         }
-                    }
-                });
-            }
-        });
-        var data = { course: eBookConfig.course };
-        jQuery.get(`${eBookConfig.new_server_prefix}/logger/getlastpage`, data, function (data) {
-            var lastPageData;
-            if (data != "None") {
-                lastPageData = data.detail;
-                if (lastPageData.lastPageChapter != null) {
-                    $("#continue-reading")
-                        .show()
-                        .html(
-                            '<div id="jump-to-chapter" class="alert alert-info" ><strong>You were Last Reading:</strong> ' +
-                            lastPageData.lastPageChapter +
-                            (lastPageData.lastPageSubchapter
-                                ? " &gt; " +
-                                lastPageData.lastPageSubchapter
-                                : "") +
-                            ' <a href="' +
-                            lastPageData.lastPageUrl +
-                            "?lastPosition=" +
-                            lastPageData.lastPageScrollLocation +
-                            '">Continue Reading</a></div>'
-                        );
+                    });
                 }
             }
-        });
+        );
+        var data = { course: eBookConfig.course };
+        jQuery.get(
+            `${eBookConfig.new_server_prefix}/logger/getlastpage`,
+            data,
+            function (data) {
+                var lastPageData;
+                if (data != "None") {
+                    lastPageData = data.detail;
+                    if (lastPageData.lastPageChapter != null) {
+                        $("#continue-reading")
+                            .show()
+                            .html(
+                                '<div id="jump-to-chapter" class="alert alert-info" ><strong>You were Last Reading:</strong> ' +
+                                    lastPageData.lastPageChapter +
+                                    (lastPageData.lastPageSubchapter
+                                        ? " &gt; " +
+                                          lastPageData.lastPageSubchapter
+                                        : "") +
+                                    ' <a href="' +
+                                    lastPageData.lastPageUrl +
+                                    "?lastPosition=" +
+                                    lastPageData.lastPageScrollLocation +
+                                    '">Continue Reading</a></div>'
+                            );
+                    }
+                }
+            }
+        );
     }
 }
 
@@ -268,7 +272,7 @@ function enableCompletions() {
 }
 
 // call enable user highlights after login
-$(document).bind("runestone:login", enableCompletions);
+$(document).on("runestone:login", enableCompletions);
 
 // _ processPageState
 // -------------------------

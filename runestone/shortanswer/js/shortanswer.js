@@ -127,7 +127,7 @@ export default class ShortAnswer extends RunestoneBase {
         // before MathJax is loaded.  In that case we will need to implement something
         // like `the solution described here <https://stackoverflow.com/questions/3014018/how-to-detect-when-mathjax-is-fully-loaded>`_
         if (typeof MathJax !== "undefined") {
-            this.queueMathJax(this.containerDiv)
+            this.queueMathJax(this.containerDiv);
         }
     }
 
@@ -136,11 +136,11 @@ export default class ShortAnswer extends RunestoneBase {
             value = value.replace(/\$\$(.*?)\$\$/g, "\\[ $1 \\]");
             value = value.replace(/\$(.*?)\$/g, "\\( $1 \\)");
             $(this.renderedAnswer).text(value);
-            this.queueMathJax(this.renderedAnswer)
+            this.queueMathJax(this.renderedAnswer);
         }
     }
 
-    checkCurrentAnswer() { }
+    checkCurrentAnswer() {}
 
     async logCurrentAnswer(sid) {
         let value = $(document.getElementById(this.divid + "_solution")).val();
@@ -277,7 +277,7 @@ export default class ShortAnswer extends RunestoneBase {
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
 =================================*/
-$(document).bind("runestone:login-complete", function () {
+$(document).on("runestone:login-complete", function () {
     $("[data-component=shortanswer]").each(function () {
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here

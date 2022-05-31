@@ -162,7 +162,7 @@ export default class ACFactory {
 // Page Initialization
 //
 
-$(document).bind("runestone:login-complete", function () {
+$(document).on("runestone:login-complete", function () {
     ACFactory.createScratchActivecode();
     $("[data-component=activecode]").each(function () {
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
@@ -202,10 +202,10 @@ window.ACFactory = ACFactory;
 // figure out the login/logout status of the user.  Sometimes its immediate, and sometimes its
 // long.  So to be safe we'll do it both ways..
 var loggedout;
-$(document).bind("runestone:logout", function () {
+$(document).on("runestone:logout", function () {
     loggedout = true;
 });
-$(document).bind("runestone:logout", function () {
+$(document).on("runestone:logout", function () {
     for (let k in window.edList) {
         if (window.edList.hasOwnProperty(k)) {
             window.edList[k].disableSaveLoad();

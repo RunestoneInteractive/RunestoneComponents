@@ -158,7 +158,7 @@ export default class Poll extends RunestoneBase {
         //displays the results returned by the server
         results = results.detail;
         var total = results["total"];
-        var optCounts = results["opt_counts"]
+        var optCounts = results["opt_counts"];
         var div_id = results["div_id"];
         var my_vote = results["my_vote"];
         // restore current users vote
@@ -180,7 +180,7 @@ export default class Poll extends RunestoneBase {
                 var count;
                 var percent;
                 if (optCounts[i] > 0) {
-                    count = optCounts[i]
+                    count = optCounts[i];
                     percent = (count / total) * 100;
                 } else {
                     count = 0;
@@ -214,7 +214,7 @@ export default class Poll extends RunestoneBase {
         }
         this.indicate_component_ready();
     }
-    disableOptions() { }
+    disableOptions() {}
     checkPollStorage() {
         //checks the localstorage to see if the poll has been completed already
         var _this = this;
@@ -224,11 +224,13 @@ export default class Poll extends RunestoneBase {
             var data = {};
             data.div_id = this.divid;
             data.course = eBookConfig.course;
-            jQuery.get(
-                `${eBookConfig.new_server_prefix}/assessment/getpollresults`,
-                data,
-                this.showPollResults.bind(this)
-            ).fail(this.indicate_component_ready.bind(this));
+            jQuery
+                .get(
+                    `${eBookConfig.new_server_prefix}/assessment/getpollresults`,
+                    data,
+                    this.showPollResults.bind(this)
+                )
+                .fail(this.indicate_component_ready.bind(this));
         } else {
             this.indicate_component_ready();
         }
@@ -236,7 +238,7 @@ export default class Poll extends RunestoneBase {
 }
 
 // Do not render poll data until login-complete event so we know instructor status
-$(document).bind("runestone:login-complete", function () {
+$(document).on("runestone:login-complete", function () {
     $("[data-component=poll]").each(function (index) {
         try {
             pollList[this.id] = new Poll({ orig: this });

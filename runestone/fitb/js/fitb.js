@@ -407,7 +407,7 @@ export default class FITB extends RunestoneBase {
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
 =================================*/
-$(document).bind("runestone:login-complete", function () {
+$(document).on("runestone:login-complete", function () {
     $("[data-component=fillintheblank]").each(function (index) {
         var opts = {
             orig: this,

@@ -95,7 +95,7 @@ const module_map = {
 // ========================
 // Fulfill a promise when the Runestone pre-login complete event occurs.
 let pre_login_complete_promise = new Promise((resolve) =>
-    $(document).bind("runestone:pre-login-complete", resolve)
+    $(document).on("runestone:pre-login-complete", resolve)
 );
 let loadedComponents;
 // Provide a simple function to import the JS for all components on the page.

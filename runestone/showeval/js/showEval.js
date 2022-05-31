@@ -206,7 +206,7 @@ export class ShowEval extends RunestoneBase {
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
 =================================*/
-$(document).bind("runestone:login-complete", function () {
+$(document).on("runestone:login-complete", function () {
     $("[data-component=showeval]").each(function (index) {
         // MC
         var opts = {

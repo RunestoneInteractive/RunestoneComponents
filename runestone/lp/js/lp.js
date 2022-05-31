@@ -50,7 +50,9 @@ class LP extends RunestoneBase {
         // Store the DOM element (the textarea) where compile results will be displayed.
         this.resultElement = $(this.element).siblings(".lp-result");
         // Store the DOM element (a div) where feedback will be displayed.
-        this.feedbackElement = $(this.element).siblings(".lp-feedback").children("div");
+        this.feedbackElement = $(this.element)
+            .siblings(".lp-feedback")
+            .children("div");
         // Use a nice editor.
         let that = this;
         this.textAreas = [];
@@ -74,7 +76,9 @@ class LP extends RunestoneBase {
             that.textAreas.push(editor);
         });
         // Handle clicks to the "Save and run" button.
-        $(this.element).click((eventObject) => that.onSaveAndRun(eventObject).then(null));
+        $(this.element).click((eventObject) =>
+            that.onSaveAndRun(eventObject).then(null)
+        );
         this.checkServer("lp_build", true);
     }
 
@@ -133,7 +137,7 @@ class LP extends RunestoneBase {
         // Store the answer as a string, since this is what goes in to / comes out from the database. We have to translate this back to a data structure when restoring from the db or local storage.
         let code_snippets = this.textareasToData();
         this.setLocalStorage({
-            answer: JSON.stringify({code_snippets: code_snippets}),
+            answer: JSON.stringify({ code_snippets: code_snippets }),
             timestamp: new Date(),
         });
         // Store the answer that the server returns, which includes additional data (correct/incorrect, feedback from the build, etc.).
@@ -252,7 +256,7 @@ class LP extends RunestoneBase {
 // Initialization
 // ==============
 // Find the custom HTML tags and execute our code on them.
-$(document).bind("runestone:login-complete", function () {
+$(document).on("runestone:login-complete", function () {
     $("[data-component=lp_build]").each(function (index) {
         try {
             window.LPList[this.id] = new LP({

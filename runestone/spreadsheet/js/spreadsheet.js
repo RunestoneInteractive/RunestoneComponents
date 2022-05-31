@@ -193,7 +193,7 @@ class SpreadSheet extends RunestoneBase {
     }
 }
 
-$(document).bind("runestone:login-complete", function () {
+$(document).on("runestone:login-complete", function () {
     $("[data-component=spreadsheet]").each(function (index) {
         // MC
         var opts = {

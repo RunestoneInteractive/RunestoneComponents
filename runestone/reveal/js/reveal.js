@@ -216,7 +216,7 @@ class Reveal extends RunestoneBase {
 ==     execute our code on them        ==
 =================================*/
 
-$(document).bind("runestone:login-complete", function () {
+$(document).on("runestone:login-complete", function () {
     $("[data-component=reveal]").each(function (index) {
         try {
             RevealList[this.id] = new Reveal({ orig: this });

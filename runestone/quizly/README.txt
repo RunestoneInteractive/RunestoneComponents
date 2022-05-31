@@ -83,7 +83,7 @@ quizly.js contains the following methods and functions:
     -- submitQuizly() -- the method invoked from the callback function when the user
        clicks "Check Me" button in the quizly exercise.
 
-$(document).bind( ,,, function() {}) -- function that sets up the callback function
+$(document).on( ,,, function() {}) -- function that sets up the callback function
     and binds it to the html document.
 
 setupCallback(quizly)  -- defines the callback function that is invoked when the "Check Me"

@@ -5,11 +5,9 @@ import "../css/hljs-xcode.css";
 import BlockFeedback from "./BlockFeedback.js";
 import SQLFeedback from "./SQLFeedback.js";
 
-
 export var hpList;
 // Dictionary that contains all instances of horizontal Parsons problem objects
-if (hpList === undefined) hpList = {}; 
-
+if (hpList === undefined) hpList = {};
 
 import "./horizontal-parsons.js";
 
@@ -20,12 +18,12 @@ export default class SQLHParons extends RunestoneBase {
         var suffStart;
         // getting settings
         var orig = $(opts.orig).find("textarea")[0];
-        this.reuse = $(orig).data('reuse') ? true : false;
-        this.randomize = $(orig).data('randomize') ? true : false;
-        this.isBlockGrading = $(orig).data('blockanswer') ? true : false;
-        this.language = $(orig).data('language');
+        this.reuse = $(orig).data("reuse") ? true : false;
+        this.randomize = $(orig).data("randomize") ? true : false;
+        this.isBlockGrading = $(orig).data("blockanswer") ? true : false;
+        this.language = $(orig).data("language");
         if (this.isBlockGrading) {
-            this.blockAnswer = $(orig).data('blockanswer').split(' ');
+            this.blockAnswer = $(orig).data("blockanswer").split(" ");
         }
         this.divid = opts.orig.id;
         this.containerDiv = opts.orig;
@@ -75,12 +73,11 @@ export default class SQLHParons extends RunestoneBase {
         this.feedbackController.init();
     }
 
-
     // copied from activecode, already modified to add parsons
     createEditor() {
         this.outerDiv = document.createElement("div");
         $(this.origElem).replaceWith(this.outerDiv);
-        let parsonsHTML = `<horizontal-parsons id='${this.divid}-hparsons'`
+        let parsonsHTML = `<horizontal-parsons id='${this.divid}-hparsons'`;
         parsonsHTML += ` input-type='parsons' `;
         if (this.reuse) {
             parsonsHTML += ` reuse-blocks="true"`;
@@ -91,23 +88,26 @@ export default class SQLHParons extends RunestoneBase {
         if (this.language) {
             parsonsHTML += ` language="` + this.language + `"`;
         }
-        parsonsHTML += `>`
+        parsonsHTML += `>`;
         this.outerDiv.innerHTML = parsonsHTML;
-        this.outerDiv.addEventListener('horizontal-parsons', (ev) => {
-            this.logHorizontalParsonsEvent(ev.detail)
+        this.outerDiv.addEventListener("horizontal-parsons", (ev) => {
+            this.logHorizontalParsonsEvent(ev.detail);
             this.feedbackController.clearFeedback();
-        })
+        });
         let blocks = [];
-        let blockIndex = this.code.indexOf('--blocks--');
+        let blockIndex = this.code.indexOf("--blocks--");
         if (blockIndex > -1) {
             let blocksString = this.code.substring(blockIndex + 10);
-            let endIndex = blocksString.indexOf('\n--');
-            blocksString = endIndex > -1 ? blocksString.substring(0, endIndex) : blocksString;
-            blocks = blocksString.split('\n');
+            let endIndex = blocksString.indexOf("\n--");
+            blocksString =
+                endIndex > -1
+                    ? blocksString.substring(0, endIndex)
+                    : blocksString;
+            blocks = blocksString.split("\n");
         }
         this.hparsonsInput = $(this.outerDiv).find("horizontal-parsons")[0];
-        this.originalBlocks = blocks.slice(1,-1);
-        this.hparsonsInput.parsonsData = blocks.slice(1,-1);
+        this.originalBlocks = blocks.slice(1, -1);
+        this.hparsonsInput.parsonsData = blocks.slice(1, -1);
     }
 
     createOutput() {
@@ -128,7 +128,7 @@ export default class SQLHParons extends RunestoneBase {
         $(this.runButton).text("Run");
         this.runButton.onclick = () => {
             this.feedbackController.runButtonHandler();
-        }
+        };
 
         // Reset button
         var resetBtn;
@@ -140,7 +140,7 @@ export default class SQLHParons extends RunestoneBase {
         this.resetButton.onclick = () => {
             this.hparsonsInput.resetInput();
             this.feedbackController.reset();
-        }
+        };
         $(resetBtn).attr("type", "button");
 
         $(this.outerDiv).prepend(ctrlDiv);
@@ -148,7 +148,7 @@ export default class SQLHParons extends RunestoneBase {
     }
 
     logHorizontalParsonsEvent(hparsonsEvent) {
-        // TODO: might need to find another way to change "act". 
+        // TODO: might need to find another way to change "act".
         // The event string is probably too long.
         let ev = {
             event: "hparsons",
@@ -159,20 +159,19 @@ export default class SQLHParons extends RunestoneBase {
     }
 }
 
-
 /*=================================
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
 =================================*/
-$(document).bind("runestone:login-complete", function () {
+$(document).on("runestone:login-complete", function () {
     $("[data-component=hparsons]").each(function () {
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
             // try {
-                hpList[this.id] = new SQLHParons({
-                    orig: this,
-                    useRunestoneServices: eBookConfig.useRunestoneServices,
-                });
+            hpList[this.id] = new SQLHParons({
+                orig: this,
+                useRunestoneServices: eBookConfig.useRunestoneServices,
+            });
             // } catch (err) {
             //     console.log(`Error rendering ShortAnswer Problem ${this.id}
             //     Details: ${err}`);

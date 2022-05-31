@@ -512,7 +512,7 @@ window.component_factory.selectquestion = function (opts) {
  * When the page is loaded and the login checks are complete find and render
  * each selectquestion component that is not part of a timedAssessment.
  **/
-$(document).bind("runestone:login-complete", async function () {
+$(document).on("runestone:login-complete", async function () {
     let selQuestions = document.querySelectorAll(
         "[data-component=selectquestion]"
     );

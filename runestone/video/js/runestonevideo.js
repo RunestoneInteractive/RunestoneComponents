@@ -74,7 +74,7 @@ $(function () {
     document.body.appendChild(script);
 });
 
-$(document).bind("runestone:login-complete", function () {
+$(document).on("runestone:login-complete", function () {
     $("[data-component=youtube]").each(function (index) {
         // MC
         var opts = {

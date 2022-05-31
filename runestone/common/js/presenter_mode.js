@@ -211,7 +211,7 @@ function configureCodelens() {
     }
 }
 
-$(document).bind("runestone:login-complete", function () {
+$(document).on("runestone:login-complete", function () {
     // if user is instructor, enable presenter mode
     if (eBookConfig.isInstructor) {
         configure();

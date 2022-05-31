@@ -1277,7 +1277,7 @@ export default class Timed extends RunestoneBase {
 /*=======================================================
 === Function that calls the constructors on page load ===
 =======================================================*/
-$(document).bind("runestone:login-complete", function () {
+$(document).on("runestone:login-complete", function () {
     $("[data-component=timedAssessment]").each(function (index) {
         TimedList[this.id] = new Timed({
             orig: this,

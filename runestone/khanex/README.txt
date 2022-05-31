@@ -68,7 +68,7 @@ khanex.js contains the following methods and functions:
     -- submitKhanex() -- the method invoked from the callback function when the user
        clicks "Check Me" button in the khanex exercise.
 
-$(document).bind( ,,, function() {}) -- function that sets up the callback function
+$(document).on( ,,, function() {}) -- function that sets up the callback function
     and binds it to the html document.
 
 setupCallback(khanex)  -- defines the callback function that is invoked when the "Check Me"
