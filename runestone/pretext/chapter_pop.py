@@ -10,6 +10,7 @@ from sqlalchemy.sql import text
 from sphinx.util import logging
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 QT_MAP = {
     "multiplechoice": "mchoice",
@@ -35,8 +36,8 @@ def manifest_data_to_db(course_name, manifest_path):
         elif os.environ["WEB2PY_CONFIG"] == "production":
             DBURL = os.environ["DBURL"]
     except KeyError:
-        print("PreTeXt integration requires a valid WEB2PY Environment")
-        print("make sure WEB2PY_CONFIG and DBURLs are set up")
+        logger.error("PreTeXt integration requires a valid WEB2PY Environment")
+        logger.error("make sure WEB2PY_CONFIG and DBURLs are set up")
         exit(-1)
 
     engine = create_engine(DBURL)
@@ -63,9 +64,10 @@ def manifest_data_to_db(course_name, manifest_path):
     root = tree.getroot()
     chap = 0
     for chapter in root.findall("./chapter"):
-        print(chapter)
+        logger.info(chapter)
         chap += 1
-        print(chapter.tag, chapter.find("./id").text, chapter.find("./title").text)
+        logger.debug(chapter.tag, chapter.find(
+            "./id").text, chapter.find("./title").text)
         ins = chapters.insert().values(
             chapter_name=chapter.find("./title").text,
             course_id=course_name,
@@ -82,7 +84,7 @@ def manifest_data_to_db(course_name, manifest_path):
         #  sub_chapter_num    | integer
         for subchapter in chapter.findall("./subchapter"):
             subchap += 1
-            print(subchapter.find("./id").text, subchapter.find("./title").text)
+            logger.debug(subchapter.find("./id").text, subchapter.find("./title").text)
             ins = subchapters.insert().values(
                 sub_chapter_name=subchapter.find("./title").text,
                 chapter_id=chapid,
@@ -129,9 +131,15 @@ def manifest_data_to_db(course_name, manifest_path):
 
             for question in subchapter.findall("./question"):
                 dbtext = " ".join(
-                    [ET.tostring(y).decode("utf8") for y in question.findall("*")]
+                    [ET.tostring(y).decode("utf8")
+                     for y in question.findall("./htmlsrc/*")]
                 )
-                print("looking for data-component")
+                qlabel = " ".join(
+                    [y.text
+                     for y in question.findall("./label")]
+                )
+                logger.debug(f"found label= {qlabel}")
+                logger.debug("looking for data-component")
                 # pdb.set_trace()
                 el = question.find(".//*[@data-component]")
                 # Unbelievably if find finds something it evals to False!!
@@ -155,6 +163,7 @@ def manifest_data_to_db(course_name, manifest_path):
                     from_source="T",
                     subchapter=subchapter.find("./id").text,
                     chapter=chapter.find("./id").text,
+                    qnumber=qlabel,
                 )
                 res = sess.execute(
                     f"""select * from questions where name='{idchild}' and base_course='{course_name}'"""
