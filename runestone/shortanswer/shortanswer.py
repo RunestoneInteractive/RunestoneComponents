@@ -49,7 +49,7 @@ TEXT_END = """
 """
 
 XML_START = """
-<exercise xml:id="{divid}"  {optional}>
+<exercise label="{divid}"  {optional}>
     <statement>
 """
 

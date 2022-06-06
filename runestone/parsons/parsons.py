@@ -85,7 +85,7 @@ def visit_parsons_xml(self, node):
     else:
         node["runestone_options"]["language"] = "language='python'"
 
-    res = "<exercise xml:id='{divid}' {numbered} {adaptive} {noindent} {language}>".format(
+    res = "<exercise label='{divid}' {numbered} {adaptive} {noindent} {language}>".format(
         **node["runestone_options"])
     res += "<statement>\n"
     self.output.append(res)

@@ -61,7 +61,7 @@ def setup(app):
 
 
 XML_EX_START = """
-<exercise xml:id="{divid}">
+<exercise label="{divid}">
     <statement>
 """
 

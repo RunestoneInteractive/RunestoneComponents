@@ -36,7 +36,7 @@ class MChoiceNode(nodes.General, nodes.Element, RunestoneIdNode):
 
 
 XML_START = """
-    <exercise xml:id="{divid}">
+    <exercise label="{divid}">
         <statement>
 
 """

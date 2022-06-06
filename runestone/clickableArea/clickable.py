@@ -47,7 +47,7 @@ TEMPLATE_END = """
 """
 
 XML_START = """
-<exercise xml:id="{divid}">
+<exercise label="{divid}">
     <statement><p>{question}</p></statement>
 """
 

@@ -10,7 +10,7 @@ from sqlalchemy.sql import text
 from sphinx.util import logging
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+#logger.setLevel(logging.INFO)
 
 QT_MAP = {
     "multiplechoice": "mchoice",
@@ -85,8 +85,14 @@ def manifest_data_to_db(course_name, manifest_path):
         for subchapter in chapter.findall("./subchapter"):
             subchap += 1
             logger.debug(subchapter.find("./id").text, subchapter.find("./title").text)
+            titletext = subchapter.find("./title").text
+            if not titletext:
+                titletext = " ".join(
+                    [ET.tostring(y).decode("utf8")
+                     for y in subchapter.findall("./title/*")]
+                )
             ins = subchapters.insert().values(
-                sub_chapter_name=subchapter.find("./title").text,
+                sub_chapter_name=titletext,
                 chapter_id=chapid,
                 sub_chapter_label=subchapter.find("./id").text,
                 skipreading="F",
