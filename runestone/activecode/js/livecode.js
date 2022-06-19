@@ -29,7 +29,7 @@ export default class LiveCode extends ActiveCode {
         }
         this.createErrorOutput();
     }
-    outputfun(a) { }
+    outputfun(a) {}
     createInputElement() {
         var label = document.createElement("label");
         label.for = this.divid + "_stdin";
@@ -43,7 +43,7 @@ export default class LiveCode extends ActiveCode {
         this.outerDiv.appendChild(input);
         this.stdin_el = input;
     }
-    createErrorOutput() { }
+    createErrorOutput() {}
 
     /*  Main runProg method for livecode
      *
@@ -205,9 +205,9 @@ export default class LiveCode extends ActiveCode {
             public static void main(String[] args) {
                 CodeTestHelper.resetFinalResults();
                 Result result = JUnitCore.runClasses(${testdrivername.replace(
-            ".java",
-            ".class"
-        )});
+                    ".java",
+                    ".class"
+                )});
                 System.out.println(CodeTestHelper.getFinalResults());
 
                 int total = result.getRunCount();
@@ -315,7 +315,10 @@ export default class LiveCode extends ActiveCode {
                 $(odiv).html(this.parsedOutput.stdout);
                 if (this.suffix) {
                     if (this.parsedOutput.pct === undefined) {
-                        this.parsedOutput.pct = this.parsedOutput.passed = this.parsedOutput.failed = 0;
+                        this.parsedOutput.pct =
+                            this.parsedOutput.passed =
+                            this.parsedOutput.failed =
+                                0;
                     }
                     this.unit_results = `percent:${this.parsedOutput.pct}:passed:${this.parsedOutput.passed}:failed:${this.parsedOutput.failed}`;
                 }
