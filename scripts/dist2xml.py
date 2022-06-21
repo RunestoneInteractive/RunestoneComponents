@@ -2,6 +2,7 @@ import json
 from json2xml import json2xml
 from json2xml.utils import readfromstring
 import sys
+import tarfile
 import os
 import pdb
 
@@ -37,3 +38,8 @@ data["version"] = sys.argv[1]
 
 with open(os.path.join(data_path, "webpack_static_imports.xml"), "w") as f:
     f.write(json2xml.Json2xml(data).to_xml())
+
+with tarfile.open(f"dist-{sys.argv[1]}.tgz", "w:gz") as tar:
+    for fn in os.listdir(data_path):
+        p = os.path.join(data_path, fn)
+        tar.add(p, arcname=fn)
