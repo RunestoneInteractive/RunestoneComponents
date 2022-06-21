@@ -123,10 +123,11 @@ export function createTimedComponent(componentSrc, moreOpts) {
 // For integration with the React overhault of Pretext
 // 1. Disable the automatic instantiation at the end of each component.js
 // 2. react will search for all ".runestone" and will call this function for each of them.
-export function renderOneComponent(rsDiv) {
+export async function renderOneComponent(rsDiv) {
     // Find the actual component inside the runestone component.
     let component = rsDiv.querySelector("[data-component]");
     let componentKind = component.dataset.component;
+    await runestone_import(componentKind);
     if ($(this).closest("[data-component=timedAssessment]").length == 0) {
         // If this element exists within a timed component, don't render it here
         try {
