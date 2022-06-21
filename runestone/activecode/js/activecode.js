@@ -46,7 +46,7 @@ document.onmousedown = function () {
 document.onmouseup = function () {
     isMouseDown = false;
 };
-window.edList = {};
+window.componentMap = {};
 
 var socket, connection, doc;
 var chatcodesServer = "chat.codes";
@@ -1115,8 +1115,8 @@ Yet another is that there is an internal error.  The internal error message is: 
     }
 
     async getIncludedCode(divid) {
-        if (window.edList[divid]) {
-            return window.edList[divid].editor.getValue();
+        if (window.componentMap[divid]) {
+            return window.componentMap[divid].editor.getValue();
         } else {
             let request = new Request(
                 `/runestone/ajax/get_datafile?course_id=${eBookConfig.course}&acid=${divid}`,

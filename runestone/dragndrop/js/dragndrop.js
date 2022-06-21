@@ -18,8 +18,6 @@ import "./dragndrop-i18n.en.js";
 import "./dragndrop-i18n.pt-br.js";
 import "./DragDropTouch.js";
 
-export var ddList = {}; // Dictionary that contains all instances of dragndrop objects
-
 export default class DragNDrop extends RunestoneBase {
     constructor(opts) {
         super(opts);
@@ -566,7 +564,7 @@ $(document).on("runestone:login-complete", function () {
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
             try {
-                ddList[this.id] = new DragNDrop(opts);
+                window.componentMap[this.id] = new DragNDrop(opts);
             } catch (err) {
                 console.log(`Error rendering DragNDrop Problem ${this.id}`);
             }

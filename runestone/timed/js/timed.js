@@ -21,8 +21,6 @@ import TimedParsons from "../../parsons/js/timedparsons.js";
 import SelectOne from "../../selectquestion/js/selectone";
 import "../css/timed.css";
 
-export var TimedList = {}; // Timed dictionary
-
 // Timed constructor
 export default class Timed extends RunestoneBase {
     constructor(opts) {
@@ -1287,7 +1285,7 @@ export default class Timed extends RunestoneBase {
 =======================================================*/
 $(document).on("runestone:login-complete", function () {
     $("[data-component=timedAssessment]").each(function (index) {
-        TimedList[this.id] = new Timed({
+        window.componentMap[this.id] = new Timed({
             orig: this,
             useRunestoneServices: eBookConfig.useRunestoneServices,
         });

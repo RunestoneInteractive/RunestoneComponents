@@ -20,8 +20,6 @@ import RunestoneBase from "../../common/js/runestonebase.js";
 
 var DEBUG = false;
 
-export var quizlyList = {};
-
 export default class Quizly extends RunestoneBase {
     constructor(opts) {
         super(opts);
@@ -110,7 +108,7 @@ $(document).on("runestone:login-complete", function () {
     $("[data-component=quizly").each(function (index) {
         try {
             var quizly = new Quizly({ orig: this });
-            quizlyList[this.id] = quizly;
+            window.componentMap[this.id] = quizly;
             if (DEBUG)
                 console.log("DEBUG: Quizly rendering, this.id = " + this.id);
             setupCallback(quizly, quizly.quizname);
