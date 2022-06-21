@@ -6,7 +6,6 @@ __date__ = 6/12/2015  */
 import RunestoneBase from "../../common/js/runestonebase";
 import "../css/poll.css";
 
-export var pollList = {};
 
 export default class Poll extends RunestoneBase {
     constructor(opts) {
@@ -241,7 +240,7 @@ export default class Poll extends RunestoneBase {
 $(document).on("runestone:login-complete", function () {
     $("[data-component=poll]").each(function (index) {
         try {
-            pollList[this.id] = new Poll({ orig: this });
+            window.componentMap[this.id] = new Poll({ orig: this });
         } catch (err) {
             console.log(`Error rendering Poll Problem ${this.id}
                          Details: ${err}`);

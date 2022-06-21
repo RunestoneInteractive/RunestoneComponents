@@ -1,13 +1,19 @@
 import { runestone_import } from "../../../webpack.index.js";
 
-export async function renderRunestoneComponent(componentSrc, whereDiv, moreOpts) {
+export async function renderRunestoneComponent(
+    componentSrc,
+    whereDiv,
+    moreOpts
+) {
     /**
      *  The easy part is adding the componentSrc to the existing div.
      *  The tedious part is calling the right functions to turn the
      *  source into the actual component.
      */
     if (!componentSrc) {
-        jQuery(`#${whereDiv}`).html(`<p>Sorry, no source is available for preview.</p>`);
+        jQuery(`#${whereDiv}`).html(
+            `<p>Sorry, no source is available for preview.</p>`
+        );
         return;
     }
     let patt = /..\/_images/g;
@@ -17,8 +23,8 @@ export async function renderRunestoneComponent(componentSrc, whereDiv, moreOpts)
     );
     jQuery(`#${whereDiv}`).html(componentSrc);
 
-    if (typeof window.edList === "undefined") {
-        window.edList = {};
+    if (typeof window.componentMap === "undefined") {
+        window.componentMap = {};
     }
 
     let componentKind = $($(`#${whereDiv} [data-component]`)[0]).data(
@@ -41,9 +47,7 @@ export async function renderRunestoneComponent(componentSrc, whereDiv, moreOpts)
     }
 
     if (typeof component_factory === "undefined") {
-        alert(
-            "Error:  Missing the component factory!"
-        );
+        alert("Error:  Missing the component factory!");
     } else {
         if (
             !window.component_factory[componentKind] &&
@@ -56,11 +60,11 @@ export async function renderRunestoneComponent(componentSrc, whereDiv, moreOpts)
             let res = window.component_factory[componentKind](opt);
             if (componentKind === "activecode") {
                 if (moreOpts.multiGrader) {
-                    window.edList[
+                    window.componentMap[
                         `${moreOpts.gradingContainer} ${res.divid}`
                     ] = res;
                 } else {
-                    window.edList[res.divid] = res;
+                    window.componentMap[res.divid] = res;
                 }
             }
         }
@@ -114,4 +118,28 @@ export function createTimedComponent(componentSrc, moreOpts) {
     let rdict = {};
     rdict.question = ret;
     return rdict;
+}
+
+// For integration with the React overhault of Pretext
+// 1. Disable the automatic instantiation at the end of each component.js
+// 2. react will search for all ".runestone" and will call this function for each of them.
+export function renderOneComponent(rsDiv) {
+    // Find the actual component inside the runestone component.
+    let component = rsDiv.querySelector("[data-component]");
+    let componentKind = component.dataset.component;
+    if ($(this).closest("[data-component=timedAssessment]").length == 0) {
+        // If this element exists within a timed component, don't render it here
+        try {
+            let divid = component.id;
+            window.componentMap[divid] = window.component_factory[
+                componentKind
+            ]({
+                orig: component,
+                useRunestoneServices: eBookConfig.useRunestoneServices,
+            });
+        } catch (err) {
+            console.log(`Error rendering ClickableArea Problem ${this.id}
+                         Details: ${err}`);
+        }
+    }
 }

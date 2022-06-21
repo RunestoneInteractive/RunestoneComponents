@@ -20,8 +20,6 @@ import RunestoneBase from "../../common/js/runestonebase.js";
 
 var DEBUG = false;
 
-export var khanexList = {};
-
 export default class Khanex extends RunestoneBase {
     constructor(opts) {
         super(opts);
@@ -113,7 +111,7 @@ $(document).on("runestone:login-complete", function () {
         if (DEBUG) console.log("DEBUG: Khanex rendering");
         try {
             var khanex = new Khanex({ orig: this });
-            khanexList[this.id] = khanex;
+            window.componentMap[this.id] = khanex;
             setupCallback(khanex, khanex.quizname);
         } catch (err) {
             console.log(`Error rendering Khanex Exercise ${this.id}

@@ -51,7 +51,6 @@ import ParsonsBlock from "./parsonsBlock";
 ==== INITIALIZATION ====================================================
 ===================================================================== */
 
-export var prsList = {}; // Parsons dictionary
 export default class Parsons extends RunestoneBase {
     constructor(opts) {
         super(opts);
@@ -2573,7 +2572,7 @@ $(document).on("runestone:login-complete", function () {
     $("[data-component=parsons]").each(function (index) {
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             try {
-                prsList[this.id] = new Parsons({
+                window.componentMap[this.id] = new Parsons({
                     orig: this,
                     useRunestoneServices: eBookConfig.useRunestoneServices,
                 });

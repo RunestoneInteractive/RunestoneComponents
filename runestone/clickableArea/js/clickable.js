@@ -13,8 +13,6 @@
 import RunestoneBase from "../../common/js/runestonebase.js";
 import "../css/clickable.css";
 
-export var CAList = {}; // Object that contains all instances of ClickableArea objects
-
 export default class ClickableArea extends RunestoneBase {
     constructor(opts) {
         super(opts);
@@ -464,7 +462,7 @@ $(document).on("runestone:login-complete", function () {
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
             try {
-                CAList[this.id] = new ClickableArea({
+                window.componentMap[this.id] = new ClickableArea({
                     orig: this,
                     useRunestoneServices: eBookConfig.useRunestoneServices,
                 });

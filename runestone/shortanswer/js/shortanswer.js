@@ -14,9 +14,6 @@
 import RunestoneBase from "../../common/js/runestonebase.js";
 import "./../css/shortanswer.css";
 
-export var saList;
-if (saList === undefined) saList = {}; // Dictionary that contains all instances of shortanswer objects
-
 export default class ShortAnswer extends RunestoneBase {
     constructor(opts) {
         super(opts);
@@ -282,7 +279,7 @@ $(document).on("runestone:login-complete", function () {
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
             try {
-                saList[this.id] = new ShortAnswer({
+                window.componentMap[this.id] = new ShortAnswer({
                     orig: this,
                     useRunestoneServices: eBookConfig.useRunestoneServices,
                 });

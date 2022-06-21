@@ -168,7 +168,7 @@ $(document).on("runestone:login-complete", function () {
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
             try {
-                window.edList[this.id] = ACFactory.createActiveCode(
+                window.componentMap[this.id] = ACFactory.createActiveCode(
                     this,
                     $(this).find("textarea").data("lang")
                 );
@@ -179,12 +179,12 @@ $(document).on("runestone:login-complete", function () {
         }
     });
     if (loggedout) {
-        for (let k in window.edList) {
-            window.edList[k].disableSaveLoad();
+        for (let k in window.componentMap) {
+            window.componentMap[k].disableSaveLoad();
         }
     } else {
-        for (let k in window.edList) {
-            window.edList[k].enableSaveLoad();
+        for (let k in window.componentMap) {
+            window.componentMap[k].enableSaveLoad();
         }
     }
 });
@@ -206,9 +206,12 @@ $(document).on("runestone:logout", function () {
     loggedout = true;
 });
 $(document).on("runestone:logout", function () {
-    for (let k in window.edList) {
-        if (window.edList.hasOwnProperty(k)) {
-            window.edList[k].disableSaveLoad();
+    for (let k in window.componentMap) {
+        if (
+            window.componentMap.hasOwnProperty(k) &&
+            window.componentMap.attributes["data-component"] == "activecode"
+        ) {
+            window.componentMap[k].disableSaveLoad();
         }
     }
 });

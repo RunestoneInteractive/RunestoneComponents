@@ -9,8 +9,6 @@ import "./fitb-i18n.en.js";
 import "./fitb-i18n.pt-br.js";
 import "../css/fitb.css";
 
-export var FITBList = {}; // Object containing all instances of FITB that aren't a child of a timed assessment.
-
 // FITB constructor
 export default class FITB extends RunestoneBase {
     constructor(opts) {
@@ -416,7 +414,7 @@ $(document).on("runestone:login-complete", function () {
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
             try {
-                FITBList[this.id] = new FITB(opts);
+                window.componentMap[this.id] = new FITB(opts);
             } catch (err) {
                 console.log(
                     `Error rendering Fill in the Blank Problem ${this.id}

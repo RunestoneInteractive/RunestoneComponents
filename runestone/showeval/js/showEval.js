@@ -12,8 +12,6 @@ https://github.com/asweigart/
 import RunestoneBase from "../../common/js/runestonebase";
 import "../css/showEval.css";
 
-var seList = [];
-
 export class ShowEval extends RunestoneBase {
     constructor(opts) {
         super(opts);
@@ -216,7 +214,7 @@ $(document).on("runestone:login-complete", function () {
         opts.raw = window.raw_steps[this.id];
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
-            seList[this.id] = new ShowEval(opts);
+            window.componentMap[this.id] = new ShowEval(opts);
         }
     });
 });

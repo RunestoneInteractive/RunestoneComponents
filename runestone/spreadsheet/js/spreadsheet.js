@@ -6,8 +6,6 @@ import "../css/spreadsheet.css";
 import "../css/spreadsheet.css";
 import "jexcel/dist/jexcel.css";
 
-window.ssList = {};
-
 class SpreadSheet extends RunestoneBase {
     constructor(opts) {
         super(opts);
@@ -201,7 +199,7 @@ $(document).on("runestone:login-complete", function () {
             useRunestoneServices: eBookConfig.useRunestoneServices,
         };
         try {
-            window.ssList[this.id] = new SpreadSheet(opts);
+            window.componentMap[this.id] = new SpreadSheet(opts);
         } catch (err) {
             console.log(`Error rendering SpreadSheet Problem ${this.id}
                          Details: ${err}`);

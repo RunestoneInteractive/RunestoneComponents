@@ -15,8 +15,6 @@ import RunestoneBase from "../../common/js/runestonebase.js";
 //import "./../styles/runestone-custom-sphinx-bootstrap.css";
 import "../css/mchoice.css";
 
-window.mcList = {}; // Multiple Choice dictionary
-
 // MC constructor
 export default class MultipleChoice extends RunestoneBase {
     constructor(opts) {
@@ -692,7 +690,7 @@ $(document).on("runestone:login-complete", function () {
         };
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
-            window.mcList[this.id] = new MultipleChoice(opts);
+            window.componentMap[this.id] = new MultipleChoice(opts);
         }
     });
 });
