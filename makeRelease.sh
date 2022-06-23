@@ -42,9 +42,8 @@ if [ -d ~/.virtualenvs/json2xml ]
     source ~/.virtualenvs/json2xml/bin/activate
     python scripts/dist2xml.py $1 
     cd runestone
-    tar zcf dist-$1.tgz dist
+    tar --strip-components 1 -zcf dist-$1.tgz dist/*
+    scp dist-$1.tgz balance.runestoneacademy.org:~/
   else
     echo "Warning: no json2xml ve found skipping pretext"
 fi
-
-
