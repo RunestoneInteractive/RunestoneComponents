@@ -18,7 +18,8 @@ def click_run(selenium_utils, ac_selenium_element):
     rb.click()
     # After clicking run, the browser may need some time to load and execute the code. Wait until the run button becomes clickable, indicating the code has finished running.
     div_id = ac_selenium_element.get_attribute("id")
-    selenium_utils.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, f"#{div_id} .run-button")))
+    selenium_utils.wait.until(EC.element_to_be_clickable(
+        (By.CSS_SELECTOR, f"#{div_id} .run-button")))
 
 
 def test_hello(selenium_utils_get):
@@ -75,7 +76,7 @@ def test_history(selenium_utils_get):
     ta = t1.find_element_by_class_name("cm-s-default")
     assert ta
     selenium_utils_get.driver.execute_script(
-        f"""window.edList['{div_id}'].editor.setValue("print('Goodbye')")"""
+        f"""window.componentMap['{div_id}'].editor.setValue("print('Goodbye')")"""
     )
     click_run(selenium_utils_get, t1)
     output = t1.find_element_by_class_name("ac_output")
@@ -111,14 +112,17 @@ def test_activity_count(selenium_utils_progress):
     click_run(selenium_utils_progress, t2)
     pb = selenium_utils_progress.driver.find_element_by_id("subchapterprogress")
     assert pb
-    total = selenium_utils_progress.driver.find_element_by_id("scprogresstotal").text.strip()
+    total = selenium_utils_progress.driver.find_element_by_id(
+        "scprogresstotal").text.strip()
     assert 2 == int(total)
-    possible = selenium_utils_progress.driver.find_element_by_id("scprogressposs").text.strip()
+    possible = selenium_utils_progress.driver.find_element_by_id(
+        "scprogressposs").text.strip()
     # expect only 1 because the page isn't included when not using services
     assert 2 == int(possible)
     # count should not increment after a second click
     click_run(selenium_utils_progress, t2)
-    total = selenium_utils_progress.driver.find_element_by_id("scprogresstotal").text.strip()
+    total = selenium_utils_progress.driver.find_element_by_id(
+        "scprogresstotal").text.strip()
     assert 2 == int(total)
 
 
@@ -128,7 +132,8 @@ def test_sql_activecode(selenium_utils_get):
     # TODO: We don't yet have a way for async operations in ActiveCode constructors to signal when they're complete. So, insert a delay to guesstimate when the async load of the SQL WASM code and other async functions complete.
     time.sleep(2)
     click_run(selenium_utils_get, t2)
-    selenium_utils_get.wait.until(EC.text_to_be_present_in_element((By.ID, f"{div_id}_stdout"), "You"))
+    selenium_utils_get.wait.until(
+        EC.text_to_be_present_in_element((By.ID, f"{div_id}_stdout"), "You"))
     res = selenium_utils_get.driver.find_element_by_id(f"{div_id}_sql_out")
     assert res
     out = selenium_utils_get.driver.find_element_by_id(f"{div_id}_stdout")
@@ -146,7 +151,7 @@ def test_sql_activecode(selenium_utils_get):
     ta = t1.find_element_by_class_name("cm-s-default")
     assert ta
     selenium_utils_get.driver.execute_script(
-        f"""window.edList['{div_id}'].editor.setValue("CREATE TABLE created_table (x TEXT); INSERT INTO created_table VALUES ('itworks');")"""
+        f"""window.componentMap['{div_id}'].editor.setValue("CREATE TABLE created_table (x TEXT); INSERT INTO created_table VALUES ('itworks');")"""
     )
     click_run(selenium_utils_get, t1)
 
@@ -155,11 +160,13 @@ def test_sql_activecode(selenium_utils_get):
     # TODO: We don't yet have a way for async operations in ActiveCode constructors to signal when they're complete. So, insert a delay to guesstimate when the async load of the SQL WASM code and other async functions complete.
     time.sleep(2)
     click_run(selenium_utils_get, t2)
-    selenium_utils_get.wait.until(EC.text_to_be_present_in_element((By.ID, f"{div_id}_stdout"), "You"))
+    selenium_utils_get.wait.until(
+        EC.text_to_be_present_in_element((By.ID, f"{div_id}_stdout"), "You"))
     res = selenium_utils_get.driver.find_element_by_id(f"{div_id}_sql_out")
     assert res
     out = selenium_utils_get.driver.find_element_by_id(f"{div_id}_stdout")
     assert "You passed 1 out of 1 tests" in out.text
+
 
 @pytest.fixture
 def selenium_utils_sf(selenium_utils):
