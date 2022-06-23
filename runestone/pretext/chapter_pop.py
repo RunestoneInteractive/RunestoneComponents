@@ -153,6 +153,7 @@ def manifest_data_to_db(course_name, manifest_path):
                     idchild = el.attrib["id"]
                 else:
                     el = question.find("./div")
+                    idchild = el.attrib["id"] or "foo_id"
                 try:
                     qtype = el.attrib["data-component"]
                     # translate qtype to question_type
