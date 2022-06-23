@@ -227,8 +227,10 @@
 {% endmacro %}
 
 {%- block extrahead %}
+<!-- Add an extra class to the root to help differentiate runestone classic from pretext+runestone -->
+{%- block body_tag %}<body class="runestone-sphinx">{% endblock %}
 
-{% if not favicon %}
+  {% if not favicon %}
 <link rel="shortcut icon" href="/{{appname}}/static/favicon.ico" type="image/ico" />
 {% endif %}
 

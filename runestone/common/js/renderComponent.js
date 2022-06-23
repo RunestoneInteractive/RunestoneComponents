@@ -139,7 +139,7 @@ export async function renderOneComponent(rsDiv) {
                 useRunestoneServices: eBookConfig.useRunestoneServices,
             });
         } catch (err) {
-            console.log(`Error rendering ClickableArea Problem ${this.id}
+            console.log(`Error rendering ${componentKind} Problem ${this.id}
                          Details: ${err}`);
         }
     }

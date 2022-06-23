@@ -16,6 +16,9 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = (env, argv) => {
     const is_dev_mode = argv.mode === "development";
+    const bundleFormatString = is_dev_mode
+        ? "[name].bundle.js"
+        : "[name].[contenthash].bundle.js";
 
     return {
         // Cache build results between builds in development mode, per the `docs <https://webpack.js.org/configuration/cache/>`__.
@@ -31,6 +34,14 @@ module.exports = (env, argv) => {
         devtool: is_dev_mode ? "inline-source-map" : "source-map",
         module: {
             rules: [
+                {
+                    test: /\.less$/i,
+                    use: [
+                        MiniCssExtractPlugin.loader,
+                        "css-loader",
+                        "less-loader",
+                    ],
+                },
                 {
                     test: /\.css$/i,
                     use: [MiniCssExtractPlugin.loader, "css-loader"],
@@ -57,7 +68,7 @@ module.exports = (env, argv) => {
         output: {
             path: path.resolve(__dirname, "runestone/dist"),
             // _`Output file naming`: see the `caching guide <https://webpack.js.org/guides/caching/>`_. This provides a hash for dynamic imports as well, avoiding caching out-of-date JS. Putting the hash in a query parameter (such as ``[name].js?v=[contenthash]``) causes the compression plugin to not update zipped files.
-            filename: "[name].[contenthash].bundle.js",
+            filename: bundleFormatString,
             // Node 17.0 reports ``Error: error:0308010C:digital envelope routines::unsupported``. Per `SO <https://stackoverflow.com/a/69394785/16038919>`_, this error is produced by using an old, default hash that OpenSSL removed support for. The `webpack docs <https://webpack.js.org/configuration/output/#outputhashfunction>`__ say that ``xxhash64`` is a faster algorithm.
             hashFunction: "xxhash64",
             // Delete everything in the output directory on each build.

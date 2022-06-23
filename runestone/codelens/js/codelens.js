@@ -49,7 +49,49 @@ if (typeof allVsualizers === "undefined") {
     window.allVisualizers = [];
 }
 
-$(function () {
+if (typeof window.component_factory === "undefined") {
+    window.component_factory = {};
+}
+
+window.component_factory.codelens = function (opts) {
+    // opts is an object that will contain a key referencing the orignal dom element
+    // often it will also have a key for  useRunestoneServices
+    let el = opts.orig;
+    let vel = el.querySelector(".pytutorVisualizer");
+    let divid = vel.id;
+    let lang = JSON.parse(vel.dataset.params).lang;
+    // addVisualizerToPage comes from pytutor-embed
+    // allTraceData is created by a series of script tags that when loaded create this
+    // as a global object containing trace information.
+    try {
+        let vis = addVisualizerToPage(allTraceData[divid], divid, {
+            startingInstruction: 0,
+            editCodeBaseURL: null,
+            hideCode: false,
+            lang: lang,
+        });
+        attachLoggers(vis, divid);
+        styleButtons(divid);
+        window.allVisualizers.push(vis);
+    } catch (err) {
+        console.log(`Error rendering CodeLens Problem ${divid}`);
+        console.log(err);
+    }
+
+    window.addEventListener("codelens:answer", function (evt) {
+        let rb = new RunestoneBase();
+        rb.logBookEvent({
+            event: "codelens",
+            div_id: evt.detail.divid,
+            act: `answer:${evt.detail.answer}`,
+            correct: evt.detail.correct,
+        });
+        console.log(evt);
+    });
+};
+
+// After all of the libraries are loaded...
+$(document).on("runestone:login-complete", function () {
     if (typeof allTraceData !== "undefined") {
         for (let divid in allTraceData) {
             let cl = document.getElementById(divid);
