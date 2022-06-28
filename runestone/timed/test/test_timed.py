@@ -95,8 +95,7 @@ def _test_1(selenium_utils_mq, timed_divid):
     src, dest = dnd.find_elements_by_class_name("rsdraggable")
     src_items = src.find_elements_by_tag_name("span")
     for i in range(3):
-        selenium_utils_mq.driver.execute_script(
-            f"""$("#{src_items[i].get_attribute('id')}").simulateDragDrop({{ dropTarget: 'span:contains("Answer {src_items[i].text[8:]}")' }})""")
+        selenium_utils_mq.driver.execute_script(f"""$("#{src_items[i].get_attribute('id')}").simulateDragDrop({{ dropTarget: 'span:contains("Answer {src_items[i].text[8:]}")' }})""")
     selenium_utils_mq.scroll_to_top()
     next.click()
 
@@ -111,7 +110,7 @@ def _test_1(selenium_utils_mq, timed_divid):
     div_id = "test_timed_activecode_1"
     selenium_utils_mq.wait_until_ready(div_id)
     selenium_utils_mq.driver.execute_script(
-        f"""window.componentMap['{div_id}'].editor.setValue("def add(a, b): return a + b")"""
+        f"""window.edList['{div_id}'].editor.setValue("def add(a, b): return a + b")"""
     )
     next.click()
 
@@ -119,25 +118,19 @@ def _test_1(selenium_utils_mq, timed_divid):
     selenium_utils_mq.wait_until_ready("test_timed_parsons_1")
     # This is an ugly hack, since Parson's problems number problems sequentially instead of based on the problem's ID. The div_id happens to match the ordering of Parson's problems...
     parsons_counter = timed_divid[-1]
-    source = selenium_utils_mq.driver.find_element_by_id(
-        f"parsons-{parsons_counter}-source")
-    answer = selenium_utils_mq.driver.find_element_by_id(
-        f"parsons-{parsons_counter}-answer")
-    dragndrop(selenium_utils_mq, source.find_element_by_id(
-        f"parsons-{parsons_counter}-block-0"), answer)
+    source = selenium_utils_mq.driver.find_element_by_id(f"parsons-{parsons_counter}-source")
+    answer = selenium_utils_mq.driver.find_element_by_id(f"parsons-{parsons_counter}-answer")
+    dragndrop(selenium_utils_mq, source.find_element_by_id(f"parsons-{parsons_counter}-block-0"), answer)
     time.sleep(1)
-    dragndrop(selenium_utils_mq, source.find_element_by_id(
-        f"parsons-{parsons_counter}-block-2"), answer)
+    dragndrop(selenium_utils_mq, source.find_element_by_id(f"parsons-{parsons_counter}-block-2"), answer)
     time.sleep(1)
-    dragndrop(selenium_utils_mq, source.find_element_by_id(
-        f"parsons-{parsons_counter}-block-1"), answer)
+    dragndrop(selenium_utils_mq, source.find_element_by_id(f"parsons-{parsons_counter}-block-1"), answer)
     next.click()
 
     # The short answer question.
     div_id = "test_timed_shortanswer_1"
     selenium_utils_mq.wait_until_ready(div_id)
-    selenium_utils_mq.driver.find_element_by_id(
-        f"{div_id}_solution").send_keys("ROYGBIV circle area")
+    selenium_utils_mq.driver.find_element_by_id(f"{div_id}_solution").send_keys("ROYGBIV circle area")
 
     finish(selenium_utils_mq)
     div_id = f"{timed_divid}results"
