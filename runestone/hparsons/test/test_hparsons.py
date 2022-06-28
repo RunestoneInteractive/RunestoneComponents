@@ -51,7 +51,7 @@ def test_run_block(selenium_utils_get):
     # 1-2. Click on run button to check the result is hinting missing blocks
     run_btn.click()
     feedback_area = hp_question.find_element(By.CLASS_NAME, 'alert')
-    assert 'Your program is too short.' in feedback_area.text
+    assert 'Your answer is too short.' in feedback_area.text
 
     # 2-1. Click on more blocks to form an incorrect solution
     block = drag_area.find_element(By.CSS_SELECTOR, '.parsons-block')
@@ -60,7 +60,7 @@ def test_run_block(selenium_utils_get):
     run_btn.click()
     time.sleep(1)
     feedback_area = hp_question.find_element(By.CLASS_NAME, 'alert')
-    assert 'Highlighted blocks in your program are wrong or are in the wrong order.' in feedback_area.text
+    assert 'Highlighted blocks in your answer are wrong or are in the wrong order.' in feedback_area.text
     highlighted_blocks = []
     for block in drop_area.find_elements(By.CSS_SELECTOR, '.parsons-block.incorrectPosition'):
         highlighted_blocks.append(block.text)
