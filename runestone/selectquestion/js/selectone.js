@@ -307,13 +307,24 @@ export default class SelectOne extends RunestoneBase {
         let closeButton = document.createElement("button");
         $(closeButton).text("Close Preview");
         $(closeButton).addClass("btn btn-default");
-        $(closeButton).click(function (event) {
-            $("#toggle-preview").html("");
-            toggleQuestionSelect.value = $("#" + parentID).data(
-                "toggle_current"
-            );
+        $(closeButton).click(
+            async function () {
+                $("#toggle-preview").html("");
+                toggleQuestionSelect.value = $("#" + parentID).data(
+                    "toggle_current"
+                );
             $("#component-preview").hide();
-        });
+        }
+        );
+        closeButton.addEventListener("click",
+            async function () {
+            this.logBookEvent({
+                event: "close_toggle",
+                act: toggleQuestionSelect.value,
+                div_id: toggleQuestionSelect.parentElement.id
+            });
+         }.bind(this)
+         );
         $("#toggle-buttons").append(closeButton);
 
         // if "lock" is not in toggle options, then allow adding more buttons to the preview panel

@@ -2042,8 +2042,10 @@ export default class Parsons extends RunestoneBase {
         //this.helpButton.disabled = true;
         //}
         // if less than 3 attempts
+        console.log("msg_parson_atleast_three_attempts")
         if (this.numDistinct < 3) {
             alert($.i18n("msg_parson_atleast_three_attempts"));
+            console.log("msg_parson_atleast_three_attempts")
         }
         // otherwise give help
         else {
