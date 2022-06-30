@@ -122,7 +122,7 @@ class ModuleFixture(unittest.TestCase):
         os.chdir(self.base_path)
         # Compile the docs. Save the stdout and stderr for examination.
         p = subprocess.run(
-            ["runestone", "build", "--all"], capture_output=True, text=True,
+            [sys.executable, "-m", "runestone", "build", "--all"], capture_output=True, text=True,
         )
         self.build_stdout_data = p.stdout
         self.build_stderr_data = p.stderr
