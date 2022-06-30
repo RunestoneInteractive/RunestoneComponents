@@ -27,14 +27,14 @@ jobs:
                   channel: "#builds"
               if: always()
 
-            - name: Setup npm and build runestone.js
+            - name: Install npm dependencies
               run: |
                   npm install
             - name: Set up Python ${{ matrix.python-version }}
               uses: actions/setup-python@v2
               with:
                   python-version: ${{ matrix.python-version }}
-            - name: Install dependencies
+            - name: Install Python dependencies
               run: |
                   # Install Poetry per the `instructions <https://python-poetry.org/docs/master/#installing-with-the-official-installer>`.
                   curl -sSL https://install.python-poetry.org | python3 -
