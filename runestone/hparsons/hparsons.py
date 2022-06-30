@@ -24,7 +24,6 @@ from sqlalchemy import Table
 from runestone.server.componentdb import (
     addQuestionToDB,
     addHTMLToDB,
-    get_engine_meta,
     maybeAddToAssignment,
 )
 from runestone.common.runestonedirective import (
@@ -129,6 +128,7 @@ class HParsonsDirective(RunestoneIdDirective):
 
     def run(self):
         super(HParsonsDirective, self).run()
+        addQuestionToDB(self)
 
         env = self.state.document.settings.env
 
@@ -163,7 +163,6 @@ class HParsonsDirective(RunestoneIdDirective):
             source = "\n"
 
         self.explain_text = explain_text or ["Not an Exercise"]
-        addQuestionToDB(self)
 
         self.options["initialsetting"] = source
 
@@ -175,41 +174,6 @@ class HParsonsDirective(RunestoneIdDirective):
 
         course_name = env.config.html_context["course_id"]
         divid = self.options["divid"]
-
-        engine, meta, sess = get_engine_meta()
-
-        if engine:
-            Source_code = Table(
-                "source_code", meta, autoload=True, autoload_with=engine
-            )
-            engine.execute(
-                Source_code.delete()
-                .where(Source_code.c.acid == divid)
-                .where(Source_code.c.course_id == course_name)
-            )
-            engine.execute(
-                Source_code.insert().values(
-                    acid=divid,
-                    course_id=course_name,
-                    main_code=source,
-                    suffix_code=suffix,
-                )
-            )
-        else:
-            if (
-                not hasattr(env, "dberr_activecode_reported")
-                or not env.dberr_activecode_reported
-            ):
-                env.dberr_activecode_reported = True
-                print(
-                    "Unable to save to source_code table in activecode.py. Possible problems:"
-                )
-                print("  1. dburl or course_id are not set in conf.py for your book")
-                print("  2. unable to connect to the database using dburl")
-                print("")
-                print(
-                    "This should only affect the grading interface. Everything else should be fine."
-                )
 
         hpnode = HParsonsNode()
         hpnode["runestone_options"] = self.options
