@@ -3,7 +3,7 @@ $.i18n().load({
         msg_parson_check_me: "Check",
         msg_parson_reset: "Reset",
         msg_parson_help: "Help me",
-        msg_parson_too_short: "Your program is too short. Add more blocks.",
+        msg_parson_too_short: "Your answer is too short. Add more blocks.",
         msg_parson_drag_from_here: "Drag from here",
         msg_parson_drag_to_here: "Drop blocks here",
         msg_parson_correct_first_try:
@@ -15,7 +15,7 @@ $.i18n().load({
         msg_parson_wrong_indents:
             "These blocks are not indented correctly. To indent a block more, drag it to the right. To reduce the indention, drag it to the left.",
         msg_parson_wrong_order:
-            "Highlighted blocks in your program are wrong or are in the wrong order. This can be fixed by moving, removing, or replacing highlighted blocks.",
+            "Highlighted blocks in your answer are wrong or are in the wrong order. This can be fixed by moving, removing, or replacing highlighted blocks.",
         msg_parson_arrow_navigate:
             "Arrow keys to navigate. Space to select / deselect block to move.",
         msg_parson_help_info:
