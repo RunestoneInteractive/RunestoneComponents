@@ -37,13 +37,12 @@ jobs:
             - name: Install dependencies
               run: |
                   python -m pip install --upgrade pip
-                  python -m pip install flake8 pytest
-                  # Install as editable so that tests run in cwd, instead of in wherever Python puts system lib. This is important because tests are run on the local (not system lib) files. Therefore, the npm run build produces its files locally, not in system libs; if installed in system libs, then the components won't be able to find these files.
-                  pip install -e .
-                  if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+                  # Install Poetry per the `instructions <https://python-poetry.org/docs/#osx--linux--bashonwindows-install-instructions>`.
+                  curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+                  $HOME/.poetry/bin/poetry install
             - name: Tests
               run: |
-                pytest
+                $HOME/.poetry/bin/poetry run pytest
 
             - uses: act10ns/slack@v1
               with:
