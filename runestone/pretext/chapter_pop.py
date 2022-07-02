@@ -155,10 +155,18 @@ def manifest_data_to_db(course_name, manifest_path):
                 el = question.find(".//*[@data-component]")
                 # Unbelievably if find finds something it evals to False!!
                 if el is not None:
-                    idchild = el.attrib["id"]
+                    if "id" in el.attrib:
+                        idchild = el.attrib["id"]
+                    else:
+                        idchild = "fix_me"
                 else:
                     el = question.find("./div")
-                    idchild = el.attrib["id"] or "foo_id"
+                    if el is None:
+                        idchild = "fix_me"
+                    elif "id" in el.attrib:
+                        idchild = el.attrib["id"]
+                    else:
+                        idchild = "fix_me"
                 try:
                     qtype = el.attrib["data-component"]
                     # translate qtype to question_type
