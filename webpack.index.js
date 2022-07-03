@@ -111,6 +111,10 @@ export function runestone_auto_import() {
             )
             .get()
     );
+    // webwork questions are not wrapped in div with a data-component so we have to check a different way
+    if (document.querySelector(".webwork-button")) {
+        s.add("webwork");
+    }
 
     // Load JS for each of the components found.
     const a = [...s].map((value) =>
