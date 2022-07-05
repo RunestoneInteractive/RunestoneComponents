@@ -309,7 +309,12 @@ export default class Parsons extends RunestoneBase {
                     s.replace(/\s+/g, "")
                 ); // remove whitespace in tag and depends list
                 tagIndex = textBlock.indexOf("#tag:");
-                tag = textBlock.substring(tagIndex + 5, tagIndex + 6);
+                tag = textBlock.substring(
+                    tagIndex + 5,
+                    textBlock.indexOf(";", tagIndex + 5)
+                );
+                if (tag == "")
+                    tag = "block-" + i;
                 dependsIndex = textBlock.indexOf(";depends:");
                 let dependsString = textBlock.substring(
                     dependsIndex + 9,
