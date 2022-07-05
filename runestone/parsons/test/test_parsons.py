@@ -356,6 +356,58 @@ def test_dag_grader(selenium_utils_get):
     assert message.get_attribute("class") == "alert alert-info"
 
 
+def test_dag_grader_indentation(selenium_utils_get):
+    selenium_utils_get.wait_until_ready("test_parsons_dag_indent")
+
+    source = selenium_utils_get.driver.find_element(By.ID, "parsons-7-source")
+    answer = selenium_utils_get.driver.find_element(By.ID, "parsons-7-answer")
+    checkme = selenium_utils_get.driver.find_element(By.ID, "parsons-7-check")
+    reset = selenium_utils_get.driver.find_element(By.ID, "parsons-7-reset")
+
+    def drag_to_answer(blockNum):
+        targetLoc = answer.location
+        block = source.find_element(By.ID, "parsons-7-block-" + str(blockNum))
+        xOffset = answer.location["x"] - block.location["x"] + 1
+        yOffset = answer.location["y"] - block.location["y"] + 1
+        ActionChains(selenium_utils_get.driver).drag_and_drop_by_offset(
+            block, xOffset, yOffset
+        ).perform()
+
+    reset.click()
+
+    for i in range(5, -1, -1):
+        element = source.find_element(By.ID, "parsons-7-block-" + str(i))
+        drag_to_answer(i)
+    checkme.click()
+
+    message = selenium_utils_get.driver.find_element(By.ID, "parsons-7-message")
+    assert "alert-danger" in message.get_attribute("class")
+
+    checkme.click()
+    b1 = answer.find_element(By.ID, "parsons-7-block-1")
+    b2 = answer.find_element(By.ID, "parsons-7-block-2")
+    b4 = answer.find_element(By.ID, "parsons-7-block-4")
+    assert "indentRight" in b1.get_attribute("class")
+    assert "indentRight" in b2.get_attribute("class")
+    assert "indentRight" in b4.get_attribute("class")
+    
+    ActionChains(selenium_utils_get.driver).drag_and_drop_by_offset(
+        answer.find_element(By.ID, "parsons-7-block-1"), 10, 0
+    ).perform()
+    ActionChains(selenium_utils_get.driver).drag_and_drop_by_offset(
+        answer.find_element(By.ID, "parsons-7-block-2"), 60, 0
+    ).perform()
+    ActionChains(selenium_utils_get.driver).drag_and_drop_by_offset(
+        answer.find_element(By.ID, "parsons-7-block-4"), 10, 0
+    ).perform()
+    wait_for_animation(selenium_utils_get, "#parsons-7-block-4")
+
+    checkme.click()
+    assert "indentRight" not in b1.get_attribute("class")
+    assert "indentRight" not in b2.get_attribute("class")
+    assert "indentRight" not in b4.get_attribute("class")
+
+
 def wait_for_animation(selenium_utils, selector):
     while is_element_animated(selenium_utils, selector):
         time.sleep(0.5)

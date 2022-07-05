@@ -147,3 +147,34 @@ Proof Blocks
   $c'(u) \ne c'(v)$ #tag:7;depends:6,3;
   =====
   $c'$ is a 2-coloring of $H$, so $H$ is 2-colorable. (end of proof) #tag:8;depends:7;
+
+============
+Code DAG
+============
+
+.. parsonsprob:: test_parsons_dag_indent
+   :grader: dag
+
+   Test that indentation works with dag
+
+   .. code-block:: python
+
+      def foo:
+         if True:
+            return 2
+      def bar:
+         return 40
+      print(foo() + bar())
+
+   -----
+   def foo(): #tag:foo;depends:;
+   =====
+      if True: #tag:foo_if; depends:foo;
+   =====
+         return 2 #tag:f1; depends:foo_if;
+   =====
+   def bar(): #tag:bar;depends:;
+   =====
+      return 40 #tag:b1; depends:bar;
+   =====
+   print(foo() + bar()) #tag:asdf; depends: f1,b1;
