@@ -122,7 +122,7 @@ class ModuleFixture(unittest.TestCase):
         os.chdir(self.base_path)
         # Compile the docs. Save the stdout and stderr for examination.
         p = subprocess.run(
-            ["runestone", "build", "--all"], capture_output=True, text=True,
+            [sys.executable, "-m", "runestone", "build", "--all"], capture_output=True, text=True,
         )
         self.build_stdout_data = p.stdout
         self.build_stderr_data = p.stderr
@@ -184,9 +184,9 @@ class ModuleFixture(unittest.TestCase):
                         "Unknown error while trying to kill stale runestone server"
                     )
 
-        # Run the server. Simply calling ``runestone serve`` fails, since the process killed isn't the actual server, but probably a setuptools-created launcher.
+        # Run the server. Simply calling ``runestone preview`` fails, since the process killed isn't the actual server, but probably a setuptools-created launcher.
         self.runestone_server = subprocess.Popen(
-            [sys.executable, "-m", "runestone", "serve", "--port", PORT]
+            [sys.executable, "-m", "runestone", "preview", "--port", PORT]
         )
 
         # Testing time in dominated by browser startup/shutdown. So, simply run all tests in a module in a single browser instance to speed things up. See ``RunestoneTestCase.setUp`` for additional code to (mostly) clear the browser between tests.
