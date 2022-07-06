@@ -8,14 +8,17 @@ import time
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
+
 def find_hp_question(selenium_utils, div_id):
     selenium_utils.wait_until_ready(div_id)
     return selenium_utils.driver.find_element(By.ID, div_id)
+
 
 def click_control(hp_question, button_name):
     css = '.btn-success.run-button' if button_name == 'Run' else '.btn-warning.run-button'
     btn = hp_question.find_element(By.CSS_SELECTOR, css)
     btn.click()
+
 
 """
 Test Block Based feedback is correct:
@@ -30,9 +33,11 @@ Test Block Based feedback is correct:
 4-2. Form a correct solution
 4-3. Click on run button to check the result is hinting completed in one attempt
 """
+
+
 def test_run_block(selenium_utils_get):
     div_id = "test_hparsons_block_1"
-    hp_question = find_hp_question(selenium_utils_get, div_id) 
+    hp_question = find_hp_question(selenium_utils_get, div_id)
     hp = hp_question.find_element(By.CSS_SELECTOR, 'horizontal-parsons')
     drag_area = hp.find_element(By.CSS_SELECTOR, '.drag-area')
     drop_area = hp.find_element(By.CSS_SELECTOR, '.drop-area')
@@ -51,7 +56,7 @@ def test_run_block(selenium_utils_get):
     # 1-2. Click on run button to check the result is hinting missing blocks
     run_btn.click()
     feedback_area = hp_question.find_element(By.CLASS_NAME, 'alert')
-    assert 'Your program is too short.' in feedback_area.text
+    assert 'Your answer is too short.' in feedback_area.text
 
     # 2-1. Click on more blocks to form an incorrect solution
     block = drag_area.find_element(By.CSS_SELECTOR, '.parsons-block')
@@ -60,7 +65,7 @@ def test_run_block(selenium_utils_get):
     run_btn.click()
     time.sleep(1)
     feedback_area = hp_question.find_element(By.CLASS_NAME, 'alert')
-    assert 'Highlighted blocks in your program are wrong or are in the wrong order.' in feedback_area.text
+    assert 'Highlighted blocks in your answer are wrong or are in the wrong order.' in feedback_area.text
     highlighted_blocks = []
     for block in drop_area.find_elements(By.CSS_SELECTOR, '.parsons-block.incorrectPosition'):
         highlighted_blocks.append(block.text)
@@ -71,6 +76,8 @@ def test_run_block(selenium_utils_get):
     drag_area.find_element(By.CSS_SELECTOR, '.parsons-block').click()
     # 3-2. Click on run button to check the result is hinting that they completed in 3 attempts
     run_btn.click()
+    selenium_utils_get.wait.until(
+        EC.text_to_be_present_in_element((By.CLASS_NAME, "alert"), "It"))
     feedback_area = hp_question.find_element(By.CLASS_NAME, 'alert')
     assert 'It took you 3 tries to solve this.' in feedback_area.text
     # 3-3. Check the run button is disabled
@@ -87,19 +94,22 @@ def test_run_block(selenium_utils_get):
     # 4-3. Click on run button to check the result is hinting completed in one attempt
     run_btn.click()
     feedback_area = hp_question.find_element(By.CLASS_NAME, 'alert')
-    assert 'It took you only one try to solve this.' in feedback_area.text
+    assert 'Perfect' in feedback_area.text
 
-    
+
 '''
 Test if the blocks are properly randomized.
 1. Assert the sequence of the blocks is not the same as set in .rst file.
 '''
+
+
 def test_randomize_block(selenium_utils_get):
     div_id = "test_hparsons_sql_1"
-    hp = find_hp_question(selenium_utils_get, div_id).find_element(By.CSS_SELECTOR, 'horizontal-parsons')
-    original_sequence = ['SELECT','*','FROM','test']
+    hp = find_hp_question(selenium_utils_get, div_id).find_element(
+        By.CSS_SELECTOR, 'horizontal-parsons')
+    original_sequence = ['SELECT', '*', 'FROM', 'test']
     randomized_sequence = []
-    for block in hp.find_element(By.CSS_SELECTOR,'.drag-area').find_elements(By.CSS_SELECTOR, '.parsons-block'):
+    for block in hp.find_element(By.CSS_SELECTOR, '.drag-area').find_elements(By.CSS_SELECTOR, '.parsons-block'):
         randomized_sequence.append(block.text)
     assert len(original_sequence) == len(randomized_sequence)
     is_same_order = True
@@ -108,7 +118,7 @@ def test_randomize_block(selenium_utils_get):
             is_same_order = False
             break
     assert not is_same_order
-    
+
 
 """
 Test adding and removing blocks by clicking in non-duplicating blocks
@@ -119,9 +129,12 @@ For reuseable blocks:
 1. Click on the first block and make sure it is copied to the bottom
 2. Click on the first block in the bottom and make sure it disappears
 """
+
+
 def test_add_and_remove_blocks(selenium_utils_get):
     div_id = "test_hparsons_sql_1"
-    hp = find_hp_question(selenium_utils_get, div_id).find_element(By.CSS_SELECTOR, 'horizontal-parsons')
+    hp = find_hp_question(selenium_utils_get, div_id).find_element(
+        By.CSS_SELECTOR, 'horizontal-parsons')
     drag_area = hp.find_element(By.CSS_SELECTOR, '.drag-area')
     drop_area = hp.find_element(By.CSS_SELECTOR, '.drop-area')
 
@@ -130,7 +143,7 @@ def test_add_and_remove_blocks(selenium_utils_get):
     block1.click()
     assert block1 not in drag_area.find_elements(By.CSS_SELECTOR, '.parsons-block')
     assert block1 == drop_area.find_elements(By.CSS_SELECTOR, '.parsons-block')[-1]
-    
+
     # 2. Click on the moved block and make sure it is returned to the top
     # block2 and block1 are the same object
     block2 = drop_area.find_elements(By.CSS_SELECTOR, '.parsons-block')[0]
@@ -140,7 +153,8 @@ def test_add_and_remove_blocks(selenium_utils_get):
 
     # For reusable blocks
     div_id = "test_hparsons_sql_2"
-    hp = find_hp_question(selenium_utils_get, div_id).find_element(By.CSS_SELECTOR, 'horizontal-parsons')
+    hp = find_hp_question(selenium_utils_get, div_id).find_element(
+        By.CSS_SELECTOR, 'horizontal-parsons')
     drag_area = hp.find_element(By.CSS_SELECTOR, '.drag-area')
     drop_area = hp.find_element(By.CSS_SELECTOR, '.drop-area')
 
@@ -148,8 +162,9 @@ def test_add_and_remove_blocks(selenium_utils_get):
     block1 = drag_area.find_elements(By.CSS_SELECTOR, '.parsons-block')[0]
     block1.click()
     assert len(drag_area.find_elements(By.CSS_SELECTOR, '.parsons-block')) == 4
-    assert block1.text == drop_area.find_elements(By.CSS_SELECTOR, '.parsons-block')[-1].text
-    
+    assert block1.text == drop_area.find_elements(
+        By.CSS_SELECTOR, '.parsons-block')[-1].text
+
     # 2. Click on the moved block and make sure it is removed
     block2 = drop_area.find_elements(By.CSS_SELECTOR, '.parsons-block')[0]
     block2.click()
@@ -162,10 +177,12 @@ Test SQL feedback is correct
 1. Click on each of the four blocks in second problem to form a solution
 2. Click on run button to run code and check the result
 """
+
+
 def test_run_SQL(selenium_utils_get):
     # For reusable blocks
     div_id = "test_hparsons_sql_2"
-    hp_question = find_hp_question(selenium_utils_get, div_id) 
+    hp_question = find_hp_question(selenium_utils_get, div_id)
     time.sleep(2)
     hp = hp_question.find_element(By.CSS_SELECTOR, 'horizontal-parsons')
     drag_area = hp.find_element(By.CSS_SELECTOR, '.drag-area')
@@ -175,12 +192,12 @@ def test_run_SQL(selenium_utils_get):
     blocks = drag_area.find_elements(By.CSS_SELECTOR, '.parsons-block')
     for block in blocks:
         block.click()
-    
+
     # 2. Click on run button to run code and check the result
     click_control(hp_question, 'Run')
-    selenium_utils_get.wait.until(EC.text_to_be_present_in_element((By.ID, f"{div_id}_stdout"), "You"))
+    selenium_utils_get.wait.until(
+        EC.text_to_be_present_in_element((By.ID, f"{div_id}_stdout"), "You"))
     res = selenium_utils_get.driver.find_element(By.ID, f"{div_id}_sql_out")
     assert res
     out = selenium_utils_get.driver.find_element(By.ID, f"{div_id}_stdout")
     assert "You passed 2 out of 3 tests" in out.text
-

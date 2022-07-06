@@ -18,7 +18,7 @@ function logWebWork(e, data) {
         if (data.rh_result.answers[k].score == 1) {
             correctCount += 1;
         }
-        actString += `actual:${data.rh_result.answers[k].student_ans}:expected:${data.rh_result.answers[k].correct_value}:`;
+        actString += `actual:${data.rh_result.answers[k].original_student_ans}:expected:${data.rh_result.answers[k].correct_value}:`;
     }
     let pct = correctCount / qCount;
     actString += `correct:${correctCount}:count:${qCount}:pct:${pct}`;
@@ -27,7 +27,7 @@ function logWebWork(e, data) {
     }
     rb.logBookEvent({
         event: "webwork",
-        div_id: data.ww_id,
+        div_id: data.inputs_ref.problemUUID,
         act: actString,
         correct: correct,
     });
@@ -36,7 +36,7 @@ function logWebWork(e, data) {
 function logShowCorrect(e, data) {
     rb.logBookEvent({
         event: "webwork",
-        div_id: data.ww_id,
+        div_id: data.inputs_ref.problemUUID,
         act: "show",
     });
 }

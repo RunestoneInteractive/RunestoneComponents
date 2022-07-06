@@ -1,0 +1,138 @@
+# ********************************
+# |docname| - Poetry configuration
+# ********************************
+#
+# See https://python-poetry.org/docs/dependency-specification/ to get an understanding of
+# how poetry specifies dependencies.
+#
+# Project metadata
+# ================
+[tool.poetry]
+authors = ["Brad Miller <bonelake@mac.com>"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Environment :: Plugins",
+    "Environment :: Web Environment",
+    "Framework :: Sphinx :: Extension",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: MacOS",
+    "Operating System :: Unix",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: Education",
+    "Topic :: Text Processing :: Markup",
+]
+description = "Sphinx extensions for writing interactive documents."
+documentation = "https://bookserver.readthedocs.io/en/latest/"
+keywords = ["runestone", "sphinx", "ebook", "oer", "education"]
+license = "GPL"
+name = "runestone"
+readme = "README.rst"
+repository = "https://github.com/RunestoneInteractive/RunestoneComponents"
+version = "6.2.3dev"
+
+# See https://python-poetry.org/docs/pyproject/#include-and-exclude.
+include = [
+    "README.md",
+    # Webpacked output.
+    "runestone/dist/*",
+    # Some of the Runestone Components doesn't use webpack; they still need raw JS/CSS available. See ``runestone_static_dirs()``.
+    "runestone/animation/js/*",
+    "runestone/codelens/js/*",
+    "runestone/webgldemo/js/*",
+    "runestone/matrixeq/js/*",
+    "runestone/accessibility/css/*",
+    "runestone/webgldemo/css/*",
+    "runestone/matrixeq/css/*",
+    "runestone/lp/css/*",
+    # We need to include the templates used by Sphinx.
+    "runestone/common/project_template/**/*",
+]
+
+# The includes above override these.
+exclude = [
+    # Images/media.
+    "**/*.cur",
+    "**/*.gif",
+    "**/*.jpg",
+    "**/*.mp3",
+    "**/*.ogg",
+    "**/*.png",
+    "**/*.svg",
+    "**/*.wav",
+    # Web files.
+    "**/*.css",
+    "**/*.html",
+    "**/*.js",
+    # Docs.
+    "**/*.md",
+    "**/*.rst",
+    # Skulpt files.
+    "runestone/activecode/js/skulpt.min.js.*",
+    # All test files.
+    "**/test/**/*",
+]
+
+
+# Dependencies
+# ============
+[tool.poetry.dependencies]
+# TODO: loosen some of these? Explain why these versions were picked?
+cogapp = ">=2.5"
+click = "~8"
+CodeChat = ">=1.8.6"
+jinja2 = "<3.1.0"
+Paver = ">=1.2.4"
+python = "^3.7.0"
+six = ">1.12"
+Sphinx = ">=4.4.0"
+sphinxcontrib-paverutils = ">=1.17"
+SQLAlchemy = ">=1.4.0"
+
+# Development dependencies
+# ========================
+[tool.poetry.dev-dependencies]
+selenium = ">=2.53.6"
+pyvirtualdisplay = "~3"
+pytest = "~7"
+pylint = "~2"
+readme-renderer = ">24"
+myst-parser = "~0"
+json2xml = "~3"
+
+# Scripts
+# =======
+# See `scripts <https://python-poetry.org/docs/pyproject/#scripts>`_.
+[tool.poetry.scripts]
+runestone = 'runestone.__main__:cli'
+
+# Poetry backend
+# ==============
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+# .. _pytest configuration:
+#
+# pytest configuration
+# ====================
+[tool.pytest.ini_options]
+minversion = "6.0"
+# Ignore source code produced by Sphinx. This happens because the source text for literate programming pages is a source file. Use `short tracebacks <https://docs.pytest.org/en/6.2.x/usage.html#modifying-python-traceback-printing>`_ since the default longer tracebacks produce too much noise.
+addopts = "--ignore=_build --tb=short"
+# The `pytest-env <https://github.com/MobileDynasty/pytest-env>`_ plugin sets these environment variables. Set them here, before imports, since bookserver imports read from the environment variables.
+env = [
+    "BOOK_SERVER_CONFIG=test",
+]
+# The _`default logging level` of INFO produces a LOT of output. Use a higher level of ``WARNING`` to reduce the noise.
+log_cli_level = 30
+# All async tests use the `pytest-asyncio framework <https://github.com/pytest-dev/pytest-asyncio#modes>`_.
+asyncio_mode = "auto"
+
+
+[tool.mypy]
+ignore_missing_imports = true

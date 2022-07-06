@@ -111,16 +111,15 @@ Developing and Hacking
 
 So, you would like to help out with developing the Runestone Components.  Great We welcome all the help we can get.  There is plenty to do no matter what your experience level.  There are a couple of prerequisites.
 
-1. You will need a version of Python, I currently develop on 3.8 or higher, but test on 3.7 and later.
+1. You will need a version of Python, I currently develop on 3.9 or higher, but test on 3.8 and later.
+
 2. You will need nodejs and npm as well since there is a LOT of Javascript code in the components.
 
 To get everything set up do the following
 
 1.  Make a Fork of this repository. and ``git clone`` the repository to your development machine.
-2.  Set up your environment on your development machine
 
-    1.  Make a virtual environment for testing and working  (I recommend ``python -m venv`` as it is baked in).  Activate the virtual environment. Then run ``pip install -r requirements-dev.txt`` to install the necessary python packages.
-    2.  To use Runestone Components, rather than following the instructions above for installing runestone simply run ``pip install -e .`` from the top level runestone directory.  This will install all of the required prerequisites and setup the runestone install as a link to the development directory. Once you've done that, you can continue following the instructions in the Quick Start section from the line starting with ``mkdir myproject``.
+2.  Install `Poetry  <https://python-poetry.org/docs/>`_
 
 3.  From the top level RunestoneComponents folder run ``npm install`` this will install the packaging tools that are needed for Javascript development.  ``npm run`` gives you a list of commands  The key command is ``npm run build`` this will combine all of the Javascript and CSS files for all the components into a single runestone.js file.  If you are doing some really deep development and want to avoid building a book, you can put your html in public/index.html and use the ``npm run start`` command.  This will automatically rebuild runestone.js and refresh the webpage every time you save a change.
 
@@ -154,15 +153,7 @@ Our goal is to have unit tests which rely on Selenium (a library that helps simu
 
 * You'll also need to have done the above installation.
 
-  * You should be using virtual environment,
-    you'll need a clone of the RunestoneComponents repository,
-    and you'll need to have done ``pip install -e .`` from
-    the top level of the RunestoneComponents directory.
-
-* If you have installed RunestoneComponents in your virtualenv using ``pip install -e .``,
-  then you should have all the python dependencies you need.
-
-* You can do ``pip install -r requirements-dev.txt`` to be sure you have everything.
+* We have converted to using poetry for our dependency management.  To run `runestone` while in development mode `poetry run runestone ...`  OR you can run `poetry shell` to start up a shell with a virtual environment activated.
 
 
 **To run tests:**
@@ -175,10 +166,10 @@ Our goal is to have unit tests which rely on Selenium (a library that helps simu
 
 * Finally, to run a test, ensuring that you have accessed a directive folder, type the following at the command prompt:
 
-  * ``pytest``
+  * ``poetry run pytest``
 
 Running pytest from the main directory will run all the tests.  To run a single test you can navigate to the
-directory of the test, or you can run ``pytest -k XXX`` where XXX is a substring that matches some part of
+directory of the test, or you can run ``poetry run pytest -k XXX`` where XXX is a substring that matches some part of
 the test functions name.
 
 .. note::
