@@ -648,7 +648,7 @@ export class ActiveCode extends RunestoneBase {
             $(this.timestampP).text(`${curVal} - ${pos + 1} of ${outOf}`);
             this.logBookEvent({
                 event: "activecode",
-                act: "slide" + curVal,
+                act: "slide:" + curVal,
                 div_id: this.divid,
             });
         };
