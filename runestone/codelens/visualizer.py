@@ -40,6 +40,8 @@ def setup(app):
 VIS = """
 <div class="runestone codelens %(optclass)s">
     <div class="%(divclass)s" data-component="codelens" data-question_label="%(question_label)s">
+        <div id=%(divid)s_question class="ac_question">
+        </div>
         <div class="pytutorVisualizer" id="%(divid)s"
            data-params='{"embeddedMode": true, "lang": "%(language)s", "jumpToEnd": false}'>
         </div>

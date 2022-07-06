@@ -75,20 +75,10 @@ export default class LineBasedGrader {
         let isCorrectOrder = this.checkCorrectOrdering(solutionLines, answerLines)
 
         // Determine whether blocks are indented correctly
-        this.indentLeft = [];
-        this.indentRight = [];
-        let loopLimit = Math.min(solutionLines.length, answerLines.length);
-        for (i = 0; i < loopLimit; i++) {
-            if (answerLines[i].viewIndent() < solutionLines[i].indent) {
-                this.indentRight.push(answerLines[i]);
-            } else if (answerLines[i].viewIndent() > solutionLines[i].indent) {
-                this.indentLeft.push(answerLines[i]);
-            }
-        }
-        this.incorrectIndents =
-            this.indentLeft.length + this.indentRight.length;
+        let isCorrectIndents = this.checkCorrectIndentation(solutionLines, answerLines);
+
         if (
-            this.incorrectIndents == 0 &&
+            isCorrectIndents &&
             isCorrectOrder &&
             this.correctLength
         ) {
@@ -103,6 +93,23 @@ export default class LineBasedGrader {
         this.graderState = state;
 
         return state;
+    }
+
+    checkCorrectIndentation(solutionLines, answerLines) {
+        this.indentLeft = [];
+        this.indentRight = [];
+        let loopLimit = Math.min(solutionLines.length, answerLines.length);
+        for (let i = 0; i < loopLimit; i++) {
+            if (answerLines[i].viewIndent() < answerLines[i].indent) {
+                this.indentRight.push(answerLines[i]);
+            } else if (answerLines[i].viewIndent() > solutionLines[i].indent) {
+                this.indentLeft.push(answerLines[i]);
+            }
+        }
+        this.incorrectIndents =
+            this.indentLeft.length + this.indentRight.length;
+
+        return this.incorrectIndents == 0;
     }
 
     checkCorrectOrdering(solutionLines, answerLines) {

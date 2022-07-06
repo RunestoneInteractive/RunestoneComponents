@@ -35,6 +35,11 @@ def manifest_data_to_db(course_name, manifest_path):
             DBURL = os.environ["DEV_DBURL"]
         elif os.environ["WEB2PY_CONFIG"] == "production":
             DBURL = os.environ["DBURL"]
+        elif os.environ["WEB2PY_CONFIG"] == "test":
+            DBURL = os.environ["TEST_DBURL"]
+        else:
+            logger.error("No WEB2PY_CONFIG found! Do not know which DB to use!")
+            exit(-1)
     except KeyError:
         logger.error("PreTeXt integration requires a valid WEB2PY Environment")
         logger.error("make sure WEB2PY_CONFIG and DBURLs are set up")
@@ -150,10 +155,18 @@ def manifest_data_to_db(course_name, manifest_path):
                 el = question.find(".//*[@data-component]")
                 # Unbelievably if find finds something it evals to False!!
                 if el is not None:
-                    idchild = el.attrib["id"]
+                    if "id" in el.attrib:
+                        idchild = el.attrib["id"]
+                    else:
+                        idchild = "fix_me"
                 else:
                     el = question.find("./div")
-                    idchild = el.attrib["id"] or "foo_id"
+                    if el is None:
+                        idchild = "fix_me"
+                    elif "id" in el.attrib:
+                        idchild = el.attrib["id"]
+                    else:
+                        idchild = "fix_me"
                 try:
                     qtype = el.attrib["data-component"]
                     # translate qtype to question_type
