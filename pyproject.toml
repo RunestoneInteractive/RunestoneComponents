@@ -23,6 +23,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Topic :: Education",
     "Topic :: Text Processing :: Markup",
 ]
@@ -33,7 +34,7 @@ license = "GPL"
 name = "runestone"
 readme = "README.rst"
 repository = "https://github.com/RunestoneInteractive/RunestoneComponents"
-version = "6.2.3dev"
+version = "6.3.0beta1"
 
 # See https://python-poetry.org/docs/pyproject/#include-and-exclude.
 include = [
