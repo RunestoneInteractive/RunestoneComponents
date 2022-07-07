@@ -290,7 +290,7 @@ def addQuestionToDB(self):
         autograde = self.options.get("autograde", None)
         if "practice" in self.options:
             value = self.options["practice"].upper()
-            assert value == "T" or value == "F", f":practice: must be T or F not '{value}'"
+            assert value == "T" or value == "F", f":practice: must be T or F not '{value}' for {self.options['divid']}"
             practice = value
         else:
             practice = None
