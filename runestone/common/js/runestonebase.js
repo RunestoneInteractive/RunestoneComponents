@@ -437,6 +437,9 @@ export default class RunestoneBase {
         if (MathJax.version.substring(0, 1) === "2") {
             MathJax.Hub.Queue(["Typeset", MathJax.Hub, component]);
         } else {
+            // See - https://docs.mathjax.org/en/latest/advanced/typeset.html
+            // Per the above we should keep track of the promises and only call this
+            // a second time if all previous promises have resolved.
             MathJax.typesetPromise([component]);
         }
     }
