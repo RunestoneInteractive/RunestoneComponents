@@ -155,7 +155,7 @@ def process_manifest(cname, mpath, click=click):
         )
 
 
-def check_project_ptx():
+def check_project_ptx(click=click):
     """
     Verify that the PreTeXt project is set up for a Runestone build
 
@@ -185,7 +185,7 @@ def check_project_ptx():
             sys.exit(1)
 
 
-def extract_docinfo(tree, string, attr=None):
+def extract_docinfo(tree, string, attr=None, click=click):
     """
     Parameters:
     tree: The parsed document tree from ET
@@ -203,7 +203,7 @@ def extract_docinfo(tree, string, attr=None):
     return ""
 
 
-def update_library(config, mpath, course):
+def update_library(config, mpath, course, click=click):
     """
     Parameters:
     config : This originated as a config object from click -- a mock config will be provided by the AuthorServer
@@ -246,7 +246,7 @@ def update_library(config, mpath, course):
         )
 
 
-def populate_static(config, mpath: Path, course: str):
+def populate_static(config, mpath: Path, course: str, click=click):
     """
     Copy the apropriate Javascript to the _static folder for PreTeXt books.  This may
     involve downloading it from the Runestone CDN.  PreTeXt does not include the current set
@@ -261,7 +261,7 @@ def populate_static(config, mpath: Path, course: str):
         tree = ET.parse(sdir / "webpack_static_imports.xml")
         current_version = tree.find("./version").text
     else:
-        sdir.mkdir(mode=775, exist_ok=True)
+        sdir.mkdir(mode=0o775, exist_ok=True)  # NB mode must be in Octal!
     tree = ET.parse(mpath)
     el = tree.find("./runestone-services[@version]")
     version = el.attrib["version"].strip()
