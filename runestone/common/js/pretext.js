@@ -19,6 +19,9 @@ function setupPTXEvents() {
         let code = $(container[0]).find(".sagecell_input")[0].textContent;
         rb.logBookEvent({ event: "sage", act: "run", div_id: container[0].id });
     });
+    if (!eBookConfig.isInstructor) {
+        $(".commentary").hide();
+    }
 }
 
 window.addEventListener("load", function () {

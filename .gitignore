@@ -4,6 +4,7 @@
 *.py[cod]
 *.log
 .venv
+jsdist
 
 # C extensions
 *.so

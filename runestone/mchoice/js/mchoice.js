@@ -49,6 +49,9 @@ export default class MultipleChoice extends RunestoneBase {
         this.createMCForm();
         this.addCaption("runestone");
         this.checkServer("mChoice", true);
+        $(document).on("runestone:mathjax-ready", function () {
+            this.queueMathJax(this.containerDiv);
+        });
     }
 
     /*====================================
