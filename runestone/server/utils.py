@@ -1,17 +1,44 @@
-import pdb
-import click
+# *******************************************
+# |docname| - reusable functions for rsmanage
+# *******************************************
+# These functions are used by the rsmanage command in RunestoneServer as well as
+# by the AuthorServer in its Celery worker tasks.  There may be other places that
+# find these utils handy as well.
+#
+#
+# Imports
+# =======
+# These are listed in the order prescribed by `PEP 8`_.
+#
+# Standard library
+# ----------------
+
+import os
 import subprocess
 import sys
-import os
-from pathlib import Path
 import xml.etree.ElementTree as ET
 from xml.etree import ElementInclude
+from pathlib import Path
+
+# Third Party
+# -----------
+import click
 from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
+
+# Local packages
+# --------------
 from runestone.pretext.chapter_pop import manifest_data_to_db
 
 
-def _build_runestone_book(course):
+# Build a Runestone Book
+# ----------------------
+def _build_runestone_book(course, click=click):
+    """
+    Parameters:
+    course: the name of the course to build.
+    click: default is the click module otherwise an object that has an echo method
+    """
     try:
         if os.path.exists("pavement.py"):
             sys.path.insert(0, os.getcwd())
@@ -54,13 +81,25 @@ def _build_runestone_book(course):
         click.echo("Deploy failed, check the log to see what went wrong.")
 
 
-def _build_ptx_book(config, gen, manifest, course):
+# Build a PreTeXt Book
+# --------------------
+def _build_ptx_book(config, gen, manifest, course, click=click):
+    """
+    Parameters:
+    config : This originated as a config object from click -- a mock config will be provided by the AuthorServer
+    gen: A flag to indicate whether or not we should build static assets
+    manifest: the name of the manifest file
+    course: the name of the course to build.
+    click: default is the click module otherwise an object that has an echo method
+    """
     if not os.path.exists("project.ptx"):
         click.echo("PreTeXt books need a project.ptx file")
         sys.exit(1)
     else:
         main_file = check_project_ptx()
+        # parse the main file, but this does not resolve any xi:includes
         tree = ET.parse(main_file)
+        # The next two lines are needed to parse the entire tree
         root = tree.getroot()
         ElementInclude.include(root, base_url=main_file)  # include all xi:include parts
         if gen:
@@ -96,7 +135,17 @@ def _build_ptx_book(config, gen, manifest, course):
         update_library(config, mpath, course)
 
 
-def process_manifest(cname, mpath):
+# Support Functions
+# -----------------
+
+def process_manifest(cname, mpath, click=click):
+    """
+    cname - the name of the course
+    mpath - path to the runestone-manifest.xml file
+
+    Setup this book in the database and populate the questions table as well as
+    The chapter and subchapter tables.
+    """
     click.echo("processing manifest...")
     if os.path.exists(mpath):
         manifest_data_to_db(cname, mpath)
@@ -107,6 +156,17 @@ def process_manifest(cname, mpath):
 
 
 def check_project_ptx():
+    """
+    Verify that the PreTeXt project is set up for a Runestone build
+
+    Returns: Name of the main project file.
+
+    1. Is there a runestone target in project.ptx?
+    2. Is the output dir set to published/basecourse
+    3. Is the top level source file set properly
+    4. TODO: Is the publisher file set (and present)
+
+    """
     tree = ET.parse("project.ptx")
     targ = tree.find(".//target[@name='runestone']")
     if not targ:
@@ -126,6 +186,12 @@ def check_project_ptx():
 
 
 def extract_docinfo(tree, string, attr=None):
+    """
+    Parameters:
+    tree: The parsed document tree from ET
+    string: The name of the element we are looking for
+    Helper to get the contents of several tags from the docinfo element of a PreTeXt book
+    """
     el = tree.find(f"./{string}")
     if attr is not None and el is not None:
         print(f"{el.attrib[attr]=}")
@@ -138,6 +204,16 @@ def extract_docinfo(tree, string, attr=None):
 
 
 def update_library(config, mpath, course):
+    """
+    Parameters:
+    config : This originated as a config object from click -- a mock config will be provided by the AuthorServer
+    mpath: Path to the runestone-manifest file which containes the library metadata
+    course: the name of the course we are buildingn
+
+    Update the library table using meta data from the book
+
+    Returns: Nothing
+    """
     tree = ET.parse(mpath)
     docinfo = tree.find("./library-metadata")
     eng = create_engine(config.dburl)
@@ -171,7 +247,13 @@ def update_library(config, mpath, course):
 
 
 def populate_static(config, mpath: Path, course: str):
-
+    """
+    Copy the apropriate Javascript to the _static folder for PreTeXt books.  This may
+    involve downloading it from the Runestone CDN.  PreTeXt does not include the current set
+    of javascript files like the Runestone components release does, instead we supply it
+    on runestone.academy/cdn/runestone so it can be used for generic html builds as well as
+    builds on runestone.academy.
+    """
     # <runestone-services version="6.2.1"/>
     sdir = mpath.parent / "_static"
     current_version = ""
