@@ -1271,11 +1271,11 @@ Yet another is that there is an internal error.  The internal error message is: 
         }
     }
 
-    async toggleAlert(){
+    toggleAlert(){
         if (this.is_toggle && this.runCount == 3) {
             if (this.errinfo != "success" || this.unit_results.substring(8,11)!=100.0){
                 setTimeout(function() {alert("Help is Available Using the Toggle Question Selector! You can try the Mixed-up Question first."); }, 500);
-                await this.logBookEvent({
+                this.logBookEvent({
                     event: "togglealert",
                     act: "Help is Available Using the Toggle Question Selector",
                     div_id: this.divid,

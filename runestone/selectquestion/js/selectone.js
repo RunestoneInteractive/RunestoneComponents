@@ -307,22 +307,18 @@ export default class SelectOne extends RunestoneBase {
         let closeButton = document.createElement("button");
         $(closeButton).text("Close Preview");
         $(closeButton).addClass("btn btn-default");
-        $(closeButton).click(
-            async function () {
+        closeButton.addEventListener("click",
+            function () {
                 $("#toggle-preview").html("");
                 toggleQuestionSelect.value = $("#" + parentID).data(
                     "toggle_current"
                 );
-            $("#component-preview").hide();
-        }
-        );
-        closeButton.addEventListener("click",
-            async function () {
-            this.logBookEvent({
-                event: "close_toggle",
-                act: toggleQuestionSelect.value,
-                div_id: toggleQuestionSelect.parentElement.id
-            });
+                $("#component-preview").hide();
+                this.logBookEvent({
+                    event: "close_toggle",
+                    act: toggleQuestionSelect.value,
+                    div_id: toggleQuestionSelect.parentElement.id
+                });
          }.bind(this)
          );
         $("#toggle-buttons").append(closeButton);
