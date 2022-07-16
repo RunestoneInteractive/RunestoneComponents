@@ -96,6 +96,7 @@ def _build_ptx_book(config, gen, manifest, course, click=click):
         click.echo("PreTeXt books need a project.ptx file")
         sys.exit(1)
     else:
+        click.echo("Checking files")
         main_file = check_project_ptx()
         # parse the main file, but this does not resolve any xi:includes
         tree = ET.parse(main_file)
@@ -107,6 +108,7 @@ def _build_ptx_book(config, gen, manifest, course, click=click):
             if res != 0:
                 click.echo("Failed to build")
             # build the book
+        click.echo("Building for Runestone")
         res = subprocess.call("pretext build runestone", shell=True)
         if res != 0:
             click.echo("Building failed")
@@ -125,6 +127,7 @@ def _build_ptx_book(config, gen, manifest, course, click=click):
             sys.exit(1)
 
         mpath = Path(os.getcwd(), "published", cname, manifest)
+        click.echo("Processing Manifest")
         process_manifest(cname, mpath)
         # Fetch and copy the runestone components release as advertised by the manifest
         # - Use wget to get all the js files and put them in _static
