@@ -52,6 +52,9 @@ export default class JSActiveCode extends ActiveCode {
     }
 
     addErrorMessage(err) {
+        // Clear old errors for this box
+        let eContainerId = this.divid + "_errinfo";
+        $("#" + eContainerId).remove();
         // Add the error message
         this.errLastRun = true;
         var errHead = $("<h3>").html("Error");
@@ -59,7 +62,7 @@ export default class JSActiveCode extends ActiveCode {
             document.createElement("div")
         );
         this.eContainer.className = "error alert alert-danger";
-        this.eContainer.id = this.divid + "_errinfo";
+        this.eContainer.id = eContainerId;
         this.eContainer.appendChild(errHead[0]);
         var errText = this.eContainer.appendChild(
             document.createElement("pre")
