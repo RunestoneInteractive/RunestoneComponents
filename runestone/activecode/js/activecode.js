@@ -218,6 +218,7 @@ export class ActiveCode extends RunestoneBase {
                         "2px solid #b43232"
                     );
                     this.isAnswered = true;
+                    // the first time the student types in the write-code box
                     this.logBookEvent({
                         event: "activecode",
                         act: "edit",
@@ -266,9 +267,7 @@ export class ActiveCode extends RunestoneBase {
         // The run is finished; re-enable the button.
         this.runButton.disabled = false;
         this.runCount += 1;
-        if (this.is_toggle && this.runCount == 3) {
-            alert("Help is Available Using the Toggle Question Selector");
-        }
+        this.toggleAlert();
     }
 
     createControls() {
@@ -282,7 +281,7 @@ export class ActiveCode extends RunestoneBase {
         $(butt).addClass("btn btn-success run-button");
         ctrlDiv.appendChild(butt);
         this.runButton = butt;
-        console.log("adding click function for run");         
+        // console.log("adding click function for run");
         this.runButton.onclick = this.runButtonHandler.bind(this);
         $(butt).attr("type", "button");
 
@@ -1295,6 +1294,19 @@ Yet another is that there is an internal error.  The internal error message is: 
                     let urResults = document.getElementById(urDivid);
                     this.outerDiv.appendChild(urResults);
                 }
+            }
+        }
+    }
+
+    toggleAlert(){
+        if (this.is_toggle && this.runCount == 3) {
+            if (this.errinfo != "success" || this.unit_results.substring(8,11)!=100.0){
+                setTimeout(function() {alert("Help is Available Using the Toggle Question Selector! You can try the Mixed-up Question first."); }, 500);
+                this.logBookEvent({
+                    event: "togglealert",
+                    act: "Help is Available Using the Toggle Question Selector",
+                    div_id: this.divid,
+                })
             }
         }
     }
