@@ -81,6 +81,7 @@ export class ActiveCode extends RunestoneBase {
         this.saveButton = null;
         this.loadButton = null;
         this.outerDiv = null;
+        this.resetButt = null;
         this.partner = "";
         this.runCount = 0;
         this.logResults = true;
@@ -281,7 +282,7 @@ export class ActiveCode extends RunestoneBase {
         $(butt).addClass("btn btn-success run-button");
         ctrlDiv.appendChild(butt);
         this.runButton = butt;
-        console.log("adding click function for run");
+        console.log("adding click function for run");         
         this.runButton.onclick = this.runButtonHandler.bind(this);
         $(butt).attr("type", "button");
 
@@ -309,13 +310,16 @@ export class ActiveCode extends RunestoneBase {
         if (eBookConfig.isInstructor) {
             this.enableInstructorSharing(ctrlDiv);
         }
+
+        this.addReset(ctrlDiv);
+
         if (this.enablePartner) {
             this.setupPartner(ctrlDiv);
         }
         if (this.chatcodes && eBookConfig.enable_chatcodes) {
             this.enableChatCodes(ctrlDiv);
         }
-
+        
         $(this.outerDiv).prepend(ctrlDiv);
         if (this.question) {
             if ($(this.question).html().match(/^\s+$/)) {
@@ -467,6 +471,26 @@ export class ActiveCode extends RunestoneBase {
             }.bind(this)
         );
     }
+
+    addReset(ctrlDiv){
+         let butt = document.createElement("button");
+         $(butt).text("Reset");
+         ctrlDiv.appendChild(butt);
+         $(butt).addClass("btn btn-reset");
+         $(butt).css("margin-right", "10px");
+         $(butt).attr("type", "button");
+         $(butt).attr("target", "_blank");
+         this.resetButt = butt
+         $(butt).click(
+            function(){
+                this.history = [this.history[0]];
+                this.editor.setValue(this.history[0]);
+                $(this.historyScrubber).slider("value", 0)
+                $(this.timestampP).text(`${this.timestamps[0]} - 1 of 1`);
+                $(this.historyScrubber).slider("disable");
+            }.bind(this)
+         )
+        }
 
     setupPartner(ctrlDiv) {
         var checkPartner = document.createElement("input");
@@ -640,7 +664,7 @@ export class ActiveCode extends RunestoneBase {
             "max-width": "300px",
         });
         var scrubber = document.createElement("div");
-        this.timestampP = document.createElement("span");
+        this.timestampP = document.createElement("span"); 
         this.slideit = function () {
             this.editor.setValue(this.history[$(scrubber).slider("value")]);
             var curVal = this.timestamps[$(scrubber).slider("value")];
@@ -1176,6 +1200,9 @@ Yet another is that there is an internal error.  The internal error message is: 
     async manage_scrubber(saveCode) {
         if (this.historyScrubber === null && !this.autorun) {
             await this.addHistoryScrubber();
+        }
+        if (this.history.length > 0){
+            $(this.historyScrubber).slider("enable");
         }
         if (
             this.historyScrubber &&

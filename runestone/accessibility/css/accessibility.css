@@ -153,3 +153,17 @@ button.btn.btn-link {
 	color:#1a6a83 !important;
 	background-color:#FFFFFF !important;
 }
+
+/*Reset Button*/
+button.btn.btn-reset:active {
+	color:#d78080!important;
+	background-color:#FFFFFF !important;
+}
+button.btn.btn-reset:focus {
+	color:#d78080 !important;
+	background-color:#FFFFFF !important;
+}
+button.btn.btn-reset{
+	color:#FFFFFF !important;
+	background-color:#d78080 !important;
+}
