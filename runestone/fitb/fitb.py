@@ -97,12 +97,9 @@ def depart_fitb_html(self, node):
     node_with_document = node
     while not node_with_document.document:
         node_with_document = node_with_document.parent
-    # Supply client-side grading info if we're not grading on the server.
-    node["runestone_options"]["json"] = (
-        "false"
-        if node_with_document.document.settings.env.config.runestone_server_side_grading
-        else json_feedback
-    )
+    # Supply grading info (the ``json_feedback``) to the client if we're not grading on the server.
+    ssg = node_with_document.document.settings.env.config.runestone_server_side_grading
+    node["runestone_options"]["json"] = "false" if ssg else json_feedback
     res = node["template_end"] % node["runestone_options"]
     self.body.append(res)
 
@@ -111,7 +108,8 @@ def depart_fitb_html(self, node):
         node["runestone_options"]["divid"],
         node["runestone_options"]["basecourse"],
         "".join(self.body[self.body.index(node["delimiter"]) + 1 :]),
-        json_feedback,
+        # Either provide grading info to enable server-side grading or pass ``None`` to select client-side grading.
+        json_feedback if ssg else None,
     )
 
     self.body.remove(node["delimiter"])
