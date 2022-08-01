@@ -1,6 +1,6 @@
 import { ActiveCode } from "./activecode.js";
 import Handsontable from "handsontable";
-import 'handsontable/dist/handsontable.full.css';
+import "handsontable/dist/handsontable.full.css";
 import initSqlJs from "sql.js/dist/sql-wasm.js";
 
 var allDburls = {};
@@ -11,10 +11,16 @@ export default class SQLActiveCode extends ActiveCode {
         //  fnprefix sets the path to load the sql-wasm.wasm file
         var bookprefix;
         var fnprefix;
-        if (eBookConfig.useRunestoneServices) {
+        // Fix: the mode=browsing problem wich disables useRunestoneServices and
+        // makes it impossible to cororectly load sql-wasm
+        if (
+            eBookConfig.useRunestoneServices ||
+            window.location.search.includes("mode=browsing")
+        ) {
             bookprefix = `${eBookConfig.app}/books/published/${eBookConfig.basecourse}`;
             fnprefix = bookprefix + "/_static";
         } else {
+            // The else clause handles the case where you are building for a static web browser
             bookprefix = "";
             fnprefix = "/_static";
         }
@@ -299,8 +305,9 @@ export default class SQLActiveCode extends ActiveCode {
         }
         let pct = (100 * this.passed) / (this.passed + this.failed);
         pct = pct.toLocaleString(undefined, { maximumFractionDigits: 2 });
-        result += `You passed ${this.passed} out of ${this.passed + this.failed
-            } tests for ${pct}%`;
+        result += `You passed ${this.passed} out of ${
+            this.passed + this.failed
+        } tests for ${pct}%`;
         this.unit_results = `percent:${pct}:passed:${this.passed}:failed:${this.failed}`;
         return result;
     }
