@@ -53,7 +53,7 @@ CodeMirror.commands.autocomplete = function(cm) {
     var doc = cm.getDoc();
     var POS = doc.getCursor();
     var mode = CodeMirror.innerMode(cm.getMode(), cm.getTokenAt(POS).state).mode.name;
-    console.log(mode)    
+    console.log(mode)   
     if (mode == 'xml') { //html depends on xml
         CodeMirror.showHint(cm, CodeMirror.hint.html);
     } else if (mode == 'javascript') {
@@ -64,7 +64,10 @@ CodeMirror.commands.autocomplete = function(cm) {
         CodeMirror.showHint(cm, CodeMirror.hint.python);
    // } else if (mode == 'cplusplus') {
      //   CodeMirror.showHint(cm, CodeMirror.hint.cplusplus);
-    } 
+    } else {
+        CodeMirror.showHint(cm, CodeMirror.hint.cplusplus);
+            //cm.showHint({ hint: CodeMirror.hint.anyword });
+     }
  };
 
 // separate into constructor and init
