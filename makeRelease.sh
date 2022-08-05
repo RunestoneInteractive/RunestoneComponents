@@ -12,7 +12,7 @@ if [ $# -eq 0 ]
 fi
 
 while true; do
-read -p "Did you update/commit the version in setup.py " yn
+read -p "Did you update/commit the version in pyproject.toml " yn
     case $yn in
         [Yy]* ) break;;
         [Nn]* ) exit;;
@@ -20,15 +20,13 @@ read -p "Did you update/commit the version in setup.py " yn
     esac
 done
 
-rm -f dist/*
+echo "Building webpack bundle"
 npm run dist
-python setup.py sdist
-pip wheel --no-index --no-deps --global-option bdist_wheel  --wheel-dir dist dist/*.tar.gz
 
-
-twine check dist/*
-twine upload dist/*
-
+echo "building python package"
+poetry build
+poetry publish
+ 
 echo "tagging this release and pushing to github"
 
 git tag -a $1 -m 'tag new version'
@@ -44,6 +42,7 @@ if [ -d ~/.virtualenvs/json2xml ]
     cd runestone
     tar --strip-components 1 -zcf dist-$1.tgz dist/*
     scp dist-$1.tgz balance.runestoneacademy.org:~/
+    mv dist-$1.tgz ../jsdist
   else
     echo "Warning: no json2xml ve found skipping pretext"
 fi

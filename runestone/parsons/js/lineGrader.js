@@ -66,6 +66,7 @@ export default class LineBasedGrader {
         } else if (answerLines.length == solutionLines.length) {
             this.correctLength = true;
         } else {
+            state = "incorrectMoveBlocks";
             this.correctLength = false;
         }
 
