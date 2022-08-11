@@ -31,7 +31,7 @@ echo "tagging this release and pushing to github"
 
 git tag -a $1 -m 'tag new version'
 git push --follow-tags
-
+gh release create v$1 --generate-notes
 
 if [ -d ~/.virtualenvs/json2xml ] 
   then
