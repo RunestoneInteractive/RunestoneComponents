@@ -104,7 +104,7 @@ def _build_ptx_book(config, gen, manifest, course, click=click):
         root = tree.getroot()
         ElementInclude.include(root, base_url=main_file)  # include all xi:include parts
         if gen:
-            res = subprocess.call("pretext generate web")
+            res = subprocess.call("pretext generate")
             if res != 0:
                 click.echo("Failed to build")
             # build the book
@@ -140,6 +140,7 @@ def _build_ptx_book(config, gen, manifest, course, click=click):
 
 # Support Functions
 # -----------------
+
 
 def process_manifest(cname, mpath, click=click):
     """
