@@ -100,6 +100,11 @@ export default class DragNDrop extends RunestoneBase {
         this.dragDropWrapDiv.appendChild(this.dropZoneDiv);
         this.createButtons();
         this.checkServer("dragNdrop", true);
+        self = this;
+        if (typeof runestoneMathready !== "undefined") {
+            runestoneMathReady.then(() => self.queueMathJax(self.containerDiv));
+        }
+
     }
     finishSettingUp() {
         this.appendReplacementSpans();
