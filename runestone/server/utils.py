@@ -140,7 +140,6 @@ def _build_ptx_book(config, gen, manifest, course, click=click):
         else:
             click.echo("Missing document-id please add to <docinfo>")
             return False
-        return True
 
         mpath = Path(os.getcwd(), "published", cname, manifest)
         click.echo("Processing Manifest")
@@ -152,6 +151,7 @@ def _build_ptx_book(config, gen, manifest, course, click=click):
         # update the library page
         click.echo("updating library...")
         update_library(config, mpath, course)
+        return True
 
 
 # Support Functions
@@ -246,7 +246,7 @@ def update_library(config, mpath, course, click=click):
         res = eng.execute(f"select * from library where basecourse = '{course}'")
     except:
         click.echo("Missing library table?  You may need to run an alembic migration.")
-        sys.exit()
+        return False
 
     if res.rowcount == 0:
         eng.execute(
@@ -264,6 +264,7 @@ def update_library(config, mpath, course, click=click):
         where basecourse = '{course}'
         """
         )
+    return True
 
 
 def populate_static(config, mpath: Path, course: str, click=click):
@@ -302,3 +303,4 @@ def populate_static(config, mpath: Path, course: str, click=click):
         )
     else:
         click.echo(f"_static files already up to date for {version}")
+    return True
