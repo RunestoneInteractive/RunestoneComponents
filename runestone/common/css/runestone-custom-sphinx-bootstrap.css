@@ -23,6 +23,18 @@
     --componentBgColor: #f0f8ff;
     --componentBorderColor: #000000;
     --questionBgColor: #e1efff;
+    --cmGutter: #FFFFFF;
+    --cmFont: #000000;
+    --cmKeyword:#708;
+    --cmNumber: #164;
+    --cmAtom: #219;
+    --cmString: #a11;
+    --cmDef: #00f;
+    --cmBuiltIn: #30a;
+    --spanColor: #c7254e;
+    --prebg-color: #f5f5f5;
+    --miColor: #208050;
+    --kcColor: #007020;
 }
 
 [data-theme="dark"] {
@@ -47,6 +59,18 @@
     --componentBgColor: #07467d;
     --componentBorderColor: #939090;
     --questionBgColor: rgb(23, 85, 93);    
+    --cmGutter: #2c2f33;
+    --cmFont: #99AAB5;
+    --cmKeyword: rgb(209, 12, 235);
+    --cmNumber: rgb(15, 219, 138);
+    --cmAtom: rgb(25, 153, 238);
+    --cmString: rgb(250, 58, 58);
+    --cmDef: rgb(0, 204, 255);
+    --cmBuiltIn: rgb(29, 82, 255);
+    --spanColor: #fd507b;
+    --prebg-color: #3f3e3e;
+    --miColor: #37c27c;
+    --kcColor: #15d14a;
 }
 
 /* custom modification of basic.css for color-contrast (AA compliant) */
@@ -95,6 +119,10 @@ span.highlighted {
 }
 
 /* ActiveCode gutter custom modification for color-contrast (AA compliant) */
+
+.CodeMirror-gutters {
+    background-color: var(--cmGutter) !important;
+  }
 
 .CodeMirror-linenumber {
     color: #6b6b6b;
@@ -361,11 +389,24 @@ div.container {
 /* end navbar and menu related styles */
 
 .CodeMirror {
+    /* Set global font properties here */
+    color: var(--cmFont) !important;
+  }
+
+.CodeMirror {
     margin: 0 0 1em 0;
-    background-color: var(--background);
+    background-color: var(--background) !important;
     height: auto;
     clear: both;
 }
+
+/*Custom colors for words in activecode*/
+.cm-s-default .cm-keyword {color: var(--cmKeyword) !important;}
+.cm-s-default .cm-atom {color: var(--cmAtom) !important;}
+.cm-s-default .cm-number {color: var(--cmNumber)!important;}
+.cm-s-default .cm-def {color: var(--cmDef)!important;}
+.cm-s-default .cm-string {color: var(--cmString) !important;}
+.cm-s-default .cm-builtin {color: var(--cmBuiltIn) !important;}
 
 .CodeMirror-scroll {
     /* this allows CM elements to be resized to (almost) any
@@ -384,7 +425,7 @@ div.container {
     border-width: 0;
     margin: 0;
     padding: 0;
-    background: transparent;
+    background: var(--background);
     font-family: Monaco, Courier New, monospace;
     font-size: inherit;
     padding: 0;
@@ -482,6 +523,26 @@ h2 {
     margin-top: 15px;
     font-weight: bold;
 }
+
+code {
+    color: var(--spanColor);
+    background-color: var(--outerBackground) !important;
+}
+
+pre {
+    color: var(--bodyFont);
+    background-color: var(--prebg-color);
+    border: 1px solid #ccc;
+}
+
+.highlight .mi {
+    color: var(--miColor);
+}
+
+.highlight .kc {
+    color: var(--kcColor);
+    font-weight: bold;
+  }
 /*
 Missing brackets
 ================
@@ -894,6 +955,12 @@ div.flash {
 
 .container section > div.sidebar {
     margin: 0 0 0.5em 1em;
+}
+
+div.sidebar,
+aside.sidebar {
+    background-color: var(--background) !important;
+    border: 1px solid var(--outerBackground) !important;
 }
 
 a.disqus_thread_link {
