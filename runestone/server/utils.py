@@ -49,11 +49,11 @@ def _build_runestone_book(course, click=click):
                     os.getcwd()
                 )
             )
-            exit(1)
+            return False
     except ImportError as e:
         click.echo("You do not appear to have a good pavement.py file.")
         print(e)
-        exit(1)
+        return False
 
     if project_name != course:
         click.echo(
@@ -61,24 +61,37 @@ def _build_runestone_book(course, click=click):
                 course, project_name
             )
         )
-        exit(1)
+        return False
+    click.echo("Running runestone build --all")
+    res = subprocess.run("runestone build --all", shell=True, capture_output=True)
+    with open("cli.log", "wb") as olfile:
+        olfile.write(res.stdout)
+        olfile.write(b"\n====\n")
+        olfile.write(res.stderr)
 
-    res = subprocess.call("runestone build --all", shell=True)
-    if res != 0:
-        click.echo("building the book failed, check the log for errors and try again")
-        exit(1)
+    if res.returncode != 0:
+        click.echo(
+            f"building the book failed {res}, check the log for errors and try again"
+        )
+        return False
     click.echo("Build succeedeed... Now deploying to published")
     if dest != "./published":
         click.echo(
             "Incorrect deployment directory.  dest should be ./published in pavement.py"
         )
-        exit(1)
+        return False
 
-    res = subprocess.call("runestone deploy", shell=True)
-    if res == 0:
+    resd = subprocess.run("runestone deploy", shell=True, capture_output=True)
+    with open("cli.log", "ab") as olfile:
+        olfile.write(res.stdout)
+        olfile.write(b"\n====\n")
+        olfile.write(res.stderr)
+    if resd.returncode == 0:
         click.echo("Success! Book deployed")
+        return True
     else:
         click.echo("Deploy failed, check the log to see what went wrong.")
+        return False
 
 
 # Build a PreTeXt Book
@@ -94,17 +107,19 @@ def _build_ptx_book(config, gen, manifest, course, click=click):
     """
     if not os.path.exists("project.ptx"):
         click.echo("PreTeXt books need a project.ptx file")
-        sys.exit(1)
+        return False
     else:
         click.echo("Checking files")
         main_file = check_project_ptx()
+        if not main_file:
+            return False
         # parse the main file, but this does not resolve any xi:includes
         tree = ET.parse(main_file)
         # The next two lines are needed to parse the entire tree
         root = tree.getroot()
         ElementInclude.include(root, base_url=main_file)  # include all xi:include parts
         if gen:
-            res = subprocess.call("pretext generate web")
+            res = subprocess.call("pretext generate", shell=True)
             if res != 0:
                 click.echo("Failed to build")
             # build the book
@@ -112,7 +127,7 @@ def _build_ptx_book(config, gen, manifest, course, click=click):
         res = subprocess.call("pretext build runestone", shell=True)
         if res != 0:
             click.echo("Building failed")
-            sys.exit(1)
+            return False
             # process the manifest
         el = root.find("./docinfo/document-id")
         if el is not None:
@@ -121,10 +136,10 @@ def _build_ptx_book(config, gen, manifest, course, click=click):
                 click.echo(
                     f"Error course: {course} does not match document-id: {cname}"
                 )
-                sys.exit(1)
+                return False
         else:
             click.echo("Missing document-id please add to <docinfo>")
-            sys.exit(1)
+            return False
 
         mpath = Path(os.getcwd(), "published", cname, manifest)
         click.echo("Processing Manifest")
@@ -136,10 +151,12 @@ def _build_ptx_book(config, gen, manifest, course, click=click):
         # update the library page
         click.echo("updating library...")
         update_library(config, mpath, course)
+        return True
 
 
 # Support Functions
 # -----------------
+
 
 def process_manifest(cname, mpath, click=click):
     """
@@ -174,18 +191,18 @@ def check_project_ptx(click=click):
     targ = tree.find(".//target[@name='runestone']")
     if not targ:
         click.echo("No runestone target in project.ptx - please add one")
-        sys.exit(1)
+        return False
     else:
         dest = targ.find("./output-dir")
         if "published" not in dest.text:
             click.echo("destination for build must be in published/<document-id>")
-            sys.exit(1)
+            return False
         main = targ.find("./source")
         if main is not None:
             return main.text
         else:
             click.echo("No main source file specified")
-            sys.exit(1)
+            return False
 
 
 def extract_docinfo(tree, string, attr=None, click=click):
@@ -229,7 +246,7 @@ def update_library(config, mpath, course, click=click):
         res = eng.execute(f"select * from library where basecourse = '{course}'")
     except:
         click.echo("Missing library table?  You may need to run an alembic migration.")
-        sys.exit()
+        return False
 
     if res.rowcount == 0:
         eng.execute(
@@ -247,6 +264,7 @@ def update_library(config, mpath, course, click=click):
         where basecourse = '{course}'
         """
         )
+    return True
 
 
 def populate_static(config, mpath: Path, course: str, click=click):
@@ -285,3 +303,4 @@ def populate_static(config, mpath: Path, course: str, click=click):
         )
     else:
         click.echo(f"_static files already up to date for {version}")
+    return True

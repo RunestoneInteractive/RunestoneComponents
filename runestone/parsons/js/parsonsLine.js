@@ -18,7 +18,7 @@
 // Initialize from codestring
 
 export default class ParsonsLine {
-    constructor(problem, codestring) {
+    constructor(problem, codestring, displaymath) {
         this.problem = problem;
         this.index = problem.lines.length;
         var trimmed = codestring.replace(/\s*$/, "");
@@ -26,8 +26,14 @@ export default class ParsonsLine {
         this.indent = trimmed.length - this.text.length;
         // Create the View
         var view;
+        // TODO: this does not work with display math... Perhaps with pretext we should have html as a language and do nothing?
+        
         if (problem.options.language == "natural" || problem.options.language == "math") {
-            view = document.createElement("p");
+            if (! displaymath) {
+                view = document.createElement("p");
+            } else {
+                view = document.createElement("div");
+            }
         } else {
             view = document.createElement("code");
             $(view).addClass(problem.options.prettifyLanguage);

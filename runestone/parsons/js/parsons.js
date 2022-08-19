@@ -323,6 +323,11 @@ export default class Parsons extends RunestoneBase {
                 depends =
                     dependsString.length > 0 ? dependsString.split(",") : [];
             }
+            if (textBlock.includes('class="displaymath')) {
+                options["displaymath"] = true;
+            } else {
+                options["displaymath"] = false;
+            }
             textBlock = textBlock.replace(
                 /#(paired|distractor|tag:.*;.*;)/,
                 function (mystring, arg1) {
@@ -332,12 +337,16 @@ export default class Parsons extends RunestoneBase {
             );
             // Create lines
             var lines = [];
-            var split = textBlock.split("\n");
+            if (! options["displaymath"]) {
+                var split = textBlock.split("\n");
+            } else {
+                var split = [textBlock];
+            }
             for (var j = 0; j < split.length; j++) {
                 var code = split[j];
                 // discard blank rows
                 if (!/^\s*$/.test(code)) {
-                    var line = new ParsonsLine(this, code);
+                    var line = new ParsonsLine(this, code, options["displaymath"]);
                     lines.push(line);
                     if (options["paired"]) {
                         line.distractor = true;

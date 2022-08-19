@@ -162,7 +162,10 @@ def build(all, wd):
     version = require("runestone")[0].version
     print("Building with Runestone {}".format(version))
 
-    with open("conf.py", encoding="utf-8") as cf:
+    import pavement
+    confpath = pathlib.Path(pavement.options.get("confdir", "."))
+
+    with open(confpath / "conf.py", encoding="utf-8") as cf:
         ctext = cf.read()
         if not re.search(r"from runestone import.*(setup|script_files)", ctext):
             click.echo(
@@ -181,8 +184,6 @@ def build(all, wd):
                 "Change it to:\nfrom runestone import runestone_static_dirs, runestone_extensions, setup"
             )
             sys.exit(1)
-
-    import pavement
 
     if not os.path.exists(pavement.options.build.builddir):
         os.makedirs(pavement.options.build.builddir)

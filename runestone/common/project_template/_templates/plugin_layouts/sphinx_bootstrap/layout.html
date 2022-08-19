@@ -230,6 +230,10 @@
 <link rel="shortcut icon" href="/{{appname}}/static/favicon.ico" type="image/ico" />
 {% endif %}
 
+{% raw %}
+<link rel="canonical" href="https://{{canonical_host}}{{new_server_prefix}}/books/published/{{base_course}}/{{pagepath}}" />
+{% endraw %}
+
 <script>
   eBookConfig = {};
   {% if dynamic_pages == 'True' %}

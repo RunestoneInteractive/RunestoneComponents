@@ -31,7 +31,7 @@ echo "tagging this release and pushing to github"
 
 git tag -a $1 -m 'tag new version'
 git push --follow-tags
-
+gh release create v$1 --generate-notes
 
 if [ -d ~/.virtualenvs/json2xml ] 
   then
@@ -43,6 +43,8 @@ if [ -d ~/.virtualenvs/json2xml ]
     tar --strip-components 1 -zcf dist-$1.tgz dist/*
     scp dist-$1.tgz balance.runestoneacademy.org:~/
     mv dist-$1.tgz ../jsdist
+    cp dist/webpack_static_imports.xml ~/src/pretext/xsl/support/runestone-services.xml 
+    cp dist/webpack_static_imports.xml ~/.ptx/xsl/support/runestone-services.xml 
   else
     echo "Warning: no json2xml ve found skipping pretext"
 fi

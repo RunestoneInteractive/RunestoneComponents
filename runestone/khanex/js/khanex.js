@@ -87,7 +87,7 @@ export default class Khanex extends RunestoneBase {
         var eventInfo = {
             event: "khanex",
             act: loganswer,
-            answer: result,
+            answer: result["attempt_content"],
             correct: correct,
             div_id: this.divid,
         };
