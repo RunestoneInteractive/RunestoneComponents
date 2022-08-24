@@ -296,11 +296,14 @@ def populate_static(config, mpath: Path, course: str, click=click):
                 click.echo(f"ERROR - could not delete {f}")
         # call wget non-verbose, recursive, no parents, no hostname, no directoy copy files to sdir
         # trailing slash is important or otherwise you will end up with everything below runestone
-        subprocess.call(
+        res = subprocess.call(
             f"""wget -nv -r -np -nH -nd -P {sdir} https://runestone.academy/cdn/runestone/{version}/
     """,
             shell=True,
         )
+        if res != 0:
+            click.echo("wget of runestone files failed")
+            return False
     else:
         click.echo(f"_static files already up to date for {version}")
     return True
