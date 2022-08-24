@@ -93,8 +93,9 @@ export default class Timed extends RunestoneBase {
 
     getNewChildren() {
         this.newChildren = [];
-        for (var i = 0; i < this.origElem.childNodes.length; i++) {
-            this.newChildren.push(this.origElem.childNodes[i]);
+        let runestoneChildren = this.origElem.querySelectorAll(".runestone")
+        for (var i = 0; i < runestoneChildren.length; i++) {
+            this.newChildren.push(runestoneChildren[i]);
         }
     }
 
