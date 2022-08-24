@@ -27,5 +27,8 @@ function setupPTXEvents() {
 window.addEventListener("load", function () {
     console.log("setting up pretext");
     setupPTXEvents();
-    document.getElementById("primary-navbar-sticky-wrapper").style.overflow="visible"
+    let wrap = document.getElementById("primary-navbar-sticky-wrapper");
+    if (wrap) {
+        wrap.style.overflow="visible";
+    }
 });
