@@ -42,7 +42,7 @@ export default class TimedMC extends MultipleChoice {
     feedbackTimedMC() {
         for (var i = 0; i < this.indexArray.length; i++) {
             var tmpindex = this.indexArray[i];
-            $(this.feedBackEachArray[i]).text(
+            $(this.feedBackEachArray[i]).html(
                 String.fromCharCode(65 + i) + ". " + this.feedbackList[i]
             );
             var tmpid = this.answerList[tmpindex].id;
