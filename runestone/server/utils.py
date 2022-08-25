@@ -16,13 +16,13 @@
 import os
 import subprocess
 import sys
-import xml.etree.ElementTree as ET
-from xml.etree import ElementInclude
 from pathlib import Path
 
 # Third Party
 # -----------
 import click
+import lxml.etree as ET
+from lxml import ElementInclude
 from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 
