@@ -41,7 +41,9 @@ if [ -d ~/.virtualenvs/json2xml ]
     python scripts/dist2xml.py $1 
     cd runestone
     tar --strip-components 1 -zcf dist-$1.tgz dist/*
+    echo "Installing release on CDN"
     scp dist-$1.tgz balance.runestoneacademy.org:~/
+    ssh balance.runestoneacademy.org /home/bmiller/bin/install_release.sh $1
     mv dist-$1.tgz ../jsdist
     cp dist/webpack_static_imports.xml ~/src/pretext/xsl/support/runestone-services.xml 
     cp dist/webpack_static_imports.xml ~/.ptx/xsl/support/runestone-services.xml 
