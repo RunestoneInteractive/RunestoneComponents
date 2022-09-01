@@ -10,7 +10,7 @@ from sqlalchemy.sql import text
 from sphinx.util import logging
 
 logger = logging.getLogger(__name__)
-#logger.setLevel(logging.INFO)
+# logger.setLevel(logging.INFO)
 
 QT_MAP = {
     "multiplechoice": "mchoice",
@@ -71,8 +71,9 @@ def manifest_data_to_db(course_name, manifest_path):
     for chapter in root.findall("./chapter"):
         logger.info(chapter)
         chap += 1
-        logger.debug(chapter.tag, chapter.find(
-            "./id").text, chapter.find("./title").text)
+        logger.debug(
+            chapter.tag, chapter.find("./id").text, chapter.find("./title").text
+        )
         ins = chapters.insert().values(
             chapter_name=chapter.find("./title").text,
             course_id=course_name,
@@ -93,8 +94,10 @@ def manifest_data_to_db(course_name, manifest_path):
             titletext = subchapter.find("./title").text
             if not titletext:
                 titletext = " ".join(
-                    [ET.tostring(y).decode("utf8")
-                     for y in subchapter.findall("./title/*")]
+                    [
+                        ET.tostring(y).decode("utf8")
+                        for y in subchapter.findall("./title/*")
+                    ]
                 )
             ins = subchapters.insert().values(
                 sub_chapter_name=titletext,
@@ -142,13 +145,12 @@ def manifest_data_to_db(course_name, manifest_path):
 
             for question in subchapter.findall("./question"):
                 dbtext = " ".join(
-                    [ET.tostring(y).decode("utf8")
-                     for y in question.findall("./htmlsrc/*")]
+                    [
+                        ET.tostring(y).decode("utf8")
+                        for y in question.findall("./htmlsrc/*")
+                    ]
                 )
-                qlabel = " ".join(
-                    [y.text
-                     for y in question.findall("./label")]
-                )
+                qlabel = " ".join([y.text for y in question.findall("./label")])
                 logger.debug(f"found label= {qlabel}")
                 logger.debug("looking for data-component")
                 # pdb.set_trace()
@@ -173,6 +175,7 @@ def manifest_data_to_db(course_name, manifest_path):
                     qtype = QT_MAP.get(qtype, qtype)
                 except:
                     qtype = "webwork"
+                    dbtext = ET.tostring(el).decode("utf8")
                 valudict = dict(
                     base_course=course_name,
                     name=idchild,
