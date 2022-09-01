@@ -42,7 +42,12 @@ def _build_runestone_book(course, click=click):
     try:
         if os.path.exists("pavement.py"):
             sys.path.insert(0, os.getcwd())
-            from pavement import options, dest, project_name
+            # Since this may be used in a long running process (see AuthorServer/worker)
+            # we need to re-import to get the right values
+            if "pavement" in globals():
+                importlib.reload(pavement)
+            else:
+                import pavement
         else:
             click.echo(
                 "I can't find a pavement.py file in {} you need that to build".format(
@@ -55,10 +60,10 @@ def _build_runestone_book(course, click=click):
         print(e)
         return False
 
-    if project_name != course:
+    if pavement.project_name != course:
         click.echo(
             "Error: {} and {} do not match.  Your course name needs to match the project_name in pavement.py".format(
-                course, project_name
+                course, pavement.project_name
             )
         )
         return False
@@ -75,7 +80,7 @@ def _build_runestone_book(course, click=click):
         )
         return False
     click.echo("Build succeedeed... Now deploying to published")
-    if dest != "./published":
+    if pavement.dest != "./published":
         click.echo(
             "Incorrect deployment directory.  dest should be ./published in pavement.py"
         )
