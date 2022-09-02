@@ -257,7 +257,8 @@ div.container {
 #main-content section > .runestone.parsons-container,
 #main-content section > .runestone.parsons-problems,
 #main-content section > .codelens,
-#main-content section > .timedAssessment
+#main-content section > .timedAssessment,
+#main-content section > .jupyterlite_sphinx_iframe_container
 {
     max-width: var(--contentWidthWide);
     margin-left: auto;
