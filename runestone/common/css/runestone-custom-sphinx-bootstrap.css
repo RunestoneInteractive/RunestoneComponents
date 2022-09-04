@@ -341,7 +341,8 @@ div.container {
     margin-bottom: -6px;
 }
 
-.dropdown-menu > li > span {
+.dropdown-menu > li > span,
+.dropdown-menu > li > div {
     display: block;
     padding: 3px 20px;
     clear: both;
