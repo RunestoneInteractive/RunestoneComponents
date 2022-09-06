@@ -342,7 +342,8 @@ div.container {
 }
 
 .dropdown-menu > li > span,
-.dropdown-menu > li > div {
+.dropdown-menu > li > div,
+.dropdown-menu > li > label {
     display: block;
     padding: 3px 20px;
     clear: both;
@@ -350,6 +351,12 @@ div.container {
     line-height: 20px;
     color: var(--grayToWhite);
     white-space: nowrap;
+}
+
+.dropdown-menu > li > label:hover, .dropdown-menu > li > label:focus {
+  color: #262626;
+  text-decoration: none;
+  background-color: #f5f5f5;
 }
 
 .dropdown-menu > li > a {
@@ -1093,63 +1100,50 @@ body {
 }
 
 /*Theme toggle*/
-.theme-switch-wrapper {
+.dropdown-menu > li > label.theme-switch {
     display: flex;
     align-items: center;
-}
-
-.theme-switch-wrapper em {
-    margin-left: 10px;
-    font-size: 1rem;
-}
-
-.theme-switch {
-    display: inline-block;
-    height: 34px;
-    position: relative;
-    width: 60px;
+    font-weight: normal;
+    cursor: pointer;
 }
 
 .theme-switch input {
     display: none;
 }
 
-.slider {
-    background-color: #ccc;
-    bottom: 0;
-    cursor: pointer;
-    left: 0;
-    position: absolute;
-    right: 0;
-    top: 0;
-    transition: 0.4s;
+.theme-switch .slider {
+background-color: #ccc;
+height: 1.25em;
+width: 2em;
+transition: 0.4s;
+position: relative;
+margin-right: 3px;
 }
 
-.slider:before {
+.theme-switch .slider:before {
     background-color: #fff;
-    bottom: 4px;
+    bottom: 2px;
     content: "";
-    height: 26px;
-    left: 4px;
+    height: calc(1.25em - 4px);
+    left: 2px;
     position: absolute;
     transition: 0.4s;
-    width: 26px;
+    width: calc(1.25em - 4px);
 }
 
-input:checked + .slider {
+.theme-switch input:checked + .slider {
     background-color: #66bb6a;
 }
 
-input:checked + .slider:before {
-    transform: translateX(26px);
+.theme-switch input:checked + .slider:before {
+    transform: translateX( calc(0.75em - 1px) );
 }
 
-.slider.round {
-    border-radius: 34px;
+.theme-switch .slider.round {
+    border-radius: 1.25em;
 }
 
-.slider.round:before {
-    border-radius: 50%;
+.theme-switch .slider.round:before {
+    border-radius: 1.25em;
 }
-
 /*End theme toggle*/
