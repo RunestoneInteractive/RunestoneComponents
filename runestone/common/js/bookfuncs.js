@@ -284,15 +284,27 @@ window.addEventListener("load", function () {
             e.stopPropagation();
         });
     });
-
+    
+    // re-write some urls
+    // This is tricker than it looks and you have to obey the rules for # anchors
+    // The #anchors must come after the query string as the server basically ignores any part
+    // of a url that comes after # - like a comment...
     if (location.href.includes("mode=browsing")) {
         let queryString = "?mode=browsing";
         document.querySelectorAll("a").forEach((link) => {
-            if (link.href.includes("books/published")) {
+            console.log(`Starting: ${link.href}`)
+            let anchorText = "";
+            if (link.href.includes("books/published") && ! link.href.includes("?mode=browsing")) {
+                if (link.href.includes("#")) {
+                    let aPoint = link.href.indexOf("#");
+                    anchorText = link.href.substring(aPoint);
+                    link.href = link.href.substring(0,aPoint);
+                }
                 link.href = link.href.includes("?")
-                    ? link.href + queryString.replace("?", "&")
-                    : link.href + queryString;
+                    ? link.href + queryString.replace("?", "&") + anchorText
+                    : link.href + queryString + anchorText;
             }
+            console.log(`Ending: ${link.href}`)
         });
     }
 });
