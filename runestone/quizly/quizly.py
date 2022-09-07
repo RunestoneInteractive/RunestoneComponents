@@ -30,6 +30,7 @@ from pathlib import Path
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 from runestone.common import RunestoneIdDirective, RunestoneIdNode
 from docutils import nodes
+
 __author__ = "rmorelli"
 
 # Debug flags
@@ -55,6 +56,7 @@ def setup(app):
     app.add_directive("quizly", Quizly)
     app.add_node(QuizlyNode, html=(visit_quizly_html, depart_quizly_html))
 
+
 # The only content needed from quizly.py is the quizname
 
 
@@ -72,28 +74,30 @@ def visit_quizly_html(self, node):
     node["delimiter"] = "_start__{}_".format(node["runestone_options"]["divid"])
     self.body.append(node["delimiter"])
 
-    print('DEBUG: visit_quizly_html quizname = ' + node["quizname"]) if DEBUG else None
-    print('DEBUG: visit_quizly_html template = ' + node["template"]) if DEBUG else None
-    print('DEBUG: visit_quizly_html options = '
-          + str(node["runestone_options"])) if DEBUG else None
+    print("DEBUG: visit_quizly_html quizname = " + node["quizname"]) if DEBUG else None
+    print("DEBUG: visit_quizly_html template = " + node["template"]) if DEBUG else None
+    print(
+        "DEBUG: visit_quizly_html options = " + str(node["runestone_options"])
+    ) if DEBUG else None
 
     res = node["template"] % (node["runestone_options"])
-    print('DEBUG: visit_quizly_html res = ' + res) if DEBUG else None
+    print("DEBUG: visit_quizly_html res = " + res) if DEBUG else None
     self.body.append(res)
 
 
 def depart_quizly_html(self, node):
-    """ This is called at the start of processing an activecode node.  If activecode had recursive nodes
-        etc and did not want to do all of the processing in visit_ac_html any finishing touches could be
-        added here.
+    """This is called at the start of processing an activecode node.  If activecode had recursive nodes
+    etc and did not want to do all of the processing in visit_ac_html any finishing touches could be
+    added here.
     """
-    print('DEBUG: depart_quizly_html') if DEBUG else None
+    print("DEBUG: depart_quizly_html") if DEBUG else None
     bc = node["runestone_options"]["basecourse"]
     addHTMLToDB(
         node["runestone_options"]["divid"],
         bc,
-        "".join(self.body[self.body.index(node["delimiter"]) + 1 :])
-        .replace("../_static", f"/runestone/books/published/{bc}/_static"),
+        "".join(self.body[self.body.index(node["delimiter"]) + 1 :]).replace(
+            "../_static", f"/ns/books/published/{bc}/_static"
+        ),
     )
     self.body.remove(node["delimiter"])
 
@@ -114,6 +118,7 @@ class Quizly(RunestoneIdDirective):
 
        :quizname: quiz_eval_expression
     """
+
     required_arguments = 1
     optional_arguments = 0
     has_content = True
@@ -122,9 +127,9 @@ class Quizly(RunestoneIdDirective):
 
     def run(self):
         super(Quizly, self).run()
-        print('DEBUG; Quizly.run()') if DEBUG else None
+        print("DEBUG; Quizly.run()") if DEBUG else None
 
-        addQuestionToDB(self)   # Not sure whether this works?
+        addQuestionToDB(self)  # Not sure whether this works?
         document = self.state.document
         rel_filename, filename = document.settings.env.relfn2path(self.arguments[0])
 
@@ -137,14 +142,16 @@ class Quizly(RunestoneIdDirective):
 
         quizly_node = QuizlyNode()
         quizly_node["runestone_options"] = self.options
-        quizly_node["quizname"] = str(self.options['controls'][0])
+        quizly_node["quizname"] = str(self.options["controls"][0])
         quizly_node["quizname"] = str.strip(quizly_node["quizname"][10:])
         quizly_node["template"] = QUIZLY_TEMPLATE.replace(
-            '###', quizly_node["quizname"])
-
-        quizly_node["source"], quizly_node["line"] = self.state_machine.get_source_and_line(
-            self.lineno
+            "###", quizly_node["quizname"]
         )
-        print('DEBUG: run() self.content = ' + str(self.content)) if DEBUG else None
-        print('DEBUG: run() quizly_node = ' + str(quizly_node)) if DEBUG else None
+
+        (
+            quizly_node["source"],
+            quizly_node["line"],
+        ) = self.state_machine.get_source_and_line(self.lineno)
+        print("DEBUG: run() self.content = " + str(self.content)) if DEBUG else None
+        print("DEBUG: run() quizly_node = " + str(quizly_node)) if DEBUG else None
         return [quizly_node]

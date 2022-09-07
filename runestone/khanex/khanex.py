@@ -29,6 +29,7 @@ from pathlib import Path
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
 from runestone.common import RunestoneIdDirective, RunestoneIdNode
 from docutils import nodes
+
 __author__ = "rmorelli"
 
 # Debug flags
@@ -53,11 +54,13 @@ def setup(app):
     app.add_directive("khanex", Khanex)
     app.add_node(KhanexNode, html=(visit_khanex_html, depart_khanex_html))
 
+
 # The only content needed from khanex.py is the exercise name
 
 
 class KhanexNode(nodes.General, nodes.Element, RunestoneIdNode):
     pass
+
 
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
@@ -69,28 +72,30 @@ def visit_khanex_html(self, node):
     node["delimiter"] = "_start__{}_".format(node["runestone_options"]["divid"])
     self.body.append(node["delimiter"])
 
-    print('DEBUG: visit_khanex_html exername = ' + node["exername"]) if DEBUG else None
-    print('DEBUG: visit_khanex_html template = ' + node["template"]) if DEBUG else None
-    print('DEBUG: visit_khanex_html options = '
-          + str(node["runestone_options"])) if DEBUG else None
+    print("DEBUG: visit_khanex_html exername = " + node["exername"]) if DEBUG else None
+    print("DEBUG: visit_khanex_html template = " + node["template"]) if DEBUG else None
+    print(
+        "DEBUG: visit_khanex_html options = " + str(node["runestone_options"])
+    ) if DEBUG else None
 
     res = node["template"] % (node["runestone_options"])
-    print('DEBUG: visit_khanex_html res = ' + res) if DEBUG else None
+    print("DEBUG: visit_khanex_html res = " + res) if DEBUG else None
     self.body.append(res)
 
 
 def depart_khanex_html(self, node):
-    """ This is called at the start of processing an activecode node.  If activecode had recursive nodes
-        etc and did not want to do all of the processing in visit_ac_html any finishing touches could be
-        added here.
+    """This is called at the start of processing an activecode node.  If activecode had recursive nodes
+    etc and did not want to do all of the processing in visit_ac_html any finishing touches could be
+    added here.
     """
-    print('DEBUG: depart_khanex_html') if DEBUG else None
+    print("DEBUG: depart_khanex_html") if DEBUG else None
     bc = node["runestone_options"]["basecourse"]
     addHTMLToDB(
         node["runestone_options"]["divid"],
         bc,
-        "".join(self.body[self.body.index(node["delimiter"]) + 1 :])
-        .replace("../_static", f"/runestone/books/published/{bc}/_static"),
+        "".join(self.body[self.body.index(node["delimiter"]) + 1 :]).replace(
+            "../_static", f"/ns/books/published/{bc}/_static"
+        ),
     )
     self.body.remove(node["delimiter"])
     pass
@@ -110,20 +115,21 @@ class Khanex(RunestoneIdDirective):
     """
     .. khanex:: some_unique_id, e.g., ex1
 
-       :exercise: unique-ex-name: 
+       :exercise: unique-ex-name:
     """
+
     required_arguments = 1
     optional_arguments = 0
-    has_content = True    
+    has_content = True
     option_spec = RunestoneIdDirective.option_spec.copy()
-    option_spec.update( {} )
+    option_spec.update({})
 
     # This invokes the rendering code in js/khanex.js
     def run(self):
         super(Khanex, self).run()
-        print('DEBUG; Khanex.run()') if DEBUG else None
+        print("DEBUG; Khanex.run()") if DEBUG else None
 
-        addQuestionToDB(self)   # Not sure whether this works?
+        addQuestionToDB(self)  # Not sure whether this works?
         document = self.state.document
         rel_filename, filename = document.settings.env.relfn2path(self.arguments[0])
 
@@ -136,12 +142,14 @@ class Khanex(RunestoneIdDirective):
 
         khanex_node = KhanexNode()
         khanex_node["runestone_options"] = self.options
-        khanex_node["exername"] = str(self.options['controls'][0])
+        khanex_node["exername"] = str(self.options["controls"][0])
         khanex_node["exername"] = str.strip(khanex_node["exername"][10:])
         khanex_node["template"] = KHANEX_TEMPLATE.replace(
-            '###', khanex_node["exername"])
-
-        khanex_node["source"], khanex_node["line"] = self.state_machine.get_source_and_line(
-            self.lineno
+            "###", khanex_node["exername"]
         )
+
+        (
+            khanex_node["source"],
+            khanex_node["line"],
+        ) = self.state_machine.get_source_and_line(self.lineno)
         return [khanex_node]
