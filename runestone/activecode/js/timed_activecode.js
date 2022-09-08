@@ -13,7 +13,6 @@ var TimedActiveCodeMixin = {
     timedInit: async function (opts) {
         this.isTimed = true;
         this.hideButtons();
-        await this.addHistoryScrubber(true); // position last
         this.needsReinitialization = true; // the run button click listener needs to be reinitialized
         this.containerDiv.classList.add("timedComponent");
         window.edList[this.divid] = this;
