@@ -288,7 +288,7 @@ export class ActiveCode extends RunestoneBase {
             this.addDownloadButton(ctrlDiv);
         }
         if (!this.hidecode && !this.hidehistory) {
-            this.addHistoryButton(ctrlDiv);
+            this.addHistoryScrubber(true);
         }
         if ($(this.origElem).data("gradebutton") && !this.graderactive) {
             this.addFeedbackButton(ctrlDiv);
@@ -335,19 +335,6 @@ export class ActiveCode extends RunestoneBase {
         this.gradeButton = butt;
         ctrlDiv.appendChild(butt);
         $(butt).click(this.createGradeSummary.bind(this));
-    }
-
-    addHistoryButton(ctrlDiv) {
-        let butt = document.createElement("button");
-        $(butt).text($.i18n("msg_activecode_load_history"));
-        $(butt).addClass("btn btn-default");
-        $(butt).attr("type", "button");
-        ctrlDiv.appendChild(butt);
-        this.histButton = butt;
-        $(butt).click(this.addHistoryScrubber.bind(this));
-        if (this.graderactive) {
-            this.addHistoryScrubber(true);
-        }
     }
 
     addDownloadButton(ctrlDiv) {
@@ -687,8 +674,6 @@ export class ActiveCode extends RunestoneBase {
         let outOf = this.history.length;
         let ts = this.timestamps[$(scrubber).slider("value")];
         $(this.timestampP).text(`${ts} - ${pos + 1} of ${outOf}`);
-        $(this.histButton).remove();
-        this.histButton = null;
         this.historyScrubber = scrubber;
         $(scrubberDiv).insertAfter(this.runButton);
     } // end definition of helper

@@ -78,7 +78,6 @@ var TimedActiveCodeMixin = {
         this.runButton.disabled = false;
         $(this.codeDiv).removeClass("ac-disabled");
         this.editor.refresh();
-        $(this.histButton).click(this.addHistoryScrubber.bind(this));
         if (this.historyScrubber !== null) {
             $(this.historyScrubber).slider({
                 max: this.history.length - 1,
