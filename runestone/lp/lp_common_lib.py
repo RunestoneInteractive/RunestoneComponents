@@ -25,9 +25,10 @@ def commentForExt(file_name):
         ".ini": "; ",
         ".js": "// ",
         ".py": "# ",
+        ".v": "// ",
         # Rust.
         ".rs": "// ",
-        ".rst": "",
+        # PIC24 assembly
         ".s": "; ",
         # ARM assembly.
         ".S": "@ ",
