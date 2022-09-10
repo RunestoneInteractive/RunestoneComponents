@@ -13,6 +13,7 @@
 # Standard library
 # ----------------
 
+import datetime
 import os
 import subprocess
 import sys
@@ -95,6 +96,8 @@ def _build_runestone_book(course, click=click):
         click.echo("Deploy failed, check the log to see what went wrong.")
         return False
 
+    update_library(config, "", course, click, build_system="Runestone")
+
 
 # Build a PreTeXt Book
 # --------------------
@@ -107,6 +110,7 @@ def _build_ptx_book(config, gen, manifest, course, click=click):
     course: the name of the course to build.
     click: default is the click module otherwise an object that has an echo method
     """
+
     if not os.path.exists("project.ptx"):
         click.echo("PreTeXt books need a project.ptx file")
         return False
@@ -152,7 +156,8 @@ def _build_ptx_book(config, gen, manifest, course, click=click):
         populate_static(config, mpath, course)
         # update the library page
         click.echo("updating library...")
-        update_library(config, mpath, course)
+        main_page = find_real_url(cname)
+        update_library(config, mpath, course, main_page=main_page, build_system="PTX")
         return True
 
 
@@ -225,7 +230,9 @@ def extract_docinfo(tree, string, attr=None, click=click):
     return ""
 
 
-def update_library(config, mpath, course, click=click):
+def update_library(
+    config, mpath, course, click=click, build_system="", main_page="index.html"
+):
     """
     Parameters:
     config : This originated as a config object from click -- a mock config will be provided by the AuthorServer
@@ -236,25 +243,58 @@ def update_library(config, mpath, course, click=click):
 
     Returns: Nothing
     """
-    tree = ET.parse(mpath)
-    docinfo = tree.find("./library-metadata")
     eng = create_engine(config.dburl)
-    title = extract_docinfo(docinfo, "title")
-    subtitle = extract_docinfo(docinfo, "subtitle")
-    description = extract_docinfo(docinfo, "blurb")
-    shelf = extract_docinfo(docinfo, "shelf")
+    if build_system == "PTX":
+        tree = ET.parse(mpath)
+        docinfo = tree.find("./library-metadata")
+        title = extract_docinfo(docinfo, "title")
+        subtitle = extract_docinfo(docinfo, "subtitle")
+        description = extract_docinfo(docinfo, "blurb")
+        shelf = extract_docinfo(docinfo, "shelf")
+    else:
+        try:
+            config_vars = {}
+            exec(open("config.py").read(), config_vars)
+        except Exception as e:
+            print(f"Error adding book {book} to library list: {e}")
+            return
+        subtitle = ""
+        if "navbar_title" in config_vars:
+            title = config_vars["navbar_title"]
+        elif "html_title" in config_vars:
+            title = config_vars["html_title"]
+        elif "html_short_title" in config_vars:
+            title = config_vars["html_short_title"]
+        else:
+            title = "Runestone Book"
+        # update course description if found in the book's conf.py
+        if "course_description" in config_vars:
+            description = config_vars["course_description)"]
+        # update course key_words if found in book's conf.py
+        if "key_words" in config_vars:
+            key_words = config_vars["key_words)"]
+
+        if "shelf_section" in config_vars:
+            shelf = config_vars["shelf_section"]
+        else:
+            shelf = "Computer Science"
+
     click.echo(f"{title} : {subtitle}")
+
     try:
         res = eng.execute(f"select * from library where basecourse = '{course}'")
     except:
         click.echo("Missing library table?  You may need to run an alembic migration.")
         return False
 
+    build_time = str(datetime.datetime.utcnow())
     if res.rowcount == 0:
         eng.execute(
             f"""insert into library 
-        (title, subtitle, description, shelf_section, basecourse ) 
-        values('{title}', '{subtitle}', '{description}', '{shelf}', '{course}') """
+        (title, subtitle, description, shelf_section, basecourse, 
+            build_system, main_page, last_build ) 
+        values('{title}', '{subtitle}', '{description}', '{shelf}', '{course}', 
+        '{build_system}', '{main_page}', '{build_time}') """
         )
     else:
         eng.execute(
@@ -262,11 +302,24 @@ def update_library(config, mpath, course, click=click):
             title = '{title}',
             subtitle = '{subtitle}',
             description = '{description}',
-            shelf_section = '{shelf}'
+            shelf_section = '{shelf}',
+            build_system = '{build_system}',
+            main_page = '{main_page}',
+            build_time = '{build_time}'
         where basecourse = '{course}'
         """
         )
     return True
+
+
+def find_real_url(book):
+    idx = pathlib.Path("published", book, "index.html")
+    if idx.exists():
+        with open(idx, "r") as idxf:
+            for line in idxf:
+                if g := re.search(r"refresh.*URL='(.*?)'", line):
+                    return g.group(1)
+    return "index.html"
 
 
 def populate_static(config, mpath: Path, course: str, click=click):
