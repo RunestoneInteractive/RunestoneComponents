@@ -205,7 +205,11 @@ export class ActiveCode extends RunestoneBase {
                 ) {
                     // change events can come before any real changes for various reasons, some unknown
                     // this avoids unneccsary log events and updates to the activity counter
-                    if (this.origText === editor.getValue()) {
+                    // offsetParent === null means that the element is not on the screen and so can't change
+                    // this.controlDiv.offsetParent
+                    if (this.origText === editor.getValue() ||
+                        this.addingScrubber )  {
+                        console.log("Fake change event, skipping the log");
                         return;
                     }
                     $(editor.getWrapperElement()).css(
@@ -567,6 +571,7 @@ export class ActiveCode extends RunestoneBase {
     // add an initial load history button
     // if there is no edit then there is no append   to_save (True/False)
     async addHistoryScrubber(pos_last) {
+        this.addingScrubber = true;
         let response;
         var reqData = {
             acid: this.divid,
@@ -612,6 +617,7 @@ export class ActiveCode extends RunestoneBase {
             }
             this.renderScrubber(pos_last);
         }
+        this.addingScrubber = false;
         return "success";
     }
 
@@ -627,17 +633,19 @@ export class ActiveCode extends RunestoneBase {
         });
         var scrubber = document.createElement("div");
         this.timestampP = document.createElement("span");
-        this.slideit = function () {
+        this.slideit = function (ev, el) {
             this.editor.setValue(this.history[$(scrubber).slider("value")]);
             var curVal = this.timestamps[$(scrubber).slider("value")];
             let pos = $(scrubber).slider("value");
             let outOf = this.history.length;
             $(this.timestampP).text(`${curVal} - ${pos + 1} of ${outOf}`);
-            this.logBookEvent({
-                event: "activecode",
-                act: "slide:" + curVal,
-                div_id: this.divid,
-            });
+            if (ev !== null ) {
+                this.logBookEvent({
+                    event: "activecode",
+                    act: "slide:" + curVal,
+                    div_id: this.divid,
+                });
+            }
         };
         $(scrubber).slider({
             max: this.history.length - 1,
@@ -1179,7 +1187,7 @@ Yet another is that there is an internal error.  The internal error message is: 
                 "value",
                 this.history.length - 1
             );
-            this.slideit();
+            this.slideit(null);
         } else {
             saveCode = "False";
         }
