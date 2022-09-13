@@ -639,7 +639,9 @@ export class ActiveCode extends RunestoneBase {
             let pos = $(scrubber).slider("value");
             let outOf = this.history.length;
             $(this.timestampP).text(`${curVal} - ${pos + 1} of ${outOf}`);
-            if (ev !== null ) {
+            // a slide will also result in a slidechange event we don't want to double
+            // log these events.  So do not log the slide until it stops and creates the changed
+            if (ev !== null && ev.type != "slide") {
                 this.logBookEvent({
                     event: "activecode",
                     act: "slide:" + curVal,
