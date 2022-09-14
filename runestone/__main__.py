@@ -153,8 +153,12 @@ def build(all, wd):
     else:
         os.chdir(findProjectRoot())
     sys.path.insert(0, os.getcwd())
-    if not pathlib.Path(resource_filename("runestone", "dist/webpack_static_imports.json")).exists():
-        click.echo("Error -- you are missing webpack_static_imports.json.  Please make sure")
+    if not pathlib.Path(
+        resource_filename("runestone", "dist/webpack_static_imports.json")
+    ).exists():
+        click.echo(
+            "Error -- you are missing webpack_static_imports.json.  Please make sure"
+        )
         click.echo("you have Runestone installed correctly.")
         click.echo("In a development environment, execute npm run build.")
         sys.exit(-1)
@@ -163,6 +167,7 @@ def build(all, wd):
     print("Building with Runestone {}".format(version))
 
     import pavement
+
     confpath = pathlib.Path(pavement.options.get("confdir", "."))
 
     with open(confpath / "conf.py", encoding="utf-8") as cf:
@@ -341,16 +346,22 @@ def rs2ptx(course, sourcedir, outdir):
     else:
         tdict = {"course_id": course}
 
-    cmd_start = ["sphinx-build", "-E", "-b", "xml",
-                 "-d", f"./build/{course}/doctrees", "-c", "."]
+    cmd_start = [
+        "sphinx-build",
+        "-E",
+        "-b",
+        "xml",
+        "-d",
+        f"./build/{course}/doctrees",
+        "-c",
+        ".",
+    ]
     tplate_val = [f"-A{key}={val}" for key, val in tdict.items()]
     cmd_end = [f"{sourcedir}", f"./{outdir}/xml"]
     cmd = " ".join(cmd_start + tplate_val + cmd_end)
     click.echo(cmd)
     try:
-        cp = subprocess.run(
-            cmd , shell=True, check=True
-        )
+        cp = subprocess.run(cmd, shell=True, check=True)
     except subprocess.CalledProcessError as e:
         click.echo(f"{e.stderr or ''}{e.stdout or ''}")
         raise
@@ -424,6 +435,7 @@ def process_manifest(course, manifest):
 
 
 def main(args=None):
+    sys.dont_write_bytecode = True
     if not args:
         args = sys.argv[1:]
     if not args:
