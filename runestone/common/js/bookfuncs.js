@@ -251,10 +251,24 @@ function notifyRunestoneComponents() {
     $(document).trigger("runestone:pre-login-complete");
 }
 
+function placeAdCopy() {
+    if (typeof showAd !== "undefined" && showAd) {
+        let adNum = Math.floor(Math.random() * 2) + 1;
+        let adBlock = document.getElementById(`adcopy_${adNum}`);
+        let rsElements = document.querySelectorAll(".runestone");
+        if (rsElements.length > 0) {
+            let randomIndex = Math.floor(Math.random() * rsElements.length);
+            rsElements[randomIndex].after(adBlock)
+            adBlock.style.display = "block";
+        }
+    }
+}
+
 // initialize stuff
 $(function () {
     if (eBookConfig) {
         handlePageSetup();
+        placeAdCopy();
     } else {
         if (typeof eBookConfig === "undefined") {
             console.log(

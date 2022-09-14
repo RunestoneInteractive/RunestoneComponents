@@ -309,15 +309,28 @@
 <!-- Ad Serving for Runestone Campaign -->
 {% if dynamic_pages == 'True' %}
     {% raw %}
-        {% if settings.num_banners > 0 and settings.show_rs_banner %}
-         <div style="width: 100%;">
-            <a href="/runestone/default/donate?banner={{banner_num}}">
-            <img class="runestone-banner"
-                 src="/runestone/static/images/RunestoneBanner{{banner_num}}.png"
-                 alt="Please Support Runestone"
-                 style="display: block; width: 728px; margin-left: auto; margin-right: auto; margin-top: 10px;">
-            </a>
+        {% if show_rs_banner  %}
+         <script>
+           var showAd = true;
+         </script>
+         <div id="adcopy_1" class="adcopy" style="display: none;">
+           <h4>Before you keep reading...</h4>
+           <p>Runestone Academy can only continue if we get support from individuals like you. As a student you are well aware of the high cost of textbooks.  Our mission is to provide great books to you for free, but we ask that you consider a $10 donation, more if you can or less if $10 is a burden.
+           </p>
+           <div class="donateb">
+           <a href="/runestone/default/donate?ad=1" role="button" class="btn btn-info">Support Runestone Academy Today</a></div>
+         <div id="adcopy_2" class="adcopy" style="display: none;">
+            <h4>Before you keep reading...</h4>
+            <p>Making great stuff takes time and $$.  If you appreciate the book you are reading now and want to keep quality materials free for other students please consider a donation to Runestone Academy. We ask that you consider a $10 donation, but if you can give more thats great, if $10 is too much for your budget we would be happy with whatever you can afford as a show of support.
+            </p>
+            <div class="donateb">
+            <a href="/runestone/default/donate?ad=2" role="button" class="btn btn-info">Support Runestone Academy Today</a></div>
          </div>
+         </div>
+        {% else %}
+        <script>
+          var showAd = false;
+        </script>
         {% endif %}
     {% endraw %}
 {% endif %}
