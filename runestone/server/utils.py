@@ -15,6 +15,7 @@
 
 import datetime
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -313,7 +314,7 @@ def update_library(
 
 
 def find_real_url(book):
-    idx = pathlib.Path("published", book, "index.html")
+    idx = Path("published", book, "index.html")
     if idx.exists():
         with open(idx, "r") as idxf:
             for line in idxf:
