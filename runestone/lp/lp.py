@@ -195,7 +195,7 @@ class _LpBuildButtonDirective(RunestoneIdDirective):
     # No optional arguments.
     optional_arguments = 0
     # Per http://docutils.sourceforge.net/docs/howto/rst-directives.html, True if content is allowed. However, this isn't checked or enforced.
-    has_content = True
+    has_content = False
     # Options. Everything but language is currently ignored. This is based on activecode, so in the future similar support would be provided for these options.
     option_spec = RunestoneIdDirective.option_spec.copy()
     option_spec.update(
@@ -232,10 +232,6 @@ class _LpBuildButtonDirective(RunestoneIdDirective):
         lp_node["source"], lp_node["line"] = self.state_machine.get_source_and_line(
             self.lineno
         )
-        # Insert the question number.
-        self.content.append(self.options["qnumber"], "lp")
-        # Parse it, since the number may be a role.
-        self.state.nested_parse(self.content, self.content_offset, lp_node)
 
         return [lp_node]
 
