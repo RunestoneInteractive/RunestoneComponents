@@ -306,7 +306,7 @@ def update_library(
             shelf_section = '{shelf}',
             build_system = '{build_system}',
             main_page = '{main_page}',
-            build_time = '{build_time}'
+            last_build = '{build_time}'
         where basecourse = '{course}'
         """
         )
