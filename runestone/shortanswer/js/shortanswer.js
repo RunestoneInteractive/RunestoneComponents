@@ -34,6 +34,7 @@ export default class ShortAnswer extends RunestoneBase {
             if ($(this.origElem).is("[data-mathjax]")) {
                 this.mathjax = true;
             }
+            this.placeholder = $(this.origElem).data("placeholder") || "Write your answer here";
             this.renderHTML();
             this.caption = "shortanswer";
             this.addCaption("runestone");
@@ -75,6 +76,7 @@ export default class ShortAnswer extends RunestoneBase {
         };
         this.jTextArea.id = this.divid + "_solution";
         $(this.jTextArea).attr("aria-label", "textarea");
+        this.jTextArea.placeholder = this.placeholder;
         $(this.jTextArea).css("display:inline, width:530px");
         $(this.jTextArea).addClass("form-control");
         this.jTextArea.rows = 4;
