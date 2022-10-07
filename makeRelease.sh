@@ -20,6 +20,17 @@ read -p "Did you update/commit the version in pyproject.toml " yn
     esac
 done
 
+if [ -z "$(git status --porcelain)" ]; then
+   echo "Working directory clean"
+else
+  read -p "You have uncommitted changes do you really want to release? " yn
+  case $yn in
+      [Yy]* ) break;;
+      [Nn]* ) exit;;
+      * ) echo "Please answer yes or no.";;
+  esac
+fi
+   
 echo "Building webpack bundle"
 npm run dist
 
