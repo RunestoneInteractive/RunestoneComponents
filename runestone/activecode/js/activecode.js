@@ -36,11 +36,11 @@ import embed from "vega-embed";
 window.vegaEmbed = embed;
 
 var isMouseDown = false;
-document.onmousedown = function () {
+document.onmousedown = function() {
     isMouseDown = true;
 };
 
-document.onmouseup = function () {
+document.onmouseup = function() {
     isMouseDown = false;
 };
 window.edList = {};
@@ -48,7 +48,7 @@ window.edList = {};
 var socket, connection, doc;
 var chatcodesServer = "chat.codes";
 
-CodeMirror.commands.autocomplete = function (cm) {
+CodeMirror.commands.autocomplete = function(cm) {
     cm.showHint({ hint: CodeMirror.hint.anyword });
 };
 
@@ -135,7 +135,7 @@ export class ActiveCode extends RunestoneBase {
         }
         this.addCaption("runestone");
         setTimeout(
-            function () {
+            function() {
                 this.editor.refresh();
             }.bind(this),
             1000
@@ -190,7 +190,7 @@ export class ActiveCode extends RunestoneBase {
         });
         // Make the editor resizable
         $(editor.getWrapperElement()).resizable({
-            resize: function () {
+            resize: function() {
                 editor.setSize($(this).width(), $(this).height());
                 editor.refresh();
             },
@@ -198,7 +198,7 @@ export class ActiveCode extends RunestoneBase {
         // give the user a visual cue that they have changed but not saved
         editor.on(
             "change",
-            function (ev) {
+            function(ev) {
                 if (
                     editor.acEditEvent == false ||
                     editor.acEditEvent === undefined
@@ -208,7 +208,7 @@ export class ActiveCode extends RunestoneBase {
                     // offsetParent === null means that the element is not on the screen and so can't change
                     // this.controlDiv.offsetParent
                     if (this.origText === editor.getValue() ||
-                        this.addingScrubber )  {
+                        this.addingScrubber) {
                         console.log("Fake change event, skipping the log");
                         return;
                     }
@@ -232,16 +232,16 @@ export class ActiveCode extends RunestoneBase {
             }.bind(this)
         ); // use bind to preserve *this* inside the on handler.
         //Solving Keyboard Trap of ActiveCode: If user use tab for navigation outside of ActiveCode, then change tab behavior in ActiveCode to enable tab user to tab out of the textarea
-        $(window).keydown(function (e) {
+        $(window).keydown(function(e) {
             var code = e.keyCode ? e.keyCode : e.which;
             if (code == 9 && $("textarea:focus").length === 0) {
                 editor.setOption("extraKeys", {
-                    Tab: function (cm) {
+                    Tab: function(cm) {
                         $(document.activeElement)
                             .closest(".tab-content")
                             .nextSibling.focus();
                     },
-                    "Shift-Tab": function (cm) {
+                    "Shift-Tab": function(cm) {
                         $(document.activeElement)
                             .closest(".tab-content")
                             .previousSibling.focus();
@@ -361,7 +361,7 @@ export class ActiveCode extends RunestoneBase {
         this.showHideButt = butt;
         ctrlDiv.appendChild(butt);
         $(butt).click(
-            function () {
+            function() {
                 $(this.codeDiv).toggle();
                 if (this.historyScrubber == null) {
                     this.addHistoryScrubber(true);
@@ -407,7 +407,7 @@ export class ActiveCode extends RunestoneBase {
         this.atButton = butt;
         ctrlDiv.appendChild(butt);
         $(butt).click(
-            function () {
+            function() {
                 new AudioTour(
                     this.divid,
                     this.code,
@@ -426,7 +426,7 @@ export class ActiveCode extends RunestoneBase {
         this.shareButt = butt;
         ctrlDiv.appendChild(butt);
         $(butt).click(
-            async function () {
+            async function() {
                 if (
                     !confirm(
                         "You are about to share this code with ALL of your students.  Are you sure you want to continue?"
@@ -440,8 +440,7 @@ export class ActiveCode extends RunestoneBase {
                     lang: this.language,
                 };
                 let request = new Request(
-                    eBookConfig.ajaxURL + "broadcast_code.json",
-                    {
+                    eBookConfig.ajaxURL + "broadcast_code.json", {
                         method: "POST",
                         headers: this.jsonHeaders,
                         body: JSON.stringify(data),
@@ -468,7 +467,7 @@ export class ActiveCode extends RunestoneBase {
         $(plabel).text("Pair?");
         ctrlDiv.appendChild(plabel);
         $(checkPartner).click(
-            function () {
+            function() {
                 if (this.partner) {
                     this.partner = false;
                     $(partnerTextBox).hide();
@@ -480,8 +479,8 @@ export class ActiveCode extends RunestoneBase {
                     if (!didAgree) {
                         didAgree = confirm(
                             "Pair Programming should only be used with the consent of your instructor." +
-                                "Your partner must be a registered member of the class and have agreed to pair with you." +
-                                "By clicking OK you certify that both of these conditions have been met."
+                            "Your partner must be a registered member of the class and have agreed to pair with you." +
+                            "By clicking OK you certify that both of these conditions have been met."
                         );
                         if (didAgree) {
                             localStorage.setItem("partnerAgree", "true");
@@ -500,7 +499,7 @@ export class ActiveCode extends RunestoneBase {
         ctrlDiv.appendChild(partnerTextBox);
         $(partnerTextBox).hide();
         $(partnerTextBox).change(
-            function () {
+            function() {
                 this.partner = partnerTextBox.value;
             }.bind(this)
         );
@@ -524,21 +523,21 @@ export class ActiveCode extends RunestoneBase {
         $(butt).attr(
             "href",
             "http://" +
-                chatcodesServer +
-                "/new?" +
-                $.param({
-                    topic: window.location.host + "-" + this.divid,
-                    code: this.editor.getValue(),
-                    lang: "Python",
-                })
+            chatcodesServer +
+            "/new?" +
+            $.param({
+                topic: window.location.host + "-" + this.divid,
+                code: this.editor.getValue(),
+                lang: "Python",
+            })
         );
         this.chatButton = butt;
         chatBar.appendChild(butt);
-        var updateChatCodesChannels = function () {
+        var updateChatCodesChannels = function() {
             var data = doc.data;
             var i = 1;
             $(channels).html("");
-            data["channels"].forEach(function (channel) {
+            data["channels"].forEach(function(channel) {
                 if (!channel.archived && topic === channel.topic) {
                     var link = $("<a />");
                     var href =
@@ -581,16 +580,14 @@ export class ActiveCode extends RunestoneBase {
         }
         console.log("before get hist");
         if (
-            eBookConfig.practice_mode ||
+            eBookConfig.practice_mode || !eBookConfig.isLoggedIn ||
             (this.isTimed && !this.assessmentTaken)
         ) {
             // If this is timed and already taken we should restore history info
             this.renderScrubber();
         } else {
-            // TODO: If the user is not logged in there is no point in getting history
             let request = new Request(
-                `${eBookConfig.new_server_prefix}/assessment/gethist`,
-                {
+                `${eBookConfig.new_server_prefix}/assessment/gethist`, {
                     method: "POST",
                     headers: this.jsonHeaders,
                     body: JSON.stringify(reqData),
@@ -634,7 +631,7 @@ export class ActiveCode extends RunestoneBase {
         });
         var scrubber = document.createElement("div");
         this.timestampP = document.createElement("span");
-        this.slideit = function (ev, el) {
+        this.slideit = function(ev, el) {
             this.editor.setValue(this.history[$(scrubber).slider("value")]);
             var curVal = this.timestamps[$(scrubber).slider("value")];
             let pos = $(scrubber).slider("value");
@@ -708,7 +705,7 @@ export class ActiveCode extends RunestoneBase {
         $(this.graphics).on(
             "DOMNodeInserted",
             "canvas",
-            function () {
+            function() {
                 $(this.graphics).addClass("visible-ac-canvas");
             }.bind(this)
         );
@@ -748,10 +745,10 @@ export class ActiveCode extends RunestoneBase {
             fnb +
             "_" +
             d
-                .toJSON()
-                .substring(0, 10) // reverse date format
-                .split("-")
-                .join("") +
+            .toJSON()
+            .substring(0, 10) // reverse date format
+            .split("-")
+            .join("") +
             "." +
             languageExtensions[lang];
         var code = this.editor.getValue();
@@ -1028,10 +1025,10 @@ Yet another is that there is an internal error.  The internal error message is: 
                 $.ajax({
                     async: false,
                     url: `/runestone/ajax/get_datafile?course_id=${eBookConfig.course}&acid=${divid}`,
-                    success: function (data) {
+                    success: function(data) {
                         result = JSON.parse(data).data;
                     },
-                    error: function (err) {
+                    error: function(err) {
                         result = null;
                     },
                 });
@@ -1055,7 +1052,7 @@ Yet another is that there is an internal error.  The internal error message is: 
     }
     outputfun(text) {
         // bnm python 3
-        var pyStr = function (x) {
+        var pyStr = function(x) {
             if (x instanceof Array) {
                 return "[" + x.join(", ") + "]";
             } else {
@@ -1081,9 +1078,9 @@ Yet another is that there is an internal error.  The internal error message is: 
             .replace(/>/g, "&gt;")
             .replace(/\n/g, "<br/>");
         return Promise.resolve().then(
-            function () {
+            function() {
                 setTimeout(
-                    function () {
+                    function() {
                         $(this.output).append(text);
                     }.bind(this),
                     0
@@ -1127,8 +1124,7 @@ Yet another is that there is an internal error.  The internal error message is: 
             return window.edList[divid].editor.getValue();
         } else {
             let request = new Request(
-                `/runestone/ajax/get_datafile?course_id=${eBookConfig.course}&acid=${divid}`,
-                {
+                `/runestone/ajax/get_datafile?course_id=${eBookConfig.course}&acid=${divid}`, {
                     method: "GET",
                     headers: this.jsonHeaders,
                 }
@@ -1175,7 +1171,7 @@ Yet another is that there is an internal error.  The internal error message is: 
         if (
             this.historyScrubber &&
             this.history[$(this.historyScrubber).slider("value")] !=
-                this.editor.getValue()
+            this.editor.getValue()
         ) {
             saveCode = "True";
             this.history.push(this.editor.getValue());
@@ -1258,7 +1254,7 @@ Yet another is that there is an internal error.  The internal error message is: 
                 if (
                     $(this.outerDiv).find(`#${urDivid}`).length == 0 &&
                     $(this.outerDiv).find(`#${urDivid}_offscreen_unit_results`)
-                        .length == 0
+                    .length == 0
                 ) {
                     let urResults = document.getElementById(urDivid);
                     this.outerDiv.appendChild(urResults);
@@ -1267,10 +1263,10 @@ Yet another is that there is an internal error.  The internal error message is: 
         }
     }
 
-    toggleAlert(){
+    toggleAlert() {
         if (this.is_toggle && this.runCount == 3) {
-            if (this.errinfo != "success" || this.unit_results.substring(8,11)!=100.0){
-                setTimeout(function() {alert("Help is Available Using the Toggle Question Selector! You can try the Mixed-up Question first."); }, 500);
+            if (this.errinfo != "success" || this.unit_results.substring(8, 11) != 100.0) {
+                setTimeout(function() { alert("Help is Available Using the Toggle Question Selector! You can try the Mixed-up Question first."); }, 500);
                 this.logBookEvent({
                     event: "togglealert",
                     act: "Help is Available Using the Toggle Question Selector",
@@ -1345,7 +1341,7 @@ Yet another is that there is an internal error.  The internal error message is: 
             });
         }
         try {
-            await Sk.misceval.asyncToPromise(function () {
+            await Sk.misceval.asyncToPromise(function() {
                 return Sk.importMainWithBody("<stdin>", false, prog, true);
             });
             if (!noUI) {
@@ -1372,7 +1368,7 @@ Yet another is that there is an internal error.  The internal error message is: 
         } finally {
             $(this.runButton).removeAttr("disabled");
             if (typeof window.allVisualizers != "undefined") {
-                $.each(window.allVisualizers, function (i, e) {
+                $.each(window.allVisualizers, function(i, e) {
                     e.redrawConnectors();
                 });
             }
@@ -1445,6 +1441,6 @@ errorText.KeyErrorFix = $.i18n("msg_activecode_key_error_fix");
 errorText.AssertionError = $.i18n("msg_activecode_assertion_error");
 errorText.AssertionErrorFix = $.i18n("msg_activecode_assertion_error_fix");
 
-String.prototype.replaceAll = function (target, replacement) {
+String.prototype.replaceAll = function(target, replacement) {
     return this.split(target).join(replacement);
 };
