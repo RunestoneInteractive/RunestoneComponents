@@ -587,6 +587,7 @@ export class ActiveCode extends RunestoneBase {
             // If this is timed and already taken we should restore history info
             this.renderScrubber();
         } else {
+            // TODO: If the user is not logged in there is no point in getting history
             let request = new Request(
                 `${eBookConfig.new_server_prefix}/assessment/gethist`,
                 {
