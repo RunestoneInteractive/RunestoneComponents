@@ -213,6 +213,11 @@ async function handlePageSetup() {
             bw.innerHTML =
                 "<p class='navbar_message'>Saving and Logging are Disabled</p>";
         }
+        let aw = document.getElementById("ad_warning");
+        if (aw) {
+            aw.innerHTML =
+                "<p class='navbar_message'>🚫 Log-in to Remove <a href='/runestone/default/ads'>Ads!</a> 🚫 &nbsp;</p>";
+        }
     }
     $(".loggedinuser").html(mess);
 
@@ -298,7 +303,7 @@ window.addEventListener("load", function () {
             e.stopPropagation();
         });
     });
-    
+
     // re-write some urls
     // This is tricker than it looks and you have to obey the rules for # anchors
     // The #anchors must come after the query string as the server basically ignores any part
@@ -306,7 +311,6 @@ window.addEventListener("load", function () {
     if (location.href.includes("mode=browsing")) {
         let queryString = "?mode=browsing";
         document.querySelectorAll("a").forEach((link) => {
-            console.log(`Starting: ${link.href}`)
             let anchorText = "";
             if (link.href.includes("books/published") && ! link.href.includes("?mode=browsing")) {
                 if (link.href.includes("#")) {
@@ -318,7 +322,6 @@ window.addEventListener("load", function () {
                     ? link.href + queryString.replace("?", "&") + anchorText
                     : link.href + queryString + anchorText;
             }
-            console.log(`Ending: ${link.href}`)
         });
     }
 });
