@@ -35,7 +35,7 @@ from runestone.pretext.chapter_pop import manifest_data_to_db
 
 # Build a Runestone Book
 # ----------------------
-def _build_runestone_book(course, click=click):
+def _build_runestone_book(config, course, click=click):
     """
     Parameters:
     course: the name of the course to build.
@@ -92,12 +92,12 @@ def _build_runestone_book(course, click=click):
         olfile.write(res.stderr)
     if resd.returncode == 0:
         click.echo("Success! Book deployed")
-        return True
     else:
         click.echo("Deploy failed, check the log to see what went wrong.")
         return False
 
     update_library(config, "", course, click, build_system="Runestone")
+    return True
 
 
 # Build a PreTeXt Book
@@ -255,9 +255,9 @@ def update_library(
     else:
         try:
             config_vars = {}
-            exec(open("config.py").read(), config_vars)
+            exec(open("conf.py").read(), config_vars)
         except Exception as e:
-            print(f"Error adding book {book} to library list: {e}")
+            print(f"Error adding book {course} to library list: {e}")
             return
         subtitle = ""
         if "navbar_title" in config_vars:
@@ -270,10 +270,10 @@ def update_library(
             title = "Runestone Book"
         # update course description if found in the book's conf.py
         if "course_description" in config_vars:
-            description = config_vars["course_description)"]
+            description = config_vars["course_description"]
         # update course key_words if found in book's conf.py
         if "key_words" in config_vars:
-            key_words = config_vars["key_words)"]
+            key_words = config_vars["key_words"]
 
         if "shelf_section" in config_vars:
             shelf = config_vars["shelf_section"]
@@ -288,16 +288,29 @@ def update_library(
         click.echo("Missing library table?  You may need to run an alembic migration.")
         return False
 
-    build_time = str(datetime.datetime.utcnow())
+    build_time = datetime.datetime.utcnow()
+    click.echo("BUILD time is {build_time}")
     if res.rowcount == 0:
         eng.execute(
-            f"""insert into library 
-        (title, subtitle, description, shelf_section, basecourse, 
-            build_system, main_page, last_build ) 
-        values('{title}', '{subtitle}', '{description}', '{shelf}', '{course}', 
+            f"""insert into library
+        (title, subtitle, description, shelf_section, basecourse,
+            build_system, main_page, last_build )
+        values('{title}', '{subtitle}', '{description}', '{shelf}', '{course}',
         '{build_system}', '{main_page}', '{build_time}') """
         )
     else:
+        # If any values are missing or null do not override them here.
+        #
+        res = res.first()
+        if not title:
+            title = res.title or ""
+        if not subtitle:
+            subtitle = res.subtitle or ""
+        if not description:
+            description = res.description or ""
+        if not shelf:
+            shelf = res.shelf_section or "Misc"
+        click.echo("Updating library")
         eng.execute(
             f"""update library set
             title = '{title}',
@@ -345,9 +358,11 @@ def populate_static(config, mpath: Path, course: str, click=click):
     # Do not download if the versions already match.
     if version != current_version:
         click.echo(f"Fetching {version} files to {sdir} ")
+        # remove the old files, but keep the lunr-pretext-search-index.js file if it exists
         for f in os.listdir(sdir):
             try:
-                os.remove(sdir / f)
+                if "lunr-pretext" not in f:
+                    os.remove(sdir / f)
             except:
                 click.echo(f"ERROR - could not delete {f}")
         # call wget non-verbose, recursive, no parents, no hostname, no directoy copy files to sdir
