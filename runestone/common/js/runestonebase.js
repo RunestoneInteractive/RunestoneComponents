@@ -94,11 +94,16 @@ export default class RunestoneBase {
         if (this.percent) {
             eventInfo.percent = this.percent;
         }
-        if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
+        if (
+            eBookConfig.isLoggedIn &&
+            eBookConfig.useRunestoneServices &&
+            eBookConfig.logLevel > 0
+        ) {
             post_return = this.postLogMessage(eventInfo);
         }
         if (!this.isTimed || eBookConfig.debug) {
-            console.log("logging event " + JSON.stringify(eventInfo));
+            let prefix = eBookConfig.isLoggedIn ? "Save" : "Not";
+            console.log(`${prefix} logging event ` + JSON.stringify(eventInfo));
         }
         // When selectquestions are part of an assignment especially toggle questions
         // we need to count using the selector_id of the select question.
@@ -185,7 +190,11 @@ export default class RunestoneBase {
         if (this.forceSave || "to_save" in eventInfo === false) {
             eventInfo.save_code = "True";
         }
-        if (eBookConfig.useRunestoneServices && eBookConfig.logLevel > 0) {
+        if (
+            eBookConfig.isLoggedIn &&
+            eBookConfig.useRunestoneServices &&
+            eBookConfig.logLevel > 0
+        ) {
             let request = new Request(
                 `${eBookConfig.new_server_prefix}/logger/runlog`,
                 {
