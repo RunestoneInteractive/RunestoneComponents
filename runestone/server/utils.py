@@ -271,6 +271,8 @@ def update_library(
         # update course description if found in the book's conf.py
         if "course_description" in config_vars:
             description = config_vars["course_description"]
+        else:
+            description = ""
         # update course key_words if found in book's conf.py
         if "key_words" in config_vars:
             key_words = config_vars["key_words"]
