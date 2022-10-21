@@ -16,6 +16,8 @@ from paver.easy import sh
 from pkg_resources import resource_string, resource_filename, require
 from .pretext.chapter_pop import manifest_data_to_db
 import codecs
+from runestone.server import get_dburl
+from runestone.server.utils import update_library
 
 if len(sys.argv) == 2:
     if "--version" in sys.argv:
@@ -198,6 +200,14 @@ def build(all, wd):
         myargs.append("--all")
 
     paver_main(args=myargs)
+
+    # Need a small config object with a dburl attribute just for update_library
+    config = type("config", (object,), {})()
+    config.dburl = get_dburl()
+    course = pavement.options.project_name
+    if not course:
+        course = pavement.options.template_args["course_id"]
+    update_library(config, "", course, click, build_system="Runestone")
 
 
 @cli.command(short_help="preview the book in a minimal server (NO API support)")
