@@ -338,6 +338,14 @@
 
   {% block body %}
   {% endblock %}
+  {% if dynamic_pages == 'True' %}
+    {% raw %}
+      {% if show_ethical_ad  %}
+      <div data-ea-publisher="runestoneacademy" data-ea-type="text"></div>
+      {% endif %}
+    {% endraw %}
+  {% endif %}
+
   <div id="scprogresscontainer">
     You have attempted <span id="scprogresstotal"></span> of <span id="scprogressposs"></span> activities on this page <div id="subchapterprogress" aria-label="Page progress"></div>
   </div>
