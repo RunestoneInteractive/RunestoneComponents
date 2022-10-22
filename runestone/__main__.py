@@ -204,7 +204,9 @@ def build(all, wd):
     # Need a small config object with a dburl attribute just for update_library
     config = type("config", (object,), {})()
     config.dburl = get_dburl()
-    course = pavement.options.project_name
+    course = ""
+    if hasattr(pavement.options, "project_name"):
+        course = pavement.options.project_name
     if not course:
         course = pavement.options.template_args["course_id"]
     update_library(config, "", course, click, build_system="Runestone")
