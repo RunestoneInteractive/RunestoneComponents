@@ -296,9 +296,9 @@ def update_library(
         eng.execute(
             f"""insert into library
         (title, subtitle, description, shelf_section, basecourse,
-            build_system, main_page, last_build )
+            build_system, main_page, last_build, for_classes, is_visible )
         values('{title}', '{subtitle}', '{description}', '{shelf}', '{course}',
-        '{build_system}', '{main_page}', '{build_time}') """
+        '{build_system}', '{main_page}', '{build_time}', 'F', 'T') """
         )
     else:
         # If any values are missing or null do not override them here.
