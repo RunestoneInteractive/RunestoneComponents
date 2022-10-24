@@ -171,6 +171,10 @@ def manifest_data_to_db(course_name, manifest_path):
                         idchild = "fix_me"
                 try:
                     qtype = el.attrib["data-component"]
+                    if qtype == "codelens":
+                        # pdb.set_trace()
+                        id_el = el.find("./*[@class='pytutorVisualizer']")
+                        idchild = id_el.attrib["id"]
                     # translate qtype to question_type
                     qtype = QT_MAP.get(qtype, qtype)
                 except:
