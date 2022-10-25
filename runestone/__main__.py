@@ -201,15 +201,16 @@ def build(all, wd):
 
     paver_main(args=myargs)
 
-    # Need a small config object with a dburl attribute just for update_library
-    config = type("config", (object,), {})()
-    config.dburl = get_dburl()
-    course = ""
-    if hasattr(pavement.options, "project_name"):
-        course = pavement.options.project_name
-    if not course:
-        course = pavement.options.template_args["course_id"]
-    update_library(config, "", course, click, build_system="Runestone")
+    if pavement.options.build.template_args.get("dynamic_pages", False):
+        # Need a small config object with a dburl attribute just for update_library
+        config = type("config", (object,), {})()
+        config.dburl = get_dburl()
+        course = ""
+        if hasattr(pavement.options, "project_name"):
+            course = pavement.options.project_name
+        if not course:
+            course = pavement.options.template_args["course_id"]
+        update_library(config, "", course, click, build_system="Runestone")
 
 
 @cli.command(short_help="preview the book in a minimal server (NO API support)")
