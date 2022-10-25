@@ -178,8 +178,10 @@ def manifest_data_to_db(course_name, manifest_path):
                     # translate qtype to question_type
                     qtype = QT_MAP.get(qtype, qtype)
                 except:
-                    qtype = "webwork"
-                    dbtext = ET.tostring(el).decode("utf8")
+                    if el is not None:
+                        qtype = "webwork"
+                        dbtext = ET.tostring(el).decode("utf8")
+
                 valudict = dict(
                     base_course=course_name,
                     name=idchild,
