@@ -291,7 +291,7 @@ def update_library(
         return False
 
     build_time = datetime.datetime.utcnow()
-    click.echo("BUILD time is {build_time}")
+    click.echo(f"BUILD time is {build_time}")
     if res.rowcount == 0:
         eng.execute(
             f"""insert into library
