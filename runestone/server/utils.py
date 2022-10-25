@@ -126,7 +126,7 @@ def _build_ptx_book(config, gen, manifest, course, click=click):
         root = tree.getroot()
         ElementInclude.include(root, base_url=main_file)  # include all xi:include parts
         if gen:
-            res = subprocess.call("pretext generate", shell=True)
+            res = subprocess.call("pretext generate -t runestone", shell=True)
             if res != 0:
                 click.echo("Failed to build")
             # build the book
