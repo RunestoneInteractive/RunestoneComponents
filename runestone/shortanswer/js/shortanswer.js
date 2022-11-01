@@ -34,11 +34,16 @@ export default class ShortAnswer extends RunestoneBase {
             if ($(this.origElem).is("[data-mathjax]")) {
                 this.mathjax = true;
             }
-            this.placeholder = $(this.origElem).data("placeholder") || "Write your answer here";
+            this.placeholder =
+                $(this.origElem).data("placeholder") ||
+                "Write your answer here";
             this.renderHTML();
             this.caption = "shortanswer";
             this.addCaption("runestone");
             this.checkServer("shortanswer", true);
+            if (typeof Prism !== "undefined") {
+                Prism.highlightElement(this.containerDiv);
+            }
         }
     }
 

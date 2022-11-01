@@ -93,6 +93,9 @@ export default class Parsons extends RunestoneBase {
         this.addCaption("runestone");
         // Check the server for an answer to complete things
         this.checkServer("parsons", true);
+        if (typeof Prism !== "undefined") {
+            Prism.highlightElement(this.containerDiv);
+        }
     }
     // Based on the data-fields in the original HTML, initialize options
     initializeOptions() {
@@ -313,8 +316,7 @@ export default class Parsons extends RunestoneBase {
                     tagIndex + 5,
                     textBlock.indexOf(";", tagIndex + 5)
                 );
-                if (tag == "")
-                    tag = "block-" + i;
+                if (tag == "") tag = "block-" + i;
                 dependsIndex = textBlock.indexOf(";depends:");
                 let dependsString = textBlock.substring(
                     dependsIndex + 9,
@@ -337,7 +339,7 @@ export default class Parsons extends RunestoneBase {
             );
             // Create lines
             var lines = [];
-            if (! options["displaymath"]) {
+            if (!options["displaymath"]) {
                 var split = textBlock.split("\n");
             } else {
                 var split = [textBlock];
@@ -346,7 +348,11 @@ export default class Parsons extends RunestoneBase {
                 var code = split[j];
                 // discard blank rows
                 if (!/^\s*$/.test(code)) {
-                    var line = new ParsonsLine(this, code, options["displaymath"]);
+                    var line = new ParsonsLine(
+                        this,
+                        code,
+                        options["displaymath"]
+                    );
                     lines.push(line);
                     if (options["paired"]) {
                         line.distractor = true;
