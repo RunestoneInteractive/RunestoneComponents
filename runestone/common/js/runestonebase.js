@@ -157,16 +157,16 @@ export default class RunestoneBase {
                 throw new Error(`Failed to save the log entry
                     Status: ${response.status}`);
             }
-            post_return = response.json();
+            post_return = await response.json();
         } catch (e) {
             let detail = "none";
-            if (post_return.detail) {
+            if (post_return && post_return.detail) {
                 detail = post_return.detail;
             }
             if (eBookConfig.loginRequired) {
-                alert(`Error: Your action was not saved! 
-                    The error was ${e} 
-                    Detail: ${detail}. 
+                alert(`Error: Your action was not saved!
+                    The error was ${e}
+                    Detail: ${detail}.
                     Please report this error!`);
             }
             // send a request to save this error
