@@ -11,7 +11,7 @@ if (hpList === undefined) hpList = {};
 
 import "./horizontal-parsons.js";
 
-export default class SQLHParons extends RunestoneBase {
+export default class SQLHParsons extends RunestoneBase {
     constructor(opts) {
         super(opts);
         // copied from activecode
@@ -160,6 +160,7 @@ export default class SQLHParons extends RunestoneBase {
     }
 }
 
+
 /*=================================
 == Find the custom HTML tags and ==
 ==   execute our code on them    ==
@@ -169,7 +170,7 @@ $(document).on("runestone:login-complete", function () {
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
             // try {
-            hpList[this.id] = new SQLHParons({
+            hpList[this.id] = new SQLHParsons({
                 orig: this,
                 useRunestoneServices: eBookConfig.useRunestoneServices,
             });
@@ -180,3 +181,10 @@ $(document).on("runestone:login-complete", function () {
         }
     });
 });
+
+if (typeof window.component_factory === "undefined") {
+    window.component_factory = {};
+}
+window.component_factory["hparsons"] = function (opts) {
+    return new SQLHParsons(opts);
+};
