@@ -54,14 +54,27 @@ class LP extends RunestoneBase {
             .siblings(".lp-feedback")
             .children("div");
         // Use a nice editor.
-        let that = this;
         this.textAreas = [];
-        $(".code_snippet").each(function (index, element) {
+        this.initTextAreas();
+        // Handle clicks to the "Save and run" button.
+        let that = this;
+        $(this.element).click((eventObject) =>
+            that.onSaveAndRun(eventObject).then(null)
+        );
+        this.checkServer("lp_build", true);
+    }
+
+    // Look for each code snippet (a textarea). Make it a nice CodeMirror editor.
+    initTextAreas(is_read_only = false) {
+        let that = this;
+        // Select only textareas that haven't been initialized with CodeMirror (which sets style="display:none" on the textarea).
+        $('textarea.code_snippet:not([style="display: none;"])').each(function (index, element) {
             let editor = CodeMirror.fromTextArea(element, {
                 lineNumbers: true,
                 mode: $(that.element).attr("data-lang"),
                 indentUnit: 4,
                 matchBrackets: true,
+                readOnly: is_read_only,
                 autoMatchParens: true,
                 extraKeys: { Tab: "indentMore", "Shift-Tab": "indentLess" },
             });
@@ -75,11 +88,6 @@ class LP extends RunestoneBase {
             // Keep track of it.
             that.textAreas.push(editor);
         });
-        // Handle clicks to the "Save and run" button.
-        $(this.element).click((eventObject) =>
-            that.onSaveAndRun(eventObject).then(null)
-        );
-        this.checkServer("lp_build", true);
     }
 
     // Data structures:
@@ -213,17 +221,29 @@ class LP extends RunestoneBase {
 
     // Store an array of strings in ``data.code_snippets`` into each textarea.
     dataToTextareas(data) {
-        // Find all code snippet textareas.
+        // For places where textareas aren't provided (instructor grading interface, assignment page), create them. However, these aren't runnable, so disable the "Save and run" button. Assume this is the case when there are no textareas. Reasoning: the page containing the problem contains code intended to be intermingled with the student's answer. If that's not present, we can't build.
+        if (!this.textAreas.length) {
+            // The unusual case -- a problem not on its original page. Create textareas to display the code, then initialize them. Note that we can't simply create these in the constructor (which would be convenient) since we don't yet know how many code snippets are associated with the problem.
+            $(this.element).before((data.answer.code_snippets || []).map(() => `<textarea class="code_snippet"></textarea><br />`));
+            // Put CodeMirror in read-only mode.
+            this.initTextAreas(true);
+            // Disable the "Save and run" button.
+            $(this.element).prop("disabled", true);
+            // Now that we have textareas, let the usual case code run.
+        }
+
+        // The usual case -- a problem on its original page. Find all code snippet textareas.
         $(this.textAreas).each(function (index, value) {
             // Silently ignore if ``data.answer.code_snippets`` or ``data.answer.code_snippets[index]`` isn't defined.
             value.setValue((data.answer.code_snippets || "")[index] || "");
         });
+        // Corner case TODO: if a problem is edited after students already submit code so that there are now fewer textareas, display these but don't save them when "Save and run" is pressed. This allows students to (hopefully) re-use code from now-discarded textareas.
     }
 
     // Restore answers from storage retrieval done in RunestoneBase.
     restoreAnswers(data) {
-        // We store the answer as a JSON-encoded string in the db / local storage. Restore the actual data structure from it.
-        data.answer = JSON.parse(data.answer);
+        // We store the answer as a JSON-encoded string in the db / local storage. Restore the actual data structure from it. Avoid exceptions if no data is available.
+        data.answer = JSON.parse(data.answer || "{}");
         this.dataToTextareas(data);
         this.displayAnswer(data);
     }
