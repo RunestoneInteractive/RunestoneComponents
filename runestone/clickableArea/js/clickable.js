@@ -47,7 +47,7 @@ export default class ClickableArea extends RunestoneBase {
         this.addCaption("runestone");
         this.checkServer("clickableArea", true);
         if (typeof Prism !== "undefined") {
-            Prism.highlightElement(this.containerDiv);
+            Prism.highlightAllUnder(this.containerDiv);
         }
     }
     /*===========================

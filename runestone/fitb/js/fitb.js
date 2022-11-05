@@ -31,7 +31,7 @@ export default class FITB extends RunestoneBase {
         this.addCaption("runestone");
         this.checkServer("fillb", true);
         if (typeof Prism !== "undefined") {
-            Prism.highlightElement(this.containerDiv);
+            Prism.highlightAllUnder(this.containerDiv);
         }
     }
     // Find the script tag containing JSON in a given root DOM node.

@@ -42,7 +42,7 @@ export default class ShortAnswer extends RunestoneBase {
             this.addCaption("runestone");
             this.checkServer("shortanswer", true);
             if (typeof Prism !== "undefined") {
-                Prism.highlightElement(this.containerDiv);
+                Prism.highlightAllUnder(this.containerDiv);
             }
         }
     }

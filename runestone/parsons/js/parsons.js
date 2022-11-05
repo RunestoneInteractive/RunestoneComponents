@@ -94,7 +94,7 @@ export default class Parsons extends RunestoneBase {
         // Check the server for an answer to complete things
         this.checkServer("parsons", true);
         if (typeof Prism !== "undefined") {
-            Prism.highlightElement(this.containerDiv);
+            Prism.highlightAllUnder(this.containerDiv);
         }
     }
     // Based on the data-fields in the original HTML, initialize options

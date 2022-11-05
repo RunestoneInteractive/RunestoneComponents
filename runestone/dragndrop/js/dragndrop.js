@@ -39,7 +39,7 @@ export default class DragNDrop extends RunestoneBase {
         this.caption = "Drag-N-Drop";
         this.addCaption("runestone");
         if (typeof Prism !== "undefined") {
-            Prism.highlightElement(this.containerDiv);
+            Prism.highlightAllUnder(this.containerDiv);
         }
     }
     /*======================

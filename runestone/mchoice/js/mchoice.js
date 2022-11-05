@@ -57,7 +57,7 @@ export default class MultipleChoice extends RunestoneBase {
             runestoneMathReady.then(() => self.queueMathJax(self.containerDiv));
         }
         if (typeof Prism !== "undefined") {
-            Prism.highlightElement(this.containerDiv);
+            Prism.highlightAllUnder(this.containerDiv);
         }
     }
 

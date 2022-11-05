@@ -146,7 +146,7 @@ export class ActiveCode extends RunestoneBase {
         }
         this.indicate_component_ready();
         if (typeof Prism !== "undefined") {
-            Prism.highlightElement(this.containerDiv);
+            Prism.highlightAllUnder(this.containerDiv);
         }
     }
 
