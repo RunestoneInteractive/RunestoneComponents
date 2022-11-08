@@ -145,7 +145,7 @@ class LP extends RunestoneBase {
         // Store the answer as a string, since this is what goes in to / comes out from the database. We have to translate this back to a data structure when restoring from the db or local storage.
         let code_snippets = this.textareasToData();
         this.setLocalStorage({
-            answer: JSON.stringify({ code_snippets: code_snippets }),
+            answer: { code_snippets: code_snippets },
             timestamp: new Date(),
         });
         // Store the answer that the server returns, which includes additional data (correct/incorrect, feedback from the build, etc.).
@@ -178,8 +178,6 @@ class LP extends RunestoneBase {
         }
         serverAnswer.answer.code_snippets = code_snippets;
         this.displayAnswer(serverAnswer);
-        // JSON-encode the answer for storage.
-        serverAnswer.answer = JSON.stringify(serverAnswer.answer);
         this.setLocalStorage(serverAnswer);
     }
 
@@ -269,7 +267,10 @@ class LP extends RunestoneBase {
     }
 
     setLocalStorage(data) {
-        localStorage.setItem(this.localStorageKey(), JSON.stringify(data));
+        // Make a shallow copy, so we can JSON-encode the code snippets (matching what comes from the server) without changing the original object.
+        data_clone = object.assign({}, data);
+        data_clone.answer =  JSON.stringify(data.answer);
+        localStorage.setItem(this.localStorageKey(), JSON.stringify(data_clone));
     }
 }
 
