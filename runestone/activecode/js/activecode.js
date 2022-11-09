@@ -60,7 +60,7 @@ export class ActiveCode extends RunestoneBase {
         var orig = $(opts.orig).find("textarea")[0];
         this.containerDiv = opts.orig;
         this.useRunestoneServices = opts.useRunestoneServices;
-        this.python3 = opts.python3;
+        this.python3 = true;
         this.alignVertical = opts.vertical;
         this.origElem = orig;
         this.origText = this.origElem.textContent;
