@@ -58,9 +58,6 @@ export default class ShortAnswer extends RunestoneBase {
         this.containerDiv.appendChild(this.newForm);
         this.fieldSet = document.createElement("fieldset");
         this.newForm.appendChild(this.fieldSet);
-        this.legend = document.createElement("legend");
-        this.legend.innerHTML = "Short Answer";
-        this.fieldSet.appendChild(this.legend);
         this.firstLegendDiv = document.createElement("div");
         this.firstLegendDiv.innerHTML = this.question;
         $(this.firstLegendDiv).addClass("journal-question");
