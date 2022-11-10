@@ -304,6 +304,9 @@ export default class SQLActiveCode extends ActiveCode {
             result += "\n";
         }
         let pct = (100 * this.passed) / (this.passed + this.failed);
+        if (isNaN(pct)) {
+            pct = 0.0;
+        }
         pct = pct.toLocaleString(undefined, { maximumFractionDigits: 2 });
         result += `You passed ${this.passed} out of ${
             this.passed + this.failed
@@ -319,6 +322,7 @@ export default class SQLActiveCode extends ActiveCode {
             actual = result_table.values[row][col];
         } catch (e) {
             output = `Failed Not enough data to check row ${row} or column ${col}`;
+            this.failed++;
             return output;
         }
         const operators = {
