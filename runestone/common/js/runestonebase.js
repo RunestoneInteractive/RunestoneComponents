@@ -157,16 +157,16 @@ export default class RunestoneBase {
                 throw new Error(`Failed to save the log entry
                     Status: ${response.status}`);
             }
-            post_return = response.json();
+            post_return = await response.json();
         } catch (e) {
             let detail = "none";
-            if (post_return.detail) {
+            if (post_return && post_return.detail) {
                 detail = post_return.detail;
             }
             if (eBookConfig.loginRequired) {
-                alert(`Error: Your action was not saved! 
-                    The error was ${e} 
-                    Detail: ${detail}. 
+                alert(`Error: Your action was not saved!
+                    The error was ${e}
+                    Detail: ${detail}.
                     Please report this error!`);
             }
             // send a request to save this error
@@ -449,7 +449,7 @@ export default class RunestoneBase {
             // See - https://docs.mathjax.org/en/latest/advanced/typeset.html
             // Per the above we should keep track of the promises and only call this
             // a second time if all previous promises have resolved.
-            MathJax.typesetPromise([component]);
+            return MathJax.typesetPromise([component]);
         }
     }
 }

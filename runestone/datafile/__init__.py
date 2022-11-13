@@ -27,6 +27,7 @@ from runestone.common.runestonedirective import (
     RunestoneIdDirective,
     RunestoneIdNode,
 )
+import pdb
 
 
 def setup(app):
@@ -38,7 +39,7 @@ def setup(app):
     app.connect("env-purge-doc", purge_datafiles)
 
 
-TEMPLATE = u"""
+TEMPLATE = """
 <div class="runestone datafile %(optclass)s">
 <div class="datafile_caption">Data file: <code>%(divid)s</code></div>
 <pre data-component="datafile" id=%(divid)s %(hidden)s data-edit="%(edit)s" data-rows="%(rows)s" data-cols="%(cols)s">
@@ -54,6 +55,7 @@ IMG_TEMPLATE = """
 
 class DataFileNode(nodes.General, nodes.Element, RunestoneIdNode):
     pass
+
 
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
@@ -74,9 +76,9 @@ def visit_df_html(self, node):
 
 
 def depart_df_html(self, node):
-    """ This is called at the start of processing an datafile node.  If datafile had recursive nodes
-        etc and did not want to do all of the processing in visit_ac_html any finishing touches could be
-        added here.
+    """This is called at the start of processing an datafile node.  If datafile had recursive nodes
+    etc and did not want to do all of the processing in visit_ac_html any finishing touches could be
+    added here.
     """
     pass
 
@@ -91,14 +93,14 @@ def purge_datafiles(app, env, docname):
 
 class DataFile(RunestoneIdDirective):
     """
-.. datafile:: identifier
-   :edit: Option that makes the datafile editable
-   :cols: If editable, number of columns--default is 20
-   :rows: If editable, number of rows--default is 40
-   :hide: Flag that sets a non-editable datafile to be hidden
-   :image: Flag that says this file is an image implies :fromfile: will be used
-   :fromfile: path to file that contains the data
-   """
+    .. datafile:: identifier
+       :edit: Option that makes the datafile editable
+       :cols: If editable, number of columns--default is 20
+       :rows: If editable, number of rows--default is 40
+       :hide: Flag that sets a non-editable datafile to be hidden
+       :image: Flag that says this file is an image implies :fromfile: will be used
+       :fromfile: path to file that contains the data
+    """
 
     required_arguments = 1
     optional_arguments = 0
@@ -117,16 +119,16 @@ class DataFile(RunestoneIdDirective):
 
     def run(self):
         """
-            process the multiplechoice directive and generate html for output.
-            :param self:
-            :return:
-            .. datafile:: identifier
-                :edit: Option that makes the datafile editable
-                :cols: If editable, number of columns--default is 20
-                :rows: If editable, number of rows--default is 40
-                :hide: Flag that sets a non-editable datafile to be hidden
-                :image:
-                :fromfile: path to file that contains the data
+        process the multiplechoice directive and generate html for output.
+        :param self:
+        :return:
+        .. datafile:: identifier
+            :edit: Option that makes the datafile editable
+            :cols: If editable, number of columns--default is 20
+            :rows: If editable, number of rows--default is 40
+            :hide: Flag that sets a non-editable datafile to be hidden
+            :image:
+            :fromfile: path to file that contains the data
         """
         super(DataFile, self).run()
         env = self.state.document.settings.env

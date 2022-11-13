@@ -93,6 +93,9 @@ export default class Parsons extends RunestoneBase {
         this.addCaption("runestone");
         // Check the server for an answer to complete things
         this.checkServer("parsons", true);
+        if (typeof Prism !== "undefined") {
+            Prism.highlightAllUnder(this.containerDiv);
+        }
     }
     // Based on the data-fields in the original HTML, initialize options
     initializeOptions() {
@@ -313,8 +316,7 @@ export default class Parsons extends RunestoneBase {
                     tagIndex + 5,
                     textBlock.indexOf(";", tagIndex + 5)
                 );
-                if (tag == "")
-                    tag = "block-" + i;
+                if (tag == "") tag = "block-" + i;
                 dependsIndex = textBlock.indexOf(";depends:");
                 let dependsString = textBlock.substring(
                     dependsIndex + 9,
@@ -337,7 +339,7 @@ export default class Parsons extends RunestoneBase {
             );
             // Create lines
             var lines = [];
-            if (! options["displaymath"]) {
+            if (!options["displaymath"]) {
                 var split = textBlock.split("\n");
             } else {
                 var split = [textBlock];
@@ -346,7 +348,11 @@ export default class Parsons extends RunestoneBase {
                 var code = split[j];
                 // discard blank rows
                 if (!/^\s*$/.test(code)) {
-                    var line = new ParsonsLine(this, code, options["displaymath"]);
+                    var line = new ParsonsLine(
+                        this,
+                        code,
+                        options["displaymath"]
+                    );
                     lines.push(line);
                     if (options["paired"]) {
                         line.distractor = true;
@@ -389,7 +395,7 @@ export default class Parsons extends RunestoneBase {
         this.solution = solution;
     }
     // Based on the blocks, create the source and answer areas
-    initializeAreas(sourceBlocks, answerBlocks, options) {
+    async initializeAreas(sourceBlocks, answerBlocks, options) {
         // Create blocks property as the sum of the two
         var blocks = [];
         var i, block;
@@ -442,23 +448,29 @@ export default class Parsons extends RunestoneBase {
         var areaWidth, areaHeight;
         // Establish the width and height of the droppable areas
         var item, maxFunction;
-        areaHeight = 6;
+        areaHeight = 20;
         var height_add = 0;
         if (this.options.numbered != undefined) {
             height_add = 1;
         }
+        // Warning -- all of this is just a bit of pixie dust discovered by trial
+        // and error to try to get the height of the drag and drop boxes.
+        // item is a jQuery object
+        // outerHeight can be unreliable if elements are not yet visible
+        // outerHeight will return bad results if MathJax has not rendered the math
         if (
             this.options.language == "natural" ||
-            this.options.language == "math"
+            this.options.language == "math" || true
         ) {
             areaWidth = 300;
-            maxFunction = function (item) {
+            maxFunction = async function (item) {
+                await this.queueMathJax(item[0])
                 item.width(areaWidth - 22);
                 var addition = 3.8;
                 if (item.outerHeight(true) != 38)
-                    addition = (2.1 * (item.outerHeight(true) - 38)) / 21;
+                    addition = (3.1 * (item.outerHeight(true) - 38)) / 21;
                 areaHeight += item.outerHeight(true) + height_add * addition;
-            };
+            }.bind(this);
         } else {
             areaWidth = 300;
             // This maxFunction is how Parsons areas width and height were being calculated previously,
@@ -543,7 +555,7 @@ export default class Parsons extends RunestoneBase {
             };
         }
         for (i = 0; i < blocks.length; i++) {
-            maxFunction($(blocks[i].view));
+            await maxFunction($(blocks[i].view));
         }
         this.areaWidth = areaWidth;
         if (this.options.numbered != undefined) {
@@ -678,7 +690,7 @@ export default class Parsons extends RunestoneBase {
         }
     }
     // Based on the data, load
-    loadData(data) {
+    async loadData(data) {
         var sourceHash = data.source;
         if (sourceHash == undefined) {
             // maintain backwards compatibility
@@ -706,7 +718,7 @@ export default class Parsons extends RunestoneBase {
             answerHash == undefined ||
             answerHash.length == 1
         ) {
-            this.initializeAreas(this.blocksFromSource(), [], options);
+            await this.initializeAreas(this.blocksFromSource(), [], options);
         } else {
             this.initializeAreas(
                 this.blocksFromHash(sourceHash),

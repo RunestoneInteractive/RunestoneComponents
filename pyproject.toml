@@ -34,7 +34,7 @@ license = "GPL"
 name = "runestone"
 readme = "README.rst"
 repository = "https://github.com/RunestoneInteractive/RunestoneComponents"
-version = "6.3.20"
+version = "6.3.23"
 
 # See https://python-poetry.org/docs/pyproject/#include-and-exclude.
 include = [

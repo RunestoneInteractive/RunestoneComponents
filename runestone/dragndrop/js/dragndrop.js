@@ -38,6 +38,9 @@ export default class DragNDrop extends RunestoneBase {
         this.createNewElements();
         this.caption = "Drag-N-Drop";
         this.addCaption("runestone");
+        if (typeof Prism !== "undefined") {
+            Prism.highlightAllUnder(this.containerDiv);
+        }
     }
     /*======================
     === Update variables ===
@@ -104,7 +107,6 @@ export default class DragNDrop extends RunestoneBase {
         if (typeof runestoneMathready !== "undefined") {
             runestoneMathReady.then(() => self.queueMathJax(self.containerDiv));
         }
-
     }
     finishSettingUp() {
         this.appendReplacementSpans();

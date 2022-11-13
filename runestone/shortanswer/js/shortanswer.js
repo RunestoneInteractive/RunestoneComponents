@@ -34,11 +34,16 @@ export default class ShortAnswer extends RunestoneBase {
             if ($(this.origElem).is("[data-mathjax]")) {
                 this.mathjax = true;
             }
-            this.placeholder = $(this.origElem).data("placeholder") || "Write your answer here";
+            this.placeholder =
+                $(this.origElem).data("placeholder") ||
+                "Write your answer here";
             this.renderHTML();
             this.caption = "shortanswer";
             this.addCaption("runestone");
             this.checkServer("shortanswer", true);
+            if (typeof Prism !== "undefined") {
+                Prism.highlightAllUnder(this.containerDiv);
+            }
         }
     }
 
@@ -53,9 +58,6 @@ export default class ShortAnswer extends RunestoneBase {
         this.containerDiv.appendChild(this.newForm);
         this.fieldSet = document.createElement("fieldset");
         this.newForm.appendChild(this.fieldSet);
-        this.legend = document.createElement("legend");
-        this.legend.innerHTML = "Short Answer";
-        this.fieldSet.appendChild(this.legend);
         this.firstLegendDiv = document.createElement("div");
         this.firstLegendDiv.innerHTML = this.question;
         $(this.firstLegendDiv).addClass("journal-question");
