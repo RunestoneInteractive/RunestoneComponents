@@ -94,6 +94,8 @@ export default class BlockBasedGrader {
             state = "correct";
         } else if (!isCorrectOrder && state != "incorrectTooShort") {
             state = "incorrectMoveBlocks";
+        } else if (!this.correctLength && state != "incorrectTooShort") {
+            state = "incorrectMoveBlocks";
         }
         this.calculatePercent();
         this.graderState = state;
