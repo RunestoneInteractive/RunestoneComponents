@@ -21,51 +21,31 @@ Runestone Version 6
 Documentation
 -------------
 
-You will find the new `Authors Guide <https://runestone.academy/runestone/static/authorguide/index.html>`_
+Writing **new** books using the Runestone RST markup language is deprecated as of Summer 2022.  It is strongly recommended that you use the `PreTeXt <https://pretextbook.org>`_ markup language for writing new books.
 
-If you want to report any issues with the docs or submit PRs to improve them please do so on `github <https://github.com/RunestoneInteractive/runestoneinteractive.github.io/issues>`_
+* Take a look at the `Sample Book <https://pretextbook.org/examples/sample-book/annotated/sample-book.html>` Especially Chapter 3, the section titled Interactive Exercises.  The activecode, CodeLens and all the rest of the interactives that you see in that sample book are powered by the components in this repository.  This repository will remain the home of those interctive components.
 
-Make sure you are using Python 3.7 or later.
+* Take a look at the `PreTeXt Guide <https://pretextbook.org/doc/guide/html/guide-toc.html>`_ It contains comprehensive documentation on writing in PreTeXt.
 
-I made a video that shows how to `install the Runestone Components <https://youtu.be/Fy0S4bGRPNE>`_ into a nice clean environment.
+* As an Author you will want to use the PreTeXt CLI for writing books.   Experienced Runestone authors will find the pretext cli to be quite familiar, but better organized with fewer mysterious configuration files. See `PreTeXt-CLI <https://pretextbook.org/doc/guide/html/guide-toc.html>`
 
 
 Quick Start
 -----------
 
-If you are completely new to pip and github text editors, I have written a more thorough getting started
- tutorial `on my blog <http://reputablejournal.com/how-to-make-a-lab-in-three-easy-steps.html>`_
- Otherwise, you can install everything you need with one simple command! (Although I recommend that you first create a virtual environment for your work.)
-
- **Install and make a Python virtualenv**
-
-* Documentation here:  https://virtualenv.pypa.io/en/stable/
-* Video here:  https://www.youtube.com/watch?v=IX-v6yvGYFg
-* For the impatient:
-
-::
-
-    $ sudo pip install virtualenv
-    $ virtualenv /path/to/home/MyEnv
-    $ source /path/to/home/MyEnv/bin/activate
-
-* You will need to do the last command **every time** you want to work on RunestoneComponents.  If you have not used Python virtual environments before I strongly recommend reading the docs or watching the video
-
-* *Note:* You might need to install ``pip`` based on how you have installed `python <https://packaging.python.org/tutorials/installing-packages/#ensure-you-can-run-pip-from-the-command-line>`_.
-
-With the virtual environment installed and configured you can continue.
-::
-
-    pip install runestone
+* `pip install pretext`
+* Create a folder for your book project then run
+* `pretext new` to create a new book.
 
 
+Old Documentation
+-----------------
 
-Or, if you prefer to live on the development edge, you can check out the very latest from:
+I will keep this around for a while during the transition to PreTeXt.
 
-::
+To get started with Runestone restructuredText as the markup language:
 
-    pip install git+https://github.com/RunestoneInteractive/RunestoneComponents
-
+* `pip install runestone`
 
 To start a project, create a new folder and then run the following command (installed by pip)  in that new folder ``runestone init``  For example:
 
