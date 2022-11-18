@@ -443,6 +443,9 @@ export default class RunestoneBase {
     }
 
     queueMathJax(component) {
+        if (typeof(MathJax) === "undefined") {
+            return Promise.resolve(null);
+        }
         if (MathJax.version.substring(0, 1) === "2") {
             MathJax.Hub.Queue(["Typeset", MathJax.Hub, component]);
         } else {
