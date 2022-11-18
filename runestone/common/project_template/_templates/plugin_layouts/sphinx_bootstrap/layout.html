@@ -255,6 +255,7 @@
     eBookConfig.enableCompareMe = {{enable_compare_me}};
     // _`new_server_prefix`: Defined by the server to be the path to the new server.
     eBookConfig.new_server_prefix = '{{ new_server_prefix }}';
+    eBookConfig.served_by = '{{worker_name}}';
     {% endraw %}
   {% else %}
     eBookConfig.useRunestoneServices = {% if use_services == 'true' -%}true{%- else -%}false{%- endif -%};
