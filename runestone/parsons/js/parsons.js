@@ -463,103 +463,18 @@ export default class Parsons extends RunestoneBase {
         // item is a jQuery object
         // outerHeight can be unreliable if elements are not yet visible
         // outerHeight will return bad results if MathJax has not rendered the math
-        if (
-            this.options.language == "natural" ||
-            this.options.language == "math" || true
-        ) {
-            areaWidth = 300;
-            maxFunction = async function(item) {
-                if (this.options.language == "natural" || this.options.language == "math") {
-                    await this.queueMathJax(item[0])
-                }
-                areaWidth = Math.max(areaWidth, item.outerWidth(true));
-                item.width(areaWidth - 22);
-                var addition = 3.8;
-                if (item.outerHeight(true) != 38)
-                    addition = (3.1 * (item.outerHeight(true) - 38)) / 21;
-                areaHeight += item.outerHeight(true) + height_add * addition;
-            }.bind(this);
-        } else {
-            areaWidth = 300;
-            // This maxFunction is how Parsons areas width and height were being calculated previously,
-            // but at some point .outerHeight and .outerWidth stopped returning correct values
-            // causing lines to overflow and display awkwardly. - Vincent Qiu (September 2020)
-            // maxFunction = function (item) {
-            //     var addition = 3.8;
-            //     if (item.outerHeight(true) != 38) addition = 2.1;
-            //     areaHeight += item.outerHeight(true) + height_add * addition;
-            //     areaWidth = Math.max(areaWidth, item.outerWidth(true));
-            // };
-
-            // This new maxFunction is how Parsons areas width and height are being calculated now manually - Vincent Qiu (September 2020)
-            maxFunction = function(item) {
-                var addition = 3.8;
-
-                // Determine which index within the Parsons block JavaScript object contains the text lines and consequently the passed through data - Vincent Qiu (September 2020)
-                var linesIndex;
-                var linesItem = item[0].children;
-                for (
-                    linesIndex = 0; linesIndex < item[0].children.length; linesIndex++
-                ) {
-                    if (
-                        item[0].children[linesIndex].className.includes("lines")
-                    ) {
-                        break;
-                    }
-                }
-
-                // Create a canvas and set the passed through fontSize and fontFamily in order to measure text width - Vincent Qiu (September 2020)
-                var fontSize = linesItem[linesIndex].children[0].fontSize;
-                var fontFamily = linesItem[linesIndex].children[0].fontFamily;
-                var tempCanvas = document.createElement("canvas");
-                var tempCanvasCtx = tempCanvas.getContext("2d");
-                tempCanvasCtx.font = fontSize + " " + fontFamily;
-
-                // Increment Parsons area height based on number of lines of text in the current Parsons block - Vincent Qiu (September 2020)
-                var singleHeight = 40;
-                var additionalHeight = 20;
-                areaHeight += Math.ceil(
-                    // For future more accurate height display, this calculation should also be conditionally based on fontFamily
-                    singleHeight +
-                    (linesItem[linesIndex].children.length - 1) *
-                    additionalHeight +
-                    height_add * addition
-                );
-
-                // Determine the longest text line in the current Parsons block and calculate its width - Vincent Qiu (September 2020)
-                var itemLength;
-                var pixelsPerIndent;
-                var indent;
-                var maxInnerText;
-                var maxInnerLength = 0;
-                var i;
-                var widthLimit = 475;
-                var longCount = 0;
-                for (i = 0; i < linesItem[linesIndex].children.length; i++) {
-                    pixelsPerIndent =
-                        linesItem[linesIndex].children[i].pixelsPerIndent;
-                    indent = linesItem[linesIndex].children[i].indent;
-                    itemLength = Math.ceil(
-                        pixelsPerIndent * indent +
-                        tempCanvasCtx.measureText(
-                            linesItem[linesIndex].children[i].innerText
-                        ).width
-                    );
-                    longCount += Math.floor(itemLength / (widthLimit - 29));
-                    if (itemLength > maxInnerLength) {
-                        maxInnerText =
-                            linesItem[linesIndex].children[i].innerText;
-                        maxInnerLength = itemLength;
-                    }
-                }
-                areaWidth = Math.max(areaWidth, maxInnerLength + 40);
-                // Set width limit and determine how much additional height is needed to accommodate the forced text overflow - Vincent Qiu (September 2020)
-                if (areaWidth > widthLimit) {
-                    areaWidth = widthLimit;
-                    areaHeight += longCount * additionalHeight;
-                }
-            };
-        }
+        areaWidth = 300;
+        maxFunction = async function(item) {
+            if (this.options.language == "natural" || this.options.language == "math") {
+                await this.queueMathJax(item[0])
+            }
+            areaWidth = Math.max(areaWidth, item.outerWidth(true));
+            item.width(areaWidth - 22);
+            var addition = 3.8;
+            if (item.outerHeight(true) != 38)
+                addition = (3.1 * (item.outerHeight(true) - 38)) / 21;
+            areaHeight += item.outerHeight(true) + height_add * addition;
+        }.bind(this);
         for (i = 0; i < blocks.length; i++) {
             await maxFunction($(blocks[i].view));
         }
