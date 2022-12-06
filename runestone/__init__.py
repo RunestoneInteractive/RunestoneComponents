@@ -112,6 +112,9 @@ def setup(app):
     This could be expanded if there is additional initialization or customization
     we wanted to do for all projects.
     """
+    # This tells the mathjax extension to always load mathjax.
+    # This should save some configuration headaches as we transition from RST to PTX
+    app.set_html_assets_policy("always")
     # Include JS and CSS produced by webpack. See `webpack static imports <webpack_static_imports>`_.
     with open(
         pkg_resources.resource_filename(

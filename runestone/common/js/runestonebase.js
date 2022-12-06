@@ -73,7 +73,9 @@ export default class RunestoneBase {
             }
             this.is_toggle = true ? opts.is_toggle : false;
             this.is_select = true ? opts.is_select : false;
+
         }
+        this.mjelements = [];
         this.jsonHeaders = new Headers({
             "Content-type": "application/json; charset=utf-8",
             Accept: "application/json",
@@ -444,17 +446,79 @@ export default class RunestoneBase {
 
     queueMathJax(component) {
         if (typeof(MathJax) === "undefined") {
+            console.log("Error -- MathJax is not loaded")
             return Promise.resolve(null);
-        }
-        if (MathJax.version.substring(0, 1) === "2") {
-            MathJax.Hub.Queue(["Typeset", MathJax.Hub, component]);
         } else {
             // See - https://docs.mathjax.org/en/latest/advanced/typeset.html
             // Per the above we should keep track of the promises and only call this
             // a second time if all previous promises have resolved.
-            return MathJax.typesetPromise([component]);
+            // Create a queue of components
+            // should wait until defaultPageReady is defined
+            // If defaultPageReady is not defined then just enqueue the components.
+            // Once defaultPageReady is defined
+            if (MathJax.startup && MathJax.startup.defaultPageReady) {
+                return MathJax.startup.defaultPageReady().then(
+                    async function() {
+                        console.log(`MathJax Ready -- promising a typesetting run for ${component.id}`)
+                        return await MathJax.typesetPromise([component])
+                    }
+                );
+            }
         }
     }
+
 }
+
+
+// Inspiration and lots of code for this solution come from
+// https://stackoverflow.com/questions/53540348/js-async-await-tasks-queue
+// The idea here is that until MathJax is ready we can just enqueue things
+// once mathjax becomes ready then we can drain the queue and continue as usual.
+
+class Queue {
+  constructor() { this._items = []; }
+  enqueue(item) { this._items.push(item); }
+  dequeue()     { return this._items.shift(); }
+  get size()    { return this._items.length; }
+}
+
+class AutoQueue extends Queue {
+  constructor() {
+    super();
+    this._pendingPromise = false;
+  }
+
+  enqueue(action) {
+    return new Promise((resolve, reject) => {
+      super.enqueue({ action, resolve, reject });
+      this.dequeue();
+    });
+  }
+
+  async dequeue() {
+    if (this._pendingPromise) return false;
+
+    let item = super.dequeue();
+
+    if (!item) return false;
+
+    try {
+      this._pendingPromise = true;
+
+      let payload = await item.action(this);
+
+      this._pendingPromise = false;
+      item.resolve(payload);
+    } catch (e) {
+      this._pendingPromise = false;
+      item.reject(e);
+    } finally {
+      this.dequeue();
+    }
+
+    return true;
+  }
+}
+
 
 window.RunestoneBase = RunestoneBase;

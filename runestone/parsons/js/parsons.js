@@ -464,9 +464,16 @@ export default class Parsons extends RunestoneBase {
         // outerHeight can be unreliable if elements are not yet visible
         // outerHeight will return bad results if MathJax has not rendered the math
         areaWidth = 300;
+        let self = this;
         maxFunction = async function(item) {
             if (this.options.language == "natural" || this.options.language == "math") {
-                await this.queueMathJax(item[0])
+                if (typeof runestoneMathready !== "undefined") {
+                    await runestoneMathReady.then(async () => await self.queueMathJax(item[0]));
+                } else { // this is for older rst builds not ptx
+                    if (typeof MathJax.startup !== "undefined") {
+                        await self.queueMathJax(item[0]);
+                    }
+                }
             }
             areaWidth = Math.max(areaWidth, item.outerWidth(true));
             item.width(areaWidth - 22);
@@ -570,12 +577,13 @@ export default class Parsons extends RunestoneBase {
             this.blocks[i].initializeInteractivity();
         }
         this.initializeTabIndex();
+        let self = this;
         if (
             this.options.language == "natural" ||
             this.options.language == "math"
         ) {
-            if (typeof MathJax !== "undefined") {
-                this.queueMathJax(this.outerDiv);
+            if (typeof MathJax.startup !== "undefined") {
+                self.queueMathJax(self.outerDiv);
             }
         }
     }
