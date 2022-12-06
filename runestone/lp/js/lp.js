@@ -268,7 +268,7 @@ class LP extends RunestoneBase {
 
     setLocalStorage(data) {
         // Make a shallow copy, so we can JSON-encode the code snippets (matching what comes from the server) without changing the original object.
-        data_clone = object.assign({}, data);
+        let data_clone = Object.assign({}, data);
         data_clone.answer =  JSON.stringify(data.answer);
         localStorage.setItem(this.localStorageKey(), JSON.stringify(data_clone));
     }
