@@ -76,6 +76,11 @@ export default class RunestoneBase {
 
         }
         this.mjelements = [];
+        let self = this;
+        this.mjReady = new Promise(function(resolve, reject) {
+            self.mjresolver = resolve;
+        });
+        this.aQueue = new AutoQueue();
         this.jsonHeaders = new Headers({
             "Content-type": "application/json; charset=utf-8",
             Accept: "application/json",
@@ -134,8 +139,7 @@ export default class RunestoneBase {
     async postLogMessage(eventInfo) {
         var post_return;
         let request = new Request(
-            `${eBookConfig.new_server_prefix}/logger/bookevent`,
-            {
+            `${eBookConfig.new_server_prefix}/logger/bookevent`, {
                 method: "POST",
                 headers: this.jsonHeaders,
                 body: JSON.stringify(eventInfo),
@@ -198,8 +202,7 @@ export default class RunestoneBase {
             eBookConfig.logLevel > 0
         ) {
             let request = new Request(
-                `${eBookConfig.new_server_prefix}/logger/runlog`,
-                {
+                `${eBookConfig.new_server_prefix}/logger/runlog`, {
                     method: "POST",
                     headers: this.jsonHeaders,
                     body: JSON.stringify(eventInfo),
@@ -248,7 +251,7 @@ export default class RunestoneBase {
     ) {
         // Check if the server has stored answer
         let self = this;
-        this.checkServerComplete = new Promise(function (resolve, reject) {
+        this.checkServerComplete = new Promise(function(resolve, reject) {
             self.csresolver = resolve;
         });
         if (
@@ -280,8 +283,7 @@ export default class RunestoneBase {
                 this.assessmentTaken
             ) {
                 let request = new Request(
-                    `${eBookConfig.new_server_prefix}/assessment/results`,
-                    {
+                    `${eBookConfig.new_server_prefix}/assessment/results`, {
                         method: "POST",
                         body: JSON.stringify(data),
                         headers: this.jsonHeaders,
@@ -456,13 +458,14 @@ export default class RunestoneBase {
             // should wait until defaultPageReady is defined
             // If defaultPageReady is not defined then just enqueue the components.
             // Once defaultPageReady is defined
-            if (MathJax.startup && MathJax.startup.defaultPageReady) {
-                return MathJax.startup.defaultPageReady().then(
-                    async function() {
-                        console.log(`MathJax Ready -- promising a typesetting run for ${component.id}`)
-                        return await MathJax.typesetPromise([component])
-                    }
-                );
+            if (MathJax.typesetPromise) {
+                return this.mjresolver(this.aQueue.enqueue(component))
+            } else {
+                console.log(`Waiting on MathJax!! ${MathJax.typesetPromise}`);
+                console.log(`Runestone Math: ${runestoneMathReady}`)
+                setTimeout(() => this.queueMathJax(component), 200);
+                console.log(`Returning mjready promise: ${this.mjReady}`)
+                return this.mjReady;
             }
         }
     }
@@ -476,49 +479,54 @@ export default class RunestoneBase {
 // once mathjax becomes ready then we can drain the queue and continue as usual.
 
 class Queue {
-  constructor() { this._items = []; }
-  enqueue(item) { this._items.push(item); }
-  dequeue()     { return this._items.shift(); }
-  get size()    { return this._items.length; }
+    constructor() { this._items = []; }
+    enqueue(item) { this._items.push(item); }
+    dequeue() { return this._items.shift(); }
+    get size() { return this._items.length; }
 }
 
 class AutoQueue extends Queue {
-  constructor() {
-    super();
-    this._pendingPromise = false;
-  }
-
-  enqueue(action) {
-    return new Promise((resolve, reject) => {
-      super.enqueue({ action, resolve, reject });
-      this.dequeue();
-    });
-  }
-
-  async dequeue() {
-    if (this._pendingPromise) return false;
-
-    let item = super.dequeue();
-
-    if (!item) return false;
-
-    try {
-      this._pendingPromise = true;
-
-      let payload = await item.action(this);
-
-      this._pendingPromise = false;
-      item.resolve(payload);
-    } catch (e) {
-      this._pendingPromise = false;
-      item.reject(e);
-    } finally {
-      this.dequeue();
+    constructor() {
+        super();
+        this._pendingPromise = false;
     }
 
-    return true;
-  }
-}
+    enqueue(component) {
+        return new Promise((resolve, reject) => {
+            super.enqueue({ component, resolve, reject });
+            this.dequeue();
+        });
+    }
+
+    async dequeue() {
+        if (this._pendingPromise) return false;
+
+        let item = super.dequeue();
+
+        if (!item) return false;
+
+        try {
+            this._pendingPromise = true;
+
+            let payload = await MathJax.startup.defaultPageReady().then(
+                async function() {
+                    console.log(`MathJax Ready -- dequeing a typesetting run for ${item.component.id}`)
+                    return await MathJax.typesetPromise([item.component])
+                }
+            );
+
+                this._pendingPromise = false; item.resolve(payload);
+            }
+            catch (e) {
+                this._pendingPromise = false;
+                item.reject(e);
+            } finally {
+                this.dequeue();
+            }
+
+            return true;
+        }
+    }
 
 
-window.RunestoneBase = RunestoneBase;
+    window.RunestoneBase = RunestoneBase;

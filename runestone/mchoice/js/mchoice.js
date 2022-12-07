@@ -49,13 +49,10 @@ export default class MultipleChoice extends RunestoneBase {
         this.createMCForm();
         this.addCaption("runestone");
         this.checkServer("mChoice", true);
-        let self = this;
         // https://docs.mathjax.org/en/latest/options/startup/startup.html
         // https://docs.mathjax.org/en/latest/web/configuration.html#startup-action
         // runestoneMathReady is defined in the preamble for all PTX authored books
-        if (typeof runestoneMathready !== "undefined") {
-            runestoneMathReady.then(() => self.queueMathJax(self.containerDiv));
-        }
+        this.queueMathJax(self.containerDiv);
         if (typeof Prism !== "undefined") {
             Prism.highlightAllUnder(this.containerDiv);
         }
