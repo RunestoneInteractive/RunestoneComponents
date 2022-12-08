@@ -462,7 +462,6 @@ export default class RunestoneBase {
                 return this.mjresolver(this.aQueue.enqueue(component))
             } else {
                 console.log(`Waiting on MathJax!! ${MathJax.typesetPromise}`);
-                console.log(`Runestone Math: ${runestoneMathReady}`)
                 setTimeout(() => this.queueMathJax(component), 200);
                 console.log(`Returning mjready promise: ${this.mjReady}`)
                 return this.mjReady;
