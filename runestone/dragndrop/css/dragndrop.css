@@ -1,4 +1,14 @@
-.draggable {
+:root {
+    --draggableBgColor: #EFEFEF;
+    --dropableBgColor: #DDDDDD;
+}
+
+[data-theme="dark"] {
+    --draggableBgColor: #9d9191;
+    --dropableBgColor:  #783131;
+}
+
+.rsdraggable {
     margin-left: 2%;
     margin-top: 5px;
     display:inline;
@@ -38,7 +48,7 @@
     -webkit-border-radius:10px;
     border-radius: 10px;
     display: block;
-    background-color:#EFEFEF;
+    background-color: var(--draggableBgColor);
     border:1px solid lightgray;
     padding:10px;
     margin-top: 5px;
@@ -55,7 +65,7 @@
     -webkit-border-radius:10px;
     border-radius: 10px;
     display: block;
-    background-color:#DDDDDD;
+    background-color: var(--dropableBgColor);
     border:1px solid lightgray;
     padding:10px;
     margin-top: 5px;

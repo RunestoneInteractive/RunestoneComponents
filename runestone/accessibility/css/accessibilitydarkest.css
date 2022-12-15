@@ -1,3 +1,9 @@
+/*
+***********************************************************
+|docname| - a WCAG 2.0 AAA compliant stylesheet (dark mode)
+***********************************************************
+*/
+
 /*Navigation Tabbing Styling*/
 li.dropdown.open a.dropdown-toggle, li.dropdown.open a.dropdown-toggle:focus {
 	border:0px !important;
@@ -21,7 +27,7 @@ li.dropdown a.dropdown-toggle {
 }
 
 /*
-Bootstrap button styling  
+Bootstrap button styling
 */
 
 /* Default Button */

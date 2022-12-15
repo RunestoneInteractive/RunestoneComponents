@@ -14,26 +14,27 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-__author__ = 'isaiahmayerchak'
+__author__ = "isaiahmayerchak"
 
+from asyncore import write
 from docutils import nodes
 from docutils.parsers.rst import directives
-from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneNode
-from runestone.server.componentdb import addQuestionToDB
-
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneIdNode
+from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
+from runestone.common.xmlcommon import write_substitute, substitute_departure
 
 
 def setup(app):
-    app.add_directive('poll',Poll)
-    app.add_autoversioned_javascript('poll.js')
-    app.add_autoversioned_stylesheet('poll.css')
-    app.add_node(PollNode, html=(visit_poll_node, depart_poll_node))
+    app.add_directive("poll", Poll)
+    app.add_node(PollNode, html=(visit_poll_html, depart_poll_html),
+                 xml=(visit_poll_xml, substitute_departure))
 
-    app.add_config_value('poll_div_class', 'alert alert-warning', 'html')
+    app.add_config_value("poll_div_class", "", "html")
 
 
 TEMPLATE_START = """
-<ul data-component="poll" id=%(divid)s %(comment)s class='%(divclass)s' data-results='%(results)s'>
+<div class="runestone %(optclass)s">
+<ul data-component="poll" id=%(divid)s %(comment)s class='%(divclass)s' data-results='%(results)s' data-question_label="%(question_label)s" %(optional)s>
 %(question)s
 """
 
@@ -41,45 +42,59 @@ TEMPLATE_OPTION = """
 <li>%(optiontext)s</li>
 """
 
-TEMPLATE_END = """</ul>"""
+TEMPLATE_END = """</ul></div>"""
 
-class PollNode(nodes.General, nodes.Element, RunestoneNode):
-    def __init__(self,content, **kwargs):
-        """
-        Arguments:
-        - `self`:
-        - `content`:
-        """
-        super(PollNode,self).__init__(**kwargs)
-        self.poll_content = content
+
+class PollNode(nodes.General, nodes.Element, RunestoneIdNode):
+    pass
+
 
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
-def visit_poll_node(self,node):
-    res = TEMPLATE_START
-    res = res % node.poll_content
-
-    if node.poll_content["scale"] == "":
-        okeys = list(node.poll_content.keys())
-        okeys.sort()
-        for k in okeys:
-            if 'option_' in k:
-                node.poll_content["optiontext"] = node.poll_content[k]
-                res += TEMPLATE_OPTION % node.poll_content
-    else:
-        for i in range(node.poll_content["scale"]):
-            node.poll_content["optiontext"] = i + 1
-            res += TEMPLATE_OPTION % node.poll_content
-    res += TEMPLATE_END
+def visit_poll_html(self, node):
+    res = visit_poll_common(self, node)
+    addHTMLToDB(
+        node["runestone_options"]["divid"], node["runestone_options"]["basecourse"], res
+    )
     self.body.append(res)
 
-def depart_poll_node(self,node):
-    ''' This is called at the start of processing a poll node.  If poll had recursive nodes
-        etc and did not want to do all of the processing in visit_poll_node any finishing touches could be
+
+def visit_poll_xml(self, node):
+    html = visit_poll_common(self, node)
+    write_substitute(self, node, html)
+
+
+def depart_poll_html(self, node):
+    """ This is called at the start of processing a poll node.  If poll had recursive nodes
+        etc and did not want to do all of the processing in visit_poll_html any finishing touches could be
         added here.
-    '''
+    """
     pass
+
+
+def visit_poll_common(self, node):
+    res = TEMPLATE_START
+    res = res % node["runestone_options"]
+
+    if node["runestone_options"]["scale"] == "":
+        okeys = list(node["runestone_options"].keys())
+        okeys.sort()
+        i = 1
+        for k in okeys:
+            if "option_" in k:
+                node["runestone_options"]["optiontext"] = (
+                    f"{i}. " + node["runestone_options"][k]
+                )
+                i += 1
+                res += TEMPLATE_OPTION % node["runestone_options"]
+    else:
+        for i in range(node["runestone_options"]["scale"]):
+            node["runestone_options"]["optiontext"] = i + 1
+            res += TEMPLATE_OPTION % node["runestone_options"]
+    res += TEMPLATE_END
+
+    return res
 
 
 class Poll(RunestoneIdDirective):
@@ -93,27 +108,32 @@ class Poll(RunestoneIdDirective):
     :results: One of all, instructor, superuser - who should see results?
 
 
-config values (conf.py): 
+config values (conf.py):
 
 - poll_div_class - custom CSS class of the component's outermost div
     """
+
     required_arguments = 1
     optional_arguments = 0
     has_content = True
-    option_spec = {
-        'scale':directives.positive_int,
-        'allowcomment':directives.flag,
-        'option_1':directives.unchanged,
-        'option_2':directives.unchanged,
-        'option_3':directives.unchanged,
-        'option_4':directives.unchanged,
-        'option_5':directives.unchanged,
-        'option_6':directives.unchanged,
-        'option_7':directives.unchanged,
-        'option_8':directives.unchanged,
-        'option_9':directives.unchanged,
-        'option_10':directives.unchanged,
-    }
+    option_spec = RunestoneIdDirective.option_spec.copy()
+    option_spec.update(
+        {
+            "scale": directives.positive_int,
+            "allowcomment": directives.flag,
+            "option_1": directives.unchanged,
+            "option_2": directives.unchanged,
+            "option_3": directives.unchanged,
+            "option_4": directives.unchanged,
+            "option_5": directives.unchanged,
+            "option_6": directives.unchanged,
+            "option_7": directives.unchanged,
+            "option_8": directives.unchanged,
+            "option_9": directives.unchanged,
+            "option_10": directives.unchanged,
+            "results": directives.unchanged,
+        }
+    )
 
     def run(self):
         """
@@ -134,8 +154,8 @@ config values (conf.py):
         if self.content:
             source = "\n".join(self.content)
         else:
-            source = '\n'
-        self.options['question'] = source
+            source = "\n"
+        self.options["question"] = source
 
         if not "scale" in self.options:
             self.options["scale"] = ""
@@ -145,11 +165,14 @@ config values (conf.py):
             self.options["comment"] = ""
 
         if not "results" in self.options:
-            self.options['results'] = "instructor"
+            self.options["results"] = "instructor"
 
         env = self.state.document.settings.env
-        self.options['divclass'] = env.config.poll_div_class
+        self.options["divclass"] = env.config.poll_div_class
 
-        poll_node = PollNode(self.options, rawsource=self.block_text)
-        poll_node.source, poll_node.line = self.state_machine.get_source_and_line(self.lineno)
+        poll_node = PollNode()
+        poll_node["runestone_options"] = self.options
+        poll_node["source"], poll_node["line"] = self.state_machine.get_source_and_line(
+            self.lineno
+        )
         return [poll_node]

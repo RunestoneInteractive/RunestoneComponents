@@ -6,9 +6,10 @@
 <style type="text/css">
 #basicGChart { width: 450px; height: 300px }
 </style>
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
-<script type="text/javascript" src="jquery.gchart.js"></script>
-<script type="text/javascript">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+<script src="jquery.gchart.js"></script>
+<script>
+window.addEventListener('load', (event) => {
 $(function () {
 	$('#basicGChart').gchart({type: 'line', maxValue: 40,
 		title: 'Weather for|Brisbane, Australia', titleColor: 'green',
@@ -26,6 +27,7 @@ $(function () {
 		$.gchart.axis('right', 0, 200, 50, 'blue', 'left'),
 		$.gchart.axis('right', ['mm'], [50], 'blue', 'left')],
 		legend: 'right'});
+});
 });
 </script>
 </head>

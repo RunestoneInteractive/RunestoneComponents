@@ -1,27 +1,34 @@
-function TimedParsons (opts) {
-	if (opts) {
-		this.timedInit(opts);
-	}
+import Parsons from "./parsons";
+
+export default class TimedParsons extends Parsons {
+    constructor(opts) {
+        super(opts);
+        // todo -- make this configurable
+        if (opts.timedfeedback) {
+            this.showfeedback = true;
+        } else {
+            this.showfeedback = false;
+        }
+        this.grader.showfeedback = this.showfeedback;
+        this.hideFeedback();
+        $(this.checkButton).hide();
+        $(this.helpButton).hide();
+        $(this.resetButton).hide();
+    }
+    checkCorrectTimed() {
+        return this.correct ? "T" : "F";
+    }
+    hideFeedback() {
+        $(this.messageDiv).hide();
+    }
 }
 
-TimedParsons.prototype = new Parsons();
-
-TimedParsons.prototype.timedInit = function (opts) {
-	this.init(opts);
-};
-
-TimedParsons.prototype.checkCorrectTimed = function () {
-	return this.correct ? "T" : "F";
-};
-
-TimedParsons.prototype.hideFeedback = function () {
-	$(this.messageDiv).hide();
-};
-
-TimedParsons.prototype.processTimedSubmission = function (logFlag) {
-	if (logFlag) {
-		this.setLocalStorage();
-	}
-	this.correct = this.grader.grade() == "correct";
-	this.disable();
+if (typeof window.component_factory === "undefined") {
+    window.component_factory = {};
+}
+window.component_factory["parsons"] = function (opts) {
+    if (opts.timed) {
+        return new TimedParsons(opts);
+    }
+    return new Parsons(opts);
 };

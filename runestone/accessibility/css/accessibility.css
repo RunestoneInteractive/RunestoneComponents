@@ -1,3 +1,16 @@
+/*
+**********************************************
+|docname| - a WCAG 2.0 AA compliant stylesheet
+**********************************************
+*/
+
+/* Variables holding theme colors */
+:root {
+	--codebuttons: #474949;
+}
+[data-theme="dark"] {
+	--codebuttons: #2c0aa6;
+}
 /*Navigation Tabbing Styling*/
 li.dropdown.open a.dropdown-toggle, li.dropdown.open a.dropdown-toggle:focus {
 	border:0px !important;
@@ -21,7 +34,7 @@ li.dropdown a.dropdown-toggle {
 }
 
 /*
-Bootstrap button styling  
+Bootstrap button styling
 */
 
 /* Default Button */
@@ -36,7 +49,7 @@ button.btn.btn-default:focus {
 }
 button.btn.btn-default{
 	color:#FFFFFF !important;
-	background-color:#474949 !important;
+	background-color: var(--codebuttons) !important;
 }
 button.btn.btn-default.btn-sm.disabled:active {
 	color:#474949 !important;

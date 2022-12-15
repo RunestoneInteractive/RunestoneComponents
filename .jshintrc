@@ -1,0 +1,19 @@
+{
+    "predef": [
+        "eBookConfig",
+        "$",
+        "jQuery",
+        "Sk",
+        "allVisualizers",
+        "console"
+    ],
+    "esversion": 8,
+    "quotmark": true,
+    "strict": "implied",
+    "sub": true,
+    "browser": true,
+    "maxerr": 200,
+    "globalstrict": true,
+    "devel": true
+
+}

@@ -17,7 +17,20 @@ Testing: Short Answer Questions
 Short Answer
 ------------
 
-.. shortanswer:: question1
-   :optional:
+.. shortanswer:: test_short_answer_1
 
    What are the colors in the rainbow?
+
+
+.. shortanswer:: test_short_answer_2
+   :optional:
+   :mathjax:
+
+   What are the colors in the rainbow?
+   What is meaning of :math:`\pi r^2`
+   How about an image?
+
+   .. image:: Figures/LutherBellPic.jpg
+      :width: 200
+
+   This is the famous Luther Bell!

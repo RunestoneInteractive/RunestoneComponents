@@ -51,7 +51,7 @@
       .attr("border", 0);
   };
 
-  $(document).ready(function () {
+$(function () {
 
     /*
      * Scroll the window to avoid the topnav bar
@@ -129,4 +129,4 @@
         });
       }});
   });
-}($jqTheme || window.jQuery));
+}(window.jQuery));

@@ -1,4 +1,9 @@
 #!/bin/bash
+# *********
+# |docname|
+# *********
+
+set -e
 
 if [ $# -eq 0 ]
   then
@@ -7,7 +12,7 @@ if [ $# -eq 0 ]
 fi
 
 while true; do
-read -p "Did you update/commit the version in setup.py " yn
+read -p "Did you update/commit the version in pyproject.toml " yn
     case $yn in
         [Yy]* ) break;;
         [Nn]* ) exit;;
@@ -15,17 +20,44 @@ read -p "Did you update/commit the version in setup.py " yn
     esac
 done
 
-rm dist/*
+if [ -z "$(git status --porcelain)" ]; then
+   echo "Working directory clean"
+else
+  read -p "You have uncommitted changes do you really want to release? " yn
+  case $yn in
+      [Yy]* ) break;;
+      [Nn]* ) exit;;
+      * ) echo "Please answer yes or no.";;
+  esac
+fi
+   
+echo "Building webpack bundle"
+npm run dist
 
-#source ~/.virtualenvs/runedev/bin/activate
-python setup.py sdist
-pip wheel --no-index --no-deps --global-option bdist_wheel  --wheel-dir dist dist/*.tar.gz
-#pip3 wheel --no-index --no-deps --global-option bdist_wheel  --wheel-dir dist dist/*.tar.gz
-
-#python setup.py register -r pypi
-twine upload dist/*
-
+echo "building python package"
+poetry build
+poetry publish
+ 
 echo "tagging this release and pushing to github"
 
 git tag -a $1 -m 'tag new version'
 git push --follow-tags
+gh release create v$1 --generate-notes
+
+if [ -d ~/.virtualenvs/json2xml ] 
+  then
+
+    echo "Creating dist for PreTeXt"
+    source ~/.virtualenvs/json2xml/bin/activate
+    python scripts/dist2xml.py $1 
+    cd runestone
+    tar --strip-components 1 -zcf dist-$1.tgz dist/*
+    echo "Installing release on CDN"
+    scp dist-$1.tgz balance.runestoneacademy.org:~/
+    ssh balance.runestoneacademy.org /home/bmiller/bin/install_release.sh $1
+    mv dist-$1.tgz ../jsdist
+    cp dist/webpack_static_imports.xml ~/Pretext/pretext/xsl/support/runestone-services.xml 
+    cp dist/webpack_static_imports.xml ~/.ptx/xsl/support/runestone-services.xml 
+  else
+    echo "Warning: no json2xml ve found skipping pretext"
+fi

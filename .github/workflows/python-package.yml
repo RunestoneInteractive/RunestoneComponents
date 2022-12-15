@@ -1,0 +1,51 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Runestone Components Tests
+
+on:
+    push:
+        branches: [master, peer_support]
+    pull_request:
+        branches: [master, peer_support]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        env:
+            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        strategy:
+            matrix:
+                python-version: ["3.8", "3.9"]
+
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-node@v2.1.2
+            - uses: act10ns/slack@v1
+              with:
+                  status: starting
+                  channel: "#builds"
+              if: always()
+
+            - name: Install npm dependencies
+              run: |
+                  npm install
+            - name: Set up Python ${{ matrix.python-version }}
+              uses: actions/setup-python@v2
+              with:
+                  python-version: ${{ matrix.python-version }}
+            - name: Install Python dependencies
+              run: |
+                  # Install Poetry per the `instructions <https://python-poetry.org/docs/master/#installing-with-the-official-installer>`.
+                  curl -sSL https://install.python-poetry.org | python3 -
+                  $HOME/.local/bin/poetry install
+            - name: Tests
+              run: |
+                $HOME/.local/bin/poetry run pytest
+
+            - uses: act10ns/slack@v1
+              with:
+                  status: ${{ job.status }}
+                  steps: ${{ toJson(steps) }}
+                  channel: "#builds"
+              if: always()

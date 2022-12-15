@@ -1,5 +1,0 @@
-graft runestone
-include requirements.txt
-include README.md
-prune runestone/*/test
-

@@ -1,0 +1,18 @@
+# ********************************************
+# |docname| - Read the Docs configuration file
+# ********************************************
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
+
+# Required
+version: 2
+
+# TODO: need some way to invoke a runestone build. Idea: a mock conf.py that runs the build in a subprocess.
+sphinx:
+  configuration: conf.py
+
+# Optionally set the version of Python and requirements required to build your docs
+python:
+  version: 3.8
+  install:
+    - method: pip
+      path: .

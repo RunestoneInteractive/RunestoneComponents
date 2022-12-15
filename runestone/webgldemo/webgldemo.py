@@ -20,9 +20,8 @@ from docutils.parsers.rst import Directive
 import string
 import re
 import os
-from runestone.common.runestonedirective import add_codemirror_css_and_js
 
-__author__ = 'wayne brown'
+__author__ = "wayne brown"
 
 
 # --------------------------------------------------------------------------
@@ -30,40 +29,41 @@ def setup(app):
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Define a webgldemo directive
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    app.add_directive('webgldemo', WebglDemo)
+    app.add_directive("webgldemo", WebglDemo)
 
-    app.add_autoversioned_stylesheet('webgldemo.css')
+    app.add_autoversioned_stylesheet("webgldemo.css")
 
-    app.add_node(WebglDemoNode, html=(visit_webgldemo_node, depart_webgldemo_node))
+    app.add_node(WebglDemoNode, html=(visit_webgldemo_html, depart_webgldemo_html))
 
-    app.connect('doctree-resolved', process_webgldemo_nodes)
-    app.connect('env-purge-doc', purge_webgldemos)
+    app.connect("doctree-resolved", process_webgldemo_nodes)
+    app.connect("env-purge-doc", purge_webgldemos)
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Define a webglinteractive directive
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    app.add_directive('webglinteractive', WebglInteractive)
+    app.add_directive("webglinteractive", WebglInteractive)
 
-    app.add_autoversioned_stylesheet('webglinteractive.css')
+    app.add_autoversioned_stylesheet("webglinteractive.css")
 
     # CodeMirror syntax highlighting for various types of code
-    add_codemirror_css_and_js(app,'xml','css','htmlmixed','javascript')
 
-    app.add_autoversioned_javascript('webglinteractive.js')
+    app.add_autoversioned_javascript("webglinteractive.js", defer="")
 
     # Javascript for saving files to the client's hard drive
-    app.add_autoversioned_javascript('FileSaver.min.js')
-    app.add_autoversioned_javascript('Blob.js')
+    app.add_autoversioned_javascript("FileSaver.min.js", defer="")
 
-    app.add_node(WebglInteractiveNode, html=(visit_webglinteractive_node, depart_webglinteractive_node))
+    app.add_node(
+        WebglInteractiveNode,
+        html=(visit_webglinteractive_html, depart_webglinteractive_html),
+    )
 
-    app.connect('doctree-resolved', process_webglinteractive_nodes)
-    app.connect('env-purge-doc', purge_webglinteractive)
+    app.connect("doctree-resolved", process_webglinteractive_nodes)
+    app.connect("env-purge-doc", purge_webglinteractive)
 
 
 def find_relative_path(env, options):
     # Get the path to the current lesson being processed.
-    documentName = env.temp_data['docname']
+    documentName = env.temp_data["docname"]
     documentPath, documentName = os.path.split(documentName)
 
     # Determine how deep this lesson is nested into the textbook folders.
@@ -88,7 +88,7 @@ def find_relative_path(env, options):
     for j in range(levels_deep):
         folder_prefix = ".." + os.sep + folder_prefix
 
-    options['lib_folder_prefix'] = folder_prefix
+    options["lib_folder_prefix"] = folder_prefix
 
     # "./" gets to the WebGL program folder
     # If levels_deep is 0, then "./" must change to ""
@@ -100,7 +100,7 @@ def find_relative_path(env, options):
     for j in range(levels_deep):
         folder_prefix = ".." + os.sep + folder_prefix
 
-    options['program_folder_prefix'] = folder_prefix
+    options["program_folder_prefix"] = folder_prefix
 
 
 # ==========================================================================
@@ -158,7 +158,7 @@ class WebglDemo(Directive):
             Changes:  "../learn_webgl"  to  "../_static/learn_webgl"
             Changes:  "../shaders"      to  "../_static/shaders"
             Changes:  "../models"       to  "../_static/models"
-            Changes:  "src="./"         to  "src="../' + node.webgl_components['htmlprogrampath'] + "/")
+            Changes:  "src="./"         to  "src="../' + node["webgl_components"]['htmlprogrampath'] + "/")
         * The Javascript code at the bottom of a webgl program needs to be
           in the HTML code so that the runestone build process can modify
           the paths to these webgl program resources. The "Learn Computer Graphics
@@ -187,47 +187,47 @@ class WebglDemo(Directive):
         # placed in the the webgldemo display area. This file is saved
         # in the _static hierarchy of the web site, so the path to
         # the static folder must be pretended to the name.
-        'htmlprogram': directives.unchanged,
-        'width': directives.unchanged,
-        'height': directives.unchanged,
-        'width2': directives.unchanged,
-        'height2': directives.unchanged
+        "htmlprogram": directives.unchanged,
+        "width": directives.unchanged,
+        "height": directives.unchanged,
+        "width2": directives.unchanged,
+        "height2": directives.unchanged,
     }
 
     def run(self):
 
-        self.options['divid'] = self.arguments[0]
+        self.options["divid"] = self.arguments[0]
 
-        if 'htmlprogram' in self.options:
-            path, name = os.path.split(self.options['htmlprogram'])
+        if "htmlprogram" in self.options:
+            path, name = os.path.split(self.options["htmlprogram"])
 
-            self.options['htmlprogrampath'] = path  # .encode('ascii', 'ignore')
-            self.options['htmlprogram'] = name      # .encode('ascii', 'ignore')
+            self.options["htmlprogrampath"] = path  # .encode('ascii', 'ignore')
+            self.options["htmlprogram"] = name  # .encode('ascii', 'ignore')
 
             # Determine how much the path to resources must be adjusted.
             find_relative_path(self.state.document.settings.env, self.options)
 
-            if 'width' in self.options:
-                self.options['width'] = int(self.options['width'])
+            if "width" in self.options:
+                self.options["width"] = int(self.options["width"])
             else:
-                self.options['width'] = 0
+                self.options["width"] = 0
 
-            if 'height' in self.options:
-                self.options['height'] = int(self.options['height'])
+            if "height" in self.options:
+                self.options["height"] = int(self.options["height"])
             else:
-                self.options['height'] = 0
+                self.options["height"] = 0
 
-            if 'width2' in self.options:
-                self.options['width2'] = int(self.options['width2'])
+            if "width2" in self.options:
+                self.options["width2"] = int(self.options["width2"])
             else:
-                self.options['width2'] = 0
+                self.options["width2"] = 0
 
-            if 'height2' in self.options:
-                self.options['height2'] = int(self.options['height2'])
+            if "height2" in self.options:
+                self.options["height2"] = int(self.options["height2"])
             else:
-                self.options['height2'] = 0
+                self.options["height2"] = 0
         else:
-            print('ERROR: An htmlprogram value is required for a webgldemo directive.')
+            print("ERROR: An htmlprogram value is required for a webgldemo directive.")
 
         # print("self.options = ", self.options)
 
@@ -270,8 +270,8 @@ class WebglDemoNode(nodes.General, nodes.Element):
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
-def visit_webgldemo_node(self, node):
-    # print("In visit_webgldemo_node, node.webgl_components = ", node.webgl_components)
+def visit_webgldemo_html(self, node):
+    # print("In visit_webgldemo_html, node["webgl_components"] = ", node["webgl_components"])
 
     # start of HTML
     res = "<!-- webgldemo start -->\n"
@@ -279,67 +279,97 @@ def visit_webgldemo_node(self, node):
 
     # The HTML comes from the body of the HTMLprogram file
     # Read the HTML file
-    filename = os.path.join(node.webgl_components['htmlprogrampath'], node.webgl_components['htmlprogram'])
-    file = open(filename, 'r')
+    filename = os.path.join(
+        node["webgl_components"]["htmlprogrampath"], node["webgl_components"]["htmlprogram"]
+    )
+    file = open(filename, "r")
     fileContents = file.read()
     file.close()
 
     # Extract only the body of the HTML code
-    startPos = fileContents.find('<body')
-    startPos = fileContents.find('>', startPos) + 1
-    endPos = fileContents.find('</body>')
+    startPos = fileContents.find("<body")
+    startPos = fileContents.find(">", startPos) + 1
+    endPos = fileContents.find("</body>")
     bodyCode = fileContents[startPos:endPos]
 
     # Update the paths to library files
-    bodyCode = bodyCode.replace("../", node.webgl_components['lib_folder_prefix'])
-    bodyCode = bodyCode.replace('src="./', 'src="' + node.webgl_components['program_folder_prefix'] + node.webgl_components['htmlprogrampath'] + os.sep)
+    bodyCode = bodyCode.replace("../", node["webgl_components"]["lib_folder_prefix"])
+    bodyCode = bodyCode.replace(
+        'src="./',
+        'src="'
+        + node["webgl_components"]["program_folder_prefix"]
+        + node["webgl_components"]["htmlprogrampath"]
+        + os.sep,
+    )
 
     # make the canvas a specific size
-    if node.webgl_components['width'] > 0 and node.webgl_components['height'] > 0:
-        width_re = re.compile(r'<canvas id="my_canvas" class="webgldemo_canvas" width="(\d+)" height="(\d+)">')
+    if node["webgl_components"]["width"] > 0 and node["webgl_components"]["height"] > 0:
+        width_re = re.compile(
+            r'<canvas id="my_canvas" class="webgldemo_canvas" width="(\d+)" height="(\d+)">'
+        )
         if width_re.search(bodyCode):
-            new_text = r'<canvas id="my_canvas" class="webgldemo_canvas" width="' + str(node.webgl_components['width']) + \
-                       '" height="' + str(node.webgl_components['height']) + r'">'
+            new_text = (
+                r'<canvas id="my_canvas" class="webgldemo_canvas" width="'
+                + str(node["webgl_components"]["width"])
+                + '" height="'
+                + str(node["webgl_components"]["height"])
+                + r'">'
+            )
             bodyCode = width_re.sub(new_text, bodyCode)
 
-    if node.webgl_components['width2'] > 0 and node.webgl_components['height2'] > 0:
+    if node["webgl_components"]["width2"] > 0 and node["webgl_components"]["height2"] > 0:
         # make the secondary canvas a specific size
-        width_re = re.compile(r'<canvas id="my_canvas_b" class="webgldemo_canvas" width="(\d+)" height="(\d+)">')
+        width_re = re.compile(
+            r'<canvas id="my_canvas_b" class="webgldemo_canvas" width="(\d+)" height="(\d+)">'
+        )
         if width_re.search(bodyCode):
-            new_text = r'<canvas id="my_canvas_b" class="webgldemo_canvas" width="' + str(node.webgl_components['width2']) + \
-                       '" height="' + str(node.webgl_components['height2']) + r'">'
+            new_text = (
+                r'<canvas id="my_canvas_b" class="webgldemo_canvas" width="'
+                + str(node["webgl_components"]["width2"])
+                + '" height="'
+                + str(node["webgl_components"]["height2"])
+                + r'">'
+            )
             bodyCode = width_re.sub(new_text, bodyCode)
 
     # Make all the ids and variables unique for this embedded program.
-    bodyCode = bodyCode.replace("my_", node.webgl_components['divid'] + '_')
+    bodyCode = bodyCode.replace("my_", node["webgl_components"]["divid"] + "_")
 
     # Make the first parameter of the scene function be the ID of this webgldemo
-    bodyCode = bodyCode.replace('"my",', '"' + node.webgl_components['divid'] + '",')
+    bodyCode = bodyCode.replace('"my",', '"' + node["webgl_components"]["divid"] + '",')
 
     # Add the HTML body code to the page in the "canvas" area.
     res += bodyCode
 
     # Add a link to open the webgldemo program in a separate browser tab.
-    programPath = node.webgl_components['htmlprogrampath'].replace("_static/", "")
-    myLink = os.path.join(node.webgl_components['lib_folder_prefix'], programPath, node.webgl_components['htmlprogram'])
-    res += '<a href="' + myLink + '" target="_blank">Open this webgl demo program in a new tab or window</a>'
+    programPath = node["webgl_components"]["htmlprogrampath"].replace("_static/", "")
+    myLink = os.path.join(
+        node["webgl_components"]["lib_folder_prefix"],
+        programPath,
+        node["webgl_components"]["htmlprogram"],
+    )
+    res += (
+        '<a href="'
+        + myLink
+        + '" target="_blank">Open this webgl demo program in a new tab or window</a>'
+    )
 
     # End of HTML
     res += "</div>\n"
     res += "<!-- webgldemo end -->"
 
     # Replace all of the placeholders in the HTML with the strings stored
-    # in the node.webgl_components dictionary.
-    res = res % node.webgl_components
+    # in the node["webgl_components"] dictionary.
+    res = res % node["webgl_components"]
 
     self.body.append(res)
 
 
 # --------------------------------------------------------------------------
-def depart_webgldemo_node(self, node):
+def depart_webgldemo_html(self, node):
     """
     This is called at the start of processing an activecode node.  If activecode had recursive nodes
-    etc and did not want to do all of the processing in visit_webgldemo_node any finishing touches could be
+    etc and did not want to do all of the processing in visit_webgldemo_html any finishing touches could be
     added here.
     """
     pass
@@ -533,7 +563,7 @@ class WebglInteractive(Directive):
             Changes:  "../learn_webgl"  to  "../_static/learn_webgl"
             Changes:  "../shaders"      to  "../_static/shaders"
             Changes:  "../models"       to  "../_static/models"
-            Changes:  "src="./"         to  "src="../' + node.webgl_components['htmlprogrampath'] + "/")
+            Changes:  "src="./"         to  "src="../' + node["webgl_components"]['htmlprogrampath'] + "/")
         * The Javascript code at the bottom of a webgl program needs to be
           in the HTML code so that the runestone build process can modify
           the paths to these webgl program resources. The "Learn Computer Graphics
@@ -563,19 +593,19 @@ class WebglInteractive(Directive):
         # placed in the the webgl display area. This files are saved
         # in the _static hierarchy of the web site, so the path to
         # the static hierarchy must be pretended to the name.
-        'htmlprogram': directives.unchanged,
+        "htmlprogram": directives.unchanged,
         # A list of source files that are displayed in editor panes. Again
         # the path to these files must be adjusted.
-        'editlist': directives.unchanged,
-        'viewlist': directives.unchanged,
+        "editlist": directives.unchanged,
+        "viewlist": directives.unchanged,
         # Options for hiding parts of a webglinteractive
-        'hidecode': directives.flag,
-        'hideoutput': directives.flag,
+        "hidecode": directives.flag,
+        "hideoutput": directives.flag,
         # Change the size of the canvas
-        'width': directives.unchanged,
-        'height': directives.unchanged,
-        'width2': directives.unchanged,
-        'height2': directives.unchanged
+        "width": directives.unchanged,
+        "height": directives.unchanged,
+        "width2": directives.unchanged,
+        "height2": directives.unchanged,
     }
 
     def run(self):
@@ -587,56 +617,58 @@ class WebglInteractive(Directive):
         # for item in attrs.items():
         #     print item
 
-        if not hasattr(env, 'webglinteractivecounter'):
+        if not hasattr(env, "webglinteractivecounter"):
             env.webglinteractivecounter = 0
         env.webglinteractivecounter += 1
 
-        self.options['divid'] = self.arguments[0]
+        self.options["divid"] = self.arguments[0]
 
-        self.options['hidecanvas'] = False
-        self.options['hideoutput'] = 'hideoutput' in self.options
-        self.options['hidecode'] = 'hidecode' in self.options
+        self.options["hidecanvas"] = False
+        self.options["hideoutput"] = "hideoutput" in self.options
+        self.options["hidecode"] = "hidecode" in self.options
 
-        if 'htmlprogram' in self.options:
-            htmlprogram_folders = self.options['htmlprogram'].split('/')
+        if "htmlprogram" in self.options:
+            htmlprogram_folders = self.options["htmlprogram"].split("/")
             htmlprogram_path = "/".join(htmlprogram_folders[0:-1])
             htmlprogram_path = htmlprogram_path.strip()
-            self.options['htmlprogram'] = htmlprogram_folders[-1]
-            self.options['htmlprogrampath'] = htmlprogram_path
+            self.options["htmlprogram"] = htmlprogram_folders[-1]
+            self.options["htmlprogrampath"] = htmlprogram_path
         else:
-            print('***** ERROR: An htmlprogram is required for a webglinteractive directive.')
+            print(
+                "***** ERROR: An htmlprogram is required for a webglinteractive directive."
+            )
 
-        if 'editlist' in self.options:
+        if "editlist" in self.options:
             # Turn the comma separated string of filenames into a list
-            self.options['editlist'] = self.options['editlist'].split(',')
+            self.options["editlist"] = self.options["editlist"].split(",")
         else:
-            self.options['editlist'] = []
+            self.options["editlist"] = []
 
-        if 'viewlist' in self.options:
+        if "viewlist" in self.options:
             # Turn the comma separated string of filenames into a list
-            self.options['viewlist'] = self.options['viewlist'].split(',')
+            self.options["viewlist"] = self.options["viewlist"].split(",")
         else:
-            self.options['viewlist'] = []
+            self.options["viewlist"] = []
 
-        if 'width' in self.options:
-            self.options['width'] = int(self.options['width'])
+        if "width" in self.options:
+            self.options["width"] = int(self.options["width"])
         else:
-            self.options['width'] = 0
+            self.options["width"] = 0
 
-        if 'height' in self.options:
-            self.options['height'] = int(self.options['height'])
+        if "height" in self.options:
+            self.options["height"] = int(self.options["height"])
         else:
-            self.options['height'] = 0
+            self.options["height"] = 0
 
-        if 'width2' in self.options:
-            self.options['width2'] = int(self.options['width2'])
+        if "width2" in self.options:
+            self.options["width2"] = int(self.options["width2"])
         else:
-            self.options['width2'] = 0
+            self.options["width2"] = 0
 
-        if 'height2' in self.options:
-            self.options['height2'] = int(self.options['height2'])
+        if "height2" in self.options:
+            self.options["height2"] = int(self.options["height2"])
         else:
-            self.options['height2'] = 0
+            self.options["height2"] = 0
 
         # Determine how much the path to resources must be adjusted.
         find_relative_path(self.state.document.settings.env, self.options)
@@ -648,7 +680,7 @@ class WebglInteractive(Directive):
         return [WebglInteractiveNode(self.options)]
 
 
-OUTPUT_OPTIONS = '''
+OUTPUT_OPTIONS = """
 <div>
 Show:
 <input type="checkbox" id="%(divid)s_webgl_displayInfo" name="Display" value="InfoMessages" checked='checked' />
@@ -658,12 +690,12 @@ Show:
 <input type="checkbox" id="%(divid)s_webgl_displayErrors" name="Display" value="Errors" checked='checked' />
 <span id="webgl_errorMessages" class="webgl_errorMessages">Errors</span>
 </div>
-'''
+"""
 
-OUTPUT_WINDOW = '''
+OUTPUT_WINDOW = """
 <div id="%(divid)s_webgl_output_div" class="webgl_output_div">
 </div>
-'''
+"""
 
 # For the tabbed content
 # There is a list of tab headings
@@ -675,7 +707,7 @@ TAB_END = """</div>"""
 # Run the show/hide function on each element to get it into the correct
 # visibility and width
 SHOW_HIDE_SCRIPT = """
-    <script type='text/javascript'>
+    <script>
         %(divid)s_directive.show_webgl(\"%(divid)s_show_code\",1);
         %(divid)s_directive.show_webgl(\"%(divid)s_show_canvas\",2);
         %(divid)s_directive.show_webgl(\"%(divid)s_show_info\",3);
@@ -697,17 +729,17 @@ TAB_LIST_ELEMENT = """
 TAB_CONTENTS_BEGIN = """<div style='width:100%%; position:relative;'>
 <div class="webgl_code">"""
 
-TAB_CONTENTS_END = '''
+TAB_CONTENTS_END = """
 <div style="clear:both;"></div>
 </div>
 </div>
-'''
+"""
 
 TAB_DIV_BEGIN = """<div class='webgl_tab_content' id='%(divid)s_%(tabname)s'>"""
 
 TAB_DIV_END = """</div>"""
 
-TABBED_EDITOR = '''
+TABBED_EDITOR = """
 <textarea id="%(tabid)s_textarea" class="webgl_tabbed_editor">
 %(fileContents)s
 </textarea>
@@ -715,7 +747,7 @@ TABBED_EDITOR = '''
 <script>
     %(divid)s_directive.createCodeMirrorEditor('%(tabid)s', '%(filename)s', '%(fileextension)s' %(readonly)s);
 </script>
-'''
+"""
 
 
 # =====================================================================
@@ -732,21 +764,21 @@ class WebglInteractiveNode(nodes.General, nodes.Element):
 
 
 def add_commands(options):
-    res = ''
+    res = ""
     res += "<button class='btn btn-success' id='%(divid)s_runb' onclick='%(divid)s_directive.restart();'>Re-start</button>\n"
     res += "Show: \n"
 
-    if options['hidecode']:
+    if options["hidecode"]:
         res += "<input type='checkbox' id='%(divid)s_show_code' onclick='%(divid)s_directive.show_webgl(\"%(divid)s_show_code\",1);' />Code &nbsp\n"
     else:
         res += "<input type='checkbox' id='%(divid)s_show_code' onclick='%(divid)s_directive.show_webgl(\"%(divid)s_show_code\",1);' checked='checked' />Code &nbsp\n"
 
-    if options['hidecanvas']:
+    if options["hidecanvas"]:
         res += "<input type='checkbox' id='%(divid)s_show_canvas' onclick='%(divid)s_directive.show_webgl(\"%(divid)s_show_canvas\",2);' />Canvas &nbsp\n"
     else:
         res += "<input type='checkbox' id='%(divid)s_show_canvas' onclick='%(divid)s_directive.show_webgl(\"%(divid)s_show_canvas\",2);' checked='checked' />Canvas &nbsp\n"
 
-    if options['hideoutput']:
+    if options["hideoutput"]:
         res += "<input type='checkbox' id='%(divid)s_show_info' onclick='%(divid)s_directive.show_webgl(\"%(divid)s_show_info\",3);'/>Run Info\n"
     else:
         res += "<input type='checkbox' id='%(divid)s_show_info' onclick='%(divid)s_directive.show_webgl(\"%(divid)s_show_info\",3);' checked='checked' />Run Info\n"
@@ -762,73 +794,91 @@ def add_commands(options):
 
 def change_html_code_ids(bodyCode, webgl_components):
 
-    if webgl_components['width'] > 0 and webgl_components['height'] > 0:
+    if webgl_components["width"] > 0 and webgl_components["height"] > 0:
         # make the canvas a specific size
-        width_re = re.compile(r'<canvas id="my_canvas" class="webgldemo_canvas" width="(\d+)" height="(\d+)">')
+        width_re = re.compile(
+            r'<canvas id="my_canvas" class="webgldemo_canvas" width="(\d+)" height="(\d+)">'
+        )
         if width_re.search(bodyCode):
-            new_text = r'<canvas id="my_canvas" class="webgldemo_canvas" width="' + str(webgl_components['width']) + \
-                       '" height="' + str(webgl_components['height']) + r'">'
+            new_text = (
+                r'<canvas id="my_canvas" class="webgldemo_canvas" width="'
+                + str(webgl_components["width"])
+                + '" height="'
+                + str(webgl_components["height"])
+                + r'">'
+            )
             bodyCode = width_re.sub(new_text, bodyCode)
 
-    if webgl_components['width2'] > 0 and webgl_components['height2'] > 0:
+    if webgl_components["width2"] > 0 and webgl_components["height2"] > 0:
         # make the secondary canvas a specific size
-        width_re = re.compile(r'<canvas id="my_canvas_b" class="webgldemo_canvas" width="(\d+)" height="(\d+)">')
+        width_re = re.compile(
+            r'<canvas id="my_canvas_b" class="webgldemo_canvas" width="(\d+)" height="(\d+)">'
+        )
         if width_re.search(bodyCode):
-            new_text = r'<canvas id="my_canvas_b" class="webgldemo_canvas" width="' + str(webgl_components['width2']) + \
-                       '" height="' + str(webgl_components['height2']) + r'">'
+            new_text = (
+                r'<canvas id="my_canvas_b" class="webgldemo_canvas" width="'
+                + str(webgl_components["width2"])
+                + '" height="'
+                + str(webgl_components["height2"])
+                + r'">'
+            )
             bodyCode = width_re.sub(new_text, bodyCode)
 
     # Make all the ids and variables unique for this embedded program.
-    bodyCode = bodyCode.replace("my_", webgl_components['divid'] + '_')
+    bodyCode = bodyCode.replace("my_", webgl_components["divid"] + "_")
 
     # Make the first parameter of the scene function be the ID of this webgldemo
-    bodyCode = bodyCode.replace('"my",', '"' + webgl_components['divid'] + '",')
+    bodyCode = bodyCode.replace('"my",', '"' + webgl_components["divid"] + '",')
 
     return bodyCode
 
 
 def add_code_editors(options):
     # Put the code in the text editors in tabs
-    res = ''
+    res = ""
 
     # Add the tab headings
     res += TAB_TITLES_LIST_BEGIN
 
-    number_to_edit = len(options['editlist'])
+    number_to_edit = len(options["editlist"])
     for j in range(0, number_to_edit):
 
-        tab_name = options['editlist'][j]
+        tab_name = options["editlist"][j]
         # Remove any path on the file name
-        folders = tab_name.split('/')
+        folders = tab_name.split("/")
         if len(folders) > 1:
             tab_title = folders[len(folders) - 1].strip()
         else:
             tab_title = tab_name.strip()
 
         # Replace any periods in the filename to create the HTML id for the tab
-        tab_name = tab_title.replace('.', '_').strip()
+        tab_name = tab_title.replace(".", "_").strip()
 
-        res += TAB_LIST_ELEMENT % {'divid': options['divid'],
-                                   'tabname': tab_name,
-                                   'tabtitle': tab_title}
+        res += TAB_LIST_ELEMENT % {
+            "divid": options["divid"],
+            "tabname": tab_name,
+            "tabtitle": tab_title,
+        }
 
-    number_to_view = len(options['viewlist'])
+    number_to_view = len(options["viewlist"])
     for j in range(0, number_to_view):
 
-        tab_name = options['viewlist'][j]
+        tab_name = options["viewlist"][j]
         # Remove any path on the file name
-        folders = tab_name.split('/')
+        folders = tab_name.split("/")
         if len(folders) > 1:
             tab_title = folders[len(folders) - 1].strip()
         else:
             tab_title = tab_name.strip()
 
         # Replace any periods in the filename to create the HTML id for the tab
-        tab_name = tab_title.replace('.', '_').strip()
+        tab_name = tab_title.replace(".", "_").strip()
 
-        res += TAB_LIST_ELEMENT % {'divid': options['divid'],
-                                   'tabname': tab_name,
-                                   'tabtitle': tab_title}
+        res += TAB_LIST_ELEMENT % {
+            "divid": options["divid"],
+            "tabname": tab_name,
+            "tabtitle": tab_title,
+        }
 
     res += TAB_TITLES_LIST_END
 
@@ -836,85 +886,87 @@ def add_code_editors(options):
     res += TAB_CONTENTS_BEGIN
 
     for j in range(0, number_to_edit):
-        edit_name = options['editlist'][j]
+        edit_name = options["editlist"][j]
         # Remove any path on the file name
-        folders = edit_name.split('/')
+        folders = edit_name.split("/")
         if len(folders) > 1:
             file_name = folders[len(folders) - 1].strip()
         else:
             file_name = edit_name.strip()
 
         # Get the file name extension
-        dot_pos = file_name.find('.')
-        fileExtension = file_name[dot_pos + 1:]
+        dot_pos = file_name.find(".")
+        fileExtension = file_name[dot_pos + 1 :]
 
         # Replace any periods in the filename to create the HTML id for the tab
-        tab_name = file_name.replace('.', '_').strip()
+        tab_name = file_name.replace(".", "_").strip()
 
-        tab_id = options['divid'] + '_' + tab_name
-        tab_file = options['editlist'][j].strip()
+        tab_id = options["divid"] + "_" + tab_name
+        tab_file = options["editlist"][j].strip()
         tab_file = os.path.abspath(tab_file)
 
         # Read the data file into a single string
-        file = open(tab_file, 'r')
+        file = open(tab_file, "r")
         fileContents = file.read()
         file.close()
 
         # If this file is an HTML code file, then replace the "my_" code strings
         # with the directive ID. E.g., "my_" becomes "W2_"
-        if fileExtension == 'html':
+        if fileExtension == "html":
             fileContents = change_html_code_ids(fileContents, options)
 
-        res += TAB_DIV_BEGIN % {'divid': options['divid'],
-                                'tabname': tab_name}
+        res += TAB_DIV_BEGIN % {"divid": options["divid"], "tabname": tab_name}
         # content of tab
-        res += TABBED_EDITOR % {'divid': options['divid'],
-                                'tabid': tab_id,
-                                'tabfile': edit_name,
-                                'fileContents': fileContents,
-                                'filename': file_name,
-                                'fileextension': fileExtension,
-                                'readonly': ""}
+        res += TABBED_EDITOR % {
+            "divid": options["divid"],
+            "tabid": tab_id,
+            "tabfile": edit_name,
+            "fileContents": fileContents,
+            "filename": file_name,
+            "fileextension": fileExtension,
+            "readonly": "",
+        }
         res += TAB_DIV_END
 
     for j in range(0, number_to_view):
-        view_name = options['viewlist'][j]
+        view_name = options["viewlist"][j]
         # Remove any path on the file name
-        folders = view_name.split('/')
+        folders = view_name.split("/")
         if len(folders) > 1:
             file_name = folders[len(folders) - 1].strip()
         else:
             file_name = view_name.strip()
 
         # Get the file name extension
-        dot_pos = file_name.find('.')
-        fileExtension = file_name[dot_pos + 1:]
+        dot_pos = file_name.find(".")
+        fileExtension = file_name[dot_pos + 1 :]
 
         # Replace any periods in the filename to create the HTML id for the tab
-        tab_name = file_name.replace('.', '_').strip()
+        tab_name = file_name.replace(".", "_").strip()
 
-        tab_id = options['divid'] + '_' + tab_name
-        tab_file = options['viewlist'][j].strip()
+        tab_id = options["divid"] + "_" + tab_name
+        tab_file = options["viewlist"][j].strip()
         tab_file = os.path.abspath(tab_file)
 
         # Read the data file into a single string
-        file = open(tab_file, 'r')
+        file = open(tab_file, "r")
         fileContents = file.read()
         file.close()
 
-        if fileExtension == 'html':
+        if fileExtension == "html":
             fileContents = change_html_code_ids(fileContents, options)
 
-        res += TAB_DIV_BEGIN % {'divid': options['divid'],
-                                'tabname': tab_name}
+        res += TAB_DIV_BEGIN % {"divid": options["divid"], "tabname": tab_name}
         # content of tab
-        res += TABBED_EDITOR % {'divid': options['divid'],
-                                'tabid': tab_id,
-                                'tabfile': view_name,
-                                'fileContents': fileContents,
-                                'filename': file_name,
-                                'fileextension': fileExtension,
-                                'readonly': ", true"}
+        res += TABBED_EDITOR % {
+            "divid": options["divid"],
+            "tabid": tab_id,
+            "tabfile": view_name,
+            "fileContents": fileContents,
+            "filename": file_name,
+            "fileextension": fileExtension,
+            "readonly": ", true",
+        }
         res += TAB_DIV_END
 
     res += TAB_CONTENTS_END
@@ -925,25 +977,25 @@ def add_code_editors(options):
 # self for these functions is an instance of the writer class.  For example
 # in html, self is sphinx.writers.html.SmartyPantsHTMLTranslator
 # The node that is passed as a parameter is an instance of our node class.
-def visit_webglinteractive_node(self, node):
-    # print("In visit_webglinteractive_node, node.webgl_components = ", node.webgl_components)
+def visit_webglinteractive_html(self, node):
+    # print("In visit_webglinteractive_html, node["webgl_components"] = ", node["webgl_components"])
 
     # Overall structure is here. Content is added in the functions
     res = "<!-- webglinteractive start -->"
 
     # Create an instance of the WebglInteractive_directive class. This creates
     # the event handlers and functionality for the webglinteractive directive.
-    res += '''
+    res += """
   <script>
     var %(divid)s_directive = new WebglInteractive_directive( '%(divid)s' );
   </script>
-  '''
+  """
 
     res += "<div class='webgl_container' id='%(divid)s_webgl_container'>\n"
 
     # Commands (top row)
     res += "<div class='webgl_cmds' id='%(divid)s_webgl_cmds'>\n"
-    res += add_commands(node.webgl_components)
+    res += add_commands(node["webgl_components"])
     res += "</div>\n"
 
     # Start first row (editors and canvas)
@@ -951,34 +1003,49 @@ def visit_webglinteractive_node(self, node):
 
     # Editors for code
     res += "<div class='webgl_editors' id='%(divid)s_webgl_editors'>\n"
-    res += add_code_editors(node.webgl_components)
+    res += add_code_editors(node["webgl_components"])
     res += "</div>\n"
 
     # Canvas for rendering (with controls below the canvas)
     res += "<div class='webgl_canvas' id='%(divid)s_webgl_canvas'>"
     # Read the HTML file
-    filename = node.webgl_components['htmlprogrampath'] + "/" + node.webgl_components['htmlprogram']
+    filename = (
+        node["webgl_components"]["htmlprogrampath"]
+        + "/"
+        + node["webgl_components"]["htmlprogram"]
+    )
     filename = os.path.realpath(filename)
 
-    file = open(filename, 'r')
+    file = open(filename, "r")
     fileContents = file.read()
     file.close()
 
     # Put the HTML source file name so it can be downloaded by the user
-    html_file_name = "../" + node.webgl_components['htmlprogrampath'] + '/' + node.webgl_components['htmlprogram']
-    res += '<span style="display: none;">' + html_file_name + '</span>'
+    html_file_name = (
+        "../"
+        + node["webgl_components"]["htmlprogrampath"]
+        + "/"
+        + node["webgl_components"]["htmlprogram"]
+    )
+    res += '<span style="display: none;">' + html_file_name + "</span>"
 
     # Extract only the body of the HTML code
-    startPos = fileContents.find('<body')
-    startPos = fileContents.find('>', startPos) + 1
-    endPos = fileContents.find('</body>')
+    startPos = fileContents.find("<body")
+    startPos = fileContents.find(">", startPos) + 1
+    endPos = fileContents.find("</body>")
     bodyCode = fileContents[startPos:endPos]
 
     # Update the paths to library files
-    bodyCode = bodyCode.replace("../", node.webgl_components['lib_folder_prefix'])
-    bodyCode = bodyCode.replace('src="./', 'src="' + node.webgl_components['program_folder_prefix'] + node.webgl_components['htmlprogrampath'] + os.sep)
+    bodyCode = bodyCode.replace("../", node["webgl_components"]["lib_folder_prefix"])
+    bodyCode = bodyCode.replace(
+        'src="./',
+        'src="'
+        + node["webgl_components"]["program_folder_prefix"]
+        + node["webgl_components"]["htmlprogrampath"]
+        + os.sep,
+    )
 
-    bodyCode = change_html_code_ids(bodyCode, node.webgl_components)
+    bodyCode = change_html_code_ids(bodyCode, node["webgl_components"])
 
     # Add the HTML body code to the page in the "canvas" area.
     res += bodyCode
@@ -996,9 +1063,17 @@ def visit_webglinteractive_node(self, node):
     res += "<div style='clear:both;'></div>\n"  # turns off the float left
 
     # Add a link to open the webgl program in a separate browser tab.
-    programPath = node.webgl_components['htmlprogrampath'].replace("_static/", "")
-    myLink = os.path.join(node.webgl_components['lib_folder_prefix'], programPath, node.webgl_components['htmlprogram'])
-    res += '<a href="' + myLink + '" target="_blank">Open this webgl program in a new tab or window</a>'
+    programPath = node["webgl_components"]["htmlprogrampath"].replace("_static/", "")
+    myLink = os.path.join(
+        node["webgl_components"]["lib_folder_prefix"],
+        programPath,
+        node["webgl_components"]["htmlprogram"],
+    )
+    res += (
+        '<a href="'
+        + myLink
+        + '" target="_blank">Open this webgl program in a new tab or window</a>'
+    )
 
     res += "</div>\n"
 
@@ -1011,17 +1086,17 @@ def visit_webglinteractive_node(self, node):
     res += "<p> </p>\n"
 
     # Replace all of the placeholders in the HTML with the strings stored
-    # in the node.webgl_components dictionary.
-    res = res % node.webgl_components
+    # in the node["webgl_components"] dictionary.
+    res = res % node["webgl_components"]
 
     self.body.append(res)
 
 
-def depart_webglinteractive_node(self, node):
-    ''' This is called at the start of processing an activecode node.  If activecode had recursive nodes
-        etc and did not want to do all of the processing in depart_webglinteractive_node any finishing touches could be
+def depart_webglinteractive_html(self, node):
+    """ This is called at the start of processing an activecode node.  If activecode had recursive nodes
+        etc and did not want to do all of the processing in depart_webglinteractive_html any finishing touches could be
         added here.
-    '''
+    """
     pass
 
 
@@ -1031,4 +1106,3 @@ def process_webglinteractive_nodes(app, env, docname):
 
 def purge_webglinteractive(app, env, docname):
     pass
-

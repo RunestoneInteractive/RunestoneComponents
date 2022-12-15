@@ -1,37 +1,29 @@
+<!-- ****************************************
+     |docname| - main template for this theme
+     **************************************** -->
 {% extends "basic/layout.html" %}
 
-{% set script_files = ['_static/runestonebase.js'] + script_files + [
-    '_static'+'/jquery-ui-1.10.3.custom.min.js',
-    '_static'+'/jquery-fix.js',
-    '_static'+'/bootstrap-3.0.0/js/bootstrap.min.js',
-    '_static'+'/bootstrap-sphinx.js',
-    '_static'+'/waypoints.min.js',
-    '_static'+'/user-highlights.js',
-    '_static'+'/jquery.idle-timer.js',
-    '_static'+'/processing-1.4.1.min.js',
-    '_static'+'/jquery.hotkey.js',
-    '_static'+'/jquery-migrate-1.2.1.min.js',
-    '_static'+'/presenter_mode.js',
-  ]
-%}
+{% if dynamic_pages == 'True' %}
+  {% set appname = 'runestone' %}
+{% endif %}
 
-{% set css_files = ['_static/bootstrap-3.0.0/css/bootstrap.min.css', '_static/presenter_mode.css'] + css_files %}
+
 {% if theme_bootswatch_theme %}
   {% set css_files = css_files +
     ['http://netdna.bootstrapcdn.com/bootswatch/2.3.1/' + theme_bootswatch_theme + '/bootstrap.min.css']
   %}
 {% endif %}
 
-{% set css_files = css_files + [
-    '_static'+'/jquery-ui-1.10.3.custom.min.css',
-    '_static'+'/bootstrap-sphinx.css',
-    '_static'+'/user-highlights.css',
-    '_static/runestone-custom-sphinx-bootstrap.css',
-  ]
-%}
 
 {%- block doctype -%}
 <!DOCTYPE html>
+{%- endblock %}
+
+{%- block scripts %}
+{# Override the scripts block from sphinx so we can force loading of jquery/underscore/doctools js files #}
+{{ js_defer(script_files) }}
+{{ super() }}
+<script src="https://media.ethicalads.io/media/client/ethicalads.min.js"></script>
 {%- endblock %}
 
 {# Sidebar: Rework into our Boostrap nav section. #}
@@ -44,15 +36,28 @@
 
     <div class="navbar-header">
       <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
-      <button type='button' class='navbar-toggle' data-toggle="collapse" data-target=".navbar-ex1-collapse">
+      <button type='button' class='navbar-toggle' data-toggle="collapse" data-target=".navbar-ex1-collapse" aria-label="navbar toggle">
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
 
       <div>
-        <a class="brand-logo" style='background: transparent url("{{pathto('_static/img/logo_small.png', 1)}}") no-repeat 0px 0px;' href="/{{appname}}/default/user/login">&nbsp; </a>
-        <a class="navbar-brand" href="{{ pathto(master_doc) }}" aria-label="index-page">{% if theme_navbar_title -%}{{ theme_navbar_title|e }}{%- else -%}{{ project|e }}{%- endif -%}</a>
+        {% set logo = '_static/' + (logo if logo else 'img/RAIcon.png') %}
+        {% if minimal_outside_links != 'True' %}
+          <a class="brand-logo" href="/{{appname}}/default/user/login" aria-label="Login"><img src="{{pathto(logo, 1)}}" alt=""></a>
+        {% else %}
+          <div class="brand-logo"><img src="{{pathto(logo, 1)}}" alt=""></div>
+        {% endif %}
+        <a class="navbar-brand" href="{{ pathto(master_doc) }}" aria-label="index-page">
+          {% if dynamic_pages == 'True' %}
+            {% raw %}
+            {{ course_name }}
+            {% endraw %}
+          {% else %}
+          {% if course_title -%}{{ course_title|e }}{%- else -%}{{ course_id|e }}{%- endif -%}
+          {% endif %}
+        </a>
       </div>
     </div>
 
@@ -62,19 +67,22 @@
       <ul class="nav navbar-nav navbar-right" >
 
         <li class="divider-vertical"></li>
+        <li><span id="ad_warning"></span></li>
+        <li><span id="browsing_warning"></span></li>
 
         <!-- social media dropdown -->
+        {% if minimal_outside_links != 'True' %}
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
-            <i class="glyphicon glyphicon-globe" style="opacity: 0.9"></i>
+            <i class="glyphicon glyphicon-globe" style="opacity: 0.9"><span class="visuallyhidden" aria-label="Social">Social</span></i>
           </a>
           <ul class="dropdown-menu social-menu">
               <li>
                 <div>
                   <b>Runestone in social media:</b>
                 </div>
-                <a href="https://twitter.com/iRunestone" class="twitter-follow-button" data-show-count="true">Follow @iRunestone</a><script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-                <div class="fb-like" data-href="https://www.facebook.com/RunestoneInteractive" data-send="false" data-layout="button_count" data-width="300" data-show-faces="false" data-font="arial"></div>
+                <a href="https://twitter.com/iRunestone">Follow @iRunestone</a>
+                <a href="https://www.facebook.com/RunestoneInteractive">Our Facebook Page</a>
               </li>
 
               <li class="divider"></li>
@@ -95,22 +103,22 @@
               </li>
           </ul>
         </li>
+        {%- endif -%}
         <!-- end social media dropdown -->
 
         <li class="divider-vertical"></li>
-
         <!-- search dropdown -->
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
-            <i class="glyphicon glyphicon-search" style='opacity:0.9;'></i>
+            <i class="glyphicon glyphicon-search" style='opacity:0.9;'><span class="visuallyhidden" aria-label="Search">Search</span></i>
           </a>
           <ul class='dropdown-menu'>
             {% if 'overview' in course_id %}
-                <li><a href='/{{appname}}/static/{{course_id}}/overview.html' aria-label="index-page">Table of Contents</a></li>
+                <li><a href='{{ pathto(master_doc) }}/overview.html' aria-label="index-page">Table of Contents</a></li>
             {% else: %}
                 <li><a href='{{ pathto(master_doc) }}' aria-label="index-page">Table of Contents</a></li>
             {% endif %}
-            <li><a href='/{{appname}}/static/{{course_id}}/genindex.html'>Book Index</a></li>
+            <li><a href='{{ pathto("genindex.html",1) }}'>Book Index</a></li>
             <li class="divider"></li>
             <li style="width: 240px;">
               <form class="navbar-search" style="margin:10px;" action="{{ pathto('search') }}" method="get">
@@ -132,32 +140,39 @@
 
         <li class="divider-vertical"></li>
 
-        {% if use_services %}
+        {% if use_services == 'true' %}
         <!-- user account dropdown -->
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
-            <i class="glyphicon glyphicon-user" style="opacity:0.9;"></i>
+            <i class="glyphicon glyphicon-user" style="opacity:0.9;"><span class="visuallyhidden" aria-label="User">User</span></i>
           </a>
           <ul class="dropdown-menu user-menu">
             <li><span class='loggedinuser'></span></li>
             <li class="divider"></li>
-            <li><a href='{{course_url}}/{{appname}}/assignments/practice'>Practice</a></li>
+            <li><a href='/{{appname}}/assignments/chooseAssignment.html'>Assignments</a></li>
+            <li><a href='/{{appname}}/assignments/practice'>Practice</a></li>
+            <li id="inst_peer_link"><a href='/{{appname}}/peer/instructor.html'>Peer Instruction (Instructor)</a></li>
+            <li><a href='/{{appname}}/peer/student.html'>Peer Instruction (Student)</a></li>
             <li class="divider"></li>
+            {% if minimal_outside_links != 'True' %}
             <li><a href='/{{appname}}/default/courses'>Change Course</a></li>
+			      <li class="divider"></li>
+            <li id="ip_dropdown_link"><a href='/{{appname}}/admin/index'>Instructor's Page</a></li>
+            {% endif %}
+            <li><a href='/{{appname}}/dashboard/studentreport'>Progress Page</a></li>
             <li class="divider"></li>
-            <li><a href='{{course_url}}/{{appname}}/mygroup/initiateGroup' id="joinGroupLink">Join a Study Group</a></li>
-            <li><a href='{{course_url}}/{{appname}}/mygroup/schedule' id="groupScheduleLink">Group Schedule</a></li>
-            <li><a href='{{course_url}}/{{appname}}/mygroup/newschedule' id="newChapterLink">Schedule New Chapter</a></li>
-            <li><a href='{{course_url}}/{{appname}}/mygroup/manageGroup' id="manageGroupLink">Manage Group</a></li>
-			<li class="divider"></li>
-            <li id="ip_dropdown_link"><a href='{{course_url}}/{{appname}}/admin/index'>Instructor's Page</a></li>
-            <li><a href='{{ course_url }}/{{ appname }}/assignments/index'>Progress Page</a></li>
-            <li class="divider"></li>
-            <li><a href="{{course_url}}/{{appname}}/default/user/profile" id="profilelink">Edit Profile</a></li>
-            <li><a href="{{course_url}}/{{appname}}/default/user/change_password" id="passwordlink">Change Password</a></li>
-            <li><a href="{{course_url}}/{{appname}}/default/user/register" id="registerlink">Register</a></li>
+            {% if minimal_outside_links != 'True' %}
+            <li><a href="/{{appname}}/default/user/profile" id="profilelink">Edit Profile</a></li>
+            <li><a href="/{{appname}}/default/user/change_password" id="passwordlink">Change Password</a></li>
+            <li><a href="/{{appname}}/default/user/register" id="registerlink">Register</a></li>
+            {% endif %}
             <li class='loginout'><a href='#'>Login</a></li> <!-- correct link populated by addNavbarLoginLink() -->
-          </ul>
+            <!-- dark mode toggle -->
+            <li><label class="theme-switch" for="checkbox">
+              <input type="checkbox" id="checkbox" onchange="runestoneComponents.switchTheme()" />
+              <div class="slider round"></div>Dark Mode
+            </label></li>
+			 </ul>
         </li>
         <!-- end user account dropdown -->
         {% endif %}
@@ -165,20 +180,21 @@
         <!-- <li id="scratch_ac_link"><a href="javascript:ACFactory.toggleScratchActivecode()">Scratch ActiveCode</a></li> -->
 
         <!-- <li class="dropdown">             -->
-          <li id="scratch_ac_link" class="dropdown"><a href="javascript:ACFactory.toggleScratchActivecode()">
-              <i class="glyphicon glyphicon-pencil" style="opacity:0.9;"></i></a></li>
+          <li id="scratch_ac_link" class="dropdown"><a href="javascript:runestoneComponents.popupScratchAC()">
+              <i class="glyphicon glyphicon-pencil" style="opacity:0.9;"><span class="visuallyhidden" aria-label="Scratch Activecode" >Scratch Activecode</span></i></a></li>
         <!-- </li> -->
 
         <li class="divider-vertical"></li>
 
+        {% if minimal_outside_links != 'True' %}
         <!-- help menu dropdown -->
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
-            <i class="glyphicon glyphicon-question-sign" style="opacity:0.9;"></i>
+            <i class="glyphicon glyphicon-question-sign" style="opacity:0.9;"><span class="visuallyhidden" aria-label="Help">Help</span></i>
           </a>
           <ul class="dropdown-menu user-menu">
-            <li><a href='/{{appname}}/static/{{course_id}}/navhelp.html'>Navigation Help</a></li>
-            <li><a href='/{{appname}}/static/overview/instructor.html'>Help for Instructors</a></li>
+            <li><a href='http://runestoneinteractive.org/pages/faq.html'>FAQ</a></li>
+            <li><a href='https://runestone.academy/ns/books/published/instructorguide/index.html'>Instructors Guide</a></li>
             <li class="divider"></li>
             <li><a href='http://runestoneinteractive.org'>About Runestone</a></li>
             <li><a href='/{{ appname }}/default/reportabug?course={{ course_id }}&page={{ pathto(pagename,1) }}'>Report A Problem</a></li>
@@ -187,84 +203,94 @@
         <!-- end help menu dropdown -->
 
         <li class="divider-vertical"></li>
-
+      {% endif %}
       </ul>
-      </div>
-
-
-
-
-
 
       <ul class="nav navbar-nav">
         <li class="divider-vertical"></li>
-        <!--{% block sidebartoc %}
-          {% include "localtoc.html" %}
+        {% block sidebartoc %}
+          {% if dynamic_pages == 'True': %}
+            {% include "subchaptoc.html" %}
+          {% endif %}
           <li class="divider-vertical"></li>
         {% endblock %}
-        {% block sidebarrel %}
+        <!-- {% block sidebarrel %}
           {% include "relations.html" %}
         {% endblock %}-->
         {% if theme_source_link_position == "nav" %}
           <li>{% include "sourcelink.html" %}</li>
         {% endif %}
       </ul>
-
-    </div>
-  </div>
-</div>
+      </div> <!-- navbar-collapse -->
+    </div> <!-- navbar -->
+  </div> <!-- container -->
 {% endmacro %}
 
 {%- block extrahead %}
-<meta charset='utf-8'>
-<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
-<meta content='width=device-width, initial-scale=1.0' name='viewport' />
-<link rel="shortcut icon" href="/{{appname}}/static/favicon.ico" type="image/ico" />
 
-<script type="text/javascript">
+{% if not favicon %}
+<link rel="shortcut icon" href="/{{appname}}/static/favicon.ico" type="image/ico" />
+{% endif %}
+
+{% raw %}
+<link rel="canonical" href="https://{{canonical_host}}{{new_server_prefix}}/books/published/{{base_course}}/{{pagepath}}" />
+{% endraw %}
+
+<script>
   eBookConfig = {};
-  {% if use_services %}
+  {% if dynamic_pages == 'True' %}
     {% raw %}
-      eBookConfig.useRunestoneServices = true;
-      eBookConfig.host = '{{= "{}://{}".format(request.env.wsgi_url_scheme,
-                                               request.env.http_host) }}';
-      eBookConfig.app = eBookConfig.host + '/' + '{{= request.application }}';
-      eBookConfig.course = '{{= course_name }}';
-      eBookConfig.basecourse = '{{= base_course }}';
+    eBookConfig.useRunestoneServices = {{use_services}};
+    eBookConfig.host = '';
+    eBookConfig.app = eBookConfig.host + '/runestone';
+    eBookConfig.course = '{{ course_name }}';
+    eBookConfig.basecourse = '{{ base_course }}';
+    eBookConfig.isLoggedIn = {{ is_logged_in}};
+    eBookConfig.email = '{{ user_email }}';
+    eBookConfig.isInstructor = {{ is_instructor }};
+    eBookConfig.username = '{{ user_id}}';
+    eBookConfig.readings = {{ readings|safe}};
+    eBookConfig.activities = {{ activity_info|safe }}
+    eBookConfig.downloadsEnabled = {{downloads_enabled}};
+    eBookConfig.allow_pairs = {{allow_pairs}}
+    eBookConfig.enableCompareMe = {{enable_compare_me}};
+    // _`new_server_prefix`: Defined by the server to be the path to the new server.
+    eBookConfig.new_server_prefix = '{{ new_server_prefix }}';
+    eBookConfig.served_by = '{{worker_name}}';
     {% endraw %}
   {% else %}
-    eBookConfig.useRunestoneServices = false;
-    eBookConfig.host = '{{course_url}}' ? '{{course_url}}' : 'http://127.0.0.1:8000';
+    eBookConfig.useRunestoneServices = {% if use_services == 'true' -%}true{%- else -%}false{%- endif -%};
+    eBookConfig.host = '{{course_url}}' || 'http://127.0.0.1:8000';
     eBookConfig.app = eBookConfig.host+'/{{appname}}';
     eBookConfig.course = '{{course_id}}';
     eBookConfig.basecourse = '{{ basecourse }}';
+    eBookConfig.isLoggedIn = false;
+    eBookConfig.enableCompareMe = eBookConfig.useRunestoneServices;
+    eBookConfig.new_server_prefix = '';
   {% endif %}
   eBookConfig.ajaxURL = eBookConfig.app+'/ajax/';
   eBookConfig.logLevel = {{loglevel}};
   eBookConfig.loginRequired = {{login_required}};
   eBookConfig.build_info = "{{build_info}}";
-  eBookConfig.isLoggedIn = false;
   eBookConfig.python3 = {{ python3 }};
   eBookConfig.acDefaultLanguage = '{{ default_ac_lang }}' ? '{{ default_ac_lang }}' : 'python'
   eBookConfig.runestone_version = '{{ runestone_version }}';
   eBookConfig.jobehost = '{{jobe_server}}';
   eBookConfig.proxyuri_runs = '{{proxy_uri_runs}}';
   eBookConfig.proxyuri_files = '{{proxy_uri_files}}';
-  eBookConfig.downloadsEnabled = {{downloads_enabled}};
   eBookConfig.enable_chatcodes = {{enable_chatcodes}} ? {{ enable_chatcodes }} : false;
-  eBookConfig.allow_pairs = {{allow_pairs}} ? {{allow_pairs}} : false;
+  eBookConfig.enableScratchAC = true;
+
 </script>
 
-<div id="fb-root"></div>
-<script>
-  (function(d, s, id) {
-    var js, fjs = d.getElementsByTagName(s)[0];
-    if (d.getElementById(id)) return;
-    js = d.createElement(s); js.id = id;
-    js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&status=0";
-    fjs.parentNode.insertBefore(js, fjs);
-  }(document, 'script', 'facebook-jssdk'));
-</script>
+<!-- Ad Serving Headers Only serve ads to Anonymous Users -->
+{% if dynamic_pages == 'True' %}
+    {% raw %}
+        {% if serve_ad is defined and serve_ad and settings.adsenseid %}
+         <script data-ad-client="{{settings.adsenseid}}" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        {% endif %}
+    {% endraw %}
+{% endif %}
 
 {% endblock %}
 
@@ -281,11 +307,55 @@
 
 <div class="container" id="continue-reading"></div>
 
-<div class="container" id="main-content">
-  {% block body %}{% endblock %}
-  {% block nextprevious %}
-      {% include "subchapter.html" %}
+<div class="container" id="main-content" role="main">
+
+<!-- Ad Serving for Runestone Campaign -->
+{% if dynamic_pages == 'True' %}
+    {% raw %}
+        {% if show_rs_banner  %}
+         <script>
+           var showAd = true;
+         </script>
+         <div id="adcopy_1" class="adcopy" style="display: none;">
+           <h4>Before you keep reading...</h4>
+           <p>Runestone Academy can only continue if we get support from individuals like you. As a student you are well aware of the high cost of textbooks.  Our mission is to provide great books to you for free, but we ask that you consider a $10 donation, more if you can or less if $10 is a burden.
+           </p>
+           <div class="donateb">
+           <a href="/runestone/default/donate?ad=1" role="button" class="btn btn-info">Support Runestone Academy Today</a></div>
+         <div id="adcopy_2" class="adcopy" style="display: none;">
+            <h4>Before you keep reading...</h4>
+            <p>Making great stuff takes time and $$.  If you appreciate the book you are reading now and want to keep quality materials free for other students please consider a donation to Runestone Academy. We ask that you consider a $10 donation, but if you can give more thats great, if $10 is too much for your budget we would be happy with whatever you can afford as a show of support.
+            </p>
+            <div class="donateb">
+            <a href="/runestone/default/donate?ad=2" role="button" class="btn btn-info">Support Runestone Academy Today</a></div>
+         </div>
+         </div>
+        {% else %}
+        <script>
+          var showAd = false;
+        </script>
+        {% endif %}
+    {% endraw %}
+{% endif %}
+
+  {% block body %}
   {% endblock %}
+  {% if dynamic_pages == 'True' %}
+    {% raw %}
+      {% if show_ethical_ad  %}
+      <div style="width: 100%">
+      <div data-ea-publisher="runestoneacademy" data-ea-type="image" style="display: flex; justify-content: center"></div>
+      </div>
+      {% endif %}
+    {% endraw %}
+  {% endif %}
+
+  <div id="scprogresscontainer">
+    You have attempted <span id="scprogresstotal"></span> of <span id="scprogressposs"></span> activities on this page <div id="subchapterprogress" aria-label="Page progress"></div>
+  </div>
+
+  {% include "subchapter.html" %}
+
 </div>
 {%- endblock %}
 
@@ -293,8 +363,10 @@
 <footer class="footer">
   <div class="container">
     <p class="pull-right">
-      {% if use_services %}
-      <span id='numuserspan'></span> readers online now | <span class='loggedinuser'></span>
+      {% if use_services == 'true' %}
+      {% if minimal_outside_links != 'True' %}
+      <span id='numuserspan'></span><span class='loggedinuser'></span>
+      {% endif %}
       {% endif %}
       | <a href="#">Back to top</a>
       {% if theme_source_link_position == "footer" %}
@@ -305,9 +377,9 @@
     <p>
     {%- if show_copyright %}
       {%- if hasdoc('copyright') %}
-        {% trans path=pathto('copyright'), copyright=copyright|e %}&copy; <a href="{{ path }}">Copyright</a> {{ copyright }}.{% endtrans %}
+        {% trans path=pathto('copyright'), copyright=copyright %}&copy; <a href="{{ path }}">Copyright</a> {{ copyright }}.{% endtrans %}
       {%- else %}
-        {% trans copyright=copyright|e %}&copy; Copyright {{ copyright }}.{% endtrans %}
+        {% trans copyright=copyright %}&copy; Copyright {{ copyright }}.{% endtrans %}
       {%- endif %}
     {%- endif %}
     {%- if last_updated %}
@@ -321,18 +393,41 @@
 </footer>
 
 
-{% if appname == "runestone" %}
-<script type="text/javascript">
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-32029811-1']);
-  _gaq.push(['_trackPageview']);
+{% if dynamic_pages == 'True' %}
+  {% raw %}
+    {% if settings.google_ga %}
+      <script>
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', '{{ settings.google_ga }}']);
+        _gaq.push(['_trackPageview']);
 
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-</script>
+        (function() {
+          var ga = document.createElement('script'); ga.async = true;
+          ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+          var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+      </script>
+    {% endif %}
+  {% endraw %}
+
+  {% if minimal_outside_links != 'True' %}
+    <script type="application/json" class="js-hypothesis-config">
+    {
+      "showHighlights": false
+    }
+    </script>
+
+    <script async src="https://hypothes.is/embed.js"></script>
+    <!--provide space to prevent hypothes.is sidebar from obscuring content-->
+    <style>@media screen and (max-width:767px) { body { padding-right: 21px; }}</style>
+
+  {% endif %}
 {% endif %}
+
+<script>
+  window.addEventListener('load', (event) => {
+    runestoneComponents.getSwitch();
+  });
+</script>
 
 {% endblock %}

@@ -1,6 +1,10 @@
+# *********
+# |docname|
+# *********
 *.py[cod]
 *.log
 .venv
+jsdist
 
 # C extensions
 *.so
@@ -45,9 +49,22 @@ bower_componenets/
 runestone/*/test/build_info
 **/sphinx_settings.json
 build_info
+runestone/dist*.tgz
+dist/
 
 # IDEs
 .vscode/
+.vs/
 **/sphinx-enki-info.txt
 # Mac stuff
 .DS_Store
+node_modules
+runestone/dist
+runestone/.DS_Store
+runestone/assess/.DS_Store
+runestone/.DS_Store
+runestone/.DS_Store
+runestone/assess/.DS_Store
+.DS_Store
+.history
+.nova

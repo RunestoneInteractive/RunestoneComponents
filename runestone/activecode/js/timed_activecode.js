@@ -1,78 +1,145 @@
-function TimedActiveCode (opts) {
-    if (opts) {
+/*
+The TimedActivecode classes are a great example of where multiple inheritance would be useful
+But since Javascript does not support multiple inheritance we use the mixin pattern.
+
+*/
+import LiveCode from "./livecode";
+import { ActiveCode } from "./activecode";
+import JSActiveCode from "./activecode_js";
+import HTMLActiveCode from "./activecode_html";
+import SQLActiveCode from "./activecode_sql";
+
+var TimedActiveCodeMixin = {
+    timedInit: async function (opts) {
+        this.isTimed = true;
+        this.hideButtons();
+        this.needsReinitialization = true; // the run button click listener needs to be reinitialized
+        this.containerDiv.classList.add("timedComponent");
+        window.edList[this.divid] = this;
+        return true;
+    },
+
+    hideButtons: function () {
+        var buttonList = [
+            this.saveButton,
+            this.loadButton,
+            this.gradeButton,
+            this.showHideButt,
+            this.coachButton,
+            this.atButton,
+        ];
+        for (var i = 0; i < buttonList.length; i++) {
+            if (buttonList[i] !== undefined && buttonList[i] !== null)
+                $(buttonList[i]).hide();
+        }
+    },
+
+    // bje - not needed anymore
+    renderTimedIcon: function (component) {
+        // renders the clock icon on timed components.    The component parameter
+        // is the element that the icon should be appended to.
+        var timeIconDiv = document.createElement("div");
+        var timeIcon = document.createElement("img");
+        $(timeIcon).attr({
+            src: "../_static/clock.png",
+            style: "width:15px;height:15px",
+        });
+        timeIconDiv.className = "timeTip";
+        timeIconDiv.title = "";
+        timeIconDiv.appendChild(timeIcon);
+        $(component).prepend(timeIconDiv);
+    },
+
+    checkCorrectTimed: function () {
+        // pct_correct is set by the unittest/gui.py module in skulpt.
+        // it relies on finding this object in the edList
+        if (this.isAnswered) {
+            if (this.pct_correct >= 100.0) {
+                return "T";
+            } else {
+                return "F";
+            }
+        } else {
+            return "I"; // we ignore this in the grading if no unittests
+        }
+    },
+
+    hideFeedback: function () {
+        $(this.output).css("visibility", "hidden");
+    },
+
+    reinitializeListeners: function (taken) {
+        if (!this.runButton.onclick) {
+            console.log("reattaching runbuttonhandler");
+            this.runButton.onclick = this.runButtonHander.bind(this);
+        }
+        $(this.codeDiv).show();
+        this.runButton.disabled = false;
+        $(this.codeDiv).removeClass("ac-disabled");
+        this.editor.refresh();
+        if (this.historyScrubber !== null) {
+            $(this.historyScrubber).slider({
+                max: this.history.length - 1,
+                value: this.history.length - 1,
+                slide: this.slideit.bind(this),
+                change: this.slideit.bind(this),
+            });
+        }
+        if (taken) {
+            $(`#${this.divid}_unit_results`).show();
+        }
+    },
+};
+
+export class TimedLiveCode extends LiveCode {
+    constructor(opts) {
+        super(opts);
         this.timedInit(opts);
     }
 }
-TimedActiveCode.prototype = new ActiveCode();
 
-TimedActiveCode.prototype.timedInit = function (opts) {
-    this.init(opts);
-    //this.renderTimedIcon(this.containerDiv); - bje not needed anymore
-    if (this.language == 'javascript') {
-        TimedActiveCode.prototype.runProg = JSActiveCode.prototype.runProg;
-        TimedActiveCode.prototype.outputfun = JSActiveCode.prototype.outputfun;
+Object.assign(TimedLiveCode.prototype, TimedActiveCodeMixin);
+
+export class TimedActiveCode extends ActiveCode {
+    constructor(opts) {
+        super(opts);
+        this.timedInitComplete = this.timedInit(opts);
     }
-    this.hideButtons();
-    this.addHistoryScrubber();
-    this.needsReinitialization = true;   // the run button click listener needs to be reinitialized
-};
 
-
-TimedActiveCode.prototype.hideButtons = function () {
-    var buttonList = [this.saveButton, this.loadButton, this.gradeButton, this.showHideButt, this.clButton, this.coachButton, this.atButton];
-    for (var i = 0; i < buttonList.length; i++) {
-        if (buttonList[i] !== undefined && buttonList[i] !== null)
-            $(buttonList[i]).hide();
-    }
-};
-
-// bje - not needed anymore
-TimedActiveCode.prototype.renderTimedIcon = function (component) {
-    // renders the clock icon on timed components.    The component parameter
-    // is the element that the icon should be appended to.
-    var timeIconDiv = document.createElement("div");
-    var timeIcon = document.createElement("img");
-    $(timeIcon).attr({
-        "src": "../_static/clock.png",
-        "style": "width:15px;height:15px"
-    });
-    timeIconDiv.className = "timeTip";
-    timeIconDiv.title = "";
-    timeIconDiv.appendChild(timeIcon);
-    $(component).prepend(timeIconDiv);
-};
-
-TimedActiveCode.prototype.checkCorrectTimed = function () {
-    return "I";   // we ignore this in the grading
-};
-
-TimedActiveCode.prototype.hideFeedback = function () {
-    $(this.output).css("visibility","hidden");
-};
-
-TimedActiveCode.prototype.processTimedSubmission = function (logFlag) {
-    // Disable input & evaluate component
-    if (this.useRunestoneServices) {
-        if (logFlag) {
-            this.runProg();
-        } else {
-            this.loadEditor().done(this.runProg.bind(this));
+    // for timed exams we need to call runProg and tell it that there is
+    // no GUI for sliders or other things.
+    // the answers.
+    async checkCurrentAnswer() {
+        let noUI = true;
+        const result = await this.timedInitComplete;
+        if (this.isAnswered) {
+            await this.runProg(noUI, false);
         }
     }
-    this.runButton.disabled = true;
-    $(this.codeDiv).addClass("ac-disabled");
-};
+}
 
-TimedActiveCode.prototype.reinitializeListeners = function () {
-    // re-attach the run button listener
-    $(this.runButton).click(this.runProg.bind(this));
-    $(this.histButton).click(this.addHistoryScrubber.bind(this));
-    if (this.historyScrubber !== null) {
-        $(this.historyScrubber).slider({
-            max: this.history.length-1,
-            value: this.history.length-1,
-            slide: this.slideit.bind(this),
-            change: this.slideit.bind(this)
-        });
+Object.assign(TimedActiveCode.prototype, TimedActiveCodeMixin);
+
+export class TimedJSActiveCode extends JSActiveCode {
+    constructor(opts) {
+        super(opts);
+        this.timedInit(opts);
     }
-};
+}
+Object.assign(TimedJSActiveCode.prototype, TimedActiveCodeMixin);
+
+export class TimedHTMLActiveCode extends HTMLActiveCode {
+    constructor(opts) {
+        super(opts);
+        this.timedInit(opts);
+    }
+}
+Object.assign(TimedHTMLActiveCode.prototype, TimedActiveCodeMixin);
+
+export class TimedSQLActiveCode extends SQLActiveCode {
+    constructor(opts) {
+        super(opts);
+        this.timedInit(opts);
+    }
+}
+Object.assign(TimedSQLActiveCode.prototype, TimedActiveCodeMixin);

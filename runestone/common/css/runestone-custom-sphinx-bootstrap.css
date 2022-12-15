@@ -1,7 +1,59 @@
+/* Variables holding theme colors */
+:root {
+    --background: #ffffff;
+    --outerBackground: #eeeeee;
+    --links: #0645ad;
+    --bodyFont: #000000;
+    --tooltip: #ffffff;
+    --grayToWhite: #333333;
+    --navbar: #f8f8f8;
+    --navbarFont: #707070;
+    --navbarFontHover: #000000;
+    --alerts: #d9edf7;
+    --completionButton: #ffaa2b;
+    --completionButtonHover: #ff9f19;
+    --admonition: #fcf8e3;
+    --admonitionBorder: #fbeed5;
+    --codeButtons: #474949;
+    --codeButtonsBorder: #474949;
+    --dangerAlerts: #f2dede;
+    --successAlerts: #dff0d8;
+    --contentWidthRegular: 660px;
+    --contentWidthWide: 1060px;
+    --componentBgColor: #f0f8ff;
+    --componentBorderColor: #000000;
+    --questionBgColor: #e1efff;
+}
+
+[data-theme="dark"] {
+    --background: #2c2f33;
+    --outerBackground: #23272a;
+    --links: #7289da;
+    --bodyFont: #99aab5;
+    --tooltip: #000000;
+    --grayToWhite: #ffffff;
+    --navbar: #3d3d3d;
+    --navbarFont: #ffffff;
+    --navbarFontHover: #d6d6d6;
+    --alerts: #714082;
+    --completionButton: #650087;
+    --completionButtonHover: #560073;
+    --admonition: #3d3d3d;
+    --admonitionBorder: #262626;
+    --codeButtons: #7289da;
+    --codeButtonsBorder: #ffffff;
+    --dangerAlerts: #8c2626;
+    --successAlerts: #217300;
+    --componentBgColor: #07467d;
+    --componentBorderColor: #939090;
+    --questionBgColor: rgb(23, 85, 93);    
+}
+
 /* custom modification of basic.css for color-contrast (AA compliant) */
 td.linenos pre {
     color: #6b6b6b;
 }
+
 /* custom modification of prettify.css for color-contrast (AA compliant) */
 .str {
     color: #006b00;
@@ -13,24 +65,24 @@ td.linenos pre {
 }
 
 /* custom modification of pygments.css for color-contrast (AA compliant) */
-.highlight .c1{
-    color: #376A7B;
+.highlight .c1 {
+    color: #376a7b;
 }
 
-.highlight .nn{
-    color: #0F6C95;
+.highlight .nn {
+    color: #0f6c95;
 }
 
-.highlight .gp{
-    color: #A14C08;
+.highlight .gp {
+    color: #a14c08;
 }
 
-.highlight .si{
-    color: #3C773D;
+.highlight .si {
+    color: #3c773d;
 }
 
-.highlight .nc{
-    color: #0B719D;
+.highlight .nc {
+    color: #0b719d;
 }
 
 /* `Search` functionality's result custom modification for color-contrast (AA compliant) */
@@ -44,8 +96,13 @@ span.highlighted {
 
 /* ActiveCode gutter custom modification for color-contrast (AA compliant) */
 
-.CodeMirror-linenumber{
+.CodeMirror-linenumber {
     color: #6b6b6b;
+}
+
+.alert-warning {
+    background-color: var(--admonition);
+    border-color: var(--admonitionBorder);
 }
 
 /* Python code output custom modification for color-contrast (AA compliant) */
@@ -56,8 +113,9 @@ div.ExecutionVisualizer table#pyCodeOutput .lineNo {
 /* Runestone custom modifications */
 
 body {
+    counter-reset: rscomponent;
     padding-top: 60px;
-    background-color: #eeeeee;
+    background-color: var(--outerBackground);
 }
 
 pre {
@@ -71,11 +129,11 @@ h5 {
 
 /* table-of-contents related styles for color-contrast (AA compliant) */
 #table-of-contents a {
-    color: #0645ad;
+    color: var(--links);
 }
 
 #table-of-contents a:hover {
-    color: #0645ad;
+    color: var(--links);
     text-decoration: underline;
 }
 
@@ -84,26 +142,37 @@ h5 {
 }
 
 /* navbar-brand color contrast (AA compliant) */
-.navbar-default .navbar-nav>li>a{
-    color: #6B6B6B;
-
+.navbar-default {
+    background-color: var(--navbar);
 }
 
-.navbar-default .navbar-brand{
-    color: #6B6B6B;
+.navbar-default .navbar-nav > li {
+    color: var(--navbarFont);
+}
+
+.navbar-default .navbar-nav > li > a {
+    color: var(--navbarFont);
+}
+
+.navbar-default .navbar-nav > li > a:hover {
+    color: var(--navbarFontHover);
+}
+
+.navbar-default .navbar-brand {
+    color: var(--navbarFont);
 }
 
 /* acknowledgement related styles for color-contrast (AA compliant) */
-.toctree-wrapper{
+.toctree-wrapper {
     font-size: 16px;
 }
 
 .toctree-wrapper a {
-    color: #0645ad;
+    color: var(--links);
 }
 
 .toctree-wrapper a:hover {
-    color: #0645ad;
+    color: var(--links);
     text-decoration: underline;
 }
 
@@ -113,18 +182,18 @@ h5 {
 }
 
 #index-and-search.section a {
-    color: #0645ad;
+    color: var(--links);
 }
 
 #index-and-search.section a:hover {
-    color: #0645ad;
+    color: var(--links);
     text-decoration: underline;
 }
 
 /* custom style for `a` tag for color-contrast (AA compliant) */
 
 a {
-    color: #0645ad;
+    color: var(--links);
 }
 
 /* navbar and menu related styles */
@@ -132,13 +201,11 @@ a {
     /* Remove top padding when top navbar goes collapsed in narrow viewports */
     body {
         padding-top: 0;
-        margin: auto auto auto 5px;
     }
 
     .navbar-fixed-top {
         position: static;
     }
-
 }
 
 @media (min-width: 768px) {
@@ -147,67 +214,104 @@ a {
         margin: 0 3px;
         border-left: 1px solid #f2f2f2;
     }
+
+    .navbar-fixed-top .container {
+        padding: 0;
+    }
 }
 
 div.container {
-    background-color: #ffffff;
+    background-color: var(--background);
 }
 
-div.section {
+.container {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.runestone {
+    clear: both;
+    background-color: var(--componentBgColor);
+    padding: 10px;
+    border-style: solid;
+    border-color: var(--componentBorderColor);
+    border-radius: 10px;
+    margin-bottom: 20px;
+    margin-top: 20px;
+    }
+
+/* Sets width of content "column" */
+#main-content section > *:not(section) {
+    max-width: var(--contentWidthRegular);
+    margin-left: auto;
+    margin-right: auto;
+    
+}
+
+/* Handle content in nested sections by allowing them to grow*/
+#main-content section > section,                
+/* And then make sure a few items are wider by default */
+#main-content section > .runestone.ac_section,
+#main-content section > .runestone.codelens,
+#main-content section > .question,
+#main-content section > .runestone.parsons-container,
+#main-content section > .runestone.parsons-problems,
+#main-content section > .codelens,
+#main-content section > .timedAssessment,
+#main-content section > .jupyterlite_sphinx_iframe_container
+{
+    max-width: var(--contentWidthWide);
     margin-left: auto;
     margin-right: auto;
 }
-.container{
-	padding-left:0;
-	padding-right:0;
-}
-.container  .section >*:not(.section):not(.ac_section) {
-	max-width: 500pt;
-	margin-left: auto;
-	margin-right: auto;
+
+/* Allow individual elements to request being larger */
+#main-content section > .full-width {
+    max-width: var(--contentWidthWide);
 }
 
-/* This rule is meant to override the behavior of the
-   previous rule since it is not possible to exclude
-   more than one section in the not() part of the rule
-*/
-.container .section div.full-width.container {
-	margin-left: auto;
-	margin-right: auto;
-    max-width: 90%;
+.container section > img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.container .section>img {
-	display: block;
-	margin-left: auto;
-	margin-right: auto;
+.container-fluid > .navbar-collapse,
+.container-fluid > .navbar-header,
+.container > .navbar-collapse,
+.container > .navbar-header {
+    margin-left: 0;
+    margin-right: 0;
 }
 
-.container  .section .parsons, .container  .section .parsons .sortable-code-container, .container  .section .cd_section{
-	max-width: none;
-}
-.navbar>.container .navbar-brand {
+.navbar > .container .navbar-brand {
     margin-left: 0;
 }
 
-.navbar>.container  {
-    background-color: #f8f8f8;
+.navbar > .container {
+    background-color: var(--navbar);
 }
 
-.footer>.container {
-    background-color: #eeeeee;
+.navbar-toggle {
+    margin-right: 0px;
 }
-.footer>.container p>a {
-    color: #0645ad;
+
+.footer > .container {
+    background-color: var(--outerBackground);
+}
+
+.footer > .container p > a {
+    color: var(--links);
 }
 
 .brand-logo {
     float: left;
     display: block;
-    background-size: 40px 40px !important;
-    width: 40px;
-    height: 40px;
     margin-top: 4px;
+}
+
+.brand-logo img {
+    height: 40px;
 }
 
 .social-menu {
@@ -219,7 +323,8 @@ div.section {
     margin-top: 7px;
 }
 
-.fb_iframe_widget span, .fb_iframe_widget iframe {
+.fb_iframe_widget span,
+.fb_iframe_widget iframe {
     height: 20px !important;
     width: 82px !important;
 }
@@ -236,14 +341,26 @@ div.section {
     margin-bottom: -6px;
 }
 
-.dropdown-menu > li > span {
+.dropdown-menu > li > span,
+.dropdown-menu > li > div,
+.dropdown-menu > li > label {
     display: block;
     padding: 3px 20px;
     clear: both;
     font-weight: bold;
     line-height: 20px;
-    color: #333;
+    color: var(--grayToWhite);
     white-space: nowrap;
+}
+
+.dropdown-menu > li > label:hover, .dropdown-menu > li > label:focus {
+  color: #262626;
+  text-decoration: none;
+  background-color: #f5f5f5;
+}
+
+.dropdown-menu > li > a {
+    color: var(--grayToWhite);
 }
 
 .loggedinuser {
@@ -254,8 +371,9 @@ div.section {
 
 .CodeMirror {
     margin: 0 0 1em 0;
-    background-color: #fff;
-	clear:both;
+    background-color: var(--background);
+    height: auto;
+    clear: both;
 }
 
 .CodeMirror-scroll {
@@ -263,28 +381,38 @@ div.section {
      * height while still relying on max-height (which keeps
      * the CM editors to no more than the size needed
      * unless resized) */
-    max-height: 30em;
+    max-height: 60em;
     min-width: 30em;
 }
 
 .ac_section .CodeMirror pre {
-  -moz-border-radius: 0;
-  -webkit-border-radius: 0;
-  -o-border-radius: 0;
-  border-radius: 0;
-  border-width: 0; margin: 0; padding: 0; background: transparent;
-  font-family:  Monaco, Courier New, monospace;
-  font-size: inherit;
-  padding: 0; margin: 0;
-  white-space: pre;
-  word-wrap: normal;
+    -moz-border-radius: 0;
+    -webkit-border-radius: 0;
+    -o-border-radius: 0;
+    border-radius: 0;
+    border-width: 0;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    font-family: Monaco, Courier New, monospace;
+    font-size: inherit;
+    padding: 0;
+    margin: 0;
+    white-space: pre;
+    word-wrap: normal;
 }
 
-button.btn, btn.btn-sm,
+button.btn,
+btn.btn-sm,
 input[type="submit"].btn.btn-sm,
 input[type="button"].btn.btn-sm {
     font-size: 1em;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* Fix search menu button */
+.dropdown-menu .input-group .input-group-btn button.btn {
+    font-size: 14px;
 }
 
 .btn {
@@ -301,15 +429,18 @@ input[type="button"].btn.btn-sm {
 .btn-default[disabled],
 .btn-default.disabled:hover,
 .btn-default[disabled]:hover {
-    color: #fff;
-    background-color: #474949;
-    border-color: #474949;
+    color: #ffffff;
+    background-color: var(--codeButtons);
+    border-color: var(codeButtonsBorder);
 }
 
-.btn-default:hover, .btn-default:focus, .btn-default:active, .btn-default.active {
+.btn-default:hover,
+.btn-default:focus,
+.btn-default:active,
+.btn-default.active {
     background-color: #3a3c3c;
     border-color: #2e2f2f;
-    color: #fff;
+    color: #ffffff;
 }
 
 input[type="radio"],
@@ -333,23 +464,122 @@ h2 {
 .alert form {
     margin-bottom: 0;
 }
+
 /* default bookstrap alert color is hard to read (low contrast). */
 .alert {
-    color: #333;
+    color: var(--grayToWhite);
     padding: 10px;
+}
+
+.alert-info {
+    background-color: var(--alerts);
+}
+
+.alert-danger {
+    background-color: var(--dangerAlerts);
 }
 
 /* override the color styles applied by Skulpt to the unittest results divs */
 .unittest-results.alert-danger {
-    background-color: #f2dede !important;
+    background-color: var(--dangerAlerts) !important;
 }
 
 .unittest-results.alert-success {
-    background-color: #dff0d8 !important;
+    background-color: var(--successAlerts) !important;
 }
 
 .alert label {
     font-weight: normal;
+}
+
+.navbar_message {
+    margin-top: 15px;
+    font-weight: bold;
+}
+/*
+Missing brackets
+================
+The default styling from Sphinx's ``basic.css`` doesn't style multiple references to the same reference with brackets. Here's the relevant snippet of CSS:
+
+.. code-block:: CSS
+    :number-lines:
+
+    a.brackets:before,
+    span.brackets > a:before{
+        content: "[";
+    }
+
+    a.brackets:after,
+    span.brackets > a:after {
+        content: "]";
+    }
+
+The HTML for a footnote reference is:
+
+.. code-block:: HTML
+    :number-lines:
+
+    <a class="footnote-reference brackets" href="#assembled" id="id1">2</a>
+
+The HTML for a typical footnote is:
+
+.. code-block:: HTML
+    :number-lines:
+
+    <dl class="footnote brackets">
+        <dt class="label" id="xxx">
+            <span class="brackets">
+                <a class="fn-backref" href="#id2">1</a>
+            </span>
+        </dt>
+        <dd>Omitted this...</dd>
+    </dl>
+
+The HTML for a footnote referenced multiple times is:
+
+.. code-block:: HTML
+    :number-lines:
+
+    <dl class="footnote brackets">
+        <dt class="label" id="xxx">
+            <span class="brackets">1</span>
+            <span class="fn-backref">
+                (<a href="#id1">1</a>,<a href="#id2">2</a>,<a href="#id3">3</a>)
+            </span>
+        </dt>
+        <dd>Omitted this...</dd>
+    </dl>
+
+However, there's no (current) CSS selector that will add a ``content`` to the multiply-referenced footnote without adding an additional ``content`` to the typical footnote: we want to select ``dt.label > span.brackets > text-only content`` or ``dt.label > span.brackets > :not(:has a)`` (see the unsupported `:has selector <https://css-tricks.com/did-you-know-about-the-has-css-selector/>`_. So, I see no solution for this (outside JS).
+
+
+Incorrect color
+===============
+Second, the Bootstrap theme (v3.4.1) contains the following CSS, from ``node_modules/bootstrap/dist/css/less/labels.less``:
+
+.. code-block:: CSS
+    :number-lines:
+
+    .label {
+        display: inline;
+        padding: .2em .6em .3em;
+        font-size: 75%;
+        font-weight: 700;
+        line-height: 1;
+        color: @label-color;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: .25em;
+
+        ...more here omitted...
+    }
+
+ALL this therefore gets applied to footnotes, since they have the ``label`` class. Because the ``@label-color`` is white, this CSS makes the reference invisible against the default (light mode) white background. I like the rest of the styling changes (even though they differ from the standard Sphinx settings), so only the color is changed.
+*/
+dt.label > span.brackets:not(span.brackets > a),
+dt.label > span.fn-backref:not(span.fn-backref > a) {
+    color: black;
 }
 
 /* These admonition styles styles are copied from the Bootstrap .alert classes.
@@ -359,7 +589,7 @@ h2 {
     margin-bottom: 20px !important;
     margin-top: 20px !important;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
-    background-color: #fcf8e3;
+    background-color: var(--admonition);
     border: 1px solid #fbeed5;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
@@ -368,13 +598,14 @@ h2 {
 
 /* .alert-danger */
 .admonition.caution {
-    color: #A33F3E;
+    color: #a33f3e;
     background-color: #f2dede;
     border-color: #eed3d7;
 }
 
 /* .alert-info */
-.admonition.tip, .admonition.note {
+.admonition.tip,
+.admonition.note {
     color: #333;
     background-color: #d9edf7;
     border-color: #bce8f1;
@@ -391,7 +622,7 @@ div.flash {
     margin: 0 0 10px 10px;
     vertical-align: middle;
     cursor: pointer;
-    color: #fff;
+    color: #ffffff;
     background-color: #000;
     border: 2px solid #fff;
     border-radius: 8px;
@@ -433,13 +664,14 @@ div.flash {
 #sign_in_text td {
     font-size: 17px;
     color: #333;
-    font-family: 'lucida grande', Verdana, sans-serif;
+    font-family: "lucida grande", Verdana, sans-serif;
     padding-bottom: 13px;
 }
 
 #auth_user_remember {
     margin-top: -20px;
 }
+
 /* End login, registration, Janrain styles */
 
 /* end-of-chapter exercises styles */
@@ -457,11 +689,12 @@ div.flash {
     -moz-border-radius: 4px;
     border-radius: 4px;
 }
+
 /* End chapter exercises styles */
 
 /* Modal dialog styles (scratch activecode, compare me, etc) */
 .scratch-ac-modal {
-    width: 800px;
+    width: 90%;
 }
 
 .compare-modal .progress {
@@ -475,6 +708,14 @@ div.flash {
 .compare-me-progress .progress-bar,
 .unittest-results-progress .progress-bar {
     color: #333;
+}
+
+.modal-body {
+    background-color: var(--background);
+}
+
+.modal-header {
+    background-color: var(--background);
 }
 
 .unittest-results-progress {
@@ -512,6 +753,7 @@ div.flash {
 .codelens-modal > .modal-dialog {
     width: 400px;
 }
+
 /* End modal dialog styles */
 
 .footnote.table {
@@ -530,132 +772,143 @@ div.flash {
 }
 
 .video-play-overlay {
-	position: relative;
-	top: -150px;
-	left: 44%;
+    position: relative;
+    top: -150px;
+    left: 44%;
     height: 85px;
     width: 130px;
     background-position: center;
     background-repeat: no-repeat;
 }
+
 .video_popup video {
-	width: 500pt;
-	cursor:pointer;
+    width: var(--contentWidthRegular);
+    cursor: pointer;
 }
+
 .ui-sortable-helper {
     height: auto !important;
     width: auto !important;
 }
-.navLink{
-	z-index:2;
-	display: inline;
-	bottom: 65px;
-	position:fixed;
+
+.navLink {
+    z-index: 2;
+    display: inline;
+    bottom: 65px;
+    position: fixed;
+    opacity: 0.4;
 }
 
-#relations-next{
-	right: 35px;
+.navLink:hover {
+    opacity: 1;
 }
 
-#relations-prev{
-	left: 35px;
+.navLink a {
+    display: inline-block;
+    background-color: white;
+    border-style: solid;
+    border-color: lightgrey;
+    border-width: 2px;
+    width: 100px;
+    height: 50px;
+}
+
+#relations-next {
+    right: 35px;
+}
+
+#relations-prev {
+    left: 35px;
+}
+
+.nextprev-list {
+    margin: 10px;
+    padding-left: 0;
+    height: 50px;
 }
 
 @media (max-width: 600px) {
-    /* Styling definitions for chevron function in bookfuncs.js */
-	.navLink{
-		z-index:2;
-		display: inline;
-		position: static;
-	}
-	ul#top-relations-console,
-	ul#bottom-relations-console {
-		list-style: none;
-		text-align: center;
-		width: 100%;
-		margin: 0 auto;
-		padding: 40px 0 20px 0;
-	}
-	#top-relations-next,
-	#top-relations-prev,
-	#bottom-relations-next,
-	#bottom-relations-prev {
-		width: 25%;
-		padding: 0 20px;
-		display: inline;
-	}
+    .navLink {
+        display: inline-block;
+        bottom: auto;
+        position: absolute;
+    }
+
+    #relations-next,
+    #relations-prev {
+        width: 25%;
+        padding: 0 20px;
+        display: inline;
+    }
 }
 
-.navLink a{
-	color: #999;
+#completionButton {
+    margin-top: 25px;
+    margin-bottom: 15px;
+    padding-left: 70px;
+    padding-right: 70px;
+    color: #ffffff;
+    font-weight: bold;
 }
 
-#completionButton{
-	margin-top: 25px;
-	margin-bottom: 15px;
-	padding-left: 70px;
-	padding-right: 70px;
-	color: #fff;
-	font-weight: bold;
-}
-.buttonAskCompletion{
-	background-color: #ffaa2b;
-	border-color:#ff9f19;
-	font-weight: bold;
-}
-.buttonAskCompletion:hover{
-	background-color: #ff9f19;
-	border-color:#ff9f19;
+.buttonAskCompletion {
+    background-color: var(--completionButton);
+    border-color: var(--completionButtonHover);
+    font-weight: bold;
 }
 
-.buttonConfirmCompletion{
-	background-color: #50d392;
-	border-color:#3dc682;
-
-}
-.buttonConfirmCompletion:hover{
-	background-color: #3dc682;
-	border-color:#3dc682;
+.buttonAskCompletion:hover {
+    background-color: var(--completionButtonHover);
+    border-color: var(--completionButtonHover);
 }
 
-.navLinkBg{
-	height: 40px;
-	background-color: #fff;
-	z-index: 1;
-	position: fixed;
-	bottom: 55px;
-	color: #999;
-	font-weight: bold;
-	-webkit-box-shadow: 0px 0px 3px rgba(50, 50, 50, 0.5);
-	-moz-box-shadow:    0px 0px 3px rgba(50, 50, 50, 0.5);
-	box-shadow:         0px 0px 3px rgba(50, 50, 50, 0.5);
+.buttonConfirmCompletion {
+    background-color: #50d392;
+    border-color: #3dc682;
 }
 
-.navLinkBg:hover{
-	color: #999;
+.buttonConfirmCompletion:hover {
+    background-color: #3dc682;
+    border-color: #3dc682;
 }
 
-#navLinkBgRight{
-	right: -1000px;
-	padding: 10px 15px 0 65px;
+.navLinkBg {
+    height: 40px;
+    background-color: #ffffff;
+    z-index: 1;
+    position: fixed;
+    bottom: 55px;
+    color: #999;
+    font-weight: bold;
+    -webkit-box-shadow: 0px 0px 3px rgba(50, 50, 50, 0.5);
+    -moz-box-shadow: 0px 0px 3px rgba(50, 50, 50, 0.5);
+    box-shadow: 0px 0px 3px rgba(50, 50, 50, 0.5);
 }
 
-#navLinkBgLeft{
-	left: -65px;
-	padding-left: 15px;
-	padding-right: 50px;
+.navLinkBg:hover {
+    color: #999;
 }
 
-.activehtml  {
+#navLinkBgRight {
+    right: -1000px;
+    padding: 10px 15px 0 65px;
+}
+
+#navLinkBgLeft {
+    left: -65px;
+    padding-left: 15px;
+    padding-right: 50px;
+}
+
+.activehtml {
     width: 100%;
     height: 400px;
-    background-color: #fff;
+    background-color: #ffffff;
 }
 
-.container  .section>div.sidebar {
-	margin: 0 0 0.5em 1em;
-	width: auto;
-	}
+.container section > div.sidebar {
+    margin: 0 0 0.5em 1em;
+}
 
 a.disqus_thread_link {
     display: block;
@@ -670,88 +923,30 @@ iframe[seamless] {
     display: block;
 }
 
-@media (min-width: 768px){
-	.container  .section>div.sidebar {
-		margin: 0 3em 0.5em 1em;
-	}
-}
-@media (min-width: 992px){
-	.container  .section>div.sidebar {
-		margin: 0 11em 0.5em 1em;
-	}
-}
-@media (min-width: 1200px){
-	.container  .section>div.sidebar {
-		margin: 0 18em 0.5em 1em;
-	}
+@media (min-width: 768px) {
+    .container section > div.sidebar {
+        margin: 0 3em 0.5em 1em;
+    }
 }
 
+@media (min-width: 992px) {
+    .container section > div.sidebar {
+        margin: 0 11em 0.5em 1em;
+    }
+}
+
+@media (min-width: 1200px) {
+    .container section > div.sidebar {
+        margin: 0 18em 0.5em 1em;
+    }
+}
 
 div.ExecutionVisualizer table.visualizer {
     width: auto;
     margin-left: auto;
     margin-right: auto;
-    background-color: #fff;
+    background-color: #ffffff;
 }
-
-
-/* TIMED ASSESSMENT BUTTON STYLES */
-ul#pageNums, ul#pageNums li {
- text-align: center;
- padding: 10px 0;
-}
-
-
-.pagination > li > a:hover {
-	background-color: #eee !important;
-	color: #000 !important;
-}
-
-
-/* The following override styles in Bootstrap distribution file (bootstrap.min.css) */
-
-.pagination > .active > a,
-.pagination > .active > span {
-background-color: #428bca !important;
-color: #fff !important;
-}
-
-.col-md-6-override {
-	text-align: center !important;
-	max-width: 100% !important;
-}
-
-/* end */
-
-
-
-.pagination > .answered > a,
-.pagination > .answered > span {
-background-color: #eee;
-color: #000;
-}
-
-.pagination > .correctCount > a,
-.pagination > .correctCount > span {
-background-color: #dff0d8;
-color: #000000;
-border-color: #000000;
-}
-
-.pagination > .skippedCount > a,
-.pagination > .skippedCount > span {
-background-color: #fcf8e3;
-color: #000000;
-border-color: #000000;
-}
-
-.pagination > .incorrectCount > a,
-.pagination > .incorrectCount > span {
-background-color: #f2dede;
-color: #000000;
-border-color: #000000;
-}
-/* END TIMED ASSESSMENT BUTTON STYLES */
 
 .sltooltip {
     position: absolute;
@@ -761,7 +956,7 @@ border-color: #000000;
     font-size: 11px;
     visibility: visible;
     margin-top: -2px;
-    bottom:120%;
+    bottom: 120%;
     margin-left: -2em;
 }
 
@@ -780,13 +975,13 @@ border-color: #000000;
 .sltooltip-inner {
     max-width: 200px;
     padding: 3px 8px;
-    color: #ffffff;
+    color: var(--tooltip);
     text-align: center;
     text-decoration: none;
     background-color: #000000;
     -webkit-border-radius: 4px;
-       -moz-border-radius: 4px;
-            border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
 }
 
 ul.dropdown-menu.globaltoc {
@@ -794,13 +989,18 @@ ul.dropdown-menu.globaltoc {
     overflow: auto;
 }
 
-
 .globaltoc span.caption-text {
     display: inline-block;
     font-weight: bold;
     font-size: large;
 }
 
+/* Style lp textareas. */
+textarea.lp-result {
+    width: 100%;
+    height: 10em;
+    font-family: monospace;
+}
 
 /*
  * Hide only visually, but have it available for screen readers:
@@ -811,7 +1011,7 @@ ul.dropdown-menu.globaltoc {
  *    https://medium.com/@jessebeach/beware-smushed-off-screen-accessible-text-5952a4c2cbfe
  */
 
- .visuallyhidden {
+.visuallyhidden {
     border: 0;
     clip: rect(0 0 0 0);
     height: 1px;
@@ -820,7 +1020,8 @@ ul.dropdown-menu.globaltoc {
     padding: 0;
     position: absolute;
     width: 1px;
-    white-space: nowrap; /* 1 */
+    white-space: nowrap;
+    /* 1 */
 }
 
 /*
@@ -840,11 +1041,126 @@ ul.dropdown-menu.globaltoc {
     white-space: inherit;
 }
 
-
 .blockquote {
     text-align: center;
     font-size: large;
     font-style: italic;
     padding-left: 2em;
     padding-right: 2em;
+}
+
+#scprogresscontainer {
+    width: 100%;
+    max-width: 500px;
+    margin: 10px auto;
+}
+
+#subchapterprogress.ui-progressbar .ui-progressbar-value {
+    margin: 0;
+    border-radius: 0px;
+}
+
+#subchapterprogress > div {
+    background: green;
+}
+
+#subchapterprogress > div.loggedout {
+    background: lightgray;
+}
+
+.runestone_caption {
+    text-align: center;
+}
+
+.runestone_caption_divid {
+    opacity: 50%;
+}
+
+#questions .runestone_caption:before {
+    counter-increment: rscomponent;
+    content: "Problem: " counter(rscomponent) " -- ";
+}
+
+body {
+    color: var(--bodyFont);
+}
+
+.jupyter_container .output {
+    margin-top: 10px;
+}
+
+.jupyter_container .output td {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.jupyter_container .output th {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+/*Theme toggle*/
+.dropdown-menu > li > label.theme-switch {
+    display: flex;
+    align-items: center;
+    font-weight: normal;
+    cursor: pointer;
+}
+
+.theme-switch input {
+    display: none;
+}
+
+.theme-switch .slider {
+background-color: #ccc;
+height: 1.25em;
+width: 2em;
+transition: 0.4s;
+position: relative;
+margin-right: 3px;
+}
+
+.theme-switch .slider:before {
+    background-color: #fff;
+    bottom: 2px;
+    content: "";
+    height: calc(1.25em - 4px);
+    left: 2px;
+    position: absolute;
+    transition: 0.4s;
+    width: calc(1.25em - 4px);
+}
+
+.theme-switch input:checked + .slider {
+    background-color: #66bb6a;
+}
+
+.theme-switch input:checked + .slider:before {
+    transform: translateX( calc(0.75em - 1px) );
+}
+
+.theme-switch .slider.round {
+    border-radius: 1.25em;
+}
+
+.theme-switch .slider.round:before {
+    border-radius: 1.25em;
+}
+/*End theme toggle*/
+
+/* for ads */
+.adcopy {
+    width: 60%;
+    background-color: #f2e0c3;
+    padding: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+    border: solid black 2px;
+    border-radius: 10px;
+}
+
+.adcopy .donateb {
+  
+  margin-left: 30%;
 }

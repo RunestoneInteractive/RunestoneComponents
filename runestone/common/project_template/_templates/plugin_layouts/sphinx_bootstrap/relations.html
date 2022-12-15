@@ -19,12 +19,14 @@
   <li class="divider-vertical"></li>
 {%- endif %}
 
-<script type="text/javascript">
+<script>
   opts = {'placement':'bottom',
           'selector': '',
           'delay': { show: 100, hide: 50}
          };
 
-  $('#relations-prev').tooltip(opts);
-  $('#relations-next').tooltip(opts);
+  window.addEventListener('load', (event) => {
+    $('#relations-prev').tooltip(opts);
+    $('#relations-next').tooltip(opts);
+  });
 </script>

@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-__author__ = 'isaacdontjelindell'
+__author__ = "isaacdontjelindell"
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -21,7 +21,7 @@ from runestone.common.runestonedirective import RunestoneDirective, RunestoneNod
 
 
 DISQUS_BOX = """\
-<script type="text/javascript">
+<script>
     function %(identifier)s_disqus(source) {
         if (window.DISQUS) {
 
@@ -56,39 +56,43 @@ DISQUS_BOX = """\
 """
 
 DISQUS_LINK = """
-<a href="#disqus_thread" class='disqus_thread_link' data-disqus-identifier="%(identifier)s" onclick="%(identifier)s_disqus(this);">Show Comments</a>
-<script type='text/javascript'>
+<a href="#disqus_thread" class="disqus_thread_link" data-disqus-identifier="%(identifier)s" onclick="%(identifier)s_disqus(this);">Show Comments</a>
+<script>
+  window.addEventListener('load', (event) => {
     $("a[data-disqus-identifier='%(identifier)s']").attr('data-disqus-identifier', '%(identifier)s_' + eBookConfig.course);
+  });
 </script>
 """
 
 
 def setup(app):
-    app.add_directive('disqus', DisqusDirective)
+    app.add_directive("disqus", DisqusDirective)
 
-    app.add_node(DisqusNode, html=(visit_disqus_node, depart_disqus_node))
-    app.connect('doctree-resolved' ,process_disqus_nodes)
-    app.connect('env-purge-doc', purge_disqus_nodes)
+    app.add_node(DisqusNode, html=(visit_disqus_html, depart_disqus_html))
+    app.connect("doctree-resolved", process_disqus_nodes)
+    app.connect("env-purge-doc", purge_disqus_nodes)
+
 
 class DisqusNode(nodes.General, nodes.Element, RunestoneNode):
-    def __init__(self,content, **kwargs):
-        super(DisqusNode,self).__init__(**kwargs)
-        self.disqus_components = content
+    pass
 
 
-def visit_disqus_node(self, node):
+def visit_disqus_html(self, node):
     res = DISQUS_BOX
     res += DISQUS_LINK
 
-    res = res % node.disqus_components
+    res = res % node["runestone_options"]
 
     self.body.append(res)
 
-def depart_disqus_node(self,node):
+
+def depart_disqus_html(self, node):
     pass
+
 
 def process_disqus_nodes(app, env, docname):
     pass
+
 
 def purge_disqus_nodes(app, env, docname):
     pass
@@ -100,14 +104,18 @@ class DisqusDirective(RunestoneDirective):
    :shortname: Your registered disqus id
    :identifier: unique id for this discussion
     """
+
     required_arguments = 0
     optional_arguments = 0
     final_argument_whitespace = True
     has_content = False
-    option_spec = {'shortname':directives.unchanged_required,
-                   'identifier':directives.unchanged_required
-                  }
-
+    option_spec = RunestoneDirective.option_spec.copy()
+    option_spec.update(
+        {
+            "shortname": directives.unchanged_required,
+            "identifier": directives.unchanged_required,
+        }
+    )
 
     def run(self):
         """
@@ -116,6 +124,9 @@ class DisqusDirective(RunestoneDirective):
         :return:
         """
 
-        disqus_node = DisqusNode(self.options, rawsource=self.block_text)
-        disqus_node.source, disqus_node.line = self.state_machine.get_source_and_line(self.lineno)
+        disqus_node = DisqusNode()
+        disqus_node["runestone_options"] = self.options
+        disqus_node["source"], disqus_node["line"] = self.state_machine.get_source_and_line(
+            self.lineno
+        )
         return [disqus_node]

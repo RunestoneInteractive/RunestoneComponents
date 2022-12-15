@@ -2,67 +2,60 @@
 Test Short Answer question directive
 """
 
-__author__ = 'yasinovskyy'
+__author__ = "yasinovskyy"
 
-from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
-
-setUpModule, tearDownModule = module_fixture_maker(__file__)
-
-class ShortAnswerQuestion_Tests(RunestoneTestCase):
-    def test_sa1(self):
-        '''No input. Button not clicked'''
-        self.driver.get(self.host + "/index.html")
-        t1 = self.driver.find_element_by_id("question1")
-
-        fb = t1.find_element_by_id("question1_feedback")
-        self.assertIsNotNone(fb)
-        cnamestr = fb.get_attribute("class")
-        self.assertIn("alert-danger", cnamestr)
+DIV_ID = "test_short_answer_1"
 
 
-    def test_sa2(self):
-        '''No input. Button clicked'''
-        self.driver.get(self.host + "/index.html")
-        t1 = self.driver.find_element_by_id("question1")
-
-        btn_check = t1.find_element_by_tag_name('button')
-        btn_check.click()
-
-        fb = t1.find_element_by_id("question1_feedback")
-        self.assertIsNotNone(fb)
-        cnamestr = fb.get_attribute("class")
-        self.assertIn("alert-success", cnamestr)
+def get_sa(selenium_utils):
+    selenium_utils.wait_until_ready(DIV_ID)
+    selenium_utils.scroll_to_top()
+    return selenium_utils.driver.find_element_by_id(DIV_ID)
 
 
-    def test_sa3(self):
-        '''Answer entered'''
-        self.driver.get(self.host + "/index.html")
-        t1 = self.driver.find_element_by_id("question1")
-        ta = t1.find_element_by_id("question1_solution")
-        ta.send_keys("My answer")
-
-        btn_check = t1.find_element_by_tag_name('button')
-        btn_check.click()
-
-        fb = t1.find_element_by_id("question1_feedback")
-        self.assertIsNotNone(fb)
-        cnamestr = fb.get_attribute("class")
-        self.assertIn("alert-success", cnamestr)
+def click_button(sa_element):
+    sa_element.find_element_by_tag_name("button").click()
 
 
-    def test_sa4(self):
-        '''Answer entered and cleared'''
-        self.driver.get(self.host + "/index.html")
-        t1 = self.driver.find_element_by_id("question1")
-        ta = t1.find_element_by_id("question1_solution")
-        ta.send_keys("My answer")
+def test_sa1(selenium_utils_get):
+    """No input. Button not clicked"""
+    t1 = get_sa(selenium_utils_get)
+    fb = t1.find_element_by_id(f"{DIV_ID}_feedback")
+    assert "alert-danger" in fb.get_attribute("class")
 
-        btn_check = t1.find_element_by_tag_name('button')
-        btn_check.click()
 
-        ta.clear()
+def test_sa2(selenium_utils_get):
+    """No input. Button clicked"""
+    t1 = get_sa(selenium_utils_get)
+    click_button(t1)
+    fb = t1.find_element_by_id(f"{DIV_ID}_feedback")
+    assert "alert-success" in fb.get_attribute("class")
 
-        fb = t1.find_element_by_id("question1_feedback")
-        self.assertIsNotNone(fb)
-        cnamestr = fb.get_attribute("class")
-        self.assertIn("alert-success", cnamestr)
+
+def test_sa3(selenium_utils_get):
+    """Answer entered"""
+    t1 = get_sa(selenium_utils_get)
+    ta = t1.find_element_by_id(f"{DIV_ID}_solution")
+    ta.clear()
+    ta.send_keys("My answer")
+
+    click_button(t1)
+
+    fb = t1.find_element_by_id(f"{DIV_ID}_feedback")
+    assert fb is not None
+    assert "alert-success" in fb.get_attribute("class")
+
+
+# TODO: this is the same as ``_test_sa3``.
+def test_sa4(selenium_utils_get):
+    """Answer entered and cleared"""
+    t1 = get_sa(selenium_utils_get)
+    ta = t1.find_element_by_id(f"{DIV_ID}_solution")
+    ta.clear()
+    ta.send_keys("My answer")
+
+    click_button(t1)
+
+    fb = t1.find_element_by_id(f"{DIV_ID}_feedback")
+    assert fb is not None
+    assert "alert-success" in fb.get_attribute("class")

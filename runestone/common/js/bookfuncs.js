@@ -1,9 +1,13 @@
 /**
- * Created by IntelliJ IDEA.
+ *
  * User: bmiller
- * Date: 4/20/11
+ * Original: 2011-04-20
+ * Date: 2019-06-14
  * Time: 2:01 PM
- * To change this template use File | Settings | File Templates.
+ * This change marks the beginning of version 4.0 of the runestone components
+ * Login/logout is no longer handled through javascript but rather server side.
+ * Many of the components depend on the runestone:login event so we will keep that
+ * for now to keep the churn fairly minimal.
  */
 
 /*
@@ -26,319 +30,299 @@
  */
 
 //
-// Chevron functions - Must correspond with width in runestone-custom-sphinx-bootstrap.css
-//
-$(function () {
-	var resizeWindow = false;
-    var	resizeWidth = 600;
-	$(window).on('resize', function (event){
-		if ($(window).width() <= resizeWidth && resizeWindow == false){
-			resizeWindow = true;
-			var topPrev = $("#relations-prev").clone().attr("id", "top-relations-prev");
-			var topNext = $("#relations-next").clone().attr("id", "top-relations-next");
-			$("#relations-prev, #relations-next").hide();
-			var bottomPrev = topPrev.clone().attr("id", "bottom-relations-prev");
-			var bottomNext = topNext.clone().attr("id", "bottom-relations-next");
-			$("div#main-content > div").prepend(topPrev, topNext);
-			$("#top-relations-prev, #top-relations-next").wrapAll("<ul id=\"top-relations-console\"></ul>");
-			$("div#main-content > div").append(bottomPrev, bottomNext);
-			$("#bottom-relations-prev, #bottom-relations-next").wrapAll("<ul id=\"bottom-relations-console\"></ul>");
-		}
-		if ($(window).width() >= resizeWidth + 1 && resizeWindow == true){
-			resizeWindow = false;
-			$("#top-relations-console, #bottom-relations-console").remove();
-			$("#relations-prev, #relations-next").show();
-		}
-	}).resize();
-});
-
-
-//
-// Logging functions
+// Page decoration functions
 //
 
-
-
-//
-// Grading functions
-//
-
-function comment(blockid) {
-    $.modal('<iframe width="600" height="400" src="/getcomment?id=' + blockid + '" style="background-color: white">', {
-        //$.modal('<form><textarea name="content"></textarea><input type="submit" name="submit" > </form>', {
-        overlayClose: true,
-        closeHTML: "",
-        containerCss: {
-            width: 600,
-            height: 400,
-            backgroundColor: "#fff"
-        }
-    });
-}
-
-function sendGrade(grade, sid, acid, id) {
-    var data = {'sid': sid, 'acid': acid, 'grade': grade, 'id': id};
-    jQuery.get(eBookConfig.ajaxURL + 'savegrade', data);
-}
-
-function sendComment(comment, sid, acid, id) {
-    var data = {'sid': sid, 'acid': acid, 'comment': comment, 'id': id};
-    jQuery.get(eBookConfig.ajaxURL + 'savegrade', data);
-}
-
-//
-// User login and page decoration functions
-//
-
-var rb = new RunestoneBase();
-
-function gotUser(data, status, whatever) {
-    var mess = '';
-    var caughtErr = false;
-    var d;
-    try {
-        d = eval(data)[0];
-    } catch (err) {
-        if (eBookConfig.loginRequired) {
-            if (confirm("Error: " + err.toString() + "Please report this error!  Click OK to continue without logging in.  Cancel to retry.")) {
-                caughtErr = true;
-                mess = "Not logged in";
-                $(document).trigger("runestone:logout")
-                $('li.loginout').html('<a href="' + eBookConfig.app + '/default/user/login">Login</a>')
-            } else {
-                window.location.href = eBookConfig.app + '/default/user/login?_next=' + window.location.href
-            }
-        }
-    }
-    if (d.course_list && d.course_list.indexOf(eBookConfig.course) < 0) {
-        alert(`Hey there you appear to have wandered into ${eBookConfig.course} But you are not registered for this course. Sending you to safety.` )
-        window.location.href = eBookConfig.app + '/default/courses';
-    }
-    if (d.readings){
-        cur_path_parts = window.location.pathname.split('/');
-        name = cur_path_parts[cur_path_parts.length-2] + '/' + cur_path_parts[cur_path_parts.length-1];
-        position = d.readings.indexOf(name);
-        num_readings = d.readings.length
-        if (position == (d.readings.length-1)){
+function addReadingList() {
+    if (eBookConfig.readings) {
+        var l, nxt, path_parts, nxt_link;
+        let cur_path_parts = window.location.pathname.split("/");
+        let name =
+            cur_path_parts[cur_path_parts.length - 2] +
+            "/" +
+            cur_path_parts[cur_path_parts.length - 1];
+        let position = eBookConfig.readings.indexOf(name);
+        let num_readings = eBookConfig.readings.length;
+        if (position == eBookConfig.readings.length - 1) {
             // no more readings
-            l = $("<div />", {text: `Finished reading assignment. Page ${num_readings} of ${num_readings}.`});
-        }
-        else if(position >= 0){
+            l = $("<div />", {
+                text: `Finished reading assignment. Page ${num_readings} of ${num_readings}.`,
+            });
+        } else if (position >= 0) {
             // get next name
-            nxt = d.readings[position+1];
-            path_parts = cur_path_parts.slice(0,cur_path_parts.length-2 );
+            nxt = eBookConfig.readings[position + 1];
+            path_parts = cur_path_parts.slice(0, cur_path_parts.length - 2);
             path_parts.push(nxt);
-            nxt_link = path_parts.join('/');
-            l = $("<a />", {name : "link", class: "btn btn-lg ' + 'buttonConfirmCompletion'", href : nxt_link, text : `Continue to page ${position+2} of ${num_readings} in the reading assignment.`});
-        }
-        else{
-            l = $("<div />", {text: "This page is not part of the last reading assignment you visited."});
+            nxt_link = path_parts.join("/");
+            l = $("<a />", {
+                name: "link",
+                class: "btn btn-lg ' + 'buttonConfirmCompletion'",
+                href: nxt_link,
+                text: `Continue to page ${
+                    position + 2
+                } of ${num_readings} in the reading assignment.`,
+            });
+        } else {
+            l = $("<div />", {
+                text: "This page is not part of the last reading assignment you visited.",
+            });
         }
         $("#main-content").append(l);
     }
-    if (d.redirect) {
-        if (eBookConfig.loginRequired) {
-            window.location.href = eBookConfig.app + '/default/user/login?_next=' + window.location.href
-        } else {
-            mess = "Not logged in";
-            $(document).trigger("runestone:logout")
-            $('li.loginout').html('<a href="' + eBookConfig.app + '/default/user/login">Login</a>')
-        }
-    } else {
-        if (!caughtErr) {
-            mess = "username: " + d.nick;
-            eBookConfig.email = d.email;
-            eBookConfig.isLoggedIn = true;
-            eBookConfig.cohortId = d.cohortId;
-            eBookConfig.isInstructor = d.isInstructor;
-            // If the user is not an instructor then remove the link to the instructors page
-            if (! d.isInstructor) {
-                $("#ip_dropdown_link").remove()
-            }
-            $(document).trigger("runestone:login")
-            timedRefresh();
-        }
-    }
-    $(".loggedinuser").html(mess);
-    rb.logBookEvent({
-        'event': 'page',
-        'act': 'view',
-        'div_id': window.location.pathname
-    })
-	notifyRunestoneComponents();
 }
 
-
 function timedRefresh() {
-    timeoutPeriod = 4500000;  // 75 minutes
-    $(document).bind("idle.idleTimer", function () {
+    var timeoutPeriod = 900000; // 75 minutes
+    $(document).on("idle.idleTimer", function () {
         // After timeout period send the user back to the index.  This will force a login
         // if needed when they want to go to a particular page.  This may not be perfect
         // but its an easy way to make sure laptop users are properly logged in when they
         // take quizzes and save stuff.
-        if (location.href.indexOf('index.html') < 0) {
-            console.log("Idle timer - " + location.pathname)
-            location.href = eBookConfig.app + '/default/user/login?_next=' + location.pathname;
+        if (location.href.indexOf("index.html") < 0) {
+            console.log("Idle timer - " + location.pathname);
+            location.href =
+                eBookConfig.app +
+                "/default/user/login?_next=" +
+                location.pathname +
+                location.search;
         }
     });
     $.idleTimer(timeoutPeriod);
 }
 
-function shouldLogin() {
-    var sli = true;
-
-    if (window.location.href.indexOf('file://') > -1 || (! eBookConfig.useRunestoneServices) ) {
-        sli = false;
+class PageProgressBar {
+    constructor(actDict) {
+        this.possible = 0;
+        this.total = 1;
+        if (actDict && Object.keys(actDict).length > 0) {
+            this.activities = actDict;
+        } else {
+            let activities = { page: 0 };
+            $(".runestone").each(function (idx, e) {
+                activities[e.firstElementChild.id] = 0;
+            });
+            this.activities = activities;
+        }
+        this.calculateProgress();
+        if (
+            window.location.pathname.match(
+                /.*(index.html|toctree.html|Exercises.html|Glossary.html|search.html)$/i
+            )
+        ) {
+            $("#scprogresscontainer").hide();
+        }
+        this.renderProgress();
     }
 
-    return sli;
-}
-
-function isLoggedIn() {
-    if (typeof eBookConfig.isLoggedIn !== undefined) {
-        return eBookConfig.isLoggedIn;
+    calculateProgress() {
+        for (let k in this.activities) {
+            if (k !== undefined) {
+                this.possible++;
+                if (this.activities[k] > 0) {
+                    this.total++;
+                }
+            }
+        }
     }
-    return false;
+
+    renderProgress() {
+        let value = 0;
+        $("#scprogresstotal").text(this.total);
+        $("#scprogressposs").text(this.possible);
+        try {
+            value = (100 * this.total) / this.possible;
+        } catch (e) {
+            value = 0;
+        }
+        $("#subchapterprogress").progressbar({
+            value: value,
+        });
+        if (!eBookConfig.isLoggedIn) {
+            $("#subchapterprogress>div").addClass("loggedout");
+        }
+    }
+
+    updateProgress(div_id) {
+        this.activities[div_id]++;
+        // Only update the progress bar on the first interaction with an object.
+        if (this.activities[div_id] === 1) {
+            this.total++;
+            let val = (100 * this.total) / this.possible;
+            $("#scprogresstotal").text(this.total);
+            $("#scprogressposs").text(this.possible);
+            $("#subchapterprogress").progressbar("option", "value", val);
+            if (
+                val == 100.0 &&
+                $("#completionButton").text().toLowerCase() ===
+                    "mark as completed"
+            ) {
+                $("#completionButton").click();
+            }
+        }
+    }
 }
 
-function handleLoginLogout() {
-    if (shouldLogin()) {
-        data = {timezoneoffset: (new Date()).getTimezoneOffset()/60 }
-        jQuery.get(eBookConfig.ajaxURL + 'getuser', data, gotUser).error(notifyRunestoneComponents);
+export var pageProgressTracker = {};
+
+async function handlePageSetup() {
+    var mess;
+    if (eBookConfig.useRunestoneServices) {
+        let headers = new Headers({
+            "Content-type": "application/json; charset=utf-8",
+            Accept: "application/json",
+        });
+        let data = { timezoneoffset: new Date().getTimezoneOffset() / 60 };
+        let request = new Request(
+            `${eBookConfig.new_server_prefix}/logger/set_tz_offset`,
+            {
+                method: "POST",
+                body: JSON.stringify(data),
+                headers: headers,
+            }
+        );
+        try {
+            let response = await fetch(request);
+            if (!response.ok) {
+                console.error(`Failed to set timezone! ${response.statusText}`);
+            }
+            data = await response.json();
+        } catch (e) {
+            console.error(`Error setting timezone ${e}`);
+        }
+    }
+    console.log(`This page served by ${eBookConfig.served_by}`);
+    if (eBookConfig.isLoggedIn) {
+        mess = `username: ${eBookConfig.username}`;
+        if (!eBookConfig.isInstructor) {
+            $("#ip_dropdown_link").remove();
+            $("#inst_peer_link").remove();
+        }
+        $(document).trigger("runestone:login");
+        addReadingList();
+        // Avoid the timedRefresh on the grading page.
+        if (
+            window.location.pathname.indexOf("/admin/grading") == -1 &&
+            window.location.pathname.indexOf("/peer/") == -1
+        ) {
+            timedRefresh();
+        }
     } else {
-        $(document).trigger("runestone:logout")
-		// Let runestone components know they can run their javascript now
-		notifyRunestoneComponents();
+        mess = "Not logged in";
+        $(document).trigger("runestone:logout");
+        let bw = document.getElementById("browsing_warning");
+        if (bw) {
+            bw.innerHTML =
+                "<p class='navbar_message'>Saving and Logging are Disabled</p>";
+        }
+        let aw = document.getElementById("ad_warning");
+        if (aw) {
+            aw.innerHTML =
+                "<p class='navbar_message'>🚫 Log-in to Remove <a href='/runestone/default/ads'>Ads!</a> 🚫 &nbsp;</p>";
+        }
     }
+    $(".loggedinuser").html(mess);
+
+    pageProgressTracker = new PageProgressBar(eBookConfig.activities);
+    notifyRunestoneComponents();
 }
 
 function setupNavbarLoggedIn() {
-    if (eBookConfig.cohortId == null || eBookConfig.cohortId == "") {
-        $('#joinGroupLink').show();
-        $('#groupScheduleLink').hide();
-        $('#newChapterLink').hide();
-        $('#manageGroupLink').hide();
-    } else {
-        $('#joinGroupLink').hide();
-        $('#groupScheduleLink').show();
-        $('#newChapterLink').show();
-        $('#manageGroupLink').show();
-    }
-    $('#profilelink').show();
-    $('#passwordlink').show();
-    $('#registerlink').hide();
-    $('li.loginout').html('<a href="' + eBookConfig.app + '/default/user/logout">Log Out</a>')
+    $("#profilelink").show();
+    $("#passwordlink").show();
+    $("#registerlink").hide();
+    $("li.loginout").html(
+        '<a href="' + eBookConfig.app + '/default/user/logout">Log Out</a>'
+    );
 }
-$(document).bind("runestone:login", setupNavbarLoggedIn);
+$(document).on("runestone:login", setupNavbarLoggedIn);
 
 function setupNavbarLoggedOut() {
-    console.log("setup navbar for logged out");
-    $('#registerlink').show();
-    $('#profilelink').hide();
-    $('#passwordlink').hide();
-    $('#ip_dropdown_link').hide();
-    $('li.loginout').html('<a href="' + eBookConfig.app + '/default/user/login">Login</a>')
-    $(".footer").html('user not logged in');
-    rb.logBookEvent({'event': 'page', 'act': 'view', 'div_id': window.location.pathname})
-}
-$(document).bind("runestone:logout",setupNavbarLoggedOut);
-
-function getOnlineUsers() {
-    let MSCACHE = 60 * 1000 * 10;
     if (eBookConfig.useRunestoneServices) {
-        let cacheValue = JSON.parse(localStorage.getItem("users_online"));
-        if(cacheValue == null || cacheValue.timestamp < (Date.now() - MSCACHE) ) {
-            $.getJSON(eBookConfig.ajaxURL + 'getnumonline', setOnlineUsers)
-        } else  {
-            $("#numuserspan").text(cacheValue.onlineCount);
-        }
+        console.log("setup navbar for logged out");
+        $("#registerlink").show();
+        $("#profilelink").hide();
+        $("#passwordlink").hide();
+        $("#ip_dropdown_link").hide();
+        $("#inst_peer_link").hide();
+        $("li.loginout").html(
+            '<a href="' + eBookConfig.app + '/default/user/login">Login</a>'
+        );
+        $(".footer").html("user not logged in");
     }
 }
-
-function setOnlineUsers(data) {
-    var d = data[0];
-    $("#numuserspan").text(d.online);
-    localStorage.setItem("users_online", JSON.stringify({onlineCount: d.online, timestamp: Date.now()}))
-}
-
+$(document).on("runestone:logout", setupNavbarLoggedOut);
 
 function notifyRunestoneComponents() {
-	// Runestone components wait until login process is over to load components because of storage issues
-	$(document).trigger("runestone:login-complete");
-	if (typeof $pjQ !== 'undefined')
-		$pjQ(document).trigger("runestone:login-complete");   // for parsons components which are using a different version of jQuery
+    // Runestone components wait until login process is over to load components because of storage issues. This triggers the `dynamic import machinery`, which then sends the login complete signal when this and all dynamic imports are finished.
+    $(document).trigger("runestone:pre-login-complete");
 }
 
-//
-// Nice interface for localstore  -- Thanks acbart
-//
-//
-
-var storage = {
-    set: function (directive, value) {
-        localStorage.setItem(directive + "_value", value);
-        localStorage.setItem(directive + "_timestamp", $.now());
-    },
-    remove: function (directive) {
-        localStorage.removeItem(directive + "_value");
-        localStorage.removeItem(directive + "_timestamp");
-    },
-    get: function (directive) {
-        return localStorage.getItem(directive + "_value");
-    },
-    has: function (directive) {
-        return localStorage.getItem(directive + "_value") !== null;
-    },
-    // Tests whether the server has the newer version
-    is_new: function (directive, server_time) {
-        var stored_time = localStorage.getItem(directive + "_timestamp");
-        return (server_time >= stored_time + 5000);
-    },
-};
-
-//
-// delay function used by VT to autosave some component data
-//
-
-var timers = {};
-function addDelay(directive, action, delay) {
-    if (delay === undefined) {
-        delay = 400;
+function placeAdCopy() {
+    if (typeof showAd !== "undefined" && showAd) {
+        let adNum = Math.floor(Math.random() * 2) + 1;
+        let adBlock = document.getElementById(`adcopy_${adNum}`);
+        let rsElements = document.querySelectorAll(".runestone");
+        if (rsElements.length > 0) {
+            let randomIndex = Math.floor(Math.random() * rsElements.length);
+            rsElements[randomIndex].after(adBlock)
+            adBlock.style.display = "block";
+        }
     }
-    clearTimeout(timers[directive]);
-    timers[directive] = setTimeout(action, delay);
 }
-
-
 
 // initialize stuff
-$(document).ready(function() {
-    if (eBookConfig && eBookConfig.useRunestoneServices) {
-        $(document).ready(handleLoginLogout);
-        $(document).ready(getOnlineUsers);
+$(function () {
+    if (eBookConfig) {
+        handlePageSetup();
+        placeAdCopy();
     } else {
-        if (typeof eBookConfig === 'undefined') {
-            console.log("eBookConfig is not defined.  This page must not be set up for Runestone");
+        if (typeof eBookConfig === "undefined") {
+            console.log(
+                "eBookConfig is not defined.  This page must not be set up for Runestone"
+            );
         }
-		notifyRunestoneComponents();
     }
 });
 
 // misc stuff
 // todo:  This could be further distributed but making a video.js file just for one function seems dumb.
-$(document).ready(function() {
-  // add the video play button overlay image
-  $(".video-play-overlay").each(function() {
-    $(this).css('background-image', "url(\'{{pathto('_static/play_overlay_icon.png', 1)}}\')")
+window.addEventListener("load", function () {
+    // add the video play button overlay image
+    $(".video-play-overlay").each(function () {
+        $(this).css(
+            "background-image",
+            "url('{{pathto('_static/play_overlay_icon.png', 1)}}')"
+        );
     });
 
-  // This function is needed to allow the dropdown search bar to work;
-  // The default behaviour is that the dropdown menu closes when something in
-  // it (like the search bar) is clicked
-  $(function() {
-    // Fix input element click problem
-    $('.dropdown input, .dropdown label').click(function(e) {
-      e.stopPropagation();
-      });
-  });
+    // This function is needed to allow the dropdown search bar to work;
+    // The default behaviour is that the dropdown menu closes when something in
+    // it (like the search bar) is clicked
+    $(function () {
+        // Fix input element click problem
+        $(".dropdown input, .dropdown label").click(function (e) {
+            e.stopPropagation();
+        });
+    });
+
+    // re-write some urls
+    // This is tricker than it looks and you have to obey the rules for # anchors
+    // The #anchors must come after the query string as the server basically ignores any part
+    // of a url that comes after # - like a comment...
+    if (location.href.includes("mode=browsing")) {
+        let queryString = "?mode=browsing";
+        document.querySelectorAll("a").forEach((link) => {
+            let anchorText = "";
+            if (link.href.includes("books/published") && ! link.href.includes("?mode=browsing")) {
+                if (link.href.includes("#")) {
+                    let aPoint = link.href.indexOf("#");
+                    anchorText = link.href.substring(aPoint);
+                    link.href = link.href.substring(0,aPoint);
+                }
+                link.href = link.href.includes("?")
+                    ? link.href + queryString.replace("?", "&") + anchorText
+                    : link.href + queryString + anchorText;
+            }
+        });
+    }
 });

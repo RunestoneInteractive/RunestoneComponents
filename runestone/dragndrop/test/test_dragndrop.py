@@ -8,127 +8,136 @@ https://api.jquery.com/contains-selector/
 For some reason, question id had to be 3 or above
 """
 
-__author__ = 'yasinovskyy'
-
-from runestone.unittest_base import module_fixture_maker, RunestoneTestCase
-
-setUpModule, tearDownModule = module_fixture_maker(__file__)
-jquery_url = "http://code.jquery.com/jquery-1.12.4.min.js"
-
-class DragAndDropQuestion_Tests(RunestoneTestCase):
-    def setUp(self):
-        super(DragAndDropQuestion_Tests, self).setUp()
-        self.driver.set_script_timeout(5)
-        with open("jquery_load_helper.js") as f:
-            self.load_jquery_js = f.read()
-        self.driver.execute_async_script(self.load_jquery_js, jquery_url)
-        with open("drag_and_drop_helper.js") as f:
-            self.js = f.read()
-
-    def test_dnd1(self):
-        '''No selection. Button clicked'''
-        self.driver.get(self.host + "/index.html")
-        t1 = self.driver.find_element_by_id("drag-and-drop")
-
-        btn_check = t1.find_element_by_class_name('btn-success')
-        btn_check.click()
-
-        fb = t1.find_element_by_id("question3_feedback")
-        self.assertIsNotNone(fb)
-        cnamestr = fb.get_attribute("class")
-        self.assertIn("alert-danger", cnamestr)
-
-        targets = t1.find_elements_by_class_name("draggable-drop")
-        for item in targets:
-            self.assertIn("drop-incorrect", item.get_attribute("class"))
+__author__ = "yasinovskyy"
 
 
-    def test_dnd2(self):
-        '''Terms matched correctly'''
-        self.driver.get(self.host + "/index.html")
-        t1 = self.driver.find_element_by_id("drag-and-drop")
-
-        targets = self.driver.find_elements_by_class_name("draggable-drop")
-
-        for target in targets:
-            if target.text == "cpp":
-                element_id = "question3question3_drag1"
-            elif target.text == "java":
-                element_id = "question3question3_drag2"
-            elif target.text == "py":
-                element_id = "question3question3_drag3"
-
-            self.driver.execute_script(self.js + "$('#" + element_id + "').simulateDragDrop({ dropTarget: 'span:contains(\"" + target.text + "\")' });")
-
-        btn_check = t1.find_element_by_class_name('btn-success')
-        btn_check.click()
-
-        fb = t1.find_element_by_id("question3_feedback")
-        self.assertIsNotNone(fb)
-        cnamestr = fb.get_attribute("class")
-        self.assertIn("alert-info", cnamestr)
+from pathlib import Path
 
 
-    def test_dnd3(self):
-        '''Reset button clicked'''
-        self.driver.get(self.host + "/index.html")
-        t1 = self.driver.find_element_by_id("drag-and-drop")
-
-        targets = self.driver.find_elements_by_class_name("draggable-drop")
-
-        for target in targets:
-            if target.text == "cpp":
-                element_id = "question3question3_drag1"
-            elif target.text == "java":
-                element_id = "question3question3_drag2"
-            elif target.text == "py":
-                element_id = "question3question3_drag3"
-
-            self.driver.execute_script(self.js + "$('#" + element_id + "').simulateDragDrop({ dropTarget: 'span:contains(\"" + target.text + "\")' });")
-
-        for target in targets:
-            element = target.find_element_by_class_name('draggable-drag')
-            #Expected: draggable-drag inside a draggable-drop
-            self.assertIsNotNone(element)
-
-        btn_reset = t1.find_element_by_class_name('drag-reset')
-        btn_reset.click()
-
-        for target in targets:
-            element = target.find_elements_by_class_name('draggable-drag')
-            #Expected: empty list of elements
-            self.assertFalse(element)
+def dnd_helper():
+    dnd_helper_path = Path(__file__).parent / "drag_and_drop_helper.js"
+    with open(dnd_helper_path, encoding="utf-8") as f:
+        return f.read()
 
 
-    def test_dnd4(self):
-        '''Incorrect answer changed to correct'''
-        self.driver.get(self.host + "/index.html")
-        t1 = self.driver.find_element_by_id("drag-and-drop")
+def get_dnd_div(selenium_utils):
+    selenium_utils.wait_until_ready("test_dnd_1")
+    div = selenium_utils.driver.find_element_by_id("test_dnd_1")
+    return div, div.find_elements_by_class_name("draggable-drop")
 
-        targets = self.driver.find_elements_by_class_name("draggable-drop")
 
-        for target in targets:
-            if target.text == "cpp":
-                element_id = "question3question3_drag1"
-            elif target.text == "java":
-                element_id = "question3question3_drag2"
-            elif target.text == "py":
-                element_id = ""
+def find_feedback(dnd_element):
+    div_id = dnd_element.get_attribute("id")
+    fb = dnd_element.find_element_by_id(f"{div_id}_feedback")
+    return fb.get_attribute("class")
 
-            self.driver.execute_script(self.js + "$('#" + element_id + "').simulateDragDrop({ dropTarget: 'span:contains(\"" + target.text + "\")' });")
 
-        btn_check = t1.find_element_by_class_name('btn-success')
-        btn_check.click()
+def click_button(dnd_element):
+    btn_check = dnd_element.find_element_by_class_name("btn-success")
+    btn_check.click()
 
-        fb = t1.find_element_by_id("question3_feedback")
-        self.assertIsNotNone(fb)
-        cnamestr = fb.get_attribute("class")
-        self.assertIn("alert-danger", cnamestr)
 
-        self.driver.execute_script(self.js + "$('#question3question3_drag3').simulateDragDrop({ dropTarget: 'span:contains(\"py\")' });")
-        btn_check.click()
+def test_dnd1(selenium_utils_get):
+    """No selection. Button clicked"""
+    t1, targets = get_dnd_div(selenium_utils_get)
 
-        fb = t1.find_element_by_id("question3_feedback")
-        self.assertIsNotNone(fb)
-        cnamestr = fb.get_attribute("class")
-        self.assertIn("alert-info", cnamestr)
+    click_button(t1)
+    assert "alert-danger" in find_feedback(t1)
+
+    for item in targets:
+        assert "drop-incorrect" in item.get_attribute("class")
+
+
+def test_dnd2(selenium_utils_get):
+    """Terms matched correctly"""
+    t1, targets = get_dnd_div(selenium_utils_get)
+    div_id = t1.get_attribute("id")
+
+    for target in targets:
+        div_id = t1.get_attribute("id")
+        if target.text == "cpp":
+            element_id = f"{div_id}{div_id}_drag1"
+        elif target.text == "java":
+            element_id = f"{div_id}{div_id}_drag2"
+        elif target.text == "py":
+            element_id = f"{div_id}{div_id}_drag3"
+
+        selenium_utils_get.driver.execute_script(
+            dnd_helper()
+            + "$('#"
+            + element_id
+            + "').simulateDragDrop({ dropTarget: 'span:contains(\""
+            + target.text
+            + "\")' });"
+        )
+
+    click_button(t1)
+    assert "alert-info" in find_feedback(t1)
+
+
+def test_dnd3(selenium_utils_get):
+    """Reset button clicked"""
+    t1, targets = get_dnd_div(selenium_utils_get)
+
+    for target in targets:
+        div_id = t1.get_attribute("id")
+        if target.text == "cpp":
+            element_id = f"{div_id}{div_id}_drag1"
+        elif target.text == "java":
+            element_id = f"{div_id}{div_id}_drag2"
+        elif target.text == "py":
+            element_id = f"{div_id}{div_id}_drag3"
+
+        selenium_utils_get.driver.execute_script(
+            dnd_helper()
+            + "$('#"
+            + element_id
+            + "').simulateDragDrop({ dropTarget: 'span:contains(\""
+            + target.text
+            + "\")' });"
+        )
+
+    for target in targets:
+        element = target.find_element_by_class_name("draggable-drag")
+        # Expected: draggable-drag inside a draggable-drop
+        assert element
+
+    t1.find_element_by_class_name("drag-reset").click()
+    for target in targets:
+        element = target.find_elements_by_class_name("draggable-drag")
+        # Expected: empty list of elements
+        assert not element
+
+
+def test_dnd4(selenium_utils_get):
+    """Incorrect answer changed to correct"""
+    t1, targets = get_dnd_div(selenium_utils_get)
+
+    for target in targets:
+        div_id = t1.get_attribute("id")
+        if target.text == "cpp":
+            element_id = f"{div_id}{div_id}_drag1"
+        elif target.text == "java":
+            element_id = f"{div_id}{div_id}_drag2"
+        elif target.text == "py":
+            element_id = ""
+
+        if element_id:
+            selenium_utils_get.driver.execute_script(
+                dnd_helper()
+                + "$('#"
+                + element_id
+                + "').simulateDragDrop({ dropTarget: 'span:contains(\""
+                + target.text
+                + "\")' });"
+            )
+
+    click_button(t1)
+    assert "alert-danger" in find_feedback(t1)
+
+    selenium_utils_get.driver.execute_script(
+        dnd_helper()
+        + f"$('#{div_id}{div_id}_drag3').simulateDragDrop({{ dropTarget: 'span:contains(\"py\")' }});"
+    )
+    click_button(t1)
+    assert "alert-info" in find_feedback(t1)

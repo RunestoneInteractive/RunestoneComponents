@@ -14,7 +14,7 @@ This Is A New Project
    (e.g. "DataStructures/queues.rst").
 
 
-.. poll:: pollid1
+.. poll:: test_poll_1
    :scale: 10
    :allowcomment:
 
@@ -22,3 +22,10 @@ This Is A New Project
 
 
 
+.. poll:: test_poll_2
+   :option_1: beginner programmer
+   :option_2: intermediate programmer
+   :option_3: expert programmer
+   :option_4: prefer not to answer
+
+   I am a :

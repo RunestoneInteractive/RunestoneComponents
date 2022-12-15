@@ -1,6 +1,7 @@
 import paver
 from paver.easy import *
 import paver.setuputils
+
 paver.setuputils.install_distutils_tasks()
 import os, sys
 from runestone.server import get_dburl
@@ -18,43 +19,46 @@ serving_dir = "./build/" + project_name
 dest = "../../static"
 
 options(
-    sphinx = Bunch(docroot=".",),
-
-    build = Bunch(
+    sphinx=Bunch(docroot="."),
+    build=Bunch(
         builddir=serving_dir,
         sourcedir="_sources",
         outdir=serving_dir,
         confdir=".",
-        template_args={'course_id': project_name,
-                       'login_required':'false',
-                       'appname': 'runestone',
-                       'loglevel': 0,
-                       'course_url': 'http://127.0.0.1:8000',
-                       'use_services': 'false',
-                       'python3': 'false',
-                       'dburl': '',
-                       'default_ac_lang': 'python',
-                       'basecourse': 'testfitb',
-                       'jobe_server': 'http://jobe2.cosc.canterbury.ac.nz',
-                       'proxy_uri_runs': '/jobe/index.php/restapi/runs/',
-                       'proxy_uri_files': '/jobe/index.php/restapi/files/',
-                       'downloads_enabled': 'false',
-                       'enable_chatcodes': 'false',
-                       'allow_pairs': 'false'
-                        }
-    )
+        template_args={
+            "course_id": project_name,
+            "login_required": "false",
+            "appname": "runestone",
+            "loglevel": 0,
+            "course_url": "http://127.0.0.1:8000",
+            "use_services": "false",
+            "python3": "false",
+            "dburl": "",
+            "downloads_enabled": "true",
+            "enable_chatcodes": "false",
+            "allow_pairs": "false",
+            "default_ac_lang": "python",
+            "basecourse": "testfitb",
+            "jobe_server": "http://jobe2.cosc.canterbury.ac.nz",
+            "proxy_uri_runs": "/jobe/index.php/restapi/runs/",
+            "proxy_uri_files": "/jobe/index.php/restapi/files/",
+            "downloads_enabled": "false",
+            "enable_chatcodes": "false",
+            "allow_pairs": "false",
+        },
+    ),
 )
 
 # if we are on runestone-deploy then use the proxy server not canterbury
-if gethostname() == 'runestone-deploy':
-    del options.build.template_args['jobe_server']
-    del options.build.template_args['proxy_uri_runs']
-    del options.build.template_args['proxy_uri_files']
+if gethostname() == "runestone-deploy":
+    del options.build.template_args["jobe_server"]
+    del options.build.template_args["proxy_uri_runs"]
+    del options.build.template_args["proxy_uri_files"]
 
 version = pkg_resources.require("runestone")[0].version
-options.build.template_args['runestone_version'] = version
+options.build.template_args["runestone_version"] = version
 
 # If DBURL is in the environment override dburl
-options.build.template_args['dburl'] = get_dburl(outer=locals())
+options.build.template_args["dburl"] = get_dburl(outer=locals())
 
 from runestone import build  # build is called implicitly by the paver driver.

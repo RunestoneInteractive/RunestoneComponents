@@ -1,0 +1,101 @@
+/* TIMED ASSESSMENT BUTTON STYLES */
+ul#pageNums,
+ul#pageNums li {
+    text-align: center;
+    padding: 10px 0;
+}
+
+.pagination > li > a:hover {
+    background-color: #eee !important;
+    color: #000 !important;
+}
+
+.flagBtn { /* documentation */
+    background-color: #ED9C59 !important;
+    border: 3px solid #CE5718;
+    border-radius: 5px;
+    color: #030201 !important;
+    cursor: pointer;
+    width: 150;
+    height: 115;
+    text-align: center;
+    text-decoration: none;
+    display: ruby;
+    font-size: 15px;
+}
+
+/* The following override styles in Bootstrap distribution file (bootstrap.min.css) */
+
+.pagination > .active > a,
+.pagination > .active > span {
+    background-color: #428bca !important;
+    color: #ffffff !important;
+}
+
+.col-md-6-override {
+    text-align: center !important;
+    max-width: 100% !important;
+}
+
+/* end */
+
+.pagination > .answered > a,
+.pagination > .answered > span {
+    background-color: #eee;
+    color: #000;
+}
+
+.pagination > .broken > a,
+.pagination > .broken > span {
+    background-color: #f99;
+    color: #000;
+}
+
+.pagination > .toolate > a,
+.pagination > .toolate > span {
+    background-color: rgb(236, 203, 54);
+    color: #000;
+}
+
+.pagination > .flagcolor > a,
+.pagination > .flagcolor > span {
+    background-color: #ED9C59;
+    color: #000;
+}
+
+p.examwarning {
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: rgba(243, 156, 156, 0.822);
+    border: solid black;
+    border-radius: 5px;
+    border-width: 2px;
+    padding: 5px;
+}
+
+.pagination > .correctCount > a,
+.pagination > .correctCount > span {
+    background-color: #dff0d8;
+    color: #000000;
+    border-color: #000000;
+}
+
+.pagination > .skippedCount > a,
+.pagination > .skippedCount > span {
+    background-color: #fcf8e3;
+    color: #000000;
+    border-color: #000000;
+}
+
+.pagination > .incorrectCount > a,
+.pagination > .incorrectCount > span {
+    background-color: #f2dede;
+    color: #000000;
+    border-color: #000000;
+}
+
+.switchcontainer {
+    height: 600px;
+    overflow: auto;
+}

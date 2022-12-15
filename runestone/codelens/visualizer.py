@@ -14,105 +14,114 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-__author__ = 'bmiller'
+__author__ = "bmiller"
 
 from docutils import nodes
 from docutils.parsers.rst import directives
 from .pg_logger import exec_script_str_local
 import json
 import six
+import requests
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common.runestonedirective import RunestoneIdDirective
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneIdNode
+
 
 def setup(app):
-    app.add_directive('codelens', Codelens)
-    app.add_autoversioned_stylesheet('pytutor.css')
-    app.add_autoversioned_stylesheet('modal-basic.css')
+    app.add_directive("codelens", Codelens)
 
-    app.add_autoversioned_javascript('d3.v2.min.js')
-    app.add_autoversioned_javascript('jquery.ba-bbq.min.js')
-    app.add_autoversioned_javascript('jquery.jsPlumb-1.3.10-all-min.js')
-    app.add_autoversioned_javascript('pytutor.js')
-    app.add_autoversioned_javascript('codelens.js')
-
-    app.add_config_value('codelens_div_class', "alert alert-warning cd_section", 'html')
+    app.add_config_value("codelens_div_class", "cd_section", "html")
+    app.add_config_value("trace_url", "http://tracer.runestone.academy:5000", "html")
+    app.add_node(
+        CodeLensNode,
+        html=(visit_codelens_html, depart_codelens_html),
+        xml=(visit_codelens_xml, depart_codelens_xml),
+    )
 
 
-VIS = '''
-<div class="runestone" style="max-width: none;">
-<div class="%(divclass)s">
-<div id="%(divid)s"></div>
-<p class="cl_caption"><span class="cl_caption_text">%(caption)s (%(divid)s)</span> </p>
-</div>'''
+#  data-tracefile="pytutor-embed-demo/java.json"
 
-QUESTION = '''
-<div id="%(divid)s_modal" class="modal fade codelens-modal">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Check your understanding</h4>
-      </div>
-      <div class="modal-body">
-        <p>%(question)s</p>
-        <input id="%(divid)s_textbox" type="textbox" class="form-control" style="width:200px;" />
-        <br />
-        <button id="%(divid)s_tracecheck" class='btn btn-default tracecheck' onclick="traceQCheckMe('%(divid)s_textbox','%(divid)s','%(correct)s')">
-          Check Me
-        </button>
-        <button type="button" class="btn btn-default" data-dismiss="modal">Continue</button>
-        <br />
-        <p id="%(divid)s_feedbacktext" class="feedbacktext alert alert-warning"></p>
-      </div>
+VIS = """
+<div class="runestone codelens %(optclass)s">
+    <div class="%(divclass)s" data-component="codelens" data-question_label="%(question_label)s">
+        <div id=%(divid)s_question class="ac_question">
+        </div>
+        <div class="pytutorVisualizer" id="%(divid)s"
+           data-params='{"embeddedMode": true, "lang": "%(language)s", "jumpToEnd": false}'>
+        </div>
+        <p class="runestone_caption"><span class="runestone_caption_text">Activity: CodeLens %(caption)s (%(divid)s)</span> </p>
     </div>
-  </div>
-</div>
+"""
 
-'''
 
-DATA = '''
-<script type="text/javascript">
-%(tracedata)s
+DATA = """
+<script>
 var %(divid)s_vis;
 
-$(document).ready(function() {
-    try {
-        %(divid)s_vis = new ExecutionVisualizer('%(divid)s',%(divid)s_trace,
-                                    {embeddedMode: %(embedded)s,
-                                    verticalStack: false,
-                                    heightChangeCallback: redrawAllVisualizerArrows,
-                                    codeDivWidth: 500,
-                                    lang : '%(python)s'
-                                    });
-        attachLoggers(%(divid)s_vis,'%(divid)s');
-        styleButtons('%(divid)s');
-        allVisualizers.push(%(divid)s_vis);
-    } catch (e) {
-        console.log("Failed to Initialize CodeLens component %(divid)s_vis" );
-        console.log(e.toString());
-    }
-
-});
-
-$(document).ready(function() {
-    $("#%(divid)s_tracecheck").click(function() {
-        logBookEvent({'event':'codelens', 'act': 'check', 'div_id':'%(divid)s'});
-    });
-});
-
-if (allVisualizers === undefined) {
-   var allVisualizers = [];
+if (allTraceData === undefined) {
+   var allTraceData = {};
 }
 
-
-$(window).resize(function() {
-    if (%(divid)s_vis) {
-        %(divid)s_vis.redrawConnectors();
-    }
-});
+allTraceData["%(divid)s"] = %(tracedata)s;
 </script>
 </div>
-'''
+"""
+
+PTX_TEMPLATE = """
+<program xml:id="{divid}" interactive="codelens" language="{language}">
+    <input>
+{source}
+    </input>
+</program>
+"""
+
+
+class CodeLensNode(nodes.General, nodes.Element, RunestoneIdNode):
+    pass
+
+
+def visit_codelens_xml(self, node):
+    html = VIS
+    if "caption" not in node["runestone_options"]:
+        node["runestone_options"]["caption"] = node["runestone_options"][
+            "question_label"
+        ]
+    if "tracedata" in node["runestone_options"]:
+        node["runestone_options"]["tracedata"] = (
+            node["runestone_options"]["tracedata"]
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+        )
+
+    res = PTX_TEMPLATE.format(**node["runestone_options"])
+    self.output.append(res)
+
+
+def visit_codelens_html(self, node):
+    html = VIS
+    if "caption" not in node["runestone_options"]:
+        node["runestone_options"]["caption"] = node["runestone_options"][
+            "question_label"
+        ]
+    if "tracedata" in node["runestone_options"]:
+        html += DATA
+    else:
+        html += "</div>"
+    html = html % node["runestone_options"]
+
+    self.body.append(html)
+    addHTMLToDB(
+        node["runestone_options"]["divid"],
+        node["runestone_options"]["basecourse"],
+        html,
+    )
+
+
+def depart_codelens_html(self, node):
+    pass
+
+
+def depart_codelens_xml(self, node):
+    pass
 
 
 # Some documentation to help the author.
@@ -153,38 +162,42 @@ $(window).resize(function() {
 
 class Codelens(RunestoneIdDirective):
     """
-.. codelens:: uniqueid
-   :tracedata: Autogenerated or provided
-   :caption: caption below
-   :showoutput: show stdout from program
-   :question: Text of question to ask on breakline
-   :correct: correct answer to the question
-   :feedback: feedback for incorrect answers
-   :breakline: Line to stop on and pop up a question dialog
-   :python: either py2 or py3
+    .. codelens:: uniqueid
+       :tracedata: Autogenerated or provided
+       :caption: caption below
+       :showoutput: show stdout from program
+       :question: Text of question to ask on breakline
+       :correct: correct answer to the question
+       :feedback: feedback for incorrect answers
+       :breakline: Line to stop on and pop up a question dialog
+       :python: either py2 or py3
 
-    x = 0
-    for i in range(10):
-       x = x + i
+        x = 0
+        for i in range(10):
+           x = x + i
 
 
-config values (conf.py): 
+    config values (conf.py):
 
-- codelens_div_class - custom CSS class of the component's outermost div
+    - codelens_div_class - custom CSS class of the component's outermost div
     """
+
     required_arguments = 1
     optional_arguments = 1
     option_spec = RunestoneIdDirective.option_spec.copy()
-    option_spec.update({
-        'tracedata': directives.unchanged,
-        'caption': directives.unchanged,
-        'showoutput': directives.flag,
-        'question': directives.unchanged,
-        'correct': directives.unchanged,
-        'feedback': directives.unchanged,
-        'breakline': directives.nonnegative_int,
-        'python': directives.unchanged
-    })
+    option_spec.update(
+        {
+            "tracedata": directives.unchanged,
+            "caption": directives.unchanged,
+            "showoutput": directives.flag,
+            "question": directives.unchanged,
+            "correct": directives.unchanged,
+            "feedback": directives.unchanged,
+            "breakline": directives.nonnegative_int,
+            "python": directives.unchanged,
+            "language": directives.unchanged,
+        }
+    )
 
     has_content = True
 
@@ -201,63 +214,90 @@ config values (conf.py):
             return ret
 
         def js_var_finalizer(input_code, output_trace):
-            global JS_VARNAME
             ret = dict(code=input_code, trace=output_trace)
             json_output = json.dumps(ret, indent=None)
-            return "var %s = %s;" % (self.JS_VARNAME, json_output)
+            return json_output
 
         if self.content:
             source = "\n".join(self.content)
         else:
-            source = '\n'
-
+            source = "\n"
+        self.options["source"] = source.replace("<", "&lt;")
         CUMULATIVE_MODE = False
-        self.JS_VARNAME = self.options['divid'] + '_trace'
+        self.JS_VARNAME = self.options["divid"] + "_trace"
         env = self.state.document.settings.env
-        self.options['divclass'] = env.config.codelens_div_class
+        self.options["divclass"] = env.config.codelens_div_class
 
-        if 'showoutput' not in self.options:
-            self.options['embedded'] = 'true'  # to set embeddedmode to true
+        if "showoutput" not in self.options:
+            self.options["embedded"] = "true"  # to set embeddedmode to true
         else:
-            self.options['embedded'] = 'false'
+            self.options["embedded"] = "false"
 
-        if 'python' not in self.options:
+        if "language" not in self.options:
+            self.options["language"] = "python"
+
+        if "python" not in self.options:
             if six.PY2:
-                self.options['python'] = 'py2'
+                self.options["python"] = "py2"
             else:
-                self.options['python'] = 'py3'
+                self.options["python"] = "py3"
 
-        if 'question' in self.options:
-            curTrace = exec_script_str_local(source, None, CUMULATIVE_MODE, None, raw_dict)
-            self.inject_questions(curTrace)
-            json_output = json.dumps(curTrace, indent=None)
-            self.options['tracedata'] = "var %s = %s;" % (self.JS_VARNAME, json_output)
-        else:
-            self.options['tracedata'] = exec_script_str_local(source, None,
-                                                              CUMULATIVE_MODE,
-                                                              None, js_var_finalizer)
+        if "tracedata" not in self.options:
+            if "question" in self.options:
+                curTrace = exec_script_str_local(
+                    source, None, CUMULATIVE_MODE, None, raw_dict
+                )
+                self.inject_questions(curTrace)
+                json_output = json.dumps(curTrace, indent=None)
+                self.options["tracedata"] = json_output
+            else:
+                if self.options["language"] == "python":
+                    self.options["tracedata"] = exec_script_str_local(
+                        source, None, CUMULATIVE_MODE, None, js_var_finalizer
+                    )
+                elif self.options["language"] == "java":
+                    self.options["tracedata"] = self.get_trace(source, "java")
+                elif self.options["language"] == "cpp":
+                    self.options["tracedata"] = self.get_trace(source, "cpp")
+                elif self.options["language"] == "c":
+                    self.options["tracedata"] = self.get_trace(source, "c")
+                else:
+                    raise ValueError("language not supported")
 
-        res = VIS
-        if 'caption' not in self.options:
-            self.options['caption'] = ''
-        if 'question' in self.options:
-            res += QUESTION
-        if 'tracedata' in self.options:
-            res += DATA
-        else:
-            res += '</div>'
-        addHTMLToDB(self.options['divid'], self.options['basecourse'], res % self.options)
-        raw_node = nodes.raw(self.block_text, res % self.options, format='html')
-        raw_node.source, raw_node.line = self.state_machine.get_source_and_line(self.lineno)
-        return [raw_node]
+        cl_node = CodeLensNode()
+        cl_node["runestone_options"] = self.options
+        cl_node["source"], cl_node["line"] = self.state_machine.get_source_and_line(
+            self.lineno
+        )
+        return [cl_node]
 
     def inject_questions(self, curTrace):
-        if 'breakline' not in self.options:
-            raise RuntimeError('Must have breakline option')
-        breakline = self.options['breakline']
-        for frame in curTrace['trace']:
-            if frame['line'] == breakline:
-                frame['question'] = dict(text=self.options['question'],
-                                         correct=self.options['correct'],
-                                         div=self.options['divid'] + '_modal',
-                                         feedback=self.options['feedback'])
+        if "breakline" not in self.options:
+            raise RuntimeError("Must have breakline option")
+        breakline = self.options["breakline"]
+        for frame in curTrace["trace"]:
+            if frame["line"] == breakline:
+                frame["question"] = dict(
+                    text=self.options["question"],
+                    correct=self.options["correct"],
+                    div=self.options["divid"] + "_modal",
+                    feedback=self.options["feedback"],
+                )
+
+    def get_trace(self, src, lang):
+        env = self.state.document.settings.env
+        url = f"{env.config.trace_url}/trace{lang}"
+
+        try:
+            r = requests.post(url, data=dict(src=src), timeout=30)
+        except requests.ReadTimeout:
+            self.error(
+                "The request to the trace server timed out, you will need to rerun the build"
+            )
+            return ""
+        if r.status_code == 200:
+            if lang == "java":
+                return r.text
+            else:
+                res = r.text[r.text.find('{"code":') :]
+                return res

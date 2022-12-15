@@ -1,1 +1,8 @@
-from .runestonedirective import setup, RunestoneDirective, RunestoneIdDirective, RunestoneNode, get_node_line
+from .runestonedirective import (
+    setup,
+    RunestoneDirective,
+    RunestoneIdDirective,
+    RunestoneNode,
+    RunestoneIdNode,
+    get_node_line,
+)

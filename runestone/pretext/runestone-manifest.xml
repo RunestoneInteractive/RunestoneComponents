@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+  <chapter>
+    <id>sets</id>
+    <title>Preliminaries</title>
+    <subchapter>
+      <id>section-note-on-proofs</id>
+      <title>A Short Note on Proofs</title>
+    </subchapter>
+    <subchapter>
+      <id>section-sets-and-equivalence-relations</id>
+      <title>Sets and Equivalence Relations</title>
+    </subchapter>
+    <subchapter>
+      <id>sets-sage</id>
+      <title>Sage</title>
+    </subchapter>
+  </chapter>
+  <chapter>
+    <id>integers</id>
+    <title>The Integers</title>
+    <subchapter>
+      <id>section-math-induction</id>
+      <title>Mathematical Induction</title>
+    </subchapter>
+    <subchapter>
+      <id>section-division-algorithm</id>
+      <title>The Division Algorithm</title>
+    </subchapter>
+    <subchapter>
+      <id>integers-sage</id>
+      <title>Sage</title>
+    </subchapter>
+  </chapter>
+  <chapter>
+    <id>groups</id>
+    <title>Groups</title>
+    <subchapter>
+      <id>section-mod-n-sym</id>
+      <title>Integer Equivalence Classes and Symmetries</title>
+    </subchapter>
+    <subchapter>
+      <id>section-groups-define</id>
+      <title>Definitions and Examples</title>
+    </subchapter>
+    <subchapter>
+      <id>section-subgroups</id>
+      <title>Subgroups</title>
+    </subchapter>
+    <subchapter>
+      <id>groups-sage</id>
+      <title>Sage</title>
+    </subchapter>
+  </chapter>
+  <chapter>
+    <id>cyclic</id>
+    <title>Cyclic Groups</title>
+    <subchapter>
+      <id>section-11</id>
+      <title>Cyclic groups</title>
+    </subchapter>
+    <subchapter>
+      <id>section-12</id>
+      <title>Subgroups of a Cyclic Group</title>
+    </subchapter>
+    <subchapter>
+      <id>section-13</id>
+      <title>Cyclic Groups of Complex Numbers</title>
+    </subchapter>
+    <subchapter>
+      <id>section-14</id>
+      <title>Large Powers of Integers</title>
+    </subchapter>
+  </chapter>
+  <chapter>
+    <id>rune</id>
+    <title>Runestone Testing</title>
+    <subchapter>
+      <id>section-15</id>
+      <title>ActiveCode</title>
+    </subchapter>
+    <subchapter>
+      <id>reading-questions-1</id>
+      <title>Reading Questions</title>
+      <question>
+        <div class="runestone">
+          <div data-component="shortanswer" class="journal alert alert-success" data-optional="" id="exercise-188">
+            <p id="p-792">This is a simple question.  Does this look like a short answer question?</p>
+          </div>
+        </div>
+      </question>
+      <question>
+        <div class="runestone">
+          <div data-component="shortanswer" class="journal alert alert-success" data-optional="" id="exercise-189">
+            <p id="p-793">And a second reading question, so we can test having more than one.  Specifically to be certain each goes into the manifest properly.  How about some math now, \(a^2+b^2=c^2\text{.}\)  Is that all right?</p>
+          </div>
+        </div>
+      </question>
+    </subchapter>
+  </chapter>
+</manifest>

@@ -1,3 +1,6 @@
+# *********
+# |docname|
+# *********
 # Copyright (C) 2011  Bradley N. Miller
 #
 # This program is free software: you can redistribute it and/or modify
@@ -13,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-__author__ = 'bmiller'
+__author__ = "bmiller"
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -25,7 +28,7 @@ import random
 
 
 def textfield_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
-    '''
+    """
     Usage:
     In your document you can write :textfield:`myid:myvalue:width`
     This will translate to:
@@ -34,22 +37,25 @@ def textfield_role(name, rawtext, text, lineno, inliner, options={}, content=[])
     where width can be specified in pixels or percentage of page width (standard CSS syntax).
     Width can also be specified using relative sizes:
         mini, small, medium, large, xlarge, and xxlarge
-    '''
-    iid, value, width = text.split(':')
+    """
+    iid, value, width = text.split(":")
 
-    if 'mini' in width:
-        width = '60px'
-    elif 'small' in width:
-        width = '90px'
-    elif 'medium' in width:
-        width = '150px'
-    elif 'large' in width:
-        width = '210px'
-    elif 'xlarge' in width:
-        width = '270px'
-    elif 'xxlarge' in width:
-        width = '530px'
+    if "mini" in width:
+        width = "60px"
+    elif "small" in width:
+        width = "90px"
+    elif "medium" in width:
+        width = "150px"
+    elif "large" in width:
+        width = "210px"
+    elif "xlarge" in width:
+        width = "270px"
+    elif "xxlarge" in width:
+        width = "530px"
 
-    res = '''<input type='text' id='%s' class="form-control" style="display:inline; width: %s;" value="%s"></input>''' % (iid,width,value)
+    res = (
+        """<input type='text' id='%s' class="form-control" style="display:inline; width: %s;" value="%s"></input>"""
+        % (iid, width, value)
+    )
 
-    return [nodes.raw('',res, format='html')],[]
+    return [nodes.raw("", res, format="html")], []

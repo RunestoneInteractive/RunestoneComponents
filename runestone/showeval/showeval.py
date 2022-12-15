@@ -13,40 +13,64 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-__author__ = 'tconzett'
+__author__ = "tconzett"
 
+from asyncore import write
 from docutils import nodes
 from docutils.parsers.rst import directives
-from docutils.parsers.rst import Directive
+from runestone.common.xmlcommon import substitute_departure
 from runestone.server.componentdb import addQuestionToDB, addHTMLToDB
-from runestone.common.runestonedirective import RunestoneIdDirective
+from runestone.common.runestonedirective import RunestoneIdDirective, RunestoneIdNode
+from runestone.common.xmlcommon import substitute_departure, write_substitute
+
 
 def setup(app):
-    app.add_directive('showeval', ShowEval)
-    app.add_autoversioned_javascript('showEval.js')
-    app.add_autoversioned_stylesheet('showEval.css')
+    app.add_directive("showeval", ShowEval)
 
-    app.add_config_value('showeval_div_class', 'runestone explainer alert alert-warning', 'html')
+    app.add_config_value(
+        "showeval_div_class", "runestone explainer", "html"
+    )
+    app.add_node(ShowEvalNode, html=(visit_showeval_html, depart_showeval_html),
+                 xml=(visit_showeval_xml, substitute_departure))
 
-CODE = """\
-<div data-childcomponent="showeval" class="%(divclass)s">
+
+# Create visitors, so we can generate HTML after the doctree is resolve (where the question label is determined).
+class ShowEvalNode(nodes.General, nodes.Element, RunestoneIdNode):
+    pass
+
+
+def visit_showeval_html(self, node):
+    html = CODE % node["runestone_options"]
+    self.body.append(html)
+    addHTMLToDB(
+        node["runestone_options"]["divid"], node["runestone_options"]["basecourse"], html
+    )
+
+
+def visit_showeval_xml(self, node):
+    html = CODE % node["runestone_options"]
+    write_substitute(self, node, html)
+
+
+def depart_showeval_html(self, node):
+    pass
+
+
+CODE = """
+<div data-component="showeval" data-question_label="%(question_label)s" class="%(divclass)s" id="%(divid)s" data-tracemode="%(trace_mode)s" %(optional)s>
     <button class="btn btn-success" id="%(divid)s_nextStep">Next Step</button>
     <button class="btn btn-default" id ="%(divid)s_reset">Reset</button>
     <div class="evalCont" style="background-color: #FDFDFD;">%(preReqLines)s</div>
-    <div class="evalCont" id="%(divid)s"></div>
+    <div class="evalCont"></div>
+    <script>
+    if (typeof window.raw_steps === "undefined") {
+    window.raw_steps = {};
+    }
+    raw_steps["%(divid)s"] = %(steps)s;
+    </script>
 </div>
 """
 
-SCRIPT = """\
-<script>
-    $(document).ready(function() {
-      steps = %(steps)s;
-      %(divid)s_object = new SHOWEVAL.ShowEval($('#%(divid)s'), steps, %(trace_mode)s);
-      %(divid)s_object.setNextButton('#%(divid)s_nextStep');
-      %(divid)s_object.setResetButton('#%(divid)s_reset');
-    });
-</script>
-"""
 
 class ShowEval(RunestoneIdDirective):
     """
@@ -57,19 +81,22 @@ class ShowEval(RunestoneIdDirective):
    more code
    ~~~~
    more {{code}}{{what code becomes in step 1}}
-   more {{what code becomes in step 1}}{{what code becomes in step2}}  ##Optional comment for step 2
+   ##Optional comment for step 2
+   more {{what code becomes in step 1}}{{what code becomes in step2}}
    as many steps as you want {{the first double braces}}{{animate into the second}} wherever.
 
 
-config values (conf.py): 
+config values (conf.py):
 
 - showeval_div_class - custom CSS class of the component's outermost div
     """
+
     required_arguments = 1
     optional_arguments = 0
     final_argument_whitespace = True
     has_content = True
-    option_spec = {'trace_mode':directives.unchanged_required}
+    option_spec = RunestoneIdDirective.option_spec.copy()
+    option_spec.update({"trace_mode": directives.unchanged_required})
 
     def run(self):
         """
@@ -91,7 +118,8 @@ config values (conf.py):
        ~~~~
 
        ''.join({{eggs}}{{['dogs', 'cats', 'moose']}}).upper().join(eggs)
-       {{''.join(['dogs', 'cats', 'moose'])}}{{'dogscatsmoose'}}.upper().join(eggs)  ##I want to put a comment here!
+       ##I want to put a comment here!
+       {{''.join(['dogs', 'cats', 'moose'])}}{{'dogscatsmoose'}}.upper().join(eggs)
        {{'dogscatsmoose'.upper()}}{{'DOGSCATSMOOSE'}}.join(eggs)
        'DOGSCATSMOOSE'.join({{eggs}}{{['dogs', 'cats', 'moose']}})
        {{'DOGSCATSMOOSE'.join(['dogs', 'cats', 'moose'])}}{{'dogsDOGSCATSMOOSEcatsDOGSCATSMOOSEmoose'}}
@@ -102,26 +130,31 @@ config values (conf.py):
         super(ShowEval, self).run()
         addQuestionToDB(self)
 
-        self.options['trace_mode'] = self.options['trace_mode'].lower()
-        self.options['preReqLines'] = ''
-        self.options['steps'] = []
+        self.options["trace_mode"] = self.options["trace_mode"].lower()
+        self.options["preReqLines"] = ""
+        self.options["steps"] = []
 
         env = self.state.document.settings.env
-        self.options['divclass'] = env.config.showeval_div_class
+        self.options["divclass"] = env.config.showeval_div_class
 
+        is_dynamic = env.config.html_context.get("dynamic_pages", False)
+        is_dynamic = True if is_dynamic == "True" else False
         step = False
-        count = 0
         for line in self.content:
             if step == True:
-                if line != '':
-                    self.options['steps'].append(str(line))
-            elif '~~~~' in line:
+                if line != "":
+                    if is_dynamic:
+                        esc_line = str(line).replace("{", r"\{")
+                    else:
+                        esc_line = str(line)
+                    self.options["steps"].append(esc_line)
+            elif "~~~~" in line:
                 step = True
             else:
-                self.options['preReqLines'] += line + '<br />\n'
-
-
-        res = (CODE + SCRIPT) % self.options
-
-        addHTMLToDB(self.options['divid'], self.options['basecourse'], res)
-        return [nodes.raw(self.block_text, res, format='html')]
+                self.options["preReqLines"] += line + "<br />\n"
+        se_node = ShowEvalNode()
+        se_node["runestone_options"] = self.options
+        se_node["source"], se_node["line"] = self.state_machine.get_source_and_line(
+            self.lineno
+        )
+        return [se_node]

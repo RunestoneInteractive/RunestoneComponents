@@ -80,3 +80,18 @@ These are just two of the many interactive components for writing online course 
 
 Now feel free to modify this file to start creating your own interactive page.
 
+
+Section 4: Theme
+:::::::::::::::::::
+
+You can add your own CSS or JS files to every page of a book by modifying ``setup.custom_css_files`` or ``setup.custom_js_files`` in conf.py.
+
+If you want to do more significant changes to the theme, you should copy the files you wish to modify from
+the runestone/common/project/template/sphinx_bootstrap to a directory like ``_templates/``. Then make sure
+the ``templates_path`` points to them in your conf.py.
+
+conf.py:
+
+.. code:: 
+
+    templates_path = ["_templates"]

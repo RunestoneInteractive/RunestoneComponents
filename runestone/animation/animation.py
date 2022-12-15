@@ -1,3 +1,6 @@
+# *********
+# |docname|
+# *********
 # Copyright (C) 2011  Bradley N. Miller
 #
 # This program is free software: you can redistribute it and/or modify
@@ -13,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-__author__ = 'bmiller'
+__author__ = "bmiller"
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -21,12 +24,12 @@ from runestone.common.runestonedirective import RunestoneIdDirective
 
 
 def setup(app):
-    app.add_directive('animation',Animation)
-    app.add_autoversioned_javascript('animationbase.js')
+    app.add_directive("animation", Animation)
+    app.add_autoversioned_javascript("animationbase.js", defer="")
 
 
-SRC = '''
-<div id="%(divid)s">
+SRC = """
+<div id="%(divid)s" class="%(optclass)s">
 <canvas id="%(divid)s_canvas" width="400" height="400" style="border:4px solid blue"></canvas>
 <br />
 <button onclick="%(divid)s_anim = %(divid)s_init('%(divid)s')">Initialize</button>
@@ -37,7 +40,7 @@ SRC = '''
 <button onclick="%(divid)s_anim.backward()">Step Backward</button>
 <button onclick="%(divid)s_anim.end()">End</button>
 
-<script type="text/javascript">
+<script>
 %(divid)s_init = function(divid)
 {
    var a = new Animator(new %(model)s(), new %(viewer)s(), divid)
@@ -47,20 +50,25 @@ SRC = '''
 </script>
 
 </div>
-'''
+"""
 
-SCRIPTTAG = '''<script type="text/javascript" src="../_static/%s"></script>\n'''
+SCRIPTTAG = """<script src="../_static/%s"></script>\n"""
+
 
 class Animation(RunestoneIdDirective):
     required_arguments = 1
     optional_arguments = 1
     final_argument_whitespace = True
     has_content = False
-    option_spec = {'modelfile':directives.unchanged,
-                   'viewerfile':directives.unchanged,
-                   'model':directives.unchanged,
-                   'viewer':directives.unchanged
-                   }
+    option_spec = RunestoneIdDirective.option_spec.copy()
+    option_spec.update(
+        {
+            "modelfile": directives.unchanged,
+            "viewerfile": directives.unchanged,
+            "model": directives.unchanged,
+            "viewer": directives.unchanged,
+        }
+    )
 
     def run(self):
         """
@@ -69,37 +77,39 @@ class Animation(RunestoneIdDirective):
         :return:
         """
         super(Animation, self).run()
-        res = ''
+        res = ""
 
-        if 'modelfile' in self.options:
-          res = res + SCRIPTTAG % self.options['modelfile']
-        if 'viewerfile' in self.options:
-          res = res + SCRIPTTAG % self.options['viewerfile']
-
+        if "modelfile" in self.options:
+            res = res + SCRIPTTAG % self.options["modelfile"]
+        if "viewerfile" in self.options:
+            res = res + SCRIPTTAG % self.options["viewerfile"]
 
         res = res + SRC % self.options
-        rawnode = nodes.raw(self.block_text, res, format='html')
-        rawnode.source, rawnode.line = self.state_machine.get_source_and_line(self.lineno)
+        rawnode = nodes.raw(self.block_text, res, format="html")
+        rawnode.source, rawnode.line = self.state_machine.get_source_and_line(
+            self.lineno
+        )
         return [rawnode]
 
 
-source = '''
+source = """
 .. animation:: testanim
    :modelfile: sortmodels.js
    :viewerfile: sortviewers.js
    :model: SortModel
    :viewer: BarViewer
 
-'''
+"""
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from docutils.core import publish_parts
 
-    directives.register_directive('animation',Animation)
+    directives.register_directive("animation", Animation)
 
-    doc_parts = publish_parts(source,
-            settings_overrides={'output_encoding': 'utf8',
-            'initial_header_level': 2},
-            writer_name="html")
+    doc_parts = publish_parts(
+        source,
+        settings_overrides={"output_encoding": "utf8", "initial_header_level": 2},
+        writer_name="html",
+    )
 
-    print(doc_parts['html_body'])
+    print(doc_parts["html_body"])
