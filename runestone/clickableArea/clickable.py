@@ -113,9 +113,11 @@ def visit_ca_xml(self, node):
         # any runestone books
         for row in node["runestone_options"]["raw_source"]:
             row = row.replace("\n", "")
+
+						# Make all clicks explicit
             row = row.replace(":click-correct:", "<area correct='yes'>")
-            row = row.replace(":click-incorrect:", "<area>")
-            row = row.replace(":endclick", "</area>")
+            row = row.replace(":click-incorrect:", "<area correct='no'>")
+            row = row.replace(":endclick:", "</area>")  # add ending colon
             row = "<cline>" + row + "</cline>\n"
             res += row
     self.output.append(res)
