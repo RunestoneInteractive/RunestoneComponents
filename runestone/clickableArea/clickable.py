@@ -114,7 +114,7 @@ def visit_ca_xml(self, node):
         for row in node["runestone_options"]["raw_source"]:
             row = row.replace("\n", "")
             row = row.replace(":click-correct:", "<area correct='yes'>")
-            row = row.replace(":click-incorrect:", "<area correcct='no'>")  # make explicit
+            row = row.replace(":click-incorrect:", "<area correct='no'>")  # make explicit
             row = row.replace(":endclick:", "</area>") # eliminate final colon as well
             row = "<cline>" + row + "</cline>\n"
             res += row
