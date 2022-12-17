@@ -410,7 +410,7 @@ def visit_answers_bullet_xml(self, node):
 
 
 def depart_answers_bullet_xml(self, node):
-    self.output.append("</choice>")
+    self.output.append("</choices>")
 
 
 # Write out the special attributes needed by the ``<li>`` tag.
