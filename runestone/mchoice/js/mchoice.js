@@ -52,7 +52,7 @@ export default class MultipleChoice extends RunestoneBase {
         // https://docs.mathjax.org/en/latest/options/startup/startup.html
         // https://docs.mathjax.org/en/latest/web/configuration.html#startup-action
         // runestoneMathReady is defined in the preamble for all PTX authored books
-        this.queueMathJax(self.containerDiv);
+        this.queueMathJax(this.containerDiv);
         if (typeof Prism !== "undefined") {
             Prism.highlightAllUnder(this.containerDiv);
         }

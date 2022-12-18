@@ -29,8 +29,11 @@ from runestone.common.runestonedirective import RunestoneDirective, RunestoneIdN
 
 def setup(app):
     app.add_directive("shortanswer", JournalDirective)
-    app.add_node(JournalNode, html=(visit_journal_html, depart_journal_html),
-                 xml=(visit_journal_xml, depart_journal_xml))
+    app.add_node(
+        JournalNode,
+        html=(visit_journal_html, depart_journal_html),
+        xml=(visit_journal_xml, depart_journal_xml),
+    )
 
     app.add_config_value("shortanswer_div_class", "journal", "html")
     app.add_config_value(
@@ -40,7 +43,7 @@ def setup(app):
 
 TEXT_START = """
 <div class="runestone">
-<div data-component="shortanswer" data-question_label="%(question_label)s" class="%(divclass)s" id=%(divid)s %(optional)s %(mathjax)s>
+<div data-component="shortanswer" data-question_label="%(question_label)s" class="%(divclass)s" id=%(divid)s %(optional)s %(mathjax)s %(attachment)s >
 """
 
 TEXT_END = """
@@ -55,7 +58,7 @@ XML_START = """
 
 XML_END = """
     </statement>
-</exercise> 
+</exercise>
 """
 
 
@@ -102,15 +105,15 @@ def depart_journal_xml(self, node):
 
 class JournalDirective(Assessment):
     """
-.. shortanswer:: uniqueid
-   :optional:
+    .. shortanswer:: uniqueid
+       :optional:
 
-   text of the question goes here
+       text of the question goes here
 
 
-config values (conf.py):
+    config values (conf.py):
 
-- shortanswer_div_class - custom CSS class of the component's outermost div
+    - shortanswer_div_class - custom CSS class of the component's outermost div
     """
 
     required_arguments = 1  # the div id
@@ -118,7 +121,7 @@ config values (conf.py):
     final_argument_whitespace = True
     has_content = True
     option_spec = Assessment.option_spec.copy()
-    option_spec.update({"mathjax": directives.flag})
+    option_spec.update({"mathjax": directives.flag, "attachment": directives.flag})
 
     node_class = JournalNode
 
@@ -129,12 +132,16 @@ config values (conf.py):
         self.assert_has_content()
 
         self.options["mathjax"] = "data-mathjax" if "mathjax" in self.options else ""
+        self.options["attachment"] = (
+            "data-attachment" if "attachment" in self.options else ""
+        )
 
         journal_node = JournalNode()
         journal_node["runestone_options"] = self.options
-        journal_node["source"], journal_node["line"] = self.state_machine.get_source_and_line(
-            self.lineno
-        )
+        (
+            journal_node["source"],
+            journal_node["line"],
+        ) = self.state_machine.get_source_and_line(self.lineno)
 
         self.updateContent()
 

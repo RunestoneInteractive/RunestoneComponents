@@ -295,6 +295,12 @@ export default class RunestoneBase {
                         data = await response.json();
                         data = data.detail;
                         this.repopulateFromStorage(data);
+                        this.attempted = true;
+                        if (typeof(data.correct) !== "undefined") {
+                            this.correct = data.correct;
+                        } else {
+                            this.correct = null;
+                        }
                         this.csresolver("server");
                     } else {
                         console.log(
