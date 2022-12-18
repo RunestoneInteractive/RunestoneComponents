@@ -323,7 +323,17 @@ export default class ShortAnswer extends RunestoneBase {
     viewFile() {
         // Get the URL from the S3 API -- saved when we display in grader mode
         if (this.attachURL) {
-            window.open(this.attachURL, "_blank");
+            //window.open(this.attachURL, "_blank");
+            const image_window = window.open("", "_blank")
+            image_window.document.write(`
+                  <html>
+                    <head>
+                    </head>
+                    <body>
+                      <img src="${this.attachURL}" alt="Attachment" >
+                    </body>
+                  </html>
+            `);
         } else {
             alert("No attachment for this student.")
         }
