@@ -75,18 +75,22 @@ def visit_parsons_xml(self, node):
         node["runestone_options"]["adaptive"] = "adaptive='yes'"
 
     if not node["runestone_options"]["noindent"]:
-        node["runestone_options"]["noindent"] = "indent='show'"
+        node["runestone_options"]["noindent"] = "indentation='show'"
     else:
-        node["runestone_options"]["noindent"] = "indent='hide'"
+        node["runestone_options"]["noindent"] = "indentation='hide'"
 
     if node["runestone_options"]["language"]:
-        node["runestone_options"]["language"] = node["runestone_options"]["language"].replace(
-            "data-", "")
+        node["runestone_options"]["language"] = node["runestone_options"][
+            "language"
+        ].replace("data-", "")
     else:
         node["runestone_options"]["language"] = "language='python'"
 
-    res = "<exercise label='{divid}' {numbered} {adaptive} {noindent} {language}>".format(
-        **node["runestone_options"])
+    res = (
+        "<exercise label='{divid}' {numbered} {adaptive} {noindent} {language}>".format(
+            **node["runestone_options"]
+        )
+    )
     res += "<statement>\n"
     self.output.append(res)
 
