@@ -50,12 +50,16 @@ def noop(self, node):
 def setup(app):
     app.add_directive("fillintheblank", FillInTheBlank)
     app.add_role("blank", BlankRole)
-    app.add_node(FITBNode, html=(visit_fitb_html, depart_fitb_html),
-                 xml=(visit_fitb_xml, depart_fitb_xml))
+    app.add_node(
+        FITBNode,
+        html=(visit_fitb_html, depart_fitb_html),
+        xml=(visit_fitb_xml, depart_fitb_xml),
+    )
     app.add_node(BlankNode, html=(visit_blank_html, depart_blank_html))
     app.add_node(
-        FITBFeedbackNode, html=(visit_fitb_feedback_html, depart_fitb_feedback_html),
-        xml=(noop, noop)
+        FITBFeedbackNode,
+        html=(visit_fitb_feedback_html, depart_fitb_feedback_html),
+        xml=(noop, noop),
     )
 
     app.add_config_value("fitb_div_class", "runestone", "html")
@@ -114,6 +118,7 @@ def depart_fitb_html(self, node):
 
     self.body.remove(node["delimiter"])
 
+
 # <exercise>
 #     <title>Fill-In, Integer Answer</title>
 
@@ -144,8 +149,8 @@ def depart_fitb_html(self, node):
 
 def visit_fitb_xml(self, node):
 
-    TEMPLATE_START = """
-        <exercise>
+    TEMPLATE_START = f"""
+        <exercise label="{node["runestone_options"]["divid"]}">
             <statement>
     """
     self.output.append(TEMPLATE_START)
@@ -156,7 +161,7 @@ def visit_fitb_xml(self, node):
     numBlanks = stmt.count("<var />")
     diff = neededBlanks - numBlanks
     if diff > 0:
-        stmt = stmt[0:stmt.rfind("</paragraph>")]
+        stmt = stmt[0 : stmt.rfind("</paragraph>")]
         for i in range(diff):
             stmt += " <var /> "
         stmt += " </paragraph>"
@@ -234,11 +239,11 @@ class FillInTheBlank(RunestoneIdDirective):
 
     def run(self):
         """
-            process the fillintheblank directive and generate html for output.
-            :param self:
-            :return: Nodes resulting from this directive.
-            ...
-            """
+        process the fillintheblank directive and generate html for output.
+        :param self:
+        :return: Nodes resulting from this directive.
+        ...
+        """
 
         super(FillInTheBlank, self).run()
 
@@ -375,7 +380,6 @@ class FillInTheBlank(RunestoneIdDirective):
                     regex = (
                         # The given regex must match the entire string, from the beginning (which may be preceded by whitespaces) ...
                         r"^\s*"
-
                         # ... to the contents (where a single space in the provided pattern is treated as one or more whitespaces in the student's answer) ...
                         + feedback_field_name.rawsource.replace(" ", r"\s+")
                         # ... to the end (also with optional spaces).
@@ -401,7 +405,7 @@ class FillInTheBlank(RunestoneIdDirective):
                 ffn = FITBFeedbackNode(
                     feedback_field_body.rawsource,
                     *feedback_field_body.children,
-                    **feedback_field_body.attributes
+                    **feedback_field_body.attributes,
                 )
                 ffn["blankFeedbackDict"] = blankFeedbackDict
                 fitbNode += ffn
@@ -454,7 +458,7 @@ def visit_blank_html(self, node):
 
 
 def visit_blank_xml(self, node):
-    self.output.append('<p><var /></p>')
+    self.output.append("<p><var /></p>")
 
 
 def depart_blank_html(self, node):
