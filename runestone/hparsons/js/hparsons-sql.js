@@ -9,6 +9,9 @@ export var hpList;
 // Dictionary that contains all instances of horizontal Parsons problem objects
 if (hpList === undefined) hpList = {};
 
+// The following js library is a custom element for micro parsons (horizontal parsons) input.
+// Currently it is not published as an npm package yet, and edits should be made through: https://github.com/amy21206/micro-parsons-element.
+// It will be replaced by importing the corresponding package in the future.
 import "./micro-parsons.js";
 
 export default class SQLHParsons extends RunestoneBase {
