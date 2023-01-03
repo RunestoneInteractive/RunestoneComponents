@@ -272,34 +272,20 @@ export default class SQLFeedback extends HParsonsFeedback {
     }
 
     // copied from activecode-sql
-    async logCurrentAnswer(sid) {
-        // commenting these out for now
-        // Not sure if we need to log run event in horizontal parsons
-        // let data = {
-        //     div_id: this.hparsons.divid,
-        //     code: this.hparsons.hparsonsInput.getParsonsTextArray(),
-        //     language: "sql",
-        //     // errinfo: this.results[this.results.length - 1].status,
-        //     to_save: this.hparsons.saveCode,
-        //     prefix: this.hparsons.pretext,
-        //     suffix: this.hparsons.suffix,
-        // }; // Log the run event
-        // if (typeof sid !== "undefined") {
-        //     data.sid = sid;
-        // }
-        // await this.hparsons.logRunEvent(data);
-
+    async logCurrentAnswer() {
         if (this.unit_results) {
-            let unitData = {
-                event: "unittest",
-                div_id: this.hparsons.divid,
-                course: eBookConfig.course,
-                act: this.unit_results,
-            };
-            if (typeof sid !== "undefined") {
-                unitData.sid = sid;
+            let act = {
+                scheme: "execution",
+                correct: (this.failed === 0 && this.percent != null) ? "T" : "F",
+                answer: this.hparsons.hparsonsInput.getParsonsTextArray(),
+                percent: this.percent // percent is null if there is execution error
             }
-            await this.hparsons.logBookEvent(unitData);
+            let logData = {
+                event: "hparsonsAnswer",
+                div_id: this.hparsons.divid,
+                act: act
+            }
+            await this.hparsons.logBookEvent(logData);
         }
     }
 
@@ -332,6 +318,7 @@ export default class SQLFeedback extends HParsonsFeedback {
             result += "\n";
         }
         let pct = (100 * this.passed) / (this.passed + this.failed);
+        this.percent = pct;
         pct = pct.toLocaleString(undefined, { maximumFractionDigits: 2 });
         result += `You passed ${this.passed} out of ${this.passed + this.failed
             } tests for ${pct}%`;

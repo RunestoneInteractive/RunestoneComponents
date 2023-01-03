@@ -75,7 +75,6 @@ export default class SQLHParsons extends RunestoneBase {
 
     // copied from activecode, already modified to add parsons
     createEditor() {
-        console.log('test create editor hparsons')
         this.outerDiv = document.createElement("div");
         $(this.origElem).replaceWith(this.outerDiv);
         let parsonsHTML = `<horizontal-parsons id='${this.divid}-hparsons'`;
