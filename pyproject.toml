@@ -91,7 +91,7 @@ Paver = ">=1.2.4"
 python = "^3.7.0"
 six = ">1.12"
 Sphinx = ">=4.4.0"
-sphinxcontrib-paverutils = ">=1.17"
+sphinxcontrib-paverutils = ">=1.17, < 6.0.0"
 SQLAlchemy = ">=1.4.0"
 
 # Development dependencies
