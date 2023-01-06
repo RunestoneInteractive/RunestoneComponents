@@ -9,7 +9,10 @@ export var hpList;
 // Dictionary that contains all instances of horizontal Parsons problem objects
 if (hpList === undefined) hpList = {};
 
-import "./horizontal-parsons.js";
+// The following js library is a custom element for micro parsons (horizontal parsons) input.
+// Currently it is not published as an npm package yet, and edits should be made through: https://github.com/amy21206/micro-parsons-element.
+// It will be replaced by importing the corresponding package in the future.
+import "./micro-parsons.js";
 
 export default class SQLHParsons extends RunestoneBase {
     constructor(opts) {
@@ -75,10 +78,10 @@ export default class SQLHParsons extends RunestoneBase {
 
     // copied from activecode, already modified to add parsons
     createEditor() {
-        console.log('test create editor hparsons')
+        // console.log('test create editor hparsons')
         this.outerDiv = document.createElement("div");
         $(this.origElem).replaceWith(this.outerDiv);
-        let parsonsHTML = `<horizontal-parsons id='${this.divid}-hparsons'`;
+        let parsonsHTML = `<micro-parsons id='${this.divid}-hparsons'`;
         parsonsHTML += ` input-type='parsons' `;
         if (this.reuse) {
             parsonsHTML += ` reuse-blocks="true"`;
@@ -91,7 +94,7 @@ export default class SQLHParsons extends RunestoneBase {
         }
         parsonsHTML += `>`;
         this.outerDiv.innerHTML = parsonsHTML;
-        this.outerDiv.addEventListener("horizontal-parsons", (ev) => {
+        this.outerDiv.addEventListener("micro-parsons", (ev) => {
             this.logHorizontalParsonsEvent(ev.detail);
             this.feedbackController.clearFeedback();
         });
@@ -106,7 +109,7 @@ export default class SQLHParsons extends RunestoneBase {
                     : blocksString;
             blocks = blocksString.split("\n");
         }
-        this.hparsonsInput = $(this.outerDiv).find("horizontal-parsons")[0];
+        this.hparsonsInput = $(this.outerDiv).find("micro-parsons")[0];
         this.originalBlocks = blocks.slice(1, -1);
         this.hparsonsInput.parsonsData = blocks.slice(1, -1);
     }
