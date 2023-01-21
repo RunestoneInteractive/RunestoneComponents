@@ -21,7 +21,10 @@ function getCompletions() {
             currentPathname.lastIndexOf("?")
         );
     }
-    var data = { lastPageUrl: currentPathname };
+    var data = {
+        lastPageUrl: currentPathname,
+        isPtxBook: isPreTeXt()
+     };
     jQuery
         .ajax({
             url: `${eBookConfig.new_server_prefix}/logger/getCompletionStatus`,
@@ -40,7 +43,7 @@ function getCompletions() {
                     completionClass = "buttonAskCompletion";
                     completionMsg = "Mark as Completed";
                 }
-                $("#main-content").append(
+                $("#scprogresscontainer").append(
                     '<div style="text-align:center"><button class="btn btn-lg ' +
                         completionClass +
                         '" id="completionButton">' +
@@ -274,6 +277,14 @@ function enableCompletions() {
 // call enable user highlights after login
 $(document).on("runestone:login", enableCompletions);
 
+function isPreTeXt() {
+    let ptxMarker = document.querySelector("body.pretext");
+    if (ptxMarker) {
+        return true;
+    } else {
+        return false;
+    }
+}
 // _ processPageState
 // -------------------------
 function processPageState(completionFlag) {
@@ -285,11 +296,14 @@ function processPageState(completionFlag) {
             currentPathname.lastIndexOf("?")
         );
     }
+    // Is this a ptx book?
+    let isPtxBook = isPreTeXt()
     var data = {
         lastPageUrl: currentPathname,
         lastPageScrollLocation: $(window).scrollTop(),
         completionFlag: completionFlag,
         course: eBookConfig.course,
+        isPtxBook: isPtxBook,
     };
     $(document).ajaxError(function (e, jqhxr, settings, exception) {
         console.log("Request Failed for " + settings.url);
