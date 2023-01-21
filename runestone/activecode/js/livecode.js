@@ -101,6 +101,20 @@ export default class LiveCode extends ActiveCode {
 
         // extract the class names so files can be named properly
         if (this.suffix && this.language == "java") {
+            // the suffix contains unit test code and should include and import of junit
+            // import static org.junit.Assert.*;
+            // import org.junit.*;
+            // import java.io.*;
+            if (this.suffix.indexOf("import org.junit") <0 ) {
+                console.log(`Missing imports in unit tests:
+                    ${this.suffix}`);
+                // alert("The unit tests for this problem are incomplete, Please report this.");
+                this.suffix = `
+                import static org.junit.Assert.*;
+                import org.junit.*;
+                import java.io.*;
+                ` + this.suffix;
+            }
             let classMatch = new RegExp(/public class\s+(\w+)[\s+{]/);
             source = await this.buildProg(false);
             let m = source.match(classMatch);
