@@ -4,12 +4,14 @@ import "../css/hparsons.css";
 import "../css/hljs-xcode.css";
 import BlockFeedback from "./BlockFeedback.js";
 import SQLFeedback from "./SQLFeedback.js";
+// import "micro-parsons.j" from 'micro-parsons';
+import 'micro-parsons/micro-parsons/micro-parsons.js';
+import 'micro-parsons/micro-parsons/micro-parsons.css';
 
 export var hpList;
 // Dictionary that contains all instances of horizontal Parsons problem objects
 if (hpList === undefined) hpList = {};
 
-import "./horizontal-parsons.js";
 
 export default class SQLHParsons extends RunestoneBase {
     constructor(opts) {
@@ -77,7 +79,7 @@ export default class SQLHParsons extends RunestoneBase {
     createEditor() {
         this.outerDiv = document.createElement("div");
         $(this.origElem).replaceWith(this.outerDiv);
-        let parsonsHTML = `<horizontal-parsons id='${this.divid}-hparsons'`;
+        let parsonsHTML = `<micro-parsons id='${this.divid}-hparsons'`;
         parsonsHTML += ` input-type='parsons' `;
         if (this.reuse) {
             parsonsHTML += ` reuse-blocks="true"`;
@@ -90,7 +92,7 @@ export default class SQLHParsons extends RunestoneBase {
         }
         parsonsHTML += `>`;
         this.outerDiv.innerHTML = parsonsHTML;
-        this.outerDiv.addEventListener("horizontal-parsons", (ev) => {
+        this.outerDiv.addEventListener("micro-parsons", (ev) => {
             this.logHorizontalParsonsEvent(ev.detail);
             this.feedbackController.clearFeedback();
         });
@@ -105,7 +107,7 @@ export default class SQLHParsons extends RunestoneBase {
                     : blocksString;
             blocks = blocksString.split("\n");
         }
-        this.hparsonsInput = $(this.outerDiv).find("horizontal-parsons")[0];
+        this.hparsonsInput = $(this.outerDiv).find("micro-parsons")[0];
         this.originalBlocks = blocks.slice(1, -1);
         this.hparsonsInput.parsonsData = blocks.slice(1, -1);
     }
