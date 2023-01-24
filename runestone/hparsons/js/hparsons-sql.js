@@ -5,7 +5,7 @@ import "../css/hljs-xcode.css";
 import BlockFeedback from "./BlockFeedback.js";
 import SQLFeedback from "./SQLFeedback.js";
 // import "micro-parsons.j" from 'micro-parsons';
-import 'micro-parsons/micro-parsons/micro-parsons.js';
+import {InitMicroParsons} from 'micro-parsons/micro-parsons/micro-parsons.js';
 import 'micro-parsons/micro-parsons/micro-parsons.css';
 
 export var hpList;
@@ -79,19 +79,7 @@ export default class SQLHParsons extends RunestoneBase {
     createEditor() {
         this.outerDiv = document.createElement("div");
         $(this.origElem).replaceWith(this.outerDiv);
-        let parsonsHTML = `<micro-parsons id='${this.divid}-hparsons'`;
-        parsonsHTML += ` input-type='parsons' `;
-        if (this.reuse) {
-            parsonsHTML += ` reuse-blocks="true"`;
-        }
-        if (this.randomize) {
-            parsonsHTML += ` randomize="true"`;
-        }
-        if (this.language) {
-            parsonsHTML += ` language="` + this.language + `"`;
-        }
-        parsonsHTML += `>`;
-        this.outerDiv.innerHTML = parsonsHTML;
+        this.outerDiv.id = `${this.divid}-container`;
         this.outerDiv.addEventListener("micro-parsons", (ev) => {
             this.logHorizontalParsonsEvent(ev.detail);
             this.feedbackController.clearFeedback();
@@ -107,9 +95,17 @@ export default class SQLHParsons extends RunestoneBase {
                     : blocksString;
             blocks = blocksString.split("\n");
         }
-        this.hparsonsInput = $(this.outerDiv).find("micro-parsons")[0];
         this.originalBlocks = blocks.slice(1, -1);
-        this.hparsonsInput.parsonsData = blocks.slice(1, -1);
+        const props = {
+            selector: `#${this.divid}-container`,
+            id: `${this.divid}-hparsons`,
+            reuse: this.reuse,
+            randomize: this.randomize,
+            parsonsBlocks: blocks.slice(1, -1),
+            language: this.language
+        }
+        InitMicroParsons(props);
+        this.hparsonsInput = $(this.outerDiv).find("micro-parsons")[0];
     }
 
     createOutput() {
