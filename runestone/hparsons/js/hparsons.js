@@ -1,10 +1,8 @@
-// import 'handsontable/dist/handsontable.full.css';
 import RunestoneBase from "../../common/js/runestonebase.js";
 import "../css/hparsons.css";
 import "../css/hljs-xcode.css";
 import BlockFeedback from "./BlockFeedback.js";
 import SQLFeedback from "./SQLFeedback.js";
-// import "micro-parsons.j" from 'micro-parsons';
 import {InitMicroParsons} from 'micro-parsons/micro-parsons/micro-parsons.js';
 import 'micro-parsons/micro-parsons/micro-parsons.css';
 
@@ -13,7 +11,7 @@ export var hpList;
 if (hpList === undefined) hpList = {};
 
 
-export default class SQLHParsons extends RunestoneBase {
+export default class HParsons extends RunestoneBase {
     constructor(opts) {
         super(opts);
         // copied from activecode
@@ -66,7 +64,7 @@ export default class SQLHParsons extends RunestoneBase {
         if ($(orig).data("caption")) {
             this.caption = $(orig).data("caption");
         } else {
-            this.caption = "HorizontalParsons";
+            this.caption = "MicroParsons";
         }
         this.addCaption("runestone");
         this.indicate_component_ready();
@@ -146,8 +144,6 @@ export default class SQLHParsons extends RunestoneBase {
     }
 
     logHorizontalParsonsEvent(hparsonsEvent) {
-        // TODO: might need to find another way to change "act".
-        // The event string is probably too long.
         let ev = {
             event: "hparsons",
             div_id: this.divid,
@@ -167,7 +163,7 @@ $(document).on("runestone:login-complete", function () {
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
             // try {
-            hpList[this.id] = new SQLHParsons({
+            hpList[this.id] = new HParsons({
                 orig: this,
                 useRunestoneServices: eBookConfig.useRunestoneServices,
             });
@@ -183,5 +179,5 @@ if (typeof window.component_factory === "undefined") {
     window.component_factory = {};
 }
 window.component_factory["hparsons"] = function (opts) {
-    return new SQLHParsons(opts);
+    return new HParsons(opts);
 };
