@@ -64,8 +64,16 @@ export default class HParsons extends RunestoneBase {
 
     processContent(code) {
         // todo: add errors when blocks are nonexistent (maybe in python)?
+        this.hiddenPrefix = this.processSingleContent(code, '--hiddenprefix--');
         this.originalBlocks = this.processSingleContent(code, '--blocks--').split('\n').slice(1,-1);
+        this.hiddenSuffix = this.processSingleContent(code, '--hiddensuffix--');
         this.unittest = this.processSingleContent(code, '--unittest--');
+        console.log({
+            'pre': this.hiddenPrefix,
+            'blocks': this.originalBlocks,
+            'suf': this.hiddenSuffix,
+            'test': this.unittest
+        })
     }
 
     processSingleContent(code, delimitier) {

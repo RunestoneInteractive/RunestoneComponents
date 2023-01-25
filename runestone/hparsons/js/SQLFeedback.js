@@ -45,16 +45,21 @@ export default class SQLFeedback extends HParsonsFeedback {
         // fnprefix sets the path to load the sql-wasm.wasm file
         var bookprefix;
         var fnprefix;
-        if (eBookConfig.useRunestoneServices) {
+        if (
+            eBookConfig.useRunestoneServices ||
+            window.location.search.includes("mode=browsing")
+        ) {
             bookprefix = `${eBookConfig.app}/books/published/${eBookConfig.basecourse}`;
             fnprefix = bookprefix + "/_static";
         } else {
+            // The else clause handles the case where you are building for a static web browser
             bookprefix = "";
             fnprefix = "/_static";
         }
         let SQLconfig = {
             locateFile: (filename) => `${fnprefix}/${filename}`,
         };
+        // this.showLast = $(this.origElem).data("showlastsql");
         var self = this.hparsons;
         initSqlJs(SQLconfig).then(function (SQL) {
             // set up call to load database asynchronously if given
@@ -134,64 +139,18 @@ export default class SQLFeedback extends HParsonsFeedback {
         let query = await this.buildProg();
         if (!this.hparsons.db) {
             $(this.output).text(
-                `Error: Database not initialized! DBURL: ${this.dburl}`
+                `Error: Database not initialized! DBURL: ${this.hparsons.dburl}`
             );
             return;
         }
 
-        let it = this.hparsons.db.iterateStatements(query);
-        this.results = [];
-        try {
-            for (let statement of it) {
-                let columns = statement.getColumnNames();
-                if (columns.length > 0) {
-                    // data! probably a SELECT
-                    let data = [];
-                    while (statement.step()) {
-                        data.push(statement.get());
-                    }
-                    this.results.push({
-                        status: "success",
-                        columns: columns,
-                        values: data,
-                        rowcount: data.length,
-                    });
-                } else {
-                    let nsql = statement.getNormalizedSQL();
-                    let prefix = nsql.substr(0, 6).toLowerCase();
-                    statement.step(); // execute the query
-                    // Try to detect INSERT/UPDATE/DELETE to give friendly feedback
-                    // on rows modified - unfortunately, this won't catch such queries
-                    // if they use CTEs.  There seems to be no reliable way of knowing
-                    // when a SQLite query actually modified data.
-                    if (
-                        prefix === "insert" ||
-                        prefix === "update" ||
-                        prefix === "delete"
-                    ) {
-                        this.results.push({
-                            status: "success",
-                            operation: prefix,
-                            rowcount: this.db.getRowsModified(),
-                        });
-                    } else {
-                        this.results.push({ status: "success" });
-                    }
-                }
-            }
-        } catch (e) {
-            this.results.push({
-                status: "failure",
-                message: e.toString(),
-                sql: it.getRemainingSQL(),
-            });
+        // TODO: cancel the execution if previous steps have errors
+        if (query.prefix) {
+            this.prefixresults = this.executeIteratedStatements(this.hparsons.db.iterateStatements(query.prefix));
         }
-
-        if (this.results.length === 0) {
-            this.results.push({
-                status: "failure",
-                message: "No queries submitted.",
-            });
+        this.results = this.executeIteratedStatements(this.hparsons.db.iterateStatements(query.input));
+        if (query.suffix) {
+            this.suffixresults = this.executeIteratedStatements(this.hparsons.db.iterateStatements(query.suffix));
         }
 
         respDiv = document.createElement("div");
@@ -248,9 +207,15 @@ export default class SQLFeedback extends HParsonsFeedback {
 
         // Now handle autograding
         if (this.hparsons.unittest) {
-            this.testResult = this.autograde(
-                this.results[this.results.length - 1]
-            );
+            if (this.suffixresults) {
+                this.testResult = this.autograde(
+                    this.suffixresults[this.suffixresults.length - 1]
+                );
+            } else {
+                this.testResult = this.autograde(
+                    this.results[this.results.length - 1]
+                );
+            }
         } else {
             $(this.output).css("visibility", "hidden");
         }
@@ -258,15 +223,72 @@ export default class SQLFeedback extends HParsonsFeedback {
         return Promise.resolve("done");
     }
 
+    executeIteratedStatements(it) {
+        let results = [];
+        try {
+            for (let statement of it) {
+                let columns = statement.getColumnNames();
+                if (columns.length > 0) {
+                    // data! probably a SELECT
+                    let data = [];
+                    while (statement.step()) {
+                        data.push(statement.get());
+                    }
+                    results.push({
+                        status: "success",
+                        columns: columns,
+                        values: data,
+                        rowcount: data.length,
+                    });
+                } else {
+                    let nsql = statement.getNormalizedSQL();
+                    let prefix = nsql.substr(0, 6).toLowerCase();
+                    statement.step(); // execute the query
+                    // Try to detect INSERT/UPDATE/DELETE to give friendly feedback
+                    // on rows modified - unfortunately, this won't catch such queries
+                    // if they use CTEs.  There seems to be no reliable way of knowing
+                    // when a SQLite query actually modified data.
+                    if (
+                        prefix === "insert" ||
+                        prefix === "update" ||
+                        prefix === "delete"
+                    ) {
+                        results.push({
+                            status: "success",
+                            operation: prefix,
+                            rowcount: this.hparsons.db.getRowsModified(),
+                        });
+                    } else {
+                        results.push({ status: "success" });
+                    }
+                }
+            }
+        } catch (e) {
+            results.push({
+                status: "failure",
+                message: e.toString(),
+                sql: it.getRemainingSQL(),
+            });
+        }
+        if (results.length === 0) {
+            results.push({
+                status: "failure",
+                message: "No queries submitted.",
+            });
+        }
+        return results;
+    }
+ 
     // adapted from activecode
     async buildProg() {
         // assemble code from prefix, suffix, and editor for running.
-        // TODO: fix or remove text entry
-        var prog;
-        if (this.hparsons.textentry) {
-            prog = this.hparsons.hparsonsInput.getCurrentInput();
-        } else {
-            prog = this.hparsons.hparsonsInput.getParsonsTextArray().join(' ') + "\n";
+        let prog = {};
+        if (this.hparsons.hiddenPrefix) {
+            prog.prefix = this.hparsons.hiddenPrefix;
+        }
+        prog.input = this.hparsons.hparsonsInput.getParsonsTextArray().join(' ') + "\n";
+        if (this.hparsons.hiddenSuffix) {
+            prog.suffix = this.hparsons.hiddenSuffix;
         }
         return Promise.resolve(prog);
     }

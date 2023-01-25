@@ -102,10 +102,14 @@ class HParsonsDirective(RunestoneIdDirective):
         Here is the problem description. It must ends with the tildes.
         Make sure you use the correct delimitier for each section below.
         ~~~~
+        --hiddenprefix--
+        // code that is for scaffolding the execution (e.g. initializing database)
         --blocks--
         block 1
         block 2
         block 3
+        --hiddensuffix--
+        // code that is for scaffolding unittest/execution (e.g. adding query for database)
         --unittest--
         assert 1,1 == world
         assert 0,1 == hello
