@@ -247,7 +247,7 @@ export default class SQLFeedback extends HParsonsFeedback {
         }
 
         // Now handle autograding
-        if (this.hparsons.suffix) {
+        if (this.hparsons.unittest) {
             this.testResult = this.autograde(
                 this.results[this.results.length - 1]
             );
@@ -291,7 +291,7 @@ export default class SQLFeedback extends HParsonsFeedback {
 
     // might move to base class if used by multiple execution based feedback
     autograde(result_table) {
-        var tests = this.hparsons.suffix.split(/\n/);
+        var tests = this.hparsons.unittest.split(/\n/);
         this.passed = 0;
         this.failed = 0;
         // Tests should be of the form
