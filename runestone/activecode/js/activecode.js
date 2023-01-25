@@ -121,6 +121,7 @@ export class ActiveCode extends RunestoneBase {
         }
         suffStart = this.code.indexOf("====");
         if (suffStart > -1) {
+            // The +5 gets past the ====\n
             this.suffix = this.code.substring(suffStart + 5);
             this.code = this.code.substring(0, suffStart);
         }

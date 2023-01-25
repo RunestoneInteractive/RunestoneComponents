@@ -491,15 +491,6 @@ export default class Parsons extends RunestoneBase {
             //areaHeight += (blocks.length);
         }
         // + 40 to areaHeight to provide some additional buffer in case any text overflow still happens - Vincent Qiu (September 2020)
-        this.areaHeight = areaHeight + 40;
-        $(this.sourceArea).css({
-            width: this.areaWidth + 2,
-            height: areaHeight,
-        });
-        $(this.answerArea).css({
-            width: this.options.pixelsPerIndent * indent + this.areaWidth + 2,
-            height: areaHeight,
-        });
         if (indent > 0 && indent <= 4) {
             $(this.answerArea).addClass("answer" + indent);
         } else {
@@ -558,6 +549,19 @@ export default class Parsons extends RunestoneBase {
         } else {
             pairedBins = [];
         }
+        areaHeight += pairedBins.length * 10;  // the paired bins take up extra space which can
+                                               // cause the blocks to spill out.  This
+                                               // corrects that by adding a little extra
+        this.areaHeight = areaHeight + 40;
+        $(this.sourceArea).css({
+            width: this.areaWidth + 2,
+            height: areaHeight,
+        });
+        $(this.answerArea).css({
+            width: this.options.pixelsPerIndent * indent + this.areaWidth + 2,
+            height: areaHeight,
+        });
+
         this.pairedBins = pairedBins;
         this.pairedDivs = pairedDivs;
         if (this.options.numbered != undefined) {
