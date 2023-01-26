@@ -1,20 +1,17 @@
-// import 'handsontable/dist/handsontable.full.css';
 import RunestoneBase from "../../common/js/runestonebase.js";
 import "../css/hparsons.css";
 import "../css/hljs-xcode.css";
 import BlockFeedback from "./BlockFeedback.js";
 import SQLFeedback from "./SQLFeedback.js";
+import {InitMicroParsons} from 'micro-parsons/micro-parsons/micro-parsons.js';
+import 'micro-parsons/micro-parsons/micro-parsons.css';
 
 export var hpList;
 // Dictionary that contains all instances of horizontal Parsons problem objects
 if (hpList === undefined) hpList = {};
 
-// The following js library is a custom element for micro parsons (horizontal parsons) input.
-// Currently it is not published as an npm package yet, and edits should be made through: https://github.com/amy21206/micro-parsons-element.
-// It will be replaced by importing the corresponding package in the future.
-import "./micro-parsons.js";
 
-export default class SQLHParsons extends RunestoneBase {
+export default class HParsons extends RunestoneBase {
     constructor(opts) {
         super(opts);
         // copied from activecode
@@ -67,7 +64,7 @@ export default class SQLHParsons extends RunestoneBase {
         if ($(orig).data("caption")) {
             this.caption = $(orig).data("caption");
         } else {
-            this.caption = "HorizontalParsons";
+            this.caption = "MicroParsons";
         }
         this.addCaption("runestone");
         this.indicate_component_ready();
@@ -78,22 +75,9 @@ export default class SQLHParsons extends RunestoneBase {
 
     // copied from activecode, already modified to add parsons
     createEditor() {
-        // console.log('test create editor hparsons')
         this.outerDiv = document.createElement("div");
         $(this.origElem).replaceWith(this.outerDiv);
-        let parsonsHTML = `<micro-parsons id='${this.divid}-hparsons'`;
-        parsonsHTML += ` input-type='parsons' `;
-        if (this.reuse) {
-            parsonsHTML += ` reuse-blocks="true"`;
-        }
-        if (this.randomize) {
-            parsonsHTML += ` randomize="true"`;
-        }
-        if (this.language) {
-            parsonsHTML += ` language="` + this.language + `"`;
-        }
-        parsonsHTML += `>`;
-        this.outerDiv.innerHTML = parsonsHTML;
+        this.outerDiv.id = `${this.divid}-container`;
         this.outerDiv.addEventListener("micro-parsons", (ev) => {
             this.logHorizontalParsonsEvent(ev.detail);
             this.feedbackController.clearFeedback();
@@ -109,9 +93,17 @@ export default class SQLHParsons extends RunestoneBase {
                     : blocksString;
             blocks = blocksString.split("\n");
         }
-        this.hparsonsInput = $(this.outerDiv).find("micro-parsons")[0];
         this.originalBlocks = blocks.slice(1, -1);
-        this.hparsonsInput.parsonsData = blocks.slice(1, -1);
+        const props = {
+            selector: `#${this.divid}-container`,
+            id: `${this.divid}-hparsons`,
+            reuse: this.reuse,
+            randomize: this.randomize,
+            parsonsBlocks: blocks.slice(1, -1),
+            language: this.language
+        }
+        InitMicroParsons(props);
+        this.hparsonsInput = $(this.outerDiv).find("micro-parsons")[0];
     }
 
     createOutput() {
@@ -152,8 +144,6 @@ export default class SQLHParsons extends RunestoneBase {
     }
 
     logHorizontalParsonsEvent(hparsonsEvent) {
-        // TODO: might need to find another way to change "act".
-        // The event string is probably too long.
         let ev = {
             event: "hparsons",
             div_id: this.divid,
@@ -173,7 +163,7 @@ $(document).on("runestone:login-complete", function () {
         if ($(this).closest("[data-component=timedAssessment]").length == 0) {
             // If this element exists within a timed component, don't render it here
             // try {
-            hpList[this.id] = new SQLHParsons({
+            hpList[this.id] = new HParsons({
                 orig: this,
                 useRunestoneServices: eBookConfig.useRunestoneServices,
             });
@@ -189,5 +179,5 @@ if (typeof window.component_factory === "undefined") {
     window.component_factory = {};
 }
 window.component_factory["hparsons"] = function (opts) {
-    return new SQLHParsons(opts);
+    return new HParsons(opts);
 };

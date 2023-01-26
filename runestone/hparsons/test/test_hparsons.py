@@ -38,7 +38,7 @@ Test Block Based feedback is correct:
 def test_run_block(selenium_utils_get):
     div_id = "test_hparsons_block_1"
     hp_question = find_hp_question(selenium_utils_get, div_id)
-    hp = hp_question.find_element(By.CSS_SELECTOR, 'horizontal-parsons')
+    hp = hp_question.find_element(By.CSS_SELECTOR, 'micro-parsons')
     drag_area = hp.find_element(By.CSS_SELECTOR, '.drag-area')
     drop_area = hp.find_element(By.CSS_SELECTOR, '.drop-area')
     run_btn = hp_question.find_elements(By.TAG_NAME, 'button')[0]
@@ -106,7 +106,7 @@ Test if the blocks are properly randomized.
 def test_randomize_block(selenium_utils_get):
     div_id = "test_hparsons_sql_1"
     hp = find_hp_question(selenium_utils_get, div_id).find_element(
-        By.CSS_SELECTOR, 'horizontal-parsons')
+        By.CSS_SELECTOR, 'micro-parsons')
     original_sequence = ['SELECT', '*', 'FROM', 'test']
     randomized_sequence = []
     for block in hp.find_element(By.CSS_SELECTOR, '.drag-area').find_elements(By.CSS_SELECTOR, '.parsons-block'):
@@ -134,7 +134,7 @@ For reuseable blocks:
 def test_add_and_remove_blocks(selenium_utils_get):
     div_id = "test_hparsons_sql_1"
     hp = find_hp_question(selenium_utils_get, div_id).find_element(
-        By.CSS_SELECTOR, 'horizontal-parsons')
+        By.CSS_SELECTOR, 'micro-parsons')
     drag_area = hp.find_element(By.CSS_SELECTOR, '.drag-area')
     drop_area = hp.find_element(By.CSS_SELECTOR, '.drop-area')
 
@@ -154,7 +154,7 @@ def test_add_and_remove_blocks(selenium_utils_get):
     # For reusable blocks
     div_id = "test_hparsons_sql_2"
     hp = find_hp_question(selenium_utils_get, div_id).find_element(
-        By.CSS_SELECTOR, 'horizontal-parsons')
+        By.CSS_SELECTOR, 'micro-parsons')
     drag_area = hp.find_element(By.CSS_SELECTOR, '.drag-area')
     drop_area = hp.find_element(By.CSS_SELECTOR, '.drop-area')
 
@@ -184,7 +184,7 @@ def test_run_SQL(selenium_utils_get):
     div_id = "test_hparsons_sql_2"
     hp_question = find_hp_question(selenium_utils_get, div_id)
     time.sleep(2)
-    hp = hp_question.find_element(By.CSS_SELECTOR, 'horizontal-parsons')
+    hp = hp_question.find_element(By.CSS_SELECTOR, 'micro-parsons')
     drag_area = hp.find_element(By.CSS_SELECTOR, '.drag-area')
     drop_area = hp.find_element(By.CSS_SELECTOR, '.drop-area')
 
