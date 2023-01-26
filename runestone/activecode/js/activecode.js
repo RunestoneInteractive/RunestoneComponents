@@ -1022,7 +1022,12 @@ Yet another is that there is an internal error.  The internal error message is: 
         return Sk.builtinFiles["files"][x];
     }
     fileReader(divid) {
+        // In the beginning files were just pre tags and we used the divid as the filename
         let elem = document.getElementById(divid);
+        // In PreTeXt we moved that to a @data-filename
+        if (elem === null) {
+            elem = document.querySelector(`[data-filename="${divid}"]`);
+        }
         let data = "";
         let result = "";
         if (elem == null && Sk.builtinFiles.files.hasOwnProperty(divid)) {
