@@ -106,7 +106,7 @@ class PageProgressBar {
         this.calculateProgress();
         if (
             window.location.pathname.match(
-                /.*(index.html|toctree.html|Exercises.html|Glossary.html|search.html)$/i
+                /.*(index.html|toctree.html|Exercises.html|search.html)$/i
             )
         ) {
             $("#scprogresscontainer").hide();
