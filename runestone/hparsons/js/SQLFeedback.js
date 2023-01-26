@@ -139,6 +139,8 @@ export default class SQLFeedback extends HParsonsFeedback {
         respDiv = document.createElement("div");
         respDiv.id = divid;
         this.outDiv.appendChild(respDiv);
+        // show the output div
+        $(this.outDiv).show();
 
         // Run this query
         let query = await this.buildProg();
@@ -182,9 +184,6 @@ export default class SQLFeedback extends HParsonsFeedback {
                 this.visualizeResults(respDiv, this.suffixresults, "Error executing hidden code in suffix");
             }
         }
-
-        // show the output div
-        $(this.outDiv).show();
 
         // Now handle autograding
         // autograding takes the results of the hidden suffix if exist
