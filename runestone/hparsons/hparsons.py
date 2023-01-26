@@ -110,6 +110,8 @@ class HParsonsDirective(RunestoneIdDirective):
         block 3
         --hiddensuffix--
         // code that is for scaffolding unittest/execution (e.g. adding query for database)
+        // most of the time the hiddensuffix is just "select * from table" to
+        //      get all entries from the table to test the update or other operations.
         --unittest--
         assert 1,1 == world
         assert 0,1 == hello

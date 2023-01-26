@@ -135,6 +135,11 @@ export default class SQLFeedback extends HParsonsFeedback {
             respDiv.parentElement.removeChild(respDiv);
         }
         $(this.output).text("");
+        // creating new results div
+        respDiv = document.createElement("div");
+        respDiv.id = divid;
+        this.outDiv.appendChild(respDiv);
+
         // Run this query
         let query = await this.buildProg();
         if (!this.hparsons.db) {
@@ -144,68 +149,46 @@ export default class SQLFeedback extends HParsonsFeedback {
             return;
         }
 
-        // TODO: cancel the execution if previous steps have errors
+        let executionSuccessFlag = true;
+
+        // executing hidden prefix if exist
         if (query.prefix) {
             this.prefixresults = this.executeIteratedStatements(this.hparsons.db.iterateStatements(query.prefix));
-        }
-        this.results = this.executeIteratedStatements(this.hparsons.db.iterateStatements(query.input));
-        if (query.suffix) {
-            this.suffixresults = this.executeIteratedStatements(this.hparsons.db.iterateStatements(query.suffix));
-        }
-
-        respDiv = document.createElement("div");
-        respDiv.id = divid;
-        this.outDiv.appendChild(respDiv);
-        $(this.outDiv).show();
-        // Sometimes we don't want to show a bunch of intermediate results
-        // like when we are including a bunch of previous statements from
-        // other activecodes In that case the showlastsql flag can be set
-        // so we only show the last result
-        let resultArray = this.results;
-        for (let r of resultArray) {
-            let section = document.createElement("div");
-            section.setAttribute("class", "hp_sql_result");
-            respDiv.appendChild(section);
-            if (r.status === "success") {
-                if (r.columns) {
-                    let tableDiv = document.createElement("div");
-                    section.appendChild(tableDiv);
-                    let maxHeight = 350;
-                    if (resultArray.length > 1) maxHeight = 200; // max height smaller if lots of results
-                    createTable(r, tableDiv, maxHeight);
-                    let messageBox = document.createElement("pre");
-                    let rmsg = r.rowcount !== 1 ? " rows " : " row ";
-                    let msg = "" + r.rowcount + rmsg + "returned";
-                    if (r.rowcount > 100) {
-                        msg = msg + " (only first 100 rows displayed)";
-                    }
-                    msg = msg + ".";
-                    messageBox.textContent = msg;
-                    messageBox.setAttribute("class", "hp_sql_result_success");
-                    section.appendChild(messageBox);
-                } else if (r.rowcount) {
-                    let messageBox = document.createElement("pre");
-                    let op = r.operation;
-                    op = op + (op.charAt(op.length - 1) === "e" ? "d." : "ed.");
-                    let rmsg = r.rowcount !== 1 ? " rows " : " row ";
-                    messageBox.textContent = "" + r.rowcount + rmsg + op;
-                    messageBox.setAttribute("class", "hp_sql_result_success");
-                    section.appendChild(messageBox);
-                } else {
-                    let messageBox = document.createElement("pre");
-                    messageBox.textContent = "Operation succeeded.";
-                    messageBox.setAttribute("class", "hp_sql_result_success");
-                    section.appendChild(messageBox);
-                }
-            } else {
-                let messageBox = document.createElement("pre");
-                messageBox.textContent = r.message;
-                messageBox.setAttribute("class", "hp_sql_result_failure");
-                section.appendChild(messageBox);
+            if (this.prefixresults.at(-1).status == 'failure') {
+                // if error occured in hidden prefix, log and stop executing the rest
+                this.visualizeResults(respDiv, this.prefixresults, "Error executing hidden code in prefix");
+                executionSuccessFlag = false;
             }
         }
 
+        // executing student input in micro Parsons
+        if (executionSuccessFlag) {
+            this.results = this.executeIteratedStatements(this.hparsons.db.iterateStatements(query.input));
+            // always render full execution results of student input regardless of success/failure
+            this.visualizeResults(respDiv, this.results);
+            if (this.results.at(-1).status == 'failure') {
+                // if error occured in student input, stop executing suffix/unitttest 
+                executionSuccessFlag = false;
+            }
+        }
+        
+        // executing hidden suffix if exist
+        // In most cases the suffix is just "select * from x" to 
+        //    see if the operations on the database is correct
+        if (executionSuccessFlag && query.suffix) {
+            this.suffixresults = this.executeIteratedStatements(this.hparsons.db.iterateStatements(query.suffix));
+            if (this.suffixresults.at(-1).status == 'failure') {
+                // if error occured in hidden suffix, visualize the results
+                this.visualizeResults(respDiv, this.suffixresults, "Error executing hidden code in suffix");
+            }
+        }
+
+        // show the output div
+        $(this.outDiv).show();
+
         // Now handle autograding
+        // autograding takes the results of the hidden suffix if exist
+        // otherwise take the result of student input
         if (this.hparsons.unittest) {
             if (this.suffixresults) {
                 this.testResult = this.autograde(
@@ -223,6 +206,26 @@ export default class SQLFeedback extends HParsonsFeedback {
         return Promise.resolve("done");
     }
 
+    // Refactored from activecode-sql.
+    // Takes iterated statements from db.iterateStatemnts(queryString)
+    // Returns Array<result>:
+    /* each result: {
+        status: "success" or "faliure",
+        // for SELECT statements (?):
+        columns: number of columns,
+        values: data,
+        rowcount: number of rows in data,
+        // for INSERT, UPDATE, DELETE:
+        operation: "INSERT", "UPDATE", or "DELETE",
+        rowcount: number of rows modified,
+        // when error occurred (aside from status):
+        message: error message,
+        sql: remaining SQL (?)
+        // when no queries were executed:
+        message: "no queries submitted"
+    }*/
+    // If an error occurs it will stop executing the rest of queries in it.
+    // Thus the error result will always be the last item.
     executeIteratedStatements(it) {
         let results = [];
         try {
@@ -277,6 +280,66 @@ export default class SQLFeedback extends HParsonsFeedback {
             });
         }
         return results;
+    }
+
+    // output the results in the resultArray(Array<results>).
+    // container: the container that contains the results
+    // resultArray (Array<result>): see executeIteratedStatements
+    // Each result will be in a separate row.
+    // devNote will be displayed in the top row if exist.
+    // Current usage: "error executing hidden code in prefix/suffix"
+    visualizeResults(container, resultArray, devNote) {
+        if (devNote) {
+            let section = document.createElement("div");
+            section.setAttribute("class", "hp_sql_result");
+            container.appendChild(section);
+            let messageBox = document.createElement("pre");
+            messageBox.textContent = devNote;
+            messageBox.setAttribute("class", "hp_sql_result_failure");
+            section.appendChild(messageBox);
+        }
+        for (let r of resultArray) {
+            let section = document.createElement("div");
+            section.setAttribute("class", "hp_sql_result");
+            container.appendChild(section);
+            if (r.status === "success") {
+                if (r.columns) {
+                    let tableDiv = document.createElement("div");
+                    section.appendChild(tableDiv);
+                    let maxHeight = 350;
+                    if (resultArray.length > 1) maxHeight = 200; // max height smaller if lots of results
+                    createTable(r, tableDiv, maxHeight);
+                    let messageBox = document.createElement("pre");
+                    let rmsg = r.rowcount !== 1 ? " rows " : " row ";
+                    let msg = "" + r.rowcount + rmsg + "returned";
+                    if (r.rowcount > 100) {
+                        msg = msg + " (only first 100 rows displayed)";
+                    }
+                    msg = msg + ".";
+                    messageBox.textContent = msg;
+                    messageBox.setAttribute("class", "hp_sql_result_success");
+                    section.appendChild(messageBox);
+                } else if (r.rowcount) {
+                    let messageBox = document.createElement("pre");
+                    let op = r.operation;
+                    op = op + (op.charAt(op.length - 1) === "e" ? "d." : "ed.");
+                    let rmsg = r.rowcount !== 1 ? " rows " : " row ";
+                    messageBox.textContent = "" + r.rowcount + rmsg + op;
+                    messageBox.setAttribute("class", "hp_sql_result_success");
+                    section.appendChild(messageBox);
+                } else {
+                    let messageBox = document.createElement("pre");
+                    messageBox.textContent = "Operation succeeded.";
+                    messageBox.setAttribute("class", "hp_sql_result_success");
+                    section.appendChild(messageBox);
+                }
+            } else {
+                let messageBox = document.createElement("pre");
+                messageBox.textContent = r.message;
+                messageBox.setAttribute("class", "hp_sql_result_failure");
+                section.appendChild(messageBox);
+            }
+        }
     }
  
     // adapted from activecode

@@ -105,7 +105,7 @@ Reusable Block with Execution Based Feedback
 
 Randomized Block with Execution Based Feedback and Hidden Code
 ---------------------------------------------------------------
-.. hparsons:: hparsons_lg_sql_practice_A_2_pb
+.. hparsons:: test_hparsons_sql_exe_hidden
     :language: sql
     :randomize:
 
@@ -116,6 +116,10 @@ Randomized Block with Execution Based Feedback and Hidden Code
     A student completed an extra assignment and got some additional points.
 
     Please write an UPDATE statement to change the entry whose ``student_id`` is 1, and set their math score for ``final`` ``test_name`` to 90.
+
+    hidden prefix initializes the table above;
+    hidden suffix is "SELECT * FROM grades".
+
     ~~~~
     --hiddenprefix--
     DROP TABLE IF EXISTS grades;
@@ -136,6 +140,33 @@ Randomized Block with Execution Based Feedback and Hidden Code
     student_id = 1 AND test_name = final
     --hiddensuffix--
     ;SELECT * FROM grades
+    --unittest--
+    assert 1,1 == final
+    assert 1,3 == 90
+    assert 3,3 == 99
+
+
+Randomized Block with Execution Based Feedback and Hidden Code + error in prefix
+--------------------------------------------------------------------------------
+.. hparsons:: test_hparsons_sql_exe_hidden_error
+    :language: sql
+    :randomize:
+
+    The third line of the hidden code is incorrect.
+
+    ~~~~
+    --hiddenprefix--
+    DROP TABLE IF EXISTS grades;
+    create table "grades" ("student_id" INTEGER, "test_name" TEXT, "english" INTEGER, "math" INTEGER);
+    INSERT INTO grades (student_id,test_name,english,math) 
+    --blocks--
+    UPDATE grades
+    SET
+    math = 90
+    WHERE
+    student_id = 1 AND test_name = "final"
+    LET
+    student_id = 1 AND test_name = final
     --unittest--
     assert 1,1 == final
     assert 1,3 == 90
