@@ -172,11 +172,12 @@ export default class RunestoneBase {
             if (eBookConfig.loginRequired) {
                 alert(`Error: Your action was not saved!
                     The error was ${e}
+                    Status Code: ${response.status}
                     Detail: ${detail}.
                     Please report this error!`);
             }
             // send a request to save this error
-            console.log(`Error: ${e} Detail: ${detail}`);
+            console.log(`Error: ${e} Detail: ${detail} Status Code: ${response.status}`);
         }
         return post_return;
     }
