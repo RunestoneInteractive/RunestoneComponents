@@ -30,7 +30,23 @@ export default class BlockFeedback extends HParsonsFeedback {
     // Called when check button clicked (block-based Feedback)
     async runButtonHandler() {
         this.checkCurrentAnswer();
+        this.logCurrentAnswer();
         this.renderFeedback();
+    }
+
+    async logCurrentAnswer() {
+        let act = {
+            scheme: "block",
+            correct: this.grader.graderState == 'correct' ? "T" : "F",
+            answer: this.hparsons.hparsonsInput.getParsonsTextArray(),
+            percent: this.grader.percent
+        }
+        let logData = {
+            event: "hparsonsAnswer",
+            div_id: this.hparsons.divid, 
+            act: act
+        }
+        await this.hparsons.logBookEvent(logData);
     }
 
     // Used for block-based feedback

@@ -6,6 +6,7 @@
 export default class BlockBasedGrader {
     constructor(problem) {
         this.problem = problem;
+        this.percent = 0;
     }
     // Use a LIS (Longest Increasing Subsequence) algorithm to return the indexes
     // that are not part of that subsequence.

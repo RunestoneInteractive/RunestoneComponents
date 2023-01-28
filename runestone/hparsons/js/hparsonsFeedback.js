@@ -1,6 +1,7 @@
 export default class HParsonsFeedback {
     constructor(hparsons) {
         this.hparsons = hparsons;
+        this.percent = 0;
     }
     createOutput() {
         console.log('createOutput method not implemented in feedback!');
