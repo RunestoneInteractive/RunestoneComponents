@@ -11,6 +11,7 @@ class WebWork extends RunestoneBase {
         this.multipleanswers = false;
         this.divid = opts.orig.id;
         this.correct = null;
+        this.optional = false;
         this.answerList = [];
         this.correctList = [];
         this.question = null;
@@ -69,8 +70,43 @@ class WebWork extends RunestoneBase {
         );
     }
 
+    processCurrentAnswers(data) {
+        let correctCount = 0;
+        let qCount = 0;
+        let actString = "check:";
+        this.answerObj = {}
+        this.lastAnswerRaw = data;
+
+        for (let k of Object.keys(data.rh_result.answers)) {
+            qCount += 1;
+            if (data.rh_result.answers[k].score == 1) {
+                correctCount += 1;
+            }
+            this.answerObj[k] = `${data.rh_result.answers[k].original_student_ans}`
+            actString += `actual:${data.rh_result.answers[k].original_student_ans}:expected:${data.rh_result.answers[k].correct_value}:`;
+        }
+        let pct = correctCount / qCount;
+        // If this.percent is set, then runestonebase will transmit it as part of
+        // the logBookEvent API.
+        this.percent = pct;
+        this.actString = actString + `correct:${correctCount}:count:${qCount}:pct:${pct}`;
+        if (pct == 1.0) {
+            this.correct = true;
+        } else {
+            this.correct = false;
+        }
+
+    }
+
     async logCurrentAnswer(sid) {
-        // todo
+        this.logBookEvent({
+            event: "webwork",
+            div_id: this.divid, //todo unmangle problemid
+            act: this.actString,
+            correct: this.correct,
+            answer: JSON.stringify(this.answerObj),
+        });
+
     }
 
     checkCurrentAnswer() {
@@ -79,39 +115,19 @@ class WebWork extends RunestoneBase {
 
 }
 
-// TODO - it would be better if we can get rid of this, and use the runestone object corresponding to the webwork question to make the logging calls.  Or this could be a tiny wrapper because we can look up the object using inputs_ref.problemUUID.replace("-ww-rs","")
-let rb = new WebWork({orig:{id:"fakeww-ww-rs"}});
 
+//
+// These are functions that get called in response to webwork generated events.
+// submitting the work, or showing an answer.
 function logWebWork(e, data) {
-    var correct = false;
-    let correctCount = 0;
-    let qCount = 0;
-    let actString = "check:";
-    let answerObj = {}
-    for (let k of Object.keys(data.rh_result.answers).sort()) {
-        qCount += 1;
-        if (data.rh_result.answers[k].score == 1) {
-            correctCount += 1;
-        }
-        answerObj[k] = `${data.rh_result.answers[k].original_student_ans}`
-        actString += `actual:${data.rh_result.answers[k].original_student_ans}:expected:${data.rh_result.answers[k].correct_value}:`;
-    }
-    let pct = correctCount / qCount;
-    actString += `correct:${correctCount}:count:${qCount}:pct:${pct}`;
-    if (pct == 1.0) {
-        correct = true;
-    }
-    rb.logBookEvent({
-        event: "webwork",
-        div_id: data.inputs_ref.problemUUID.replace("-ww-rs",""), //todo unmangle problemid
-        act: actString,
-        correct: correct,
-        answer: JSON.stringify(answerObj),
-    });
+    let wwObj = wwList[data.inputs_ref.problemUUID.replace("-ww-rs","")]
+    wwObj.processCurrentAnswers(data);
+    wwObj.logCurrentAnswer();
 }
 
 function logShowCorrect(e, data) {
-    rb.logBookEvent({
+    let wwObj = wwList[data.inputs_ref.problemUUID.replace("-ww-rs","")]
+    wwObj.logBookEvent({
         event: "webwork",
         div_id: data.inputs_ref.problemUUID,
         act: "show",
