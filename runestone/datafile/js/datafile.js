@@ -23,6 +23,7 @@ class DataFile extends RunestoneBase {
         this.divid = orig.id;
         this.dataEdit = false;
         this.isImage = $(orig).data("isimage");
+        this.fileName = $(orig).data("filename");
         if ($(this.origElem).data("edit") === true) {
             this.dataEdit = true;
         }
@@ -38,6 +39,9 @@ class DataFile extends RunestoneBase {
                 this.createTextArea();
             } else {
                 this.createPre();
+            }
+            if (this.fileName) {
+                this.containerDiv.dataset.filename = this.fileName
             }
         }
         this.indicate_component_ready();
