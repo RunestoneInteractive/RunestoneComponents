@@ -43,8 +43,11 @@ export default class BlockFeedback extends HParsonsFeedback {
         }
         let logData = {
             event: "hparsonsAnswer",
-            div_id: this.hparsons.divid, 
-            act: act
+            div_id: this.hparsons.divid,
+            act: JSON.stringify(act),
+            answer: JSON.stringify({"blocks": act.answer}),
+            percent: this.grader.percent,
+            correct: act.correct,
         }
         await this.hparsons.logBookEvent(logData);
     }
