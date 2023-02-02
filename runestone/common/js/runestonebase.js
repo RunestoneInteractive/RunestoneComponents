@@ -146,7 +146,7 @@ export default class RunestoneBase {
             }
         );
         try {
-            let response = await fetch(request);
+            var response = await fetch(request);
             if (!response.ok) {
                 if (response.status === 422) {
                     // Get details about why this is unprocesable.
