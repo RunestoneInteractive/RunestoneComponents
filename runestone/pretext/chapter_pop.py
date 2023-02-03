@@ -54,6 +54,7 @@ def manifest_data_to_db(course_name, manifest_path):
     chapters = Table("chapters", meta, autoload=True, autoload_with=engine)
     subchapters = Table("sub_chapters", meta, autoload=True, autoload_with=engine)
     questions = Table("questions", meta, autoload=True, autoload_with=engine)
+    source_code = Table("source_code", meta, autoload=True, autoload_with=engine)
     course_attributes = Table(
         "course_attributes", meta, autoload=True, autoload_with=engine
     )
@@ -155,12 +156,15 @@ def manifest_data_to_db(course_name, manifest_path):
                 logger.debug("looking for data-component")
                 # pdb.set_trace()
                 el = question.find(".//*[@data-component]")
+                old_ww_id = None
                 # Unbelievably if find finds something it evals to False!!
                 if el is not None:
                     if "id" in el.attrib:
                         idchild = el.attrib["id"]
                     else:
                         idchild = "fix_me"
+                    if "the-id-on-the-webwork" in el.attrib:
+                        old_ww_id = el.attrib["the-id-on-the-webwork"]
                 else:
                     el = question.find("./div")
                     if el is None:
@@ -194,15 +198,19 @@ def manifest_data_to_db(course_name, manifest_path):
                     chapter=chapter.find("./id").text,
                     qnumber=qlabel,
                 )
+                if old_ww_id:
+                    namekey = old_ww_id
+                else:
+                    namekey = idchild
                 res = sess.execute(
-                    f"""select * from questions where name='{idchild}' and base_course='{course_name}'"""
+                    f"""select * from questions where name='{namekey}' and base_course='{course_name}'"""
                 ).first()
                 if res:
                     ins = (
                         questions.update()
                         .where(
                             and_(
-                                questions.c.name == idchild,
+                                questions.c.name == namekey,
                                 questions.c.base_course == course_name,
                             )
                         )
@@ -211,6 +219,44 @@ def manifest_data_to_db(course_name, manifest_path):
                 else:
                     ins = questions.insert().values(**valudict)
                 sess.execute(ins)
+                if qtype == "datafile":
+                    d = el.find("./*pre")
+                    if d is not None:
+                        file_contents = ET.tostring(d).decode("utf8")
+                    else:
+                        d = el.find("./*textarea")
+                        if d is not None:
+                            file_contents = ET.tostring(d).decode("utf8")
+                        else:
+                            d = el.find("./*img")
+                            if d is not None:
+                                file_contents = d.attrib["src"]
+
+                    if "data-filename" in el.attrib["data-filename"]:
+                        filename = el.attrib["data-filename"]
+                    else:
+                        filename = el.attrib["id"]
+
+                    # write datafile contents to the source_code table
+                    res = res = sess.execute(
+                        f"""select * from source_code where acid='{filename}' and course_id='{course_name}'"""
+                    ).first()
+                    vdict = dict(
+                        acid=filename, course_id=course_name, main_code=file_contents
+                    )
+                    if res:
+                        upd = (
+                            source_code.update()
+                            .where(
+                                and_(
+                                    source_code.c.acid == filename,
+                                    questions.c.course_id == course_name,
+                                )
+                            )
+                            .values(**vdict)
+                        )
+                    else:
+                        ins = source_code.insert().values(**vdict)
 
     latex = root.find("./latex-macros")
     logger.info("Setting attributes for this base course")
