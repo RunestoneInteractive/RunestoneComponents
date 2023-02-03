@@ -46,7 +46,7 @@
     --successAlerts: #217300;
     --componentBgColor: #07467d;
     --componentBorderColor: #939090;
-    --questionBgColor: rgb(23, 85, 93);    
+    --questionBgColor: rgb(23, 85, 93);
 }
 
 /* custom modification of basic.css for color-contrast (AA compliant) */
@@ -245,11 +245,11 @@ div.container {
     max-width: var(--contentWidthRegular);
     margin-left: auto;
     margin-right: auto;
-    
+
 }
 
 /* Handle content in nested sections by allowing them to grow*/
-#main-content section > section,                
+#main-content section > section,
 /* And then make sure a few items are wider by default */
 #main-content section > .runestone.ac_section,
 #main-content section > .runestone.codelens,
@@ -1161,6 +1161,20 @@ margin-right: 3px;
 }
 
 .adcopy .donateb {
-  
+
   margin-left: 30%;
+}
+
+.isCorrect:before {
+  /*content: url(https://em-content.zobj.net/thumbs/240/apple/325/check-mark_2714-fe0f.png);*/
+  content: "✅ ";
+  float:right;
+  padding-left: 4px;
+}
+
+.isInCorrect:before {
+  /*content: url(https://em-content.zobj.net/thumbs/240/apple/325/check-mark_2714-fe0f.png);*/
+  content: "⚠️ ";
+  float:right;
+  padding-left: 4px;
 }

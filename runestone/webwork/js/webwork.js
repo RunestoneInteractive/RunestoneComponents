@@ -31,6 +31,9 @@ class WebWork extends RunestoneBase {
         }
         // data.answers comes from postgresql as a JSON column type so no need to parse it.
         this.answers = data.answer;
+        this.correct = data.correct;
+        this.percent = data.percent;
+        this.decorateStatus();
     }
 
     checkLocalStorage() {

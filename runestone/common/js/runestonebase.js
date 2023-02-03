@@ -476,6 +476,19 @@ export default class RunestoneBase {
         }
     }
 
+    decorateStatus() {
+        let rsDiv = $(this.containerDiv).closest("div.runestone")[0];
+        if (this.correct) {
+            rsDiv.classList.add("isCorrect");
+        } else {
+            if (this.correct === null) {
+                rsDiv.classList.add("notAnswered");
+            } else {
+                rsDiv.classList.add("isInCorrect");
+            }
+        }
+    }
+
 }
 
 
