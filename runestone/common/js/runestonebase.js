@@ -98,7 +98,7 @@ export default class RunestoneBase {
         eventInfo.course_name = eBookConfig.course;
         eventInfo.clientLoginStatus = eBookConfig.isLoggedIn;
         eventInfo.timezoneoffset = new Date().getTimezoneOffset() / 60;
-        if (this.percent) {
+        if (typeof(this.percent) === "number") {
             eventInfo.percent = this.percent;
         }
         if (
