@@ -94,6 +94,8 @@ def manifest_data_to_db(course_name, manifest_path):
             logger.debug(subchapter.find("./id").text, subchapter.find("./title").text)
             titletext = subchapter.find("./title").text
             if not titletext:
+                # ET.tostring  converts the tag and everything to text
+                # el.text gets the text inside the element
                 titletext = " ".join(
                     [
                         ET.tostring(y).decode("utf8")
@@ -220,19 +222,11 @@ def manifest_data_to_db(course_name, manifest_path):
                     ins = questions.insert().values(**valudict)
                 sess.execute(ins)
                 if qtype == "datafile":
-                    d = el.find("./*pre")
-                    if d is not None:
-                        file_contents = ET.tostring(d).decode("utf8")
+                    if "data-isimage" in el.attrib:
+                        file_contents = el.attrib["src"]
                     else:
-                        d = el.find("./*textarea")
-                        if d is not None:
-                            file_contents = ET.tostring(d).decode("utf8")
-                        else:
-                            d = el.find("./*img")
-                            if d is not None:
-                                file_contents = d.attrib["src"]
-
-                    if "data-filename" in el.attrib["data-filename"]:
+                        file_contents = el.text
+                    if "data-filename" in el.attrib:
                         filename = el.attrib["data-filename"]
                     else:
                         filename = el.attrib["id"]
@@ -241,6 +235,7 @@ def manifest_data_to_db(course_name, manifest_path):
                     res = res = sess.execute(
                         f"""select * from source_code where acid='{filename}' and course_id='{course_name}'"""
                     ).first()
+
                     vdict = dict(
                         acid=filename, course_id=course_name, main_code=file_contents
                     )
@@ -256,7 +251,8 @@ def manifest_data_to_db(course_name, manifest_path):
                             .values(**vdict)
                         )
                     else:
-                        ins = source_code.insert().values(**vdict)
+                        upd = source_code.insert().values(**vdict)
+                    sess.execute(upd)
 
     latex = root.find("./latex-macros")
     logger.info("Setting attributes for this base course")
