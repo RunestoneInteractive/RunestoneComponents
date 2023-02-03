@@ -120,18 +120,30 @@ class WebWork extends RunestoneBase {
 // These are functions that get called in response to webwork generated events.
 // submitting the work, or showing an answer.
 function logWebWork(e, data) {
-    let wwObj = wwList[data.inputs_ref.problemUUID.replace("-ww-rs","")]
-    wwObj.processCurrentAnswers(data);
-    wwObj.logCurrentAnswer();
+    if (eBookConfig.useRunestoneServices) {
+        let wwObj = wwList[data.inputs_ref.problemUUID.replace("-ww-rs","")]
+        if (wwObj) {
+            wwObj.processCurrentAnswers(data);
+            wwObj.logCurrentAnswer();
+        } else {
+            console.log(`Error: Could not find webwork object ${data.inputs_ref.problemUUID}`)
+        }
+    }
 }
 
 function logShowCorrect(e, data) {
-    let wwObj = wwList[data.inputs_ref.problemUUID.replace("-ww-rs","")]
-    wwObj.logBookEvent({
-        event: "webwork",
-        div_id: data.inputs_ref.problemUUID,
-        act: "show",
-    });
+    if (eBookConfig.useRunestoneServices) {
+        let wwObj = wwList[data.inputs_ref.problemUUID.replace("-ww-rs","")]
+        if (wwObj) {
+            wwObj.logBookEvent({
+                event: "webwork",
+                div_id: data.inputs_ref.problemUUID,
+                act: "show",
+            });
+        } else {
+            console.log(`Error: Could not find webwork object ${data.inputs_ref.problemUUID}`)
+        }
+    }
 }
 
 async function getScores(sid, wwId) {
