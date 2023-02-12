@@ -18,6 +18,9 @@
     "author": "",
     "license": "ISC",
     "devDependencies": {
+        "@babel/core": "^7.0.0",
+        "@babel/preset-env": "^7.15.4",
+        "babel-loader": "^8.2.2",
         "compression-webpack-plugin": "^9.0.0",
         "copy-webpack-plugin": "^9.0.0",
         "css-loader": "^6.0.0",
@@ -32,6 +35,7 @@
     "dependencies": {
         "-": "0.0.1",
         "bootstrap": "3.4.1",
+        "btm-expressions": "^0.1.0",
         "codemirror": "^5.59.4",
         "handsontable": "7.2.2",
         "jexcel": "^3.9.1",
