@@ -29,7 +29,7 @@ function definePluginDict(env) {
         //
         // Implementation: pass webpack the ``--env test`` option (see the `env docs <https://webpack.js.org/api/cli/#environment-options>`_). Using the `DefinePlugin <https://webpack.js.org/plugins/define-plugin/>`_, select the appropriate random function.
         RAND_FUNC: env.test
-            ? "(typeof rs_test_rand === 'undefined') ? Math.random : rs_test_rand"
+            ? "(typeof rs_test_rand === 'undefined') ? rand : rs_test_rand"
             : "rand",
     };
 }
