@@ -97,7 +97,7 @@ SQLAlchemy = ">=1.4.0"
 # Development dependencies
 # ========================
 [tool.poetry.dev-dependencies]
-selenium = ">=2.53.6"
+selenium = ">=2.53.6, <4.0.0"
 pyvirtualdisplay = "~3"
 pytest = "~7"
 pylint = "~2"
