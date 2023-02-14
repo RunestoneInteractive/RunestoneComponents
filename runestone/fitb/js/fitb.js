@@ -551,10 +551,11 @@ export default class FITB extends RunestoneBase {
         // Save the answer locally.
         this.saveAnswersLocallyOnly();
         // Save the answer to the server.
+        const is_dynamic = this.dyn_vars !== undefined;
         const data = {
-            event: "fillb",
+            event: is_dynamic ? "dyn-fillb" : "fillb",
             div_id: this.divid,
-            act: answer || "",
+            act: (is_dynamic ? this.dyn_vars_eval : answer) || "",
             seed: this.seed,
             answer: answer || "",
             correct: this.correct ? "T" : "F",
