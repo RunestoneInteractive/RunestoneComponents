@@ -5,7 +5,7 @@ from selenium.webdriver.support import expected_conditions as EC
 def test_1(selenium_module_fixture):
     mf = selenium_module_fixture
 
-    # Check for the following directive-level errors.
+    # Check for the following directive-level errors
     directive_level_errors = (
         # Produced my fitb id error1_no_content,
         (
