@@ -94,14 +94,16 @@ export function renderDynamicContent(
         Object.assign({ divid, prepareCheckAnswers}, dyn_imports),
         rand,
         // In addition to providing this in v, make it available in the function as well, since most problem authors will write ``foo = new BTM()`` (for example, assuming BTM is in dyn_imports) instead of ``foo = new v.BTM()`` (which is unusual syntax).
-        ...Object.values(dyn_imports));
+        ...Object.values(dyn_imports)
+    );
 
     let html_out;
     if (typeof dyn_vars_eval.beforeContentRender === "function") {
         try {
             dyn_vars_eval.beforeContentRender(dyn_vars_eval);
         } catch (err) {
-            console.assert(false,
+            console.assert(
+                false,
                 `Error in problem ${divid} invoking beforeContentRender`
             );
             throw err;

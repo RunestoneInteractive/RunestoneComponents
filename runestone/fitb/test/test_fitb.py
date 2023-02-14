@@ -218,7 +218,7 @@ def _test_dynamic_1(selenium_utils_get, test_values):
     selenium_utils_get.inject_random_values(test_values)
     click_randomize(fitb)
 
-    # Try all the different answers. Include whitespace, various numberic formats, etc.
+    # Try all the different answers. Include whitespace, various numeric formats, etc.
     check_description(selenium_utils_get, fitb, "What is 2 + 1?")
     # Dynamic problems re-create the blanks after receiving new HTML. Wait for this to be ready before typing in a blank to avoid errors.
     import time

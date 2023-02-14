@@ -61,6 +61,7 @@ def run_webpack():
     print(p.stderr + p.stdout)
     assert not p.returncode
 
+
 # .. _selenium_module_fixture:
 #
 # ``selenium_module_fixture``
