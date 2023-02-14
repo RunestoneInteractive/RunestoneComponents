@@ -83,7 +83,6 @@ export function renderDynamicContent(
     // Initialize RNG with ``seed``.
     const rand = aleaPRNG(seed);
 
-    // See `RAND_FUNC <RAND_FUNC>`_, which refers to ``rand`` above.
     const dyn_vars_eval = window.Function(
         "v",
         "rand",
@@ -91,8 +90,9 @@ export function renderDynamicContent(
         `"use strict";\n${dyn_vars};\nreturn v;`
     )(
         // We want v.divid = divid and v.prepareCheckAnswers = prepareCheckAnswers. In contrast, the key/values pairs of dyn_imports should be directly assigned to v, hence the Object.assign.
-        Object.assign({ divid, prepareCheckAnswers}, dyn_imports),
-        rand,
+        Object.assign({ divid, prepareCheckAnswers }, dyn_imports),
+        // See `RAND_FUNC <RAND_FUNC>`_, which refers to ``rand`` above.
+        RAND_FUNC,
         // In addition to providing this in v, make it available in the function as well, since most problem authors will write ``foo = new BTM()`` (for example, assuming BTM is in dyn_imports) instead of ``foo = new v.BTM()`` (which is unusual syntax).
         ...Object.values(dyn_imports)
     );
