@@ -130,7 +130,7 @@ def _build_ptx_book(config, gen, manifest, course, click=click):
             if res != 0:
                 click.echo("Failed to build")
             # build the book
-        click.echo("Building for Runestone")
+        click.echo("Building for Runestone Academy")
         res = subprocess.call("pretext build runestone", shell=True)
         if res != 0:
             click.echo("Building failed")
@@ -181,6 +181,7 @@ def process_manifest(cname, mpath, click=click):
         raise IOError(
             f"You must provide a valid path to a manifest file: {mpath} does not exist."
         )
+    return True
 
 
 def check_project_ptx(click=click):
