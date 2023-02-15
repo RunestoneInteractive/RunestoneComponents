@@ -167,9 +167,12 @@ export default class SQLFeedback extends HParsonsFeedback {
         if (executionSuccessFlag) {
             this.results = this.executeIteratedStatements(this.hparsons.db.iterateStatements(query.input));
             // always render full execution results of student input regardless of success/failure
-            this.visualizeResults(respDiv, this.results);
+            // for lab study: to be consistent with code execution, only visualize last entry
+            // this.visualizeResults(respDiv, this.results);
             if (this.results.at(-1).status == 'failure') {
                 // if error occured in student input, stop executing suffix/unitttest 
+                // and visualize the error
+                this.visualizeResults(respDiv, this.results);
                 executionSuccessFlag = false;
             }
         }
@@ -182,6 +185,9 @@ export default class SQLFeedback extends HParsonsFeedback {
             if (this.suffixresults.at(-1).status == 'failure') {
                 // if error occured in hidden suffix, visualize the results
                 this.visualizeResults(respDiv, this.suffixresults, "Error executing hidden code in suffix");
+            } else {
+                // for study: visualize last result (suffix is always select *)
+                this.visualizeResults(respDiv, this.suffixresults);
             }
         }
 
