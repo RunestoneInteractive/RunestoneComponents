@@ -28,6 +28,11 @@ export default class HParsons extends RunestoneBase {
         this.divid = opts.orig.id;
         this.containerDiv = opts.orig;
         this.useRunestoneServices = opts.useRunestoneServices;
+
+        // Set the storageId (key for storing data)
+        var storageId = super.localStorageKey();
+        this.storageId = storageId;
+        
         this.origElem = orig;
         this.origText = this.origElem.textContent;
         this.code = $(orig).text() || "\n\n\n\n\n";
@@ -141,6 +146,46 @@ export default class HParsons extends RunestoneBase {
 
         $(this.outerDiv).prepend(ctrlDiv);
         this.controlDiv = ctrlDiv;
+    }
+
+    // Return previous answers in local storage
+    localData() {
+        var data = localStorage.getItem(this.storageId);
+        if (data !== null) {
+            if (data.charAt(0) == "{") {
+                data = JSON.parse(data);
+            } else {
+                data = {};
+            }
+        } else {
+            data = {};
+        }
+        return data;
+    }
+    // RunestoneBase: Sent when the server has data
+    restoreAnswers(serverData) {
+        this.loadData(serverData);
+    }
+    // RunestoneBase: Load what is in local storage
+    checkLocalStorage() {
+        if (this.graderactive) {
+            return;
+        }
+        this.loadData(this.localData());
+    }
+    // RunestoneBase: Set the state of the problem in local storage
+    setLocalStorage(data) {
+        var toStore;
+        if (data == undefined) {
+            toStore = {
+                source: this.sourceHash(),
+                answer: this.answerHash(),
+                timestamp: new Date(),
+            };
+        } else {
+            toStore = data;
+        }
+        localStorage.setItem(this.storageId, JSON.stringify(toStore));
     }
 
     logHorizontalParsonsEvent(hparsonsEvent) {
