@@ -174,6 +174,8 @@ export default class SQLFeedback extends HParsonsFeedback {
                 // and visualize the error
                 this.visualizeResults(respDiv, this.results);
                 executionSuccessFlag = false;
+            } else if (query.suffix != null) {
+                this.visualizeResults(respDiv, this.results);
             }
         }
         
