@@ -261,13 +261,10 @@ export default class SQLFeedback extends HParsonsFeedback {
     // adapted from activecode
     async buildProg() {
         // assemble code from prefix, suffix, and editor for running.
-        // TODO: fix or remove text entry
+        // TODO: automatically joins the text array with space. 
+        //       Should be joining without space when implementing regex.
         var prog;
-        if (this.hparsons.textentry) {
-            prog = this.hparsons.hparsonsInput.getCurrentInput();
-        } else {
-            prog = this.hparsons.hparsonsInput.getParsonsTextArray().join(' ') + "\n";
-        }
+        prog = this.hparsons.hparsonsInput.getParsonsTextArray().join(' ') + "\n";
         return Promise.resolve(prog);
     }
 

@@ -76,6 +76,7 @@ export default class HParsons extends RunestoneBase {
 
         // initializing functionalities for different feedback
         this.feedbackController.init();
+        this.checkServer('hparsons', true);
     }
 
     // copied from activecode, already modified to add parsons
@@ -115,7 +116,6 @@ export default class HParsons extends RunestoneBase {
         this.feedbackController.createOutput();
     }
 
-    // copied from activecode
     createControls() {
         var ctrlDiv = document.createElement("div");
         $(ctrlDiv).addClass("hp_actions");
@@ -127,8 +127,10 @@ export default class HParsons extends RunestoneBase {
         ctrlDiv.appendChild(this.runButton);
         $(this.runButton).attr("type", "button");
         $(this.runButton).text("Run");
+        var that = this;
         this.runButton.onclick = () => {
-            this.feedbackController.runButtonHandler();
+            that.feedbackController.runButtonHandler();
+            that.setLocalStorage();
         };
 
         // Reset button
@@ -139,8 +141,9 @@ export default class HParsons extends RunestoneBase {
         ctrlDiv.appendChild(resetBtn);
         this.resetButton = resetBtn;
         this.resetButton.onclick = () => {
-            this.hparsonsInput.resetInput();
-            this.feedbackController.reset();
+            that.hparsonsInput.resetInput();
+            that.setLocalStorage();
+            that.feedbackController.reset();
         };
         $(resetBtn).attr("type", "button");
 
@@ -149,6 +152,7 @@ export default class HParsons extends RunestoneBase {
     }
 
     // Return previous answers in local storage
+    // 
     localData() {
         var data = localStorage.getItem(this.storageId);
         if (data !== null) {
@@ -164,28 +168,39 @@ export default class HParsons extends RunestoneBase {
     }
     // RunestoneBase: Sent when the server has data
     restoreAnswers(serverData) {
-        this.loadData(serverData);
+        if (serverData.answer){
+            this.hparsonsInput.restoreAnswer(serverData.answer);
+        }
     }
     // RunestoneBase: Load what is in local storage
     checkLocalStorage() {
         if (this.graderactive) {
+            // Zihan: I think this means the component is still loading?
             return;
         }
-        this.loadData(this.localData());
+        let localData = this.localData();
+        if (localData.answer) {
+            this.hparsonsInput.restoreAnswer(localData.answer);
+        }
+        if (localData.count) {
+            this.feedbackController.checkCount = localData.count;
+        }
     }
     // RunestoneBase: Set the state of the problem in local storage
     setLocalStorage(data) {
-        var toStore;
+        let currentState = {};
         if (data == undefined) {
-            toStore = {
-                source: this.sourceHash(),
-                answer: this.answerHash(),
-                timestamp: new Date(),
-            };
+            currentState = {
+                answer: this.hparsonsInput.getParsonsTextArray()
+            }
+            if (this.isBlockGrading) {
+                // if this is block grading, add number of previous attempts too
+                currentState.count = this.feedbackController.checkCount;
+            }
         } else {
-            toStore = data;
+            currentState = data;
         }
-        localStorage.setItem(this.storageId, JSON.stringify(toStore));
+        localStorage.setItem(this.storageId, JSON.stringify(currentState));
     }
 
     logHorizontalParsonsEvent(hparsonsEvent) {
