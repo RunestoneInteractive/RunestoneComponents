@@ -168,8 +168,19 @@ export default class HParsons extends RunestoneBase {
     }
     // RunestoneBase: Sent when the server has data
     restoreAnswers(serverData) {
+        // TODO: not tested with server data yet. 
+        // Server side data should be:
+        /*
+            {
+                answer: Array<string>, // list of answer block content
+                count: ?number // number of previous attempts if block-based feedback
+            }
+        */
         if (serverData.answer){
             this.hparsonsInput.restoreAnswer(serverData.answer);
+        }
+        if (serverData.count) {
+            this.feedbackController.checkCount = serverData.count;
         }
     }
     // RunestoneBase: Load what is in local storage
