@@ -28,6 +28,11 @@ export default class HParsons extends RunestoneBase {
         this.divid = opts.orig.id;
         this.containerDiv = opts.orig;
         this.useRunestoneServices = opts.useRunestoneServices;
+
+        // Set the storageId (key for storing data)
+        var storageId = super.localStorageKey();
+        this.storageId = storageId;
+        
         this.origElem = orig;
         this.origText = this.origElem.textContent;
         this.code = $(orig).text() || "\n\n\n\n\n";
@@ -71,6 +76,7 @@ export default class HParsons extends RunestoneBase {
 
         // initializing functionalities for different feedback
         this.feedbackController.init();
+        this.checkServer('hparsons', true);
     }
 
     // copied from activecode, already modified to add parsons
@@ -110,7 +116,6 @@ export default class HParsons extends RunestoneBase {
         this.feedbackController.createOutput();
     }
 
-    // copied from activecode
     createControls() {
         var ctrlDiv = document.createElement("div");
         $(ctrlDiv).addClass("hp_actions");
@@ -122,8 +127,10 @@ export default class HParsons extends RunestoneBase {
         ctrlDiv.appendChild(this.runButton);
         $(this.runButton).attr("type", "button");
         $(this.runButton).text("Run");
+        var that = this;
         this.runButton.onclick = () => {
-            this.feedbackController.runButtonHandler();
+            that.feedbackController.runButtonHandler();
+            that.setLocalStorage();
         };
 
         // Reset button
@@ -134,13 +141,77 @@ export default class HParsons extends RunestoneBase {
         ctrlDiv.appendChild(resetBtn);
         this.resetButton = resetBtn;
         this.resetButton.onclick = () => {
-            this.hparsonsInput.resetInput();
-            this.feedbackController.reset();
+            that.hparsonsInput.resetInput();
+            that.setLocalStorage();
+            that.feedbackController.reset();
         };
         $(resetBtn).attr("type", "button");
 
         $(this.outerDiv).prepend(ctrlDiv);
         this.controlDiv = ctrlDiv;
+    }
+
+    // Return previous answers in local storage
+    // 
+    localData() {
+        var data = localStorage.getItem(this.storageId);
+        if (data !== null) {
+            if (data.charAt(0) == "{") {
+                data = JSON.parse(data);
+            } else {
+                data = {};
+            }
+        } else {
+            data = {};
+        }
+        return data;
+    }
+    // RunestoneBase: Sent when the server has data
+    restoreAnswers(serverData) {
+        // TODO: not tested with server data yet. 
+        // Server side data should be:
+        /*
+            {
+                answer: Array<string>, // list of answer block content
+                count: ?number // number of previous attempts if block-based feedback
+            }
+        */
+        if (serverData.answer){
+            this.hparsonsInput.restoreAnswer(serverData.answer);
+        }
+        if (serverData.count) {
+            this.feedbackController.checkCount = serverData.count;
+        }
+    }
+    // RunestoneBase: Load what is in local storage
+    checkLocalStorage() {
+        if (this.graderactive) {
+            // Zihan: I think this means the component is still loading?
+            return;
+        }
+        let localData = this.localData();
+        if (localData.answer) {
+            this.hparsonsInput.restoreAnswer(localData.answer);
+        }
+        if (localData.count) {
+            this.feedbackController.checkCount = localData.count;
+        }
+    }
+    // RunestoneBase: Set the state of the problem in local storage
+    setLocalStorage(data) {
+        let currentState = {};
+        if (data == undefined) {
+            currentState = {
+                answer: this.hparsonsInput.getParsonsTextArray()
+            }
+            if (this.isBlockGrading) {
+                // if this is block grading, add number of previous attempts too
+                currentState.count = this.feedbackController.checkCount;
+            }
+        } else {
+            currentState = data;
+        }
+        localStorage.setItem(this.storageId, JSON.stringify(currentState));
     }
 
     logHorizontalParsonsEvent(hparsonsEvent) {
