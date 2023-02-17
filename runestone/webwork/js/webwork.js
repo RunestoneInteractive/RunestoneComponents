@@ -98,6 +98,7 @@ class WebWork extends RunestoneBase {
         } else {
             this.correct = false;
         }
+        this.decorateStatus();
 
     }
 
