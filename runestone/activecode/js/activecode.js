@@ -36,6 +36,8 @@ import embed from "vega-embed";
 window.vegaEmbed = embed;
 
 var isMouseDown = false;
+var stopExecution = false;
+
 document.onmousedown = function () {
     isMouseDown = true;
 };
@@ -97,6 +99,7 @@ export class ActiveCode extends RunestoneBase {
         this.historyScrubber = null;
         this.timestamps = ["Original"];
         this.autorun = $(orig).data("autorun");
+        this.outputLineCount = 0;
         if (this.chatcodes && eBookConfig.enable_chatcodes) {
             if (!socket) {
                 socket = new WebSocket("wss://" + chatcodesServer);
@@ -1074,6 +1077,7 @@ Yet another is that there is an internal error.  The internal error message is: 
     }
     outputfun(text) {
         // bnm python 3
+        if (this.outputLineCount > 1000) return;
         var pyStr = function (x) {
             if (x instanceof Array) {
                 return "[" + x.join(", ") + "]";
@@ -1099,11 +1103,21 @@ Yet another is that there is an internal error.  The internal error message is: 
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
             .replace(/\n/g, "<br/>");
+        // todo: try to make this use the suspension mechanism in skulpt
         return Promise.resolve().then(
             function () {
                 setTimeout(
                     function () {
-                        $(this.output).append(text);
+                        if (this.outputLineCount < 1000) {
+                            $(this.output).append(text);
+                            this.outputLineCount += 1;
+                        } else {
+                            if (this.outputLineCount == 1000) {
+                                $(this.output).append("Too Much output");
+                                this.outputLineCount += 1;
+                                stopExecution = true;
+                            }
+                        }
                     }.bind(this),
                     0
                 );
@@ -1318,6 +1332,7 @@ Yet another is that there is an internal error.  The internal error message is: 
      */
     async runProg(noUI, logResults) {
         console.log("starting runProg");
+        this.outputLineCount = 0;
         if (typeof logResults === "undefined") {
             this.logResults = true;
         } else {
@@ -1373,6 +1388,13 @@ Yet another is that there is an internal error.  The internal error message is: 
         try {
             await Sk.misceval.asyncToPromise(function () {
                 return Sk.importMainWithBody("<stdin>", false, prog, true);
+            }, { // suspension handlers
+            "*": () => {
+                if (stopExecution) {
+                    console.log("stopExecution is true")
+                    throw new Error(`Too much output`);
+                }
+            },
             });
             if (!noUI) {
                 if (this.slideit) {
