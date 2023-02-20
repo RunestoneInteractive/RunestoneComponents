@@ -73,6 +73,10 @@ class WebWork extends RunestoneBase {
         );
     }
 
+
+    // This is called when the runestone_ww_check event is triggered by the webwork problem
+    // Note the webwork problem is in an iframe so we rely on this event and the data
+    // compiled and passed along with the event to "grade" the answer.
     processCurrentAnswers(data) {
         let correctCount = 0;
         let qCount = 0;
