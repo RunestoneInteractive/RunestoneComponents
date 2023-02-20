@@ -649,6 +649,7 @@ export default class Timed extends RunestoneBase {
                 let componentKind = $(tmpChild).data("component");
                 this.renderedQuestionArray[this.currentQuestionIndex] = {
                     question: window.component_factory[componentKind](opts),
+                    state: opts.state,
                 };
             }
         } else if (opts.state === "broken_exam") {
@@ -658,6 +659,7 @@ export default class Timed extends RunestoneBase {
         currentQuestion =
             this.renderedQuestionArray[this.currentQuestionIndex].question;
         if (opts.state === "forreview") {
+            await currentQuestion.component_ready_promise;
             await currentQuestion.checkCurrentAnswer();
             currentQuestion.renderFeedback();
             currentQuestion.disableInteraction();
@@ -1156,7 +1158,7 @@ export default class Timed extends RunestoneBase {
                 parseInt(data.correct),
                 parseInt(data.incorrect),
                 parseInt(data.skipped),
-                parseInt(data.timeTaken),
+                parseInt(data.time_taken),
                 data.reset,
             ];
             this.setLocalStorage(tmpArr);
@@ -1169,6 +1171,11 @@ export default class Timed extends RunestoneBase {
         }
         if (tmpArr.length == 4) {
             // Accidental Reload OR Database Entry
+            this.score = tmpArr[0];
+            this.incorrect = tmpArr[1];
+            this.skipped = tmpArr[2];
+            this.timeTaken = tmpArr[3];
+        } else if (tmpArr.length == 5) {
             this.score = tmpArr[0];
             this.incorrect = tmpArr[1];
             this.skipped = tmpArr[2];
@@ -1224,14 +1231,14 @@ export default class Timed extends RunestoneBase {
                 scoreString = `Num Correct: ${this.score}. Questions: ${this.correctStr}<br>Num Wrong: ${this.incorrect}. Questions: ${this.incorrectStr}<br>Num Skipped: ${this.skipped}. Questions: ${this.skippedStr}<br>`;
                 numQuestions = this.score + this.incorrect + this.skipped;
                 percentCorrect = (this.score / numQuestions) * 100;
-                scoreString += "Percent Correct: " + percentCorrect + "%";
+                scoreString += "Percent Correct: " + percentCorrect.toFixed(2) + "%";
                 $(this.scoreDiv).html(scoreString);
                 this.scoreDiv.style.display = "block";
             } else {
                 scoreString = `Num Correct: ${this.score}<br>Num Wrong: ${this.incorrect}<br>Num Skipped: ${this.skipped}<br>`;
                 numQuestions = this.score + this.incorrect + this.skipped;
                 percentCorrect = (this.score / numQuestions) * 100;
-                scoreString += "Percent Correct: " + percentCorrect + "%";
+                scoreString += "Percent Correct: " + percentCorrect.toFixed(2) + "%";
                 $(this.scoreDiv).html(scoreString);
                 this.scoreDiv.style.display = "block";
             }
