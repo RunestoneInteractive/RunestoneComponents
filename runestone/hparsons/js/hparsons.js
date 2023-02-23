@@ -5,6 +5,12 @@ import BlockFeedback from "./BlockFeedback.js";
 import SQLFeedback from "./SQLFeedback.js";
 import {InitMicroParsons} from 'micro-parsons/micro-parsons/micro-parsons.js';
 import 'micro-parsons/micro-parsons/micro-parsons.css';
+// If you need to debug something in the micro-parsons library then
+// gh repo clone amy21206/micro-parsons-element
+// run npm install and npm build
+// copy everything from bin into the hparsons/js folder and build the components.
+/*import {InitMicroParsons} from './micro-parsons.js';
+import './micro-parsons.css';*/
 
 export var hpList;
 // Dictionary that contains all instances of horizontal Parsons problem objects
@@ -32,7 +38,7 @@ export default class HParsons extends RunestoneBase {
         // Set the storageId (key for storing data)
         var storageId = super.localStorageKey();
         this.storageId = storageId;
-        
+
         this.origElem = orig;
         this.origText = this.origElem.textContent;
         this.code = $(orig).text() || "\n\n\n\n\n";
@@ -76,7 +82,7 @@ export default class HParsons extends RunestoneBase {
 
         // initializing functionalities for different feedback
         this.feedbackController.init();
-        this.checkServer('hparsons', true);
+        this.checkServer('hparsonsAnswer', true);
     }
 
     // copied from activecode, already modified to add parsons
@@ -152,7 +158,7 @@ export default class HParsons extends RunestoneBase {
     }
 
     // Return previous answers in local storage
-    // 
+    //
     localData() {
         var data = localStorage.getItem(this.storageId);
         if (data !== null) {
@@ -168,7 +174,7 @@ export default class HParsons extends RunestoneBase {
     }
     // RunestoneBase: Sent when the server has data
     restoreAnswers(serverData) {
-        // TODO: not tested with server data yet. 
+        // TODO: not tested with server data yet.
         // Server side data should be:
         /*
             {
@@ -177,7 +183,7 @@ export default class HParsons extends RunestoneBase {
             }
         */
         if (serverData.answer){
-            this.hparsonsInput.restoreAnswer(serverData.answer);
+            this.hparsonsInput.restoreAnswer(serverData.answer.blocks);
         }
         if (serverData.count) {
             this.feedbackController.checkCount = serverData.count;

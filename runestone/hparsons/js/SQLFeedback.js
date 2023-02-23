@@ -261,7 +261,7 @@ export default class SQLFeedback extends HParsonsFeedback {
     // adapted from activecode
     async buildProg() {
         // assemble code from prefix, suffix, and editor for running.
-        // TODO: automatically joins the text array with space. 
+        // TODO: automatically joins the text array with space.
         //       Should be joining without space when implementing regex.
         var prog;
         prog = this.hparsons.hparsonsInput.getParsonsTextArray().join(' ') + "\n";
@@ -280,7 +280,10 @@ export default class SQLFeedback extends HParsonsFeedback {
             let logData = {
                 event: "hparsonsAnswer",
                 div_id: this.hparsons.divid,
-                act: act
+                act: JSON.stringify(act),
+                percent: this.percent || 0,
+                correct: act.correct,
+                answer: JSON.stringify({"blocks": act.answer}),
             }
             await this.hparsons.logBookEvent(logData);
         }
