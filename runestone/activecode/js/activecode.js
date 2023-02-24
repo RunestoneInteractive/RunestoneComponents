@@ -708,6 +708,8 @@ export class ActiveCode extends RunestoneBase {
         this.output = document.createElement("pre");
         this.output.id = this.divid + "_stdout";
         $(this.output).css("visibility", "hidden");
+        $(this.output).css("max-height", "400px");
+        $(this.output).css("overflow", "auto");
         this.graphics = document.createElement("div");
         this.graphics.id = this.divid + "_graphics";
         $(this.graphics).addClass("ac-canvas");
@@ -1104,25 +1106,26 @@ Yet another is that there is an internal error.  The internal error message is: 
             .replace(/>/g, "&gt;")
             .replace(/\n/g, "<br/>");
         // todo: try to make this use the suspension mechanism in skulpt
-        return Promise.resolve().then(
-            function () {
+        return new Sk.misceval.promiseToSuspension(new Promise(function (resolve) {
                 setTimeout(
                     function () {
                         if (this.outputLineCount < 1000) {
                             $(this.output).append(text);
                             this.outputLineCount += 1;
+                            resolve(Sk.builtin.none.none$)
                         } else {
                             if (this.outputLineCount == 1000) {
                                 $(this.output).append("Too Much output");
                                 this.outputLineCount += 1;
                                 stopExecution = true;
+                                resolve(Sk.builtin.none.none$)
                             }
                         }
                     }.bind(this),
-                    0
+                    1
                 );
             }.bind(this)
-        );
+        ));
     }
 
     filewriter(fobj, bytes) {
