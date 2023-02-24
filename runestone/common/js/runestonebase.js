@@ -465,8 +465,16 @@ export default class RunestoneBase {
             // should wait until defaultPageReady is defined
             // If defaultPageReady is not defined then just enqueue the components.
             // Once defaultPageReady is defined
+            // the window.runestoneMathReady promise will be fulfilled when the
+            // initial typesetting is complete.
             if (MathJax.typesetPromise) {
-                return this.mjresolver(this.aQueue.enqueue(component))
+                if (typeof(window.runestoneMathReady) !== "undefined") {
+                    return window.runestoneMathReady.then(
+                        () => this.mjresolver(this.aQueue.enqueue(component))
+                    )
+                } else {
+                    return this.mjresolver(this.aQueue.enqueue(component))
+                }
             } else {
                 console.log(`Waiting on MathJax!! ${MathJax.typesetPromise}`);
                 setTimeout(() => this.queueMathJax(component), 200);
