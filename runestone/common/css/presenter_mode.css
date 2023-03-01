@@ -6,11 +6,11 @@
   padding: 0.85em;
 }
 
-.presentation-mode .section *{
+.presentation-mode section *{
   display: none;
 }
 
-.presentation-mode .section .runestone, .presentation-mode .section .runestone *{
+.presentation-mode section .runestone, .presentation-mode section .runestone *{
   display: initial;
 }
 
@@ -32,7 +32,7 @@
 }
 
 div.ExecutionVisualizer #dataViz{
-  margin: 0;  
+  margin: 0;
 }
 
 div.ExecutionVisualizer div#stackHeader {
@@ -166,7 +166,7 @@ div.ExecutionVisualizer table.visualizer {
   min-height: 60px;
 }
 
-.container .section > runestone:not(.ac_section){
+.container section > runestone:not(.ac_section){
   max-width:none;
   margin: 0;
 }

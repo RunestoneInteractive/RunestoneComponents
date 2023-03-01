@@ -12,9 +12,9 @@ function presentToggle() {
     let fullHeightClass = "full-height";
     let bottomClass = "bottom";
     if (bod.hasClass(presentClass)) {
-        $(".section *")
+        $("section *")
             .not(
-                "h1, .presentation-title, .btn-presenter, .runestone, .runestone *, .section, .pre, code"
+                "h1, .presentation-title, .btn-presenter, .runestone, .runestone *, section, .pre, code"
             )
             .removeClass("hidden"); //show everything
         $("#completionButton").removeClass("hidden");
@@ -25,19 +25,19 @@ function presentToggle() {
         codeExercises.removeClass("hidden");
         presenterCssLink.disabled = true; // disable present_mode.css
     } else {
-        $(".section *")
+        $("section *")
             .not(
-                "h1, .presentation-title, .btn-presenter, .runestone, .runestone *, .section, .pre, code"
+                "h1, .presentation-title, .btn-presenter, .runestone, .runestone *, section, .pre, code"
             )
             .addClass("hidden"); // hide extraneous stuff
         $("#completionButton").addClass("hidden");
         bod.addClass(presentClass);
         bod.addClass(fullHeightClass);
         $("html").addClass(fullHeightClass);
-        $(".section .runestone").addClass(fullHeightClass);
+        $("section .runestone").addClass(fullHeightClass);
         $(".ac-caption").addClass(bottomClass);
         localStorage.setItem("presentMode", presentClass);
-        loadPresenterCss(); // present_mode.css should only apply when in presenter mode.
+        //loadPresenterCss(); // present_mode.css should only apply when in presenter mode.
         activateExercise();
     }
 }
@@ -57,7 +57,7 @@ function presentModeSetup() {
     // this still leaves some things semi-messed up when you exit presenter mode.
     // but instructors will probably just learn to refresh the page.
     dataComponent.addClass("runestone");
-    dataComponent.parent().closest("div").not(".section").addClass("runestone");
+    dataComponent.parent().closest("div").not("section").addClass("runestone");
     dataComponent.parent().closest("div").css("max-width", "none");
 
     dataComponent.each(function (index) {
@@ -68,7 +68,7 @@ function presentModeSetup() {
     });
 
     codelensListener(500);
-    $(".section img").wrap('<div class="runestone">');
+    $("section img").wrap('<div class="runestone">');
     codeExercises = $(".runestone").not(".runestone .runestone");
     // codeExercises.each(function(){
     $("h1").before(
@@ -97,7 +97,7 @@ function activateExercise(index) {
     }
 }
 
-function nextExercise() {
+window.nextExercise = function() {
     let active = getActiveExercise();
     let nextIndex = codeExercises.index(active) + 1;
     if (nextIndex < codeExercises.length) {
@@ -105,7 +105,7 @@ function nextExercise() {
     }
 }
 
-function prevExercise() {
+window.prevExercise = function() {
     let active = getActiveExercise();
     let prevIndex = codeExercises.index(active) - 1;
     if (prevIndex >= 0) {
