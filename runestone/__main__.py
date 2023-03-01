@@ -17,7 +17,7 @@ from pkg_resources import resource_string, resource_filename, require
 from .pretext.chapter_pop import manifest_data_to_db
 import codecs
 from runestone.server import get_dburl
-from runestone.server.utils import update_library
+from runestone.server.utils import update_library, populate_static
 
 if len(sys.argv) == 2:
     if "--version" in sys.argv:
@@ -447,6 +447,17 @@ def process_manifest(course, manifest):
         raise IOError("You must provide a valid path to a manifest file")
 
 
+@cli.command(short_help="Fetch Javascript/CSS from CDN and copy to _static")
+@click.option("--course", help="Name of the course (base course)")
+def fetch_latest_static(course):
+    config = type("config", (object,), {})()
+    config.dburl = get_dburl()
+    os.chdir(findProjectRoot())
+    manifest = "runestone-manifest.xml"
+    mpath = pathlib.Path(os.getcwd(), "published", course, manifest)
+    populate_static(config, mpath, course)
+
+
 def main(args=None):
     sys.dont_write_bytecode = True
     if not args:
@@ -468,6 +479,8 @@ def findProjectRoot():
     prevdir = ""
     while start != prevdir:
         if os.path.exists(os.path.join(start, "pavement.py")):
+            return start
+        if os.path.exists(os.path.join(start, "project.ptx")):
             return start
         prevdir = start
         start = os.path.dirname(start)

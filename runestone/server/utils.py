@@ -355,9 +355,13 @@ def populate_static(config, mpath: Path, course: str, click=click):
         current_version = tree.find("./version").text
     else:
         sdir.mkdir(mode=0o775, exist_ok=True)  # NB mode must be in Octal!
-    tree = ET.parse(mpath)
-    el = tree.find("./runestone-services[@version]")
-    version = el.attrib["version"].strip()
+    if mpath.exists():
+        tree = ET.parse(mpath)
+        el = tree.find("./runestone-services[@version]")
+        version = el.attrib["version"].strip()
+    else:
+        click.echo("Error: missing runestone-manifest.xml file")
+        return False
     # Do not download if the versions already match.
     if version != current_version:
         click.echo(f"Fetching {version} files to {sdir} ")
