@@ -83,13 +83,17 @@ class WebWork extends RunestoneBase {
         let actString = "check:";
         this.answerObj = {}
         this.lastAnswerRaw = data;
-
+        this.answerObj.answers = {};
+        this.answerObj.mqAnswers = {};
+        // data.inputs_
         for (let k of Object.keys(data.rh_result.answers)) {
             qCount += 1;
             if (data.rh_result.answers[k].score == 1) {
                 correctCount += 1;
             }
-            this.answerObj[k] = `${data.rh_result.answers[k].original_student_ans}`
+            this.answerObj.answers[k] = `${data.rh_result.answers[k].original_student_ans}`
+            let mqKey = `MaThQuIlL_${k}`;
+            this.answerObj.mqAnswers[mqKey] = data.inputs_ref[mqKey];
             actString += `actual:${data.rh_result.answers[k].original_student_ans}:expected:${data.rh_result.answers[k].correct_value}:`;
         }
         let pct = correctCount / qCount;
