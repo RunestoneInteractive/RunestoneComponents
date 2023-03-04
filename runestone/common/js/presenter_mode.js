@@ -37,6 +37,7 @@ function presentToggle() {
         $("section .runestone").addClass(fullHeightClass);
         $(".ac-caption").addClass(bottomClass);
         localStorage.setItem("presentMode", presentClass);
+        // presenter_mode.css is loaded by webpack
         //loadPresenterCss(); // present_mode.css should only apply when in presenter mode.
         activateExercise();
     }
