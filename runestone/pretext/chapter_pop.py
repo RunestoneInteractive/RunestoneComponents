@@ -245,7 +245,7 @@ def manifest_data_to_db(course_name, manifest_path):
                             .where(
                                 and_(
                                     source_code.c.acid == filename,
-                                    questions.c.course_id == course_name,
+                                    source_code.c.course_id == course_name,
                                 )
                             )
                             .values(**vdict)
