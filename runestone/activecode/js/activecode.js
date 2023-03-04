@@ -1315,6 +1315,7 @@ Yet another is that there is an internal error.  The internal error message is: 
      */
     async runProg(noUI, logResults) {
         console.log("starting runProg");
+        stopExecution = false;
         this.outputLineCount = 0;
         if (typeof logResults === "undefined") {
             this.logResults = true;
