@@ -1080,27 +1080,7 @@ Yet another is that there is an internal error.  The internal error message is: 
     outputfun(text) {
         // bnm python 3
         if (this.outputLineCount > 1000) return;
-        var pyStr = function (x) {
-            if (x instanceof Array) {
-                return "[" + x.join(", ") + "]";
-            } else {
-                return x;
-            }
-        };
-        var x = text;
-        if (!this.python3) {
-            if (x.charAt(0) == "(") {
-                x = x.slice(1, -1);
-                x = "[" + x + "]";
-                try {
-                    var xl = eval(x);
-                    xl = xl.map(pyStr);
-                    x = xl.join(" ");
-                } catch (err) {}
-            }
-        }
         $(this.output).css("visibility", "visible");
-        text = x;
         text = text
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
