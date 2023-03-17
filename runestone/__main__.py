@@ -340,7 +340,8 @@ def rs2ptx(course, sourcedir, outdir):
     """
     os.chdir(findProjectRoot())
     sys.path.insert(0, os.getcwd())
-    del os.environ["DBURL"]
+    if "DBURL" in os.environ:
+        del os.environ["DBURL"]
     try:
         import pavement
     except Exception as e:
