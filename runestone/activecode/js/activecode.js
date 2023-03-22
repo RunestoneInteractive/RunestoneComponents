@@ -722,24 +722,20 @@ export class ActiveCode extends RunestoneBase {
                 $(this.graphics).addClass("visible-ac-canvas");
             }.bind(this)
         );
-        var clearDiv = document.createElement("div");
-        $(clearDiv).css("clear", "both"); // needed to make parent div resize properly
-        this.outerDiv.appendChild(clearDiv);
         outDiv.appendChild(this.output);
         outDiv.appendChild(this.graphics);
         this.outerDiv.appendChild(outDiv);
         var lensDiv = document.createElement("div");
+        lensDiv.classList.add("codelens");
         lensDiv.id = `${this.divid}_codelens`;
         $(lensDiv).css("display", "none");
         this.codelens = lensDiv;
         this.outerDiv.appendChild(lensDiv);
         var coachDiv = document.createElement("div");
+        coachDiv.classList.add("codecoach");
         $(coachDiv).css("display", "none");
         this.codecoach = coachDiv;
         this.outerDiv.appendChild(coachDiv);
-        clearDiv = document.createElement("div");
-        $(clearDiv).css("clear", "both"); // needed to make parent div resize properly
-        this.outerDiv.appendChild(clearDiv);
     }
 
     disableSaveLoad() {
