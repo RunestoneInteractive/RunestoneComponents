@@ -3,7 +3,6 @@ import { ActiveCode } from "./activecode.js";
 export default class HTMLActiveCode extends ActiveCode {
     constructor(opts) {
         super(opts);
-        opts.alignVertical = true;
         this.code = $("<textarea />").html(this.origElem.innerHTML).text();
         $(this.runButton).text("Render");
         this.editor.setValue(this.code);
@@ -14,12 +13,6 @@ export default class HTMLActiveCode extends ActiveCode {
         let saveCode = "True";
         this.saveCode = await this.manage_scrubber(saveCode);
         $(this.output).text("");
-        if (!this.alignVertical) {
-            $(this.codeDiv).switchClass("col-md-12", "col-md-6", {
-                duration: 500,
-                queue: false,
-            });
-        }
         $(this.outDiv).show({ duration: 700, queue: false });
         prog =
             "<script type=text/javascript>window.onerror = function(msg,url,line) {alert(msg+' on line: '+line);};</script>" +
@@ -28,14 +21,8 @@ export default class HTMLActiveCode extends ActiveCode {
     }
 
     createOutput() {
-        this.alignVertical = true;
         var outDiv = document.createElement("div");
         $(outDiv).addClass("ac_output");
-        if (this.alignVertical) {
-            $(outDiv).addClass("col-md-12");
-        } else {
-            $(outDiv).addClass("col-md-5");
-        }
         this.outDiv = outDiv;
         this.output = document.createElement("iframe");
         $(this.output).css("background-color", "white");

@@ -86,9 +86,6 @@ export default class ACFactory {
             sid: sid,
             graderactive: true,
         };
-        if (language === "htmlmixed") {
-            addopts["vertical"] = true;
-        }
         newac = ACFactory.createActiveCode(thepre, language, addopts);
         var savediv = newac.divid;
         newac.divid = savediv;
