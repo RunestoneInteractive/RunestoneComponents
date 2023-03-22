@@ -63,7 +63,6 @@ export class ActiveCode extends RunestoneBase {
         this.containerDiv = opts.orig;
         this.useRunestoneServices = opts.useRunestoneServices;
         this.python3 = true;
-        this.alignVertical = opts.vertical;
         this.origElem = orig;
         this.origText = this.origElem.textContent;
         this.divid = opts.orig.id;
