@@ -125,7 +125,6 @@ export default class HParsons extends RunestoneBase {
     createControls() {
         var ctrlDiv = document.createElement("div");
         $(ctrlDiv).addClass("hp_actions");
-        $(ctrlDiv).addClass("col-md-12");
 
         // Run Button
         this.runButton = document.createElement("button");

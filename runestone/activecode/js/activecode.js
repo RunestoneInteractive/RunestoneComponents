@@ -159,7 +159,7 @@ export class ActiveCode extends RunestoneBase {
         var linkdiv = document.createElement("div");
         linkdiv.id = this.divid.replace(/_/g, "-").toLowerCase(); // :ref: changes _ to - so add this as a target
         var codeDiv = document.createElement("div");
-        $(codeDiv).addClass("ac_code_div col-md-12");
+        $(codeDiv).addClass("ac_code_div");
         this.codeDiv = codeDiv;
         this.outerDiv.lang = this.language;
         $(this.origElem).replaceWith(this.outerDiv);
@@ -286,7 +286,6 @@ export class ActiveCode extends RunestoneBase {
         var ctrlDiv = document.createElement("div");
         var butt;
         $(ctrlDiv).addClass("ac_actions");
-        $(ctrlDiv).addClass("col-md-12");
         // Run
         butt = document.createElement("button");
         $(butt).text($.i18n("msg_activecode_run_code"));
@@ -703,7 +702,7 @@ export class ActiveCode extends RunestoneBase {
         // to hold turtle graphics output.  We use a div in case the turtle changes from
         // using a canvas to using some other element like svg in the future.
         var outDiv = document.createElement("div");
-        $(outDiv).addClass("ac_output col-md-12");
+        $(outDiv).addClass("ac_output");
         this.outDiv = outDiv;
         this.output = document.createElement("pre");
         this.output.id = this.divid + "_stdout";
@@ -731,12 +730,10 @@ export class ActiveCode extends RunestoneBase {
         this.outerDiv.appendChild(outDiv);
         var lensDiv = document.createElement("div");
         lensDiv.id = `${this.divid}_codelens`;
-        $(lensDiv).addClass("col-md-12");
         $(lensDiv).css("display", "none");
         this.codelens = lensDiv;
         this.outerDiv.appendChild(lensDiv);
         var coachDiv = document.createElement("div");
-        $(coachDiv).addClass("col-md-12");
         $(coachDiv).css("display", "none");
         this.codecoach = coachDiv;
         this.outerDiv.appendChild(coachDiv);

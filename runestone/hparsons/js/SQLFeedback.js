@@ -9,7 +9,7 @@ export default class SQLFeedback extends HParsonsFeedback {
 
     createOutput() {
         var outDiv = document.createElement("div");
-        $(outDiv).addClass("hp_output col-md-12");
+        $(outDiv).addClass("hp_output");
         this.outDiv = outDiv;
         this.output = document.createElement("pre");
         this.output.id = this.hparsons.divid + "_stdout";
