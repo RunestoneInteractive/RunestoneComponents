@@ -67,6 +67,7 @@
 
 .ac_output {
     margin-top: 10px;
+    margin-bottom: -10px;
     display: none;
     background-color: inherit;
 }
@@ -145,4 +146,8 @@
     margin-top: 10px;
     margin-bottom: 10px;
     min-height: 0px !important;
+}
+
+.codelens {
+    margin-bottom: 20px;
 }
