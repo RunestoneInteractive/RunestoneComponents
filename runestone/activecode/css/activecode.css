@@ -112,10 +112,6 @@
     border: 2px solid black;
 }
 
-.ac_section > .col-md-12 {
-    max-width: 100% !important;
-}
-
 .full_width ol {
     max-width: 100% !important;
 }

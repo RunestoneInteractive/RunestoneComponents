@@ -39,7 +39,7 @@ def setup(app):
 TEMPLATE_START = """
 <div class="runestone">
 <div data-component="hparsons" id=%(divid)s data-question_label="%(question_label)s" class="alert alert-warning hparsons_section">
-<div class="hp_question col-md-12">
+<div class="hp_question">
 """
 
 TEMPLATE_END = """

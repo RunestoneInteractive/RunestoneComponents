@@ -138,7 +138,7 @@ function codelensListener(duration) {
 function configureCodelens() {
     let acCodeTitle = document.createElement("h4");
     acCodeTitle.textContent = "Active Code Window";
-    let acCode = $(".ac_code_div").removeClass("col-md-12");
+    let acCode = $(".ac_code_div");
     $(".ac_code_div").addClass("col-md-6");
     acCode.prepend(acCodeTitle);
 
