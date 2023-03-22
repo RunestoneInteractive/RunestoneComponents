@@ -1343,7 +1343,7 @@ Yet another is that there is an internal error.  The internal error message is: 
                 checkDiv = document.createElement("div");
                 checkDiv.classList.add("python_check_results","alert", "alert-warning");
                 let checkHead = checkDiv.appendChild(document.createElement("h3"));
-                checkHead.textContent = "Syntax tips:";
+                checkHead.textContent = "Syntax Tips";
                 let checkPre = checkDiv.appendChild(document.createElement("pre"));
                 //checkPre.classList.add("alert-warning");
                 checkPre.textContent = message;
