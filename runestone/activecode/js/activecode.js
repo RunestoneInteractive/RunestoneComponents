@@ -1310,7 +1310,7 @@ Yet another is that there is an internal error.  The internal error message is: 
 
         let code = this.editor.getValue();
 
-        fetch('/ns/books/python_check', {
+        fetch('/ns/coach/python_check', {
             method: 'POST',
             body: code
         })
