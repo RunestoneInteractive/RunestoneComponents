@@ -45,10 +45,14 @@ export default class SQLFeedback extends HParsonsFeedback {
         // fnprefix sets the path to load the sql-wasm.wasm file
         var bookprefix;
         var fnprefix;
-        if (eBookConfig.useRunestoneServices) {
+        if (
+            eBookConfig.useRunestoneServices ||
+            window.location.search.includes("mode=browsing")
+        ) {
             bookprefix = `${eBookConfig.app}/books/published/${eBookConfig.basecourse}`;
             fnprefix = bookprefix + "/_static";
         } else {
+            // The else clause handles the case where you are building for a static web browser
             bookprefix = "";
             fnprefix = "/_static";
         }
@@ -130,17 +134,115 @@ export default class SQLFeedback extends HParsonsFeedback {
             respDiv.parentElement.removeChild(respDiv);
         }
         $(this.output).text("");
+        // creating new results div
+        respDiv = document.createElement("div");
+        respDiv.id = divid;
+        this.outDiv.appendChild(respDiv);
+        // show the output div
+        $(this.outDiv).show();
+
         // Run this query
         let query = await this.buildProg();
         if (!this.hparsons.db) {
             $(this.output).text(
-                `Error: Database not initialized! DBURL: ${this.dburl}`
+                `Error: Database not initialized! DBURL: ${this.hparsons.dburl}`
             );
             return;
         }
 
-        let it = this.hparsons.db.iterateStatements(query);
-        this.results = [];
+        // When having prefix/suffix, the visualization is consistent with "showlastsql" option of sql activecode:
+        //        only visualize last entry
+
+        let executionSuccessFlag = true;
+        // executing hidden prefix if exist
+        if (query.prefix) {
+            this.prefixresults = this.executeIteratedStatements(this.hparsons.db.iterateStatements(query.prefix));
+            if (this.prefixresults.at(-1).status == 'failure') {
+                // if error occured in hidden prefix, log and stop executing the rest
+                this.visualizeResults(respDiv, this.prefixresults, "Error executing hidden code in prefix");
+                executionSuccessFlag = false;
+            }
+        }
+
+        // executing student input in micro Parsons
+        if (executionSuccessFlag) {
+            this.results = this.executeIteratedStatements(this.hparsons.db.iterateStatements(query.input));
+            if (this.results.at(-1).status == 'failure') {
+                // if error occured in student input, stop executing suffix/unitttest 
+                // and visualize the error
+                this.visualizeResults(respDiv, this.results);
+                executionSuccessFlag = false;
+            } else if (!query.suffix) {
+                this.visualizeResults(respDiv, this.results);
+            }
+        }
+        
+        // executing hidden suffix if exist
+        // In most cases the suffix is just "select * from x" to 
+        //    get all data from the table to see if the operations the table is correct
+        if (executionSuccessFlag && query.suffix) {
+            this.suffixresults = this.executeIteratedStatements(this.hparsons.db.iterateStatements(query.suffix));
+            if (this.suffixresults.at(-1).status == 'failure') {
+                // if error occured in hidden suffix, visualize the results
+                this.visualizeResults(respDiv, this.suffixresults, "Error executing hidden code in suffix");
+                executionSuccessFlag = false;
+            } else {
+                this.visualizeResults(respDiv, this.suffixresults);
+            }
+        }
+
+        // Now handle autograding
+        // autograding takes the results of the hidden suffix if exist
+        // otherwise take the result of student input
+        if (this.hparsons.unittest) {
+            if (executionSuccessFlag) {
+                if (this.suffixresults) {
+                    this.testResult = this.autograde(
+                        this.suffixresults[this.suffixresults.length - 1]
+                    );
+                } else {
+                    this.testResult = this.autograde(
+                        this.results[this.results.length - 1]
+                    );
+                }
+            } else {
+                // unit test results when execution failed
+                this.passed = 0;
+                this.failed = 0;
+                this.percent = NaN;
+                this.unit_results = `percent:${this.percent}:passed:${this.passed}:failed:${this.failed}`;
+                // Do not show unittest results if execution failed
+                $(this.output).css("visibility", "hidden");
+            }
+        } else {
+            $(this.output).css("visibility", "hidden");
+        }
+
+        return Promise.resolve("done");
+    }
+
+    // Refactored from activecode-sql.
+    // Takes iterated statements from db.iterateStatemnts(queryString)
+    // Returns Array<result>:
+    /* each result: {
+        status: "success" or "faliure",
+        // for SELECT statements (?):
+        columns: number of columns,
+        values: data,
+        rowcount: number of rows in data,
+        // for INSERT, UPDATE, DELETE:
+        operation: "INSERT", "UPDATE", or "DELETE",
+        rowcount: number of rows modified,
+        // when error occurred (aside from status):
+        message: error message,
+        sql: remaining SQL (?)
+        // when no queries were executed:
+        message: "no queries submitted"
+    }*/
+    // If an error occurs it will stop executing the rest of queries in it.
+    // Thus the error result will always be the last item.
+    executeIteratedStatements(it) {
+        let results = [];
         try {
             for (let statement of it) {
                 let columns = statement.getColumnNames();
@@ -150,7 +252,7 @@ export default class SQLFeedback extends HParsonsFeedback {
                     while (statement.step()) {
                         data.push(statement.get());
                     }
-                    this.results.push({
+                    results.push({
                         status: "success",
                         columns: columns,
                         values: data,
@@ -169,44 +271,53 @@ export default class SQLFeedback extends HParsonsFeedback {
                         prefix === "update" ||
                         prefix === "delete"
                     ) {
-                        this.results.push({
+                        results.push({
                             status: "success",
                             operation: prefix,
-                            rowcount: this.db.getRowsModified(),
+                            rowcount: this.hparsons.db.getRowsModified(),
                         });
                     } else {
-                        this.results.push({ status: "success" });
+                        results.push({ status: "success" });
                     }
                 }
             }
         } catch (e) {
-            this.results.push({
+            results.push({
                 status: "failure",
                 message: e.toString(),
                 sql: it.getRemainingSQL(),
             });
         }
-
-        if (this.results.length === 0) {
-            this.results.push({
+        if (results.length === 0) {
+            results.push({
                 status: "failure",
                 message: "No queries submitted.",
             });
         }
+        return results;
+    }
 
-        respDiv = document.createElement("div");
-        respDiv.id = divid;
-        this.outDiv.appendChild(respDiv);
-        $(this.outDiv).show();
-        // Sometimes we don't want to show a bunch of intermediate results
-        // like when we are including a bunch of previous statements from
-        // other activecodes In that case the showlastsql flag can be set
-        // so we only show the last result
-        let resultArray = this.results;
+    // output the results in the resultArray(Array<results>).
+    // container: the container that contains the results
+    // resultArray (Array<result>): see executeIteratedStatements
+    // Each result will be in a separate row.
+    // devNote will be displayed in the top row if exist;
+    //     it usually won't happen unless something is wrong with prefix and suffix.
+    //     ("error execution prefix/suffix")
+    visualizeResults(container, resultArray, devNote) {
+        if (devNote) {
+            let section = document.createElement("div");
+            section.setAttribute("class", "hp_sql_result");
+            container.appendChild(section);
+            let messageBox = document.createElement("pre");
+            messageBox.textContent = devNote;
+            messageBox.setAttribute("class", "hp_sql_result_failure");
+            section.appendChild(messageBox);
+        }
         for (let r of resultArray) {
             let section = document.createElement("div");
             section.setAttribute("class", "hp_sql_result");
-            respDiv.appendChild(section);
+            container.appendChild(section);
             if (r.status === "success") {
                 if (r.columns) {
                     let tableDiv = document.createElement("div");
@@ -245,26 +356,19 @@ export default class SQLFeedback extends HParsonsFeedback {
                 section.appendChild(messageBox);
             }
         }
-
-        // Now handle autograding
-        if (this.hparsons.suffix) {
-            this.testResult = this.autograde(
-                this.results[this.results.length - 1]
-            );
-        } else {
-            $(this.output).css("visibility", "hidden");
-        }
-
-        return Promise.resolve("done");
     }
-
+ 
     // adapted from activecode
     async buildProg() {
         // assemble code from prefix, suffix, and editor for running.
-        // TODO: automatically joins the text array with space.
-        //       Should be joining without space when implementing regex.
-        var prog;
-        prog = this.hparsons.hparsonsInput.getParsonsTextArray().join(' ') + "\n";
+        let prog = {};
+        if (this.hparsons.hiddenPrefix) {
+            prog.prefix = this.hparsons.hiddenPrefix;
+        }
+        prog.input = this.hparsons.hparsonsInput.getParsonsTextArray().join(' ') + "\n";
+        if (this.hparsons.hiddenSuffix) {
+            prog.suffix = this.hparsons.hiddenSuffix;
+        }
         return Promise.resolve(prog);
     }
 
@@ -273,7 +377,7 @@ export default class SQLFeedback extends HParsonsFeedback {
         if (this.unit_results) {
             let act = {
                 scheme: "execution",
-                correct: (this.failed === 0 && this.percent != null) ? "T" : "F",
+                correct: (this.failed == 0 && this.passed != 0) ? "T" : "F",
                 answer: this.hparsons.hparsonsInput.getParsonsTextArray(),
                 percent: this.percent // percent is null if there is execution error
             }
@@ -291,7 +395,7 @@ export default class SQLFeedback extends HParsonsFeedback {
 
     // might move to base class if used by multiple execution based feedback
     autograde(result_table) {
-        var tests = this.hparsons.suffix.split(/\n/);
+        var tests = this.hparsons.unittest.split(/\n/);
         this.passed = 0;
         this.failed = 0;
         // Tests should be of the form

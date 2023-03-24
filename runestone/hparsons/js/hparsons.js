@@ -20,8 +20,6 @@ if (hpList === undefined) hpList = {};
 export default class HParsons extends RunestoneBase {
     constructor(opts) {
         super(opts);
-        // copied from activecode
-        var suffStart;
         // getting settings
         var orig = $(opts.orig).find("textarea")[0];
         this.reuse = $(orig).data("reuse") ? true : false;
@@ -48,16 +46,7 @@ export default class HParsons extends RunestoneBase {
         this.loadButton = null;
         this.outerDiv = null;
         this.controlDiv = null;
-        let prefixEnd = this.code.indexOf("^^^^");
-        if (prefixEnd > -1) {
-            this.prefix = this.code.substring(0, prefixEnd);
-            this.code = this.code.substring(prefixEnd + 5);
-        }
-        suffStart = this.code.indexOf("--unittest--");
-        if (suffStart > -1) {
-            this.suffix = this.code.substring(suffStart + 5);
-            this.code = this.code.substring(0, suffStart);
-        }
+        this.processContent(this.code)
 
         // Change to factory when more execution based feedback is included
         if (this.isBlockGrading) {
@@ -85,33 +74,48 @@ export default class HParsons extends RunestoneBase {
         this.checkServer('hparsonsAnswer', true);
     }
 
+    processContent(code) {
+        // todo: add errors when blocks are nonexistent (maybe in python)?
+        this.hiddenPrefix = this.processSingleContent(code, '--hiddenprefix--');
+        this.originalBlocks = this.processSingleContent(code, '--blocks--').split('\n').slice(1,-1);
+        this.hiddenSuffix = this.processSingleContent(code, '--hiddensuffix--');
+        this.unittest = this.processSingleContent(code, '--unittest--');
+    }
+
+    processSingleContent(code, delimitier) {
+        let index = code.indexOf(delimitier);
+        if (index > -1) {
+            let content = code.substring(index + delimitier.length);
+            let endIndex = content.indexOf("\n--");
+            content =
+                endIndex > -1
+                    ? content.substring(0, endIndex + 1)
+                    : content;
+            return content;
+        }
+        return undefined;
+    }
+
     // copied from activecode, already modified to add parsons
     createEditor() {
         this.outerDiv = document.createElement("div");
         $(this.origElem).replaceWith(this.outerDiv);
         this.outerDiv.id = `${this.divid}-container`;
         this.outerDiv.addEventListener("micro-parsons", (ev) => {
-            this.logHorizontalParsonsEvent(ev.detail);
-            this.feedbackController.clearFeedback();
+            const eventListRunestone = ['input', 'reset'];
+            if (eventListRunestone.includes(ev.detail.type)) {
+                // only log the events in the event list
+                this.logHorizontalParsonsEvent(ev.detail);
+                // when event is input or reset: clear previous feedback
+                this.feedbackController.clearFeedback();
+            }
         });
-        let blocks = [];
-        let blockIndex = this.code.indexOf("--blocks--");
-        if (blockIndex > -1) {
-            let blocksString = this.code.substring(blockIndex + 10);
-            let endIndex = blocksString.indexOf("\n--");
-            blocksString =
-                endIndex > -1
-                    ? blocksString.substring(0, endIndex)
-                    : blocksString;
-            blocks = blocksString.split("\n");
-        }
-        this.originalBlocks = blocks.slice(1, -1);
         const props = {
             selector: `#${this.divid}-container`,
             id: `${this.divid}-hparsons`,
             reuse: this.reuse,
             randomize: this.randomize,
-            parsonsBlocks: blocks.slice(1, -1),
+            parsonsBlocks: [...this.originalBlocks],
             language: this.language
         }
         InitMicroParsons(props);
