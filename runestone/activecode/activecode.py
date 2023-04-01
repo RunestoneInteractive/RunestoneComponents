@@ -87,7 +87,7 @@ XML_LISTING_START = """
 TEMPLATE_START = """
 <div class="%(divclass)s %(optclass)s">
 <div data-component="activecode" id=%(divid)s data-question_label="%(question_label)s">
-<div id=%(divid)s_question class="ac_question col-md-12">
+<div id=%(divid)s_question class="ac_question">
 """
 
 TEMPLATE_END = """

@@ -63,7 +63,6 @@ export class ActiveCode extends RunestoneBase {
         this.containerDiv = opts.orig;
         this.useRunestoneServices = opts.useRunestoneServices;
         this.python3 = true;
-        this.alignVertical = opts.vertical;
         this.origElem = orig;
         this.origText = this.origElem.textContent;
         this.divid = opts.orig.id;
@@ -159,7 +158,7 @@ export class ActiveCode extends RunestoneBase {
         var linkdiv = document.createElement("div");
         linkdiv.id = this.divid.replace(/_/g, "-").toLowerCase(); // :ref: changes _ to - so add this as a target
         var codeDiv = document.createElement("div");
-        $(codeDiv).addClass("ac_code_div col-md-12");
+        $(codeDiv).addClass("ac_code_div");
         this.codeDiv = codeDiv;
         this.outerDiv.lang = this.language;
         $(this.origElem).replaceWith(this.outerDiv);
@@ -286,7 +285,6 @@ export class ActiveCode extends RunestoneBase {
         var ctrlDiv = document.createElement("div");
         var butt;
         $(ctrlDiv).addClass("ac_actions");
-        $(ctrlDiv).addClass("col-md-12");
         // Run
         butt = document.createElement("button");
         $(butt).text($.i18n("msg_activecode_run_code"));
@@ -703,7 +701,7 @@ export class ActiveCode extends RunestoneBase {
         // to hold turtle graphics output.  We use a div in case the turtle changes from
         // using a canvas to using some other element like svg in the future.
         var outDiv = document.createElement("div");
-        $(outDiv).addClass("ac_output col-md-12");
+        $(outDiv).addClass("ac_output");
         this.outDiv = outDiv;
         this.output = document.createElement("pre");
         this.output.id = this.divid + "_stdout";
@@ -723,26 +721,28 @@ export class ActiveCode extends RunestoneBase {
                 $(this.graphics).addClass("visible-ac-canvas");
             }.bind(this)
         );
-        var clearDiv = document.createElement("div");
-        $(clearDiv).css("clear", "both"); // needed to make parent div resize properly
-        this.outerDiv.appendChild(clearDiv);
+
+        //Anything that wants to add output to coachdiv can do so after the h3
+        // all those elements will be cleared with each run and coach display will be
+        // reset to none. Any component that adds content after a run should set display
+        // to block to ensure visibility
+        var coachDiv = document.createElement("div");
+        coachDiv.classList.add("alert", "alert-warning", "codecoach");
+        $(coachDiv).css("display", "none");
+        let coachHead = coachDiv.appendChild(document.createElement("h3"));
+        coachHead.textContent = "Code Coach";
+        this.outerDiv.appendChild(coachDiv);
+        this.codecoach = coachDiv;
+
         outDiv.appendChild(this.output);
         outDiv.appendChild(this.graphics);
         this.outerDiv.appendChild(outDiv);
         var lensDiv = document.createElement("div");
+        lensDiv.classList.add("codelens");
         lensDiv.id = `${this.divid}_codelens`;
-        $(lensDiv).addClass("col-md-12");
         $(lensDiv).css("display", "none");
         this.codelens = lensDiv;
         this.outerDiv.appendChild(lensDiv);
-        var coachDiv = document.createElement("div");
-        $(coachDiv).addClass("col-md-12");
-        $(coachDiv).css("display", "none");
-        this.codecoach = coachDiv;
-        this.outerDiv.appendChild(coachDiv);
-        clearDiv = document.createElement("div");
-        $(clearDiv).css("clear", "both"); // needed to make parent div resize properly
-        this.outerDiv.appendChild(clearDiv);
     }
 
     disableSaveLoad() {
@@ -907,38 +907,6 @@ export class ActiveCode extends RunestoneBase {
         this.codelens.appendChild(myIframe);
         this.logBookEvent({
             event: "codelens",
-            act: "view",
-            div_id: this.divid,
-        });
-    }
-    // <iframe id="%(divid)s_codelens" width="800" height="500" style="display:block"src="#">
-    // </iframe>
-    showCodeCoach() {
-        var myIframe;
-        var srcURL;
-        var cl;
-        var div_id = this.divid;
-        if (this.codecoach === null) {
-            this.codecoach = document.createElement("div");
-            this.codecoach.style.display = "block";
-        }
-        cl = this.codecoach.firstChild;
-        if (cl) {
-            this.codecoach.removeChild(cl);
-        }
-        srcURL = eBookConfig.app + "/admin/diffviewer?divid=" + div_id;
-        myIframe = document.createElement("iframe");
-        myIframe.setAttribute("id", div_id + "_coach");
-        myIframe.setAttribute("width", "100%");
-        myIframe.setAttribute("height", "500px");
-        myIframe.setAttribute("style", "display:block");
-        myIframe.style.background = "#fff";
-        myIframe.style.width = "100%";
-        myIframe.src = srcURL;
-        this.codecoach.appendChild(myIframe);
-        $(this.codecoach).show();
-        this.logBookEvent({
-            event: "coach",
             act: "view",
             div_id: this.divid,
         });
@@ -1303,6 +1271,51 @@ Yet another is that there is an internal error.  The internal error message is: 
         }
     }
 
+    async checkPythonSyntax() {
+        let code = this.editor.getValue();
+        fetch('/ns/coach/python_check', {
+            method: 'POST',
+            body: code
+        })
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            if(data.trim() !== '') {
+                //clean up returned text
+                let errorLines = data.split("\n");
+                let codeLines = code.split("\n");
+                let message = "";
+                for(let line of errorLines) {
+                    if(line.indexOf(".py:") != -1) {
+                        //old pyflakes returns "file:line:col error"
+                        //new pyflakes returns "file:line:col: error"
+                        //handle either
+                        const cleaner = /[^.]*.py:(\d+):(\d+):? (.*)/i;
+                        let lineParts = line.match(cleaner)
+                        message += "Line " + lineParts[1] + ": " + lineParts[3] + "\n";
+                        message += codeLines[lineParts[1] - 1] + "\n";
+                        message += " ".repeat(lineParts[2] - 1) + "^\n";
+                    } else {
+                        message += line + "\n";
+                    }
+                }
+                message = message.slice(0,-1);  //remove trailing newline
+
+                //Render
+                let checkDiv = document.createElement("div");
+                checkDiv.classList.add("python_check_results");
+                let checkPre = checkDiv.appendChild(document.createElement("pre"));
+                checkPre.textContent = message;
+                this.codecoach.append(checkDiv);
+                $(this.codecoach).css("display", "block");
+            }
+        })
+        .catch(err => {
+            console.log("Error with ajax python check:", err);
+        });
+    }
+
     /* runProg has several async elements to it.
      * 1. Skulpt runs the python program asynchronously
      * 2. The history is restored asynchronously
@@ -1328,6 +1341,10 @@ Yet another is that there is an internal error.  The internal error message is: 
         var prog = await this.buildProg(true);
         this.saveCode = "True";
         $(this.output).text("");
+
+        //clear anything after header in codecoach
+        $(this.codecoach).children().slice(1).remove();
+
         while ($(`#${this.divid}_errinfo`).length > 0) {
             $(`#${this.divid}_errinfo`).remove();
         }
@@ -1368,6 +1385,9 @@ Yet another is that there is an internal error.  The internal error message is: 
                 duration: 700,
                 queue: false,
             });
+        }
+        if (this.language == "python" || this.language == "python3") {
+            this.checkPythonSyntax();
         }
         try {
             await Sk.misceval.asyncToPromise(function () {

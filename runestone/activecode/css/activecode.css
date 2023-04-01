@@ -57,21 +57,22 @@
     clear: both;
 }
 
-.ac_section .clearfix {
-    position: initial;
-}
-
 .unittest-results {
     margin-left: 20px;
 }
 
 .ac_output {
     margin-top: 10px;
+    margin-bottom: -10px;
     display: none;
     background-color: inherit;
 }
 .ac_output pre {
     background-color: lightgray;
+}
+
+.python_check_results pre {
+    background-color: #f5f5f5;
 }
 
 .ac_caption {
@@ -100,10 +101,6 @@
 
 .visible-ac-canvas {
     border: 2px solid black;
-}
-
-.ac_section > .col-md-12 {
-    max-width: 100% !important;
 }
 
 .full_width ol {
@@ -150,3 +147,15 @@
     margin-bottom: 10px;
     min-height: 0px !important;
 }
+
+.codelens {
+    margin-bottom: 20px;
+}
+
+.codecoach {
+    margin-top: 20px;
+}
+
+.ac_section .alert h3:first-child {
+    margin-top: 0px;
+  }
