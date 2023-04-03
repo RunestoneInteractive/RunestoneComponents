@@ -721,6 +721,19 @@ export class ActiveCode extends RunestoneBase {
                 $(this.graphics).addClass("visible-ac-canvas");
             }.bind(this)
         );
+
+        //Anything that wants to add output to coachdiv can do so after the h3
+        // all those elements will be cleared with each run and coach display will be
+        // reset to none. Any component that adds content after a run should set display
+        // to block to ensure visibility
+        var coachDiv = document.createElement("div");
+        coachDiv.classList.add("alert", "alert-warning", "codecoach");
+        $(coachDiv).css("display", "none");
+        let coachHead = coachDiv.appendChild(document.createElement("h3"));
+        coachHead.textContent = "Code Coach";
+        this.outerDiv.appendChild(coachDiv);
+        this.codecoach = coachDiv;
+
         outDiv.appendChild(this.output);
         outDiv.appendChild(this.graphics);
         this.outerDiv.appendChild(outDiv);
@@ -730,11 +743,6 @@ export class ActiveCode extends RunestoneBase {
         $(lensDiv).css("display", "none");
         this.codelens = lensDiv;
         this.outerDiv.appendChild(lensDiv);
-        var coachDiv = document.createElement("div");
-        coachDiv.classList.add("codecoach");
-        $(coachDiv).css("display", "none");
-        this.codecoach = coachDiv;
-        this.outerDiv.appendChild(coachDiv);
     }
 
     disableSaveLoad() {
@@ -899,38 +907,6 @@ export class ActiveCode extends RunestoneBase {
         this.codelens.appendChild(myIframe);
         this.logBookEvent({
             event: "codelens",
-            act: "view",
-            div_id: this.divid,
-        });
-    }
-    // <iframe id="%(divid)s_codelens" width="800" height="500" style="display:block"src="#">
-    // </iframe>
-    showCodeCoach() {
-        var myIframe;
-        var srcURL;
-        var cl;
-        var div_id = this.divid;
-        if (this.codecoach === null) {
-            this.codecoach = document.createElement("div");
-            this.codecoach.style.display = "block";
-        }
-        cl = this.codecoach.firstChild;
-        if (cl) {
-            this.codecoach.removeChild(cl);
-        }
-        srcURL = eBookConfig.app + "/admin/diffviewer?divid=" + div_id;
-        myIframe = document.createElement("iframe");
-        myIframe.setAttribute("id", div_id + "_coach");
-        myIframe.setAttribute("width", "100%");
-        myIframe.setAttribute("height", "500px");
-        myIframe.setAttribute("style", "display:block");
-        myIframe.style.background = "#fff";
-        myIframe.style.width = "100%";
-        myIframe.src = srcURL;
-        this.codecoach.appendChild(myIframe);
-        $(this.codecoach).show();
-        this.logBookEvent({
-            event: "coach",
             act: "view",
             div_id: this.divid,
         });
@@ -1296,13 +1272,8 @@ Yet another is that there is an internal error.  The internal error message is: 
     }
 
     async checkPythonSyntax() {
-        let checkDiv = this.outerDiv.querySelector("div.python_check_results");
-        if( checkDiv != null )
-            checkDiv.remove();
-
         let code = this.editor.getValue();
-
-        fetch('/ns/books/python_check', {
+        fetch('/ns/coach/python_check', {
             method: 'POST',
             body: code
         })
@@ -1332,17 +1303,12 @@ Yet another is that there is an internal error.  The internal error message is: 
                 message = message.slice(0,-1);  //remove trailing newline
 
                 //Render
-                checkDiv = document.createElement("div");
-                checkDiv.classList.add("python_check_results","alert", "alert-warning");
-                let checkHead = checkDiv.appendChild(document.createElement("h3"));
-                checkHead.textContent = "Syntax Tips";
+                let checkDiv = document.createElement("div");
+                checkDiv.classList.add("python_check_results");
                 let checkPre = checkDiv.appendChild(document.createElement("pre"));
-                //checkPre.classList.add("alert-warning");
                 checkPre.textContent = message;
-
-                //Squeeze check_results right before output pane
-                const outDiv = this.outDiv;
-                outDiv.parentNode.insertBefore(checkDiv, outDiv);
+                this.codecoach.append(checkDiv);
+                $(this.codecoach).css("display", "block");
             }
         })
         .catch(err => {
@@ -1375,6 +1341,10 @@ Yet another is that there is an internal error.  The internal error message is: 
         var prog = await this.buildProg(true);
         this.saveCode = "True";
         $(this.output).text("");
+
+        //clear anything after header in codecoach
+        $(this.codecoach).children().slice(1).remove();
+
         while ($(`#${this.divid}_errinfo`).length > 0) {
             $(`#${this.divid}_errinfo`).remove();
         }
