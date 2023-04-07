@@ -30,6 +30,7 @@ import "codemirror/addon/hint/anyword-hint.js";
 import "codemirror/addon/edit/matchbrackets.js";
 import "./skulpt.min.js";
 import "./skulpt-stdlib.js";
+import PyflakesCoach from "./coach-python-pyflakes.js";
 // Used by Skulpt.
 import embed from "vega-embed";
 // Adapt for use outside webpack -- see https://github.com/vega/vega-embed.
@@ -65,6 +66,7 @@ export class ActiveCode extends RunestoneBase {
         this.python3 = true;
         this.origElem = orig;
         this.origText = this.origElem.textContent;
+        this.codeCoachList = [];    //list of CodeCoaches that will be used to provide feedback
         this.divid = opts.orig.id;
         this.code = $(orig).text() || "\n\n\n\n\n";
         this.language = $(orig).data("lang");
@@ -92,7 +94,7 @@ export class ActiveCode extends RunestoneBase {
         }
         this.output = null; // create pre for output
         this.graphics = null; // create div for turtle graphics
-        this.codecoach = null;
+        this.codecoach = null; // div for Code Coaches
         this.codelens = null;
         this.controlDiv = null;
         this.historyScrubber = null;
@@ -137,6 +139,12 @@ export class ActiveCode extends RunestoneBase {
             this.caption = "ActiveCode";
         }
         this.addCaption("runestone");
+
+        //Setup CodeCoaches - add based on language
+        if (this.language == "python" || this.language == "python3") {
+            this.codeCoachList.push(new PyflakesCoach());
+        }
+
         setTimeout(
             function () {
                 this.editor.refresh();
@@ -274,6 +282,7 @@ export class ActiveCode extends RunestoneBase {
         if (this.logResults) {
             this.logCurrentAnswer();
         }
+        this.runCoaches();
         this.renderFeedback();
         // The run is finished; re-enable the button.
         this.runButton.disabled = false;
@@ -722,15 +731,11 @@ export class ActiveCode extends RunestoneBase {
             }.bind(this)
         );
 
-        //Anything that wants to add output to coachdiv can do so after the h3
-        // all those elements will be cleared with each run and coach display will be
-        // reset to none. Any component that adds content after a run should set display
-        // to block to ensure visibility
         var coachDiv = document.createElement("div");
         coachDiv.classList.add("alert", "alert-warning", "codecoach");
         $(coachDiv).css("display", "none");
         let coachHead = coachDiv.appendChild(document.createElement("h3"));
-        coachHead.textContent = "Code Coach";
+        coachHead.textContent = $.i18n("msg_activecode_code_coach");
         this.outerDiv.appendChild(coachDiv);
         this.codecoach = coachDiv;
 
@@ -1222,6 +1227,35 @@ Yet another is that there is an internal error.  The internal error message is: 
         }
     }
 
+    async runCoaches() {
+        //Run all available code coaches and update code coach div
+
+        //clear anything after header in codecoach div and hide it
+        $(this.codecoach).children().slice(1).remove();
+        $(this.codecoach).css("display", "none");
+
+        //get code, run coaches
+        let code = await this.buildProg(false);
+        let results = [];
+        for(let coach of this.codeCoachList) {
+            results.push(coach.check(code));
+        }
+
+        //once all coaches are done, update div
+        Promise.allSettled(results).then((promises) => {
+            for(let p of promises) {
+                if(p.status === 'fulfilled' && p.value !== null && p.value.trim() !== "") {
+                    let checkDiv = document.createElement("div");
+                    checkDiv.classList.add("python_check_results");
+                    let checkPre = checkDiv.appendChild(document.createElement("pre"));
+                    checkPre.textContent = p.value;
+                    this.codecoach.append(checkDiv);
+                    $(this.codecoach).css("display", "block");
+                }
+            }
+        });
+    }
+
     renderFeedback() {
         // The python unit test code builds the table as it is running the tests
         // In "normal" usage this is displayed immediately.
@@ -1271,51 +1305,6 @@ Yet another is that there is an internal error.  The internal error message is: 
         }
     }
 
-    async checkPythonSyntax() {
-        let code = this.editor.getValue();
-        fetch('/ns/coach/python_check', {
-            method: 'POST',
-            body: code
-        })
-        .then((response) => {
-            return response.json();
-        })
-        .then((data) => {
-            if(data.trim() !== '') {
-                //clean up returned text
-                let errorLines = data.split("\n");
-                let codeLines = code.split("\n");
-                let message = "";
-                for(let line of errorLines) {
-                    if(line.indexOf(".py:") != -1) {
-                        //old pyflakes returns "file:line:col error"
-                        //new pyflakes returns "file:line:col: error"
-                        //handle either
-                        const cleaner = /[^.]*.py:(\d+):(\d+):? (.*)/i;
-                        let lineParts = line.match(cleaner)
-                        message += "Line " + lineParts[1] + ": " + lineParts[3] + "\n";
-                        message += codeLines[lineParts[1] - 1] + "\n";
-                        message += " ".repeat(lineParts[2] - 1) + "^\n";
-                    } else {
-                        message += line + "\n";
-                    }
-                }
-                message = message.slice(0,-1);  //remove trailing newline
-
-                //Render
-                let checkDiv = document.createElement("div");
-                checkDiv.classList.add("python_check_results");
-                let checkPre = checkDiv.appendChild(document.createElement("pre"));
-                checkPre.textContent = message;
-                this.codecoach.append(checkDiv);
-                $(this.codecoach).css("display", "block");
-            }
-        })
-        .catch(err => {
-            console.log("Error with ajax python check:", err);
-        });
-    }
-
     /* runProg has several async elements to it.
      * 1. Skulpt runs the python program asynchronously
      * 2. The history is restored asynchronously
@@ -1341,9 +1330,6 @@ Yet another is that there is an internal error.  The internal error message is: 
         var prog = await this.buildProg(true);
         this.saveCode = "True";
         $(this.output).text("");
-
-        //clear anything after header in codecoach
-        $(this.codecoach).children().slice(1).remove();
 
         while ($(`#${this.divid}_errinfo`).length > 0) {
             $(`#${this.divid}_errinfo`).remove();
@@ -1385,9 +1371,6 @@ Yet another is that there is an internal error.  The internal error message is: 
                 duration: 700,
                 queue: false,
             });
-        }
-        if (this.language == "python" || this.language == "python3") {
-            this.checkPythonSyntax();
         }
         try {
             await Sk.misceval.asyncToPromise(function () {
