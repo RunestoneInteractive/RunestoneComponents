@@ -59,6 +59,13 @@ def _build_runestone_book(config, course, click=click):
         print(e)
         return False
 
+    # If the click object has a worker attribute then we are running in a worker
+    # process and **know** we are making a build for a runestone server. In that
+    # case we need to make sure that the dynamic_pages flag is set to True in
+    # pavement.py
+    if hasattr(click, "worker") and paver_vars["dynamic_pages"] != True:
+        click.echo("dynamic_pages must be set to True in pavement.py")
+        return False
     if paver_vars["project_name"] != course:
         click.echo(
             "Error: {} and {} do not match.  Your course name needs to match the project_name in pavement.py".format(
