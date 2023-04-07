@@ -1305,51 +1305,6 @@ Yet another is that there is an internal error.  The internal error message is: 
         }
     }
 
-    async checkPythonSyntax() {
-        let code = this.editor.getValue();
-        fetch('/ns/coach/python_check', {
-            method: 'POST',
-            body: code
-        })
-        .then((response) => {
-            return response.json();
-        })
-        .then((data) => {
-            if(data.trim() !== '') {
-                //clean up returned text
-                let errorLines = data.split("\n");
-                let codeLines = code.split("\n");
-                let message = "";
-                for(let line of errorLines) {
-                    if(line.indexOf(".py:") != -1) {
-                        //old pyflakes returns "file:line:col error"
-                        //new pyflakes returns "file:line:col: error"
-                        //handle either
-                        const cleaner = /[^.]*.py:(\d+):(\d+):? (.*)/i;
-                        let lineParts = line.match(cleaner)
-                        message += "Line " + lineParts[1] + ": " + lineParts[3] + "\n";
-                        message += codeLines[lineParts[1] - 1] + "\n";
-                        message += " ".repeat(lineParts[2] - 1) + "^\n";
-                    } else {
-                        message += line + "\n";
-                    }
-                }
-                message = message.slice(0,-1);  //remove trailing newline
-
-                //Render
-                let checkDiv = document.createElement("div");
-                checkDiv.classList.add("python_check_results");
-                let checkPre = checkDiv.appendChild(document.createElement("pre"));
-                checkPre.textContent = message;
-                this.codecoach.append(checkDiv);
-                $(this.codecoach).css("display", "block");
-            }
-        })
-        .catch(err => {
-            console.log("Error with ajax python check:", err);
-        });
-    }
-
     /* runProg has several async elements to it.
      * 1. Skulpt runs the python program asynchronously
      * 2. The history is restored asynchronously
