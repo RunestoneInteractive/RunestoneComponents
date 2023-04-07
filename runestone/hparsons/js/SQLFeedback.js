@@ -1,12 +1,11 @@
 import HParsonsFeedback from "./hparsonsFeedback";
 import initSqlJs from "sql.js/dist/sql-wasm.js";
 import Handsontable from "handsontable";
-import 'handsontable/dist/handsontable.full.css';
+import "handsontable/dist/handsontable.full.css";
 
 var allDburls = {};
 
 export default class SQLFeedback extends HParsonsFeedback {
-
     createOutput() {
         var outDiv = document.createElement("div");
         $(outDiv).addClass("hp_output");
@@ -49,7 +48,7 @@ export default class SQLFeedback extends HParsonsFeedback {
             eBookConfig.useRunestoneServices ||
             window.location.search.includes("mode=browsing")
         ) {
-            bookprefix = `${eBookConfig.app}/books/published/${eBookConfig.basecourse}`;
+            bookprefix = `/books/published/${eBookConfig.basecourse}`;
             fnprefix = bookprefix + "/_static";
         } else {
             // The else clause handles the case where you are building for a static web browser
@@ -156,19 +155,27 @@ export default class SQLFeedback extends HParsonsFeedback {
         let executionSuccessFlag = true;
         // executing hidden prefix if exist
         if (query.prefix) {
-            this.prefixresults = this.executeIteratedStatements(this.hparsons.db.iterateStatements(query.prefix));
-            if (this.prefixresults.at(-1).status == 'failure') {
+            this.prefixresults = this.executeIteratedStatements(
+                this.hparsons.db.iterateStatements(query.prefix)
+            );
+            if (this.prefixresults.at(-1).status == "failure") {
                 // if error occured in hidden prefix, log and stop executing the rest
-                this.visualizeResults(respDiv, this.prefixresults, "Error executing hidden code in prefix");
+                this.visualizeResults(
+                    respDiv,
+                    this.prefixresults,
+                    "Error executing hidden code in prefix"
+                );
                 executionSuccessFlag = false;
             }
         }
 
         // executing student input in micro Parsons
         if (executionSuccessFlag) {
-            this.results = this.executeIteratedStatements(this.hparsons.db.iterateStatements(query.input));
-            if (this.results.at(-1).status == 'failure') {
-                // if error occured in student input, stop executing suffix/unitttest 
+            this.results = this.executeIteratedStatements(
+                this.hparsons.db.iterateStatements(query.input)
+            );
+            if (this.results.at(-1).status == "failure") {
+                // if error occured in student input, stop executing suffix/unitttest
                 // and visualize the error
                 this.visualizeResults(respDiv, this.results);
                 executionSuccessFlag = false;
@@ -176,15 +183,21 @@ export default class SQLFeedback extends HParsonsFeedback {
                 this.visualizeResults(respDiv, this.results);
             }
         }
-        
+
         // executing hidden suffix if exist
-        // In most cases the suffix is just "select * from x" to 
+        // In most cases the suffix is just "select * from x" to
         //    get all data from the table to see if the operations the table is correct
         if (executionSuccessFlag && query.suffix) {
-            this.suffixresults = this.executeIteratedStatements(this.hparsons.db.iterateStatements(query.suffix));
-            if (this.suffixresults.at(-1).status == 'failure') {
+            this.suffixresults = this.executeIteratedStatements(
+                this.hparsons.db.iterateStatements(query.suffix)
+            );
+            if (this.suffixresults.at(-1).status == "failure") {
                 // if error occured in hidden suffix, visualize the results
-                this.visualizeResults(respDiv, this.suffixresults, "Error executing hidden code in suffix");
+                this.visualizeResults(
+                    respDiv,
+                    this.suffixresults,
+                    "Error executing hidden code in suffix"
+                );
                 executionSuccessFlag = false;
             } else {
                 this.visualizeResults(respDiv, this.suffixresults);
@@ -357,7 +370,7 @@ export default class SQLFeedback extends HParsonsFeedback {
             }
         }
     }
- 
+
     // adapted from activecode
     async buildProg() {
         // assemble code from prefix, suffix, and editor for running.
@@ -365,7 +378,8 @@ export default class SQLFeedback extends HParsonsFeedback {
         if (this.hparsons.hiddenPrefix) {
             prog.prefix = this.hparsons.hiddenPrefix;
         }
-        prog.input = this.hparsons.hparsonsInput.getParsonsTextArray().join(' ') + "\n";
+        prog.input =
+            this.hparsons.hparsonsInput.getParsonsTextArray().join(" ") + "\n";
         if (this.hparsons.hiddenSuffix) {
             prog.suffix = this.hparsons.hiddenSuffix;
         }
@@ -377,18 +391,18 @@ export default class SQLFeedback extends HParsonsFeedback {
         if (this.unit_results) {
             let act = {
                 scheme: "execution",
-                correct: (this.failed == 0 && this.passed != 0) ? "T" : "F",
+                correct: this.failed == 0 && this.passed != 0 ? "T" : "F",
                 answer: this.hparsons.hparsonsInput.getParsonsTextArray(),
-                percent: this.percent // percent is null if there is execution error
-            }
+                percent: this.percent, // percent is null if there is execution error
+            };
             let logData = {
                 event: "hparsonsAnswer",
                 div_id: this.hparsons.divid,
                 act: JSON.stringify(act),
                 percent: this.percent || 0,
                 correct: act.correct,
-                answer: JSON.stringify({"blocks": act.answer}),
-            }
+                answer: JSON.stringify({ blocks: act.answer }),
+            };
             await this.hparsons.logBookEvent(logData);
         }
     }
@@ -424,8 +438,9 @@ export default class SQLFeedback extends HParsonsFeedback {
         let pct = (100 * this.passed) / (this.passed + this.failed);
         this.percent = pct;
         pct = pct.toLocaleString(undefined, { maximumFractionDigits: 2 });
-        result += `You passed ${this.passed} out of ${this.passed + this.failed
-            } tests for ${pct}%`;
+        result += `You passed ${this.passed} out of ${
+            this.passed + this.failed
+        } tests for ${pct}%`;
         this.unit_results = `percent:${pct}:passed:${this.passed}:failed:${this.failed}`;
         return result;
     }
@@ -438,7 +453,7 @@ export default class SQLFeedback extends HParsonsFeedback {
         try {
             actual = result_table.values[row][col];
         } catch (e) {
-            if (expected == 'NO_DATA') {
+            if (expected == "NO_DATA") {
                 this.passed++;
                 output = `Passed: No data in row ${row}, column ${col}`;
                 return output;
