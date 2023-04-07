@@ -114,5 +114,6 @@ $.i18n().load({
         msg_activecode_assertion_error_fix:
             "Check the expression to the right of assert.  The expression is False and you will need to determine why that is.  You may want to simply print out the individual parts of the expression to understand why it is evaluating to False.",
         msg_activecode_load_db: "Loading DB...",
+        msg_activecode_code_coach: "Code Coach",
     },
 });
