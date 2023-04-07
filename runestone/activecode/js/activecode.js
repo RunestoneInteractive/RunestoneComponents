@@ -1244,7 +1244,7 @@ Yet another is that there is an internal error.  The internal error message is: 
         //once all coaches are done, update div
         Promise.allSettled(results).then((promises) => {
             for(let p of promises) {
-                if(p.status === 'fulfilled' && p.value != null) {
+                if(p.status === 'fulfilled' && p.value !== null && p.value.trim() !== "") {
                     let checkDiv = document.createElement("div");
                     checkDiv.classList.add("python_check_results");
                     let checkPre = checkDiv.appendChild(document.createElement("pre"));

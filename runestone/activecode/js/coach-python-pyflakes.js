@@ -26,11 +26,16 @@ export default class PyflakesCoach {
                             //new pyflakes returns "file:line:col: error"
                             //handle either
                             const cleaner = /[^.]*.py:(\d+):(\d+):? (.*)/i;
-                            let lineParts = line.match(cleaner)
+                            let lineParts = line.match(cleaner);  //[1]: line, [2]: col, [3]: error
                             
-                            message += $.i18n("msd_pyflakes_coach_line") + lineParts[1] + ": " + lineParts[3] + "\n";
-                            message += codeLines[lineParts[1] - 1] + "\n";
-                            message += " ".repeat(lineParts[2] - 1) + "^\n";
+                            //for now, filter messages about star imports
+                            if(!lineParts[3].includes("defined from star imports") 
+                            && !lineParts[3].includes("*' used; unable to detect undefined names"))
+                            {
+                                message += $.i18n("msd_pyflakes_coach_line") + lineParts[1] + ": " + lineParts[3] + "\n";
+                                message += codeLines[lineParts[1] - 1] + "\n";
+                                message += " ".repeat(lineParts[2] - 1) + "^\n";
+                            }
                         } else {
                             message += line + "\n";
                         }
