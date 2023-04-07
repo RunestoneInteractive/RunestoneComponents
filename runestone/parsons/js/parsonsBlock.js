@@ -85,9 +85,12 @@ export default class ParsonsBlock {
                     $(lines[i].view).removeClass(
                         "indent1 indent2 indent3 indent4"
                     );
-                    $(lines[i].view).addClass(
-                        "indent" + (lines[i].indent - line.indent)
-                    );
+                    // todo: if language is natural or math then don't do this
+                    if (this.options.language !== "natural" && this.options.language !== "math") {
+                        $(lines[i].view).addClass(
+                            "indent" + (lines[i].indent - line.indent)
+                        );
+                    }
                 }
             }
         }
