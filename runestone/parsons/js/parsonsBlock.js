@@ -40,8 +40,13 @@ export default class ParsonsBlock {
                 lineIndent = line.indent - sharedIndent;
             }
             $(line.view).removeClass("indent1 indent2 indent3 indent4");
-            if (lineIndent > 0) {
-                $(line.view).addClass("indent" + lineIndent);
+            if (
+                this.problem.options.language != "natural" &&
+                this.problem.options.language != "math"
+            ) {
+                if (lineIndent > 0) {
+                    $(line.view).addClass("indent" + lineIndent);
+                }
             }
             lineDiv.appendChild(line.view);
         }
@@ -86,7 +91,10 @@ export default class ParsonsBlock {
                         "indent1 indent2 indent3 indent4"
                     );
                     // todo: if language is natural or math then don't do this
-                    if (this.options.language !== "natural" && this.options.language !== "math") {
+                    if (
+                        this.options.language !== "natural" &&
+                        this.options.language !== "math"
+                    ) {
                         $(lines[i].view).addClass(
                             "indent" + (lines[i].indent - line.indent)
                         );
@@ -316,11 +324,11 @@ export default class ParsonsBlock {
     verticalOffset() {
         var verticalOffset;
         if (this.inSourceArea()) {
-            verticalOffset = this.problem.sourceArea.getBoundingClientRect()
-                .top;
+            verticalOffset =
+                this.problem.sourceArea.getBoundingClientRect().top;
         } else {
-            verticalOffset = this.problem.answerArea.getBoundingClientRect()
-                .top;
+            verticalOffset =
+                this.problem.answerArea.getBoundingClientRect().top;
         }
         verticalOffset =
             this.view.getBoundingClientRect().top +
