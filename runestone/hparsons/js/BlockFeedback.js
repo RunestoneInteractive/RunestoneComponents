@@ -18,12 +18,17 @@ export default class BlockFeedback extends HParsonsFeedback {
         this.solved = false;
         // TODO: not sure what is the best way to do this
         this.grader = new BlockBasedGrader();
-        let solutionBlocks = [];
+        let solutionContent = [];
         for (let i = 0; i < this.hparsons.blockAnswer.length; ++i) {
-            solutionBlocks.push(this.hparsons.originalBlocks[this.hparsons.blockAnswer[i]]);
+            if (this.hparsons.renderRaw) {
+                // if rendering raw (html): answer is text content instead of the original string
+                solutionContent.push(this.getContentFromRawString(this.hparsons.originalBlocks[this.hparsons.blockAnswer[i]]));
+            } else {
+                solutionContent.push(this.hparsons.originalBlocks[this.hparsons.blockAnswer[i]]);
+            }
         }
-        this.solution = solutionBlocks;
-        this.grader.solution = solutionBlocks;
+        this.solution = solutionContent;
+        this.grader.solution = solutionContent;
         this.answerArea = this.hparsons.hparsonsInput.querySelector('.drop-area');
     }
 
@@ -57,7 +62,14 @@ export default class BlockFeedback extends HParsonsFeedback {
         if (!this.solved) {
             this.checkCount++;
             this.clearFeedback();
-            this.grader.answer = this.hparsons.hparsonsInput.getParsonsTextArray();
+            if (this.hparsons.renderRaw) {
+                // when rendering raw: the answer is actually the text content.
+                this.grader.answer = this.hparsons.hparsonsInput.getParsonsTextArray().map((blockHTML) => {
+                    return this.getContentFromRawString(blockHTML);
+                });
+            } else {
+                this.grader.answer = this.hparsons.hparsonsInput.getParsonsTextArray();
+            }
             this.grade = this.grader.grade();
             if (this.grade == "correct") {
                 $(this.hparsons.runButton).prop("disabled", true);
@@ -101,7 +113,9 @@ export default class BlockFeedback extends HParsonsFeedback {
             var notInSolution = [];
             for (let i = 0; i < answerBlocks.length; i++) {
                 var block = answerBlocks[i];
-                var index = this.solution.indexOf(block.textContent);
+                var index = this.hparsons.renderRaw ?
+                        this.solution.indexOf(this.getContentFromRawString(block.innerHTML))
+                        : this.solution.indexOf(block.textContent);
                 if (index == -1) {
                     notInSolution.push(block);
                 } else {
@@ -121,6 +135,11 @@ export default class BlockFeedback extends HParsonsFeedback {
             }
             feedbackArea.html($.i18n("msg_parson_wrong_order"));
         }
+    }
+    
+    getContentFromRawString(html) {
+        let doc = new DOMParser().parseFromString(html, "text/html");
+        return doc.body.textContent;
     }
 
     // Feedback UI for Block-based Feedback
