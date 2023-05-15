@@ -8,7 +8,7 @@ import RunestoneBase from "./runestonebase.js";
 function setupPTXEvents() {
     let rb = new RunestoneBase();
     // log an event when a knowl is opened.
-    $("[data-knowl").on("click", function () {
+    $("[data-knowl]").on("click", function () {
         let div_id = $(this).data("refid");
         rb.logBookEvent({ event: "knowl", act: "click", div_id: div_id });
     });

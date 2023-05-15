@@ -66,7 +66,7 @@ export class ActiveCode extends RunestoneBase {
         this.python3 = true;
         this.origElem = orig;
         this.origText = this.origElem.textContent;
-        this.codeCoachList = [];    //list of CodeCoaches that will be used to provide feedback
+        this.codeCoachList = []; //list of CodeCoaches that will be used to provide feedback
         this.divid = opts.orig.id;
         this.code = $(orig).text() || "\n\n\n\n\n";
         this.language = $(orig).data("lang");
@@ -935,7 +935,7 @@ export class ActiveCode extends RunestoneBase {
         // But, adjust the line numbers.  If the line number is <= pretextLines then it is in included code
         // if it is greater than the number of included lines but less than the pretext + current editor then it is in the student code.
         // adjust the line number we display by eliminating the pre-included code.
-        if (err.traceback.length >= 1) {
+        if (err.traceback && err.traceback.length >= 1) {
             var errorLine = err.traceback[0].lineno;
             if (errorLine <= this.pretextLines) {
                 errText.innerHTML =
@@ -1059,26 +1059,29 @@ Yet another is that there is an internal error.  The internal error message is: 
             .replace(/>/g, "&gt;")
             .replace(/\n/g, "<br/>");
         // todo: try to make this use the suspension mechanism in skulpt
-        return new Sk.misceval.promiseToSuspension(new Promise(function (resolve) {
-                setTimeout(
-                    function () {
-                        if (this.outputLineCount < 1000) {
-                            $(this.output).append(text);
-                            this.outputLineCount += 1;
-                            resolve(Sk.builtin.none.none$)
-                        } else {
-                            if (this.outputLineCount == 1000) {
-                                $(this.output).append("Too Much output");
+        return new Sk.misceval.promiseToSuspension(
+            new Promise(
+                function (resolve) {
+                    setTimeout(
+                        function () {
+                            if (this.outputLineCount < 1000) {
+                                $(this.output).append(text);
                                 this.outputLineCount += 1;
-                                stopExecution = true;
-                                resolve(Sk.builtin.none.none$)
+                                resolve(Sk.builtin.none.none$);
+                            } else {
+                                if (this.outputLineCount == 1000) {
+                                    $(this.output).append("Too Much output");
+                                    this.outputLineCount += 1;
+                                    stopExecution = true;
+                                    resolve(Sk.builtin.none.none$);
+                                }
                             }
-                        }
-                    }.bind(this),
-                    1
-                );
-            }.bind(this)
-        ));
+                        }.bind(this),
+                        1
+                    );
+                }.bind(this)
+            )
+        );
     }
 
     filewriter(fobj, bytes) {
@@ -1237,17 +1240,23 @@ Yet another is that there is an internal error.  The internal error message is: 
         //get code, run coaches
         let code = await this.buildProg(false);
         let results = [];
-        for(let coach of this.codeCoachList) {
+        for (let coach of this.codeCoachList) {
             results.push(coach.check(code));
         }
 
         //once all coaches are done, update div
         Promise.allSettled(results).then((promises) => {
-            for(let p of promises) {
-                if(p.status === 'fulfilled' && p.value !== null && p.value.trim() !== "") {
+            for (let p of promises) {
+                if (
+                    p.status === "fulfilled" &&
+                    p.value !== null &&
+                    p.value.trim() !== ""
+                ) {
                     let checkDiv = document.createElement("div");
                     checkDiv.classList.add("python_check_results");
-                    let checkPre = checkDiv.appendChild(document.createElement("pre"));
+                    let checkPre = checkDiv.appendChild(
+                        document.createElement("pre")
+                    );
                     checkPre.textContent = p.value;
                     this.codecoach.append(checkDiv);
                     $(this.codecoach).css("display", "block");
@@ -1346,6 +1355,8 @@ Yet another is that there is an internal error.  The internal error message is: 
             read: this.fileReader,
             filewrite: this.filewriter.bind(this),
             __future__: Sk.python3,
+            killableWhile: true,
+            killableFor: true,
             nonreadopen: true,
             //        python3: this.python3,
             imageProxy: "http://image.runestone.academy:8080/320x",
@@ -1373,16 +1384,20 @@ Yet another is that there is an internal error.  The internal error message is: 
             });
         }
         try {
-            await Sk.misceval.asyncToPromise(function () {
-                return Sk.importMainWithBody("<stdin>", false, prog, true);
-            }, { // suspension handlers
-            "*": () => {
-                if (stopExecution) {
-                    console.log("stopExecution is true")
-                    throw new Error(`Too much output`);
+            await Sk.misceval.asyncToPromise(
+                function () {
+                    return Sk.importMainWithBody("<stdin>", false, prog, true);
+                },
+                {
+                    // suspension handlers
+                    "*": () => {
+                        if (stopExecution) {
+                            console.log("stopExecution is true");
+                            throw new Error(`The program was interrupted`);
+                        }
+                    },
                 }
-            },
-            });
+            );
             if (!noUI) {
                 if (this.slideit) {
                     $(this.historyScrubber).on(
