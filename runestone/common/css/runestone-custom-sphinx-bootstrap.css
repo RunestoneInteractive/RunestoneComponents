@@ -1,5 +1,4 @@
 /* Variables holding theme colors */
-<<<<<<< HEAD
 :root {
     --background: #ffffff;
     --outerBackground: #eeeeee;
@@ -49,8 +48,6 @@
     --componentBorderColor: #939090;
     --questionBgColor: rgb(23, 85, 93);
 }
-=======
->>>>>>> 2183a85c (Change: Get working with overhaul)
 
 /* custom modification of basic.css for color-contrast (AA compliant) */
 td.linenos pre {
