@@ -1,6 +1,8 @@
 RunestoneComponents
 ===================
 
+**This repo is now Archived.  Future development has moved to our monorepo called rs**. Please join us there.
+
 .. image:: https://img.shields.io/pypi/v/Runestone.svg
    :target: https://pypi.python.org/pypi/Runestone
    :alt: PyPI Version
