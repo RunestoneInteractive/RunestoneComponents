@@ -23,7 +23,6 @@ import json
 import ast
 from numbers import Number
 import re
-import pdb
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -70,53 +69,88 @@ class FITBNode(nodes.General, nodes.Element, RunestoneIdNode):
 
 
 def visit_fitb_html(self, node):
-
-    node["delimiter"] = "_start__{}_".format(node["runestone_options"]["divid"])
-    self.body.append(node["delimiter"])
-
-    res = node["template_start"] % node["runestone_options"]
-    self.body.append(res)
+    # Save the HTML that's been generated so far. We want to know only what's generated inside this directive.
+    self.context.append(self.body)
+    self.body = []
 
 
 def depart_fitb_html(self, node):
-    # If there were fewer blanks than feedback items, add blanks at the end of the question.
-    blankCount = 0
-    for _ in node.traverse(BlankNode):
-        blankCount += 1
-    while blankCount < len(node["feedbackArray"]):
+    # If there were fewer blanks than feedback items, add blanks at the end of the question. Also, determine the names of each blank.
+    blank_names = {}
+    blank_count = 0
+    for blank_node in node.traverse(BlankNode):
+        # Empty blanks have a "name" of ``-``.
+        name = blank_node["input_name"]
+        if name != "-":
+            # Map from the blank's name to its index in the array of blanks. Don't include unnamed blanks.
+            blank_names[name] = blank_count
+        blank_count += 1
+    while blank_count < len(node["feedbackArray"]):
         visit_blank_html(self, None)
-        blankCount += 1
+        blank_count += 1
 
     # Warn if there are fewer feedback items than blanks.
-    if len(node["feedbackArray"]) < blankCount:
+    if len(node["feedbackArray"]) < blank_count:
         # Taken from the example in the `logging API <http://www.sphinx-doc.org/en/stable/extdev/logging.html#logging-api>`_.
         logger = logging.getLogger(__name__)
         logger.warning(
             "Not enough feedback for the number of blanks supplied.", location=node
         )
 
-    # Generate the HTML.
-    json_feedback = json.dumps(node["feedbackArray"])
+    # Capture HTML generated inside this directive.
+    inner_html = self.body
+    self.body = self.context.pop()
+
+    # Generate the HTML. Start with required JSON data.
+    db_dict = {
+        "problemHtml": "".join(inner_html),
+        "dyn_vars": node.dynamic,
+        "blankNames": blank_names,
+        "feedbackArray": node["feedbackArray"],
+    }
+    # Add in optional data.
+    if dyn_imports := node["runestone_options"].get("dyn_imports", "").split():
+        db_dict["dyn_imports"] = dyn_imports
+    if (static_seed := node["runestone_options"].get("static_seed")) is not None:
+        db_dict["static_seed"] = static_seed
+    db_json = json.dumps(db_dict)
+
     # Some nodes (for example, those in a timed node) have their ``document == None``. Find a valid ``document``.
     node_with_document = node
     while not node_with_document.document:
         node_with_document = node_with_document.parent
-    # Supply grading info (the ``json_feedback``) to the client if we're not grading on the server.
-    ssg = node_with_document.document.settings.env.config.runestone_server_side_grading
-    node["runestone_options"]["json"] = "false" if ssg else json_feedback
-    res = node["template_end"] % node["runestone_options"]
-    self.body.append(res)
+    # Supply client-side grading info if we're not grading on the server.
+    if node_with_document.document.settings.env.config.runestone_server_side_grading:
+        if node.dynamic:
+            # Server-side graded dynamic problems render and provide the problem's HTML on the server; just tell the client it's a dynamic problem.
+            client_json = json.dumps(dict(dyn_vars=True))
+        else:
+            # Other server-side graded problems need the problem's HTML.
+            client_json = json.dumps(dict(problemHtml="".join(inner_html)))
+    else:
+        client_json = db_json
+    node["runestone_options"]["client_json"] = client_json
+    outer_html = (
+        """
+        <div class="%(divclass)s">
+            <div data-component="fillintheblank" data-question_label="%(question_label)s" id="%(divid)s" %(optional)s style="visibility: hidden;">
+                <script type="application/json">
+                    %(client_json)s
+                </script>
+            </div>
+        </div>
+            """
+        % node["runestone_options"]
+    )
 
     # add HTML to the Database and clean up
     addHTMLToDB(
         node["runestone_options"]["divid"],
         node["runestone_options"]["basecourse"],
-        "".join(self.body[self.body.index(node["delimiter"]) + 1 :]),
-        # Either provide grading info to enable server-side grading or pass ``None`` to select client-side grading.
-        json_feedback if ssg else None,
+        outer_html,
+        db_json,
     )
-
-    self.body.remove(node["delimiter"])
+    self.body.append(outer_html)
 
 
 # <exercise>
@@ -233,7 +267,14 @@ class FillInTheBlank(RunestoneIdDirective):
     option_spec = RunestoneIdDirective.option_spec.copy()
     option_spec.update(
         {
-            "casei": directives.flag,  # case insensitive matching
+            # For dynamic problems, this contains JavaScript code which defines the variables used in template substitution in the problem. If this option isn't present, the problem will be a static problem.
+            "dyn_vars": directives.unchanged,
+            # For dynamic problems, this contain a space-separated list of libraries needed by this problem.
+            "dyn_imports": directives.unchanged,
+            # For dynamic problems, this provides an optional static seed.
+            "static_seed": directives.unchanged,
+            # case insensitive matching
+            "casei": directives.flag,
         }
     )
 
@@ -247,20 +288,6 @@ class FillInTheBlank(RunestoneIdDirective):
 
         super(FillInTheBlank, self).run()
 
-        TEMPLATE_START = """
-        <div class="%(divclass)s %(optclass)s">
-        <div data-component="fillintheblank" data-question_label="%(question_label)s" id="%(divid)s" %(optional)s style="visibility: hidden;">
-            """
-
-        TEMPLATE_END = """
-        <script type="application/json">
-            %(json)s
-        </script>
-
-        </div>
-        </div>
-            """
-
         addQuestionToDB(self)
 
         fitbNode = FITBNode()
@@ -269,18 +296,21 @@ class FillInTheBlank(RunestoneIdDirective):
         fitbNode["source"], fitbNode["line"] = self.state_machine.get_source_and_line(
             self.lineno
         )
-        fitbNode["template_start"] = TEMPLATE_START
-        fitbNode["template_end"] = TEMPLATE_END
 
         self.updateContent()
 
-        self.state.nested_parse(self.content, self.content_offset, fitbNode)
+        # Process dynamic problem content.
         env = self.state.document.settings.env
+        dyn_vars = self.options.get("dyn_vars")
+        # Store the dynamic code, or None if it's a static problem.
+        fitbNode.dynamic = dyn_vars
+
+        self.state.nested_parse(self.content, self.content_offset, fitbNode)
         self.options["divclass"] = env.config.fitb_div_class
         # Expected _`structure`, with assigned variable names and transformations made:
         #
         # .. code-block::
-        #   :number-lines:
+        #   :linenos:
         #
         #   fitbNode = FITBNode()
         #       Item 1 of problem text
@@ -299,14 +329,16 @@ class FillInTheBlank(RunestoneIdDirective):
         # This becomes a data structure:
         #
         # .. code-block::
-        #   :number-lines:
+        #   :linenos:
         #
         #   self.feedbackArray = [
         #       [   # blankArray
         #           { # blankFeedbackDict: feedback 1
-        #               "regex" : feedback_field_name   # (An answer, as a regex;
-        #               "regexFlags" : "x"              # "i" if ``:casei:`` was specified, otherwise "".) OR
-        #               "number" : [min, max]           # a range of correct numeric answers.
+        #               "regex" : feedback_field_name,      # (An answer, as a regex;
+        #               "regexFlags" : "x",                 # "i" if ``:casei:`` was specified, otherwise "".) OR
+        #               "number" : [min, max],              # a range of correct numeric answers OR
+        #               "solution_code" : source_code,      # For dynamic problems -- an expression which evaluates
+        #                                                   # to true or false to determine if the solution was correct.
         #               "feedback": feedback_field_body (after being rendered as HTML)  # Provides feedback for this answer.
         #           },
         #           { # Feedback 2
@@ -314,13 +346,14 @@ class FillInTheBlank(RunestoneIdDirective):
         #           }
         #       ],
         #       [  # Blank 2, same as above.
-        #       ]
+        #       ],
+        #       ...,
         #   ]
         #
         # ...and a transformed node structure:
         #
         # .. code-block::
-        #   :number-lines:
+        #   :linenos:
         #
         #   fitbNode = FITBNode()
         #       Item 1 of problem text
@@ -338,7 +371,7 @@ class FillInTheBlank(RunestoneIdDirective):
                     get_node_line(feedback_bullet_list)
                 )
             )
-        # Thelength of feedbback_list_item gives us the number of blanks.
+        # The length of feedbback_list_item gives us the number of blanks.
         # the number of feedback is len(feedback_bullet_list.children[x].children[0].children)
         for feedback_list_item in feedback_bullet_list.children:
             assert isinstance(feedback_list_item, nodes.list_item)
@@ -358,46 +391,49 @@ class FillInTheBlank(RunestoneIdDirective):
                 feedback_field_name = feedback_field[0]
                 assert isinstance(feedback_field_name, nodes.field_name)
                 feedback_field_name_raw = feedback_field_name.rawsource
-                # See if this is a number, optinonally followed by a tolerance.
-                try:
-                    # Parse the number. In Python 3 syntax, this would be ``str_num, *list_tol = feedback_field_name_raw.split()``.
-                    tmp = feedback_field_name_raw.split()
-                    str_num = tmp[0]
-                    list_tol = tmp[1:]
-                    num = ast.literal_eval(str_num)
-                    assert isinstance(num, Number)
-                    # If no tolerance is given, use a tolarance of 0.
-                    if len(list_tol) == 0:
-                        tol = 0
-                    else:
-                        assert len(list_tol) == 1
-                        tol = ast.literal_eval(list_tol[0])
-                        assert isinstance(tol, Number)
-                    # We have the number and a tolerance. Save that.
-                    blankFeedbackDict = {"number": [num - tol, num + tol]}
-                except (SyntaxError, ValueError, AssertionError):
-                    # We can't parse this as a number, so assume it's a regex.
-                    regex = (
-                        # The given regex must match the entire string, from the beginning (which may be preceded by whitespaces) ...
-                        r"^\s*"
-                        # ... to the contents (where a single space in the provided pattern is treated as one or more whitespaces in the student's answer) ...
-                        + feedback_field_name.rawsource.replace(" ", r"\s+")
-                        # ... to the end (also with optional spaces).
-                        + r"\s*$"
-                    )
-                    blankFeedbackDict = {
-                        "regex": regex,
-                        "regexFlags": "i" if "casei" in self.options else "",
-                    }
-                    # Test out the regex to make sure it compiles without an error.
+                # Simply store the solution code for a dynamic problem.
+                if dyn_vars:
+                    blankFeedbackDict = {"solution_code": feedback_field_name_raw}
+                else:
+                    # See if this is a number, optionally followed by a tolerance.
                     try:
-                        re.compile(regex)
-                    except Exception as ex:
-                        raise self.error(
-                            'Error when compiling regex "{}": {}.'.format(
-                                regex, str(ex)
-                            )
+                        # Parse the number.
+                        str_num, *list_tol = feedback_field_name_raw.split()
+                        num = ast.literal_eval(str_num)
+                        assert isinstance(num, Number)
+                        # If no tolerance is given, use a tolerance of 0.
+                        if len(list_tol) == 0:
+                            tol = 0
+                        else:
+                            assert len(list_tol) == 1
+                            tol = ast.literal_eval(list_tol[0])
+                            assert isinstance(tol, Number)
+                        # We have the number and a tolerance. Save that.
+                        blankFeedbackDict = {"number": [num - tol, num + tol]}
+                    except (SyntaxError, ValueError, AssertionError):
+                        # We can't parse this as a number, so assume it's a regex.
+                        regex = (
+                            # The given regex must match the entire string, from the beginning (which may be preceded by whitespaces) ...
+                            r"^\s*"
+                            +
+                            # ... to the contents (where a single space in the provided pattern is treated as one or more whitespaces in the student's answer) ...
+                            feedback_field_name.rawsource.replace(" ", r"\s+")
+                            # ... to the end (also with optional spaces).
+                            + r"\s*$"
                         )
+                        blankFeedbackDict = {
+                            "regex": regex,
+                            "regexFlags": "i" if "casei" in self.options else "",
+                        }
+                        # Test out the regex to make sure it compiles without an error.
+                        try:
+                            re.compile(regex)
+                        except Exception as ex:
+                            raise self.error(
+                                'Error when compiling regex "{}": {}.'.format(
+                                    regex, str(ex)
+                                )
+                            )
                 blankArray.append(blankFeedbackDict)
                 feedback_field_body = feedback_field[1]
                 assert isinstance(feedback_field_body, nodes.field_body)
@@ -429,7 +465,7 @@ class FillInTheBlank(RunestoneIdDirective):
 def BlankRole(
     # _`roleName`: the local name of the interpreted role, the role name actually used in the document.
     roleName,
-    # _`rawtext` is a string containing the enitre interpreted text input, including the role and markup. Return it as a problematic node linked to a system message if a problem is encountered.
+    # _`rawtext` is a string containing the entire interpreted text input, including the role and markup. Return it as a problematic node linked to a system message if a problem is encountered.
     rawtext,
     # The interpreted _`text` content.
     text,
@@ -443,9 +479,7 @@ def BlankRole(
     content=[],
 ):
 
-    # Blanks ignore all arguments, just inserting a blank.
-    blank_node = BlankNode(rawtext)
-    blank_node.line = lineno
+    blank_node = BlankNode(rawtext, input_name=text)
     return [blank_node], []
 
 
@@ -454,7 +488,11 @@ class BlankNode(nodes.Inline, nodes.TextElement, RunestoneNode):
 
 
 def visit_blank_html(self, node):
-    self.body.append('<input type="text">')
+    # Note that the fitb visit code may call this with ``node = None``.
+    name = node["input_name"] if node else ""
+    # If the blank contained a name, use that as the name of the input element. A name of ``-`` (the default value for ``|blank|``, since there's no way to pass an empty value) is treated as an unnamed input element.
+    html_name = "" if name == "-" else f" name={repr(name)}"
+    self.body.append(f'<input type="text"{html_name} />')
 
 
 def visit_blank_xml(self, node):
