@@ -96,7 +96,7 @@ TEMPLATE_END = """
     %(hidecode)s %(include)s %(timelimit)s %(coach)s %(codelens)s %(enabledownload)s %(chatcodes)s %(optional)s
     data-audio='%(ctext)s' %(sourcefile)s %(datafile)s %(stdin)s %(tie)s %(dburl)s %(nopair)s
     %(cargs)s %(largs)s %(rargs)s %(iargs)s %(gradebutton)s %(caption)s %(hidehistory)s %(wasmuri)s
-    %(showlastsql)s style="visibility: hidden;">
+    %(showlastsql)s %(python3_interpreter)s style="visibility: hidden;">
 %(initialcode)s
 </textarea>
 </div>
@@ -194,6 +194,7 @@ class ActiveCode(RunestoneIdDirective):
        :nopair: -- disable pair programming features
        :dburl: url to load database for sql mode
        :showlastsql: -- Only show the last sql result in output
+       :python3_interpreter: brython (uses brython as interpreter of python3)
 
         If this is a homework problem instead of an example in the text
         then the assignment text should go here.  The assignment text ends with
@@ -249,6 +250,7 @@ class ActiveCode(RunestoneIdDirective):
             "nopair": directives.flag,
             "dburl": directives.unchanged,
             "showlastsql": directives.flag,
+            "python3_interpreter": directives.unchanged
         }
     )
 
@@ -303,6 +305,11 @@ class ActiveCode(RunestoneIdDirective):
         newcomplete = complete.replace('"', "*doubleq*")
         self.options["ctext"] = newcomplete
         self.options["no_of_buttons"] = no_of_buttons
+
+        if ("python3_interpreter" in self.options) and (self.options["language"]=="python3") :
+            self.options["python3_interpreter"] = "data-python3_interpreter='%s'" % self.options["python3_interpreter"]
+        else:
+            self.options["python3_interpreter"] = ""
 
         if "caption" not in self.options:
             self.options["caption"] = ""
