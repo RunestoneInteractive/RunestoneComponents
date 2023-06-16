@@ -171,3 +171,54 @@ Randomized Block with Execution Based Feedback and Hidden Code + error in prefix
     assert 1,1 == final
     assert 1,3 == 90
     assert 3,3 == 99
+
+
+Testing rendering raw blocks (pretext)
+------------------------------------------
+.. hparsons:: test_hparsons_block_raw_render
+    :language: sql
+    :randomize:
+    :blockanswer: 0 1 2 3
+
+    Testing rendering raw blocks.
+
+    Raw blocks will be rendered when:
+
+    1. the langauge is not html
+    
+    2. all blocks contain html nodes
+
+    In this case, it renders html as-is.
+    ~~~~
+    --blocks--
+    SE<b>LECT</b>
+    <code>*</code>
+    FR<span style='color:red;'>OM</span>
+    <h3>test</h3>
+
+
+.. hparsons:: test_hparsons_block_raw_normal
+    :language: sql
+    :randomize:
+    :blockanswer: 0 1 2 3
+
+    Testing rendering raw blocks.
+    
+    Raw blocks will be rendered when:
+
+    1. the langauge is not html
+
+    2. all blocks contain html nodes
+
+    In this case, one of the blocks does not contain html, so it is rendered as code.
+    
+    This is to prevent rendering some html strings as a part of a complete line,
+    
+    e.g. ``a = '<code>abc</code>'`` in python.
+
+    ~~~~
+    --blocks--
+    SELECT
+    <code>*</code>
+    FR<span style='color:red;'>OM</span>
+    <h3>test</h3>

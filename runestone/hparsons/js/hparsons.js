@@ -26,6 +26,7 @@ export default class HParsons extends RunestoneBase {
         this.randomize = $(orig).data("randomize") ? true : false;
         this.isBlockGrading = $(orig).data("blockanswer") ? true : false;
         this.language = $(orig).data("language");
+        this.renderRaw = false;
         if (this.isBlockGrading) {
             this.blockAnswer = $(orig).data("blockanswer").split(" ");
         }
@@ -80,6 +81,22 @@ export default class HParsons extends RunestoneBase {
         this.originalBlocks = this.processSingleContent(code, '--blocks--').split('\n').slice(1,-1);
         this.hiddenSuffix = this.processSingleContent(code, '--hiddensuffix--');
         this.unittest = this.processSingleContent(code, '--unittest--');
+        // (for pretext) if all blocks can be parsed as html but language is not html,
+        //               ask micro parsons to render raw
+        if (this.language != 'html') {
+            this.renderRaw = true;
+            for (let i = 0; i < this.originalBlocks.length; ++i) {
+                if (!this.isHTML(this.originalBlocks[i])) {
+                    this.renderRaw = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    isHTML(block) {
+        let doc = new DOMParser().parseFromString(block, "text/html");
+        return Array.from(doc.body.childNodes).some(node => node.nodeType === 1);
     }
 
     processSingleContent(code, delimitier) {
@@ -116,7 +133,7 @@ export default class HParsons extends RunestoneBase {
             reuse: this.reuse,
             randomize: this.randomize,
             parsonsBlocks: [...this.originalBlocks],
-            language: this.language
+            language: this.renderRaw ? 'raw' : this.language
         }
         InitMicroParsons(props);
         this.hparsonsInput = $(this.outerDiv).find("micro-parsons")[0];
